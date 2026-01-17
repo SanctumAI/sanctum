@@ -177,11 +177,39 @@ async def store_extraction_to_graph(
             if result.single():
                 neo4j_result["relationships_created"] += 1
     
-    # Store embeddings in Qdrant
+    # Store embeddings in Qdrant - BATCH ALL EMBEDDINGS IN ONE CALL
     points_to_insert = []
     
-    # Embed the source chunk
-    chunk_embedding = model.encode(f"passage: {source_text}").tolist()
+    # Prepare all texts for batched embedding
+    texts_to_embed = [f"passage: {source_text}"]  # Chunk text first
+    entity_metadata = []  # Store metadata for each entity
+    
+    for entity in entities:
+        entity_type = entity.get("type", "Entity")
+        entity_name = entity.get("name", "Unknown")
+        properties = entity.get("properties", {})
+        
+        entity_text = f"{entity_type}: {entity_name}"
+        if "definition" in properties:
+            entity_text += f" - {properties['definition']}"
+        elif "description" in properties:
+            entity_text += f" - {properties['description']}"
+        
+        texts_to_embed.append(f"passage: {entity_text}")
+        entity_metadata.append({
+            "type": entity_type,
+            "name": entity_name,
+            "text": entity_text,
+            "id": generate_entity_id(entity_type, entity_name),
+        })
+    
+    # BATCH ENCODE - much faster than one-at-a-time!
+    logger.debug(f"[{chunk_id}] Batch encoding {len(texts_to_embed)} texts...")
+    all_embeddings = model.encode(texts_to_embed, show_progress_bar=False)
+    logger.debug(f"[{chunk_id}] Batch encoding complete")
+    
+    # First embedding is the chunk
+    chunk_embedding = all_embeddings[0].tolist()
     chunk_point_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"chunk:{chunk_id}"))
     
     points_to_insert.append(
@@ -191,7 +219,7 @@ async def store_extraction_to_graph(
             payload={
                 "type": "chunk",
                 "chunk_id": chunk_id,
-                "text": source_text[:1000],  # Truncate for payload
+                "text": source_text[:1000],
                 "source_file": source_file,
                 "ontology_id": ontology_id,
                 "entity_count": len(entities),
@@ -200,22 +228,10 @@ async def store_extraction_to_graph(
         )
     )
     
-    # Embed each entity (for entity-level search)
-    for entity in entities:
-        entity_type = entity.get("type", "Entity")
-        entity_name = entity.get("name", "Unknown")
-        properties = entity.get("properties", {})
-        
-        # Create text representation of entity
-        entity_text = f"{entity_type}: {entity_name}"
-        if "definition" in properties:
-            entity_text += f" - {properties['definition']}"
-        elif "description" in properties:
-            entity_text += f" - {properties['description']}"
-        
-        entity_embedding = model.encode(f"passage: {entity_text}").tolist()
-        entity_id = generate_entity_id(entity_type, entity_name)
-        point_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"entity:{entity_id}"))
+    # Remaining embeddings are entities
+    for i, meta in enumerate(entity_metadata):
+        entity_embedding = all_embeddings[i + 1].tolist()
+        point_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"entity:{meta['id']}"))
         
         points_to_insert.append(
             PointStruct(
@@ -223,10 +239,10 @@ async def store_extraction_to_graph(
                 vector=entity_embedding,
                 payload={
                     "type": "entity",
-                    "entity_type": entity_type,
-                    "entity_id": entity_id,
-                    "name": entity_name,
-                    "text": entity_text,
+                    "entity_type": meta["type"],
+                    "entity_id": meta["id"],
+                    "name": meta["name"],
+                    "text": meta["text"],
                     "source_file": source_file,
                     "chunk_id": chunk_id,
                     "ontology_id": ontology_id,

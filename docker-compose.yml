@@ -82,6 +82,7 @@ services:
     volumes:
       - ./backend/app:/app
       - ./uploads:/uploads
+      - ./logs:/logs
       - embedding_cache:/root/.cache/huggingface
     networks:
       - sanctum-net

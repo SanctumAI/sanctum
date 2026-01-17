@@ -10,9 +10,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from neo4j import GraphDatabase
 from qdrant_client import QdrantClient
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
+from sentence_transformers import SentenceTransformer
 
 from llm import get_provider
+
+# Embedding model config
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "intfloat/multilingual-e5-base")
 
 app = FastAPI(
     title="Sanctum API",
@@ -74,6 +78,40 @@ class ChatResponse(BaseModel):
     message: str
     model: str
     provider: str
+
+
+class QueryRequest(BaseModel):
+    """Request model for RAG query endpoint"""
+    question: str
+    top_k: int = 3
+
+
+class Citation(BaseModel):
+    """Citation from retrieved knowledge"""
+    claim_id: str
+    claim_text: str
+    source_title: str
+    source_url: Optional[str] = None
+
+
+class QueryResponse(BaseModel):
+    """Response model for RAG query endpoint"""
+    answer: str
+    citations: List[Citation]
+    model: str
+    provider: str
+
+
+# Lazy-loaded embedding model singleton
+_embedding_model = None
+
+
+def get_embedding_model():
+    """Get or create the embedding model (lazy singleton)"""
+    global _embedding_model
+    if _embedding_model is None:
+        _embedding_model = SentenceTransformer(EMBEDDING_MODEL)
+    return _embedding_model
 
 
 def get_neo4j_driver():
@@ -303,5 +341,99 @@ async def chat(request: ChatRequest):
             model=result.model,
             provider=result.provider
         )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/query", response_model=QueryResponse)
+async def query(request: QueryRequest):
+    """
+    RAG query endpoint.
+
+    1. Embeds the question using the same model as ingestion
+    2. Searches Qdrant for semantically similar claims
+    3. Resolves claim IDs to full Neo4j graph data
+    4. Sends context + question to LLM
+    5. Returns grounded answer with citations
+    """
+    try:
+        # 1. Embed the question
+        model = get_embedding_model()
+        query_embedding = model.encode(f"query: {request.question}").tolist()
+
+        # 2. Search Qdrant for similar vectors
+        qdrant = get_qdrant_client()
+        results = qdrant.search(
+            collection_name=COLLECTION_NAME,
+            query_vector=query_embedding,
+            limit=request.top_k
+        )
+
+        if not results:
+            return QueryResponse(
+                answer="No relevant information found in the knowledge base.",
+                citations=[],
+                model="none",
+                provider="none"
+            )
+
+        # 3. Resolve to Neo4j for full claim + source data
+        claim_ids = [r.payload["claim_id"] for r in results]
+        driver = get_neo4j_driver()
+        with driver.session() as session:
+            records = session.run("""
+                MATCH (c:Claim)-[:SUPPORTED_BY]->(s:Source)
+                WHERE c.id IN $claim_ids
+                RETURN c.id as claim_id, c.text as claim_text,
+                       s.title as source_title, s.url as source_url
+            """, claim_ids=claim_ids)
+            claims = [dict(r) for r in records]
+        driver.close()
+
+        if not claims:
+            return QueryResponse(
+                answer="Retrieved vectors but could not resolve to graph data.",
+                citations=[],
+                model="none",
+                provider="none"
+            )
+
+        # 4. Build context from retrieved claims
+        context = "\n".join([
+            f"- {c['claim_text']} (Source: {c['source_title']})"
+            for c in claims
+        ])
+
+        # 5. Generate answer using LLM
+        prompt = f"""Answer the question using ONLY the context below. Cite your sources.
+
+Context:
+{context}
+
+Question: {request.question}
+
+Answer:"""
+
+        provider = get_provider()
+        result = provider.complete(prompt)
+
+        # Build citations from retrieved claims
+        citations = [
+            Citation(
+                claim_id=c["claim_id"],
+                claim_text=c["claim_text"],
+                source_title=c["source_title"],
+                source_url=c.get("source_url")
+            )
+            for c in claims
+        ]
+
+        return QueryResponse(
+            answer=result.content,
+            citations=citations,
+            model=result.model,
+            provider=result.provider
+        )
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

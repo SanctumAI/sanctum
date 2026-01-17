@@ -1,4 +1,21 @@
 services:
+  maple-proxy:
+    image: ghcr.io/opensecretcloud/maple-proxy:latest
+    container_name: sanctum-maple-proxy
+    ports:
+      - "8080:8080"
+    environment:
+      - MAPLE_BACKEND_URL=https://enclave.trymaple.ai
+      - MAPLE_API_KEY=${MAPLE_API_KEY}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - sanctum-net
+
   neo4j:
     image: neo4j:5.15.0
     container_name: sanctum-neo4j
@@ -51,10 +68,16 @@ services:
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
       - EMBEDDING_MODEL=intfloat/multilingual-e5-base
+      - LLM_PROVIDER=maple
+      - MAPLE_BASE_URL=http://maple-proxy:8080/v1
+      - MAPLE_API_KEY=${MAPLE_API_KEY:-}
+      - MAPLE_MODEL=gpt-oss-120b
     depends_on:
       neo4j:
         condition: service_healthy
       qdrant:
+        condition: service_healthy
+      maple-proxy:
         condition: service_healthy
     volumes:
       - ./backend/app:/app

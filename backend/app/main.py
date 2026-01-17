@@ -12,6 +12,8 @@ from qdrant_client import QdrantClient
 from pydantic import BaseModel
 from typing import Optional
 
+from llm import get_provider
+
 app = FastAPI(
     title="Sanctum API",
     description="Privacy-first RAG system for curated knowledge",
@@ -50,6 +52,28 @@ class HealthResponse(BaseModel):
     """Response model for health endpoint"""
     status: str
     services: dict
+
+
+class LLMTestResult(BaseModel):
+    """Response model for LLM smoke test endpoint"""
+    success: bool
+    provider: str
+    health: bool
+    response: Optional[str] = None
+    model: Optional[str] = None
+    error: Optional[str] = None
+
+
+class ChatRequest(BaseModel):
+    """Request model for chat endpoint"""
+    message: str
+
+
+class ChatResponse(BaseModel):
+    """Response model for chat endpoint"""
+    message: str
+    model: str
+    provider: str
 
 
 def get_neo4j_driver():
@@ -215,3 +239,69 @@ async def smoke_test():
         message=message,
         success=success
     )
+
+
+@app.get("/llm/test", response_model=LLMTestResult)
+async def llm_smoke_test():
+    """
+    Smoke test LLM provider connectivity.
+
+    Tests the configured LLM provider (set via LLM_PROVIDER env var):
+    - Checks provider health endpoint
+    - Sends a simple test prompt
+    - Returns the response
+
+    Supports: maple, ollama
+    """
+    provider_name = os.getenv("LLM_PROVIDER", "maple")
+
+    try:
+        provider = get_provider()
+
+        # Check health first
+        health = provider.health_check()
+        if not health:
+            return LLMTestResult(
+                success=False,
+                provider=provider.name,
+                health=False,
+                error=f"Provider '{provider.name}' health check failed"
+            )
+
+        # Send a simple test prompt
+        result = provider.complete("Say 'hello' and nothing else.")
+
+        return LLMTestResult(
+            success=True,
+            provider=provider.name,
+            health=True,
+            response=result.content,
+            model=result.model
+        )
+
+    except Exception as e:
+        return LLMTestResult(
+            success=False,
+            provider=provider_name,
+            health=False,
+            error=str(e)
+        )
+
+
+@app.post("/llm/chat", response_model=ChatResponse)
+async def chat(request: ChatRequest):
+    """
+    Simple chat endpoint for smoke testing LLM provider.
+
+    Takes a user message and returns the LLM response.
+    """
+    try:
+        provider = get_provider()
+        result = provider.complete(request.message)
+        return ChatResponse(
+            message=result.content,
+            model=result.model,
+            provider=result.provider
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

@@ -1,21 +1,26 @@
 # FastAPI and server
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.6
 
 # Neo4j driver
-neo4j==5.17.0
+neo4j>=5.17.0
 
 # Qdrant client
-qdrant-client==1.7.3
+qdrant-client>=1.7.3
 
 # Embeddings (CPU-friendly, multilingual)
-sentence-transformers==2.3.1
-torch==2.1.2
-transformers==4.36.0
+sentence-transformers>=2.3.1
+torch>=2.1.2
+transformers>=4.36.0
+
+# Document processing
+docling>=2.5.2
+PyMuPDF>=1.23.0
 
 # Utilities
-pydantic==2.5.3
-python-dotenv==1.0.0
+pydantic>=2.6.0,<3.0.0
+python-dotenv>=1.0.0
 numpy<2
 
 # LLM provider (OpenAI-compatible SDK)

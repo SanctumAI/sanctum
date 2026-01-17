@@ -81,6 +81,7 @@ services:
         condition: service_healthy
     volumes:
       - ./backend/app:/app
+      - ./uploads:/uploads
       - embedding_cache:/root/.cache/huggingface
     networks:
       - sanctum-net

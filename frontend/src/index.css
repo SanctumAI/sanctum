@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   SANCTUM THEME - Warm Neutral with Blue Accent
+   A human-centered, trustworthy design system for privacy-first applications
+   ============================================================================= */
+
+/* Enable class-based dark mode */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* =============================================================================
+   THEME TOKENS
+   ============================================================================= */
+
+@theme {
+  /* Typography */
+  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Semantic Colors - Light Mode Defaults */
+  --color-surface: #ffffff;
+  --color-surface-raised: #fafaf9;
+  --color-surface-overlay: #f5f5f4;
+
+  --color-text: #1c1917;
+  --color-text-secondary: #57534e;
+  --color-text-muted: #a8a29e;
+
+  --color-border: #e7e5e4;
+  --color-border-strong: #d6d3d1;
+
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-accent-subtle: #dbeafe;
+  --color-accent-text: #ffffff;
+
+  --color-success: #15803d;
+  --color-success-subtle: #dcfce7;
+  --color-warning: #ca8a04;
+  --color-warning-subtle: #fef9c3;
+  --color-error: #dc2626;
+  --color-error-subtle: #fee2e2;
+  --color-info: #0284c7;
+  --color-info-subtle: #e0f2fe;
+
+  /* Shadows - Light Mode */
+  --shadow-sm: 0 1px 2px 0 rgb(28 25 23 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(28 25 23 / 0.1), 0 2px 4px -2px rgb(28 25 23 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(28 25 23 / 0.1), 0 4px 6px -4px rgb(28 25 23 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(28 25 23 / 0.1), 0 8px 10px -6px rgb(28 25 23 / 0.1);
+
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =============================================================================
+   DARK MODE OVERRIDES
+   ============================================================================= */
+
+.dark {
+  --color-surface: #1c1917;
+  --color-surface-raised: #292524;
+  --color-surface-overlay: #44403c;
+
+  --color-text: #fafaf9;
+  --color-text-secondary: #a8a29e;
+  --color-text-muted: #78716c;
+
+  --color-border: #44403c;
+  --color-border-strong: #57534e;
+
+  --color-accent: #3b82f6;
+  --color-accent-hover: #60a5fa;
+  --color-accent-subtle: #1e3a8a;
+  --color-accent-text: #ffffff;
+
+  --color-success: #22c55e;
+  --color-success-subtle: #14532d;
+  --color-warning: #facc15;
+  --color-warning-subtle: #713f12;
+  --color-error: #f87171;
+  --color-error-subtle: #7f1d1d;
+  --color-info: #38bdf8;
+  --color-info-subtle: #0c4a6e;
+
+  /* Shadows - Dark Mode (subtle glow effect) */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+}
+
+/* =============================================================================
+   BASE STYLES
+   ============================================================================= */
+
+html {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--color-surface);
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+/* Focus styles for accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Selection colors */
+::selection {
+  background-color: var(--color-accent-subtle);
+  color: var(--color-text);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* =============================================================================
+   UTILITY CLASSES
+   ============================================================================= */
+
+/* Smooth theme transitions */
+.theme-transition {
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base),
+    box-shadow var(--transition-base);
+}

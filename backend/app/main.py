@@ -5,12 +5,25 @@ Smoke test implementation for verifying Neo4j and Qdrant connectivity.
 
 import os
 import uuid
+import logging
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from neo4j import GraphDatabase
 from qdrant_client import QdrantClient
 from pydantic import BaseModel
 from typing import Optional
+
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("sanctum.main")
+
+# Import routers
+from ingest import router as ingest_router
+
+logger.info("Starting Sanctum API...")
 
 app = FastAPI(
     title="Sanctum API",
@@ -26,6 +39,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(ingest_router)
 
 # Configuration from environment
 NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")

@@ -1,0 +1,17 @@
+# FastAPI and server
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+
+# Neo4j driver
+neo4j==5.17.0
+
+# Qdrant client
+qdrant-client==1.7.3
+
+# Embeddings (CPU-friendly, multilingual)
+sentence-transformers==2.3.1
+torch==2.1.2
+
+# Utilities
+pydantic==2.5.3
+python-dotenv==1.0.0

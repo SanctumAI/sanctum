@@ -7,6 +7,7 @@ Uses intfloat/multilingual-e5-base for CPU-friendly, Spanish-capable embeddings.
 import os
 import sys
 import time
+import uuid
 from neo4j import GraphDatabase
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
@@ -153,12 +154,13 @@ def seed_qdrant(client, embedding_model):
     print(f"  Generating embedding for: '{SEED_CLAIM['text']}'")
     embedding = model.encode(text_to_embed).tolist()
     
-    # Insert into Qdrant
+    # Insert into Qdrant - use UUID derived from claim ID
+    point_uuid = str(uuid.uuid5(uuid.NAMESPACE_DNS, SEED_CLAIM["id"]))
     client.upsert(
         collection_name=COLLECTION_NAME,
         points=[
             PointStruct(
-                id=SEED_CLAIM["id"],
+                id=point_uuid,
                 vector=embedding,
                 payload={
                     "claim_id": SEED_CLAIM["id"],
@@ -170,7 +172,7 @@ def seed_qdrant(client, embedding_model):
             )
         ]
     )
-    print(f"  Inserted point: {SEED_CLAIM['id']}")
+    print(f"  Inserted point: {SEED_CLAIM['id']} (UUID: {point_uuid})")
     
     print("Qdrant seeding complete!")
 

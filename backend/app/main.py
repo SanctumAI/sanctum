@@ -4,6 +4,7 @@ Smoke test implementation for verifying Neo4j and Qdrant connectivity.
 """
 
 import os
+import uuid
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from neo4j import GraphDatabase
@@ -167,10 +168,12 @@ async def smoke_test():
         collection_exists = any(c.name == COLLECTION_NAME for c in collections)
         
         if collection_exists:
-            # Retrieve the seeded point
+            # Retrieve the seeded point using UUID derived from claim ID
+            claim_id = "claim_udhr_1948"
+            point_uuid = str(uuid.uuid5(uuid.NAMESPACE_DNS, claim_id))
             points = client.retrieve(
                 collection_name=COLLECTION_NAME,
-                ids=["claim_udhr_1948"],
+                ids=[point_uuid],
                 with_vectors=True
             )
             

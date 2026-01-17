@@ -50,8 +50,8 @@ Expected response:
   },
   "qdrant": {
     "status": "ok",
-    "vector_id": "claim_udhr_1948",
-    "payload": {...},
+    "vector_id": "6437e612-5e33-5e2e-99ee-b40fa6a6b018",
+    "payload": {"claim_id": "claim_udhr_1948", ...},
     "vector_dimension": 768
   },
   "message": "Smoke test passed! ✓",

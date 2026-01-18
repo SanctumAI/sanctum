@@ -38,7 +38,7 @@ services:
       - sanctum-net
 
   qdrant:
-    image: qdrant/qdrant:v1.7.4
+    image: qdrant/qdrant:v1.12.6
     container_name: sanctum-qdrant
     ports:
       - "6333:6333"  # HTTP

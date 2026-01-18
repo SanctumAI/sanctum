@@ -292,12 +292,113 @@ TEXT CHUNK:
 
 
 # =============================================================================
+# HUMAN RIGHTS ASSISTANCE ONTOLOGY (PATHWAY TO FREEDOM)
+# =============================================================================
+
+HUMAN_RIGHTS_ASSISTANCE_ONTOLOGY = Ontology(
+    id="HumanRightsAssistance",
+    name="Human Rights Assistance (Pathway to Freedom)",
+    description="Ontology for human rights assistance, political prisoner advocacy, and detention response",
+    version="1.0.0",
+    entity_types=[
+        EntityType(
+            name="Action",
+            description="An action or step to take",
+            properties=["name", "description", "timing"],
+            example="Contact UN Working Group"
+        ),
+        EntityType(
+            name="Actor",
+            description="Person, organization, or role involved",
+            properties=["name", "type", "role"],
+            example="UN Committee on Enforced Disappearances"
+        ),
+        EntityType(
+            name="Resource",
+            description="A resource, tool, or support available",
+            properties=["name", "type", "availability"],
+            example="Legal aid organization"
+        ),
+        EntityType(
+            name="Risk",
+            description="A risk, danger, or negative outcome",
+            properties=["name", "severity", "mitigation"],
+            example="Retaliation against family"
+        ),
+        EntityType(
+            name="Right",
+            description="A human right or legal protection",
+            properties=["name", "legal_basis", "scope"],
+            example="Right to liberty (ICCPR Art. 9)"
+        ),
+        EntityType(
+            name="Condition",
+            description="A situation, circumstance, or precondition",
+            properties=["name", "description"],
+            example="Detainee with dual nationality"
+        ),
+    ],
+    relationship_types=[
+        RelationshipType(name="ADAPTS_TO", description="Adapts or adjusts to a situation", from_types=["Action"], to_types=["Condition"]),
+        RelationshipType(name="ADDRESSES", description="Addresses or deals with something", from_types=["Action"], to_types=["Risk", "Condition"]),
+        RelationshipType(name="APPLIES_IN", description="Applies in a specific context", from_types=["Action", "Right"], to_types=["Condition"]),
+        RelationshipType(name="AVAILABLE_FOR", description="Available for use by", from_types=["Resource"], to_types=["Actor", "Condition"]),
+        RelationshipType(name="BLOCKED_BY", description="Blocked or prevented by", from_types=["Action"], to_types=["Condition", "Risk"]),
+        RelationshipType(name="BLOCKS", description="Blocks or prevents", from_types=["Condition"], to_types=["Action"]),
+        RelationshipType(name="CAUSES", description="Causes or leads to", from_types=["Action", "Condition"], to_types=["Condition", "Risk"]),
+        RelationshipType(name="CAUTIONS_AGAINST", description="Warns against", from_types=["Action"], to_types=["Risk", "Action"]),
+        RelationshipType(name="CONTRAINDICATED_IN", description="Should not be used in", from_types=["Action"], to_types=["Condition"]),
+        RelationshipType(name="DEDICATED_TO", description="Dedicated to a purpose", from_types=["Resource", "Actor"], to_types=["Action"]),
+        RelationshipType(name="DELAY_UNTIL", description="Should be delayed until", from_types=["Action"], to_types=["Condition"]),
+        RelationshipType(name="DOCUMENTS", description="Documents or records", from_types=["Action"], to_types=["Condition", "Risk"]),
+        RelationshipType(name="ESCALATES_TO", description="Escalates to next level", from_types=["Action"], to_types=["Action", "Actor"]),
+        RelationshipType(name="EXERTS", description="Exerts influence or pressure", from_types=["Actor"], to_types=["Actor", "Action"]),
+        RelationshipType(name="FORECLOSES", description="Forecloses or eliminates option", from_types=["Action"], to_types=["Action"]),
+        RelationshipType(name="HARMS_CASE_IF", description="Harms the case if done", from_types=["Action"], to_types=["Condition"]),
+        RelationshipType(name="ILLUSTRATES", description="Illustrates or demonstrates", from_types=["Condition"], to_types=["Right", "Risk"]),
+        RelationshipType(name="IMPLEMENTED_BY", description="Implemented by actor", from_types=["Action"], to_types=["Actor"]),
+        RelationshipType(name="INVOLVES", description="Involves or includes", from_types=["Action"], to_types=["Actor", "Resource"]),
+        RelationshipType(name="LEADS_TO", description="Leads to outcome", from_types=["Action"], to_types=["Condition", "Action"]),
+        RelationshipType(name="MAINTAINS", description="Maintains or preserves", from_types=["Action"], to_types=["Condition", "Right"]),
+        RelationshipType(name="MITIGATES", description="Mitigates or reduces risk", from_types=["Action"], to_types=["Risk"]),
+        RelationshipType(name="MONITORS", description="Monitors or tracks", from_types=["Actor", "Action"], to_types=["Condition"]),
+        RelationshipType(name="PERFORM", description="Performs an action", from_types=["Actor"], to_types=["Action"]),
+        RelationshipType(name="PROTECTS_AGAINST", description="Protects against harm", from_types=["Action", "Resource"], to_types=["Risk"]),
+        RelationshipType(name="PROVIDES", description="Provides resource or capability", from_types=["Actor", "Resource"], to_types=["Resource", "Action"]),
+        RelationshipType(name="RECOMMENDS", description="Recommends an action", from_types=["Actor"], to_types=["Action"]),
+        RelationshipType(name="REQUIRES", description="Requires precondition", from_types=["Action"], to_types=["Condition", "Resource"]),
+        RelationshipType(name="REQUIRES_FIRST", description="Must be done first", from_types=["Action"], to_types=["Action"]),
+        RelationshipType(name="RISKS", description="Risks negative outcome", from_types=["Action"], to_types=["Risk"]),
+        RelationshipType(name="SAFE_VIA", description="Made safe through", from_types=["Action"], to_types=["Action", "Resource"]),
+        RelationshipType(name="SUPPORTS", description="Supports or enables", from_types=["Resource", "Actor"], to_types=["Action"]),
+        RelationshipType(name="TIME_ASSOCIATED", description="Associated with timing", from_types=["Action"], to_types=["Condition"]),
+        RelationshipType(name="TIME_SENSITIVE", description="Time sensitive action", from_types=["Action"], to_types=["Condition"]),
+        RelationshipType(name="TRIGGERED_BY", description="Triggered by condition", from_types=["Action"], to_types=["Condition"]),
+        RelationshipType(name="USES", description="Uses resource or method", from_types=["Action"], to_types=["Resource"]),
+        RelationshipType(name="VIOLATES", description="Violates right or law", from_types=["Action", "Condition"], to_types=["Right"]),
+        RelationshipType(name="WORSENS", description="Worsens situation", from_types=["Action"], to_types=["Condition", "Risk"]),
+    ],
+    extraction_prompt="""You are extracting structured knowledge from a human rights assistance document.
+
+Given the following text chunk, extract entities and relationships about:
+- Actions to take for political prisoner advocacy
+- Resources and support networks available
+- Risks and how to mitigate them
+- Rights that apply and conditions they apply in
+
+TEXT CHUNK:
+"""
+)
+
+
+# =============================================================================
 # ONTOLOGY REGISTRY
 # =============================================================================
 
 ONTOLOGY_REGISTRY: dict[str, Ontology] = {
     "bitcoin_technical": BITCOIN_TECHNICAL_ONTOLOGY,
     "human_rights": HUMAN_RIGHTS_ONTOLOGY,
+    "HumanRightsAssistance": HUMAN_RIGHTS_ASSISTANCE_ONTOLOGY,
 }
 
 DEFAULT_ONTOLOGY = "bitcoin_technical"

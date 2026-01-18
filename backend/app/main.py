@@ -444,11 +444,13 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
 
         # 2. Search Qdrant for similar vectors - use sanctum_knowledge for real data
         qdrant = get_qdrant_client()
-        results = qdrant.search(
+        search_result = qdrant.query_points(
             collection_name="sanctum_knowledge",
-            query_vector=query_embedding,
-            limit=request.top_k
+            query=query_embedding,
+            limit=request.top_k,
+            with_payload=True
         )
+        results = search_result.points
 
         if not results:
             return QueryResponse(
@@ -563,11 +565,13 @@ async def vector_search(request: VectorSearchRequest):
 
         # 2. Search Qdrant
         qdrant = get_qdrant_client()
-        results = qdrant.search(
+        search_result = qdrant.query_points(
             collection_name=request.collection,
-            query_vector=query_embedding,
-            limit=request.top_k
+            query=query_embedding,
+            limit=request.top_k,
+            with_payload=True
         )
+        results = search_result.points
 
         # 3. Format results
         search_results = [

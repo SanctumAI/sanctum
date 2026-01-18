@@ -29,6 +29,7 @@ export interface UserProfile {
 // LocalStorage helpers
 export const STORAGE_KEYS = {
   ADMIN_PUBKEY: 'sanctum_admin_pubkey',
+  ADMIN_SESSION_TOKEN: 'sanctum_admin_session_token',
   USER_EMAIL: 'sanctum_user_email',
   USER_NAME: 'sanctum_user_name',
   CUSTOM_FIELDS: 'sanctum_custom_fields',
@@ -36,6 +37,8 @@ export const STORAGE_KEYS = {
   PENDING_EMAIL: 'sanctum_pending_email',
   PENDING_NAME: 'sanctum_pending_name',
   USER_TYPE_ID: 'sanctum_user_type_id',
+  SESSION_TOKEN: 'sanctum_session_token',
+  USER_APPROVED: 'sanctum_user_approved',
 } as const
 
 export function getCustomFields(): CustomField[] {
@@ -88,3 +91,91 @@ export function clearSelectedUserTypeId(): void {
 
 // API base URL - uses Vite proxy in development, can be overridden via env var
 export const API_BASE = import.meta.env.VITE_API_BASE || '/api'
+
+// Admin and auth response interfaces for TestDashboard
+export interface AdminResponse {
+  id: number
+  pubkey: string
+  created_at: string | null
+}
+
+export interface AdminListResponse {
+  admins: AdminResponse[]
+}
+
+export interface InstanceSettingsResponse {
+  settings: Record<string, string>
+}
+
+export interface RateLimitStatus {
+  used: number
+  limit: number
+  resetAt: Date | null
+}
+
+export interface MagicLinkResponse {
+  success: boolean
+  message: string
+}
+
+export interface AuthUserResponse {
+  id: number
+  email: string
+  name: string | null
+  user_type_id: number | null
+  approved: boolean
+  created_at: string | null
+}
+
+export interface VerifyTokenResponse {
+  success: boolean
+  user: AuthUserResponse
+  session_token: string
+}
+
+export interface SessionCheckResponse {
+  authenticated: boolean
+  user: AuthUserResponse | null
+}
+
+export interface ColumnInfo {
+  name: string
+  type: string
+  nullable: boolean
+  primaryKey: boolean
+  defaultValue: string | null
+}
+
+export interface TableInfo {
+  name: string
+  columns: ColumnInfo[]
+  rowCount: number
+}
+
+export interface DBQueryResponse {
+  success: boolean
+  columns: string[]
+  rows: Record<string, unknown>[]
+  error?: string
+  executionTimeMs?: number
+}
+
+export interface FieldDefinitionResponse {
+  id: number
+  field_name: string
+  field_type: string
+  required: boolean
+  display_order: number
+  user_type_id: number | null
+}
+
+export interface UserWithFieldsResponse {
+  id: number
+  pubkey: string | null
+  email: string | null
+  name: string | null
+  user_type_id: number | null
+  approved: boolean
+  created_at: string | null
+  fields: Record<string, string>
+}

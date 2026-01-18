@@ -10,6 +10,7 @@ import { UserAuth } from './pages/UserAuth'
 import { UserTypeSelection } from './pages/UserTypeSelection'
 import { UserProfile } from './pages/UserProfile'
 import { VerifyMagicLink } from './pages/VerifyMagicLink'
+import { PendingApproval } from './pages/PendingApproval'
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/user-type" element={<UserTypeSelection />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/verify" element={<VerifyMagicLink />} />
+        <Route path="/pending" element={<PendingApproval />} />
       </Routes>
     </Router>
   )

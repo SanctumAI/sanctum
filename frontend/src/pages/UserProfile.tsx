@@ -48,8 +48,8 @@ export function UserProfile() {
         const userTypeId = getSelectedUserTypeId()
         // Fetch fields - include global fields and type-specific if type selected
         const url = userTypeId !== null
-          ? `${API_BASE}/admin/user-fields?user_type_id=${userTypeId}&include_global=true`
-          : `${API_BASE}/admin/user-fields`
+          ? `${API_BASE}/user-fields?user_type_id=${userTypeId}&include_global=true`
+          : `${API_BASE}/user-fields`
 
         const response = await fetch(url)
         if (!response.ok) throw new Error('Failed to fetch fields')
@@ -74,9 +74,10 @@ export function UserProfile() {
         setFields(fetchedFields)
 
         // Initialize values with empty strings or false for checkboxes
+        // Use field.name as key since backend expects field names, not IDs
         const initialValues: Record<string, string | boolean> = {}
         fetchedFields.forEach((field) => {
-          initialValues[field.id] = field.type === 'checkbox' ? false : ''
+          initialValues[field.name] = field.type === 'checkbox' ? false : ''
         })
         setValues(initialValues)
       } catch (err) {
@@ -106,14 +107,14 @@ export function UserProfile() {
     const newErrors: Record<string, string> = {}
 
     fields.forEach((field) => {
-      const value = values[field.id]
+      const value = values[field.name]
 
       // Required check
       if (field.required) {
         if (field.type === 'checkbox') {
           // Checkbox doesn't need to be checked for required
         } else if (!value || (typeof value === 'string' && !value.trim())) {
-          newErrors[field.id] = t('onboarding.profile.fieldRequired', { field: field.name })
+          newErrors[field.name] = t('onboarding.profile.fieldRequired', { field: field.name })
           return
         }
       }
@@ -123,17 +124,17 @@ export function UserProfile() {
         switch (field.type) {
           case 'email':
             if (!validateEmail(value)) {
-              newErrors[field.id] = t('onboarding.profile.invalidEmail')
+              newErrors[field.name] = t('onboarding.profile.invalidEmail')
             }
             break
           case 'url':
             if (!validateUrl(value)) {
-              newErrors[field.id] = t('onboarding.profile.invalidUrl')
+              newErrors[field.name] = t('onboarding.profile.invalidUrl')
             }
             break
           case 'number':
             if (isNaN(Number(value))) {
-              newErrors[field.id] = t('onboarding.profile.invalidNumber')
+              newErrors[field.name] = t('onboarding.profile.invalidNumber')
             }
             break
         }
@@ -205,9 +206,9 @@ export function UserProfile() {
           <DynamicField
             key={field.id}
             field={field}
-            value={values[field.id]}
-            onChange={(value) => handleValueChange(field.id, value)}
-            error={errors[field.id]}
+            value={values[field.name]}
+            onChange={(value) => handleValueChange(field.name, value)}
+            error={errors[field.name]}
           />
         ))}
 

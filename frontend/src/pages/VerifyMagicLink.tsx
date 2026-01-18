@@ -1,33 +1,33 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { STORAGE_KEYS, API_BASE } from '../types/onboarding'
+
+// DEV_MODE enables token-less verification for testing without real emails
+const DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true'
 
 type VerifyState = 'verifying' | 'success' | 'error'
 
 export function VerifyMagicLink() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { t } = useTranslation()
   const [state, setState] = useState<VerifyState>('verifying')
   const [email, setEmail] = useState<string | null>(null)
   const [name, setName] = useState<string | null>(null)
   const [hasOnboarding, setHasOnboarding] = useState(false)
+  const [isApproved, setIsApproved] = useState(true)
 
   useEffect(() => {
-    // Get stored email and name from localStorage
-    const storedEmail = localStorage.getItem(STORAGE_KEYS.PENDING_EMAIL)
-    const storedName = localStorage.getItem(STORAGE_KEYS.PENDING_NAME)
-
-    setEmail(storedEmail)
-    setName(storedName)
+    const token = searchParams.get('token')
 
     // Check if there are user types or custom fields to complete
     async function checkOnboarding() {
       try {
         const [typesRes, fieldsRes] = await Promise.all([
           fetch(`${API_BASE}/user-types`),
-          fetch(`${API_BASE}/admin/user-fields`),
+          fetch(`${API_BASE}/user-fields`),
         ])
 
         const typesData = typesRes.ok ? await typesRes.json() : { types: [] }
@@ -42,35 +42,94 @@ export function VerifyMagicLink() {
       }
     }
 
-    checkOnboarding()
-
-    // Simulate verification process
-    const verifyTimer = setTimeout(() => {
-      if (storedEmail) {
-        // Mark as verified
-        localStorage.setItem(STORAGE_KEYS.USER_EMAIL, storedEmail)
-        if (storedName) {
-          localStorage.setItem(STORAGE_KEYS.USER_NAME, storedName)
+    async function verifyToken() {
+      if (!token) {
+        // No token - only allow in DEV_MODE for testing
+        if (DEV_MODE) {
+          const storedEmail = localStorage.getItem(STORAGE_KEYS.PENDING_EMAIL)
+          if (storedEmail) {
+            setEmail(storedEmail)
+            setName(localStorage.getItem(STORAGE_KEYS.PENDING_NAME))
+            // For testing without real token, just mark as verified
+            localStorage.setItem(STORAGE_KEYS.USER_EMAIL, storedEmail)
+            const storedName = localStorage.getItem(STORAGE_KEYS.PENDING_NAME)
+            if (storedName) {
+              localStorage.setItem(STORAGE_KEYS.USER_NAME, storedName)
+            }
+            localStorage.removeItem(STORAGE_KEYS.PENDING_EMAIL)
+            localStorage.removeItem(STORAGE_KEYS.PENDING_NAME)
+            setState('success')
+            return
+          }
         }
+        // No token and not in DEV_MODE (or no pending email) = error
+        setState('error')
+        return
+      }
+
+      try {
+        // Verify the token with the backend
+        const response = await fetch(`${API_BASE}/auth/verify?token=${encodeURIComponent(token)}`)
+
+        if (!response.ok) {
+          let errorMessage = 'Verification failed'
+          try {
+            const contentType = response.headers.get('content-type')
+            if (contentType && contentType.includes('application/json')) {
+              const error = await response.json()
+              errorMessage = error.detail || error.message || errorMessage
+            } else {
+              const text = await response.text()
+              errorMessage = text || errorMessage
+            }
+          } catch (parseError) {
+            errorMessage = response.statusText || errorMessage
+          }
+          console.error('Verification failed:', errorMessage)
+          setState('error')
+          return
+        }
+
+        const data = await response.json()
+
+        // Store session token and user info
+        localStorage.setItem(STORAGE_KEYS.SESSION_TOKEN, data.session_token)
+        localStorage.setItem(STORAGE_KEYS.USER_EMAIL, data.user.email)
+        if (data.user.name) {
+          localStorage.setItem(STORAGE_KEYS.USER_NAME, data.user.name)
+        }
+
+        // Store approval status
+        const approved = data.user.approved !== false
+        localStorage.setItem(STORAGE_KEYS.USER_APPROVED, String(approved))
+        setIsApproved(approved)
+
         // Clean up pending state
         localStorage.removeItem(STORAGE_KEYS.PENDING_EMAIL)
         localStorage.removeItem(STORAGE_KEYS.PENDING_NAME)
 
+        setEmail(data.user.email)
+        setName(data.user.name)
         setState('success')
-      } else {
+      } catch (error) {
+        console.error('Verification error:', error)
         setState('error')
       }
-    }, 1500)
+    }
 
-    return () => clearTimeout(verifyTimer)
-  }, [])
+    checkOnboarding()
+    verifyToken()
+  }, [searchParams])
 
   useEffect(() => {
     // Redirect after success
     if (state === 'success') {
       const redirectTimer = setTimeout(() => {
-        // If onboarding needed, go to user-type selection (which auto-skips if needed)
-        if (hasOnboarding) {
+        // If not approved, go to pending page
+        if (!isApproved) {
+          navigate('/pending')
+        } else if (hasOnboarding) {
+          // If onboarding needed, go to user-type selection (which auto-skips if needed)
           navigate('/user-type')
         } else {
           navigate('/chat')
@@ -79,7 +138,7 @@ export function VerifyMagicLink() {
 
       return () => clearTimeout(redirectTimer)
     }
-  }, [state, navigate, hasOnboarding])
+  }, [state, navigate, hasOnboarding, isApproved])
 
   return (
     <OnboardingCard>

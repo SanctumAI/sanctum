@@ -11,7 +11,7 @@ from datetime import datetime
 # --- Admin Models ---
 
 class AdminAuth(BaseModel):
-    """Request model for admin authentication"""
+    """Legacy request model for admin authentication (deprecated)"""
     pubkey: str
 
 
@@ -25,6 +25,32 @@ class AdminResponse(BaseModel):
 class AdminListResponse(BaseModel):
     """Response model for list of admins"""
     admins: list[AdminResponse]
+
+
+# --- Nostr Auth Models ---
+
+class NostrEvent(BaseModel):
+    """A signed Nostr event (NIP-01)"""
+    id: str
+    pubkey: str
+    created_at: int
+    kind: int
+    tags: list[list[str]]
+    content: str
+    sig: str
+
+
+class AdminAuthRequest(BaseModel):
+    """Request model for admin authentication with signed Nostr event"""
+    event: NostrEvent
+
+
+class AdminAuthResponse(BaseModel):
+    """Response model for successful admin authentication"""
+    admin: AdminResponse
+    is_new: bool
+    instance_initialized: bool
+    session_token: str
 
 
 # --- Instance Settings Models ---
@@ -138,6 +164,48 @@ class UserResponse(BaseModel):
 class UserListResponse(BaseModel):
     """Response model for list of users"""
     users: list[UserResponse]
+
+
+# --- Magic Link Auth Models ---
+
+class MagicLinkRequest(BaseModel):
+    """Request model for sending a magic link"""
+    email: str
+    name: str = ""
+
+
+class MagicLinkResponse(BaseModel):
+    """Response model for magic link request"""
+    success: bool
+    message: str
+
+
+class VerifyTokenRequest(BaseModel):
+    """Request model for verifying a magic link token"""
+    token: str
+
+
+class AuthUserResponse(BaseModel):
+    """Response model for authenticated user"""
+    id: int
+    email: str
+    name: Optional[str] = None
+    user_type_id: Optional[int] = None
+    approved: bool = True
+    created_at: Optional[str] = None
+
+
+class VerifyTokenResponse(BaseModel):
+    """Response model for successful verification"""
+    success: bool
+    user: AuthUserResponse
+    session_token: str
+
+
+class SessionUserResponse(BaseModel):
+    """Response model for /auth/me endpoint"""
+    user: Optional[AuthUserResponse] = None
+    authenticated: bool
 
 
 # --- Generic Response Models ---

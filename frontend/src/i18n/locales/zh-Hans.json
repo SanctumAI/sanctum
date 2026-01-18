@@ -5,7 +5,7 @@
       "subtitle": "选择首选语言以继续",
       "searchPlaceholder": "搜索语言...",
       "searchLabel": "搜索语言",
-      "noResults": "未找到与“{{query}}”匹配的语言",
+      "noResults": "未找到与「{{query}}」匹配的语言",
       "continue": "继续",
       "changeInSettings": "你可以稍后在设置中更改。"
     },
@@ -89,8 +89,8 @@
       "docsLabel": "文档"
     },
     "messages": {
-      "searching": "🔍 正在搜索"{{term}}"...",
-      "searchResults": "我为你搜索了"{{term}}"：",
+      "searching": "🔍 正在搜索「{{term}}」...",
+      "searchResults": "我为你搜索了「{{term}}」：",
       "newConversation": "新对话"
     },
     "code": {

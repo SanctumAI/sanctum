@@ -1,16 +1,17 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '../theme'
 import { useInstanceConfig } from '../context/InstanceConfigContext'
 import { ChatContainer } from '../components/chat/ChatContainer'
 import { MessageList } from '../components/chat/MessageList'
 import { ChatInput } from '../components/chat/ChatInput'
-import { ToolSelector } from '../components/chat/ToolSelector'
+import { ToolSelector, Tool } from '../components/chat/ToolSelector'
 import { DocumentScope } from '../components/chat/DocumentScope'
 import { ExportButton } from '../components/chat/ExportButton'
 import { DynamicIcon } from '../components/shared/DynamicIcon'
 import { Message } from '../components/chat/ChatMessage'
 import { API_BASE, STORAGE_KEYS } from '../types/onboarding'
+import { isAdminAuthenticated } from '../utils/adminApi'
 
 function ThemeToggle() {
   const { setTheme, resolvedTheme } = useTheme()
@@ -45,6 +46,38 @@ export function ChatPage() {
   const [error, setError] = useState<string | null>(null)
   const [selectedTools, setSelectedTools] = useState<string[]>([])
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([])
+
+  // Build available tools list - db-query only visible to admins
+  const availableTools = useMemo<Tool[]>(() => {
+    const tools: Tool[] = [
+      {
+        id: 'web-search',
+        name: 'Web',
+        description: 'Search the web for current information',
+        icon: (
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+        ),
+      },
+    ]
+
+    // Only show Database tool to authenticated admins
+    if (isAdminAuthenticated()) {
+      tools.push({
+        id: 'db-query',
+        name: 'Database',
+        description: 'Query the SQLite database',
+        icon: (
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+          </svg>
+        ),
+      })
+    }
+
+    return tools
+  }, [])
 
   // Check approval status on mount
   useEffect(() => {
@@ -84,8 +117,8 @@ export function ChatPage() {
       const useRag = selectedDocuments.length > 0
       const endpoint = useRag ? '/query' : '/llm/chat'
       const body = useRag
-        ? { question: content, top_k: 5 }
-        : { message: content }
+        ? { question: content, top_k: 5, tools: selectedTools }
+        : { message: content, tools: selectedTools }
 
       const token = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
 
@@ -196,7 +229,7 @@ export function ChatPage() {
 
   const inputToolbar = (
     <>
-      <ToolSelector selectedTools={selectedTools} onToggle={handleToolToggle} />
+      <ToolSelector tools={availableTools} selectedTools={selectedTools} onToggle={handleToolToggle} />
       <div className="w-px h-4 bg-border mx-1" />
       <DocumentScope selectedDocuments={selectedDocuments} onToggle={handleDocumentToggle} />
     </>

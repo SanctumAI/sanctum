@@ -19,6 +19,7 @@ from typing import Optional, List
 from sentence_transformers import SentenceTransformer
 
 from llm import get_provider
+from tools import init_tools, ToolOrchestrator, ToolCallInfo
 import database
 from models import (
     AdminAuth, AdminResponse, AdminListResponse,
@@ -114,9 +115,17 @@ class LLMTestResult(BaseModel):
     error: Optional[str] = None
 
 
+class ToolCallInfoResponse(BaseModel):
+    """Info about a tool that was called"""
+    tool_id: str
+    tool_name: str
+    query: Optional[str] = None
+
+
 class ChatRequest(BaseModel):
     """Request model for chat endpoint"""
     message: str
+    tools: List[str] = []
 
 
 class ChatResponse(BaseModel):
@@ -124,12 +133,14 @@ class ChatResponse(BaseModel):
     message: str
     model: str
     provider: str
+    tools_used: List[ToolCallInfoResponse] = []
 
 
 class QueryRequest(BaseModel):
     """Request model for RAG query endpoint"""
     question: str
     top_k: int = 3
+    tools: List[str] = []
 
 
 class Citation(BaseModel):
@@ -146,6 +157,7 @@ class QueryResponse(BaseModel):
     citations: List[Citation]
     model: str
     provider: str
+    tools_used: List[ToolCallInfoResponse] = []
 
 
 class VectorSearchRequest(BaseModel):
@@ -192,6 +204,15 @@ def get_embedding_model():
     if _embedding_model is None:
         _embedding_model = SentenceTransformer(EMBEDDING_MODEL)
     return _embedding_model
+
+
+# Initialize tool registry
+_tool_registry = init_tools()
+
+
+def get_tool_orchestrator() -> ToolOrchestrator:
+    """Get a tool orchestrator instance"""
+    return ToolOrchestrator(_tool_registry)
 
 
 def get_neo4j_driver():
@@ -409,18 +430,51 @@ async def llm_smoke_test():
 @app.post("/llm/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest, user: dict = Depends(auth.require_approved_user)):
     """
-    Simple chat endpoint for smoke testing LLM provider.
+    Chat endpoint with optional tool support.
 
-    Takes a user message and returns the LLM response.
+    Takes a user message and optional list of tool IDs.
+    If tools are specified, executes them and includes results in context.
     Requires authenticated and approved user.
     """
     try:
+        tools_used = []
+        prompt = request.message
+
+        # Execute tools if any are selected
+        if request.tools:
+            orchestrator = get_tool_orchestrator()
+            tool_context, tool_infos = await orchestrator.execute_tools(
+                query=request.message,
+                tool_ids=request.tools
+            )
+
+            # Convert ToolCallInfo to response format
+            tools_used = [
+                ToolCallInfoResponse(
+                    tool_id=info.tool_id,
+                    tool_name=info.tool_name,
+                    query=info.query
+                )
+                for info in tool_infos
+            ]
+
+            # Build augmented prompt with tool context
+            if tool_context:
+                prompt = f"""Use the following information to help answer the question.
+
+{tool_context}
+
+Question: {request.message}
+
+Answer:"""
+
         provider = get_provider()
-        result = provider.complete(request.message)
+        result = provider.complete(prompt)
         return ChatResponse(
             message=result.content,
             model=result.model,
-            provider=result.provider
+            provider=result.provider,
+            tools_used=tools_used
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -429,15 +483,37 @@ async def chat(request: ChatRequest, user: dict = Depends(auth.require_approved_
 @app.post("/query", response_model=QueryResponse)
 async def query(request: QueryRequest, user: dict = Depends(auth.require_approved_user)):
     """
-    RAG query endpoint. Requires authenticated and approved user.
+    RAG query endpoint with optional tool support. Requires authenticated and approved user.
 
-    1. Embeds the question using the same model as ingestion
-    2. Searches Qdrant for semantically similar claims
-    3. Resolves claim IDs to full Neo4j graph data
-    4. Sends context + question to LLM
-    5. Returns grounded answer with citations
+    1. Executes any selected tools (e.g., web search)
+    2. Embeds the question using the same model as ingestion
+    3. Searches Qdrant for semantically similar claims
+    4. Resolves claim IDs to full Neo4j graph data
+    5. Combines tool + RAG context and sends to LLM
+    6. Returns grounded answer with citations and tool info
     """
     try:
+        tools_used = []
+        tool_context = ""
+
+        # 0. Execute tools if any are selected
+        if request.tools:
+            orchestrator = get_tool_orchestrator()
+            tool_context, tool_infos = await orchestrator.execute_tools(
+                query=request.question,
+                tool_ids=request.tools
+            )
+
+            # Convert ToolCallInfo to response format
+            tools_used = [
+                ToolCallInfoResponse(
+                    tool_id=info.tool_id,
+                    tool_name=info.tool_name,
+                    query=info.query
+                )
+                for info in tool_infos
+            ]
+
         # 1. Embed the question
         model = get_embedding_model()
         query_embedding = model.encode(f"query: {request.question}").tolist()
@@ -455,7 +531,8 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_approve
                 answer="No relevant information found in the knowledge base.",
                 citations=[],
                 model="none",
-                provider="none"
+                provider="none",
+                tools_used=tools_used
             )
 
         # 3. Resolve to Neo4j for full claim + source data
@@ -476,20 +553,31 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_approve
                 answer="Retrieved vectors but could not resolve to graph data.",
                 citations=[],
                 model="none",
-                provider="none"
+                provider="none",
+                tools_used=tools_used
             )
 
         # 4. Build context from retrieved claims
-        context = "\n".join([
+        rag_context = "\n".join([
             f"- {c['claim_text']} (Source: {c['source_title']})"
             for c in claims
         ])
 
-        # 5. Generate answer using LLM
-        prompt = f"""Answer the question using ONLY the context below. Cite your sources.
+        # 5. Combine tool and RAG context
+        if tool_context:
+            combined_context = f"""Web Search Results:
+{tool_context}
+
+Knowledge Base:
+{rag_context}"""
+        else:
+            combined_context = rag_context
+
+        # 6. Generate answer using LLM
+        prompt = f"""Answer the question using the context below. Cite your sources.
 
 Context:
-{context}
+{combined_context}
 
 Question: {request.question}
 
@@ -513,7 +601,8 @@ Answer:"""
             answer=result.content,
             citations=citations,
             model=result.model,
-            provider=result.provider
+            provider=result.provider,
+            tools_used=tools_used
         )
 
     except Exception as e:

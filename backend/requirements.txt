@@ -6,8 +6,8 @@ python-multipart>=0.0.6
 # Neo4j driver
 neo4j>=5.17.0
 
-# Qdrant client
-qdrant-client>=1.7.3
+# Qdrant client (pinned to match server version 1.7.4)
+qdrant-client>=1.7.3,<1.8.0
 
 # Embeddings (CPU-friendly, multilingual)
 sentence-transformers>=2.3.1

@@ -402,7 +402,8 @@ Example: [FACTS: nationality=Cuban, location=Caracas, detention_country=Venezuel
 2. Vary your tone - don't repeat the same opener.
 3. NEVER invent org names or phone numbers.
 4. If user says "I don't know anyone/who to call" → TRIGGER A SEARCH.
-5. {jurisdiction_note}
+5. When recommending orgs/lawyers, give 2-3 options when possible. Organizations get shut down, people become unavailable. Backup contacts save lives.
+6. {jurisdiction_note}
 
 === SOURCE ===
 {source_citation}

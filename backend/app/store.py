@@ -177,49 +177,80 @@ async def store_extraction_to_graph(
             if result.single():
                 neo4j_result["relationships_created"] += 1
     
-    # Store embeddings in Qdrant - BATCH ALL EMBEDDINGS IN ONE CALL
+    # =========================================================================
+    # EMBEDDING STRATEGY OPTIONS (Current: Option A - Chunks + Facts)
+    # =========================================================================
+    # 
+    # Option A: Chunks + Facts (CURRENT - Best for action-oriented queries)
+    #   - Embed chunks for grounding/citation
+    #   - Embed facts as statements: "Legal counsel PROTECTS_AGAINST coerced confession"
+    #   - Skip entity embeddings (entities searchable via Neo4j)
+    #   - Typically 1 chunk + 8-20 facts per chunk
+    #   - Best for "what should I do?" style queries
+    #
+    # Option B: Chunks Only (Fastest, ~10-40x speedup)
+    #   - Embed only the source text chunk
+    #   - Rely on Neo4j graph traversal for entity/relationship queries
+    #   - 1 embedding per chunk (~0.3s vs 2-13s)
+    #   - Retrieval: embed query → find chunks → traverse graph from chunks
+    #
+    # Option C: Full (Original - Slowest but most comprehensive)
+    #   - Embed chunks + all entities + optionally facts
+    #   - 11-50+ embeddings per chunk
+    #   - Best retrieval quality but 2-13+ seconds per chunk
+    #
+    # To switch strategies, modify the embedding loop below.
+    # =========================================================================
+    
+    # OPTION A: Chunks + Facts - embed source text and each relationship as a fact
+    # Entities are stored in Neo4j and can be queried directly by name
     points_to_insert = []
+    texts_to_embed = []
     
-    # Prepare all texts for batched embedding
-    texts_to_embed = [f"passage: {source_text}"]  # Chunk text first
-    entity_metadata = []  # Store metadata for each entity
+    # 1. Chunk text (for grounding/citation retrieval)
+    texts_to_embed.append(f"passage: {source_text}")
     
-    for entity in entities:
-        entity_type = entity.get("type", "Entity")
-        entity_name = entity.get("name", "Unknown")
-        properties = entity.get("properties", {})
+    # 2. Facts as statements (for "what should I do?" style queries)
+    # Format: "Subject RELATIONSHIP Object: evidence"
+    fact_metadata = []
+    for rel in relationships:
+        from_entity = rel.get("from_entity", "")
+        to_entity = rel.get("to_entity", "")
+        rel_type = rel.get("type", "RELATED_TO")
+        evidence = rel.get("evidence", "")
         
-        entity_text = f"{entity_type}: {entity_name}"
-        if "definition" in properties:
-            entity_text += f" - {properties['definition']}"
-        elif "description" in properties:
-            entity_text += f" - {properties['description']}"
+        if not from_entity or not to_entity:
+            continue
         
-        texts_to_embed.append(f"passage: {entity_text}")
-        entity_metadata.append({
-            "type": entity_type,
-            "name": entity_name,
-            "text": entity_text,
-            "id": generate_entity_id(entity_type, entity_name),
+        # Create natural language fact statement
+        fact_text = f"{from_entity} {rel_type} {to_entity}"
+        if evidence:
+            fact_text += f": {evidence}"
+        
+        texts_to_embed.append(f"passage: {fact_text}")
+        fact_metadata.append({
+            "from_entity": from_entity,
+            "to_entity": to_entity,
+            "rel_type": rel_type,
+            "evidence": evidence,
+            "fact_text": fact_text,
         })
     
-    # BATCH ENCODE - much faster than one-at-a-time!
-    logger.debug(f"[{chunk_id}] Batch encoding {len(texts_to_embed)} texts...")
+    # Batch encode all texts at once
+    logger.debug(f"[{chunk_id}] Encoding 1 chunk + {len(fact_metadata)} facts...")
     all_embeddings = model.encode(texts_to_embed, show_progress_bar=False)
-    logger.debug(f"[{chunk_id}] Batch encoding complete")
+    logger.debug(f"[{chunk_id}] Encoding complete")
     
-    # First embedding is the chunk
-    chunk_embedding = all_embeddings[0].tolist()
+    # Create chunk point
     chunk_point_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"chunk:{chunk_id}"))
-    
     points_to_insert.append(
         PointStruct(
             id=chunk_point_id,
-            vector=chunk_embedding,
+            vector=all_embeddings[0].tolist(),
             payload={
                 "type": "chunk",
                 "chunk_id": chunk_id,
-                "text": source_text[:1000],
+                "text": source_text[:1000],  # Truncate for payload size
                 "source_file": source_file,
                 "ontology_id": ontology_id,
                 "entity_count": len(entities),
@@ -228,29 +259,28 @@ async def store_extraction_to_graph(
         )
     )
     
-    # Remaining embeddings are entities
-    for i, meta in enumerate(entity_metadata):
-        entity_embedding = all_embeddings[i + 1].tolist()
-        point_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"entity:{meta['id']}"))
-        
+    # Create fact points
+    for i, meta in enumerate(fact_metadata):
+        fact_point_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"fact:{chunk_id}:{i}"))
         points_to_insert.append(
             PointStruct(
-                id=point_id,
-                vector=entity_embedding,
+                id=fact_point_id,
+                vector=all_embeddings[i + 1].tolist(),
                 payload={
-                    "type": "entity",
-                    "entity_type": meta["type"],
-                    "entity_id": meta["id"],
-                    "name": meta["name"],
-                    "text": meta["text"],
-                    "source_file": source_file,
+                    "type": "fact",
                     "chunk_id": chunk_id,
+                    "source_file": source_file,
                     "ontology_id": ontology_id,
+                    "from_entity": meta["from_entity"],
+                    "to_entity": meta["to_entity"],
+                    "rel_type": meta["rel_type"],
+                    "evidence": meta["evidence"][:500] if meta["evidence"] else "",
+                    "fact_text": meta["fact_text"],
                 }
             )
         )
     
-    # Batch insert to Qdrant
+    # Insert to Qdrant
     if points_to_insert:
         client.upsert(
             collection_name=COLLECTION_NAME,

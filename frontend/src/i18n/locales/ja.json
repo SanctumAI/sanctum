@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "言語を選択",
+      "subtitle": "続行するには希望の言語を選択してください",
+      "searchPlaceholder": "言語を検索...",
+      "searchLabel": "言語を検索",
+      "noResults": "「{{query}}」に一致する言語が見つかりません",
+      "continue": "続行",
+      "changeInSettings": "後で設定で変更できます。"
+    },
+    "auth": {
+      "signUp": "新規登録",
+      "logIn": "ログイン",
+      "createAccountTitle": "アカウントを作成",
+      "createAccountSubtitle": "Sanctum の利用を開始するために登録しましょう",
+      "welcomeBackTitle": "お帰りなさい",
+      "welcomeBackSubtitle": "続きから利用するにはログインしてください",
+      "nameLabel": "名前",
+      "namePlaceholder": "お名前",
+      "emailLabel": "メールアドレス",
+      "emailPlaceholder": "you@example.com",
+      "nameRequired": "名前は必須です",
+      "emailRequired": "メールアドレスは必須です",
+      "emailInvalid": "有効なメールアドレスを入力してください",
+      "sendingLink": "リンクを送信中...",
+      "continueWithEmail": "メールで続行",
+      "magicLinkHelp": "ログイン用のマジックリンクを送信します — パスワードは不要です。",
+      "checkEmail": "メールを確認してください！",
+      "sentMagicLink": "次の宛先にマジックリンクを送信しました",
+      "clickLink": "メール内のリンクをクリックしてログインしてください。",
+      "checkSpam": "見当たりませんか？迷惑メールフォルダを確認してください。",
+      "simulateMagicLink": "マジックリンクのクリックをシミュレート",
+      "forTesting": "テスト用:"
+    },
+    "verify": {
+      "verifying": "リンクを確認中...",
+      "pleaseWait": "サインインしています。少々お待ちください。",
+      "welcomeName": "ようこそ、{{name}}！",
+      "welcomeBack": "お帰りなさい！",
+      "signedInAs": "次のアカウントでサインインしています",
+      "completingProfile": "プロフィールを作成中...",
+      "redirectingChat": "チャットに移動しています...",
+      "linkExpired": "リンクの有効期限が切れているか無効です",
+      "linkExpiredMessage": "このマジックリンクは期限切れ、または既に使用された可能性があります。",
+      "requestNewLink": "新しいリンクをリクエスト"
+    },
+    "profile": {
+      "title": "プロフィールを完成させましょう",
+      "subtitle": "もう少しで開始できます",
+      "saving": "保存中...",
+      "continue": "チャットへ進む",
+      "fieldRequired": "{{field}}は必須です",
+      "invalidEmail": "有効なメールアドレスを入力してください",
+      "invalidUrl": "有効なURLを入力してください",
+      "invalidNumber": "有効な数字を入力してください"
+    }
+  },
+  "common": {
+    "adminQuestion": "管理者ですか？",
+    "signInNostr": "Nostrでサインイン"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Válaszd ki a nyelvedet",
+      "subtitle": "Válaszd ki a folytatáshoz a kívánt nyelvet",
+      "searchPlaceholder": "Nyelvek keresése...",
+      "searchLabel": "Nyelvek keresése",
+      "noResults": "Nem található nyelv a(z) \"{{query}}\" keresésre",
+      "continue": "Tovább",
+      "changeInSettings": "Ezt később a beállításokban módosíthatod."
+    },
+    "auth": {
+      "signUp": "Regisztráció",
+      "logIn": "Bejelentkezés",
+      "createAccountTitle": "Hozd létre a fiókodat",
+      "createAccountSubtitle": "Regisztrálj a Sanctum használatához",
+      "welcomeBackTitle": "Üdv újra",
+      "welcomeBackSubtitle": "Jelentkezz be, hogy ott folytasd, ahol abbahagytad",
+      "nameLabel": "Név",
+      "namePlaceholder": "A neved",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "te@pelda.hu",
+      "nameRequired": "A név kötelező",
+      "emailRequired": "Az e-mail kötelező",
+      "emailInvalid": "Kérjük, adj meg érvényes e-mail címet",
+      "sendingLink": "Link küldése...",
+      "continueWithEmail": "Folytatás e-maillel",
+      "magicLinkHelp": "Küldünk egy mágikus linket a bejelentkezéshez — nem kell jelszó.",
+      "checkEmail": "Ellenőrizd az e-mailed!",
+      "sentMagicLink": "Mágikus linket küldtünk erre",
+      "clickLink": "Kattints az e-mailben lévő linkre a bejelentkezéshez.",
+      "checkSpam": "Nem látod? Nézd meg a spam mappát.",
+      "simulateMagicLink": "Mágikus link kattintásának szimulálása",
+      "forTesting": "Tesztelési célokra:"
+    },
+    "verify": {
+      "verifying": "Link ellenőrzése...",
+      "pleaseWait": "Egy pillanat, bejelentkeztetünk.",
+      "welcomeName": "Üdv, {{name}}!",
+      "welcomeBack": "Üdv újra!",
+      "signedInAs": "Bejelentkezve mint",
+      "completingProfile": "Profilod véglegesítése...",
+      "redirectingChat": "Átirányítás a csevegéshez...",
+      "linkExpired": "A link lejárt vagy érvénytelen",
+      "linkExpiredMessage": "Ez a mágikus link lejárhatott vagy már felhasználták.",
+      "requestNewLink": "Új link kérése"
+    },
+    "profile": {
+      "title": "Profilod befejezése",
+      "subtitle": "Még néhány adat, és kezdhetsz",
+      "saving": "Mentés...",
+      "continue": "Tovább a csevegéshez",
+      "fieldRequired": "{{field}} megadása kötelező",
+      "invalidEmail": "Kérjük, adj meg érvényes e-mail címet",
+      "invalidUrl": "Kérjük, adj meg érvényes URL-t",
+      "invalidNumber": "Kérjük, adj meg érvényes számot"
+    }
+  },
+  "common": {
+    "adminQuestion": "Ön adminisztrátor?",
+    "signInNostr": "Bejelentkezés Nostr használatával"
+  }
+}

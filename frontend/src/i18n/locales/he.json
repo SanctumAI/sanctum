@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "בחר את השפה שלך",
+      "subtitle": "בחר את השפה המועדפת כדי להמשיך",
+      "searchPlaceholder": "חפש שפות...",
+      "searchLabel": "חפש שפות",
+      "noResults": "לא נמצאו שפות עבור \"{{query}}\"",
+      "continue": "המשך",
+      "changeInSettings": "תוכל לשנות זאת מאוחר יותר בהגדרות."
+    },
+    "auth": {
+      "signUp": "הרשמה",
+      "logIn": "התחברות",
+      "createAccountTitle": "צור את החשבון שלך",
+      "createAccountSubtitle": "הירשם כדי להתחיל להשתמש ב‑Sanctum",
+      "welcomeBackTitle": "ברוך שובך",
+      "welcomeBackSubtitle": "התחבר כדי להמשיך מהמקום שבו הפסקת",
+      "nameLabel": "שם",
+      "namePlaceholder": "שמך",
+      "emailLabel": "אימייל",
+      "emailPlaceholder": "you@example.com",
+      "nameRequired": "שם הוא שדה חובה",
+      "emailRequired": "אימייל הוא שדה חובה",
+      "emailInvalid": "אנא הזן כתובת אימייל תקינה",
+      "sendingLink": "שולח קישור...",
+      "continueWithEmail": "המשך עם אימייל",
+      "magicLinkHelp": "נשלח לך קישור קסם להתחברות — אין צורך בסיסמה.",
+      "checkEmail": "בדוק את האימייל שלך!",
+      "sentMagicLink": "שלחנו קישור קסם אל",
+      "clickLink": "לחץ על הקישור באימייל כדי להתחבר.",
+      "checkSpam": "לא רואה? בדוק את תיקיית הספאם.",
+      "simulateMagicLink": "הדמיית לחיצה על קישור קסם",
+      "forTesting": "למטרות בדיקה:"
+    },
+    "verify": {
+      "verifying": "מאמתים את הקישור שלך...",
+      "pleaseWait": "רגע אחד בזמן שאנו מחברים אותך.",
+      "welcomeName": "ברוך הבא, {{name}}!",
+      "welcomeBack": "ברוך שובך!",
+      "signedInAs": "אתה מחובר כ־",
+      "completingProfile": "משלימים את הפרופיל שלך...",
+      "redirectingChat": "מעבירים לצ'אט...",
+      "linkExpired": "הקישור פג תוקף או לא תקין",
+      "linkExpiredMessage": "ייתכן שקישור הקסם הזה פג תוקף או שכבר נעשה בו שימוש.",
+      "requestNewLink": "בקש קישור חדש"
+    },
+    "profile": {
+      "title": "השלים את הפרופיל שלך",
+      "subtitle": "עוד כמה פרטים כדי להתחיל",
+      "saving": "שומר...",
+      "continue": "המשך לצ'אט",
+      "fieldRequired": "השדה {{field}} הוא חובה",
+      "invalidEmail": "אנא הזן כתובת אימייל תקינה",
+      "invalidUrl": "אנא הזן כתובת URL תקינה",
+      "invalidNumber": "אנא הזן מספר תקין"
+    }
+  },
+  "common": {
+    "adminQuestion": "האם אתה מנהל?",
+    "signInNostr": "התחבר עם Nostr"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Chọn ngôn ngữ của bạn",
+      "subtitle": "Chọn ngôn ngữ bạn muốn để tiếp tục",
+      "searchPlaceholder": "Tìm kiếm ngôn ngữ...",
+      "searchLabel": "Tìm kiếm ngôn ngữ",
+      "noResults": "Không tìm thấy ngôn ngữ cho \"{{query}}\"",
+      "continue": "Tiếp tục",
+      "changeInSettings": "Bạn có thể thay đổi sau trong phần cài đặt."
+    },
+    "auth": {
+      "signUp": "Đăng ký",
+      "logIn": "Đăng nhập",
+      "createAccountTitle": "Tạo tài khoản của bạn",
+      "createAccountSubtitle": "Đăng ký để bắt đầu sử dụng Sanctum",
+      "welcomeBackTitle": "Chào mừng trở lại",
+      "welcomeBackSubtitle": "Đăng nhập để tiếp tục từ nơi bạn đã dừng",
+      "nameLabel": "Tên",
+      "namePlaceholder": "Tên của bạn",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "nameRequired": "Tên là bắt buộc",
+      "emailRequired": "Email là bắt buộc",
+      "emailInvalid": "Vui lòng nhập email hợp lệ",
+      "sendingLink": "Đang gửi liên kết...",
+      "continueWithEmail": "Tiếp tục với Email",
+      "magicLinkHelp": "Chúng tôi sẽ gửi cho bạn liên kết ma thuật để đăng nhập — không cần mật khẩu.",
+      "checkEmail": "Kiểm tra email của bạn!",
+      "sentMagicLink": "Chúng tôi đã gửi liên kết ma thuật tới",
+      "clickLink": "Nhấp vào liên kết trong email để đăng nhập.",
+      "checkSpam": "Không thấy? Hãy kiểm tra thư mục spam.",
+      "simulateMagicLink": "Mô phỏng nhấp vào liên kết ma thuật",
+      "forTesting": "Cho mục đích thử nghiệm:"
+    },
+    "verify": {
+      "verifying": "Đang xác minh liên kết của bạn...",
+      "pleaseWait": "Vui lòng chờ trong giây lát khi chúng tôi đăng nhập cho bạn.",
+      "welcomeName": "Chào mừng, {{name}}!",
+      "welcomeBack": "Chào mừng trở lại!",
+      "signedInAs": "Bạn đã đăng nhập với tên",
+      "completingProfile": "Đang hoàn tất hồ sơ của bạn...",
+      "redirectingChat": "Đang chuyển hướng tới chat...",
+      "linkExpired": "Liên kết hết hạn hoặc không hợp lệ",
+      "linkExpiredMessage": "Liên kết ma thuật này có thể đã hết hạn hoặc đã được sử dụng.",
+      "requestNewLink": "Yêu cầu liên kết mới"
+    },
+    "profile": {
+      "title": "Hoàn tất hồ sơ của bạn",
+      "subtitle": "Chỉ còn vài thông tin nữa để bắt đầu",
+      "saving": "Đang lưu...",
+      "continue": "Tiếp tục tới chat",
+      "fieldRequired": "{{field}} là bắt buộc",
+      "invalidEmail": "Vui lòng nhập email hợp lệ",
+      "invalidUrl": "Vui lòng nhập URL hợp lệ",
+      "invalidNumber": "Vui lòng nhập số hợp lệ"
+    }
+  },
+  "common": {
+    "adminQuestion": "Bạn có phải là quản trị viên không?",
+    "signInNostr": "Đăng nhập bằng Nostr"
+  }
+}

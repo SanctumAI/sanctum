@@ -1,0 +1,215 @@
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Link2, AlertCircle, Check } from 'lucide-react'
+import { OnboardingCard } from '../components/onboarding/OnboardingCard'
+import { NostrInfo, NostrExtensionLinks } from '../components/onboarding/NostrInfo'
+
+type ConnectionState = 'idle' | 'connecting' | 'success' | 'no-extension' | 'error'
+
+// Extend window type for NIP-07
+declare global {
+  interface Window {
+    nostr?: {
+      getPublicKey: () => Promise<string>
+      signEvent?: (event: unknown) => Promise<unknown>
+    }
+  }
+}
+
+function NostrIcon() {
+  return (
+    <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-hover)] flex items-center justify-center shadow-lg">
+      <svg className="w-8 h-8 text-accent-text" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
+      </svg>
+    </div>
+  )
+}
+
+function truncatePubkey(pubkey: string): string {
+  if (pubkey.length <= 16) return pubkey
+  return `${pubkey.slice(0, 8)}...${pubkey.slice(-8)}`
+}
+
+export function AdminOnboarding() {
+  const navigate = useNavigate()
+  const [state, setState] = useState<ConnectionState>('idle')
+  const [pubkey, setPubkey] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleConnect = async () => {
+    setState('connecting')
+    setError(null)
+
+    // Check if NIP-07 extension is available
+    if (!window.nostr) {
+      // Mock: Simulate extension check delay
+      await new Promise((resolve) => setTimeout(resolve, 800))
+      setState('no-extension')
+      return
+    }
+
+    try {
+      // Try to get public key from extension
+      const pk = await window.nostr.getPublicKey()
+      setPubkey(pk)
+      localStorage.setItem('sanctum_admin_pubkey', pk)
+      setState('success')
+
+      // Redirect after showing success
+      setTimeout(() => {
+        navigate('/admin/setup')
+      }, 2000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to connect')
+      setState('error')
+    }
+  }
+
+  const handleMockConnect = async () => {
+    setState('connecting')
+    setError(null)
+
+    // Simulate connection delay
+    await new Promise((resolve) => setTimeout(resolve, 1200))
+
+    // Generate mock pubkey (looks like a real npub hex)
+    const mockPubkey = 'npub1' + Array.from({ length: 59 }, () =>
+      '0123456789abcdef'[Math.floor(Math.random() * 16)]
+    ).join('')
+
+    setPubkey(mockPubkey)
+    localStorage.setItem('sanctum_admin_pubkey', mockPubkey)
+    setState('success')
+
+    // Redirect after showing success
+    setTimeout(() => {
+      navigate('/admin/setup')
+    }, 2000)
+  }
+
+  const handleRetry = () => {
+    setState('idle')
+    setError(null)
+    setPubkey(null)
+  }
+
+  const footer = (
+    <>
+      <span>Not an admin? </span>
+      <Link to="/login" className="text-accent hover:text-accent-hover font-medium transition-colors">
+        Sign in as user
+      </Link>
+    </>
+  )
+
+  return (
+    <OnboardingCard
+      title="Admin Setup"
+      subtitle="Connect with your Nostr identity to manage this instance"
+      footer={footer}
+    >
+      <NostrIcon />
+
+      {/* Idle State */}
+      {state === 'idle' && (
+        <div className="space-y-4">
+          <button
+            onClick={handleConnect}
+            className="w-full flex items-center justify-center gap-2 bg-accent text-accent-text rounded-xl px-6 py-3.5 font-medium hover:bg-accent-hover transition-all active-press shadow-md"
+          >
+            <Link2 className="w-5 h-5" />
+            Connect with Nostr
+          </button>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="px-3 bg-surface-raised text-text-muted">or for testing</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleMockConnect}
+            className="w-full text-sm text-text-muted hover:text-text py-2 transition-colors"
+          >
+            Continue with mock identity
+          </button>
+
+          <NostrInfo />
+        </div>
+      )}
+
+      {/* Connecting State */}
+      {state === 'connecting' && (
+        <div className="text-center py-4 animate-fade-in">
+          <div className="w-8 h-8 border-2 border-accent/30 border-t-accent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-text-secondary">Connecting to extension...</p>
+        </div>
+      )}
+
+      {/* No Extension State */}
+      {state === 'no-extension' && (
+        <div className="space-y-6 animate-fade-in">
+          <div className="bg-warning-subtle border border-warning/20 rounded-xl p-4 text-center">
+            <AlertCircle className="w-8 h-8 text-warning mx-auto mb-2" />
+            <p className="text-sm text-text font-medium mb-1">No Nostr extension found</p>
+            <p className="text-xs text-text-muted">Install a NIP-07 compatible extension to continue</p>
+          </div>
+
+          <NostrExtensionLinks />
+
+          <div className="flex gap-3">
+            <button
+              onClick={handleRetry}
+              className="flex-1 bg-surface-overlay border border-border text-text rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-surface-raised transition-all"
+            >
+              Try again
+            </button>
+            <button
+              onClick={handleMockConnect}
+              className="flex-1 bg-accent text-accent-text rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-accent-hover transition-all active-press"
+            >
+              Use mock
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Success State */}
+      {state === 'success' && pubkey && (
+        <div className="text-center py-4 animate-fade-in">
+          <div className="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Check className="w-6 h-6 text-success" />
+          </div>
+          <h3 className="text-lg font-semibold text-text mb-2">Welcome, Admin!</h3>
+          <p className="text-sm text-text-muted mb-3">Connected as</p>
+          <code className="inline-block bg-surface-overlay px-3 py-1.5 rounded-lg text-xs font-mono text-text-secondary break-all">
+            {truncatePubkey(pubkey)}
+          </code>
+          <p className="text-xs text-text-muted mt-4">Redirecting to dashboard...</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {state === 'error' && (
+        <div className="space-y-4 animate-fade-in">
+          <div className="bg-error-subtle border border-error/20 rounded-xl p-4 text-center">
+            <AlertCircle className="w-8 h-8 text-error mx-auto mb-2" />
+            <p className="text-sm text-text font-medium mb-1">Connection failed</p>
+            <p className="text-xs text-text-muted">{error || 'An unexpected error occurred'}</p>
+          </div>
+
+          <button
+            onClick={handleRetry}
+            className="w-full bg-accent text-accent-text rounded-xl px-6 py-3 font-medium hover:bg-accent-hover transition-all active-press"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+    </OnboardingCard>
+  )
+}

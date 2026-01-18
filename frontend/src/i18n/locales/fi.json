@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Valitse kieli",
+      "subtitle": "Valitse haluamasi kieli jatkaaksesi",
+      "searchPlaceholder": "Hae kieliä...",
+      "searchLabel": "Hae kieliä",
+      "noResults": "Ei löytynyt kieliä haulle \"{{query}}\"",
+      "continue": "Jatka",
+      "changeInSettings": "Voit muuttaa tämän myöhemmin asetuksissa."
+    },
+    "auth": {
+      "signUp": "Rekisteröidy",
+      "logIn": "Kirjaudu sisään",
+      "createAccountTitle": "Luo tilisi",
+      "createAccountSubtitle": "Rekisteröidy aloittaaksesi Sanctumin käytön",
+      "welcomeBackTitle": "Tervetuloa takaisin",
+      "welcomeBackSubtitle": "Kirjaudu sisään jatkaaksesi siitä mihin jäit",
+      "nameLabel": "Nimi",
+      "namePlaceholder": "Nimesi",
+      "emailLabel": "Sähköposti",
+      "emailPlaceholder": "sina@esimerkki.fi",
+      "nameRequired": "Nimi on pakollinen",
+      "emailRequired": "Sähköposti on pakollinen",
+      "emailInvalid": "Anna kelvollinen sähköpostiosoite",
+      "sendingLink": "Lähetetään linkkiä...",
+      "continueWithEmail": "Jatka sähköpostilla",
+      "magicLinkHelp": "Lähetämme sinulle taikalinkin kirjautumista varten — salasanaa ei tarvita.",
+      "checkEmail": "Tarkista sähköpostisi!",
+      "sentMagicLink": "Lähetimme taikalinkin osoitteeseen",
+      "clickLink": "Klikkaa sähköpostissa olevaa linkkiä kirjautuaksesi.",
+      "checkSpam": "Etkö näe sitä? Tarkista roskapostikansio.",
+      "simulateMagicLink": "Simuloi taikalinkin klikkausta",
+      "forTesting": "Testaustarkoituksiin:"
+    },
+    "verify": {
+      "verifying": "Linkkiäsi vahvistetaan...",
+      "pleaseWait": "Hetkinen, kirjaamme sinut sisään.",
+      "welcomeName": "Tervetuloa, {{name}}!",
+      "welcomeBack": "Tervetuloa takaisin!",
+      "signedInAs": "Olet kirjautunut sisään nimellä",
+      "completingProfile": "Viimeistellään profiiliasi...",
+      "redirectingChat": "Ohjataan chattiin...",
+      "linkExpired": "Linkki vanhentunut tai virheellinen",
+      "linkExpiredMessage": "Tämä taikalinkki on voinut vanhentua tai se on jo käytetty.",
+      "requestNewLink": "Pyydä uusi linkki"
+    },
+    "profile": {
+      "title": "Viimeistele profiilisi",
+      "subtitle": "Vielä muutama tieto ja pääset alkuun",
+      "saving": "Tallennetaan...",
+      "continue": "Jatka chattiin",
+      "fieldRequired": "{{field}} on pakollinen",
+      "invalidEmail": "Anna kelvollinen sähköpostiosoite",
+      "invalidUrl": "Anna kelvollinen URL-osoite",
+      "invalidNumber": "Anna kelvollinen numero"
+    }
+  },
+  "common": {
+    "adminQuestion": "Oletko ylläpitäjä?",
+    "signInNostr": "Kirjaudu sisään Nostrilla"
+  }
+}

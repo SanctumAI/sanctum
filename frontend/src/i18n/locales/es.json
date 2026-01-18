@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Elige tu idioma",
+      "subtitle": "Selecciona tu idioma preferido para continuar",
+      "searchPlaceholder": "Buscar idiomas...",
+      "searchLabel": "Buscar idiomas",
+      "noResults": "No se encontraron idiomas para \"{{query}}\"",
+      "continue": "Continuar",
+      "changeInSettings": "Puedes cambiarlo más tarde en la configuración."
+    },
+    "auth": {
+      "signUp": "Registrarse",
+      "logIn": "Iniciar sesión",
+      "createAccountTitle": "Crea tu cuenta",
+      "createAccountSubtitle": "Regístrate para empezar a usar Sanctum",
+      "welcomeBackTitle": "Bienvenido de nuevo",
+      "welcomeBackSubtitle": "Inicia sesión para continuar donde lo dejaste",
+      "nameLabel": "Nombre",
+      "namePlaceholder": "Tu nombre",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "tu@ejemplo.com",
+      "nameRequired": "El nombre es obligatorio",
+      "emailRequired": "El correo electrónico es obligatorio",
+      "emailInvalid": "Introduce un correo electrónico válido",
+      "sendingLink": "Enviando enlace...",
+      "continueWithEmail": "Continuar con correo electrónico",
+      "magicLinkHelp": "Te enviaremos un enlace mágico para iniciar sesión — no necesitas contraseña.",
+      "checkEmail": "¡Revisa tu correo!",
+      "sentMagicLink": "Enviamos un enlace mágico a",
+      "clickLink": "Haz clic en el enlace del correo para iniciar sesión.",
+      "checkSpam": "¿No lo ves? Revisa la carpeta de spam.",
+      "simulateMagicLink": "Simular clic en el enlace mágico",
+      "forTesting": "Para fines de prueba:"
+    },
+    "verify": {
+      "verifying": "Verificando tu enlace...",
+      "pleaseWait": "Espera un momento mientras iniciamos sesión.",
+      "welcomeName": "¡Bienvenido, {{name}}!",
+      "welcomeBack": "¡Bienvenido de nuevo!",
+      "signedInAs": "Has iniciado sesión como",
+      "completingProfile": "Completando tu perfil...",
+      "redirectingChat": "Redirigiendo al chat...",
+      "linkExpired": "Enlace caducado o inválido",
+      "linkExpiredMessage": "Este enlace mágico puede haber caducado o ya fue usado.",
+      "requestNewLink": "Solicitar un nuevo enlace"
+    },
+    "profile": {
+      "title": "Completa tu perfil",
+      "subtitle": "Solo faltan algunos datos para empezar",
+      "saving": "Guardando...",
+      "continue": "Continuar al chat",
+      "fieldRequired": "{{field}} es obligatorio",
+      "invalidEmail": "Introduce un correo electrónico válido",
+      "invalidUrl": "Introduce una URL válida",
+      "invalidNumber": "Introduce un número válido"
+    }
+  },
+  "common": {
+    "adminQuestion": "¿Eres administrador?",
+    "signInNostr": "Iniciar sesión con Nostr"
+  }
+}

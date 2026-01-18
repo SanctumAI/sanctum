@@ -16,8 +16,8 @@ export function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [selectedTools, setSelectedTools] = useState<string[]>([])
-  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([])
+  const [selectedTools, setSelectedTools] = useState<string[]>(['web-search'])
+  const [selectedDocuments, setSelectedDocuments] = useState<string[]>(['HumanRightsAssistance'])
   const [ragSessionId, setRagSessionId] = useState<string | null>(null)
 
   // Build available tools list - db-query only visible to admins
@@ -251,10 +251,6 @@ IMPORTANT: Return a CONDENSED response:
     setRagSessionId(null) // Reset session for new conversation
   }
 
-  const handleSuggestedPrompt = (prompt: string) => {
-    handleSend(prompt)
-  }
-
   const rightActions = (
     <>
       <button
@@ -285,7 +281,6 @@ IMPORTANT: Return a CONDENSED response:
       <MessageList
         messages={messages}
         isLoading={isLoading}
-        onSuggestedPrompt={handleSuggestedPrompt}
       />
 
       {error && (

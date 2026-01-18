@@ -170,10 +170,66 @@ export function ChatPage() {
       }
 
       setMessages((prev) => [...prev, assistantMessage])
+      
+      // Handle auto-search if backend returned a search term
+      if (useRag && data.search_term) {
+        await triggerAutoSearch(data.search_term, token)
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to send message')
     } finally {
       setIsLoading(false)
+    }
+  }
+  
+  // Auto-search triggered by backend
+  const triggerAutoSearch = async (searchTerm: string, token: string | null) => {
+    try {
+      // Show searching indicator
+      const searchingMessage: Message = {
+        id: generateMessageId(),
+        role: 'assistant',
+        content: `🔍 Searching for "${searchTerm}"...`,
+        timestamp: new Date(),
+      }
+      setMessages((prev) => [...prev, searchingMessage])
+      
+      // Call the chat endpoint with web-search tool
+      const searchRes = await fetch(`${API_BASE}/llm/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
+        body: JSON.stringify({
+          message: searchTerm,
+          tools: ['web-search']
+        }),
+      })
+      
+      if (!searchRes.ok) {
+        throw new Error(`Search failed: HTTP ${searchRes.status}`)
+      }
+      
+      const searchData = await searchRes.json()
+      
+      // Replace searching message with results
+      const searchResultMessage: Message = {
+        id: generateMessageId(),
+        role: 'assistant',
+        content: `I went ahead and searched "${searchTerm}" for you based on our conversation:\n\n${searchData.message}`,
+        timestamp: new Date(),
+      }
+      
+      // Remove the "Searching..." message and add results
+      setMessages((prev) => {
+        const withoutSearching = prev.filter(m => !m.content.startsWith('🔍 Searching'))
+        return [...withoutSearching, searchResultMessage]
+      })
+    } catch (e) {
+      console.error('Auto-search failed:', e)
+      // Remove searching message on error
+      setMessages((prev) => prev.filter(m => !m.content.startsWith('🔍 Searching')))
     }
   }
 

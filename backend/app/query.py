@@ -57,6 +57,7 @@ class QueryRequest(BaseModel):
     # Optional context the user provides upfront
     jurisdiction: Optional[str] = None  # e.g., "Venezuela", "Belarus"
     situation_details: Optional[str] = None  # Any facts they share
+    tools: list[str] = []  # Tool IDs enabled for this request
 
 
 class QueryResponse(BaseModel):
@@ -65,6 +66,7 @@ class QueryResponse(BaseModel):
     sources: list[dict]
     graph_context: dict
     clarifying_questions: list[str]  # Questions we need answered
+    search_term: Optional[str] = None  # Auto-search term (if search tool enabled)
     # Debug/trace info
     context_used: str  # The actual context passed to LLM (for debugging)
     temperature: float  # Temperature used
@@ -134,8 +136,8 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         # 4. Build context and call LLM with empathetic prompt
         context = _build_context(chunk_texts, graph_context, sources)
         session["_last_sources"] = sources  # For dynamic citation
-        answer, clarifying_questions, full_prompt = _call_llm_empathetic(
-            question, context, session
+        answer, clarifying_questions, full_prompt, search_term = _call_llm_empathetic(
+            question, context, session, tools=request.tools
         )
         
         # Add assistant response to history
@@ -149,7 +151,7 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         if clarifying_questions:
             session["pending_questions"] = clarifying_questions
         
-        logger.info(f"RAG complete. Answer: {len(answer)} chars, {len(clarifying_questions)} clarifying Qs")
+        logger.info(f"RAG complete. Answer: {len(answer)} chars, {len(clarifying_questions)} clarifying Qs, search_term={search_term}")
         
         return QueryResponse(
             answer=answer,
@@ -157,6 +159,7 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
             sources=sources,
             graph_context=graph_context,
             clarifying_questions=clarifying_questions,
+            search_term=search_term,  # Auto-search trigger (if web-search tool enabled)
             context_used=full_prompt,  # For debugging - see exactly what LLM received
             temperature=0.1,
         )
@@ -317,12 +320,14 @@ def _build_context(chunk_texts: list[str], graph_context: dict, sources: list[di
     return "\n".join(parts)
 
 
-def _call_llm_empathetic(question: str, context: str, session: dict) -> tuple[str, list[str], str]:
+def _call_llm_empathetic(question: str, context: str, session: dict, tools: list[str] = None) -> tuple[str, list[str], str, Optional[str]]:
     """
     Call LLM with empathetic, nuanced prompt.
-    Returns (answer, list of clarifying questions, full_prompt for debugging).
+    Returns (answer, list of clarifying questions, full_prompt for debugging, search_term or None).
     """
+    import re
     llm = get_provider()
+    tools = tools or []
     
     # Build conversation history for context
     history_str = ""
@@ -349,23 +354,34 @@ def _call_llm_empathetic(question: str, context: str, session: dict) -> tuple[st
             source_files.add(sf.replace(".pdf", "").replace("-", " ").replace("_", " "))
     source_citation = ", ".join(source_files) if source_files else "human rights guidance materials"
     
+    # Auto-search instruction if web-search tool is enabled
+    search_instruction = ""
+    if "web-search" in tools:
+        search_instruction = """
+=== AUTO-SEARCH ===
+If a web search would help the user find local resources, contacts, or current info:
+- Add [SEARCH: search term here] at the very end of your response
+- Do NOT tell them to search - we will do it automatically for them
+- Only trigger search when it would genuinely help (e.g., finding local legal aid, embassy contacts)
+- The search term should be specific and actionable (e.g., "Cuba human rights lawyers Havana")
+"""
+    
     prompt = f"""You are a calm, caring helper for someone in crisis. They may be scared, exhausted, or overwhelmed.
 
 === STYLE - THIS IS CRITICAL ===
 - VERY SHORT. 5 sentences max per idea. Max 2 short paragraphs + questions.
 - Plain words. No jargon. Talk like a trusted friend, not a lawyer.
 - ONE thing to do first. Then offer to continue.
-- If they need more detail: "You can search online for [specific term] to learn more."
 
 === RULES ===
 1. Warmth first. Acknowledge their feelings in ONE sentence.
 2. If you see "IMPORTANT TIMING" in context, calmly but clearly explain why timing matters. Don't alarm them - just help them understand it's worth acting soon.
 3. Give ONE clear next step.
 4. If you need more info, ask 1-2 questions at the end. Put each question on its own line, like a normal sentence. Do NOT start with "?" symbol.
-5. NEVER invent organization names. Say "search online for human rights help in [country]."
+5. NEVER invent organization names or contacts.
 6. Personal choices (leave? go public?): brief pros/cons, then "Only you can decide."
 7. {jurisdiction_note}
-
+{search_instruction}
 === SOURCE ===
 This advice draws from: {source_citation}
 
@@ -383,6 +399,14 @@ This advice draws from: {source_citation}
     response = llm.complete(prompt, temperature=0.1)
     answer = response.content
     
+    # Extract search term if present
+    search_term = None
+    search_match = re.search(r'\[SEARCH:\s*([^\]]+)\]', answer)
+    if search_match:
+        search_term = search_match.group(1).strip()
+        # Remove the search tag from the visible answer
+        answer = re.sub(r'\s*\[SEARCH:\s*[^\]]+\]\s*', '', answer).strip()
+    
     # Extract clarifying questions (lines starting with ?)
     clarifying_questions = []
     lines = answer.split("\n")
@@ -392,8 +416,8 @@ This advice draws from: {source_citation}
         if stripped.startswith("?"):
             clarifying_questions.append(stripped[1:].strip())
     
-    # Return answer, questions, and full prompt for debugging
-    return answer, clarifying_questions, prompt
+    # Return answer, questions, full prompt for debugging, and search term
+    return answer, clarifying_questions, prompt, search_term
 
 
 @router.get("/session/{session_id}")

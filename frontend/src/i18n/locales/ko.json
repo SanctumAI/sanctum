@@ -13,7 +13,7 @@
       "signUp": "회원가입",
       "logIn": "로그인",
       "createAccountTitle": "계정을 만드세요",
-      "createAccountSubtitle": "Sanctum을 사용하려면 가입하세요",
+      "createAccountSubtitle": "{{instanceName}}을(를) 사용하려면 가입하세요",
       "welcomeBackTitle": "다시 오신 것을 환영합니다",
       "welcomeBackSubtitle": "중단했던 지점에서 계속하려면 로그인하세요",
       "nameLabel": "이름",

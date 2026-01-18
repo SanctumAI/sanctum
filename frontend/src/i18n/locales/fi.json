@@ -13,7 +13,7 @@
       "signUp": "Rekisteröidy",
       "logIn": "Kirjaudu sisään",
       "createAccountTitle": "Luo tilisi",
-      "createAccountSubtitle": "Rekisteröidy aloittaaksesi Sanctumin käytön",
+      "createAccountSubtitle": "Rekisteröidy aloittaaksesi {{instanceName}}in käytön",
       "welcomeBackTitle": "Tervetuloa takaisin",
       "welcomeBackSubtitle": "Kirjaudu sisään jatkaaksesi siitä mihin jäit",
       "nameLabel": "Nimi",

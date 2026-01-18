@@ -13,7 +13,7 @@
       "signUp": "Înregistrează-te",
       "logIn": "Autentificare",
       "createAccountTitle": "Creează-ți contul",
-      "createAccountSubtitle": "Înregistrează-te pentru a începe să folosești Sanctum",
+      "createAccountSubtitle": "Înregistrează-te pentru a începe să folosești {{instanceName}}",
       "welcomeBackTitle": "Bine ai revenit",
       "welcomeBackSubtitle": "Autentifică-te pentru a continua de unde ai rămas",
       "nameLabel": "Nume",

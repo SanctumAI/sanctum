@@ -13,7 +13,7 @@
       "signUp": "Registreren",
       "logIn": "Inloggen",
       "createAccountTitle": "Maak je account aan",
-      "createAccountSubtitle": "Registreer je om Sanctum te gebruiken",
+      "createAccountSubtitle": "Registreer je om {{instanceName}} te gebruiken",
       "welcomeBackTitle": "Welkom terug",
       "welcomeBackSubtitle": "Log in om verder te gaan waar je gebleven was",
       "nameLabel": "Naam",

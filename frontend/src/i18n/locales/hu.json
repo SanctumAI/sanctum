@@ -13,7 +13,7 @@
       "signUp": "Regisztráció",
       "logIn": "Bejelentkezés",
       "createAccountTitle": "Hozd létre a fiókodat",
-      "createAccountSubtitle": "Regisztrálj a Sanctum használatához",
+      "createAccountSubtitle": "Regisztrálj a {{instanceName}} használatához",
       "welcomeBackTitle": "Üdv újra",
       "welcomeBackSubtitle": "Jelentkezz be, hogy ott folytasd, ahol abbahagytad",
       "nameLabel": "Név",

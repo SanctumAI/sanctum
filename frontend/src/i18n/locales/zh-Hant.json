@@ -13,7 +13,7 @@
       "signUp": "註冊",
       "logIn": "登入",
       "createAccountTitle": "建立你的帳戶",
-      "createAccountSubtitle": "註冊以開始使用 Sanctum",
+      "createAccountSubtitle": "註冊以開始使用 {{instanceName}}",
       "welcomeBackTitle": "歡迎回來",
       "welcomeBackSubtitle": "登入以繼續上次的進度",
       "nameLabel": "姓名",

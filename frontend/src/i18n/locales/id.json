@@ -13,7 +13,7 @@
       "signUp": "Daftar",
       "logIn": "Masuk",
       "createAccountTitle": "Buat akun Anda",
-      "createAccountSubtitle": "Daftar untuk mulai menggunakan Sanctum",
+      "createAccountSubtitle": "Daftar untuk mulai menggunakan {{instanceName}}",
       "welcomeBackTitle": "Selamat datang kembali",
       "welcomeBackSubtitle": "Masuk untuk melanjutkan dari tempat Anda berhenti",
       "nameLabel": "Nama",

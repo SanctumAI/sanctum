@@ -13,7 +13,7 @@
       "signUp": "Zaregistrovat se",
       "logIn": "Přihlásit se",
       "createAccountTitle": "Vytvořte si účet",
-      "createAccountSubtitle": "Zaregistrujte se, abyste mohli začít používat Sanctum",
+      "createAccountSubtitle": "Zaregistrujte se, abyste mohli začít používat {{instanceName}}",
       "welcomeBackTitle": "Vítejte zpět",
       "welcomeBackSubtitle": "Přihlaste se a pokračujte tam, kde jste skončili",
       "nameLabel": "Jméno",

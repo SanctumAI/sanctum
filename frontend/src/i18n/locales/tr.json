@@ -13,7 +13,7 @@
       "signUp": "Kayıt ol",
       "logIn": "Giriş yap",
       "createAccountTitle": "Hesabınızı oluşturun",
-      "createAccountSubtitle": "Sanctum'u kullanmaya başlamak için kayıt olun",
+      "createAccountSubtitle": "{{instanceName}}'u kullanmaya başlamak için kayıt olun",
       "welcomeBackTitle": "Tekrar hoş geldiniz",
       "welcomeBackSubtitle": "Kaldığınız yerden devam etmek için giriş yapın",
       "nameLabel": "Ad",

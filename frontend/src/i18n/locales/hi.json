@@ -13,7 +13,7 @@
       "signUp": "साइन अप करें",
       "logIn": "लॉग इन करें",
       "createAccountTitle": "अपना खाता बनाएं",
-      "createAccountSubtitle": "Sanctum का उपयोग शुरू करने के लिए साइन अप करें",
+      "createAccountSubtitle": "{{instanceName}} का उपयोग शुरू करने के लिए साइन अप करें",
       "welcomeBackTitle": "फिर से स्वागत है",
       "welcomeBackSubtitle": "जहाँ आपने छोड़ा था वहाँ से जारी रखने के लिए लॉग इन करें",
       "nameLabel": "नाम",

@@ -1,16 +1,8 @@
 /**
  * Instance Configuration Context
  *
- * LIMITATION: Currently, instance settings (name, icon, accentColor) are stored
- * in browser localStorage only. This means:
- * - Settings are per-browser/device (not shared across users)
- * - Settings are lost if browser data is cleared
- *
- * TODO: Persist settings to SQLite backend so they're shared across all users.
- * When implemented, this context should:
- * - Fetch settings from GET /settings on mount
- * - Save settings to PATCH /settings on update
- * - Keep localStorage as a cache/fallback for offline use
+ * Fetches instance settings from the backend and caches in localStorage.
+ * Settings include: instance name, accent color, icon (configured by admin)
  */
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import {
@@ -19,7 +11,10 @@ import {
   getInstanceConfig,
   saveInstanceConfig,
   applyAccentColor,
+  AccentColor,
+  ACCENT_COLORS,
 } from '../types/instance'
+import { API_BASE } from '../types/onboarding'
 
 interface InstanceConfigContextValue {
   config: InstanceConfig
@@ -29,14 +24,66 @@ interface InstanceConfigContextValue {
 
 const InstanceConfigContext = createContext<InstanceConfigContextValue | undefined>(undefined)
 
+/**
+ * Map backend primary_color (hex) to frontend AccentColor
+ */
+function hexToAccentColor(hex: string | undefined): AccentColor {
+  if (!hex) return DEFAULT_INSTANCE_CONFIG.accentColor
+  
+  // Direct mapping of known accent color hex values
+  const colorMap: Record<string, AccentColor> = {
+    '#2563eb': 'blue',
+    '#3b82f6': 'blue',
+    '#7c3aed': 'purple',
+    '#059669': 'green',
+    '#ea580c': 'orange',
+    '#db2777': 'pink',
+    '#0d9488': 'teal',
+  }
+  
+  const normalized = hex.toLowerCase()
+  if (colorMap[normalized]) {
+    return colorMap[normalized]
+  }
+  
+  // Fallback: try to match by color name in the hex string or just use default
+  return DEFAULT_INSTANCE_CONFIG.accentColor
+}
+
 export function InstanceConfigProvider({ children }: { children: ReactNode }) {
   const [config, setConfigState] = useState<InstanceConfig>(DEFAULT_INSTANCE_CONFIG)
 
-  // Load config on mount
+  // Load config: first from localStorage (immediate), then fetch from backend
   useEffect(() => {
+    // Immediately apply cached config
     const stored = getInstanceConfig()
     setConfigState(stored)
     applyAccentColor(stored.accentColor)
+
+    // Then fetch from backend to get the latest
+    async function fetchSettings() {
+      try {
+        const response = await fetch(`${API_BASE}/settings/public`)
+        if (response.ok) {
+          const data = await response.json()
+          const settings = data.settings || {}
+          
+          const newConfig: InstanceConfig = {
+            name: settings.instance_name || stored.name || DEFAULT_INSTANCE_CONFIG.name,
+            accentColor: hexToAccentColor(settings.primary_color) || stored.accentColor,
+            icon: settings.icon || stored.icon || DEFAULT_INSTANCE_CONFIG.icon,
+          }
+          
+          setConfigState(newConfig)
+          saveInstanceConfig(newConfig)
+          applyAccentColor(newConfig.accentColor)
+        }
+      } catch (error) {
+        console.warn('Failed to fetch instance settings, using cached config:', error)
+      }
+    }
+
+    fetchSettings()
   }, [])
 
   const setConfig = (newConfig: InstanceConfig) => {

@@ -820,6 +820,13 @@ async def remove_admin(pubkey: str, admin: dict = Depends(auth.require_admin)):
 
 # --- Instance Settings ---
 
+@app.get("/settings/public", response_model=InstanceSettingsResponse)
+async def get_public_settings():
+    """Public endpoint: Get instance settings for branding (name, color, etc.)"""
+    settings = database.get_all_settings()
+    return InstanceSettingsResponse(settings=settings)
+
+
 @app.get("/admin/settings", response_model=InstanceSettingsResponse)
 async def get_settings(admin: dict = Depends(auth.require_admin)):
     """Get all instance settings (requires admin auth)"""

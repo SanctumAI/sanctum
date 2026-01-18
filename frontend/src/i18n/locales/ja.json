@@ -13,7 +13,7 @@
       "signUp": "新規登録",
       "logIn": "ログイン",
       "createAccountTitle": "アカウントを作成",
-      "createAccountSubtitle": "Sanctum の利用を開始するために登録しましょう",
+      "createAccountSubtitle": "{{instanceName}} の利用を開始するために登録しましょう",
       "welcomeBackTitle": "お帰りなさい",
       "welcomeBackSubtitle": "続きから利用するにはログインしてください",
       "nameLabel": "名前",

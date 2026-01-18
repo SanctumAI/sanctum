@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Mail } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { API_BASE, STORAGE_KEYS } from '../types/onboarding'
+import { useInstanceConfig } from '../context/InstanceConfigContext'
 
 type TabType = 'signup' | 'login'
 type FormState = 'idle' | 'submitting' | 'success' | 'error'
@@ -149,6 +150,7 @@ function SuccessMessage({
 
 export function UserAuth() {
   const { t } = useTranslation()
+  const { config } = useInstanceConfig()
   const [activeTab, setActiveTab] = useState<TabType>('signup')
   const [formState, setFormState] = useState<FormState>('idle')
   const [formData, setFormData] = useState<FormData>({ name: '', email: '' })
@@ -243,7 +245,7 @@ export function UserAuth() {
     ? t('onboarding.auth.createAccountTitle')
     : t('onboarding.auth.welcomeBackTitle')
   const subtitle = activeTab === 'signup'
-    ? t('onboarding.auth.createAccountSubtitle')
+    ? t('onboarding.auth.createAccountSubtitle', { instanceName: config.name })
     : t('onboarding.auth.welcomeBackSubtitle')
 
   return (

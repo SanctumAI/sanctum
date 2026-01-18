@@ -219,7 +219,7 @@ def main():
     # Seed data
     try:
         seed_neo4j(driver)
-        seed_qdrant(client, EMBEDDING_MODEL)
+        seed_qdrant(client)
 
         print("\n" + "=" * 60)
         print("Seeding complete!")

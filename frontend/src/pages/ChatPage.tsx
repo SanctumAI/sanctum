@@ -46,6 +46,7 @@ export function ChatPage() {
   const [error, setError] = useState<string | null>(null)
   const [selectedTools, setSelectedTools] = useState<string[]>([])
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([])
+  const [ragSessionId, setRagSessionId] = useState<string | null>(null)
 
   // Build available tools list - db-query only visible to admins
   const availableTools = useMemo<Tool[]>(() => {
@@ -117,7 +118,7 @@ export function ChatPage() {
       const useRag = selectedDocuments.length > 0
       const endpoint = useRag ? '/query' : '/llm/chat'
       const body = useRag
-        ? { question: content, top_k: 5, tools: selectedTools }
+        ? { question: content, top_k: 8, tools: selectedTools, ...(ragSessionId && { session_id: ragSessionId }) }
         : { message: content, tools: selectedTools }
 
       // Admin token takes priority, fall back to user token
@@ -152,15 +153,22 @@ export function ChatPage() {
       let responseContent: string
       if (useRag) {
         responseContent = data.answer
-        if (data.citations && data.citations.length > 0) {
-          responseContent += '\n\n---\n\n**Sources:**\n'
-          data.citations.forEach((c: { claim_text: string; source_title: string; source_url?: string }, i: number) => {
-            responseContent += `\n${i + 1}. **${c.source_title}**`
-            if (c.source_url) {
-              responseContent += ` - [link](${c.source_url})`
-            }
-            responseContent += `\n   > ${c.claim_text}\n`
-          })
+        
+        // Save session_id for conversation continuity
+        if (data.session_id) {
+          setRagSessionId(data.session_id)
+        }
+        
+        // Show clarifying questions if any
+        if (data.clarifying_questions && data.clarifying_questions.length > 0) {
+          // Questions are already in the answer from the LLM
+        }
+        
+        // Show sources if available
+        if (data.sources && data.sources.length > 0) {
+          responseContent += '\n\n---\n**Sources:** '
+          const sourceFiles = [...new Set(data.sources.map((s: { source_file: string }) => s.source_file).filter(Boolean))]
+          responseContent += sourceFiles.slice(0, 3).join(', ')
         }
       } else {
         responseContent = data.message
@@ -184,6 +192,7 @@ export function ChatPage() {
   const handleNewChat = () => {
     setMessages([])
     setError(null)
+    setRagSessionId(null) // Reset session for new conversation
   }
 
   const handleSuggestedPrompt = (prompt: string) => {

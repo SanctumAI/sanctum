@@ -90,7 +90,7 @@ services:
       - LLM_PROVIDER=maple
       - MAPLE_BASE_URL=http://maple-proxy:8080/v1
       - MAPLE_API_KEY=${MAPLE_API_KEY:-}
-      - MAPLE_MODEL=gpt-oss-120b
+      - MAPLE_MODEL=kimi-k2
       - SEARXNG_URL=http://searxng:8080
       - SQLITE_PATH=/data/sanctum.db
       # Magic Link Auth configuration

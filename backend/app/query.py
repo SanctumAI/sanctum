@@ -354,47 +354,59 @@ def _call_llm_empathetic(question: str, context: str, session: dict, tools: list
             source_files.add(sf.replace(".pdf", "").replace("-", " ").replace("_", " "))
     source_citation = ", ".join(source_files) if source_files else "human rights guidance materials"
     
+    # Build known facts from session for context continuity
+    facts = session.get("facts_gathered", {})
+    known_facts_str = ", ".join(f"{k}={v}" for k, v in facts.items()) if facts else ""
+    
     # Auto-search instruction if web-search tool is enabled
     search_instruction = ""
     if "web-search" in tools:
         search_instruction = """
-=== AUTO-SEARCH ===
-You can trigger a web search by adding [SEARCH: term] at the END of your response.
+=== AUTO-SEARCH (IMPORTANT!) ===
+Add [SEARCH: specific term] at the END of your response when:
+- User says "I don't know anyone/any lawyers/who to call" → SEARCH NOW
+- User needs embassy, lawyer, NGO, or hotline contacts → SEARCH NOW
+- User asks "who do I contact" or "where do I find" → SEARCH NOW
 
-TRIGGER A SEARCH when the user:
-- Says they don't know any lawyers/contacts/resources
-- Asks "where can I find..." or "how do I contact..."
-- Needs specific local contacts (lawyers, NGOs, embassies, hotlines)
-- Needs help with secure tools (VPN, Signal, encrypted messaging)
-- Is in a location and needs local resources
-
-DO NOT search when:
-- User asks "what should I say/do" (answer from knowledge base)
-- You're still gathering basic info about their situation
-- The question is about advice/guidance, not finding contacts
-
-Example: If user says "I don't know any lawyers here" → [SEARCH: Venezuela human rights lawyers Caracas]
-Make search terms specific with location: "Venezuela human rights lawyers Caracas" not just "lawyers"
+Do NOT tell them to "look up" or "search for" something - just trigger the search.
+Make search terms specific: "[SEARCH: Cuban embassy Caracas Venezuela phone]"
 """
     
     prompt = f"""You are a calm, caring helper for someone in crisis. They may be scared, exhausted, or overwhelmed.
 
-=== STYLE - THIS IS CRITICAL ===
-- VERY SHORT. 5 sentences max per idea. Max 2 short paragraphs + questions.
-- Plain words. No jargon. Talk like a trusted friend, not a lawyer.
-- ONE thing to do first. Then offer to continue.
+=== CRITICAL: COUNTRY RISK ===
+In authoritarian countries (China, Russia, Iran, Belarus, Venezuela, Cuba, North Korea, Myanmar, etc.):
+- DO NOT suggest going to police if state may be responsible for detention
+- Citizens of that country have NO embassy to call in their own country
+- Prioritize: secure communication, international human rights orgs, documenting privately
+- If person is a FOREIGN citizen (like Cuban in Venezuela), their home embassy CAN help
 
-=== RULES ===
-1. Warmth first. Acknowledge their feelings in ONE sentence.
-2. If you see "IMPORTANT TIMING" in context, calmly but clearly explain why timing matters. Don't alarm them - just help them understand it's worth acting soon.
-3. Give ONE clear next step.
-4. If you need more info, ask 1-2 questions at the end. Put each question on its own line, like a normal sentence. Do NOT start with "?" symbol.
-5. NEVER invent organization names or contacts.
-6. Personal choices (leave? go public?): brief pros/cons, then "Only you can decide."
-7. {jurisdiction_note}
+=== CRITICAL: FACT TRACKING ===
+At the END of your response, add: [FACTS: key=value, key=value]
+Only include NEW facts. Keys: nationality, location, detention_country, is_foreigner (true if in different country than citizenship)
+Example: [FACTS: nationality=Cuban, location=Caracas, detention_country=Venezuela, is_foreigner=true]
+
+=== KNOWN FACTS FROM THIS CONVERSATION ===
+{known_facts_str if known_facts_str else "(None yet - gather nationality and location early)"}
+
+=== STYLE ===
+- ONE action at a time. Not a list. Just the single most important next step.
+- Opener must have TWO parts: acknowledge + offer support. Never just label the emotion.
+  GOOD: "That's really hard - I'm here to help." / "I hear you, let's figure this out together." / "This is tough, but we'll work through it step by step."
+  BAD: "That's terrifying." (cold, no support offered)
+- Vary between warm and direct, but always include the supportive second half.
+- Format: Warm opener with support → ONE specific action → 1 clarifying question
 {search_instruction}
+=== RULES ===
+1. ONE action per response. Not a list. The single most urgent thing.
+2. Vary your tone - don't repeat the same opener.
+3. NEVER invent org names or phone numbers.
+4. If user says "I don't know anyone/who to call" → TRIGGER A SEARCH.
+5. When recommending orgs/lawyers, give 2-3 options when possible. Organizations get shut down, people become unavailable. Backup contacts save lives.
+6. {jurisdiction_note}
+
 === SOURCE ===
-This advice draws from: {source_citation}
+{source_citation}
 
 === CONVERSATION ===
 {history_str if history_str else "(Start)"}
@@ -405,7 +417,7 @@ This advice draws from: {source_citation}
 === QUESTION ===
 {question}
 
-=== RESPOND (keep it short!) ==="""
+=== RESPOND ==="""
 
     response = llm.complete(prompt, temperature=0.1)
     answer = response.content
@@ -417,6 +429,22 @@ This advice draws from: {source_citation}
         search_term = search_match.group(1).strip()
         # Remove the search tag from the visible answer
         answer = re.sub(r'\s*\[SEARCH:\s*[^\]]+\]\s*', '', answer).strip()
+    
+    # Extract and store facts (always strip from visible answer)
+    answer = re.sub(r'\s*\[FACTS:[^\]]*\]\s*', '', answer).strip()
+    facts_match = re.search(r'\[FACTS:\s*([^\]]+)\]', response.content)
+    if facts_match:
+        facts_str = facts_match.group(1).strip()
+        if facts_str:
+            for pair in facts_str.split(','):
+                if '=' in pair:
+                    key, value = pair.split('=', 1)
+                    key, value = key.strip(), value.strip()
+                    if key and value:
+                        if "facts_gathered" not in session:
+                            session["facts_gathered"] = {}
+                        session["facts_gathered"][key] = value
+            logger.info(f"Session facts updated: {session.get('facts_gathered', {})}")
     
     # Extract clarifying questions (lines starting with ?)
     clarifying_questions = []

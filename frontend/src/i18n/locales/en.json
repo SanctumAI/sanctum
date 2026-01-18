@@ -56,6 +56,58 @@
       "invalidNumber": "Please enter a valid number"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "What would you like to know?",
+      "description": "Ask questions about your knowledge base or start a general conversation",
+      "tryAsking": "Try asking"
+    },
+    "suggestedPrompts": {
+      "documents": "What documents are in the knowledge base?",
+      "summarize": "Summarize the key concepts",
+      "ragPipeline": "How does the RAG pipeline work?",
+      "entities": "What are the main entities and relationships?"
+    },
+    "typing": "Thinking...",
+    "input": {
+      "placeholder": "Ask anything...",
+      "placeholderWithDocs": "Ask about your selected documents...",
+      "sendTitle": "Send message (Enter)",
+      "sendLabel": "Send message"
+    },
+    "tools": {
+      "label": "Tools",
+      "webSearch": "Search the web for current information",
+      "database": "Query the SQLite database",
+      "knowledgeGraph": "Query the knowledge graph"
+    },
+    "documentScope": {
+      "title": "Knowledge Bases",
+      "description": "Select sources to include in context",
+      "noSources": "No sources available",
+      "clearAll": "Clear all",
+      "docsLabel": "Docs"
+    },
+    "messages": {
+      "searching": "🔍 Searching for \"{{term}}\"...",
+      "searchResults": "I searched \"{{term}}\" for you:",
+      "newConversation": "New conversation"
+    },
+    "code": {
+      "copy": "Copy",
+      "copied": "Copied!",
+      "copyCode": "Copy code"
+    },
+    "export": {
+      "button": "Export",
+      "title": "Export conversation",
+      "disabled": "No messages to export",
+      "markdown": "Markdown",
+      "markdownExt": ".md file",
+      "plainText": "Plain Text",
+      "plainTextExt": ".txt file"
+    }
+  },
   "common": {
     "adminQuestion": "Are you an admin?",
     "signInNostr": "Sign in with Nostr"

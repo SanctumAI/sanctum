@@ -56,6 +56,58 @@
       "invalidNumber": "Indtast et gyldigt tal"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "Hvad vil du gerne vide?",
+      "description": "Stil spørgsmål om din vidensbase eller start en generel samtale",
+      "tryAsking": "Prøv at spørge"
+    },
+    "suggestedPrompts": {
+      "documents": "Hvilke dokumenter er i vidensbasen?",
+      "summarize": "Opsummer de vigtigste begreber",
+      "ragPipeline": "Hvordan fungerer RAG-pipelinen?",
+      "entities": "Hvad er de vigtigste entiteter og relationer?"
+    },
+    "typing": "Tænker...",
+    "input": {
+      "placeholder": "Spørg om hvad som helst...",
+      "placeholderWithDocs": "Spørg om dine valgte dokumenter...",
+      "sendTitle": "Send besked (Enter)",
+      "sendLabel": "Send besked"
+    },
+    "tools": {
+      "label": "Værktøjer",
+      "webSearch": "Søg på nettet efter aktuel information",
+      "database": "Forespørg SQLite-databasen",
+      "knowledgeGraph": "Forespørg vidensgrafen"
+    },
+    "documentScope": {
+      "title": "Vidensbaser",
+      "description": "Vælg kilder der skal inkluderes i konteksten",
+      "noSources": "Ingen kilder tilgængelige",
+      "clearAll": "Ryd alle",
+      "docsLabel": "Dokumenter"
+    },
+    "messages": {
+      "searching": "🔍 Søger efter \"{{term}}\"...",
+      "searchResults": "Jeg søgte efter \"{{term}}\" for dig:",
+      "newConversation": "Ny samtale"
+    },
+    "code": {
+      "copy": "Kopiér",
+      "copied": "Kopieret!",
+      "copyCode": "Kopiér kode"
+    },
+    "export": {
+      "button": "Eksportér",
+      "title": "Eksportér samtale",
+      "disabled": "Ingen beskeder at eksportere",
+      "markdown": "Markdown",
+      "markdownExt": ".md fil",
+      "plainText": "Ren tekst",
+      "plainTextExt": ".txt fil"
+    }
+  },
   "common": {
     "adminQuestion": "Er du administrator?",
     "signInNostr": "Log ind med Nostr"

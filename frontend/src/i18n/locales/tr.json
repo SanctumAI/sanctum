@@ -56,6 +56,58 @@
       "invalidNumber": "Lütfen geçerli bir sayı girin"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "Ne öğrenmek istersiniz?",
+      "description": "Bilgi tabanınız hakkında sorular sorun veya genel bir sohbet başlatın",
+      "tryAsking": "Sormayı deneyin"
+    },
+    "suggestedPrompts": {
+      "documents": "Bilgi tabanında hangi belgeler var?",
+      "summarize": "Ana kavramları özetle",
+      "ragPipeline": "RAG ardışık düzeni nasıl çalışır?",
+      "entities": "Ana varlıklar ve ilişkiler nelerdir?"
+    },
+    "typing": "Düşünüyor...",
+    "input": {
+      "placeholder": "Bir şey sorun...",
+      "placeholderWithDocs": "Seçili belgeleriniz hakkında sorun...",
+      "sendTitle": "Mesaj gönder (Enter)",
+      "sendLabel": "Mesaj gönder"
+    },
+    "tools": {
+      "label": "Araçlar",
+      "webSearch": "Web'de güncel bilgileri ara",
+      "database": "SQLite veritabanını sorgula",
+      "knowledgeGraph": "Bilgi grafiğini sorgula"
+    },
+    "documentScope": {
+      "title": "Bilgi Tabanları",
+      "description": "Bağlama dahil edilecek kaynakları seçin",
+      "noSources": "Kaynak mevcut değil",
+      "clearAll": "Tümünü temizle",
+      "docsLabel": "Belgeler"
+    },
+    "messages": {
+      "searching": "🔍 \"{{term}}\" aranıyor...",
+      "searchResults": "Sizin için \"{{term}}\" aradım:",
+      "newConversation": "Yeni sohbet"
+    },
+    "code": {
+      "copy": "Kopyala",
+      "copied": "Kopyalandı!",
+      "copyCode": "Kodu kopyala"
+    },
+    "export": {
+      "button": "Dışa aktar",
+      "title": "Sohbeti dışa aktar",
+      "disabled": "Dışa aktarılacak mesaj yok",
+      "markdown": "Markdown",
+      "markdownExt": ".md dosya",
+      "plainText": "Düz metin",
+      "plainTextExt": ".txt dosya"
+    }
+  },
   "common": {
     "adminQuestion": "Yönetici misiniz?",
     "signInNostr": "Nostr ile giriş yap"

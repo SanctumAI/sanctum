@@ -56,6 +56,58 @@
       "invalidNumber": "Ange ett giltigt nummer"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "Vad vill du veta?",
+      "description": "Ställ frågor om din kunskapsbas eller starta en allmän konversation",
+      "tryAsking": "Prova att fråga"
+    },
+    "suggestedPrompts": {
+      "documents": "Vilka dokument finns i kunskapsbasen?",
+      "summarize": "Sammanfatta de viktigaste begreppen",
+      "ragPipeline": "Hur fungerar RAG-pipelinen?",
+      "entities": "Vilka är de viktigaste entiteterna och relationerna?"
+    },
+    "typing": "Tänker...",
+    "input": {
+      "placeholder": "Fråga vad som helst...",
+      "placeholderWithDocs": "Fråga om dina valda dokument...",
+      "sendTitle": "Skicka meddelande (Enter)",
+      "sendLabel": "Skicka meddelande"
+    },
+    "tools": {
+      "label": "Verktyg",
+      "webSearch": "Sök på webben efter aktuell information",
+      "database": "Sök i SQLite-databasen",
+      "knowledgeGraph": "Sök i kunskapsgrafen"
+    },
+    "documentScope": {
+      "title": "Kunskapsbaser",
+      "description": "Välj källor att inkludera i kontexten",
+      "noSources": "Inga källor tillgängliga",
+      "clearAll": "Rensa alla",
+      "docsLabel": "Dokument"
+    },
+    "messages": {
+      "searching": "🔍 Söker efter \"{{term}}\"...",
+      "searchResults": "Jag sökte efter \"{{term}}\" åt dig:",
+      "newConversation": "Ny konversation"
+    },
+    "code": {
+      "copy": "Kopiera",
+      "copied": "Kopierat!",
+      "copyCode": "Kopiera kod"
+    },
+    "export": {
+      "button": "Exportera",
+      "title": "Exportera konversation",
+      "disabled": "Inga meddelanden att exportera",
+      "markdown": "Markdown",
+      "markdownExt": ".md fil",
+      "plainText": "Ren text",
+      "plainTextExt": ".txt fil"
+    }
+  },
   "common": {
     "adminQuestion": "Är du administratör?",
     "signInNostr": "Logga in med Nostr"

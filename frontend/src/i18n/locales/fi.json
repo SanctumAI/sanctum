@@ -56,6 +56,58 @@
       "invalidNumber": "Anna kelvollinen numero"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "Mitä haluaisit tietää?",
+      "description": "Kysy kysymyksiä tietokannastasi tai aloita yleinen keskustelu",
+      "tryAsking": "Kokeile kysyä"
+    },
+    "suggestedPrompts": {
+      "documents": "Mitä dokumentteja tietokannassa on?",
+      "summarize": "Tiivistä tärkeimmät käsitteet",
+      "ragPipeline": "Miten RAG-pipeline toimii?",
+      "entities": "Mitkä ovat tärkeimmät entiteetit ja suhteet?"
+    },
+    "typing": "Ajattelen...",
+    "input": {
+      "placeholder": "Kysy mitä tahansa...",
+      "placeholderWithDocs": "Kysy valituista dokumenteista...",
+      "sendTitle": "Lähetä viesti (Enter)",
+      "sendLabel": "Lähetä viesti"
+    },
+    "tools": {
+      "label": "Työkalut",
+      "webSearch": "Hae ajankohtaista tietoa verkosta",
+      "database": "Kysy SQLite-tietokannasta",
+      "knowledgeGraph": "Kysy tietograafista"
+    },
+    "documentScope": {
+      "title": "Tietokannat",
+      "description": "Valitse lähteet sisällytettäväksi kontekstiin",
+      "noSources": "Ei lähteitä saatavilla",
+      "clearAll": "Tyhjennä kaikki",
+      "docsLabel": "Dokumentit"
+    },
+    "messages": {
+      "searching": "🔍 Haetaan \"{{term}}\"...",
+      "searchResults": "Hain \"{{term}}\" sinulle:",
+      "newConversation": "Uusi keskustelu"
+    },
+    "code": {
+      "copy": "Kopioi",
+      "copied": "Kopioitu!",
+      "copyCode": "Kopioi koodi"
+    },
+    "export": {
+      "button": "Vie",
+      "title": "Vie keskustelu",
+      "disabled": "Ei viestejä vietäväksi",
+      "markdown": "Markdown",
+      "markdownExt": ".md tiedosto",
+      "plainText": "Pelkkä teksti",
+      "plainTextExt": ".txt tiedosto"
+    }
+  },
   "common": {
     "adminQuestion": "Oletko ylläpitäjä?",
     "signInNostr": "Kirjaudu sisään Nostrilla"

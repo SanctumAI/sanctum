@@ -56,6 +56,58 @@
       "invalidNumber": "Παρακαλώ εισάγετε έναν έγκυρο αριθμό"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "Τι θα θέλατε να μάθετε;",
+      "description": "Κάντε ερωτήσεις για τη βάση γνώσεών σας ή ξεκινήστε μια γενική συνομιλία",
+      "tryAsking": "Δοκιμάστε να ρωτήσετε"
+    },
+    "suggestedPrompts": {
+      "documents": "Ποια έγγραφα υπάρχουν στη βάση γνώσεων;",
+      "summarize": "Συνοψίστε τις βασικές έννοιες",
+      "ragPipeline": "Πώς λειτουργεί το RAG pipeline;",
+      "entities": "Ποιες είναι οι κύριες οντότητες και σχέσεις;"
+    },
+    "typing": "Σκέφτομαι...",
+    "input": {
+      "placeholder": "Ρωτήστε οτιδήποτε...",
+      "placeholderWithDocs": "Ρωτήστε για τα επιλεγμένα έγγραφά σας...",
+      "sendTitle": "Αποστολή μηνύματος (Enter)",
+      "sendLabel": "Αποστολή μηνύματος"
+    },
+    "tools": {
+      "label": "Εργαλεία",
+      "webSearch": "Αναζήτηση τρέχουσας πληροφορίας στο διαδίκτυο",
+      "database": "Ερώτημα στη βάση δεδομένων SQLite",
+      "knowledgeGraph": "Ερώτημα στο γράφο γνώσης"
+    },
+    "documentScope": {
+      "title": "Βάσεις Γνώσεων",
+      "description": "Επιλέξτε πηγές για συμπερίληψη στο πλαίσιο",
+      "noSources": "Δεν υπάρχουν διαθέσιμες πηγές",
+      "clearAll": "Εκκαθάριση όλων",
+      "docsLabel": "Έγγραφα"
+    },
+    "messages": {
+      "searching": "🔍 Αναζήτηση \"{{term}}\"...",
+      "searchResults": "Έψαξα \"{{term}}\" για εσάς:",
+      "newConversation": "Νέα συνομιλία"
+    },
+    "code": {
+      "copy": "Αντιγραφή",
+      "copied": "Αντιγράφηκε!",
+      "copyCode": "Αντιγραφή κώδικα"
+    },
+    "export": {
+      "button": "Εξαγωγή",
+      "title": "Εξαγωγή συνομιλίας",
+      "disabled": "Δεν υπάρχουν μηνύματα για εξαγωγή",
+      "markdown": "Markdown",
+      "markdownExt": "αρχείο .md",
+      "plainText": "Απλό κείμενο",
+      "plainTextExt": "αρχείο .txt"
+    }
+  },
   "common": {
     "adminQuestion": "Είστε διαχειριστής;",
     "signInNostr": "Σύνδεση με Nostr"

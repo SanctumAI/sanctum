@@ -56,6 +56,58 @@
       "invalidNumber": "Bitte gib eine gültige Zahl ein"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "Was möchtest du wissen?",
+      "description": "Stelle Fragen zu deiner Wissensbasis oder starte eine allgemeine Unterhaltung",
+      "tryAsking": "Versuche zu fragen"
+    },
+    "suggestedPrompts": {
+      "documents": "Welche Dokumente sind in der Wissensbasis?",
+      "summarize": "Fasse die wichtigsten Konzepte zusammen",
+      "ragPipeline": "Wie funktioniert die RAG-Pipeline?",
+      "entities": "Was sind die wichtigsten Entitäten und Beziehungen?"
+    },
+    "typing": "Denke nach...",
+    "input": {
+      "placeholder": "Frag alles...",
+      "placeholderWithDocs": "Frag zu deinen ausgewählten Dokumenten...",
+      "sendTitle": "Nachricht senden (Enter)",
+      "sendLabel": "Nachricht senden"
+    },
+    "tools": {
+      "label": "Werkzeuge",
+      "webSearch": "Im Web nach aktuellen Informationen suchen",
+      "database": "SQLite-Datenbank abfragen",
+      "knowledgeGraph": "Wissensgraph abfragen"
+    },
+    "documentScope": {
+      "title": "Wissensbasen",
+      "description": "Quellen für den Kontext auswählen",
+      "noSources": "Keine Quellen verfügbar",
+      "clearAll": "Alle löschen",
+      "docsLabel": "Docs"
+    },
+    "messages": {
+      "searching": "🔍 Suche nach \"{{term}}\"...",
+      "searchResults": "Ich habe \"{{term}}\" für dich gesucht:",
+      "newConversation": "Neue Unterhaltung"
+    },
+    "code": {
+      "copy": "Kopieren",
+      "copied": "Kopiert!",
+      "copyCode": "Code kopieren"
+    },
+    "export": {
+      "button": "Exportieren",
+      "title": "Unterhaltung exportieren",
+      "disabled": "Keine Nachrichten zum Exportieren",
+      "markdown": "Markdown",
+      "markdownExt": ".md Datei",
+      "plainText": "Klartext",
+      "plainTextExt": ".txt Datei"
+    }
+  },
   "common": {
     "adminQuestion": "Bist du ein Admin?",
     "signInNostr": "Mit Nostr anmelden"

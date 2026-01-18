@@ -56,6 +56,58 @@
       "invalidNumber": "Vennligst skriv inn et gyldig tall"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "Hva vil du vite?",
+      "description": "Still spørsmål om kunnskapsbasen din eller start en generell samtale",
+      "tryAsking": "Prøv å spørre"
+    },
+    "suggestedPrompts": {
+      "documents": "Hvilke dokumenter finnes i kunnskapsbasen?",
+      "summarize": "Oppsummer de viktigste konseptene",
+      "ragPipeline": "Hvordan fungerer RAG-pipelinen?",
+      "entities": "Hva er de viktigste entitetene og relasjonene?"
+    },
+    "typing": "Tenker...",
+    "input": {
+      "placeholder": "Spør om hva som helst...",
+      "placeholderWithDocs": "Spør om de valgte dokumentene dine...",
+      "sendTitle": "Send melding (Enter)",
+      "sendLabel": "Send melding"
+    },
+    "tools": {
+      "label": "Verktøy",
+      "webSearch": "Søk etter aktuell informasjon på nettet",
+      "database": "Søk i SQLite-databasen",
+      "knowledgeGraph": "Søk i kunnskapsgrafen"
+    },
+    "documentScope": {
+      "title": "Kunnskapsbaser",
+      "description": "Velg kilder som skal inkluderes i konteksten",
+      "noSources": "Ingen kilder tilgjengelig",
+      "clearAll": "Fjern alle",
+      "docsLabel": "Dokumenter"
+    },
+    "messages": {
+      "searching": "🔍 Søker etter \"{{term}}\"...",
+      "searchResults": "Jeg søkte etter \"{{term}}\" for deg:",
+      "newConversation": "Ny samtale"
+    },
+    "code": {
+      "copy": "Kopier",
+      "copied": "Kopiert!",
+      "copyCode": "Kopier kode"
+    },
+    "export": {
+      "button": "Eksporter",
+      "title": "Eksporter samtale",
+      "disabled": "Ingen meldinger å eksportere",
+      "markdown": "Markdown",
+      "markdownExt": ".md fil",
+      "plainText": "Ren tekst",
+      "plainTextExt": ".txt fil"
+    }
+  },
   "common": {
     "adminQuestion": "Er du administrator?",
     "signInNostr": "Logg inn med Nostr"

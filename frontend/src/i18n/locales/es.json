@@ -56,6 +56,58 @@
       "invalidNumber": "Introduce un número válido"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "¿Qué te gustaría saber?",
+      "description": "Haz preguntas sobre tu base de conocimientos o inicia una conversación general",
+      "tryAsking": "Prueba preguntar"
+    },
+    "suggestedPrompts": {
+      "documents": "¿Qué documentos hay en la base de conocimientos?",
+      "summarize": "Resume los conceptos clave",
+      "ragPipeline": "¿Cómo funciona el pipeline RAG?",
+      "entities": "¿Cuáles son las principales entidades y relaciones?"
+    },
+    "typing": "Pensando...",
+    "input": {
+      "placeholder": "Pregunta lo que quieras...",
+      "placeholderWithDocs": "Pregunta sobre tus documentos seleccionados...",
+      "sendTitle": "Enviar mensaje (Enter)",
+      "sendLabel": "Enviar mensaje"
+    },
+    "tools": {
+      "label": "Herramientas",
+      "webSearch": "Buscar en la web información actual",
+      "database": "Consultar la base de datos SQLite",
+      "knowledgeGraph": "Consultar el grafo de conocimientos"
+    },
+    "documentScope": {
+      "title": "Bases de conocimientos",
+      "description": "Selecciona fuentes para incluir en el contexto",
+      "noSources": "No hay fuentes disponibles",
+      "clearAll": "Limpiar todo",
+      "docsLabel": "Docs"
+    },
+    "messages": {
+      "searching": "🔍 Buscando \"{{term}}\"...",
+      "searchResults": "Busqué \"{{term}}\" para ti:",
+      "newConversation": "Nueva conversación"
+    },
+    "code": {
+      "copy": "Copiar",
+      "copied": "¡Copiado!",
+      "copyCode": "Copiar código"
+    },
+    "export": {
+      "button": "Exportar",
+      "title": "Exportar conversación",
+      "disabled": "No hay mensajes para exportar",
+      "markdown": "Markdown",
+      "markdownExt": "archivo .md",
+      "plainText": "Texto plano",
+      "plainTextExt": "archivo .txt"
+    }
+  },
   "common": {
     "adminQuestion": "¿Eres administrador?",
     "signInNostr": "Iniciar sesión con Nostr"

@@ -56,6 +56,58 @@
       "invalidNumber": "请输入有效的数字"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "你想了解什么？",
+      "description": "询问关于知识库的问题或开始一般对话",
+      "tryAsking": "试着问问"
+    },
+    "suggestedPrompts": {
+      "documents": "知识库中有哪些文档？",
+      "summarize": "总结关键概念",
+      "ragPipeline": "RAG 管道是如何工作的？",
+      "entities": "主要的实体和关系是什么？"
+    },
+    "typing": "思考中...",
+    "input": {
+      "placeholder": "随便问...",
+      "placeholderWithDocs": "询问关于所选文档的问题...",
+      "sendTitle": "发送消息（回车）",
+      "sendLabel": "发送消息"
+    },
+    "tools": {
+      "label": "工具",
+      "webSearch": "搜索网络获取最新信息",
+      "database": "查询 SQLite 数据库",
+      "knowledgeGraph": "查询知识图谱"
+    },
+    "documentScope": {
+      "title": "知识库",
+      "description": "选择要包含在上下文中的来源",
+      "noSources": "没有可用的来源",
+      "clearAll": "清除全部",
+      "docsLabel": "文档"
+    },
+    "messages": {
+      "searching": "🔍 正在搜索"{{term}}"...",
+      "searchResults": "我为你搜索了"{{term}}"：",
+      "newConversation": "新对话"
+    },
+    "code": {
+      "copy": "复制",
+      "copied": "已复制！",
+      "copyCode": "复制代码"
+    },
+    "export": {
+      "button": "导出",
+      "title": "导出对话",
+      "disabled": "没有消息可导出",
+      "markdown": "Markdown",
+      "markdownExt": ".md 文件",
+      "plainText": "纯文本",
+      "plainTextExt": ".txt 文件"
+    }
+  },
   "common": {
     "adminQuestion": "你是管理员吗？",
     "signInNostr": "使用 Nostr 登录"

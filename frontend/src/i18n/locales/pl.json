@@ -56,6 +56,58 @@
       "invalidNumber": "Wpisz prawidłową liczbę"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "Co chcesz wiedzieć?",
+      "description": "Zadawaj pytania dotyczące swojej bazy wiedzy lub rozpocznij ogólną rozmowę",
+      "tryAsking": "Spróbuj zapytać"
+    },
+    "suggestedPrompts": {
+      "documents": "Jakie dokumenty są w bazie wiedzy?",
+      "summarize": "Podsumuj kluczowe pojęcia",
+      "ragPipeline": "Jak działa pipeline RAG?",
+      "entities": "Jakie są główne encje i relacje?"
+    },
+    "typing": "Myślę...",
+    "input": {
+      "placeholder": "Zapytaj o cokolwiek...",
+      "placeholderWithDocs": "Zapytaj o wybrane dokumenty...",
+      "sendTitle": "Wyślij wiadomość (Enter)",
+      "sendLabel": "Wyślij wiadomość"
+    },
+    "tools": {
+      "label": "Narzędzia",
+      "webSearch": "Szukaj w internecie aktualnych informacji",
+      "database": "Zapytaj bazę danych SQLite",
+      "knowledgeGraph": "Zapytaj graf wiedzy"
+    },
+    "documentScope": {
+      "title": "Bazy wiedzy",
+      "description": "Wybierz źródła do uwzględnienia w kontekście",
+      "noSources": "Brak dostępnych źródeł",
+      "clearAll": "Wyczyść wszystko",
+      "docsLabel": "Dokumenty"
+    },
+    "messages": {
+      "searching": "🔍 Szukam \"{{term}}\"...",
+      "searchResults": "Wyszukałem \"{{term}}\" dla Ciebie:",
+      "newConversation": "Nowa rozmowa"
+    },
+    "code": {
+      "copy": "Kopiuj",
+      "copied": "Skopiowano!",
+      "copyCode": "Kopiuj kod"
+    },
+    "export": {
+      "button": "Eksportuj",
+      "title": "Eksportuj rozmowę",
+      "disabled": "Brak wiadomości do eksportu",
+      "markdown": "Markdown",
+      "markdownExt": "plik .md",
+      "plainText": "Zwykły tekst",
+      "plainTextExt": "plik .txt"
+    }
+  },
   "common": {
     "adminQuestion": "Czy jesteś administratorem?",
     "signInNostr": "Zaloguj się przez Nostr"

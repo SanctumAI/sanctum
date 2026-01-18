@@ -56,6 +56,58 @@
       "invalidNumber": "אנא הזן מספר תקין"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "מה תרצה לדעת?",
+      "description": "שאל שאלות על בסיס הידע שלך או התחל שיחה כללית",
+      "tryAsking": "נסה לשאול"
+    },
+    "suggestedPrompts": {
+      "documents": "אילו מסמכים יש בבסיס הידע?",
+      "summarize": "סכם את המושגים המרכזיים",
+      "ragPipeline": "איך עובד צינור ה-RAG?",
+      "entities": "מהן הישויות והיחסים העיקריים?"
+    },
+    "typing": "חושב...",
+    "input": {
+      "placeholder": "שאל כל דבר...",
+      "placeholderWithDocs": "שאל על המסמכים שבחרת...",
+      "sendTitle": "שלח הודעה (Enter)",
+      "sendLabel": "שלח הודעה"
+    },
+    "tools": {
+      "label": "כלים",
+      "webSearch": "חפש מידע עדכני באינטרנט",
+      "database": "שאילתה למסד נתונים SQLite",
+      "knowledgeGraph": "שאילתה לגרף הידע"
+    },
+    "documentScope": {
+      "title": "בסיסי ידע",
+      "description": "בחר מקורות לכלול בהקשר",
+      "noSources": "אין מקורות זמינים",
+      "clearAll": "נקה הכל",
+      "docsLabel": "מסמכים"
+    },
+    "messages": {
+      "searching": "🔍 מחפש \"{{term}}\"...",
+      "searchResults": "חיפשתי \"{{term}}\" עבורך:",
+      "newConversation": "שיחה חדשה"
+    },
+    "code": {
+      "copy": "העתק",
+      "copied": "הועתק!",
+      "copyCode": "העתק קוד"
+    },
+    "export": {
+      "button": "ייצוא",
+      "title": "ייצא שיחה",
+      "disabled": "אין הודעות לייצוא",
+      "markdown": "Markdown",
+      "markdownExt": "קובץ .md",
+      "plainText": "טקסט רגיל",
+      "plainTextExt": "קובץ .txt"
+    }
+  },
   "common": {
     "adminQuestion": "האם אתה מנהל?",
     "signInNostr": "התחבר עם Nostr"

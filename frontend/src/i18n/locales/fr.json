@@ -56,6 +56,58 @@
       "invalidNumber": "Veuillez saisir un nombre valide"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "Que souhaitez-vous savoir ?",
+      "description": "Posez des questions sur votre base de connaissances ou démarrez une conversation générale",
+      "tryAsking": "Essayez de demander"
+    },
+    "suggestedPrompts": {
+      "documents": "Quels documents sont dans la base de connaissances ?",
+      "summarize": "Résumez les concepts clés",
+      "ragPipeline": "Comment fonctionne le pipeline RAG ?",
+      "entities": "Quelles sont les principales entités et relations ?"
+    },
+    "typing": "Réflexion...",
+    "input": {
+      "placeholder": "Demandez n'importe quoi...",
+      "placeholderWithDocs": "Posez des questions sur vos documents sélectionnés...",
+      "sendTitle": "Envoyer le message (Entrée)",
+      "sendLabel": "Envoyer le message"
+    },
+    "tools": {
+      "label": "Outils",
+      "webSearch": "Rechercher sur le web des informations actuelles",
+      "database": "Interroger la base de données SQLite",
+      "knowledgeGraph": "Interroger le graphe de connaissances"
+    },
+    "documentScope": {
+      "title": "Bases de connaissances",
+      "description": "Sélectionnez les sources à inclure dans le contexte",
+      "noSources": "Aucune source disponible",
+      "clearAll": "Tout effacer",
+      "docsLabel": "Docs"
+    },
+    "messages": {
+      "searching": "🔍 Recherche de \"{{term}}\"...",
+      "searchResults": "J'ai recherché \"{{term}}\" pour vous :",
+      "newConversation": "Nouvelle conversation"
+    },
+    "code": {
+      "copy": "Copier",
+      "copied": "Copié !",
+      "copyCode": "Copier le code"
+    },
+    "export": {
+      "button": "Exporter",
+      "title": "Exporter la conversation",
+      "disabled": "Aucun message à exporter",
+      "markdown": "Markdown",
+      "markdownExt": "fichier .md",
+      "plainText": "Texte brut",
+      "plainTextExt": "fichier .txt"
+    }
+  },
   "common": {
     "adminQuestion": "Êtes-vous un administrateur ?",
     "signInNostr": "Se connecter avec Nostr"

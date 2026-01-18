@@ -56,6 +56,58 @@
       "invalidNumber": "Silakan masukkan angka yang valid"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "Apa yang ingin Anda ketahui?",
+      "description": "Ajukan pertanyaan tentang basis pengetahuan Anda atau mulai percakapan umum",
+      "tryAsking": "Coba tanya"
+    },
+    "suggestedPrompts": {
+      "documents": "Dokumen apa saja yang ada di basis pengetahuan?",
+      "summarize": "Rangkum konsep-konsep utama",
+      "ragPipeline": "Bagaimana cara kerja pipeline RAG?",
+      "entities": "Apa entitas dan hubungan utamanya?"
+    },
+    "typing": "Sedang berpikir...",
+    "input": {
+      "placeholder": "Tanya apa saja...",
+      "placeholderWithDocs": "Tanya tentang dokumen yang dipilih...",
+      "sendTitle": "Kirim pesan (Enter)",
+      "sendLabel": "Kirim pesan"
+    },
+    "tools": {
+      "label": "Alat",
+      "webSearch": "Cari informasi terkini di web",
+      "database": "Query database SQLite",
+      "knowledgeGraph": "Query graf pengetahuan"
+    },
+    "documentScope": {
+      "title": "Basis Pengetahuan",
+      "description": "Pilih sumber untuk disertakan dalam konteks",
+      "noSources": "Tidak ada sumber tersedia",
+      "clearAll": "Hapus semua",
+      "docsLabel": "Dokumen"
+    },
+    "messages": {
+      "searching": "🔍 Mencari \"{{term}}\"...",
+      "searchResults": "Saya mencari \"{{term}}\" untuk Anda:",
+      "newConversation": "Percakapan baru"
+    },
+    "code": {
+      "copy": "Salin",
+      "copied": "Disalin!",
+      "copyCode": "Salin kode"
+    },
+    "export": {
+      "button": "Ekspor",
+      "title": "Ekspor percakapan",
+      "disabled": "Tidak ada pesan untuk diekspor",
+      "markdown": "Markdown",
+      "markdownExt": "file .md",
+      "plainText": "Teks biasa",
+      "plainTextExt": "file .txt"
+    }
+  },
   "common": {
     "adminQuestion": "Apakah Anda admin?",
     "signInNostr": "Masuk dengan Nostr"

@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 export interface Tool {
   id: string
   name: string
@@ -41,10 +43,12 @@ export function ToolSelector({
   onToggle,
   compact = false,
 }: ToolSelectorProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="flex items-center gap-1.5">
       {!compact && (
-        <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium mr-1">Tools</span>
+        <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium mr-1">{t('chat.tools.label')}</span>
       )}
       {tools.map((tool) => {
         const isSelected = selectedTools.includes(tool.id)

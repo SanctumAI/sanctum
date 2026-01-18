@@ -56,6 +56,58 @@
       "invalidNumber": "請輸入有效的數字"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "你想了解什麼？",
+      "description": "詢問關於知識庫的問題或開始一般對話",
+      "tryAsking": "試著問問"
+    },
+    "suggestedPrompts": {
+      "documents": "知識庫中有哪些文件？",
+      "summarize": "總結關鍵概念",
+      "ragPipeline": "RAG 管道是如何運作的？",
+      "entities": "主要的實體和關係是什麼？"
+    },
+    "typing": "思考中...",
+    "input": {
+      "placeholder": "隨便問...",
+      "placeholderWithDocs": "詢問關於所選文件的問題...",
+      "sendTitle": "傳送訊息（Enter）",
+      "sendLabel": "傳送訊息"
+    },
+    "tools": {
+      "label": "工具",
+      "webSearch": "搜尋網路獲取最新資訊",
+      "database": "查詢 SQLite 資料庫",
+      "knowledgeGraph": "查詢知識圖譜"
+    },
+    "documentScope": {
+      "title": "知識庫",
+      "description": "選擇要包含在上下文中的來源",
+      "noSources": "沒有可用的來源",
+      "clearAll": "清除全部",
+      "docsLabel": "文件"
+    },
+    "messages": {
+      "searching": "🔍 正在搜尋「{{term}}」...",
+      "searchResults": "我為你搜尋了「{{term}}」：",
+      "newConversation": "新對話"
+    },
+    "code": {
+      "copy": "複製",
+      "copied": "已複製！",
+      "copyCode": "複製程式碼"
+    },
+    "export": {
+      "button": "匯出",
+      "title": "匯出對話",
+      "disabled": "沒有訊息可匯出",
+      "markdown": "Markdown",
+      "markdownExt": ".md 檔案",
+      "plainText": "純文字",
+      "plainTextExt": ".txt 檔案"
+    }
+  },
   "common": {
     "adminQuestion": "你是管理員嗎？",
     "signInNostr": "使用 Nostr 登入"

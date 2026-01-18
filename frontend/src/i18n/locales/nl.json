@@ -56,6 +56,58 @@
       "invalidNumber": "Vul een geldig nummer in"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "Wat wil je weten?",
+      "description": "Stel vragen over je kennisbank of start een algemeen gesprek",
+      "tryAsking": "Probeer te vragen"
+    },
+    "suggestedPrompts": {
+      "documents": "Welke documenten staan in de kennisbank?",
+      "summarize": "Vat de belangrijkste concepten samen",
+      "ragPipeline": "Hoe werkt de RAG-pipeline?",
+      "entities": "Wat zijn de belangrijkste entiteiten en relaties?"
+    },
+    "typing": "Aan het nadenken...",
+    "input": {
+      "placeholder": "Vraag alles...",
+      "placeholderWithDocs": "Vraag over je geselecteerde documenten...",
+      "sendTitle": "Bericht verzenden (Enter)",
+      "sendLabel": "Bericht verzenden"
+    },
+    "tools": {
+      "label": "Tools",
+      "webSearch": "Zoek op het web naar actuele informatie",
+      "database": "Query de SQLite-database",
+      "knowledgeGraph": "Query de kennisgraaf"
+    },
+    "documentScope": {
+      "title": "Kennisbanken",
+      "description": "Selecteer bronnen om in de context op te nemen",
+      "noSources": "Geen bronnen beschikbaar",
+      "clearAll": "Alles wissen",
+      "docsLabel": "Docs"
+    },
+    "messages": {
+      "searching": "🔍 Zoeken naar \"{{term}}\"...",
+      "searchResults": "Ik heb \"{{term}}\" voor je gezocht:",
+      "newConversation": "Nieuw gesprek"
+    },
+    "code": {
+      "copy": "Kopiëren",
+      "copied": "Gekopieerd!",
+      "copyCode": "Code kopiëren"
+    },
+    "export": {
+      "button": "Exporteren",
+      "title": "Gesprek exporteren",
+      "disabled": "Geen berichten om te exporteren",
+      "markdown": "Markdown",
+      "markdownExt": ".md bestand",
+      "plainText": "Platte tekst",
+      "plainTextExt": ".txt bestand"
+    }
+  },
   "common": {
     "adminQuestion": "Ben je een beheerder?",
     "signInNostr": "Inloggen met Nostr"

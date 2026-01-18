@@ -56,6 +56,58 @@
       "invalidNumber": "有効な数字を入力してください"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "何を知りたいですか？",
+      "description": "ナレッジベースについて質問するか、一般的な会話を始めましょう",
+      "tryAsking": "こんな質問はいかがですか"
+    },
+    "suggestedPrompts": {
+      "documents": "ナレッジベースにはどんなドキュメントがありますか？",
+      "summarize": "主要な概念を要約してください",
+      "ragPipeline": "RAGパイプラインはどのように機能しますか？",
+      "entities": "主なエンティティと関係は何ですか？"
+    },
+    "typing": "考え中...",
+    "input": {
+      "placeholder": "何でも聞いてください...",
+      "placeholderWithDocs": "選択したドキュメントについて質問してください...",
+      "sendTitle": "メッセージを送信（Enter）",
+      "sendLabel": "メッセージを送信"
+    },
+    "tools": {
+      "label": "ツール",
+      "webSearch": "ウェブで最新情報を検索",
+      "database": "SQLiteデータベースをクエリ",
+      "knowledgeGraph": "ナレッジグラフをクエリ"
+    },
+    "documentScope": {
+      "title": "ナレッジベース",
+      "description": "コンテキストに含めるソースを選択",
+      "noSources": "利用可能なソースがありません",
+      "clearAll": "すべてクリア",
+      "docsLabel": "ドキュメント"
+    },
+    "messages": {
+      "searching": "🔍 「{{term}}」を検索中...",
+      "searchResults": "「{{term}}」を検索しました：",
+      "newConversation": "新しい会話"
+    },
+    "code": {
+      "copy": "コピー",
+      "copied": "コピーしました！",
+      "copyCode": "コードをコピー"
+    },
+    "export": {
+      "button": "エクスポート",
+      "title": "会話をエクスポート",
+      "disabled": "エクスポートするメッセージがありません",
+      "markdown": "Markdown",
+      "markdownExt": ".mdファイル",
+      "plainText": "プレーンテキスト",
+      "plainTextExt": ".txtファイル"
+    }
+  },
   "common": {
     "adminQuestion": "管理者ですか？",
     "signInNostr": "Nostrでサインイン"

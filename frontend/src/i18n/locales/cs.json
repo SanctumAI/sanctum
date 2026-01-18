@@ -56,6 +56,58 @@
       "invalidNumber": "Zadejte platné číslo"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "Co byste chtěli vědět?",
+      "description": "Ptejte se na svou znalostní bázi nebo začněte obecnou konverzaci",
+      "tryAsking": "Zkuste se zeptat"
+    },
+    "suggestedPrompts": {
+      "documents": "Jaké dokumenty jsou ve znalostní bázi?",
+      "summarize": "Shrňte klíčové koncepty",
+      "ragPipeline": "Jak funguje RAG pipeline?",
+      "entities": "Jaké jsou hlavní entity a vztahy?"
+    },
+    "typing": "Přemýšlím...",
+    "input": {
+      "placeholder": "Zeptejte se na cokoliv...",
+      "placeholderWithDocs": "Zeptejte se na vybrané dokumenty...",
+      "sendTitle": "Odeslat zprávu (Enter)",
+      "sendLabel": "Odeslat zprávu"
+    },
+    "tools": {
+      "label": "Nástroje",
+      "webSearch": "Hledat aktuální informace na webu",
+      "database": "Dotaz na SQLite databázi",
+      "knowledgeGraph": "Dotaz na znalostní graf"
+    },
+    "documentScope": {
+      "title": "Znalostní báze",
+      "description": "Vyberte zdroje k zahrnutí do kontextu",
+      "noSources": "Žádné zdroje nejsou k dispozici",
+      "clearAll": "Vymazat vše",
+      "docsLabel": "Dokumenty"
+    },
+    "messages": {
+      "searching": "🔍 Hledám \"{{term}}\"...",
+      "searchResults": "Vyhledal jsem \"{{term}}\" pro vás:",
+      "newConversation": "Nová konverzace"
+    },
+    "code": {
+      "copy": "Kopírovat",
+      "copied": "Zkopírováno!",
+      "copyCode": "Kopírovat kód"
+    },
+    "export": {
+      "button": "Exportovat",
+      "title": "Exportovat konverzaci",
+      "disabled": "Žádné zprávy k exportu",
+      "markdown": "Markdown",
+      "markdownExt": "soubor .md",
+      "plainText": "Prostý text",
+      "plainTextExt": "soubor .txt"
+    }
+  },
   "common": {
     "adminQuestion": "Jste administrátor?",
     "signInNostr": "Přihlásit se přes Nostr"

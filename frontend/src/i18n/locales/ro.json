@@ -56,6 +56,58 @@
       "invalidNumber": "Te rugăm să introduci un număr valid"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "Ce ai vrea să afli?",
+      "description": "Pune întrebări despre baza ta de cunoștințe sau începe o conversație generală",
+      "tryAsking": "Încearcă să întrebi"
+    },
+    "suggestedPrompts": {
+      "documents": "Ce documente sunt în baza de cunoștințe?",
+      "summarize": "Rezumă conceptele cheie",
+      "ragPipeline": "Cum funcționează pipeline-ul RAG?",
+      "entities": "Care sunt principalele entități și relații?"
+    },
+    "typing": "Mă gândesc...",
+    "input": {
+      "placeholder": "Întreabă orice...",
+      "placeholderWithDocs": "Întreabă despre documentele selectate...",
+      "sendTitle": "Trimite mesajul (Enter)",
+      "sendLabel": "Trimite mesajul"
+    },
+    "tools": {
+      "label": "Instrumente",
+      "webSearch": "Caută informații actuale pe web",
+      "database": "Interogare bază de date SQLite",
+      "knowledgeGraph": "Interogare graf de cunoștințe"
+    },
+    "documentScope": {
+      "title": "Baze de cunoștințe",
+      "description": "Selectează sursele de inclus în context",
+      "noSources": "Nu sunt surse disponibile",
+      "clearAll": "Șterge tot",
+      "docsLabel": "Documente"
+    },
+    "messages": {
+      "searching": "🔍 Caut \"{{term}}\"...",
+      "searchResults": "Am căutat \"{{term}}\" pentru tine:",
+      "newConversation": "Conversație nouă"
+    },
+    "code": {
+      "copy": "Copiază",
+      "copied": "Copiat!",
+      "copyCode": "Copiază codul"
+    },
+    "export": {
+      "button": "Exportă",
+      "title": "Exportă conversația",
+      "disabled": "Nu există mesaje de exportat",
+      "markdown": "Markdown",
+      "markdownExt": "fișier .md",
+      "plainText": "Text simplu",
+      "plainTextExt": "fișier .txt"
+    }
+  },
   "common": {
     "adminQuestion": "Ești administrator?",
     "signInNostr": "Autentificare cu Nostr"

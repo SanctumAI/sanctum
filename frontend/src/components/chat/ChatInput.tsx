@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, KeyboardEvent, ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface ChatInputProps {
   onSend: (message: string) => void
@@ -7,7 +8,9 @@ interface ChatInputProps {
   toolbar?: ReactNode
 }
 
-export function ChatInput({ onSend, disabled, placeholder = 'Ask anything...', toolbar }: ChatInputProps) {
+export function ChatInput({ onSend, disabled, placeholder, toolbar }: ChatInputProps) {
+  const { t } = useTranslation()
+  const defaultPlaceholder = t('chat.input.placeholder')
   const [input, setInput] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -53,7 +56,7 @@ export function ChatInput({ onSend, disabled, placeholder = 'Ask anything...', t
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={placeholder}
+              placeholder={placeholder || defaultPlaceholder}
               disabled={disabled}
               rows={1}
               className="flex-1 bg-transparent text-text placeholder:text-text-muted resize-none outline-none focus-visible:outline-none border-none px-2 py-2 max-h-40 text-[15px] leading-relaxed"
@@ -61,9 +64,9 @@ export function ChatInput({ onSend, disabled, placeholder = 'Ask anything...', t
             <button
               onClick={handleSubmit}
               disabled={disabled || !input.trim()}
-              title="Send message (Enter)"
+              title={t('chat.input.sendTitle')}
               className="p-2.5 rounded-xl bg-accent text-accent-text hover:bg-accent-hover disabled:bg-surface-overlay disabled:text-text-muted disabled:cursor-not-allowed transition-all active-press shrink-0 shadow-sm hover:shadow-md disabled:shadow-none"
-              aria-label="Send message"
+              aria-label={t('chat.input.sendLabel')}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />

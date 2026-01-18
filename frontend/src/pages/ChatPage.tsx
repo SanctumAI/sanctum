@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ChatContainer } from '../components/chat/ChatContainer'
 import { MessageList } from '../components/chat/MessageList'
 import { ChatInput } from '../components/chat/ChatInput'
@@ -13,6 +14,7 @@ import { isAdminAuthenticated } from '../utils/adminApi'
 
 export function ChatPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -26,7 +28,7 @@ export function ChatPage() {
       {
         id: 'web-search',
         name: 'Web',
-        description: 'Search the web for current information',
+        description: t('chat.tools.webSearch'),
         icon: (
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -40,7 +42,7 @@ export function ChatPage() {
       tools.push({
         id: 'db-query',
         name: 'Database',
-        description: 'Query the SQLite database',
+        description: t('chat.tools.database'),
         icon: (
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
@@ -50,7 +52,7 @@ export function ChatPage() {
     }
 
     return tools
-  }, [])
+  }, [t])
 
   // Check auth and approval status on mount
   useEffect(() => {
@@ -171,7 +173,7 @@ export function ChatPage() {
       const searchingMessage: Message = {
         id: generateMessageId(),
         role: 'assistant',
-        content: `🔍 Searching for "${searchTerm}"...`,
+        content: t('chat.messages.searching', { term: searchTerm }),
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, searchingMessage])
@@ -209,7 +211,7 @@ IMPORTANT: Return a CONDENSED response:
       const searchResultMessage: Message = {
         id: generateMessageId(),
         role: 'assistant',
-        content: `I searched "${searchTerm}" for you:\n\n${searchResults}`,
+        content: `${t('chat.messages.searchResults', { term: searchTerm })}\n\n${searchResults}`,
         timestamp: new Date(),
       }
       
@@ -256,7 +258,7 @@ IMPORTANT: Return a CONDENSED response:
       <button
         onClick={handleNewChat}
         className="p-2 rounded-lg text-text-secondary hover:text-text hover:bg-surface-overlay transition-all"
-        title="New conversation"
+        title={t('chat.messages.newConversation')}
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -309,8 +311,8 @@ IMPORTANT: Return a CONDENSED response:
         disabled={isLoading}
         placeholder={
           selectedDocuments.length > 0
-            ? 'Ask about your selected documents...'
-            : 'Ask anything...'
+            ? t('chat.input.placeholderWithDocs')
+            : t('chat.input.placeholder')
         }
         toolbar={inputToolbar}
       />

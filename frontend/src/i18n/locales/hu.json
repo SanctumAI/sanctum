@@ -56,6 +56,58 @@
       "invalidNumber": "Kérjük, adj meg érvényes számot"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "Mit szeretne tudni?",
+      "description": "Kérdezzen a tudásbázisáról, vagy kezdjen általános beszélgetést",
+      "tryAsking": "Próbálja megkérdezni"
+    },
+    "suggestedPrompts": {
+      "documents": "Milyen dokumentumok vannak a tudásbázisban?",
+      "summarize": "Foglalja össze a kulcsfogalmakat",
+      "ragPipeline": "Hogyan működik a RAG pipeline?",
+      "entities": "Mik a fő entitások és kapcsolatok?"
+    },
+    "typing": "Gondolkodom...",
+    "input": {
+      "placeholder": "Kérdezzen bármit...",
+      "placeholderWithDocs": "Kérdezzen a kiválasztott dokumentumokról...",
+      "sendTitle": "Üzenet küldése (Enter)",
+      "sendLabel": "Üzenet küldése"
+    },
+    "tools": {
+      "label": "Eszközök",
+      "webSearch": "Aktuális információk keresése a weben",
+      "database": "SQLite adatbázis lekérdezése",
+      "knowledgeGraph": "Tudásgráf lekérdezése"
+    },
+    "documentScope": {
+      "title": "Tudásbázisok",
+      "description": "Válassza ki a kontextusba bevonandó forrásokat",
+      "noSources": "Nincsenek elérhető források",
+      "clearAll": "Összes törlése",
+      "docsLabel": "Dokumentumok"
+    },
+    "messages": {
+      "searching": "🔍 Keresés: \"{{term}}\"...",
+      "searchResults": "Ezt kerestem önnek: \"{{term}}\":",
+      "newConversation": "Új beszélgetés"
+    },
+    "code": {
+      "copy": "Másolás",
+      "copied": "Másolva!",
+      "copyCode": "Kód másolása"
+    },
+    "export": {
+      "button": "Exportálás",
+      "title": "Beszélgetés exportálása",
+      "disabled": "Nincs exportálható üzenet",
+      "markdown": "Markdown",
+      "markdownExt": ".md fájl",
+      "plainText": "Egyszerű szöveg",
+      "plainTextExt": ".txt fájl"
+    }
+  },
   "common": {
     "adminQuestion": "Ön adminisztrátor?",
     "signInNostr": "Bejelentkezés Nostr használatával"

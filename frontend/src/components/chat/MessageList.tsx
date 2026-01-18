@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { MessageCircle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { ChatMessage, Message } from './ChatMessage'
 
 interface MessageListProps {
@@ -8,15 +9,17 @@ interface MessageListProps {
   onSuggestedPrompt?: (prompt: string) => void
 }
 
-const suggestedPrompts = [
-  "What documents are in the knowledge base?",
-  "Summarize the key concepts",
-  "How does the RAG pipeline work?",
-  "What are the main entities and relationships?",
-]
+const suggestedPromptKeys = [
+  'chat.suggestedPrompts.documents',
+  'chat.suggestedPrompts.summarize',
+  'chat.suggestedPrompts.ragPipeline',
+  'chat.suggestedPrompts.entities',
+] as const
 
 
 function EmptyState({ onSuggestedPrompt }: { onSuggestedPrompt?: (prompt: string) => void }) {
+  const { t } = useTranslation()
+
   return (
     <div className="flex-1 flex items-center justify-center p-4">
       <div className="text-center max-w-lg animate-fade-in">
@@ -29,23 +32,23 @@ function EmptyState({ onSuggestedPrompt }: { onSuggestedPrompt?: (prompt: string
         </div>
 
         {/* Text */}
-        <h2 className="text-xl font-semibold text-text mb-2">What would you like to know?</h2>
+        <h2 className="text-xl font-semibold text-text mb-2">{t('chat.emptyState.title')}</h2>
         <p className="text-text-secondary text-sm mb-6">
-          Ask questions about your knowledge base or start a general conversation
+          {t('chat.emptyState.description')}
         </p>
 
         {/* Suggested prompts */}
         {onSuggestedPrompt && (
           <div className="space-y-2">
-            <p className="text-xs text-text-muted uppercase tracking-wide font-medium mb-3">Try asking</p>
+            <p className="text-xs text-text-muted uppercase tracking-wide font-medium mb-3">{t('chat.emptyState.tryAsking')}</p>
             <div className="flex flex-wrap justify-center gap-2">
-              {suggestedPrompts.map((prompt, i) => (
+              {suggestedPromptKeys.map((key, i) => (
                 <button
                   key={i}
-                  onClick={() => onSuggestedPrompt(prompt)}
+                  onClick={() => onSuggestedPrompt(t(key))}
                   className="px-3 py-1.5 text-sm text-text-secondary bg-surface-raised border border-border rounded-full hover:border-accent hover:text-accent hover:bg-accent/5 transition-all hover-scale active-press"
                 >
-                  {prompt}
+                  {t(key)}
                 </button>
               ))}
             </div>
@@ -57,6 +60,8 @@ function EmptyState({ onSuggestedPrompt }: { onSuggestedPrompt?: (prompt: string
 }
 
 function TypingIndicator() {
+  const { t } = useTranslation()
+
   return (
     <div className="animate-fade-in-up mb-4">
       <div className="flex gap-3">
@@ -74,7 +79,7 @@ function TypingIndicator() {
             <span className="w-2 h-2 bg-accent/60 rounded-full typing-dot" />
             <span className="w-2 h-2 bg-accent/60 rounded-full typing-dot" />
           </div>
-          <span className="text-sm text-text-secondary animate-pulse-subtle">Thinking...</span>
+          <span className="text-sm text-text-secondary animate-pulse-subtle">{t('chat.typing')}</span>
         </div>
       </div>
     </div>

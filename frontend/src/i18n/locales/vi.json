@@ -56,6 +56,58 @@
       "invalidNumber": "Vui lòng nhập số hợp lệ"
     }
   },
+  "chat": {
+    "emptyState": {
+      "title": "Bạn muốn biết điều gì?",
+      "description": "Đặt câu hỏi về cơ sở kiến thức của bạn hoặc bắt đầu cuộc trò chuyện chung",
+      "tryAsking": "Thử hỏi"
+    },
+    "suggestedPrompts": {
+      "documents": "Có những tài liệu nào trong cơ sở kiến thức?",
+      "summarize": "Tóm tắt các khái niệm chính",
+      "ragPipeline": "Pipeline RAG hoạt động như thế nào?",
+      "entities": "Các thực thể và mối quan hệ chính là gì?"
+    },
+    "typing": "Đang suy nghĩ...",
+    "input": {
+      "placeholder": "Hỏi bất cứ điều gì...",
+      "placeholderWithDocs": "Hỏi về các tài liệu đã chọn...",
+      "sendTitle": "Gửi tin nhắn (Enter)",
+      "sendLabel": "Gửi tin nhắn"
+    },
+    "tools": {
+      "label": "Công cụ",
+      "webSearch": "Tìm kiếm thông tin hiện tại trên web",
+      "database": "Truy vấn cơ sở dữ liệu SQLite",
+      "knowledgeGraph": "Truy vấn đồ thị kiến thức"
+    },
+    "documentScope": {
+      "title": "Cơ sở kiến thức",
+      "description": "Chọn nguồn để đưa vào ngữ cảnh",
+      "noSources": "Không có nguồn nào",
+      "clearAll": "Xóa tất cả",
+      "docsLabel": "Tài liệu"
+    },
+    "messages": {
+      "searching": "🔍 Đang tìm kiếm \"{{term}}\"...",
+      "searchResults": "Tôi đã tìm kiếm \"{{term}}\" cho bạn:",
+      "newConversation": "Cuộc trò chuyện mới"
+    },
+    "code": {
+      "copy": "Sao chép",
+      "copied": "Đã sao chép!",
+      "copyCode": "Sao chép mã"
+    },
+    "export": {
+      "button": "Xuất",
+      "title": "Xuất cuộc trò chuyện",
+      "disabled": "Không có tin nhắn để xuất",
+      "markdown": "Markdown",
+      "markdownExt": "tệp .md",
+      "plainText": "Văn bản thuần",
+      "plainTextExt": "tệp .txt"
+    }
+  },
   "common": {
     "adminQuestion": "Bạn có phải là quản trị viên không?",
     "signInNostr": "Đăng nhập bằng Nostr"

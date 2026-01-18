@@ -1,5 +1,13 @@
 export type FieldType = 'text' | 'email' | 'number' | 'textarea' | 'select' | 'checkbox' | 'date' | 'url'
 
+// User type - groups of users with different question sets
+export interface UserType {
+  id: number
+  name: string
+  description?: string
+  display_order: number
+}
+
 export interface CustomField {
   id: string
   name: string
@@ -7,11 +15,13 @@ export interface CustomField {
   required: boolean
   placeholder?: string
   options?: string[]  // for select type
+  user_type_id?: number | null  // null = global field (shown for all types)
 }
 
 export interface UserProfile {
   email: string
   name?: string
+  user_type_id?: number | null
   completedAt: string
   fields: Record<string, string | boolean>  // fieldId -> value
 }
@@ -25,6 +35,7 @@ export const STORAGE_KEYS = {
   USER_PROFILE: 'sanctum_user_profile',
   PENDING_EMAIL: 'sanctum_pending_email',
   PENDING_NAME: 'sanctum_pending_name',
+  USER_TYPE_ID: 'sanctum_user_type_id',
 } as const
 
 export function getCustomFields(): CustomField[] {
@@ -54,3 +65,26 @@ export function getUserProfile(): UserProfile | null {
 export function saveUserProfile(profile: UserProfile): void {
   localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(profile))
 }
+
+// User type helpers
+export function getSelectedUserTypeId(): number | null {
+  const stored = localStorage.getItem(STORAGE_KEYS.USER_TYPE_ID)
+  if (!stored) return null
+  const parsed = parseInt(stored, 10)
+  return isNaN(parsed) ? null : parsed
+}
+
+export function saveSelectedUserTypeId(typeId: number | null): void {
+  if (typeId === null) {
+    localStorage.removeItem(STORAGE_KEYS.USER_TYPE_ID)
+  } else {
+    localStorage.setItem(STORAGE_KEYS.USER_TYPE_ID, String(typeId))
+  }
+}
+
+export function clearSelectedUserTypeId(): void {
+  localStorage.removeItem(STORAGE_KEYS.USER_TYPE_ID)
+}
+
+// API base URL - uses Vite proxy in development, can be overridden via env var
+export const API_BASE = import.meta.env.VITE_API_BASE || '/api'

@@ -56,7 +56,7 @@ export function ChatInput({ onSend, disabled, placeholder = 'Ask anything...', t
               placeholder={placeholder}
               disabled={disabled}
               rows={1}
-              className="flex-1 bg-transparent text-text placeholder:text-text-muted resize-none outline-none border-none px-2 py-2 max-h-40 text-[15px] leading-relaxed"
+              className="flex-1 bg-transparent text-text placeholder:text-text-muted resize-none outline-none focus-visible:outline-none border-none px-2 py-2 max-h-40 text-[15px] leading-relaxed"
             />
             <button
               onClick={handleSubmit}

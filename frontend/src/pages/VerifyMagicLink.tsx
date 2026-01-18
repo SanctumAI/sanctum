@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
-import { getCustomFields, STORAGE_KEYS } from '../types/onboarding'
+import { STORAGE_KEYS, API_BASE } from '../types/onboarding'
 
 type VerifyState = 'verifying' | 'success' | 'error'
 
@@ -12,7 +12,7 @@ export function VerifyMagicLink() {
   const [state, setState] = useState<VerifyState>('verifying')
   const [email, setEmail] = useState<string | null>(null)
   const [name, setName] = useState<string | null>(null)
-  const [hasCustomFields, setHasCustomFields] = useState(false)
+  const [hasOnboarding, setHasOnboarding] = useState(false)
 
   useEffect(() => {
     // Get stored email and name from localStorage
@@ -22,9 +22,27 @@ export function VerifyMagicLink() {
     setEmail(storedEmail)
     setName(storedName)
 
-    // Check if there are custom fields to complete
-    const customFields = getCustomFields()
-    setHasCustomFields(customFields.length > 0)
+    // Check if there are user types or custom fields to complete
+    async function checkOnboarding() {
+      try {
+        const [typesRes, fieldsRes] = await Promise.all([
+          fetch(`${API_BASE}/user-types`),
+          fetch(`${API_BASE}/admin/user-fields`),
+        ])
+
+        const typesData = typesRes.ok ? await typesRes.json() : { types: [] }
+        const fieldsData = fieldsRes.ok ? await fieldsRes.json() : { fields: [] }
+
+        // Has onboarding if there are types (>1) or fields to complete
+        const hasTypes = (typesData.types?.length || 0) > 1
+        const hasFields = (fieldsData.fields?.length || 0) > 0
+        setHasOnboarding(hasTypes || hasFields)
+      } catch {
+        setHasOnboarding(false)
+      }
+    }
+
+    checkOnboarding()
 
     // Simulate verification process
     const verifyTimer = setTimeout(() => {
@@ -51,9 +69,9 @@ export function VerifyMagicLink() {
     // Redirect after success
     if (state === 'success') {
       const redirectTimer = setTimeout(() => {
-        // If custom fields exist, go to profile first
-        if (hasCustomFields) {
-          navigate('/profile')
+        // If onboarding needed, go to user-type selection (which auto-skips if needed)
+        if (hasOnboarding) {
+          navigate('/user-type')
         } else {
           navigate('/chat')
         }
@@ -61,7 +79,7 @@ export function VerifyMagicLink() {
 
       return () => clearTimeout(redirectTimer)
     }
-  }, [state, navigate, hasCustomFields])
+  }, [state, navigate, hasOnboarding])
 
   return (
     <OnboardingCard>
@@ -92,7 +110,7 @@ export function VerifyMagicLink() {
             {email}
           </p>
           <p className="text-xs text-text-muted mt-6">
-            {hasCustomFields ? t('onboarding.verify.completingProfile') : t('onboarding.verify.redirectingChat')}
+            {hasOnboarding ? t('onboarding.verify.completingProfile') : t('onboarding.verify.redirectingChat')}
           </p>
         </div>
       )}

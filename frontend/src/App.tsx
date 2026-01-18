@@ -7,6 +7,7 @@ import { AdminDocumentUpload } from './pages/AdminDocumentUpload'
 import { AdminDatabaseExplorer } from './pages/AdminDatabaseExplorer'
 import { UserOnboarding } from './pages/UserOnboarding'
 import { UserAuth } from './pages/UserAuth'
+import { UserTypeSelection } from './pages/UserTypeSelection'
 import { UserProfile } from './pages/UserProfile'
 import { VerifyMagicLink } from './pages/VerifyMagicLink'
 
@@ -22,6 +23,7 @@ function App() {
         <Route path="/admin/database" element={<AdminDatabaseExplorer />} />
         <Route path="/login" element={<UserOnboarding />} />
         <Route path="/auth" element={<UserAuth />} />
+        <Route path="/user-type" element={<UserTypeSelection />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/verify" element={<VerifyMagicLink />} />
       </Routes>

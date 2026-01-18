@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Sparkles } from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
 import { ChatMessage, Message } from './ChatMessage'
 
 interface MessageListProps {
@@ -24,7 +24,7 @@ function EmptyState({ onSuggestedPrompt }: { onSuggestedPrompt?: (prompt: string
         <div className="relative mx-auto mb-6 w-16 h-16">
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 rotate-6" />
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center shadow-lg">
-            <Sparkles className="w-8 h-8 text-white" strokeWidth={2} />
+            <MessageCircle className="w-8 h-8 text-white" strokeWidth={2} />
           </div>
         </div>
 
@@ -74,7 +74,7 @@ function TypingIndicator() {
             <span className="w-2 h-2 bg-accent/60 rounded-full typing-dot" />
             <span className="w-2 h-2 bg-accent/60 rounded-full typing-dot" />
           </div>
-          <span className="text-sm text-text-muted animate-pulse-subtle">Thinking...</span>
+          <span className="text-sm text-text-secondary animate-pulse-subtle">Thinking...</span>
         </div>
       </div>
     </div>

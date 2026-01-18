@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
@@ -36,6 +37,74 @@ function AssistantIcon() {
   )
 }
 
+interface CodeBlockProps {
+  language: string | null
+  children: string
+  resolvedTheme: 'light' | 'dark'
+}
+
+function CodeBlock({ language, children, resolvedTheme }: CodeBlockProps) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(children)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const codeStyle = resolvedTheme === 'dark' ? oneDark : oneLight
+
+  return (
+    <div className="my-4 rounded-xl overflow-hidden border border-border shadow-sm group">
+      <div className="flex items-center justify-between px-4 py-2 bg-surface-raised border-b border-border">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-text-secondary uppercase tracking-wide">
+            {language || 'code'}
+          </span>
+        </div>
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md
+            text-text-muted hover:text-text-secondary hover:bg-surface-overlay
+            opacity-0 group-hover:opacity-100 transition-all duration-200
+            focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-accent/50"
+          aria-label={copied ? 'Copied!' : 'Copy code'}
+        >
+          {copied ? (
+            <>
+              <svg className="w-3.5 h-3.5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Copied!</span>
+            </>
+          ) : (
+            <>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span>Copy</span>
+            </>
+          )}
+        </button>
+      </div>
+      <SyntaxHighlighter
+        style={codeStyle as { [key: string]: CSSProperties }}
+        language={language || 'text'}
+        PreTag="div"
+        showLineNumbers={false}
+        customStyle={{
+          margin: 0,
+          padding: '1rem 1.25rem',
+          fontSize: '0.8125rem',
+          lineHeight: '1.7',
+        }}
+      >
+        {children}
+      </SyntaxHighlighter>
+    </div>
+  )
+}
+
 export function ChatMessage({ message }: ChatMessageProps) {
   const { resolvedTheme } = useTheme()
   const isUser = message.role === 'user'
@@ -53,7 +122,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
               <p className="whitespace-pre-wrap text-[15px] leading-relaxed">{message.content}</p>
             </div>
           ) : (
-            <div className="text-text">
+            <div className="text-text [&_*]:text-inherit [&_a]:text-accent [&_code]:text-text">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
@@ -64,7 +133,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                     if (isInline) {
                       return (
                         <code
-                          className="bg-surface-overlay/80 px-1.5 py-0.5 rounded-md text-sm font-mono text-accent"
+                          className="bg-surface-overlay px-1.5 py-0.5 rounded text-[0.875em] font-mono text-text"
                           {...props}
                         >
                           {children}
@@ -72,30 +141,13 @@ export function ChatMessage({ message }: ChatMessageProps) {
                       )
                     }
 
-                    const codeStyle = resolvedTheme === 'dark' ? oneDark : oneLight
                     return (
-                      <div className="my-3 rounded-xl overflow-hidden border border-border shadow-sm">
-                        {match && (
-                          <div className="bg-surface-overlay px-4 py-2 text-xs font-medium text-text-secondary border-b border-border flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-text-muted/30" />
-                            {match[1]}
-                          </div>
-                        )}
-                        <SyntaxHighlighter
-                          style={codeStyle as { [key: string]: CSSProperties }}
-                          language={match ? match[1] : 'text'}
-                          PreTag="div"
-                          customStyle={{
-                            margin: 0,
-                            padding: '1rem',
-                            background: 'var(--color-surface-overlay)',
-                            fontSize: '0.8125rem',
-                            lineHeight: '1.6',
-                          }}
-                        >
-                          {String(children).replace(/\n$/, '')}
-                        </SyntaxHighlighter>
-                      </div>
+                      <CodeBlock
+                        language={match ? match[1] : null}
+                        resolvedTheme={resolvedTheme}
+                      >
+                        {String(children).replace(/\n$/, '')}
+                      </CodeBlock>
                     )
                   },
                   p({ children }) {
@@ -129,10 +181,13 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   },
                   blockquote({ children }) {
                     return (
-                      <blockquote className="my-3 border-l-2 border-accent/50 pl-4 text-text-secondary italic">
+                      <blockquote className="my-4 border-l-4 border-border pl-4 text-text-secondary text-[15px] leading-relaxed [&>p]:mb-0">
                         {children}
                       </blockquote>
                     )
+                  },
+                  em({ children }) {
+                    return <em className="italic text-inherit">{children}</em>
                   },
                   h1({ children }) {
                     return <h1 className="text-xl font-semibold mb-3 mt-4 first:mt-0 text-text">{children}</h1>
@@ -151,23 +206,44 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   },
                   table({ children }) {
                     return (
-                      <div className="my-3 overflow-x-auto rounded-lg border border-border">
-                        <table className="min-w-full text-sm">
+                      <div className="my-4 overflow-x-auto rounded-xl border border-border shadow-sm">
+                        <table className="min-w-full text-sm divide-y divide-border">
                           {children}
                         </table>
                       </div>
                     )
                   },
+                  thead({ children }) {
+                    return (
+                      <thead className="bg-surface-raised">
+                        {children}
+                      </thead>
+                    )
+                  },
+                  tbody({ children }) {
+                    return (
+                      <tbody className="divide-y divide-border bg-surface">
+                        {children}
+                      </tbody>
+                    )
+                  },
+                  tr({ children }) {
+                    return (
+                      <tr className="hover:bg-surface-raised/50 transition-colors duration-150 even:bg-surface-overlay/30">
+                        {children}
+                      </tr>
+                    )
+                  },
                   th({ children }) {
                     return (
-                      <th className="bg-surface-overlay px-4 py-2.5 text-left font-medium text-text border-b border-border">
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-text uppercase tracking-wider">
                         {children}
                       </th>
                     )
                   },
                   td({ children }) {
                     return (
-                      <td className="px-4 py-2.5 text-text-secondary border-b border-border last:border-b-0">
+                      <td className="px-4 py-3 text-text-secondary">
                         {children}
                       </td>
                     )

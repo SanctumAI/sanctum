@@ -10,8 +10,7 @@ import { DocumentScope } from '../components/chat/DocumentScope'
 import { ExportButton } from '../components/chat/ExportButton'
 import { DynamicIcon } from '../components/shared/DynamicIcon'
 import { Message } from '../components/chat/ChatMessage'
-
-const API_BASE = 'http://localhost:8000'
+import { API_BASE } from '../types/onboarding'
 
 function ThemeToggle() {
   const { setTheme, resolvedTheme } = useTheme()

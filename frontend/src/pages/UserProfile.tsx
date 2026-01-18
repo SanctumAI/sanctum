@@ -1,14 +1,16 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { Loader2 } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { DynamicField } from '../components/onboarding/DynamicField'
 import {
   CustomField,
   UserProfile as UserProfileType,
-  getCustomFields,
   saveUserProfile,
+  getSelectedUserTypeId,
   STORAGE_KEYS,
+  API_BASE,
 } from '../types/onboarding'
 
 function validateEmail(email: string): boolean {
@@ -31,8 +33,9 @@ export function UserProfile() {
   const [values, setValues] = useState<Record<string, string | boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Load fields and check user is logged in
+  // Load fields from API and check user is logged in
   useEffect(() => {
     const email = localStorage.getItem(STORAGE_KEYS.USER_EMAIL)
     if (!email) {
@@ -40,21 +43,52 @@ export function UserProfile() {
       return
     }
 
-    const customFields = getCustomFields()
-    if (customFields.length === 0) {
-      // No fields to complete, go to chat
-      navigate('/chat')
-      return
+    async function fetchFields() {
+      try {
+        const userTypeId = getSelectedUserTypeId()
+        // Fetch fields - include global fields and type-specific if type selected
+        const url = userTypeId !== null
+          ? `${API_BASE}/admin/user-fields?user_type_id=${userTypeId}&include_global=true`
+          : `${API_BASE}/admin/user-fields`
+
+        const response = await fetch(url)
+        if (!response.ok) throw new Error('Failed to fetch fields')
+
+        const data = await response.json()
+        const fetchedFields: CustomField[] = (data.fields || []).map((f: any) => ({
+          id: String(f.id),
+          name: f.field_name,
+          type: f.field_type as any,
+          required: f.required,
+          placeholder: f.placeholder,
+          options: f.options,
+          user_type_id: f.user_type_id,
+        }))
+
+        if (fetchedFields.length === 0) {
+          // No fields to complete, go to chat
+          navigate('/chat')
+          return
+        }
+
+        setFields(fetchedFields)
+
+        // Initialize values with empty strings or false for checkboxes
+        const initialValues: Record<string, string | boolean> = {}
+        fetchedFields.forEach((field) => {
+          initialValues[field.id] = field.type === 'checkbox' ? false : ''
+        })
+        setValues(initialValues)
+      } catch (err) {
+        console.error('Error fetching fields:', err)
+        // On error, proceed to chat (graceful degradation)
+        navigate('/chat')
+      } finally {
+        setIsLoading(false)
+      }
     }
 
-    setFields(customFields)
-
-    // Initialize values with empty strings or false for checkboxes
-    const initialValues: Record<string, string | boolean> = {}
-    customFields.forEach((field) => {
-      initialValues[field.id] = field.type === 'checkbox' ? false : ''
-    })
-    setValues(initialValues)
+    fetchFields()
   }, [navigate])
 
   const handleValueChange = (fieldId: string, value: string | boolean) => {
@@ -117,20 +151,44 @@ export function UserProfile() {
 
     setIsSubmitting(true)
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 800))
+    try {
+      const userTypeId = getSelectedUserTypeId()
 
-    // Save profile
-    const profile: UserProfileType = {
-      email: localStorage.getItem(STORAGE_KEYS.USER_EMAIL) || '',
-      name: localStorage.getItem(STORAGE_KEYS.USER_NAME) || undefined,
-      completedAt: new Date().toISOString(),
-      fields: values,
+      // Save profile locally
+      const profile: UserProfileType = {
+        email: localStorage.getItem(STORAGE_KEYS.USER_EMAIL) || '',
+        name: localStorage.getItem(STORAGE_KEYS.USER_NAME) || undefined,
+        user_type_id: userTypeId,
+        completedAt: new Date().toISOString(),
+        fields: values,
+      }
+      saveUserProfile(profile)
+
+      // Also save to backend
+      await fetch(`${API_BASE}/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_type_id: userTypeId,
+          fields: values,
+        }),
+      })
+
+      // Navigate to chat
+      navigate('/chat')
+    } catch (err) {
+      console.error('Error saving profile:', err)
+      // Still navigate on error (profile saved locally)
+      navigate('/chat')
     }
-    saveUserProfile(profile)
+  }
 
-    // Navigate to chat
-    navigate('/chat')
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-accent animate-spin" />
+      </div>
+    )
   }
 
   if (fields.length === 0) {

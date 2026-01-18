@@ -67,9 +67,8 @@ export interface RecordMutationResponse {
   error?: string
 }
 
-// API base URL - same as other endpoints
-// TODO: Update if admin endpoints use different base
-export const DB_API_BASE = 'http://localhost:8000'
+// API base URL - uses Vite proxy in development
+export const DB_API_BASE = import.meta.env.VITE_API_BASE || '/api'
 
 /**
  * Expected API Endpoints (not yet implemented in backend):

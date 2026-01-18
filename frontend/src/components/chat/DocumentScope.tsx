@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { API_BASE } from '../../types/onboarding'
 
 export interface Ontology {
   id: string
@@ -19,7 +20,7 @@ interface DocumentScopeProps {
 export function DocumentScope({
   selectedDocuments,
   onToggle,
-  apiBase = 'http://localhost:8000',
+  apiBase = API_BASE,
   compact = false,
 }: DocumentScopeProps) {
   const [isOpen, setIsOpen] = useState(false)

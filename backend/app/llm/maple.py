@@ -46,7 +46,7 @@ class MapleProvider(LLMProvider):
         except Exception:
             return False
 
-    def complete(self, prompt: str, model: Optional[str] = None) -> LLMResponse:
+    def complete(self, prompt: str, model: Optional[str] = None, temperature: float = 0.1) -> LLMResponse:
         """
         Generate completion using Maple Proxy.
 
@@ -59,7 +59,8 @@ class MapleProvider(LLMProvider):
         stream = self.client.chat.completions.create(
             model=model,
             messages=[{"role": "user", "content": prompt}],
-            stream=True
+            stream=True,
+            temperature=temperature,
         )
 
         # Collect streamed chunks

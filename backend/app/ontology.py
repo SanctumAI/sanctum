@@ -292,99 +292,318 @@ TEXT CHUNK:
 
 
 # =============================================================================
-# HUMAN RIGHTS ASSISTANCE ONTOLOGY (PATHWAY TO FREEDOM)
+# HUMAN RIGHTS ASSISTANCE ONTOLOGY (DEFAULT)
 # =============================================================================
 
 HUMAN_RIGHTS_ASSISTANCE_ONTOLOGY = Ontology(
     id="HumanRightsAssistance",
-    name="Human Rights Assistance (Pathway to Freedom)",
-    description="Ontology for human rights assistance, political prisoner advocacy, and detention response",
+    name="Human Rights Assistance",
+    description="Guidance for victims/families under stress in high-risk contexts",
     version="1.0.0",
     entity_types=[
         EntityType(
-            name="Action",
-            description="An action or step to take",
-            properties=["name", "description", "timing"],
-            example="Contact UN Working Group"
+            name="Situation",
+            description="Current state/phase of the case",
+            properties=["type", "legal_definition", "indicators", "urgency_level", "typical_duration"],
+            example="Forced Disappearance: Detained with no official information provided"
         ),
         EntityType(
             name="Actor",
-            description="Person, organization, or role involved",
-            properties=["name", "type", "role"],
-            example="UN Committee on Enforced Disappearances"
-        ),
-        EntityType(
-            name="Resource",
-            description="A resource, tool, or support available",
-            properties=["name", "type", "availability"],
-            example="Legal aid organization"
-        ),
-        EntityType(
-            name="Risk",
-            description="A risk, danger, or negative outcome",
-            properties=["name", "severity", "mitigation"],
-            example="Retaliation against family"
+            description="Person or organization involved",
+            properties=["name", "type", "role", "contact_info", "jurisdiction"],
+            example="PPST: NGO providing accompaniment and legal guidance"
         ),
         EntityType(
             name="Right",
-            description="A human right or legal protection",
-            properties=["name", "legal_basis", "scope"],
-            example="Right to liberty (ICCPR Art. 9)"
+            description="Legal entitlement that applies",
+            properties=["name", "legal_basis", "conditions", "limitations", "how_to_invoke"],
+            example="Right to legal counsel"
         ),
         EntityType(
-            name="Condition",
-            description="A situation, circumstance, or precondition",
-            properties=["name", "description"],
-            example="Detainee with dual nationality"
+            name="Risk",
+            description="Threat or danger to case/person",
+            properties=["type", "severity", "indicators", "affected_parties", "likelihood"],
+            example="Retaliation against family members"
+        ),
+        EntityType(
+            name="Action",
+            description="Recommended step to take",
+            properties=["description", "timing", "priority", "prerequisites", "expected_outcome"],
+            example="File habeas corpus within 48 hours"
+        ),
+        EntityType(
+            name="Resource",
+            description="Available support or assistance",
+            properties=["type", "provider", "eligibility", "how_to_access", "limitations"],
+            example="Emergency legal aid fund"
+        ),
+        EntityType(
+            name="Evidence",
+            description="Documentation of events",
+            properties=["type", "how_to_collect", "preservation", "sensitivity", "chain_of_custody"],
+            example="Medical records documenting injuries"
+        ),
+        EntityType(
+            name="Mechanism",
+            description="Legal or advocacy channel",
+            properties=["name", "jurisdiction", "type", "process", "timeline", "requirements"],
+            example="UN Special Rapporteur urgent appeal"
+        ),
+        EntityType(
+            name="Guidance",
+            description="Context-specific advice",
+            properties=["context", "recommendation", "rationale", "cautions", "timing"],
+            example="Delay media exposure until legal counsel is secured"
+        ),
+        EntityType(
+            name="Pitfall",
+            description="Common mistake that harms cases",
+            properties=["description", "why_harmful", "who_makes_it", "consequences", "alternative"],
+            example="Sharing detention location publicly"
+        ),
+        EntityType(
+            name="Precondition",
+            description="Requirement before taking action",
+            properties=["requirement", "how_to_verify", "consequences_if_ignored"],
+            example="Verified safe channel before sharing details"
+        ),
+        EntityType(
+            name="Contraindication",
+            description="Context where action is dangerous",
+            properties=["action", "dangerous_context", "why_dangerous", "safer_alternative"],
+            example="Do not name witnesses before relocation"
+        ),
+        EntityType(
+            name="Consequence",
+            description="Result of an action or mistake",
+            properties=["type", "severity", "reversibility", "affected_parties"],
+            example="Evidence becomes inadmissible"
+        ),
+        EntityType(
+            name="TimeWindow",
+            description="Time-sensitive window for action",
+            properties=["name", "duration", "start_trigger", "end_trigger"],
+            example="First 48 hours after detention"
+        ),
+        EntityType(
+            name="Channel",
+            description="Communication channel for safe coordination",
+            properties=["name", "security_level", "availability", "notes"],
+            example="Signal"
+        ),
+        EntityType(
+            name="Barrier",
+            description="Resource or safety constraint",
+            properties=["type", "severity", "workaround"],
+            example="No transportation or funds for travel"
         ),
     ],
     relationship_types=[
-        RelationshipType(name="ADAPTS_TO", description="Adapts or adjusts to a situation", from_types=["Action"], to_types=["Condition"]),
-        RelationshipType(name="ADDRESSES", description="Addresses or deals with something", from_types=["Action"], to_types=["Risk", "Condition"]),
-        RelationshipType(name="APPLIES_IN", description="Applies in a specific context", from_types=["Action", "Right"], to_types=["Condition"]),
-        RelationshipType(name="AVAILABLE_FOR", description="Available for use by", from_types=["Resource"], to_types=["Actor", "Condition"]),
-        RelationshipType(name="BLOCKED_BY", description="Blocked or prevented by", from_types=["Action"], to_types=["Condition", "Risk"]),
-        RelationshipType(name="BLOCKS", description="Blocks or prevents", from_types=["Condition"], to_types=["Action"]),
-        RelationshipType(name="CAUSES", description="Causes or leads to", from_types=["Action", "Condition"], to_types=["Condition", "Risk"]),
-        RelationshipType(name="CAUTIONS_AGAINST", description="Warns against", from_types=["Action"], to_types=["Risk", "Action"]),
-        RelationshipType(name="CONTRAINDICATED_IN", description="Should not be used in", from_types=["Action"], to_types=["Condition"]),
-        RelationshipType(name="DEDICATED_TO", description="Dedicated to a purpose", from_types=["Resource", "Actor"], to_types=["Action"]),
-        RelationshipType(name="DELAY_UNTIL", description="Should be delayed until", from_types=["Action"], to_types=["Condition"]),
-        RelationshipType(name="DOCUMENTS", description="Documents or records", from_types=["Action"], to_types=["Condition", "Risk"]),
-        RelationshipType(name="ESCALATES_TO", description="Escalates to next level", from_types=["Action"], to_types=["Action", "Actor"]),
-        RelationshipType(name="EXERTS", description="Exerts influence or pressure", from_types=["Actor"], to_types=["Actor", "Action"]),
-        RelationshipType(name="FORECLOSES", description="Forecloses or eliminates option", from_types=["Action"], to_types=["Action"]),
-        RelationshipType(name="HARMS_CASE_IF", description="Harms the case if done", from_types=["Action"], to_types=["Condition"]),
-        RelationshipType(name="ILLUSTRATES", description="Illustrates or demonstrates", from_types=["Condition"], to_types=["Right", "Risk"]),
-        RelationshipType(name="IMPLEMENTED_BY", description="Implemented by actor", from_types=["Action"], to_types=["Actor"]),
-        RelationshipType(name="INVOLVES", description="Involves or includes", from_types=["Action"], to_types=["Actor", "Resource"]),
-        RelationshipType(name="LEADS_TO", description="Leads to outcome", from_types=["Action"], to_types=["Condition", "Action"]),
-        RelationshipType(name="MAINTAINS", description="Maintains or preserves", from_types=["Action"], to_types=["Condition", "Right"]),
-        RelationshipType(name="MITIGATES", description="Mitigates or reduces risk", from_types=["Action"], to_types=["Risk"]),
-        RelationshipType(name="MONITORS", description="Monitors or tracks", from_types=["Actor", "Action"], to_types=["Condition"]),
-        RelationshipType(name="PERFORM", description="Performs an action", from_types=["Actor"], to_types=["Action"]),
-        RelationshipType(name="PROTECTS_AGAINST", description="Protects against harm", from_types=["Action", "Resource"], to_types=["Risk"]),
-        RelationshipType(name="PROVIDES", description="Provides resource or capability", from_types=["Actor", "Resource"], to_types=["Resource", "Action"]),
-        RelationshipType(name="RECOMMENDS", description="Recommends an action", from_types=["Actor"], to_types=["Action"]),
-        RelationshipType(name="REQUIRES", description="Requires precondition", from_types=["Action"], to_types=["Condition", "Resource"]),
-        RelationshipType(name="REQUIRES_FIRST", description="Must be done first", from_types=["Action"], to_types=["Action"]),
-        RelationshipType(name="RISKS", description="Risks negative outcome", from_types=["Action"], to_types=["Risk"]),
-        RelationshipType(name="SAFE_VIA", description="Made safe through", from_types=["Action"], to_types=["Action", "Resource"]),
-        RelationshipType(name="SUPPORTS", description="Supports or enables", from_types=["Resource", "Actor"], to_types=["Action"]),
-        RelationshipType(name="TIME_ASSOCIATED", description="Associated with timing", from_types=["Action"], to_types=["Condition"]),
-        RelationshipType(name="TIME_SENSITIVE", description="Time sensitive action", from_types=["Action"], to_types=["Condition"]),
-        RelationshipType(name="TRIGGERED_BY", description="Triggered by condition", from_types=["Action"], to_types=["Condition"]),
-        RelationshipType(name="USES", description="Uses resource or method", from_types=["Action"], to_types=["Resource"]),
-        RelationshipType(name="VIOLATES", description="Violates right or law", from_types=["Action", "Condition"], to_types=["Right"]),
-        RelationshipType(name="WORSENS", description="Worsens situation", from_types=["Action"], to_types=["Condition", "Risk"]),
+        RelationshipType(
+            name="APPLIES_IN",
+            description="Right or risk applies in a situation",
+            from_types=["Right", "Risk"],
+            to_types=["Situation"],
+            example="Right to legal counsel APPLIES_IN arbitrary detention"
+        ),
+        RelationshipType(
+            name="MITIGATES",
+            description="Action reduces a risk",
+            from_types=["Action"],
+            to_types=["Risk"],
+            example="Secure communications MITIGATES surveillance risk"
+        ),
+        RelationshipType(
+            name="PROVIDES",
+            description="Actor provides a resource or action",
+            from_types=["Actor"],
+            to_types=["Resource", "Action"],
+            example="NGO PROVIDES legal accompaniment"
+        ),
+        RelationshipType(
+            name="RECOMMENDS",
+            description="Guidance recommends an action",
+            from_types=["Guidance"],
+            to_types=["Action"],
+            example="Guidance RECOMMENDS immediate documentation"
+        ),
+        RelationshipType(
+            name="REQUIRES",
+            description="Action requires a resource or precondition",
+            from_types=["Action"],
+            to_types=["Resource", "Precondition"],
+            example="Filing complaint REQUIRES legal representation"
+        ),
+        RelationshipType(
+            name="REQUIRES_FIRST",
+            description="Action needs a precondition met first",
+            from_types=["Action"],
+            to_types=["Precondition"],
+            example="Media interview REQUIRES_FIRST legal counsel approval"
+        ),
+        RelationshipType(
+            name="ESCALATES_TO",
+            description="Mechanism leads to a higher mechanism",
+            from_types=["Mechanism"],
+            to_types=["Mechanism"],
+            example="National court ESCALATES_TO regional commission"
+        ),
+        RelationshipType(
+            name="DOCUMENTS",
+            description="Evidence documents a situation or right violation",
+            from_types=["Evidence"],
+            to_types=["Situation", "Right"],
+            example="Medical records DOCUMENTS torture allegations"
+        ),
+        RelationshipType(
+            name="CAUTIONS_AGAINST",
+            description="Guidance warns against an action or pitfall",
+            from_types=["Guidance"],
+            to_types=["Action", "Pitfall"],
+            example="Guidance CAUTIONS_AGAINST premature media exposure"
+        ),
+        RelationshipType(
+            name="INVOLVES",
+            description="Situation involves an actor",
+            from_types=["Situation"],
+            to_types=["Actor"],
+            example="Detention INVOLVES security forces"
+        ),
+        RelationshipType(
+            name="TRIGGERED_BY",
+            description="Situation triggered by an action or situation",
+            from_types=["Situation"],
+            to_types=["Action", "Situation"],
+            example="Forced disappearance TRIGGERED_BY arrest"
+        ),
+        RelationshipType(
+            name="HARMS_CASE_IF",
+            description="Action harms case under conditions",
+            from_types=["Action"],
+            to_types=["Situation", "Precondition"],
+            example="Public accusation HARMS_CASE_IF evidence not documented"
+        ),
+        RelationshipType(
+            name="CONTRAINDICATED_IN",
+            description="Action is dangerous in context",
+            from_types=["Action"],
+            to_types=["Situation", "Contraindication"],
+            example="Confronting authorities CONTRAINDICATED_IN early detention"
+        ),
+        RelationshipType(
+            name="WORSENS",
+            description="Pitfall worsens risk or situation",
+            from_types=["Pitfall"],
+            to_types=["Risk", "Situation"],
+            example="Posting photos WORSENS surveillance risk"
+        ),
+        RelationshipType(
+            name="FORECLOSES",
+            description="Pitfall forecloses a mechanism or right",
+            from_types=["Pitfall"],
+            to_types=["Mechanism", "Right", "Action"],
+            example="Accepting informal deal FORECLOSES international complaint"
+        ),
+        RelationshipType(
+            name="SAFER_ALTERNATIVE",
+            description="Safer action recommended instead",
+            from_types=["Pitfall", "Action"],
+            to_types=["Action"],
+            example="Public posting SAFER_ALTERNATIVE private documentation"
+        ),
+        RelationshipType(
+            name="DELAY_UNTIL",
+            description="Action should wait for a precondition",
+            from_types=["Action"],
+            to_types=["Precondition"],
+            example="Press conference DELAY_UNTIL family safety confirmed"
+        ),
+        RelationshipType(
+            name="INVALIDATES",
+            description="Pitfall invalidates evidence or mechanism",
+            from_types=["Pitfall"],
+            to_types=["Evidence", "Mechanism"],
+            example="Altering documents INVALIDATES chain of custody"
+        ),
+        RelationshipType(
+            name="LEADS_TO",
+            description="Action or pitfall leads to a consequence",
+            from_types=["Action", "Pitfall"],
+            to_types=["Consequence"],
+            example="Confronting alone LEADS_TO own detention"
+        ),
+        RelationshipType(
+            name="PROTECTS_AGAINST",
+            description="Resource or action protects against a risk",
+            from_types=["Resource", "Action"],
+            to_types=["Risk"],
+            example="Legal representation PROTECTS_AGAINST coerced confession"
+        ),
+        RelationshipType(
+            name="AVAILABLE_FOR",
+            description="Resource available for an actor type",
+            from_types=["Resource"],
+            to_types=["Actor"],
+            example="Emergency fund AVAILABLE_FOR families"
+        ),
+        RelationshipType(
+            name="ADDRESSES",
+            description="Action or resource addresses a situation",
+            from_types=["Action", "Resource"],
+            to_types=["Situation"],
+            example="Habeas corpus ADDRESSES arbitrary detention"
+        ),
+        RelationshipType(
+            name="SAFE_VIA",
+            description="Action or guidance safe only via channel",
+            from_types=["Action", "Guidance"],
+            to_types=["Channel"],
+            example="Sharing details SAFE_VIA secure channel"
+        ),
+        RelationshipType(
+            name="BLOCKED_BY",
+            description="Action or mechanism blocked by a barrier",
+            from_types=["Action", "Mechanism"],
+            to_types=["Barrier"],
+            example="Filing complaint BLOCKED_BY no transport"
+        ),
+        RelationshipType(
+            name="TIME_SENSITIVE",
+            description="Action should be taken within a time window",
+            from_types=["Action"],
+            to_types=["TimeWindow"],
+            example="Initial report TIME_SENSITIVE first 72 hours"
+        ),
     ],
-    extraction_prompt="""You are extracting structured knowledge from a human rights assistance document.
+    extraction_prompt="""You are extracting structured knowledge from a human rights assistance document intended for victims and families under stress.
 
-Given the following text chunk, extract entities and relationships about:
-- Actions to take for political prisoner advocacy
-- Resources and support networks available
-- Risks and how to mitigate them
-- Rights that apply and conditions they apply in
+Focus on actionable guidance, risks, rights, and "don't do" contraindications. Do NOT invent facts. If the text is unclear, omit.
+
+Given the following text chunk, extract:
+
+1. ENTITIES - situations, actors, rights, risks, actions, resources, evidence, mechanisms, guidance, pitfalls, preconditions, contraindications, consequences, time windows, channels, barriers
+2. RELATIONSHIPS - how these entities relate in ways that change decisions or safety
+
+For each entity, identify:
+- type: One of [Situation, Actor, Right, Risk, Action, Resource, Evidence, Mechanism, Guidance, Pitfall, Precondition, Contraindication, Consequence, TimeWindow, Channel, Barrier]
+- name: Clear identifier
+- properties: Relevant attributes based on entity type
+
+For each relationship, identify:
+- type: One of [APPLIES_IN, MITIGATES, PROVIDES, RECOMMENDS, REQUIRES, REQUIRES_FIRST, ESCALATES_TO, DOCUMENTS, CAUTIONS_AGAINST, INVOLVES, TRIGGERED_BY, HARMS_CASE_IF, CONTRAINDICATED_IN, WORSENS, FORECLOSES, SAFER_ALTERNATIVE, DELAY_UNTIL, INVALIDATES, LEADS_TO, PROTECTS_AGAINST, AVAILABLE_FOR, ADDRESSES, SAFE_VIA, BLOCKED_BY, TIME_SENSITIVE]
+- from_entity: Source entity name
+- to_entity: Target entity name
+- evidence: Brief quote or reasoning from the text
+
+Return as JSON:
+{
+  "entities": [
+    {"type": "...", "name": "...", "properties": {...}}
+  ],
+  "relationships": [
+    {"type": "...", "from_entity": "...", "to_entity": "...", "evidence": "..."}
+  ]
+}
 
 TEXT CHUNK:
 """
@@ -401,7 +620,7 @@ ONTOLOGY_REGISTRY: dict[str, Ontology] = {
     "HumanRightsAssistance": HUMAN_RIGHTS_ASSISTANCE_ONTOLOGY,
 }
 
-DEFAULT_ONTOLOGY = "bitcoin_technical"
+DEFAULT_ONTOLOGY = "HumanRightsAssistance"
 
 
 def get_ontology(ontology_id: str | None = None) -> Ontology:

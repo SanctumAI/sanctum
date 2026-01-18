@@ -54,6 +54,7 @@ logger = logging.getLogger("sanctum.main")
 
 # Import routers
 from ingest import router as ingest_router
+from query import router as query_router
 
 logger.info("Starting Sanctum API...")
 
@@ -74,6 +75,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(ingest_router)
+app.include_router(query_router)
 
 # Rate limiters for auth endpoints
 magic_link_limiter = RateLimiter(limit=5, window_seconds=60)   # 5 per minute
@@ -426,124 +428,12 @@ async def chat(request: ChatRequest, user: dict = Depends(auth.require_admin_or_
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/query", response_model=QueryResponse)
-async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_or_approved_user)):
-    """
-    RAG query endpoint. Requires authenticated admin OR approved user.
-
-    1. Embeds the question using the same model as ingestion
-    2. Searches Qdrant for semantically similar claims
-    3. Resolves claim IDs to full Neo4j graph data
-    4. Sends context + question to LLM
-    5. Returns grounded answer with citations
-    """
-    try:
-        # 1. Embed the question
-        model = get_embedding_model()
-        query_embedding = model.encode(f"query: {request.question}").tolist()
-
-        # 2. Search Qdrant for similar vectors - use sanctum_knowledge for real data
-        qdrant = get_qdrant_client()
-        search_result = qdrant.query_points(
-            collection_name="sanctum_knowledge",
-            query=query_embedding,
-            limit=request.top_k,
-            with_payload=True
-        )
-        results = search_result.points
-
-        if not results:
-            return QueryResponse(
-                answer="No relevant information found in the knowledge base.",
-                citations=[],
-                model="none",
-                provider="none"
-            )
-
-        # 3. Extract facts directly from Qdrant payload (ingested data structure)
-        facts = []
-        for r in results:
-            payload = r.payload
-            # Handle fact-type entries from ingested documents
-            if payload.get("type") == "fact":
-                facts.append({
-                    "fact_text": payload.get("fact_text", ""),
-                    "from_entity": payload.get("from_entity", ""),
-                    "to_entity": payload.get("to_entity", ""),
-                    "rel_type": payload.get("rel_type", ""),
-                    "source_file": payload.get("source_file", "Unknown"),
-                    "evidence": payload.get("evidence", ""),
-                    "score": r.score
-                })
-            # Handle chunk-type entries
-            elif payload.get("type") == "chunk":
-                facts.append({
-                    "fact_text": payload.get("text", "")[:500],
-                    "source_file": payload.get("source_file", "Unknown"),
-                    "score": r.score
-                })
-            # Fallback for smoke test data structure
-            elif "claim_id" in payload:
-                facts.append({
-                    "fact_text": payload.get("text", ""),
-                    "source_file": "smoke_test",
-                    "score": r.score
-                })
-
-        if not facts:
-            return QueryResponse(
-                answer="Retrieved vectors but could not extract fact data.",
-                citations=[],
-                model="none",
-                provider="none"
-            )
-
-        # 4. Build context from retrieved facts
-        context_lines = []
-        for i, f in enumerate(facts, 1):
-            if f.get("rel_type"):
-                # Structured fact
-                context_lines.append(f"[{i}] {f['from_entity']} {f['rel_type']} {f['to_entity']}")
-                if f.get("evidence"):
-                    context_lines.append(f"    Evidence: {f['evidence']}")
-            else:
-                # Plain text chunk
-                context_lines.append(f"[{i}] {f['fact_text']}")
-        context = "\n".join(context_lines)
-
-        # 5. Generate answer using LLM
-        prompt = f"""Answer the question using ONLY the facts below. Reference facts by their number [1], [2], etc.
-
-FACTS:
-{context}
-
-Question: {request.question}
-
-Answer (cite fact numbers):"""
-
-        provider = get_provider()
-        result = provider.complete(prompt)
-
-        # Build citations from retrieved facts
-        citations = [
-            Citation(
-                claim_id=f"fact_{i}",
-                claim_text=f.get("fact_text", f"{f.get('from_entity', '')} {f.get('rel_type', '')} {f.get('to_entity', '')}"),
-                source_title=f.get("source_file", "Unknown"),
-                source_url=None
-            )
-            for i, f in enumerate(facts, 1)
-        ]
-
-        return QueryResponse(
-            answer=result.content,
-            citations=citations,
-            model=result.model,
-            provider=result.provider
-        )
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# NOTE: /query endpoint moved to query.py router (empathetic session-aware RAG)
+# The query.py module provides:
+# - Session-aware conversation history
+# - 2-hop graph traversal  
+# - Empathetic crisis support prompts
+# - Clarifying questions for jurisdiction/context
 
 
 @app.post("/vector-search", response_model=VectorSearchResponse)

@@ -28,6 +28,7 @@ logger = logging.getLogger("sanctum.main")
 
 # Import routers
 from ingest import router as ingest_router
+from query import router as query_router
 
 logger.info("Starting Sanctum API...")
 
@@ -48,6 +49,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(ingest_router)
+app.include_router(query_router)
 
 # Configuration from environment
 NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")

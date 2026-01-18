@@ -39,7 +39,7 @@ export function AdminSetup() {
   // Check if admin is logged in
   useEffect(() => {
     if (!isAdminAuthenticated()) {
-      navigate('/admin')
+      navigate('/')
     }
   }, [navigate])
 
@@ -236,22 +236,22 @@ export function AdminSetup() {
     return userType?.name || 'Unknown'
   }
 
-  const handleSaveAndContinue = () => {
+  const handleSave = () => {
     // Save instance config
     updateConfig({ name: instanceName.trim() || 'Sanctum', accentColor, icon })
-    navigate('/')
+    navigate('/chat')
   }
 
-  const handleSkip = () => {
-    navigate('/')
+  const handleBack = () => {
+    navigate('/chat')
   }
 
   const footer = (
     <button
-      onClick={handleSkip}
+      onClick={handleBack}
       className="text-text-muted hover:text-text transition-colors"
     >
-      Skip for now
+      Back to Chat
     </button>
   )
 
@@ -553,12 +553,12 @@ export function AdminSetup() {
             </Link>
           </div>
 
-          {/* Save and Continue */}
+          {/* Save */}
           <button
-            onClick={handleSaveAndContinue}
+            onClick={handleSave}
             className="w-full bg-accent text-accent-text rounded-xl px-6 py-3.5 font-medium hover:bg-accent-hover transition-all active-press"
           >
-            Save & Continue
+            Save Configuration
           </button>
         </div>
       )}

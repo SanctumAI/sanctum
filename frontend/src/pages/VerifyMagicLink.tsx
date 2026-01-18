@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { STORAGE_KEYS, API_BASE } from '../types/onboarding'
 
 // DEV_MODE enables token-less verification for testing without real emails
-const DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true'
+const DEV_MODE = ['true', '1', 'yes'].includes(
+  String(import.meta.env.VITE_DEV_MODE || '').toLowerCase()
+)
 
 type VerifyState = 'verifying' | 'success' | 'error'
 
@@ -18,6 +20,7 @@ export function VerifyMagicLink() {
   const [name, setName] = useState<string | null>(null)
   const [hasOnboarding, setHasOnboarding] = useState(false)
   const [isApproved, setIsApproved] = useState(true)
+  const hasVerified = useRef(false) // Prevent double-execution in StrictMode
 
   useEffect(() => {
     const token = searchParams.get('token')
@@ -43,6 +46,11 @@ export function VerifyMagicLink() {
     }
 
     async function verifyToken() {
+      // Prevent double-execution in React StrictMode
+      if (hasVerified.current) {
+        return
+      }
+
       if (!token) {
         // No token - only allow in DEV_MODE for testing
         if (DEV_MODE) {
@@ -50,14 +58,20 @@ export function VerifyMagicLink() {
           if (storedEmail) {
             setEmail(storedEmail)
             setName(localStorage.getItem(STORAGE_KEYS.PENDING_NAME))
-            // For testing without real token, just mark as verified
+            // For testing without real token, simulate full verification
             localStorage.setItem(STORAGE_KEYS.USER_EMAIL, storedEmail)
             const storedName = localStorage.getItem(STORAGE_KEYS.PENDING_NAME)
             if (storedName) {
               localStorage.setItem(STORAGE_KEYS.USER_NAME, storedName)
             }
+            // Set mock session token for DEV_MODE
+            localStorage.setItem(STORAGE_KEYS.SESSION_TOKEN, 'dev-mode-mock-token')
+            // Set approval to true for dev testing
+            localStorage.setItem(STORAGE_KEYS.USER_APPROVED, 'true')
+            setIsApproved(true)
             localStorage.removeItem(STORAGE_KEYS.PENDING_EMAIL)
             localStorage.removeItem(STORAGE_KEYS.PENDING_NAME)
+            hasVerified.current = true
             setState('success')
             return
           }
@@ -110,6 +124,7 @@ export function VerifyMagicLink() {
 
         setEmail(data.user.email)
         setName(data.user.name)
+        hasVerified.current = true
         setState('success')
       } catch (error) {
         console.error('Verification error:', error)

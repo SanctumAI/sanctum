@@ -763,18 +763,34 @@ async def admin_auth(
 
     # Check if admin exists
     existing = database.get_admin_by_pubkey(pubkey)
+
+    # ==========================================================================
+    # SECURITY: Single-admin restriction (v1)
+    #
+    # Only the FIRST person to authenticate via NIP-07 can become the admin.
+    # After an admin exists, new registrations are rejected. Existing admins
+    # can still re-authenticate to get new session tokens.
+    #
+    # TODO: Future enhancement - allow existing admins to invite new admins
+    # ==========================================================================
+    all_admins = database.list_admins()
+    instance_initialized = len(all_admins) > 0
+
+    if existing is None and instance_initialized:
+        # Someone is trying to register as admin but an admin already exists
+        raise HTTPException(
+            status_code=403,
+            detail="Admin registration is closed. This instance already has an admin."
+        )
+
     is_new = existing is None
 
     if is_new:
-        # Create new admin
+        # First admin creation - only happens when no admins exist yet
         database.add_admin(pubkey)
         admin = database.get_admin_by_pubkey(pubkey)
     else:
         admin = existing
-
-    # Instance is initialized if there's at least one admin
-    all_admins = database.list_admins()
-    instance_initialized = len(all_admins) > 0
 
     # Create session token for subsequent authenticated requests
     session_token = auth.create_admin_session_token(admin["id"], pubkey)

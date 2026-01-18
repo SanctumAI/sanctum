@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { HomeRedirect } from './pages/HomeRedirect'
 import { TestDashboard } from './pages/TestDashboard'
 import { ChatPage } from './pages/ChatPage'
 import { AdminOnboarding } from './pages/AdminOnboarding'
@@ -16,7 +17,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<TestDashboard />} />
+        <Route path="/" element={<HomeRedirect />} />
+        <Route path="/test-dashboard" element={<TestDashboard />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/admin" element={<AdminOnboarding />} />
         <Route path="/admin/setup" element={<AdminSetup />} />

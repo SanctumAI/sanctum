@@ -1,46 +1,18 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useTheme } from '../theme'
-import { useInstanceConfig } from '../context/InstanceConfigContext'
+import { useNavigate } from 'react-router-dom'
 import { ChatContainer } from '../components/chat/ChatContainer'
 import { MessageList } from '../components/chat/MessageList'
 import { ChatInput } from '../components/chat/ChatInput'
 import { ToolSelector, Tool } from '../components/chat/ToolSelector'
 import { DocumentScope } from '../components/chat/DocumentScope'
 import { ExportButton } from '../components/chat/ExportButton'
-import { DynamicIcon } from '../components/shared/DynamicIcon'
+import { AppHeader } from '../components/shared/AppHeader'
 import { Message } from '../components/chat/ChatMessage'
 import { API_BASE, STORAGE_KEYS } from '../types/onboarding'
 import { isAdminAuthenticated } from '../utils/adminApi'
 
-function ThemeToggle() {
-  const { setTheme, resolvedTheme } = useTheme()
-
-  return (
-    <div className="flex items-center">
-      <button
-        onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-        className="p-2 rounded-lg text-text-secondary hover:text-text hover:bg-surface-overlay transition-all"
-        aria-label="Toggle theme"
-        title={`Switch to ${resolvedTheme === 'dark' ? 'light' : 'dark'} mode`}
-      >
-        {resolvedTheme === 'dark' ? (
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-          </svg>
-        ) : (
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-          </svg>
-        )}
-      </button>
-    </div>
-  )
-}
-
 export function ChatPage() {
   const navigate = useNavigate()
-  const { config } = useInstanceConfig()
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -80,10 +52,20 @@ export function ChatPage() {
     return tools
   }, [])
 
-  // Check approval status on mount
+  // Check auth and approval status on mount
   useEffect(() => {
+    const sessionToken = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
+    const adminToken = localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN)
+
+    // Not authenticated at all - redirect to login
+    if (!sessionToken && !adminToken) {
+      navigate('/login')
+      return
+    }
+
+    // User authenticated but not approved - redirect to pending
     const approved = localStorage.getItem(STORAGE_KEYS.USER_APPROVED)
-    if (approved === 'false') {
+    if (!adminToken && approved === 'false') {
       navigate('/pending')
     }
   }, [navigate])
@@ -273,43 +255,22 @@ IMPORTANT: Return a CONDENSED response:
     handleSend(prompt)
   }
 
-  const header = (
-    <div className="max-w-5xl mx-auto px-3 sm:px-4 py-2.5 flex items-center justify-between">
-      {/* Left: Back + Branding */}
-      <div className="flex items-center gap-3">
-        <Link
-          to="/"
-          className="p-1.5 -ml-1.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-overlay transition-all"
-          title="Back to Dashboard"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-          </svg>
-        </Link>
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center shadow-sm">
-            <DynamicIcon name={config.icon} size={16} className="text-white" />
-          </div>
-          <span className="font-semibold text-text hidden sm:block">{config.name}</span>
-        </div>
-      </div>
-
-      {/* Right: Actions */}
-      <div className="flex items-center gap-1">
-        <button
-          onClick={handleNewChat}
-          className="p-2 rounded-lg text-text-secondary hover:text-text hover:bg-surface-overlay transition-all"
-          title="New conversation"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-        </button>
-        <ExportButton messages={messages} iconOnly />
-        <ThemeToggle />
-      </div>
-    </div>
+  const rightActions = (
+    <>
+      <button
+        onClick={handleNewChat}
+        className="p-2 rounded-lg text-text-secondary hover:text-text hover:bg-surface-overlay transition-all"
+        title="New conversation"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+      </button>
+      <ExportButton messages={messages} iconOnly />
+    </>
   )
+
+  const header = <AppHeader rightActions={rightActions} />
 
   const inputToolbar = (
     <>

@@ -12,10 +12,11 @@ import uuid
 from neo4j import GraphDatabase
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
-from sentence_transformers import SentenceTransformer
-
 # SQLite database module
 import database
+
+# Use unified embedding from store.py
+from store import get_embedding_model, embed_texts
 
 # Configuration
 NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
@@ -127,12 +128,15 @@ def seed_qdrant(client, embedding_model):
     """Seed Qdrant with the claim embedding"""
     print("\nSeeding Qdrant...")
     
-    # Load embedding model
-    print(f"  Loading embedding model: {EMBEDDING_MODEL}")
-    model = SentenceTransformer(EMBEDDING_MODEL)
+    # Determine vector dimension based on provider
+    provider = os.getenv("EMBEDDING_PROVIDER", "local")
+    print(f"  Embedding provider: {provider}")
     
-    # Get vector dimension from model
-    vector_dim = model.get_sentence_embedding_dimension()
+    if provider == "openai":
+        vector_dim = int(os.getenv("EMBEDDING_DIMENSIONS", "1536"))
+    else:
+        model = get_embedding_model()
+        vector_dim = model.get_sentence_embedding_dimension()
     print(f"  Vector dimension: {vector_dim}")
     
     # Create collection if it doesn't exist
@@ -152,11 +156,9 @@ def seed_qdrant(client, embedding_model):
         )
     )
     
-    # Generate embedding for the Spanish claim
-    # E5 models expect "query: " or "passage: " prefix
-    text_to_embed = f"passage: {SEED_CLAIM['text']}"
+    # Generate embedding using unified embed_texts
     print(f"  Generating embedding for: '{SEED_CLAIM['text']}'")
-    embedding = model.encode(text_to_embed).tolist()
+    embedding = embed_texts([f"passage: {SEED_CLAIM['text']}"])[0]
     
     # Insert into Qdrant - use UUID derived from claim ID
     point_uuid = str(uuid.uuid5(uuid.NAMESPACE_DNS, SEED_CLAIM["id"]))

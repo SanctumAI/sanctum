@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Kies je taal",
+      "subtitle": "Selecteer je voorkeurstaal om verder te gaan",
+      "searchPlaceholder": "Talen zoeken...",
+      "searchLabel": "Talen zoeken",
+      "noResults": "Geen talen gevonden voor \"{{query}}\"",
+      "continue": "Doorgaan",
+      "changeInSettings": "Je kunt dit later wijzigen in je instellingen."
+    },
+    "auth": {
+      "signUp": "Registreren",
+      "logIn": "Inloggen",
+      "createAccountTitle": "Maak je account aan",
+      "createAccountSubtitle": "Registreer je om Sanctum te gebruiken",
+      "welcomeBackTitle": "Welkom terug",
+      "welcomeBackSubtitle": "Log in om verder te gaan waar je gebleven was",
+      "nameLabel": "Naam",
+      "namePlaceholder": "Je naam",
+      "emailLabel": "E-mailadres",
+      "emailPlaceholder": "jij@voorbeeld.com",
+      "nameRequired": "Naam is verplicht",
+      "emailRequired": "E-mailadres is verplicht",
+      "emailInvalid": "Vul een geldig e-mailadres in",
+      "sendingLink": "Link wordt verzonden...",
+      "continueWithEmail": "Doorgaan met e-mail",
+      "magicLinkHelp": "We sturen je een magic link om in te loggen — geen wachtwoord nodig.",
+      "checkEmail": "Controleer je e-mail!",
+      "sentMagicLink": "We hebben een magic link gestuurd naar",
+      "clickLink": "Klik op de link in de e-mail om in te loggen.",
+      "checkSpam": "Niet te zien? Controleer je spammap.",
+      "simulateMagicLink": "Klikken op magic link simuleren",
+      "forTesting": "Voor testdoeleinden:"
+    },
+    "verify": {
+      "verifying": "Je link wordt geverifieerd...",
+      "pleaseWait": "Een momentje terwijl we je aanmelden.",
+      "welcomeName": "Welkom, {{name}}!",
+      "welcomeBack": "Welkom terug!",
+      "signedInAs": "Je bent aangemeld als",
+      "completingProfile": "Je profiel wordt afgerond...",
+      "redirectingChat": "Doorsturen naar chat...",
+      "linkExpired": "Link verlopen of ongeldig",
+      "linkExpiredMessage": "Deze magic link is mogelijk verlopen of al gebruikt.",
+      "requestNewLink": "Vraag een nieuwe link aan"
+    },
+    "profile": {
+      "title": "Maak je profiel af",
+      "subtitle": "Nog een paar gegevens om te beginnen",
+      "saving": "Opslaan...",
+      "continue": "Doorgaan naar chat",
+      "fieldRequired": "{{field}} is verplicht",
+      "invalidEmail": "Vul een geldig e-mailadres in",
+      "invalidUrl": "Vul een geldige URL in",
+      "invalidNumber": "Vul een geldig nummer in"
+    }
+  },
+  "common": {
+    "adminQuestion": "Ben je een beheerder?",
+    "signInNostr": "Inloggen met Nostr"
+  }
+}

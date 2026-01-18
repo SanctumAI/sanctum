@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Scegli la tua lingua",
+      "subtitle": "Seleziona la lingua preferita per continuare",
+      "searchPlaceholder": "Cerca lingue...",
+      "searchLabel": "Cerca lingue",
+      "noResults": "Nessuna lingua trovata per \"{{query}}\"",
+      "continue": "Continua",
+      "changeInSettings": "Potrai cambiarla più tardi nelle impostazioni."
+    },
+    "auth": {
+      "signUp": "Registrati",
+      "logIn": "Accedi",
+      "createAccountTitle": "Crea il tuo account",
+      "createAccountSubtitle": "Registrati per iniziare a usare Sanctum",
+      "welcomeBackTitle": "Bentornato",
+      "welcomeBackSubtitle": "Accedi per continuare da dove avevi lasciato",
+      "nameLabel": "Nome",
+      "namePlaceholder": "Il tuo nome",
+      "emailLabel": "Email",
+      "emailPlaceholder": "tu@esempio.com",
+      "nameRequired": "Il nome è obbligatorio",
+      "emailRequired": "L'email è obbligatoria",
+      "emailInvalid": "Inserisci un'email valida",
+      "sendingLink": "Invio del link...",
+      "continueWithEmail": "Continua con email",
+      "magicLinkHelp": "Ti invieremo un link magico per accedere — non serve la password.",
+      "checkEmail": "Controlla la tua email!",
+      "sentMagicLink": "Abbiamo inviato un link magico a",
+      "clickLink": "Fai clic sul link nell'email per accedere.",
+      "checkSpam": "Non lo vedi? Controlla la cartella spam.",
+      "simulateMagicLink": "Simula il clic sul link magico",
+      "forTesting": "A scopo di test:"
+    },
+    "verify": {
+      "verifying": "Verifica del link...",
+      "pleaseWait": "Un momento mentre ti facciamo accedere.",
+      "welcomeName": "Benvenuto, {{name}}!",
+      "welcomeBack": "Bentornato!",
+      "signedInAs": "Sei connesso come",
+      "completingProfile": "Completamento del profilo...",
+      "redirectingChat": "Reindirizzamento alla chat...",
+      "linkExpired": "Link scaduto o non valido",
+      "linkExpiredMessage": "Questo link magico potrebbe essere scaduto o già utilizzato.",
+      "requestNewLink": "Richiedi un nuovo link"
+    },
+    "profile": {
+      "title": "Completa il tuo profilo",
+      "subtitle": "Solo pochi dettagli per iniziare",
+      "saving": "Salvataggio...",
+      "continue": "Continua alla chat",
+      "fieldRequired": "{{field}} è obbligatorio",
+      "invalidEmail": "Inserisci un'email valida",
+      "invalidUrl": "Inserisci un URL valido",
+      "invalidNumber": "Inserisci un numero valido"
+    }
+  },
+  "common": {
+    "adminQuestion": "Sei un amministratore?",
+    "signInNostr": "Accedi con Nostr"
+  }
+}

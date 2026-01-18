@@ -71,6 +71,7 @@ Expected response:
 
 | Service | URL |
 |---------|-----|
+| Vite Frontend | http://localhost:5173 |
 | FastAPI Backend | http://localhost:8000 |
 | Neo4j Browser | http://localhost:7474 |
 | Qdrant Dashboard | http://localhost:6333/dashboard |

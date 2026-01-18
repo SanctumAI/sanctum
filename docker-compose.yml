@@ -79,6 +79,7 @@ services:
       - MAPLE_BASE_URL=http://maple-proxy:8080/v1
       - MAPLE_API_KEY=${MAPLE_API_KEY:-}
       - MAPLE_MODEL=gpt-oss-120b
+      - SQLITE_PATH=/data/sanctum.db
     depends_on:
       neo4j:
         condition: service_healthy
@@ -91,6 +92,7 @@ services:
       - ./uploads:/uploads
       - ./logs:/logs
       - embedding_cache:/root/.cache/huggingface
+      - sqlite_data:/data
     networks:
       - sanctum-net
 
@@ -114,6 +116,7 @@ volumes:
   neo4j_logs:
   qdrant_data:
   embedding_cache:
+  sqlite_data:
 
 networks:
   sanctum-net:

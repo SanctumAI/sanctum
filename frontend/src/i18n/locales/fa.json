@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "زبان خود را انتخاب کنید",
+      "subtitle": "برای ادامه، زبان دلخواه خود را انتخاب کنید",
+      "searchPlaceholder": "جستجوی زبان‌ها...",
+      "searchLabel": "جستجوی زبان‌ها",
+      "noResults": "هیچ زبانی برای «{{query}}» یافت نشد",
+      "continue": "ادامه",
+      "changeInSettings": "بعداً می‌توانید این مورد را در تنظیمات تغییر دهید."
+    },
+    "auth": {
+      "signUp": "ثبت نام",
+      "logIn": "ورود",
+      "createAccountTitle": "حساب خود را ایجاد کنید",
+      "createAccountSubtitle": "برای شروع استفاده از Sanctum ثبت نام کنید",
+      "welcomeBackTitle": "دوباره خوش آمدید",
+      "welcomeBackSubtitle": "برای ادامه از جایی که متوقف شدید وارد شوید",
+      "nameLabel": "نام",
+      "namePlaceholder": "نام شما",
+      "emailLabel": "ایمیل",
+      "emailPlaceholder": "you@example.com",
+      "nameRequired": "نام الزامی است",
+      "emailRequired": "ایمیل الزامی است",
+      "emailInvalid": "لطفاً یک ایمیل معتبر وارد کنید",
+      "sendingLink": "در حال ارسال لینک...",
+      "continueWithEmail": "ادامه با ایمیل",
+      "magicLinkHelp": "برای ورود، یک لینک جادویی برایتان ارسال می‌کنیم؛ نیازی به رمز عبور نیست.",
+      "checkEmail": "ایمیل خود را بررسی کنید!",
+      "sentMagicLink": "یک لینک جادویی به این آدرس ارسال کردیم",
+      "clickLink": "برای ورود روی لینک داخل ایمیل کلیک کنید.",
+      "checkSpam": "آن را نمی‌بینید؟ پوشه هرزنامه را بررسی کنید.",
+      "simulateMagicLink": "شبیه‌سازی کلیک روی لینک جادویی",
+      "forTesting": "برای تست:"
+    },
+    "verify": {
+      "verifying": "در حال تأیید لینک شما...",
+      "pleaseWait": "لطفاً کمی صبر کنید تا شما را وارد کنیم.",
+      "welcomeName": "خوش آمدید، {{name}}!",
+      "welcomeBack": "دوباره خوش آمدید!",
+      "signedInAs": "شما وارد شده‌اید با حساب",
+      "completingProfile": "در حال تکمیل پروفایل شما...",
+      "redirectingChat": "در حال انتقال به چت...",
+      "linkExpired": "لینک منقضی شده یا نامعتبر است",
+      "linkExpiredMessage": "ممکن است این لینک جادویی منقضی شده باشد یا قبلاً استفاده شده باشد.",
+      "requestNewLink": "درخواست لینک جدید"
+    },
+    "profile": {
+      "title": "پروفایل خود را تکمیل کنید",
+      "subtitle": "فقط چند جزئیات دیگر تا شروع کنید",
+      "saving": "در حال ذخیره...",
+      "continue": "ادامه به چت",
+      "fieldRequired": "{{field}} الزامی است",
+      "invalidEmail": "لطفاً یک ایمیل معتبر وارد کنید",
+      "invalidUrl": "لطفاً یک URL معتبر وارد کنید",
+      "invalidNumber": "لطفاً یک عدد معتبر وارد کنید"
+    }
+  },
+  "common": {
+    "adminQuestion": "آیا شما مدیر هستید؟",
+    "signInNostr": "ورود با Nostr"
+  }
+}

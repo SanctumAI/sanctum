@@ -34,12 +34,21 @@ All services communicate over an internal Docker network.
 
 ## Frontend
 
-The frontend is built with **Vite** and provides a thin user interface for:
+The frontend is built with **Vite** and React, providing a complete user interface for two distinct personas:
 
-- Submitting ingestion jobs
-- Querying the knowledge base
-- Viewing answers with citations and context
-- Monitoring job status (ingest, reindex, export)
+### Admin Flow
+- **Authentication**: Nostr identity via NIP-07 browser extension
+- **Instance configuration**: Customize branding (name, icon, accent color)
+- **User onboarding**: Define custom fields for user registration
+- **Document upload**: Submit documents to the RAG knowledge base
+- **Database explorer**: View and manage instance data (SQLite)
+- **System monitoring**: Test RAG pipeline components
+
+### User Flow
+- **Multilingual onboarding**: Language selection (50+ languages supported)
+- **Email authentication**: Magic link sign-in flow
+- **Profile completion**: Fill admin-defined custom fields
+- **RAG Chat**: Query the knowledge base with citations and source context
 
 The frontend does not perform retrieval or generation logic. It communicates exclusively with the FastAPI backend over HTTP.
 

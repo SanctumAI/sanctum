@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Alege limba ta",
+      "subtitle": "Selectează limba preferată pentru a continua",
+      "searchPlaceholder": "Caută limbi...",
+      "searchLabel": "Caută limbi",
+      "noResults": "Nu s-au găsit limbi pentru \"{{query}}\"",
+      "continue": "Continuă",
+      "changeInSettings": "Poți schimba asta mai târziu în setări."
+    },
+    "auth": {
+      "signUp": "Înregistrează-te",
+      "logIn": "Autentificare",
+      "createAccountTitle": "Creează-ți contul",
+      "createAccountSubtitle": "Înregistrează-te pentru a începe să folosești Sanctum",
+      "welcomeBackTitle": "Bine ai revenit",
+      "welcomeBackSubtitle": "Autentifică-te pentru a continua de unde ai rămas",
+      "nameLabel": "Nume",
+      "namePlaceholder": "Numele tău",
+      "emailLabel": "Email",
+      "emailPlaceholder": "tu@exemplu.ro",
+      "nameRequired": "Numele este obligatoriu",
+      "emailRequired": "Emailul este obligatoriu",
+      "emailInvalid": "Te rugăm să introduci un email valid",
+      "sendingLink": "Se trimite linkul...",
+      "continueWithEmail": "Continuă cu emailul",
+      "magicLinkHelp": "Îți vom trimite un link magic pentru autentificare — fără parolă.",
+      "checkEmail": "Verifică-ți emailul!",
+      "sentMagicLink": "Am trimis un link magic către",
+      "clickLink": "Fă clic pe linkul din email pentru a te autentifica.",
+      "checkSpam": "Nu îl vezi? Verifică folderul de spam.",
+      "simulateMagicLink": "Simulează clic pe linkul magic",
+      "forTesting": "În scopuri de testare:"
+    },
+    "verify": {
+      "verifying": "Se verifică linkul...",
+      "pleaseWait": "Un moment cât te autentificăm.",
+      "welcomeName": "Bine ai venit, {{name}}!",
+      "welcomeBack": "Bine ai revenit!",
+      "signedInAs": "Ești autentificat ca",
+      "completingProfile": "Se completează profilul...",
+      "redirectingChat": "Redirecționare către chat...",
+      "linkExpired": "Link expirat sau invalid",
+      "linkExpiredMessage": "Acest link magic poate să fi expirat sau să fi fost folosit deja.",
+      "requestNewLink": "Solicită un link nou"
+    },
+    "profile": {
+      "title": "Completează-ți profilul",
+      "subtitle": "Încă câteva detalii pentru a începe",
+      "saving": "Se salvează...",
+      "continue": "Continuă către chat",
+      "fieldRequired": "{{field}} este obligatoriu",
+      "invalidEmail": "Te rugăm să introduci un email valid",
+      "invalidUrl": "Te rugăm să introduci un URL valid",
+      "invalidNumber": "Te rugăm să introduci un număr valid"
+    }
+  },
+  "common": {
+    "adminQuestion": "Ești administrator?",
+    "signInNostr": "Autentificare cu Nostr"
+  }
+}

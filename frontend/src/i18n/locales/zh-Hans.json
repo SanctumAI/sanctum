@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "选择你的语言",
+      "subtitle": "选择首选语言以继续",
+      "searchPlaceholder": "搜索语言...",
+      "searchLabel": "搜索语言",
+      "noResults": "未找到与“{{query}}”匹配的语言",
+      "continue": "继续",
+      "changeInSettings": "你可以稍后在设置中更改。"
+    },
+    "auth": {
+      "signUp": "注册",
+      "logIn": "登录",
+      "createAccountTitle": "创建你的账户",
+      "createAccountSubtitle": "注册以开始使用 Sanctum",
+      "welcomeBackTitle": "欢迎回来",
+      "welcomeBackSubtitle": "登录以继续上次的进度",
+      "nameLabel": "姓名",
+      "namePlaceholder": "你的姓名",
+      "emailLabel": "电子邮箱",
+      "emailPlaceholder": "you@example.com",
+      "nameRequired": "姓名为必填",
+      "emailRequired": "电子邮箱为必填",
+      "emailInvalid": "请输入有效的电子邮箱",
+      "sendingLink": "正在发送链接...",
+      "continueWithEmail": "使用电子邮箱继续",
+      "magicLinkHelp": "我们会发送魔法链接供你登录 — 无需密码。",
+      "checkEmail": "请检查你的邮箱！",
+      "sentMagicLink": "我们已将魔法链接发送至",
+      "clickLink": "点击邮件中的链接即可登录。",
+      "checkSpam": "没有看到？请检查垃圾邮件文件夹。",
+      "simulateMagicLink": "模拟点击魔法链接",
+      "forTesting": "用于测试："
+    },
+    "verify": {
+      "verifying": "正在验证你的链接...",
+      "pleaseWait": "请稍候，我们正在为你登录。",
+      "welcomeName": "欢迎，{{name}}！",
+      "welcomeBack": "欢迎回来！",
+      "signedInAs": "你已登录为",
+      "completingProfile": "正在完成你的个人资料...",
+      "redirectingChat": "正在跳转到聊天...",
+      "linkExpired": "链接已过期或无效",
+      "linkExpiredMessage": "此魔法链接可能已过期或已被使用。",
+      "requestNewLink": "请求新的链接"
+    },
+    "profile": {
+      "title": "完成你的个人资料",
+      "subtitle": "再填几个信息即可开始",
+      "saving": "正在保存...",
+      "continue": "继续到聊天",
+      "fieldRequired": "{{field}}为必填",
+      "invalidEmail": "请输入有效的电子邮箱",
+      "invalidUrl": "请输入有效的URL",
+      "invalidNumber": "请输入有效的数字"
+    }
+  },
+  "common": {
+    "adminQuestion": "你是管理员吗？",
+    "signInNostr": "使用 Nostr 登录"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Dilinizi seçin",
+      "subtitle": "Devam etmek için tercih ettiğiniz dili seçin",
+      "searchPlaceholder": "Dilleri ara...",
+      "searchLabel": "Dilleri ara",
+      "noResults": "\"{{query}}\" için dil bulunamadı",
+      "continue": "Devam et",
+      "changeInSettings": "Bunu daha sonra ayarlarda değiştirebilirsiniz."
+    },
+    "auth": {
+      "signUp": "Kayıt ol",
+      "logIn": "Giriş yap",
+      "createAccountTitle": "Hesabınızı oluşturun",
+      "createAccountSubtitle": "Sanctum'u kullanmaya başlamak için kayıt olun",
+      "welcomeBackTitle": "Tekrar hoş geldiniz",
+      "welcomeBackSubtitle": "Kaldığınız yerden devam etmek için giriş yapın",
+      "nameLabel": "Ad",
+      "namePlaceholder": "Adınız",
+      "emailLabel": "E-posta",
+      "emailPlaceholder": "siz@ornek.com",
+      "nameRequired": "Ad gerekli",
+      "emailRequired": "E-posta gerekli",
+      "emailInvalid": "Lütfen geçerli bir e-posta girin",
+      "sendingLink": "Bağlantı gönderiliyor...",
+      "continueWithEmail": "E-posta ile devam et",
+      "magicLinkHelp": "Giriş yapmak için size sihirli bir bağlantı göndereceğiz — parola gerekmez.",
+      "checkEmail": "E-postanızı kontrol edin!",
+      "sentMagicLink": "Şu adrese sihirli bağlantı gönderdik",
+      "clickLink": "Giriş yapmak için e-postadaki bağlantıya tıklayın.",
+      "checkSpam": "Görmüyor musunuz? Spam klasörünü kontrol edin.",
+      "simulateMagicLink": "Sihirli bağlantı tıklamasını simüle et",
+      "forTesting": "Test amaçları için:"
+    },
+    "verify": {
+      "verifying": "Bağlantınız doğrulanıyor...",
+      "pleaseWait": "Giriş yapmanız için bir dakika.",
+      "welcomeName": "Hoş geldiniz, {{name}}!",
+      "welcomeBack": "Tekrar hoş geldiniz!",
+      "signedInAs": "Şu kullanıcı olarak giriş yaptınız",
+      "completingProfile": "Profiliniz tamamlanıyor...",
+      "redirectingChat": "Sohbete yönlendiriliyor...",
+      "linkExpired": "Bağlantı süresi dolmuş veya geçersiz",
+      "linkExpiredMessage": "Bu sihirli bağlantının süresi dolmuş veya daha önce kullanılmış olabilir.",
+      "requestNewLink": "Yeni bağlantı iste"
+    },
+    "profile": {
+      "title": "Profilinizi tamamlayın",
+      "subtitle": "Başlamak için birkaç ayrıntı daha",
+      "saving": "Kaydediliyor...",
+      "continue": "Sohbete devam et",
+      "fieldRequired": "{{field}} gerekli",
+      "invalidEmail": "Lütfen geçerli bir e-posta girin",
+      "invalidUrl": "Lütfen geçerli bir URL girin",
+      "invalidNumber": "Lütfen geçerli bir sayı girin"
+    }
+  },
+  "common": {
+    "adminQuestion": "Yönetici misiniz?",
+    "signInNostr": "Nostr ile giriş yap"
+  }
+}

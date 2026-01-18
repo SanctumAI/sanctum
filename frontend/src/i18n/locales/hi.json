@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "अपनी भाषा चुनें",
+      "subtitle": "आगे बढ़ने के लिए अपनी पसंदीदा भाषा चुनें",
+      "searchPlaceholder": "भाषाएँ खोजें...",
+      "searchLabel": "भाषाएँ खोजें",
+      "noResults": "\"{{query}}\" के लिए कोई भाषा नहीं मिली",
+      "continue": "जारी रखें",
+      "changeInSettings": "आप इसे बाद में सेटिंग्स में बदल सकते हैं।"
+    },
+    "auth": {
+      "signUp": "साइन अप करें",
+      "logIn": "लॉग इन करें",
+      "createAccountTitle": "अपना खाता बनाएं",
+      "createAccountSubtitle": "Sanctum का उपयोग शुरू करने के लिए साइन अप करें",
+      "welcomeBackTitle": "फिर से स्वागत है",
+      "welcomeBackSubtitle": "जहाँ आपने छोड़ा था वहाँ से जारी रखने के लिए लॉग इन करें",
+      "nameLabel": "नाम",
+      "namePlaceholder": "आपका नाम",
+      "emailLabel": "ईमेल",
+      "emailPlaceholder": "you@example.com",
+      "nameRequired": "नाम आवश्यक है",
+      "emailRequired": "ईमेल आवश्यक है",
+      "emailInvalid": "कृपया एक वैध ईमेल दर्ज करें",
+      "sendingLink": "लिंक भेजा जा रहा है...",
+      "continueWithEmail": "ईमेल के साथ जारी रखें",
+      "magicLinkHelp": "हम आपको लॉग इन करने के लिए एक मैजिक लिंक भेजेंगे — पासवर्ड की ज़रूरत नहीं है।",
+      "checkEmail": "अपना ईमेल देखें!",
+      "sentMagicLink": "हमने मैजिक लिंक भेजा है",
+      "clickLink": "लॉग इन करने के लिए ईमेल में दिए लिंक पर क्लिक करें।",
+      "checkSpam": "नहीं दिख रहा? अपने स्पैम फ़ोल्डर की जाँच करें।",
+      "simulateMagicLink": "मैजिक लिंक पर क्लिक का अनुकरण करें",
+      "forTesting": "परीक्षण उद्देश्यों के लिए:"
+    },
+    "verify": {
+      "verifying": "आपके लिंक की पुष्टि की जा रही है...",
+      "pleaseWait": "एक क्षण, हम आपको साइन इन कर रहे हैं।",
+      "welcomeName": "स्वागत है, {{name}}!",
+      "welcomeBack": "फिर से स्वागत है!",
+      "signedInAs": "आप इस नाम से साइन इन हैं",
+      "completingProfile": "आपकी प्रोफ़ाइल पूरी की जा रही है...",
+      "redirectingChat": "चैट पर रीडायरेक्ट किया जा रहा है...",
+      "linkExpired": "लिंक की समय-सीमा समाप्त हो गई या अमान्य है",
+      "linkExpiredMessage": "यह मैजिक लिंक समाप्त हो सकता है या पहले ही उपयोग किया जा चुका है।",
+      "requestNewLink": "नया लिंक मांगें"
+    },
+    "profile": {
+      "title": "अपनी प्रोफ़ाइल पूरी करें",
+      "subtitle": "शुरू करने के लिए कुछ और जानकारी",
+      "saving": "सहेजा जा रहा है...",
+      "continue": "चैट पर जारी रखें",
+      "fieldRequired": "{{field}} आवश्यक है",
+      "invalidEmail": "कृपया एक वैध ईमेल दर्ज करें",
+      "invalidUrl": "कृपया एक वैध URL दर्ज करें",
+      "invalidNumber": "कृपया एक वैध संख्या दर्ज करें"
+    }
+  },
+  "common": {
+    "adminQuestion": "क्या आप एडमिन हैं?",
+    "signInNostr": "Nostr से साइन इन करें"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Choose your language",
+      "subtitle": "Select your preferred language to continue",
+      "searchPlaceholder": "Search languages...",
+      "searchLabel": "Search languages",
+      "noResults": "No languages found for \"{{query}}\"",
+      "continue": "Continue",
+      "changeInSettings": "You can change this later in your settings."
+    },
+    "auth": {
+      "signUp": "Sign Up",
+      "logIn": "Log In",
+      "createAccountTitle": "Create your account",
+      "createAccountSubtitle": "Sign up to start using Sanctum",
+      "welcomeBackTitle": "Welcome back",
+      "welcomeBackSubtitle": "Sign in to continue where you left off",
+      "nameLabel": "Name",
+      "namePlaceholder": "Your name",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email",
+      "sendingLink": "Sending link...",
+      "continueWithEmail": "Continue with Email",
+      "magicLinkHelp": "We'll send you a magic link to sign in — no password needed.",
+      "checkEmail": "Check your email!",
+      "sentMagicLink": "We sent a magic link to",
+      "clickLink": "Click the link in the email to sign in.",
+      "checkSpam": "Don't see it? Check your spam folder.",
+      "simulateMagicLink": "Simulate clicking magic link",
+      "forTesting": "For testing purposes:"
+    },
+    "verify": {
+      "verifying": "Verifying your link...",
+      "pleaseWait": "Just a moment while we sign you in.",
+      "welcomeName": "Welcome, {{name}}!",
+      "welcomeBack": "Welcome back!",
+      "signedInAs": "You're signed in as",
+      "completingProfile": "Completing your profile...",
+      "redirectingChat": "Redirecting to chat...",
+      "linkExpired": "Link expired or invalid",
+      "linkExpiredMessage": "This magic link may have expired or already been used.",
+      "requestNewLink": "Request a new link"
+    },
+    "profile": {
+      "title": "Complete Your Profile",
+      "subtitle": "Just a few more details to get started",
+      "saving": "Saving...",
+      "continue": "Continue to Chat",
+      "fieldRequired": "{{field}} is required",
+      "invalidEmail": "Please enter a valid email",
+      "invalidUrl": "Please enter a valid URL",
+      "invalidNumber": "Please enter a valid number"
+    }
+  },
+  "common": {
+    "adminQuestion": "Are you an admin?",
+    "signInNostr": "Sign in with Nostr"
+  }
+}

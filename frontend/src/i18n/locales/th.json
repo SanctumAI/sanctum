@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "เลือกภาษาของคุณ",
+      "subtitle": "เลือกภาษาที่ต้องการเพื่อดำเนินการต่อ",
+      "searchPlaceholder": "ค้นหาภาษา...",
+      "searchLabel": "ค้นหาภาษา",
+      "noResults": "ไม่พบภาษาสำหรับ \"{{query}}\"",
+      "continue": "ดำเนินการต่อ",
+      "changeInSettings": "คุณสามารถเปลี่ยนได้ภายหลังในการตั้งค่า"
+    },
+    "auth": {
+      "signUp": "สมัครสมาชิก",
+      "logIn": "เข้าสู่ระบบ",
+      "createAccountTitle": "สร้างบัญชีของคุณ",
+      "createAccountSubtitle": "สมัครเพื่อเริ่มใช้ Sanctum",
+      "welcomeBackTitle": "ยินดีต้อนรับกลับมา",
+      "welcomeBackSubtitle": "เข้าสู่ระบบเพื่อดำเนินการต่อจากจุดที่คุณหยุดไว้",
+      "nameLabel": "ชื่อ",
+      "namePlaceholder": "ชื่อของคุณ",
+      "emailLabel": "อีเมล",
+      "emailPlaceholder": "you@example.com",
+      "nameRequired": "จำเป็นต้องกรอกชื่อ",
+      "emailRequired": "จำเป็นต้องกรอกอีเมล",
+      "emailInvalid": "โปรดกรอกอีเมลที่ถูกต้อง",
+      "sendingLink": "กำลังส่งลิงก์...",
+      "continueWithEmail": "ดำเนินการต่อด้วยอีเมล",
+      "magicLinkHelp": "เราจะส่งลิงก์มหัศจรรย์เพื่อให้คุณเข้าสู่ระบบ — ไม่ต้องใช้รหัสผ่าน",
+      "checkEmail": "ตรวจสอบอีเมลของคุณ!",
+      "sentMagicLink": "เราได้ส่งลิงก์มหัศจรรย์ไปยัง",
+      "clickLink": "คลิกลิงก์ในอีเมลเพื่อเข้าสู่ระบบ",
+      "checkSpam": "ไม่เห็นใช่ไหม? โปรดตรวจสอบโฟลเดอร์สแปม",
+      "simulateMagicLink": "จำลองการคลิกลิงก์มหัศจรรย์",
+      "forTesting": "สำหรับการทดสอบ:"
+    },
+    "verify": {
+      "verifying": "กำลังตรวจสอบลิงก์ของคุณ...",
+      "pleaseWait": "โปรดรอสักครู่ขณะที่เราลงชื่อเข้าใช้ให้คุณ",
+      "welcomeName": "ยินดีต้อนรับ, {{name}}!",
+      "welcomeBack": "ยินดีต้อนรับกลับมา!",
+      "signedInAs": "คุณเข้าสู่ระบบในชื่อ",
+      "completingProfile": "กำลังทำโปรไฟล์ให้เสร็จ...",
+      "redirectingChat": "กำลังนำไปยังแชต...",
+      "linkExpired": "ลิงก์หมดอายุหรือไม่ถูกต้อง",
+      "linkExpiredMessage": "ลิงก์มหัศจรรย์นี้อาจหมดอายุหรือถูกใช้ไปแล้ว",
+      "requestNewLink": "ขอรับลิงก์ใหม่"
+    },
+    "profile": {
+      "title": "กรอกโปรไฟล์ของคุณให้ครบ",
+      "subtitle": "อีกเล็กน้อยก็เริ่มได้แล้ว",
+      "saving": "กำลังบันทึก...",
+      "continue": "ไปที่แชตต่อ",
+      "fieldRequired": "ต้องระบุ {{field}}",
+      "invalidEmail": "โปรดกรอกอีเมลที่ถูกต้อง",
+      "invalidUrl": "โปรดกรอก URL ที่ถูกต้อง",
+      "invalidNumber": "โปรดกรอกตัวเลขที่ถูกต้อง"
+    }
+  },
+  "common": {
+    "adminQuestion": "คุณเป็นผู้ดูแลระบบหรือไม่?",
+    "signInNostr": "เข้าสู่ระบบด้วย Nostr"
+  }
+}

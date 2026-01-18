@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Wähle deine Sprache",
+      "subtitle": "Wähle deine bevorzugte Sprache, um fortzufahren",
+      "searchPlaceholder": "Sprachen suchen...",
+      "searchLabel": "Sprachen suchen",
+      "noResults": "Keine Sprachen für \"{{query}}\" gefunden",
+      "continue": "Weiter",
+      "changeInSettings": "Du kannst das später in den Einstellungen ändern."
+    },
+    "auth": {
+      "signUp": "Registrieren",
+      "logIn": "Anmelden",
+      "createAccountTitle": "Erstelle dein Konto",
+      "createAccountSubtitle": "Registriere dich, um Sanctum zu nutzen",
+      "welcomeBackTitle": "Willkommen zurück",
+      "welcomeBackSubtitle": "Melde dich an, um dort fortzufahren, wo du aufgehört hast",
+      "nameLabel": "Name",
+      "namePlaceholder": "Dein Name",
+      "emailLabel": "E-Mail",
+      "emailPlaceholder": "du@beispiel.com",
+      "nameRequired": "Name ist erforderlich",
+      "emailRequired": "E-Mail ist erforderlich",
+      "emailInvalid": "Bitte gib eine gültige E-Mail-Adresse ein",
+      "sendingLink": "Link wird gesendet...",
+      "continueWithEmail": "Weiter mit E-Mail",
+      "magicLinkHelp": "Wir senden dir einen Magic-Link zum Anmelden — kein Passwort erforderlich.",
+      "checkEmail": "Prüfe deine E-Mails!",
+      "sentMagicLink": "Wir haben einen Magic-Link gesendet an",
+      "clickLink": "Klicke auf den Link in der E-Mail, um dich anzumelden.",
+      "checkSpam": "Nicht zu sehen? Prüfe deinen Spam-Ordner.",
+      "simulateMagicLink": "Klick auf den Magic-Link simulieren",
+      "forTesting": "Zu Testzwecken:"
+    },
+    "verify": {
+      "verifying": "Link wird überprüft...",
+      "pleaseWait": "Einen Moment, wir melden dich an.",
+      "welcomeName": "Willkommen, {{name}}!",
+      "welcomeBack": "Willkommen zurück!",
+      "signedInAs": "Du bist angemeldet als",
+      "completingProfile": "Profil wird vervollständigt...",
+      "redirectingChat": "Weiterleitung zum Chat...",
+      "linkExpired": "Link abgelaufen oder ungültig",
+      "linkExpiredMessage": "Dieser Magic-Link ist möglicherweise abgelaufen oder wurde bereits verwendet.",
+      "requestNewLink": "Neuen Link anfordern"
+    },
+    "profile": {
+      "title": "Vervollständige dein Profil",
+      "subtitle": "Nur noch ein paar Details, um loszulegen",
+      "saving": "Speichern...",
+      "continue": "Weiter zum Chat",
+      "fieldRequired": "{{field}} ist erforderlich",
+      "invalidEmail": "Bitte gib eine gültige E-Mail-Adresse ein",
+      "invalidUrl": "Bitte gib eine gültige URL ein",
+      "invalidNumber": "Bitte gib eine gültige Zahl ein"
+    }
+  },
+  "common": {
+    "adminQuestion": "Bist du ein Admin?",
+    "signInNostr": "Mit Nostr anmelden"
+  }
+}

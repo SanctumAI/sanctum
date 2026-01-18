@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Wybierz swój język",
+      "subtitle": "Wybierz preferowany język, aby kontynuować",
+      "searchPlaceholder": "Wyszukaj języki...",
+      "searchLabel": "Wyszukaj języki",
+      "noResults": "Nie znaleziono języków dla \"{{query}}\"",
+      "continue": "Kontynuuj",
+      "changeInSettings": "Możesz to później zmienić w ustawieniach."
+    },
+    "auth": {
+      "signUp": "Zarejestruj się",
+      "logIn": "Zaloguj się",
+      "createAccountTitle": "Utwórz konto",
+      "createAccountSubtitle": "Zarejestruj się, aby zacząć korzystać z Sanctum",
+      "welcomeBackTitle": "Witamy ponownie",
+      "welcomeBackSubtitle": "Zaloguj się, aby kontynuować tam, gdzie skończyłeś",
+      "nameLabel": "Imię",
+      "namePlaceholder": "Twoje imię",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "ty@przyklad.pl",
+      "nameRequired": "Imię jest wymagane",
+      "emailRequired": "E-mail jest wymagany",
+      "emailInvalid": "Wpisz prawidłowy adres e-mail",
+      "sendingLink": "Wysyłanie linku...",
+      "continueWithEmail": "Kontynuuj z e-mailem",
+      "magicLinkHelp": "Wyślemy Ci magiczny link do logowania — bez hasła.",
+      "checkEmail": "Sprawdź swój e-mail!",
+      "sentMagicLink": "Wysłaliśmy magiczny link na",
+      "clickLink": "Kliknij link w e-mailu, aby się zalogować.",
+      "checkSpam": "Nie widzisz? Sprawdź folder spam.",
+      "simulateMagicLink": "Symuluj kliknięcie magicznego linku",
+      "forTesting": "Do celów testowych:"
+    },
+    "verify": {
+      "verifying": "Weryfikujemy Twój link...",
+      "pleaseWait": "Chwilka, logujemy Cię.",
+      "welcomeName": "Witaj, {{name}}!",
+      "welcomeBack": "Witaj ponownie!",
+      "signedInAs": "Jesteś zalogowany jako",
+      "completingProfile": "Uzupełnianie profilu...",
+      "redirectingChat": "Przekierowanie do czatu...",
+      "linkExpired": "Link wygasł lub jest nieprawidłowy",
+      "linkExpiredMessage": "Ten magiczny link mógł wygasnąć lub został już użyty.",
+      "requestNewLink": "Poproś o nowy link"
+    },
+    "profile": {
+      "title": "Uzupełnij profil",
+      "subtitle": "Jeszcze kilka szczegółów, aby zacząć",
+      "saving": "Zapisywanie...",
+      "continue": "Przejdź do czatu",
+      "fieldRequired": "{{field}} jest wymagane",
+      "invalidEmail": "Wpisz prawidłowy adres e-mail",
+      "invalidUrl": "Wpisz prawidłowy URL",
+      "invalidNumber": "Wpisz prawidłową liczbę"
+    }
+  },
+  "common": {
+    "adminQuestion": "Czy jesteś administratorem?",
+    "signInNostr": "Zaloguj się przez Nostr"
+  }
+}

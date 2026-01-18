@@ -63,3 +63,41 @@ curl http://localhost:8000/health  # Health check
 - Neo4j browser: http://localhost:7474
 - Qdrant dashboard: http://localhost:6333/dashboard
 - No test framework configured yet - use `/test` endpoint for manual verification
+
+### Frontend Development
+
+The frontend uses a **Vite proxy** to avoid CORS issues. All API requests go through `/api`:
+
+```bash
+# Frontend URL
+http://localhost:5173
+
+# API requests are proxied:
+# Browser: http://localhost:5173/api/health
+# Proxied to: http://backend:8000/health
+```
+
+The proxy is configured in `frontend/vite.config.ts` and routes `/api/*` to the backend container.
+
+### Troubleshooting
+
+**"CORS errors" with null status code:**
+This usually means the backend isn't running. Check logs:
+```bash
+docker compose logs backend
+```
+
+**SQLite schema errors (e.g., "no such column"):**
+The database schema changed but the old database file persists. Reset the SQLite volume:
+```bash
+docker compose down
+docker volume rm sanctum-rag-runtime_sqlite_data
+docker compose up --build
+```
+
+**Backend container not starting:**
+Check if all services it depends on are healthy:
+```bash
+docker compose ps
+docker compose logs backend --tail 50
+```

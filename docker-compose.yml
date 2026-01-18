@@ -67,7 +67,14 @@ services:
       - NEO4J_PASSWORD=sanctum_dev_password
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
-      - EMBEDDING_MODEL=intfloat/multilingual-e5-base
+      # PDF extraction: "fast" (PyMuPDF) or "quality" (Docling)
+      - PDF_EXTRACT_MODE=${PDF_EXTRACT_MODE:-fast}
+      # Embedding config - set in .env
+      - EMBEDDING_PROVIDER=${EMBEDDING_PROVIDER:-local}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-intfloat/multilingual-e5-base}
+      - EMBEDDING_DIMENSIONS=${EMBEDDING_DIMENSIONS:-768}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      # LLM config
       - LLM_PROVIDER=maple
       - MAPLE_BASE_URL=http://maple-proxy:8080/v1
       - MAPLE_API_KEY=${MAPLE_API_KEY:-}
@@ -93,6 +100,7 @@ services:
     volumes:
       - ./backend/app:/app
       - ./uploads:/uploads
+      - ./logs:/logs
       - embedding_cache:/root/.cache/huggingface
       - sqlite_data:/data
     networks:

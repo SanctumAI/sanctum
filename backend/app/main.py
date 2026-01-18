@@ -54,6 +54,7 @@ logger = logging.getLogger("sanctum.main")
 
 # Import routers
 from ingest import router as ingest_router
+from query import router as query_router
 
 logger.info("Starting Sanctum API...")
 
@@ -74,6 +75,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(ingest_router)
+app.include_router(query_router)
 
 # Rate limiters for auth endpoints
 magic_link_limiter = RateLimiter(limit=5, window_seconds=60)   # 5 per minute
@@ -407,7 +409,7 @@ async def llm_smoke_test():
 
 
 @app.post("/llm/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest, user: dict = Depends(auth.require_approved_user)):
+async def chat(request: ChatRequest, user: dict = Depends(auth.require_admin_or_approved_user)):
     """
     Simple chat endpoint for smoke testing LLM provider.
 
@@ -427,7 +429,7 @@ async def chat(request: ChatRequest, user: dict = Depends(auth.require_approved_
 
 
 @app.post("/query", response_model=QueryResponse)
-async def query(request: QueryRequest, user: dict = Depends(auth.require_approved_user)):
+async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_or_approved_user)):
     """
     RAG query endpoint. Requires authenticated and approved user.
 

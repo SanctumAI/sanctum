@@ -8,6 +8,10 @@ import uuid
 import json
 import hashlib
 import logging
+import math
+import random
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -15,7 +19,8 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks
 from pydantic import BaseModel
 
-from ontology import get_ontology, list_ontologies, Ontology
+from ontology import get_ontology, list_ontologies, Ontology, DEFAULT_ONTOLOGY
+from llm import get_provider
 
 # Configure logging
 logging.basicConfig(
@@ -26,19 +31,93 @@ logger = logging.getLogger("sanctum.ingest")
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
 
+# LLM processing configuration
+MAX_RETRIES = 3
+MAX_CONCURRENT_CHUNKS = int(os.getenv("MAX_CONCURRENT_CHUNKS", "3"))
+_executor = ThreadPoolExecutor(max_workers=MAX_CONCURRENT_CHUNKS)
+
 # Configuration
 UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/uploads"))
 CHUNKS_DIR = UPLOADS_DIR / "chunks"
 PROCESSED_DIR = UPLOADS_DIR / "processed"
+LOGS_DIR = Path(os.getenv("LOGS_DIR", "/logs"))
 
 # Ensure directories exist
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 CHUNKS_DIR.mkdir(parents=True, exist_ok=True)
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
-# In-memory job tracking (would be Redis/DB in production)
-JOBS: dict[str, dict] = {}
-CHUNKS: dict[str, dict] = {}
+# Persist job state so restarts don't lose jobs
+JOBS_FILE = LOGS_DIR / "jobs_state.json"
+CHUNKS_FILE = LOGS_DIR / "chunks_state.json"
+
+
+def _load_state() -> tuple[dict, dict]:
+    jobs = {}
+    chunks = {}
+    try:
+        if JOBS_FILE.exists():
+            jobs = json.loads(JOBS_FILE.read_text(encoding="utf-8"))
+    except Exception as e:
+        logger.warning(f"Failed to load jobs state: {e}")
+    try:
+        if CHUNKS_FILE.exists():
+            chunks = json.loads(CHUNKS_FILE.read_text(encoding="utf-8"))
+    except Exception as e:
+        logger.warning(f"Failed to load chunks state: {e}")
+    return jobs, chunks
+
+
+def _save_jobs() -> None:
+    try:
+        JOBS_FILE.write_text(json.dumps(JOBS, indent=2), encoding="utf-8")
+    except Exception as e:
+        logger.error(f"Failed to save jobs state: {e}")
+
+
+def _save_chunks() -> None:
+    try:
+        CHUNKS_FILE.write_text(json.dumps(CHUNKS, indent=2), encoding="utf-8")
+    except Exception as e:
+        logger.error(f"Failed to save chunks state: {e}")
+
+
+JOBS, CHUNKS = _load_state()
+
+
+def _clear_job_chunks(job_id: str) -> None:
+    """Remove any persisted chunks for a job (used on resume)."""
+    to_delete = [cid for cid, c in CHUNKS.items() if c.get("job_id") == job_id]
+    for cid in to_delete:
+        CHUNKS.pop(cid, None)
+    if to_delete:
+        _save_chunks()
+
+
+@router.on_event("startup")
+async def resume_incomplete_jobs():
+    """Resume incomplete jobs after a restart so they don't disappear."""
+    for job_id, job in list(JOBS.items()):
+        status = job.get("status")
+        if status in ("pending", "processing", "extracting", "chunked"):
+            file_path = Path(job.get("file_path", ""))
+            if not file_path.exists():
+                job["status"] = "failed"
+                job["error"] = "Source file missing; cannot resume"
+                job["updated_at"] = datetime.utcnow().isoformat()
+                _save_jobs()
+                continue
+            logger.warning(f"[{job_id}] Resuming job after restart")
+            _clear_job_chunks(job_id)
+            asyncio.create_task(
+                process_document(
+                    job_id=job_id,
+                    file_path=file_path,
+                    ontology_id=job.get("ontology_id", DEFAULT_ONTOLOGY),
+                    sample_percent=float(job.get("sample_percent", 100.0)),
+                )
+            )
 
 
 # =============================================================================
@@ -149,7 +228,72 @@ def chunk_text(text: str, chunk_size: int = 1500, overlap: int = 200) -> list[st
     return chunks
 
 
-def process_document(job_id: str, file_path: Path, ontology_id: str):
+def parse_llm_json(response_text: str) -> dict:
+    """Parse JSON from LLM response, handling common markdown fences."""
+    text = response_text.strip()
+    if text.startswith("```json"):
+        text = text[7:]
+    elif text.startswith("```"):
+        text = text[3:]
+    if text.endswith("```"):
+        text = text[:-3]
+    text = text.strip()
+    return json.loads(text)
+
+
+def _sync_llm_call(prompt: str) -> str:
+    """Synchronous LLM call to run in thread pool."""
+    provider = get_provider()
+    response = provider.complete(prompt)
+    return response.content
+
+
+async def extract_chunk_with_llm(chunk_text_content: str, ontology: Ontology) -> dict:
+    """Run LLM extraction with retries."""
+    prompt = ontology.extraction_prompt + chunk_text_content
+    last_error = None
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            content = await asyncio.get_event_loop().run_in_executor(
+                _executor, _sync_llm_call, prompt
+            )
+            extraction = parse_llm_json(content)
+            extraction.setdefault("entities", [])
+            extraction.setdefault("relationships", [])
+            return extraction
+        except Exception as e:
+            last_error = e
+            if attempt == MAX_RETRIES:
+                raise
+    raise last_error
+
+
+async def process_and_store_chunk(
+    chunk_id: str,
+    chunk_text_content: str,
+    ontology: Ontology,
+    source_file: str,
+    ontology_id: str,
+) -> dict:
+    """LLM extract then store to Neo4j/Qdrant."""
+    from store import store_extraction_to_graph
+
+    extraction = await extract_chunk_with_llm(chunk_text_content, ontology)
+    result = await store_extraction_to_graph(
+        chunk_id=chunk_id,
+        extraction={
+            "entities": extraction.get("entities", []),
+            "relationships": extraction.get("relationships", []),
+            "extracted_at": datetime.utcnow().isoformat(),
+        },
+        source_text=chunk_text_content,
+        source_file=source_file,
+        ontology_id=ontology_id,
+    )
+    return result
+
+
+async def process_document(job_id: str, file_path: Path, ontology_id: str, sample_percent: float):
     """
     Process an uploaded document: convert to text and chunk.
     This runs as a background task.
@@ -158,6 +302,7 @@ def process_document(job_id: str, file_path: Path, ontology_id: str):
     try:
         JOBS[job_id]["status"] = "processing"
         JOBS[job_id]["updated_at"] = datetime.utcnow().isoformat()
+        _save_jobs()
         
         # Get file extension
         suffix = file_path.suffix.lower()
@@ -166,7 +311,7 @@ def process_document(job_id: str, file_path: Path, ontology_id: str):
         # Extract text based on file type
         if suffix == ".pdf":
             logger.info(f"[{job_id}] Extracting text from PDF...")
-            text = extract_pdf_text(file_path)
+            text = await asyncio.to_thread(extract_pdf_text, file_path)
         elif suffix == ".txt":
             logger.info(f"[{job_id}] Reading text file...")
             text = file_path.read_text(encoding="utf-8")
@@ -182,6 +327,14 @@ def process_document(job_id: str, file_path: Path, ontology_id: str):
         logger.info(f"[{job_id}] Chunking text...")
         chunks = chunk_text(text)
         logger.info(f"[{job_id}] Created {len(chunks)} chunks")
+
+        # Optionally sample a percentage of chunks for faster testing
+        if sample_percent < 100:
+            target_count = max(1, math.ceil(len(chunks) * (sample_percent / 100.0)))
+            chunks = random.sample(chunks, k=min(target_count, len(chunks)))
+            logger.info(
+                f"[{job_id}] Sampling {sample_percent}% -> {len(chunks)} chunks selected"
+            )
         
         # Get ontology for prompt
         ontology = get_ontology(ontology_id)
@@ -203,33 +356,103 @@ def process_document(job_id: str, file_path: Path, ontology_id: str):
                 "extracted_data": None,
                 "created_at": datetime.utcnow().isoformat(),
             }
+        _save_chunks()
         
         # Update job status
-        JOBS[job_id]["status"] = "chunked"
+        JOBS[job_id]["status"] = "extracting"
         JOBS[job_id]["total_chunks"] = len(chunks)
         JOBS[job_id]["updated_at"] = datetime.utcnow().isoformat()
+        _save_jobs()
         logger.info(f"[{job_id}] Document processing complete: {len(chunks)} chunks created")
+
+        # Process chunks with limited concurrency
+        semaphore = asyncio.Semaphore(MAX_CONCURRENT_CHUNKS)
+        processed = 0
+        failed = 0
+
+        async def run_chunk(chunk_id: str):
+            nonlocal processed, failed
+            async with semaphore:
+                chunk = CHUNKS[chunk_id]
+                try:
+                    result = await process_and_store_chunk(
+                        chunk_id=chunk_id,
+                        chunk_text_content=chunk["text"],
+                        ontology=ontology,
+                        source_file=chunk["source_file"],
+                        ontology_id=ontology_id,
+                    )
+                    chunk["status"] = "stored"
+                    chunk["store_result"] = result
+                    processed += 1
+                except Exception as e:
+                    chunk["status"] = "failed"
+                    chunk["error"] = str(e)
+                    failed += 1
+                JOBS[job_id]["processed_chunks"] = processed
+                JOBS[job_id]["failed_chunks"] = failed
+                JOBS[job_id]["updated_at"] = datetime.utcnow().isoformat()
+                _save_jobs()
+                _save_chunks()
+
+        await asyncio.gather(*(run_chunk(cid) for cid in list(CHUNKS.keys()) if CHUNKS[cid]["job_id"] == job_id))
+        JOBS[job_id]["status"] = "completed_with_errors" if failed > 0 else "completed"
+        JOBS[job_id]["updated_at"] = datetime.utcnow().isoformat()
+        _save_jobs()
         
     except Exception as e:
         logger.error(f"[{job_id}] Document processing failed: {e}", exc_info=True)
         JOBS[job_id]["status"] = "failed"
         JOBS[job_id]["error"] = str(e)
         JOBS[job_id]["updated_at"] = datetime.utcnow().isoformat()
+        _save_jobs()
+
+
+# PDF extraction mode: "fast" (PyMuPDF) or "quality" (Docling)
+# Docling gives better structure but is VERY slow on CPU (~2-3 min for 100 pages)
+# PyMuPDF is ~100x faster but loses some formatting
+PDF_EXTRACT_MODE = os.getenv("PDF_EXTRACT_MODE", "fast")
 
 
 def extract_pdf_text(file_path: Path) -> str:
     """
-    Extract text from PDF using Docling (without OCR/table models for speed).
-    Falls back to PyMuPDF if Docling fails.
+    Extract text from PDF.
+    Mode controlled by PDF_EXTRACT_MODE env var:
+      - "fast": PyMuPDF (~1 second for 100 pages)
+      - "quality": Docling (~2-3 minutes for 100 pages on CPU)
     """
-    logger.debug(f"Extracting PDF text from: {file_path}")
+    logger.debug(f"Extracting PDF text from: {file_path} (mode={PDF_EXTRACT_MODE})")
+    
+    if PDF_EXTRACT_MODE == "fast":
+        return _extract_pdf_pymupdf(file_path)
+    else:
+        return _extract_pdf_docling(file_path)
+
+
+def _extract_pdf_pymupdf(file_path: Path) -> str:
+    """Fast PDF extraction using PyMuPDF (~1 second for 100 pages)"""
+    import fitz  # PyMuPDF
+    
+    logger.debug("Using PyMuPDF extraction (fast mode)...")
+    doc = fitz.open(str(file_path))
+    text_parts = []
+    for page in doc:
+        text_parts.append(page.get_text())
+    doc.close()
+    text = "\n\n".join(text_parts)
+    logger.info(f"PyMuPDF extraction successful: {len(text)} chars")
+    return text
+
+
+def _extract_pdf_docling(file_path: Path) -> str:
+    """Quality PDF extraction using Docling (slow on CPU, ~2-3 min for 100 pages)"""
     try:
         logger.debug("Attempting Docling extraction...")
         from docling.document_converter import DocumentConverter, PdfFormatOption
         from docling.datamodel.pipeline_options import PdfPipelineOptions
         from docling.datamodel.base_models import InputFormat
         
-        # Use lightweight pipeline - no OCR, no table structure (avoids OpenCV dep)
+        # Use lightweight pipeline - no OCR, no table structure
         pipeline_options = PdfPipelineOptions()
         pipeline_options.do_ocr = False
         pipeline_options.do_table_structure = False
@@ -248,19 +471,9 @@ def extract_pdf_text(file_path: Path) -> str:
         return markdown
         
     except Exception as e:
-        # Fallback to PyMuPDF for simpler extraction
+        # Fallback to PyMuPDF
         logger.warning(f"Docling failed ({e}), falling back to PyMuPDF", exc_info=True)
-        import fitz  # PyMuPDF
-        
-        logger.debug("Using PyMuPDF extraction...")
-        doc = fitz.open(str(file_path))
-        text_parts = []
-        for page in doc:
-            text_parts.append(page.get_text())
-        doc.close()
-        text = "\n\n".join(text_parts)
-        logger.info(f"PyMuPDF extraction successful: {len(text)} chars")
-        return text
+        return _extract_pdf_pymupdf(file_path)
 
 
 # =============================================================================
@@ -272,9 +485,99 @@ async def get_available_ontologies():
     """List all available ontologies"""
     return {
         "ontologies": list_ontologies(),
-        "default": "bitcoin_technical"
+        "default": DEFAULT_ONTOLOGY
     }
 
+
+@router.post("/wipe")
+async def wipe_datastores():
+    """
+    Wipe all entries in Neo4j and Qdrant collections.
+    This is destructive and intended for local development resets.
+    """
+    logger.warning("Wipe requested: clearing Neo4j and Qdrant data")
+    result = {
+        "neo4j": {"status": "pending"},
+        "qdrant": {"status": "pending"},
+    }
+
+    # Neo4j: delete all nodes/relationships
+    try:
+        from store import get_neo4j_driver
+        driver = get_neo4j_driver()
+        with driver.session() as session:
+            session.run("MATCH (n) DETACH DELETE n")
+        result["neo4j"] = {"status": "ok", "message": "All nodes deleted"}
+        logger.info("Neo4j wipe complete")
+    except Exception as e:
+        result["neo4j"] = {"status": "error", "message": str(e)}
+        logger.error(f"Neo4j wipe failed: {e}")
+
+    # Qdrant: delete collections if they exist
+    try:
+        from store import get_qdrant_client, COLLECTION_NAME
+        client = get_qdrant_client()
+        collections = {c.name for c in client.get_collections().collections}
+        deleted = []
+        for name in (COLLECTION_NAME, "sanctum_smoke_test"):
+            if name in collections:
+                client.delete_collection(name)
+                deleted.append(name)
+        result["qdrant"] = {"status": "ok", "deleted_collections": deleted}
+        logger.info(f"Qdrant wipe complete: {deleted}")
+    except Exception as e:
+        result["qdrant"] = {"status": "error", "message": str(e)}
+        logger.error(f"Qdrant wipe failed: {e}")
+
+    return result
+
+
+@router.get("/stats")
+async def get_datastore_stats():
+    """
+    Get quick stats for Neo4j and Qdrant.
+    """
+    stats = {
+        "neo4j": {"status": "pending"},
+        "qdrant": {"status": "pending"},
+    }
+
+    # Neo4j: count nodes and relationships
+    try:
+        from store import get_neo4j_driver
+        driver = get_neo4j_driver()
+        with driver.session() as session:
+            node_count = session.run("MATCH (n) RETURN count(n) AS count").single()["count"]
+            rel_count = session.run("MATCH ()-[r]->() RETURN count(r) AS count").single()["count"]
+        stats["neo4j"] = {
+            "status": "ok",
+            "nodes": node_count,
+            "relationships": rel_count,
+        }
+    except Exception as e:
+        stats["neo4j"] = {"status": "error", "message": str(e)}
+
+    # Qdrant: count points per collection
+    try:
+        from store import get_qdrant_client
+        client = get_qdrant_client()
+        collections = client.get_collections().collections
+        collection_stats = {}
+        for c in collections:
+            info = client.get_collection(c.name)
+            collection_stats[c.name] = {
+                "points": info.points_count,
+                "status": info.status,
+                "vector_size": info.config.params.vectors.size if info.config and info.config.params else None,
+            }
+        stats["qdrant"] = {
+            "status": "ok",
+            "collections": collection_stats,
+        }
+    except Exception as e:
+        stats["qdrant"] = {"status": "error", "message": str(e)}
+
+    return stats
 
 @router.get("/ontology/{ontology_id}")
 async def get_ontology_details(ontology_id: str):
@@ -290,7 +593,8 @@ async def get_ontology_details(ontology_id: str):
 async def upload_document(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    ontology_id: str = Form(default="bitcoin_technical"),
+    ontology_id: str = Form(default=DEFAULT_ONTOLOGY),
+    sample_percent: float = Form(default=100.0),
 ):
     """
     Upload a document for processing.
@@ -315,6 +619,13 @@ async def upload_document(
         get_ontology(ontology_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+    # Validate sample percent
+    if sample_percent <= 0 or sample_percent > 100:
+        raise HTTPException(
+            status_code=400,
+            detail="sample_percent must be > 0 and <= 100"
+        )
     
     # Generate job ID and save file
     job_id = generate_job_id(file.filename)
@@ -331,15 +642,18 @@ async def upload_document(
         "file_path": str(file_path),
         "status": "pending",
         "ontology_id": ontology_id,
+        "sample_percent": sample_percent,
         "created_at": datetime.utcnow().isoformat(),
         "updated_at": datetime.utcnow().isoformat(),
         "total_chunks": 0,
         "processed_chunks": 0,
+        "failed_chunks": 0,
         "error": None,
     }
+    _save_jobs()
     
-    # Process document in background
-    background_tasks.add_task(process_document, job_id, file_path, ontology_id)
+    # Process document in background (fire-and-forget)
+    asyncio.create_task(process_document(job_id, file_path, ontology_id, sample_percent))
     
     return UploadResponse(
         job_id=job_id,

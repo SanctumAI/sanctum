@@ -215,6 +215,28 @@ def get_tool_orchestrator() -> ToolOrchestrator:
     return ToolOrchestrator(_tool_registry)
 
 
+# Admin-only tools that require additional authorization
+ADMIN_ONLY_TOOLS = {"db-query"}
+
+
+def filter_tools_for_user(tools: List[str], user: dict) -> List[str]:
+    """Filter tool list based on user permissions.
+
+    Admin-only tools (like db-query) are removed if user is not an admin.
+    """
+    if not tools:
+        return tools
+
+    user_pubkey = user.get("pubkey")
+    is_admin = user_pubkey and database.is_admin(user_pubkey)
+
+    if is_admin:
+        return tools  # Admins can use all tools
+
+    # Filter out admin-only tools for non-admins
+    return [t for t in tools if t not in ADMIN_ONLY_TOOLS]
+
+
 def get_neo4j_driver():
     """Create Neo4j driver connection"""
     return GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
@@ -440,12 +462,15 @@ async def chat(request: ChatRequest, user: dict = Depends(auth.require_approved_
         tools_used = []
         prompt = request.message
 
+        # Filter tools based on user permissions (admin-only tools removed for non-admins)
+        allowed_tools = filter_tools_for_user(request.tools, user)
+
         # Execute tools if any are selected
-        if request.tools:
+        if allowed_tools:
             orchestrator = get_tool_orchestrator()
             tool_context, tool_infos = await orchestrator.execute_tools(
                 query=request.message,
-                tool_ids=request.tools
+                tool_ids=allowed_tools
             )
 
             # Convert ToolCallInfo to response format
@@ -496,12 +521,15 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_approve
         tools_used = []
         tool_context = ""
 
+        # Filter tools based on user permissions (admin-only tools removed for non-admins)
+        allowed_tools = filter_tools_for_user(request.tools, user)
+
         # 0. Execute tools if any are selected
-        if request.tools:
+        if allowed_tools:
             orchestrator = get_tool_orchestrator()
             tool_context, tool_infos = await orchestrator.execute_tools(
                 query=request.question,
-                tool_ids=request.tools
+                tool_ids=allowed_tools
             )
 
             # Convert ToolCallInfo to response format

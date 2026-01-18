@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Choisissez votre langue",
+      "subtitle": "Sélectionnez votre langue préférée pour continuer",
+      "searchPlaceholder": "Rechercher des langues...",
+      "searchLabel": "Rechercher des langues",
+      "noResults": "Aucune langue trouvée pour \"{{query}}\"",
+      "continue": "Continuer",
+      "changeInSettings": "Vous pourrez le modifier plus tard dans vos paramètres."
+    },
+    "auth": {
+      "signUp": "S'inscrire",
+      "logIn": "Se connecter",
+      "createAccountTitle": "Créez votre compte",
+      "createAccountSubtitle": "Inscrivez-vous pour commencer à utiliser Sanctum",
+      "welcomeBackTitle": "Bon retour",
+      "welcomeBackSubtitle": "Connectez-vous pour reprendre là où vous vous êtes arrêté",
+      "nameLabel": "Nom",
+      "namePlaceholder": "Votre nom",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "vous@exemple.com",
+      "nameRequired": "Le nom est requis",
+      "emailRequired": "L'e-mail est requis",
+      "emailInvalid": "Veuillez saisir un e-mail valide",
+      "sendingLink": "Envoi du lien...",
+      "continueWithEmail": "Continuer avec l'e-mail",
+      "magicLinkHelp": "Nous vous enverrons un lien magique pour vous connecter — aucun mot de passe nécessaire.",
+      "checkEmail": "Vérifiez votre e-mail !",
+      "sentMagicLink": "Nous avons envoyé un lien magique à",
+      "clickLink": "Cliquez sur le lien dans l'e-mail pour vous connecter.",
+      "checkSpam": "Vous ne le voyez pas ? Vérifiez votre dossier spam.",
+      "simulateMagicLink": "Simuler le clic sur le lien magique",
+      "forTesting": "À des fins de test :"
+    },
+    "verify": {
+      "verifying": "Vérification de votre lien...",
+      "pleaseWait": "Un instant pendant que nous vous connectons.",
+      "welcomeName": "Bienvenue, {{name}} !",
+      "welcomeBack": "Bon retour !",
+      "signedInAs": "Vous êtes connecté en tant que",
+      "completingProfile": "Finalisation de votre profil...",
+      "redirectingChat": "Redirection vers le chat...",
+      "linkExpired": "Lien expiré ou invalide",
+      "linkExpiredMessage": "Ce lien magique a peut‑être expiré ou a déjà été utilisé.",
+      "requestNewLink": "Demander un nouveau lien"
+    },
+    "profile": {
+      "title": "Complétez votre profil",
+      "subtitle": "Encore quelques détails pour commencer",
+      "saving": "Enregistrement...",
+      "continue": "Continuer vers le chat",
+      "fieldRequired": "{{field}} est requis",
+      "invalidEmail": "Veuillez saisir un e-mail valide",
+      "invalidUrl": "Veuillez saisir une URL valide",
+      "invalidNumber": "Veuillez saisir un nombre valide"
+    }
+  },
+  "common": {
+    "adminQuestion": "Êtes-vous un administrateur ?",
+    "signInNostr": "Se connecter avec Nostr"
+  }
+}

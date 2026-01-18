@@ -101,6 +101,82 @@
 }
 
 /* =============================================================================
+   ACCENT COLOR THEMES
+   ============================================================================= */
+
+/* Blue (default) - already defined in base theme */
+.accent-blue {
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-accent-subtle: #dbeafe;
+}
+.dark.accent-blue, .dark .accent-blue {
+  --color-accent: #3b82f6;
+  --color-accent-hover: #60a5fa;
+  --color-accent-subtle: #1e3a8a;
+}
+
+/* Purple */
+.accent-purple {
+  --color-accent: #7c3aed;
+  --color-accent-hover: #6d28d9;
+  --color-accent-subtle: #ede9fe;
+}
+.dark.accent-purple, .dark .accent-purple {
+  --color-accent: #8b5cf6;
+  --color-accent-hover: #a78bfa;
+  --color-accent-subtle: #4c1d95;
+}
+
+/* Green */
+.accent-green {
+  --color-accent: #059669;
+  --color-accent-hover: #047857;
+  --color-accent-subtle: #d1fae5;
+}
+.dark.accent-green, .dark .accent-green {
+  --color-accent: #10b981;
+  --color-accent-hover: #34d399;
+  --color-accent-subtle: #064e3b;
+}
+
+/* Orange */
+.accent-orange {
+  --color-accent: #ea580c;
+  --color-accent-hover: #c2410c;
+  --color-accent-subtle: #ffedd5;
+}
+.dark.accent-orange, .dark .accent-orange {
+  --color-accent: #f97316;
+  --color-accent-hover: #fb923c;
+  --color-accent-subtle: #7c2d12;
+}
+
+/* Pink */
+.accent-pink {
+  --color-accent: #db2777;
+  --color-accent-hover: #be185d;
+  --color-accent-subtle: #fce7f3;
+}
+.dark.accent-pink, .dark .accent-pink {
+  --color-accent: #ec4899;
+  --color-accent-hover: #f472b6;
+  --color-accent-subtle: #831843;
+}
+
+/* Teal */
+.accent-teal {
+  --color-accent: #0d9488;
+  --color-accent-hover: #0f766e;
+  --color-accent-subtle: #ccfbf1;
+}
+.dark.accent-teal, .dark .accent-teal {
+  --color-accent: #14b8a6;
+  --color-accent-hover: #2dd4bf;
+  --color-accent-subtle: #134e4a;
+}
+
+/* =============================================================================
    BASE STYLES
    ============================================================================= */
 
@@ -160,4 +236,164 @@ body {
     border-color var(--transition-base),
     color var(--transition-base),
     box-shadow var(--transition-base);
+}
+
+/* =============================================================================
+   ANIMATIONS
+   ============================================================================= */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes typingDot {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: fadeIn var(--transition-base) ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp var(--transition-base) ease-out;
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale var(--transition-fast) ease-out;
+}
+
+.animate-slide-down {
+  animation: slideDown var(--transition-fast) ease-out;
+}
+
+.animate-pulse-subtle {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-overlay) 0%,
+    var(--color-surface-raised) 50%,
+    var(--color-surface-overlay) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Typing indicator dots */
+.typing-dot {
+  animation: typingDot 1.4s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* =============================================================================
+   INTERACTIVE UTILITIES
+   ============================================================================= */
+
+/* Hover lift effect */
+.hover-lift {
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+.hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Scale on hover */
+.hover-scale {
+  transition: transform var(--transition-fast);
+}
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* Button press effect */
+.active-press:active {
+  transform: scale(0.98);
+}
+
+/* Backdrop blur for dropdowns */
+.backdrop-blur-dropdown {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Glass morphism */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.dark .glass {
+  background: rgba(28, 25, 23, 0.8);
+}
+
+/* Inner shadow for inputs */
+.inner-shadow {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+.dark .inner-shadow {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Focus ring animation */
+.focus-ring {
+  transition: box-shadow var(--transition-fast);
+}
+.focus-ring:focus-within {
+  box-shadow: 0 0 0 3px var(--color-accent-subtle);
 }

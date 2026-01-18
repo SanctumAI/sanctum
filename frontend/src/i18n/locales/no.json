@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Velg språk",
+      "subtitle": "Velg ønsket språk for å fortsette",
+      "searchPlaceholder": "Søk etter språk...",
+      "searchLabel": "Søk etter språk",
+      "noResults": "Ingen språk funnet for \"{{query}}\"",
+      "continue": "Fortsett",
+      "changeInSettings": "Du kan endre dette senere i innstillingene."
+    },
+    "auth": {
+      "signUp": "Registrer deg",
+      "logIn": "Logg inn",
+      "createAccountTitle": "Opprett kontoen din",
+      "createAccountSubtitle": "Registrer deg for å begynne å bruke Sanctum",
+      "welcomeBackTitle": "Velkommen tilbake",
+      "welcomeBackSubtitle": "Logg inn for å fortsette der du slapp",
+      "nameLabel": "Navn",
+      "namePlaceholder": "Ditt navn",
+      "emailLabel": "E-post",
+      "emailPlaceholder": "deg@eksempel.no",
+      "nameRequired": "Navn er påkrevd",
+      "emailRequired": "E-post er påkrevd",
+      "emailInvalid": "Vennligst skriv inn en gyldig e-postadresse",
+      "sendingLink": "Sender lenke...",
+      "continueWithEmail": "Fortsett med e-post",
+      "magicLinkHelp": "Vi sender deg en magisk lenke for å logge inn — ingen passord nødvendig.",
+      "checkEmail": "Sjekk e-posten din!",
+      "sentMagicLink": "Vi sendte en magisk lenke til",
+      "clickLink": "Klikk på lenken i e-posten for å logge inn.",
+      "checkSpam": "Ser du den ikke? Sjekk søppelposten.",
+      "simulateMagicLink": "Simuler klikk på magisk lenke",
+      "forTesting": "For testformål:"
+    },
+    "verify": {
+      "verifying": "Verifiserer lenken din...",
+      "pleaseWait": "Et øyeblikk mens vi logger deg inn.",
+      "welcomeName": "Velkommen, {{name}}!",
+      "welcomeBack": "Velkommen tilbake!",
+      "signedInAs": "Du er logget inn som",
+      "completingProfile": "Fullfører profilen din...",
+      "redirectingChat": "Omdirigerer til chat...",
+      "linkExpired": "Lenke utløpt eller ugyldig",
+      "linkExpiredMessage": "Denne magiske lenken kan ha utløpt eller allerede blitt brukt.",
+      "requestNewLink": "Be om en ny lenke"
+    },
+    "profile": {
+      "title": "Fullfør profilen din",
+      "subtitle": "Bare noen få detaljer til for å komme i gang",
+      "saving": "Lagrer...",
+      "continue": "Fortsett til chat",
+      "fieldRequired": "{{field}} er påkrevd",
+      "invalidEmail": "Vennligst skriv inn en gyldig e-postadresse",
+      "invalidUrl": "Vennligst skriv inn en gyldig URL",
+      "invalidNumber": "Vennligst skriv inn et gyldig tall"
+    }
+  },
+  "common": {
+    "adminQuestion": "Er du administrator?",
+    "signInNostr": "Logg inn med Nostr"
+  }
+}

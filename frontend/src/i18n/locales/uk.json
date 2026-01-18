@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Виберіть мову",
+      "subtitle": "Виберіть бажану мову, щоб продовжити",
+      "searchPlaceholder": "Пошук мов...",
+      "searchLabel": "Пошук мов",
+      "noResults": "Мов для \"{{query}}\" не знайдено",
+      "continue": "Продовжити",
+      "changeInSettings": "Ви зможете змінити це пізніше в налаштуваннях."
+    },
+    "auth": {
+      "signUp": "Зареєструватися",
+      "logIn": "Увійти",
+      "createAccountTitle": "Створіть свій обліковий запис",
+      "createAccountSubtitle": "Зареєструйтеся, щоб почати користуватися Sanctum",
+      "welcomeBackTitle": "З поверненням",
+      "welcomeBackSubtitle": "Увійдіть, щоб продовжити з того місця, де зупинилися",
+      "nameLabel": "Ім'я",
+      "namePlaceholder": "Ваше ім'я",
+      "emailLabel": "Електронна пошта",
+      "emailPlaceholder": "vy@pryklad.ua",
+      "nameRequired": "Ім'я обов'язкове",
+      "emailRequired": "Електронна пошта обов'язкова",
+      "emailInvalid": "Будь ласка, введіть дійсну адресу електронної пошти",
+      "sendingLink": "Надсилання посилання...",
+      "continueWithEmail": "Продовжити з електронною поштою",
+      "magicLinkHelp": "Ми надішлемо вам магічне посилання для входу — пароль не потрібен.",
+      "checkEmail": "Перевірте свою пошту!",
+      "sentMagicLink": "Ми надіслали магічне посилання на",
+      "clickLink": "Натисніть посилання в листі, щоб увійти.",
+      "checkSpam": "Не бачите? Перевірте папку спаму.",
+      "simulateMagicLink": "Імітувати натискання на магічне посилання",
+      "forTesting": "Для тестування:"
+    },
+    "verify": {
+      "verifying": "Перевіряємо ваше посилання...",
+      "pleaseWait": "Зачекайте хвильку, ми виконуємо вхід.",
+      "welcomeName": "Ласкаво просимо, {{name}}!",
+      "welcomeBack": "З поверненням!",
+      "signedInAs": "Ви увійшли як",
+      "completingProfile": "Завершення профілю...",
+      "redirectingChat": "Перенаправлення до чату...",
+      "linkExpired": "Посилання прострочене або недійсне",
+      "linkExpiredMessage": "Це магічне посилання могло прострочитися або вже було використане.",
+      "requestNewLink": "Запросити нове посилання"
+    },
+    "profile": {
+      "title": "Завершіть свій профіль",
+      "subtitle": "Ще кілька деталей, щоб розпочати",
+      "saving": "Збереження...",
+      "continue": "Перейти до чату",
+      "fieldRequired": "Поле {{field}} є обов'язковим",
+      "invalidEmail": "Будь ласка, введіть дійсну адресу електронної пошти",
+      "invalidUrl": "Будь ласка, введіть дійсний URL",
+      "invalidNumber": "Будь ласка, введіть дійсне число"
+    }
+  },
+  "common": {
+    "adminQuestion": "Ви адміністратор?",
+    "signInNostr": "Увійти через Nostr"
+  }
+}

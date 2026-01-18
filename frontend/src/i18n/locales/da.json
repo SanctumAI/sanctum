@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Vælg dit sprog",
+      "subtitle": "Vælg dit foretrukne sprog for at fortsætte",
+      "searchPlaceholder": "Søg sprog...",
+      "searchLabel": "Søg sprog",
+      "noResults": "Ingen sprog fundet for \"{{query}}\"",
+      "continue": "Fortsæt",
+      "changeInSettings": "Du kan ændre dette senere i dine indstillinger."
+    },
+    "auth": {
+      "signUp": "Opret konto",
+      "logIn": "Log ind",
+      "createAccountTitle": "Opret din konto",
+      "createAccountSubtitle": "Tilmeld dig for at begynde at bruge Sanctum",
+      "welcomeBackTitle": "Velkommen tilbage",
+      "welcomeBackSubtitle": "Log ind for at fortsætte, hvor du slap",
+      "nameLabel": "Navn",
+      "namePlaceholder": "Dit navn",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "dig@eksempel.com",
+      "nameRequired": "Navn er påkrævet",
+      "emailRequired": "E-mail er påkrævet",
+      "emailInvalid": "Indtast en gyldig e-mail",
+      "sendingLink": "Sender link...",
+      "continueWithEmail": "Fortsæt med e-mail",
+      "magicLinkHelp": "Vi sender dig et magisk link til at logge ind — ingen adgangskode nødvendig.",
+      "checkEmail": "Tjek din e-mail!",
+      "sentMagicLink": "Vi har sendt et magisk link til",
+      "clickLink": "Klik på linket i e-mailen for at logge ind.",
+      "checkSpam": "Kan du ikke se det? Tjek din spammappe.",
+      "simulateMagicLink": "Simuler klik på magisk link",
+      "forTesting": "Til testformål:"
+    },
+    "verify": {
+      "verifying": "Bekræfter dit link...",
+      "pleaseWait": "Et øjeblik, mens vi logger dig ind.",
+      "welcomeName": "Velkommen, {{name}}!",
+      "welcomeBack": "Velkommen tilbage!",
+      "signedInAs": "Du er logget ind som",
+      "completingProfile": "Fuldfører din profil...",
+      "redirectingChat": "Omdirigerer til chat...",
+      "linkExpired": "Link udløbet eller ugyldigt",
+      "linkExpiredMessage": "Dette magiske link kan være udløbet eller allerede blevet brugt.",
+      "requestNewLink": "Anmod om et nyt link"
+    },
+    "profile": {
+      "title": "Fuldfør din profil",
+      "subtitle": "Bare et par detaljer mere for at komme i gang",
+      "saving": "Gemmer...",
+      "continue": "Fortsæt til chat",
+      "fieldRequired": "{{field}} er påkrævet",
+      "invalidEmail": "Indtast en gyldig e-mail",
+      "invalidUrl": "Indtast en gyldig URL",
+      "invalidNumber": "Indtast et gyldigt tal"
+    }
+  },
+  "common": {
+    "adminQuestion": "Er du administrator?",
+    "signInNostr": "Log ind med Nostr"
+  }
+}

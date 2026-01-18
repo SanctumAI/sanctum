@@ -1,0 +1,77 @@
+import { useState, useRef, useEffect, KeyboardEvent, ReactNode } from 'react'
+
+interface ChatInputProps {
+  onSend: (message: string) => void
+  disabled?: boolean
+  placeholder?: string
+  toolbar?: ReactNode
+}
+
+export function ChatInput({ onSend, disabled, placeholder = 'Ask anything...', toolbar }: ChatInputProps) {
+  const [input, setInput] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 160)}px`
+    }
+  }, [input])
+
+  const handleSubmit = () => {
+    if (input.trim() && !disabled) {
+      onSend(input.trim())
+      setInput('')
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto'
+      }
+    }
+  }
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSubmit()
+    }
+  }
+
+  return (
+    <div className="border-t border-border bg-surface px-3 py-3 sm:px-4">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-surface-raised border border-border rounded-2xl overflow-hidden focus-within:border-accent transition-all shadow-sm">
+          {/* Toolbar row */}
+          {toolbar && (
+            <div className="px-3 py-2 border-b border-border/50 flex items-center gap-2 bg-surface-raised/50">
+              {toolbar}
+            </div>
+          )}
+
+          {/* Input row */}
+          <div className="flex items-end gap-2 p-2">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              disabled={disabled}
+              rows={1}
+              className="flex-1 bg-transparent text-text placeholder:text-text-muted resize-none outline-none border-none px-2 py-2 max-h-40 text-[15px] leading-relaxed"
+            />
+            <button
+              onClick={handleSubmit}
+              disabled={disabled || !input.trim()}
+              title="Send message (Enter)"
+              className="p-2.5 rounded-xl bg-accent text-accent-text hover:bg-accent-hover disabled:bg-surface-overlay disabled:text-text-muted disabled:cursor-not-allowed transition-all active-press shrink-0 shadow-sm hover:shadow-md disabled:shadow-none"
+              aria-label="Send message"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

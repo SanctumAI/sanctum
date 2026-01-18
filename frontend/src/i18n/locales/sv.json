@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Välj ditt språk",
+      "subtitle": "Välj ditt föredragna språk för att fortsätta",
+      "searchPlaceholder": "Sök språk...",
+      "searchLabel": "Sök språk",
+      "noResults": "Inga språk hittades för \"{{query}}\"",
+      "continue": "Fortsätt",
+      "changeInSettings": "Du kan ändra detta senare i dina inställningar."
+    },
+    "auth": {
+      "signUp": "Registrera dig",
+      "logIn": "Logga in",
+      "createAccountTitle": "Skapa ditt konto",
+      "createAccountSubtitle": "Registrera dig för att börja använda Sanctum",
+      "welcomeBackTitle": "Välkommen tillbaka",
+      "welcomeBackSubtitle": "Logga in för att fortsätta där du slutade",
+      "nameLabel": "Namn",
+      "namePlaceholder": "Ditt namn",
+      "emailLabel": "E-post",
+      "emailPlaceholder": "du@exempel.se",
+      "nameRequired": "Namn krävs",
+      "emailRequired": "E-post krävs",
+      "emailInvalid": "Ange en giltig e-postadress",
+      "sendingLink": "Skickar länk...",
+      "continueWithEmail": "Fortsätt med e-post",
+      "magicLinkHelp": "Vi skickar en magisk länk för att logga in — inget lösenord behövs.",
+      "checkEmail": "Kolla din e-post!",
+      "sentMagicLink": "Vi skickade en magisk länk till",
+      "clickLink": "Klicka på länken i e-postmeddelandet för att logga in.",
+      "checkSpam": "Ser du den inte? Kolla din skräppost.",
+      "simulateMagicLink": "Simulera klick på magisk länk",
+      "forTesting": "För teständamål:"
+    },
+    "verify": {
+      "verifying": "Verifierar din länk...",
+      "pleaseWait": "Ett ögonblick medan vi loggar in dig.",
+      "welcomeName": "Välkommen, {{name}}!",
+      "welcomeBack": "Välkommen tillbaka!",
+      "signedInAs": "Du är inloggad som",
+      "completingProfile": "Slutför din profil...",
+      "redirectingChat": "Omdirigerar till chatten...",
+      "linkExpired": "Länken har gått ut eller är ogiltig",
+      "linkExpiredMessage": "Den här magiska länken kan ha gått ut eller redan använts.",
+      "requestNewLink": "Begär en ny länk"
+    },
+    "profile": {
+      "title": "Slutför din profil",
+      "subtitle": "Bara några detaljer till för att komma igång",
+      "saving": "Sparar...",
+      "continue": "Fortsätt till chatten",
+      "fieldRequired": "{{field}} krävs",
+      "invalidEmail": "Ange en giltig e-postadress",
+      "invalidUrl": "Ange en giltig URL",
+      "invalidNumber": "Ange ett giltigt nummer"
+    }
+  },
+  "common": {
+    "adminQuestion": "Är du administratör?",
+    "signInNostr": "Logga in med Nostr"
+  }
+}

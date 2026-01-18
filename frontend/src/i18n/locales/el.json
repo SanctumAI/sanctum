@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Επιλέξτε τη γλώσσα σας",
+      "subtitle": "Επιλέξτε την προτιμώμενη γλώσσα για να συνεχίσετε",
+      "searchPlaceholder": "Αναζήτηση γλωσσών...",
+      "searchLabel": "Αναζήτηση γλωσσών",
+      "noResults": "Δεν βρέθηκαν γλώσσες για το \"{{query}}\"",
+      "continue": "Συνέχεια",
+      "changeInSettings": "Μπορείτε να το αλλάξετε αργότερα στις ρυθμίσεις σας."
+    },
+    "auth": {
+      "signUp": "Εγγραφή",
+      "logIn": "Σύνδεση",
+      "createAccountTitle": "Δημιουργήστε τον λογαριασμό σας",
+      "createAccountSubtitle": "Εγγραφείτε για να ξεκινήσετε να χρησιμοποιείτε το Sanctum",
+      "welcomeBackTitle": "Καλώς ήρθατε ξανά",
+      "welcomeBackSubtitle": "Συνδεθείτε για να συνεχίσετε από εκεί που σταματήσατε",
+      "nameLabel": "Όνομα",
+      "namePlaceholder": "Το όνομά σας",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@paradeigma.gr",
+      "nameRequired": "Το όνομα είναι υποχρεωτικό",
+      "emailRequired": "Το email είναι υποχρεωτικό",
+      "emailInvalid": "Παρακαλώ εισάγετε ένα έγκυρο email",
+      "sendingLink": "Αποστολή συνδέσμου...",
+      "continueWithEmail": "Συνέχεια με email",
+      "magicLinkHelp": "Θα σας στείλουμε έναν μαγικό σύνδεσμο για σύνδεση — δεν χρειάζεται κωδικός.",
+      "checkEmail": "Ελέγξτε το email σας!",
+      "sentMagicLink": "Στείλαμε έναν μαγικό σύνδεσμο στο",
+      "clickLink": "Κάντε κλικ στον σύνδεσμο του email για να συνδεθείτε.",
+      "checkSpam": "Δεν το βλέπετε; Ελέγξτε τον φάκελο ανεπιθύμητων.",
+      "simulateMagicLink": "Προσομοίωση κλικ σε μαγικό σύνδεσμο",
+      "forTesting": "Για δοκιμαστικούς σκοπούς:"
+    },
+    "verify": {
+      "verifying": "Επαλήθευση του συνδέσμου σας...",
+      "pleaseWait": "Μια στιγμή καθώς σας συνδέουμε.",
+      "welcomeName": "Καλώς ήρθατε, {{name}}!",
+      "welcomeBack": "Καλώς ήρθατε ξανά!",
+      "signedInAs": "Έχετε συνδεθεί ως",
+      "completingProfile": "Ολοκλήρωση προφίλ...",
+      "redirectingChat": "Ανακατεύθυνση στη συνομιλία...",
+      "linkExpired": "Ο σύνδεσμος έληξε ή είναι άκυρος",
+      "linkExpiredMessage": "Αυτός ο μαγικός σύνδεσμος μπορεί να έχει λήξει ή να έχει ήδη χρησιμοποιηθεί.",
+      "requestNewLink": "Ζητήστε νέο σύνδεσμο"
+    },
+    "profile": {
+      "title": "Ολοκληρώστε το προφίλ σας",
+      "subtitle": "Λίγες ακόμη λεπτομέρειες για να ξεκινήσετε",
+      "saving": "Αποθήκευση...",
+      "continue": "Συνέχεια στη συνομιλία",
+      "fieldRequired": "Το πεδίο {{field}} είναι υποχρεωτικό",
+      "invalidEmail": "Παρακαλώ εισάγετε ένα έγκυρο email",
+      "invalidUrl": "Παρακαλώ εισάγετε ένα έγκυρο URL",
+      "invalidNumber": "Παρακαλώ εισάγετε έναν έγκυρο αριθμό"
+    }
+  },
+  "common": {
+    "adminQuestion": "Είστε διαχειριστής;",
+    "signInNostr": "Σύνδεση με Nostr"
+  }
+}

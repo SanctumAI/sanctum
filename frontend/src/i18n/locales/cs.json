@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Vyberte svůj jazyk",
+      "subtitle": "Vyberte preferovaný jazyk pro pokračování",
+      "searchPlaceholder": "Hledat jazyky...",
+      "searchLabel": "Hledat jazyky",
+      "noResults": "Pro \"{{query}}\" nebyly nalezeny žádné jazyky",
+      "continue": "Pokračovat",
+      "changeInSettings": "Později to můžete změnit v nastavení."
+    },
+    "auth": {
+      "signUp": "Zaregistrovat se",
+      "logIn": "Přihlásit se",
+      "createAccountTitle": "Vytvořte si účet",
+      "createAccountSubtitle": "Zaregistrujte se, abyste mohli začít používat Sanctum",
+      "welcomeBackTitle": "Vítejte zpět",
+      "welcomeBackSubtitle": "Přihlaste se a pokračujte tam, kde jste skončili",
+      "nameLabel": "Jméno",
+      "namePlaceholder": "Vaše jméno",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "vy@priklad.cz",
+      "nameRequired": "Jméno je povinné",
+      "emailRequired": "E-mail je povinný",
+      "emailInvalid": "Zadejte platný e-mail",
+      "sendingLink": "Odesílání odkazu...",
+      "continueWithEmail": "Pokračovat s e-mailem",
+      "magicLinkHelp": "Pošleme vám magický odkaz pro přihlášení — není potřeba heslo.",
+      "checkEmail": "Zkontrolujte svůj e-mail!",
+      "sentMagicLink": "Poslali jsme magický odkaz na",
+      "clickLink": "Klikněte na odkaz v e-mailu a přihlaste se.",
+      "checkSpam": "Nevidíte ho? Zkontrolujte složku spam.",
+      "simulateMagicLink": "Simulovat kliknutí na magický odkaz",
+      "forTesting": "Pro testovací účely:"
+    },
+    "verify": {
+      "verifying": "Ověřování odkazu...",
+      "pleaseWait": "Chvíli strpení, přihlašujeme vás.",
+      "welcomeName": "Vítejte, {{name}}!",
+      "welcomeBack": "Vítejte zpět!",
+      "signedInAs": "Jste přihlášeni jako",
+      "completingProfile": "Dokončování profilu...",
+      "redirectingChat": "Přesměrování do chatu...",
+      "linkExpired": "Odkaz vypršel nebo je neplatný",
+      "linkExpiredMessage": "Tento magický odkaz mohl vypršet nebo už byl použit.",
+      "requestNewLink": "Vyžádat nový odkaz"
+    },
+    "profile": {
+      "title": "Dokončete svůj profil",
+      "subtitle": "Ještě pár detailů a můžete začít",
+      "saving": "Ukládání...",
+      "continue": "Pokračovat do chatu",
+      "fieldRequired": "{{field}} je povinné",
+      "invalidEmail": "Zadejte platný e-mail",
+      "invalidUrl": "Zadejte platnou URL",
+      "invalidNumber": "Zadejte platné číslo"
+    }
+  },
+  "common": {
+    "adminQuestion": "Jste administrátor?",
+    "signInNostr": "Přihlásit se přes Nostr"
+  }
+}

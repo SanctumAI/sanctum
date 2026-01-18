@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "আপনার ভাষা নির্বাচন করুন",
+      "subtitle": "চালিয়ে যেতে আপনার পছন্দের ভাষা নির্বাচন করুন",
+      "searchPlaceholder": "ভাষা অনুসন্ধান করুন...",
+      "searchLabel": "ভাষা অনুসন্ধান করুন",
+      "noResults": "\"{{query}}\" এর জন্য কোনো ভাষা পাওয়া যায়নি",
+      "continue": "চালিয়ে যান",
+      "changeInSettings": "আপনি পরে সেটিংসে এটি পরিবর্তন করতে পারবেন।"
+    },
+    "auth": {
+      "signUp": "সাইন আপ করুন",
+      "logIn": "লগ ইন করুন",
+      "createAccountTitle": "আপনার অ্যাকাউন্ট তৈরি করুন",
+      "createAccountSubtitle": "Sanctum ব্যবহার শুরু করতে সাইন আপ করুন",
+      "welcomeBackTitle": "আবার স্বাগতম",
+      "welcomeBackSubtitle": "যেখানে থেমেছিলেন সেখান থেকে চালিয়ে যেতে লগ ইন করুন",
+      "nameLabel": "নাম",
+      "namePlaceholder": "আপনার নাম",
+      "emailLabel": "ইমেইল",
+      "emailPlaceholder": "you@example.com",
+      "nameRequired": "নাম প্রয়োজন",
+      "emailRequired": "ইমেইল প্রয়োজন",
+      "emailInvalid": "অনুগ্রহ করে একটি বৈধ ইমেইল লিখুন",
+      "sendingLink": "লিঙ্ক পাঠানো হচ্ছে...",
+      "continueWithEmail": "ইমেইল দিয়ে চালিয়ে যান",
+      "magicLinkHelp": "আমরা আপনাকে সাইন ইন করতে একটি ম্যাজিক লিঙ্ক পাঠাব — পাসওয়ার্ডের প্রয়োজন নেই।",
+      "checkEmail": "আপনার ইমেইল দেখুন!",
+      "sentMagicLink": "আমরা ম্যাজিক লিঙ্ক পাঠিয়েছি",
+      "clickLink": "সাইন ইন করতে ইমেইলের লিঙ্কে ক্লিক করুন।",
+      "checkSpam": "না দেখলে স্প্যাম ফোল্ডার দেখুন।",
+      "simulateMagicLink": "ম্যাজিক লিঙ্কে ক্লিক অনুকরণ করুন",
+      "forTesting": "পরীক্ষার উদ্দেশ্যে:"
+    },
+    "verify": {
+      "verifying": "আপনার লিঙ্ক যাচাই করা হচ্ছে...",
+      "pleaseWait": "একটু অপেক্ষা করুন, আমরা আপনাকে সাইন ইন করাচ্ছি।",
+      "welcomeName": "স্বাগতম, {{name}}!",
+      "welcomeBack": "আবার স্বাগতম!",
+      "signedInAs": "আপনি সাইন ইন করেছেন",
+      "completingProfile": "আপনার প্রোফাইল সম্পন্ন হচ্ছে...",
+      "redirectingChat": "চ্যাটে রিডাইরেক্ট করা হচ্ছে...",
+      "linkExpired": "লিঙ্কের মেয়াদ শেষ বা অবৈধ",
+      "linkExpiredMessage": "এই ম্যাজিক লিঙ্কটি মেয়াদোত্তীর্ণ হতে পারে বা ইতিমধ্যে ব্যবহার হয়েছে।",
+      "requestNewLink": "নতুন লিঙ্ক অনুরোধ করুন"
+    },
+    "profile": {
+      "title": "আপনার প্রোফাইল সম্পূর্ণ করুন",
+      "subtitle": "শুরু করতে আরও কিছু তথ্য দিন",
+      "saving": "সংরক্ষণ করা হচ্ছে...",
+      "continue": "চ্যাটে চালিয়ে যান",
+      "fieldRequired": "{{field}} প্রয়োজন",
+      "invalidEmail": "অনুগ্রহ করে একটি বৈধ ইমেইল লিখুন",
+      "invalidUrl": "অনুগ্রহ করে একটি বৈধ URL লিখুন",
+      "invalidNumber": "অনুগ্রহ করে একটি বৈধ সংখ্যা লিখুন"
+    }
+  },
+  "common": {
+    "adminQuestion": "আপনি কি অ্যাডমিন?",
+    "signInNostr": "Nostr দিয়ে সাইন ইন করুন"
+  }
+}

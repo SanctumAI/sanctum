@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "Pilih bahasa Anda",
+      "subtitle": "Pilih bahasa yang Anda inginkan untuk melanjutkan",
+      "searchPlaceholder": "Cari bahasa...",
+      "searchLabel": "Cari bahasa",
+      "noResults": "Tidak ditemukan bahasa untuk \"{{query}}\"",
+      "continue": "Lanjutkan",
+      "changeInSettings": "Anda dapat mengubahnya nanti di pengaturan."
+    },
+    "auth": {
+      "signUp": "Daftar",
+      "logIn": "Masuk",
+      "createAccountTitle": "Buat akun Anda",
+      "createAccountSubtitle": "Daftar untuk mulai menggunakan Sanctum",
+      "welcomeBackTitle": "Selamat datang kembali",
+      "welcomeBackSubtitle": "Masuk untuk melanjutkan dari tempat Anda berhenti",
+      "nameLabel": "Nama",
+      "namePlaceholder": "Nama Anda",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "nameRequired": "Nama wajib diisi",
+      "emailRequired": "Email wajib diisi",
+      "emailInvalid": "Silakan masukkan email yang valid",
+      "sendingLink": "Mengirim tautan...",
+      "continueWithEmail": "Lanjutkan dengan Email",
+      "magicLinkHelp": "Kami akan mengirimkan tautan ajaib untuk masuk — tanpa kata sandi.",
+      "checkEmail": "Periksa email Anda!",
+      "sentMagicLink": "Kami mengirimkan tautan ajaib ke",
+      "clickLink": "Klik tautan di email untuk masuk.",
+      "checkSpam": "Tidak terlihat? Periksa folder spam Anda.",
+      "simulateMagicLink": "Simulasikan klik tautan ajaib",
+      "forTesting": "Untuk tujuan pengujian:"
+    },
+    "verify": {
+      "verifying": "Memverifikasi tautan Anda...",
+      "pleaseWait": "Mohon tunggu sebentar saat kami memasukkan Anda.",
+      "welcomeName": "Selamat datang, {{name}}!",
+      "welcomeBack": "Selamat datang kembali!",
+      "signedInAs": "Anda masuk sebagai",
+      "completingProfile": "Menyelesaikan profil Anda...",
+      "redirectingChat": "Mengalihkan ke chat...",
+      "linkExpired": "Tautan kedaluwarsa atau tidak valid",
+      "linkExpiredMessage": "Tautan ajaib ini mungkin sudah kedaluwarsa atau sudah digunakan.",
+      "requestNewLink": "Minta tautan baru"
+    },
+    "profile": {
+      "title": "Lengkapi profil Anda",
+      "subtitle": "Hanya beberapa detail lagi untuk memulai",
+      "saving": "Menyimpan...",
+      "continue": "Lanjutkan ke chat",
+      "fieldRequired": "{{field}} wajib diisi",
+      "invalidEmail": "Silakan masukkan email yang valid",
+      "invalidUrl": "Silakan masukkan URL yang valid",
+      "invalidNumber": "Silakan masukkan angka yang valid"
+    }
+  },
+  "common": {
+    "adminQuestion": "Apakah Anda admin?",
+    "signInNostr": "Masuk dengan Nostr"
+  }
+}

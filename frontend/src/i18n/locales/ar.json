@@ -1,0 +1,63 @@
+{
+  "onboarding": {
+    "language": {
+      "title": "اختر لغتك",
+      "subtitle": "اختر لغتك المفضلة للمتابعة",
+      "searchPlaceholder": "ابحث عن اللغات...",
+      "searchLabel": "ابحث عن اللغات",
+      "noResults": "لا توجد لغات مطابقة لـ \"{{query}}\"",
+      "continue": "متابعة",
+      "changeInSettings": "يمكنك تغيير ذلك لاحقًا في الإعدادات."
+    },
+    "auth": {
+      "signUp": "إنشاء حساب",
+      "logIn": "تسجيل الدخول",
+      "createAccountTitle": "أنشئ حسابك",
+      "createAccountSubtitle": "سجّل للبدء في استخدام Sanctum",
+      "welcomeBackTitle": "مرحبًا بعودتك",
+      "welcomeBackSubtitle": "سجّل الدخول للمتابعة من حيث توقفت",
+      "nameLabel": "الاسم",
+      "namePlaceholder": "اسمك",
+      "emailLabel": "البريد الإلكتروني",
+      "emailPlaceholder": "you@example.com",
+      "nameRequired": "الاسم مطلوب",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "يرجى إدخال بريد إلكتروني صالح",
+      "sendingLink": "جارٍ إرسال الرابط...",
+      "continueWithEmail": "المتابعة بالبريد الإلكتروني",
+      "magicLinkHelp": "سنرسل لك رابطًا سحريًا لتسجيل الدخول — لا حاجة لكلمة مرور.",
+      "checkEmail": "تحقق من بريدك الإلكتروني!",
+      "sentMagicLink": "أرسلنا رابطًا سحريًا إلى",
+      "clickLink": "انقر على الرابط في البريد الإلكتروني لتسجيل الدخول.",
+      "checkSpam": "لا تراه؟ تحقق من مجلد الرسائل غير المرغوب فيها.",
+      "simulateMagicLink": "محاكاة النقر على الرابط السحري",
+      "forTesting": "لأغراض الاختبار:"
+    },
+    "verify": {
+      "verifying": "جارٍ التحقق من رابطك...",
+      "pleaseWait": "لحظة من فضلك بينما نسجّلك الدخول.",
+      "welcomeName": "أهلاً، {{name}}!",
+      "welcomeBack": "مرحبًا بعودتك!",
+      "signedInAs": "تم تسجيل الدخول باسم",
+      "completingProfile": "جارٍ إكمال ملفك الشخصي...",
+      "redirectingChat": "جارٍ التحويل إلى الدردشة...",
+      "linkExpired": "الرابط منتهي أو غير صالح",
+      "linkExpiredMessage": "قد يكون هذا الرابط السحري منتهيًا أو تم استخدامه بالفعل.",
+      "requestNewLink": "طلب رابط جديد"
+    },
+    "profile": {
+      "title": "أكمل ملفك الشخصي",
+      "subtitle": "بعض التفاصيل الإضافية للبدء",
+      "saving": "جارٍ الحفظ...",
+      "continue": "المتابعة إلى الدردشة",
+      "fieldRequired": "حقل {{field}} مطلوب",
+      "invalidEmail": "يرجى إدخال بريد إلكتروني صالح",
+      "invalidUrl": "يرجى إدخال عنوان URL صالح",
+      "invalidNumber": "يرجى إدخال رقم صالح"
+    }
+  },
+  "common": {
+    "adminQuestion": "هل أنت مسؤول؟",
+    "signInNostr": "تسجيل الدخول باستخدام Nostr"
+  }
+}

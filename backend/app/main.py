@@ -19,6 +19,7 @@ from typing import Optional, List
 from sentence_transformers import SentenceTransformer
 
 from llm import get_provider
+from tools import init_tools, ToolOrchestrator, ToolCallInfo
 import database
 from models import (
     AdminAuth, AdminResponse, AdminListResponse,
@@ -116,9 +117,17 @@ class LLMTestResult(BaseModel):
     error: Optional[str] = None
 
 
+class ToolCallInfoResponse(BaseModel):
+    """Info about a tool that was called"""
+    tool_id: str
+    tool_name: str
+    query: Optional[str] = None
+
+
 class ChatRequest(BaseModel):
     """Request model for chat endpoint"""
     message: str
+    tools: List[str] = []
 
 
 class ChatResponse(BaseModel):
@@ -126,12 +135,14 @@ class ChatResponse(BaseModel):
     message: str
     model: str
     provider: str
+    tools_used: List[ToolCallInfoResponse] = []
 
 
 class QueryRequest(BaseModel):
     """Request model for RAG query endpoint"""
     question: str
     top_k: int = 3
+    tools: List[str] = []
 
 
 class Citation(BaseModel):
@@ -148,6 +159,7 @@ class QueryResponse(BaseModel):
     citations: List[Citation]
     model: str
     provider: str
+    tools_used: List[ToolCallInfoResponse] = []
 
 
 class VectorSearchRequest(BaseModel):
@@ -194,6 +206,37 @@ def get_embedding_model():
     if _embedding_model is None:
         _embedding_model = SentenceTransformer(EMBEDDING_MODEL)
     return _embedding_model
+
+
+# Initialize tool registry
+_tool_registry = init_tools()
+
+
+def get_tool_orchestrator() -> ToolOrchestrator:
+    """Get a tool orchestrator instance"""
+    return ToolOrchestrator(_tool_registry)
+
+
+# Admin-only tools that require additional authorization
+ADMIN_ONLY_TOOLS = {"db-query"}
+
+
+def filter_tools_for_user(tools: List[str], user: dict) -> List[str]:
+    """Filter tool list based on user permissions.
+
+    Admin-only tools (like db-query) are removed if user is not an admin.
+    """
+    if not tools:
+        return tools
+
+    user_pubkey = user.get("pubkey")
+    is_admin = user_pubkey and database.is_admin(user_pubkey)
+
+    if is_admin:
+        return tools  # Admins can use all tools
+
+    # Filter out admin-only tools for non-admins
+    return [t for t in tools if t not in ADMIN_ONLY_TOOLS]
 
 
 def get_neo4j_driver():
@@ -411,18 +454,54 @@ async def llm_smoke_test():
 @app.post("/llm/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest, user: dict = Depends(auth.require_admin_or_approved_user)):
     """
-    Simple chat endpoint for smoke testing LLM provider.
+    Chat endpoint with optional tool support.
 
-    Takes a user message and returns the LLM response.
+    Takes a user message and optional list of tool IDs.
+    If tools are specified, executes them and includes results in context.
     Requires authenticated admin OR approved user.
     """
     try:
+        tools_used = []
+        prompt = request.message
+
+        # Filter tools based on user permissions (admin-only tools removed for non-admins)
+        allowed_tools = filter_tools_for_user(request.tools, user)
+
+        # Execute tools if any are selected
+        if allowed_tools:
+            orchestrator = get_tool_orchestrator()
+            tool_context, tool_infos = await orchestrator.execute_tools(
+                query=request.message,
+                tool_ids=allowed_tools
+            )
+
+            # Convert ToolCallInfo to response format
+            tools_used = [
+                ToolCallInfoResponse(
+                    tool_id=info.tool_id,
+                    tool_name=info.tool_name,
+                    query=info.query
+                )
+                for info in tool_infos
+            ]
+
+            # Build augmented prompt with tool context
+            if tool_context:
+                prompt = f"""Use the following information to help answer the question.
+
+{tool_context}
+
+Question: {request.message}
+
+Answer:"""
+
         provider = get_provider()
-        result = provider.complete(request.message)
+        result = provider.complete(prompt)
         return ChatResponse(
             message=result.content,
             model=result.model,
-            provider=result.provider
+            provider=result.provider,
+            tools_used=tools_used
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -431,7 +510,7 @@ async def chat(request: ChatRequest, user: dict = Depends(auth.require_admin_or_
 # NOTE: /query endpoint moved to query.py router (empathetic session-aware RAG)
 # The query.py module provides:
 # - Session-aware conversation history
-# - 2-hop graph traversal  
+# - 2-hop graph traversal
 # - Empathetic crisis support prompts
 # - Clarifying questions for jurisdiction/context
 

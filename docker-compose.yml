@@ -54,6 +54,22 @@ services:
     networks:
       - sanctum-net
 
+  searxng:
+    image: searxng/searxng:latest
+    container_name: sanctum-searxng
+    volumes:
+      - ./searxng:/etc/searxng:ro
+    environment:
+      - SEARXNG_BASE_URL=http://searxng:8080/
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - sanctum-net
+
   backend:
     build:
       context: ./backend
@@ -75,6 +91,7 @@ services:
       - MAPLE_BASE_URL=http://maple-proxy:8080/v1
       - MAPLE_API_KEY=${MAPLE_API_KEY:-}
       - MAPLE_MODEL=gpt-oss-120b
+      - SEARXNG_URL=http://searxng:8080
       - SQLITE_PATH=/data/sanctum.db
       # Magic Link Auth configuration
       - SECRET_KEY=${SECRET_KEY:-dev-secret-change-in-production}
@@ -92,6 +109,8 @@ services:
       qdrant:
         condition: service_healthy
       maple-proxy:
+        condition: service_healthy
+      searxng:
         condition: service_healthy
     volumes:
       - ./backend/app:/app

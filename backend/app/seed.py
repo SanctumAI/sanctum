@@ -1,7 +1,7 @@
 """
 Sanctum Seed Script
 Seeds Neo4j with a Spanish claim/fact and Qdrant with its embedding.
-Uses intfloat/multilingual-e5-base for CPU-friendly, Spanish-capable embeddings.
+Uses the configured embedding provider (local or OpenAI).
 """
 
 import os
@@ -11,7 +11,9 @@ import uuid
 from neo4j import GraphDatabase
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
-from sentence_transformers import SentenceTransformer
+
+# Import embedding functions from store module
+from store import embed_texts, get_embedding_dimension, EMBEDDING_PROVIDER
 
 # Configuration
 NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
@@ -19,7 +21,6 @@ NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "sanctum_dev_password")
 QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
-EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "intfloat/multilingual-e5-base")
 
 COLLECTION_NAME = "sanctum_smoke_test"
 
@@ -119,16 +120,15 @@ def seed_neo4j(driver):
     print("Neo4j seeding complete!")
 
 
-def seed_qdrant(client, embedding_model):
+def seed_qdrant(client, embedding_model=None):
     """Seed Qdrant with the claim embedding"""
     print("\nSeeding Qdrant...")
     
-    # Load embedding model
-    print(f"  Loading embedding model: {EMBEDDING_MODEL}")
-    model = SentenceTransformer(EMBEDDING_MODEL)
+    # Use the configured embedding provider
+    print(f"  Embedding provider: {EMBEDDING_PROVIDER}")
     
-    # Get vector dimension from model
-    vector_dim = model.get_sentence_embedding_dimension()
+    # Get vector dimension from configured provider
+    vector_dim = get_embedding_dimension()
     print(f"  Vector dimension: {vector_dim}")
     
     # Create collection if it doesn't exist
@@ -149,10 +149,10 @@ def seed_qdrant(client, embedding_model):
     )
     
     # Generate embedding for the Spanish claim
-    # E5 models expect "query: " or "passage: " prefix
     text_to_embed = f"passage: {SEED_CLAIM['text']}"
     print(f"  Generating embedding for: '{SEED_CLAIM['text']}'")
-    embedding = model.encode(text_to_embed).tolist()
+    embeddings = embed_texts([text_to_embed])
+    embedding = embeddings[0]
     
     # Insert into Qdrant - use UUID derived from claim ID
     point_uuid = str(uuid.uuid5(uuid.NAMESPACE_DNS, SEED_CLAIM["id"]))
@@ -199,7 +199,7 @@ def main():
     # Seed data
     try:
         seed_neo4j(driver)
-        seed_qdrant(client, EMBEDDING_MODEL)
+        seed_qdrant(client)
         
         print("\n" + "=" * 60)
         print("Seeding complete!")

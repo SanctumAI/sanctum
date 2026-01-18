@@ -11,7 +11,6 @@ from typing import Any
 from neo4j import GraphDatabase
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
-from sentence_transformers import SentenceTransformer
 
 # Configure logging
 logger = logging.getLogger("sanctum.store")
@@ -22,7 +21,23 @@ NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "sanctum_dev_password")
 QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
+
+# =============================================================================
+# EMBEDDING PROVIDER CONFIGURATION
+# =============================================================================
+# Set EMBEDDING_PROVIDER to switch between local and API-based embeddings:
+#   - "local" (default): Uses sentence-transformers on CPU (slow but free)
+#   - "openai": Uses OpenAI API (fast but costs money, requires OPENAI_API_KEY)
+#
+# For OpenAI, set these env vars:
+#   EMBEDDING_PROVIDER=openai
+#   OPENAI_API_KEY=sk-...
+#   EMBEDDING_MODEL=text-embedding-3-small  (or text-embedding-ada-002)
+#   EMBEDDING_DIMENSIONS=768  (to match local model, or 1536 for full quality)
+# =============================================================================
+EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "local")  # "local" or "openai"
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "intfloat/multilingual-e5-base")
+EMBEDDING_DIMENSIONS = int(os.getenv("EMBEDDING_DIMENSIONS", "768"))
 
 # Collection name for knowledge base
 COLLECTION_NAME = "sanctum_knowledge"
@@ -31,6 +46,7 @@ COLLECTION_NAME = "sanctum_knowledge"
 _neo4j_driver = None
 _qdrant_client = None
 _embedding_model = None
+_openai_client = None
 
 
 def get_neo4j_driver():
@@ -50,23 +66,79 @@ def get_qdrant_client():
 
 
 def get_embedding_model():
-    """Get or create embedding model"""
+    """Get or create local embedding model (sentence-transformers)"""
     global _embedding_model
     if _embedding_model is None:
+        from sentence_transformers import SentenceTransformer
         _embedding_model = SentenceTransformer(EMBEDDING_MODEL)
     return _embedding_model
+
+
+def get_openai_client():
+    """Get or create OpenAI client"""
+    global _openai_client
+    if _openai_client is None:
+        from openai import OpenAI
+        _openai_client = OpenAI()  # Uses OPENAI_API_KEY env var
+    return _openai_client
+
+
+def embed_texts(texts: list[str]) -> list[list[float]]:
+    """
+    Embed a list of texts using the configured provider.
+    Returns list of embedding vectors.
+    """
+    if EMBEDDING_PROVIDER == "openai":
+        return _embed_texts_openai(texts)
+    else:
+        return _embed_texts_local(texts)
+
+
+def _embed_texts_local(texts: list[str]) -> list[list[float]]:
+    """Embed using local sentence-transformers model (slow on CPU)"""
+    model = get_embedding_model()
+    embeddings = model.encode(texts, show_progress_bar=False)
+    return [emb.tolist() for emb in embeddings]
+
+
+def _embed_texts_openai(texts: list[str]) -> list[list[float]]:
+    """Embed using OpenAI API (fast, requires API key)"""
+    client = get_openai_client()
+    
+    # OpenAI embedding API
+    # text-embedding-3-small supports dimensions parameter
+    # text-embedding-ada-002 does not (always 1536)
+    model = EMBEDDING_MODEL if EMBEDDING_MODEL.startswith("text-embedding") else "text-embedding-3-small"
+    
+    response = client.embeddings.create(
+        model=model,
+        input=texts,
+        dimensions=EMBEDDING_DIMENSIONS if "text-embedding-3" in model else None,
+    )
+    
+    # Extract embeddings in order
+    embeddings = [item.embedding for item in response.data]
+    return embeddings
+
+
+def get_embedding_dimension() -> int:
+    """Get the dimension of embeddings from current provider"""
+    if EMBEDDING_PROVIDER == "openai":
+        return EMBEDDING_DIMENSIONS
+    else:
+        model = get_embedding_model()
+        return model.get_sentence_embedding_dimension()
 
 
 def ensure_qdrant_collection():
     """Ensure the knowledge collection exists in Qdrant"""
     client = get_qdrant_client()
-    model = get_embedding_model()
     
     collections = client.get_collections().collections
     collection_exists = any(c.name == COLLECTION_NAME for c in collections)
     
     if not collection_exists:
-        vector_dim = model.get_sentence_embedding_dimension()
+        vector_dim = get_embedding_dimension()
         client.create_collection(
             collection_name=COLLECTION_NAME,
             vectors_config=VectorParams(
@@ -74,7 +146,7 @@ def ensure_qdrant_collection():
                 distance=Distance.COSINE
             )
         )
-        print(f"Created Qdrant collection: {COLLECTION_NAME}")
+        logger.info(f"Created Qdrant collection: {COLLECTION_NAME} (dim={vector_dim})")
 
 
 def generate_entity_id(entity_type: str, entity_name: str) -> str:
@@ -107,8 +179,6 @@ async def store_extraction_to_graph(
     driver = get_neo4j_driver()
     logger.debug(f"[{chunk_id}] Getting Qdrant client...")
     client = get_qdrant_client()
-    logger.debug(f"[{chunk_id}] Getting embedding model...")
-    model = get_embedding_model()
     
     # Ensure Qdrant collection exists
     logger.debug(f"[{chunk_id}] Ensuring Qdrant collection exists...")
@@ -236,9 +306,9 @@ async def store_extraction_to_graph(
             "fact_text": fact_text,
         })
     
-    # Batch encode all texts at once
-    logger.debug(f"[{chunk_id}] Encoding 1 chunk + {len(fact_metadata)} facts...")
-    all_embeddings = model.encode(texts_to_embed, show_progress_bar=False)
+    # Batch encode all texts at once using configured provider
+    logger.debug(f"[{chunk_id}] Encoding 1 chunk + {len(fact_metadata)} facts (provider={EMBEDDING_PROVIDER})...")
+    all_embeddings = embed_texts(texts_to_embed)
     logger.debug(f"[{chunk_id}] Encoding complete")
     
     # Create chunk point
@@ -246,7 +316,7 @@ async def store_extraction_to_graph(
     points_to_insert.append(
         PointStruct(
             id=chunk_point_id,
-            vector=all_embeddings[0].tolist(),
+            vector=all_embeddings[0],  # Already a list from embed_texts()
             payload={
                 "type": "chunk",
                 "chunk_id": chunk_id,
@@ -265,7 +335,7 @@ async def store_extraction_to_graph(
         points_to_insert.append(
             PointStruct(
                 id=fact_point_id,
-                vector=all_embeddings[i + 1].tolist(),
+                vector=all_embeddings[i + 1],  # Already a list from embed_texts()
                 payload={
                     "type": "fact",
                     "chunk_id": chunk_id,

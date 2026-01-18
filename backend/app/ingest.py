@@ -408,19 +408,51 @@ async def process_document(job_id: str, file_path: Path, ontology_id: str, sampl
         _save_jobs()
 
 
+# PDF extraction mode: "fast" (PyMuPDF) or "quality" (Docling)
+# Docling gives better structure but is VERY slow on CPU (~2-3 min for 100 pages)
+# PyMuPDF is ~100x faster but loses some formatting
+PDF_EXTRACT_MODE = os.getenv("PDF_EXTRACT_MODE", "fast")
+
+
 def extract_pdf_text(file_path: Path) -> str:
     """
-    Extract text from PDF using Docling (without OCR/table models for speed).
-    Falls back to PyMuPDF if Docling fails.
+    Extract text from PDF.
+    Mode controlled by PDF_EXTRACT_MODE env var:
+      - "fast": PyMuPDF (~1 second for 100 pages)
+      - "quality": Docling (~2-3 minutes for 100 pages on CPU)
     """
-    logger.debug(f"Extracting PDF text from: {file_path}")
+    logger.debug(f"Extracting PDF text from: {file_path} (mode={PDF_EXTRACT_MODE})")
+    
+    if PDF_EXTRACT_MODE == "fast":
+        return _extract_pdf_pymupdf(file_path)
+    else:
+        return _extract_pdf_docling(file_path)
+
+
+def _extract_pdf_pymupdf(file_path: Path) -> str:
+    """Fast PDF extraction using PyMuPDF (~1 second for 100 pages)"""
+    import fitz  # PyMuPDF
+    
+    logger.debug("Using PyMuPDF extraction (fast mode)...")
+    doc = fitz.open(str(file_path))
+    text_parts = []
+    for page in doc:
+        text_parts.append(page.get_text())
+    doc.close()
+    text = "\n\n".join(text_parts)
+    logger.info(f"PyMuPDF extraction successful: {len(text)} chars")
+    return text
+
+
+def _extract_pdf_docling(file_path: Path) -> str:
+    """Quality PDF extraction using Docling (slow on CPU, ~2-3 min for 100 pages)"""
     try:
         logger.debug("Attempting Docling extraction...")
         from docling.document_converter import DocumentConverter, PdfFormatOption
         from docling.datamodel.pipeline_options import PdfPipelineOptions
         from docling.datamodel.base_models import InputFormat
         
-        # Use lightweight pipeline - no OCR, no table structure (avoids OpenCV dep)
+        # Use lightweight pipeline - no OCR, no table structure
         pipeline_options = PdfPipelineOptions()
         pipeline_options.do_ocr = False
         pipeline_options.do_table_structure = False
@@ -439,19 +471,9 @@ def extract_pdf_text(file_path: Path) -> str:
         return markdown
         
     except Exception as e:
-        # Fallback to PyMuPDF for simpler extraction
+        # Fallback to PyMuPDF
         logger.warning(f"Docling failed ({e}), falling back to PyMuPDF", exc_info=True)
-        import fitz  # PyMuPDF
-        
-        logger.debug("Using PyMuPDF extraction...")
-        doc = fitz.open(str(file_path))
-        text_parts = []
-        for page in doc:
-            text_parts.append(page.get_text())
-        doc.close()
-        text = "\n\n".join(text_parts)
-        logger.info(f"PyMuPDF extraction successful: {len(text)} chars")
-        return text
+        return _extract_pdf_pymupdf(file_path)
 
 
 # =============================================================================

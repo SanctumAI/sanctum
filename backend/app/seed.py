@@ -2,6 +2,7 @@
 Sanctum Seed Script
 Seeds Neo4j with a Spanish claim/fact and Qdrant with its embedding.
 Uses intfloat/multilingual-e5-base for CPU-friendly, Spanish-capable embeddings.
+Also initializes SQLite database for user/admin management.
 """
 
 import os
@@ -12,6 +13,9 @@ from neo4j import GraphDatabase
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 from sentence_transformers import SentenceTransformer
+
+# SQLite database module
+import database
 
 # Configuration
 NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
@@ -177,35 +181,52 @@ def seed_qdrant(client, embedding_model):
     print("Qdrant seeding complete!")
 
 
+def seed_sqlite():
+    """Initialize SQLite database and seed default settings"""
+    print("\nInitializing SQLite database...")
+    database.init_schema()
+    print("  Schema initialized")
+    database.seed_default_settings()
+    print("  Default settings seeded")
+    print("SQLite initialization complete!")
+
+
 def main():
     """Main seeding function"""
     print("=" * 60)
     print("Sanctum Seed Script")
     print("=" * 60)
-    
+
+    # Initialize SQLite first (no external service to wait for)
+    try:
+        seed_sqlite()
+    except Exception as e:
+        print(f"ERROR initializing SQLite: {e}")
+        sys.exit(1)
+
     # Initialize clients
     driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
     client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
-    
+
     # Wait for services
     if not wait_for_neo4j(driver):
         print("ERROR: Neo4j did not become ready in time")
         sys.exit(1)
-    
+
     if not wait_for_qdrant(client):
         print("ERROR: Qdrant did not become ready in time")
         sys.exit(1)
-    
+
     # Seed data
     try:
         seed_neo4j(driver)
         seed_qdrant(client, EMBEDDING_MODEL)
-        
+
         print("\n" + "=" * 60)
         print("Seeding complete!")
         print("Test with: curl http://localhost:8000/test")
         print("=" * 60)
-        
+
     except Exception as e:
         print(f"ERROR during seeding: {e}")
         sys.exit(1)

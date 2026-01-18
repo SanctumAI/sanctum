@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { CustomField, FieldType } from '../../types/onboarding'
+import { CustomField, FieldType, UserType } from '../../types/onboarding'
 
 interface FieldEditorProps {
   onSave: (field: CustomField) => void
   onCancel: () => void
   initialField?: CustomField
+  userTypes?: UserType[]
 }
 
 const FIELD_TYPES: { value: FieldType; label: string; description: string }[] = [
@@ -18,12 +19,13 @@ const FIELD_TYPES: { value: FieldType; label: string; description: string }[] = 
   { value: 'url', label: 'URL', description: 'Website link' },
 ]
 
-export function FieldEditor({ onSave, onCancel, initialField }: FieldEditorProps) {
+export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: FieldEditorProps) {
   const [name, setName] = useState(initialField?.name || '')
   const [type, setType] = useState<FieldType>(initialField?.type || 'text')
   const [required, setRequired] = useState(initialField?.required ?? true)
   const [placeholder, setPlaceholder] = useState(initialField?.placeholder || '')
   const [options, setOptions] = useState<string[]>(initialField?.options || [''])
+  const [userTypeId, setUserTypeId] = useState<number | null>(initialField?.user_type_id ?? null)
   const [errors, setErrors] = useState<{ name?: string; options?: string }>({})
 
   const handleAddOption = () => {
@@ -68,6 +70,7 @@ export function FieldEditor({ onSave, onCancel, initialField }: FieldEditorProps
       required,
       placeholder: placeholder.trim() || undefined,
       options: type === 'select' ? options.filter((o) => o.trim()) : undefined,
+      user_type_id: userTypeId,
     }
 
     onSave(field)
@@ -105,6 +108,45 @@ export function FieldEditor({ onSave, onCancel, initialField }: FieldEditorProps
           </div>
           {errors.name && <p className="text-xs text-error mt-1">{errors.name}</p>}
         </div>
+
+        {/* User Type Selector - only show if there are user types */}
+        {userTypes.length > 0 && (
+          <div>
+            <label className="text-sm font-medium text-text mb-1.5 block">
+              Apply To
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setUserTypeId(null)}
+                className={`px-3 py-2 rounded-lg border text-sm transition-all ${
+                  userTypeId === null
+                    ? 'border-accent bg-accent/10 text-text'
+                    : 'border-border hover:border-accent/50 text-text-secondary hover:text-text'
+                }`}
+              >
+                All Users (Global)
+              </button>
+              {userTypes.map((ut) => (
+                <button
+                  key={ut.id}
+                  type="button"
+                  onClick={() => setUserTypeId(ut.id)}
+                  className={`px-3 py-2 rounded-lg border text-sm transition-all ${
+                    userTypeId === ut.id
+                      ? 'border-accent bg-accent/10 text-text'
+                      : 'border-border hover:border-accent/50 text-text-secondary hover:text-text'
+                  }`}
+                >
+                  {ut.name}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-text-muted mt-1.5">
+              Global fields are shown to all users. Type-specific fields only appear for that user type.
+            </p>
+          </div>
+        )}
 
         {/* Field Type */}
         <div>

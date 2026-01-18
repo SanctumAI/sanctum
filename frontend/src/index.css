@@ -200,6 +200,12 @@ body {
   outline-offset: 2px;
 }
 
+/* Remove default focus outline from inputs/textareas that have container focus styles */
+textarea:focus-visible,
+input:focus-visible {
+  outline: none;
+}
+
 /* Selection colors */
 ::selection {
   background-color: var(--color-accent-subtle);

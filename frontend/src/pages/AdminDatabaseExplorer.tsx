@@ -15,107 +15,6 @@ import {
 // TODO: Replace localStorage check with proper auth token validation
 // Current implementation only checks for admin pubkey in localStorage
 
-// =============================================================================
-// MOCK DATA - Remove once backend is implemented
-// =============================================================================
-
-// TODO: Remove mock data once backend API is available
-const MOCK_TABLES: TableInfo[] = [
-  {
-    name: 'instance_config',
-    rowCount: 1,
-    columns: [
-      { name: 'id', type: 'INTEGER', nullable: false, primaryKey: true },
-      { name: 'name', type: 'TEXT', nullable: false, primaryKey: false },
-      { name: 'icon', type: 'TEXT', nullable: false, primaryKey: false },
-      { name: 'accent_color', type: 'TEXT', nullable: false, primaryKey: false },
-      { name: 'created_at', type: 'TEXT', nullable: false, primaryKey: false },
-      { name: 'updated_at', type: 'TEXT', nullable: false, primaryKey: false },
-    ],
-  },
-  {
-    name: 'users',
-    rowCount: 3,
-    columns: [
-      { name: 'id', type: 'INTEGER', nullable: false, primaryKey: true },
-      { name: 'email', type: 'TEXT', nullable: false, primaryKey: false },
-      { name: 'name', type: 'TEXT', nullable: true, primaryKey: false },
-      { name: 'role', type: 'TEXT', nullable: false, primaryKey: false, defaultValue: 'user' },
-      { name: 'created_at', type: 'TEXT', nullable: false, primaryKey: false },
-    ],
-  },
-  {
-    name: 'documents',
-    rowCount: 5,
-    columns: [
-      { name: 'id', type: 'INTEGER', nullable: false, primaryKey: true },
-      { name: 'filename', type: 'TEXT', nullable: false, primaryKey: false },
-      { name: 'file_type', type: 'TEXT', nullable: false, primaryKey: false },
-      { name: 'size_bytes', type: 'INTEGER', nullable: false, primaryKey: false },
-      { name: 'status', type: 'TEXT', nullable: false, primaryKey: false },
-      { name: 'uploaded_by', type: 'INTEGER', nullable: true, primaryKey: false },
-      { name: 'created_at', type: 'TEXT', nullable: false, primaryKey: false },
-    ],
-  },
-  {
-    name: 'custom_fields',
-    rowCount: 2,
-    columns: [
-      { name: 'id', type: 'INTEGER', nullable: false, primaryKey: true },
-      { name: 'field_name', type: 'TEXT', nullable: false, primaryKey: false },
-      { name: 'field_type', type: 'TEXT', nullable: false, primaryKey: false },
-      { name: 'required', type: 'INTEGER', nullable: false, primaryKey: false },
-      { name: 'options', type: 'TEXT', nullable: true, primaryKey: false },
-      { name: 'display_order', type: 'INTEGER', nullable: false, primaryKey: false },
-    ],
-  },
-  {
-    name: 'audit_log',
-    rowCount: 12,
-    columns: [
-      { name: 'id', type: 'INTEGER', nullable: false, primaryKey: true },
-      { name: 'action', type: 'TEXT', nullable: false, primaryKey: false },
-      { name: 'table_name', type: 'TEXT', nullable: true, primaryKey: false },
-      { name: 'record_id', type: 'INTEGER', nullable: true, primaryKey: false },
-      { name: 'admin_pubkey', type: 'TEXT', nullable: false, primaryKey: false },
-      { name: 'details', type: 'TEXT', nullable: true, primaryKey: false },
-      { name: 'created_at', type: 'TEXT', nullable: false, primaryKey: false },
-    ],
-  },
-]
-
-// Mock data for tables
-const MOCK_TABLE_DATA: Record<string, Record<string, unknown>[]> = {
-  instance_config: [
-    { id: 1, name: 'Sanctum', icon: 'Sparkles', accent_color: 'blue', created_at: '2024-01-15T10:00:00Z', updated_at: '2024-01-20T15:30:00Z' },
-  ],
-  users: [
-    { id: 1, email: 'admin@example.com', name: 'Admin User', role: 'admin', created_at: '2024-01-15T10:00:00Z' },
-    { id: 2, email: 'user1@example.com', name: 'John Doe', role: 'user', created_at: '2024-01-16T11:00:00Z' },
-    { id: 3, email: 'user2@example.com', name: null, role: 'user', created_at: '2024-01-17T09:30:00Z' },
-  ],
-  documents: [
-    { id: 1, filename: 'bitcoin_whitepaper.pdf', file_type: 'pdf', size_bytes: 184292, status: 'processed', uploaded_by: 1, created_at: '2024-01-18T14:00:00Z' },
-    { id: 2, filename: 'lightning_network.pdf', file_type: 'pdf', size_bytes: 523841, status: 'processed', uploaded_by: 1, created_at: '2024-01-18T14:30:00Z' },
-    { id: 3, filename: 'notes.txt', file_type: 'txt', size_bytes: 2341, status: 'pending', uploaded_by: 2, created_at: '2024-01-19T10:00:00Z' },
-    { id: 4, filename: 'research.md', file_type: 'md', size_bytes: 8721, status: 'processing', uploaded_by: null, created_at: '2024-01-19T11:00:00Z' },
-    { id: 5, filename: 'guide.pdf', file_type: 'pdf', size_bytes: 102400, status: 'failed', uploaded_by: 1, created_at: '2024-01-20T09:00:00Z' },
-  ],
-  custom_fields: [
-    { id: 1, field_name: 'Company', field_type: 'text', required: 0, options: null, display_order: 1 },
-    { id: 2, field_name: 'Role', field_type: 'select', required: 1, options: '["Developer","Designer","Manager","Other"]', display_order: 2 },
-  ],
-  audit_log: [
-    { id: 1, action: 'CREATE', table_name: 'users', record_id: 2, admin_pubkey: 'npub1abc...', details: '{"email":"user1@example.com"}', created_at: '2024-01-16T11:00:00Z' },
-    { id: 2, action: 'UPDATE', table_name: 'instance_config', record_id: 1, admin_pubkey: 'npub1abc...', details: '{"accent_color":"purple"}', created_at: '2024-01-17T10:00:00Z' },
-    { id: 3, action: 'CREATE', table_name: 'documents', record_id: 1, admin_pubkey: 'npub1abc...', details: null, created_at: '2024-01-18T14:00:00Z' },
-  ],
-}
-
-// =============================================================================
-// COMPONENT
-// =============================================================================
-
 export function AdminDatabaseExplorer() {
   const navigate = useNavigate()
 
@@ -162,23 +61,18 @@ export function AdminDatabaseExplorer() {
   const fetchTables = useCallback(async () => {
     setIsLoadingTables(true)
     try {
-      // TODO: Replace with actual API call once backend is implemented
-      // const response = await fetch(`${DB_API_BASE}/admin/db/tables`)
-      // if (!response.ok) throw new Error('Failed to fetch tables')
-      // const data = await response.json()
-      // setTables(data.tables)
-
-      // Mock implementation - remove when backend is ready
-      await new Promise((resolve) => setTimeout(resolve, 500)) // Simulate network delay
-      setTables(MOCK_TABLES)
+      const response = await fetch(`${DB_API_BASE}/admin/db/tables`)
+      if (!response.ok) throw new Error('Failed to fetch tables')
+      const data = await response.json()
+      setTables(data.tables)
 
       // Auto-select first table
-      if (MOCK_TABLES.length > 0 && !selectedTable) {
-        setSelectedTable(MOCK_TABLES[0].name)
+      if (data.tables.length > 0 && !selectedTable) {
+        setSelectedTable(data.tables[0].name)
       }
     } catch (error) {
       console.error('Error fetching tables:', error)
-      // TODO: Show user-friendly error toast/message
+      setTables([])
     } finally {
       setIsLoadingTables(false)
     }
@@ -191,28 +85,23 @@ export function AdminDatabaseExplorer() {
   }, [isAuthorized, fetchTables])
 
   // Fetch table data when selection changes
-  const fetchTableData = useCallback(async (tableName: string) => {
+  const fetchTableData = useCallback(async (tableName: string, page: number = 1) => {
     setIsLoadingData(true)
-    setCurrentPage(1)
     try {
-      // TODO: Replace with actual API call once backend is implemented
-      // const response = await fetch(
-      //   `${DB_API_BASE}/admin/db/tables/${tableName}?page=${currentPage}&pageSize=${pageSize}`
-      // )
-      // if (!response.ok) throw new Error('Failed to fetch table data')
-      // const data = await response.json()
-      // setTableData(data.rows)
-
-      // Mock implementation - remove when backend is ready
-      await new Promise((resolve) => setTimeout(resolve, 300))
-      setTableData(MOCK_TABLE_DATA[tableName] || [])
+      const response = await fetch(
+        `${DB_API_BASE}/admin/db/tables/${tableName}?page=${page}&page_size=${pageSize}`
+      )
+      if (!response.ok) throw new Error('Failed to fetch table data')
+      const data = await response.json()
+      setTableData(data.rows)
+      setCurrentPage(data.page)
     } catch (error) {
       console.error('Error fetching table data:', error)
       setTableData([])
     } finally {
       setIsLoadingData(false)
     }
-  }, [])
+  }, [pageSize])
 
   useEffect(() => {
     if (selectedTable) {
@@ -228,51 +117,13 @@ export function AdminDatabaseExplorer() {
     setQueryResult(null)
 
     try {
-      // TODO: Replace with actual API call once backend is implemented
-      // const response = await fetch(`${DB_API_BASE}/admin/db/query`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ sql: sqlQuery }),
-      // })
-      // const data = await response.json()
-      // setQueryResult(data)
-
-      // Mock implementation - simulate query execution
-      await new Promise((resolve) => setTimeout(resolve, 400))
-
-      // Simple mock query parser
-      const queryLower = sqlQuery.toLowerCase().trim()
-      if (queryLower.startsWith('select')) {
-        // Try to extract table name and return mock data
-        const tableMatch = queryLower.match(/from\s+(\w+)/)
-        if (tableMatch && MOCK_TABLE_DATA[tableMatch[1]]) {
-          const mockData = MOCK_TABLE_DATA[tableMatch[1]]
-          setQueryResult({
-            success: true,
-            columns: mockData.length > 0 ? Object.keys(mockData[0]) : [],
-            rows: mockData,
-            executionTimeMs: Math.floor(Math.random() * 50) + 10,
-          })
-        } else {
-          setQueryResult({
-            success: true,
-            columns: [],
-            rows: [],
-            executionTimeMs: 5,
-          })
-        }
-      } else if (queryLower.startsWith('insert') || queryLower.startsWith('update') || queryLower.startsWith('delete')) {
-        setQueryResult({
-          success: true,
-          rowsAffected: 1,
-          executionTimeMs: Math.floor(Math.random() * 30) + 5,
-        })
-      } else {
-        setQueryResult({
-          success: false,
-          error: 'Only SELECT, INSERT, UPDATE, and DELETE queries are supported',
-        })
-      }
+      const response = await fetch(`${DB_API_BASE}/admin/db/query`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sql: sqlQuery }),
+      })
+      const data = await response.json()
+      setQueryResult(data)
     } catch (error) {
       setQueryResult({
         success: false,
@@ -315,41 +166,43 @@ export function AdminDatabaseExplorer() {
 
   // Handle record save
   const handleSaveRecord = async () => {
+    if (!selectedTable) return
     setIsSavingRecord(true)
 
     try {
       if (isCreatingRecord) {
-        // TODO: Replace with actual API call
-        // await fetch(`${DB_API_BASE}/admin/db/tables/${selectedTable}/rows`, {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ data: recordFormData }),
-        // })
-        console.log('Creating record:', recordFormData)
+        const response = await fetch(`${DB_API_BASE}/admin/db/tables/${selectedTable}/rows`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: recordFormData }),
+        })
+        const result = await response.json()
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to create record')
+        }
       } else if (editingRecord) {
-        // TODO: Replace with actual API call
-        // const recordId = editingRecord.id
-        // await fetch(`${DB_API_BASE}/admin/db/tables/${selectedTable}/rows/${recordId}`, {
-        //   method: 'PUT',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ data: recordFormData }),
-        // })
-        console.log('Updating record:', editingRecord, 'with:', recordFormData)
+        const recordId = editingRecord.id
+        const response = await fetch(`${DB_API_BASE}/admin/db/tables/${selectedTable}/rows/${recordId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: recordFormData }),
+        })
+        const result = await response.json()
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to update record')
+        }
       }
-
-      // Mock: just close the form
-      await new Promise((resolve) => setTimeout(resolve, 300))
 
       // Reset form and refresh data
       setIsCreatingRecord(false)
       setEditingRecord(null)
       setRecordFormData({})
 
-      // TODO: Refresh table data after save
-      // fetchTableData(selectedTable!)
+      // Refresh table data after save
+      fetchTableData(selectedTable)
     } catch (error) {
       console.error('Error saving record:', error)
-      // TODO: Show error message
+      alert(error instanceof Error ? error.message : 'Failed to save record')
     } finally {
       setIsSavingRecord(false)
     }
@@ -357,20 +210,24 @@ export function AdminDatabaseExplorer() {
 
   // Handle record delete
   const handleDeleteRecord = async (record: Record<string, unknown>) => {
+    if (!selectedTable) return
     if (!confirm('Are you sure you want to delete this record?')) return
 
     try {
-      // TODO: Replace with actual API call
-      // const recordId = record.id
-      // await fetch(`${DB_API_BASE}/admin/db/tables/${selectedTable}/rows/${recordId}`, {
-      //   method: 'DELETE',
-      // })
-      console.log('Deleting record:', record)
+      const recordId = record.id
+      const response = await fetch(`${DB_API_BASE}/admin/db/tables/${selectedTable}/rows/${recordId}`, {
+        method: 'DELETE',
+      })
+      const result = await response.json()
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to delete record')
+      }
 
-      // TODO: Refresh table data after delete
-      // fetchTableData(selectedTable!)
+      // Refresh table data after delete
+      fetchTableData(selectedTable)
     } catch (error) {
       console.error('Error deleting record:', error)
+      alert(error instanceof Error ? error.message : 'Failed to delete record')
     }
   }
 
@@ -873,10 +730,9 @@ export function AdminDatabaseExplorer() {
           )}
         </div>
         <div className="flex items-center gap-2">
-          {/* TODO: Add connection status indicator */}
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-warning animate-pulse" />
-            Mock Data
+            <span className="w-2 h-2 rounded-full bg-success" />
+            SQLite Connected
           </span>
         </div>
       </footer>
@@ -885,41 +741,11 @@ export function AdminDatabaseExplorer() {
 }
 
 /**
- * TODO LIST FOR BACKEND IMPLEMENTATION:
- *
- * 1. Create SQLite database file for instance configuration
- *    - Location: /data/sanctum.db or configurable path
- *    - Initialize with schema on first run
- *
- * 2. Implement FastAPI router for admin database endpoints:
- *    - GET  /admin/db/tables              - List all tables
- *    - GET  /admin/db/tables/{name}       - Get table data (paginated)
- *    - GET  /admin/db/tables/{name}/schema - Get table schema
- *    - POST /admin/db/query               - Execute SQL (read-only for safety)
- *    - POST /admin/db/tables/{name}/rows  - Insert row
- *    - PUT  /admin/db/tables/{name}/rows/{id} - Update row
- *    - DELETE /admin/db/tables/{name}/rows/{id} - Delete row
- *
- * 3. Add admin authentication middleware
- *    - Verify admin pubkey/token on all /admin/* routes
- *    - Consider rate limiting for query endpoint
- *
- * 4. Implement audit logging
- *    - Log all write operations to audit_log table
- *    - Include admin pubkey, action, affected table/record
- *
- * 5. Safety features:
- *    - Prevent DROP TABLE, TRUNCATE, etc. in query endpoint
- *    - Add query timeout to prevent long-running queries
- *    - Consider read-only mode option
- *
- * 6. Frontend enhancements:
- *    - Add query history (localStorage)
- *    - Add saved queries feature
- *    - Add table creation UI
- *    - Add column editing UI
- *    - Add data export (CSV, JSON)
- *    - Add data import feature
- *    - Add full-text search across tables
- *    - Add foreign key visualization
+ * Future enhancements:
+ * - Add admin authentication middleware (verify pubkey on /admin/* routes)
+ * - Add audit logging for write operations
+ * - Add query history (localStorage)
+ * - Add saved queries feature
+ * - Add data export (CSV, JSON)
+ * - Add data import feature
  */

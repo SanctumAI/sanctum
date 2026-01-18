@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Sun, Moon, Settings, Upload, Database, User, MessageCircle } from 'lucide-react'
 import { useTheme } from '../theme'
-
-const API_BASE = 'http://localhost:8000'
+import { API_BASE } from '../types/onboarding'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -56,6 +55,44 @@ interface IngestStats {
   jobs: { total: number; by_status: Record<string, number> }
   chunks: { total: number; by_status: Record<string, number> }
   ontologies_available: string[]
+}
+
+// Vector Search interfaces
+interface VectorSearchResultItem {
+  id: string
+  score: number
+  payload: Record<string, unknown>
+}
+
+interface VectorSearchResponse {
+  results: VectorSearchResultItem[]
+  query_embedding_dim: number
+  collection: string
+}
+
+// User onboarding interfaces
+interface UserType {
+  id: number
+  name: string
+  description: string | null
+  display_order: number
+}
+
+interface FieldDefinition {
+  id: number
+  field_name: string
+  field_type: string
+  required: boolean
+  display_order: number
+  user_type_id: number | null
+}
+
+// Neo4j query interfaces
+interface Neo4jQueryResult {
+  success: boolean
+  columns: string[]
+  rows: Record<string, unknown>[]
+  error?: string
 }
 
 function ThemeToggle() {
@@ -191,6 +228,32 @@ export function TestDashboard() {
 
   const [ingestStats, setIngestStats] = useState<IngestStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(false)
+
+  // Ontology detail state
+  const [selectedOntologyId, setSelectedOntologyId] = useState<string | null>(null)
+
+  // Vector search state
+  const [vectorQuery, setVectorQuery] = useState('')
+  const [vectorTopK, setVectorTopK] = useState(5)
+  const [vectorCollection, setVectorCollection] = useState('sanctum_smoke_test')
+  const [vectorResults, setVectorResults] = useState<VectorSearchResponse | null>(null)
+  const [vectorLoading, setVectorLoading] = useState(false)
+
+  // User onboarding test state
+  const [userTypes, setUserTypes] = useState<UserType[] | null>(null)
+  const [userTypesLoading, setUserTypesLoading] = useState(false)
+  const [selectedUserTypeId, setSelectedUserTypeId] = useState<number | null>(null)
+  const [fieldDefinitions, setFieldDefinitions] = useState<FieldDefinition[] | null>(null)
+  const [fieldsLoading, setFieldsLoading] = useState(false)
+  const [userFields, setUserFields] = useState<Record<string, string>>({})
+  const [testPubkey, setTestPubkey] = useState('')
+  const [createUserResult, setCreateUserResult] = useState<Record<string, unknown> | null>(null)
+  const [createUserLoading, setCreateUserLoading] = useState(false)
+
+  // Neo4j query state
+  const [cypherQuery, setCypherQuery] = useState('MATCH (n) RETURN n LIMIT 10')
+  const [neo4jResult, setNeo4jResult] = useState<Neo4jQueryResult | null>(null)
+  const [neo4jLoading, setNeo4jLoading] = useState(false)
 
   // API calls
   const checkHealth = async () => {
@@ -414,6 +477,103 @@ export function TestDashboard() {
       setIngestStats(null)
     } finally {
       setStatsLoading(false)
+    }
+  }
+
+  // Vector search API call
+  const runVectorSearch = async () => {
+    if (!vectorQuery.trim()) return
+    setVectorLoading(true)
+    setVectorResults(null)
+    try {
+      const res = await fetch(`${API_BASE}/vector-search`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: vectorQuery.trim(),
+          top_k: vectorTopK,
+          collection: vectorCollection
+        })
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      setVectorResults(await res.json())
+    } catch (e) {
+      setVectorResults({ results: [], query_embedding_dim: 0, collection: vectorCollection })
+    } finally {
+      setVectorLoading(false)
+    }
+  }
+
+  // User onboarding API calls
+  const fetchUserTypes = async () => {
+    setUserTypesLoading(true)
+    try {
+      const res = await fetch(`${API_BASE}/user-types`)
+      const data = await res.json()
+      setUserTypes(data.types)
+    } catch (e) {
+      setUserTypes(null)
+    } finally {
+      setUserTypesLoading(false)
+    }
+  }
+
+  const fetchFieldDefinitions = async (typeId: number | null) => {
+    setFieldsLoading(true)
+    try {
+      const url = typeId
+        ? `${API_BASE}/admin/user-fields?user_type_id=${typeId}`
+        : `${API_BASE}/admin/user-fields`
+      const res = await fetch(url)
+      const data = await res.json()
+      setFieldDefinitions(data.fields)
+      // Reset field values when type changes
+      setUserFields({})
+    } catch (e) {
+      setFieldDefinitions(null)
+    } finally {
+      setFieldsLoading(false)
+    }
+  }
+
+  const createTestUser = async () => {
+    if (!testPubkey.trim()) return
+    setCreateUserLoading(true)
+    setCreateUserResult(null)
+    try {
+      const res = await fetch(`${API_BASE}/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pubkey: testPubkey.trim(),
+          user_type_id: selectedUserTypeId,
+          fields: userFields
+        })
+      })
+      setCreateUserResult(await res.json())
+    } catch (e) {
+      setCreateUserResult({ error: e instanceof Error ? e.message : 'Failed' })
+    } finally {
+      setCreateUserLoading(false)
+    }
+  }
+
+  // Neo4j query API call
+  const runNeo4jQuery = async () => {
+    if (!cypherQuery.trim()) return
+    setNeo4jLoading(true)
+    setNeo4jResult(null)
+    try {
+      const res = await fetch(`${API_BASE}/admin/neo4j/query`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cypher: cypherQuery.trim() })
+      })
+      setNeo4jResult(await res.json())
+    } catch (e) {
+      setNeo4jResult({ success: false, columns: [], rows: [], error: e instanceof Error ? e.message : 'Failed' })
+    } finally {
+      setNeo4jLoading(false)
     }
   }
 
@@ -688,19 +848,34 @@ export function TestDashboard() {
             {ontologies && (
               <div className="mt-4 space-y-2">
                 {ontologies.map((ont) => (
-                  <div key={ont.id} className="bg-surface-overlay rounded-lg p-3">
-                    <p className="font-medium text-text">{ont.name} <span className="text-text-muted font-mono text-sm">({ont.id})</span></p>
+                  <div
+                    key={ont.id}
+                    className={`bg-surface-overlay rounded-lg p-3 cursor-pointer transition-colors ${
+                      selectedOntologyId === ont.id ? 'ring-2 ring-accent' : 'hover:bg-surface'
+                    }`}
+                    onClick={() => setSelectedOntologyId(selectedOntologyId === ont.id ? null : ont.id)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium text-text">{ont.name} <span className="text-text-muted font-mono text-sm">({ont.id})</span></p>
+                      <span className="text-text-muted text-sm">{selectedOntologyId === ont.id ? '▼' : '▶'}</span>
+                    </div>
                     <p className="text-sm text-text-secondary mt-1">{ont.description}</p>
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {ont.entity_types.map((t) => (
-                        <span key={t} className="text-xs bg-accent-subtle text-accent px-2 py-0.5 rounded">{t}</span>
-                      ))}
-                    </div>
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {ont.relationship_types.map((t) => (
-                        <span key={t} className="text-xs bg-surface text-text-muted px-2 py-0.5 rounded border border-border">{t}</span>
-                      ))}
-                    </div>
+                    {selectedOntologyId === ont.id && (
+                      <div className="mt-3 pt-3 border-t border-border">
+                        <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-2">Entity Types ({ont.entity_types.length})</p>
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {ont.entity_types.map((t) => (
+                            <span key={t} className="text-xs bg-accent-subtle text-accent px-2 py-0.5 rounded">{t}</span>
+                          ))}
+                        </div>
+                        <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-2">Relationship Types ({ont.relationship_types.length})</p>
+                        <div className="flex flex-wrap gap-1">
+                          {ont.relationship_types.map((t) => (
+                            <span key={t} className="text-xs bg-surface text-text-muted px-2 py-0.5 rounded border border-border">{t}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -979,6 +1154,288 @@ export function TestDashboard() {
                     ))}
                   </div>
                 </div>
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* Vector Search */}
+        <Card className="mt-6">
+          <h3 className="text-lg font-semibold text-text mb-2">7. Vector Search (Direct Qdrant)</h3>
+          <p className="text-sm text-text-secondary mb-4">
+            Search the vector store directly without LLM generation. Useful for debugging embeddings.
+          </p>
+          <InfoBox>
+            <strong className="text-text">POST /vector-search</strong> — Embeds your query and searches Qdrant directly.
+            Returns matching vectors with similarity scores (no LLM call).
+          </InfoBox>
+
+          <div className="space-y-3 mb-4">
+            <div className="flex gap-3">
+              <input
+                type="text"
+                value={vectorQuery}
+                onChange={e => setVectorQuery(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && runVectorSearch()}
+                placeholder="Enter search query..."
+                className="flex-1 px-4 py-2 bg-surface border border-border rounded-lg text-text placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                disabled={vectorLoading}
+              />
+              <Button onClick={runVectorSearch} disabled={vectorLoading || !vectorQuery.trim()}>
+                {vectorLoading ? 'Searching...' : 'Search'}
+              </Button>
+            </div>
+            <div className="flex gap-4 items-center">
+              <label className="text-sm text-text-secondary">
+                Top K:
+                <select
+                  value={vectorTopK}
+                  onChange={(e) => setVectorTopK(Number(e.target.value))}
+                  className="ml-2 px-2 py-1 bg-surface border border-border rounded text-text text-sm focus:border-accent focus:ring-1 focus:ring-accent"
+                >
+                  <option value={3}>3</option>
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                </select>
+              </label>
+              <label className="text-sm text-text-secondary">
+                Collection:
+                <select
+                  value={vectorCollection}
+                  onChange={(e) => setVectorCollection(e.target.value)}
+                  className="ml-2 px-2 py-1 bg-surface border border-border rounded text-text text-sm focus:border-accent focus:ring-1 focus:ring-accent"
+                >
+                  <option value="sanctum_smoke_test">sanctum_smoke_test</option>
+                  <option value="sanctum_knowledge">sanctum_knowledge</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          {vectorResults && (
+            <div className="space-y-3">
+              <p className="text-sm text-text-secondary">
+                Found {vectorResults.results.length} results | Embedding dimension: {vectorResults.query_embedding_dim}
+              </p>
+              {vectorResults.results.length === 0 ? (
+                <p className="text-text-muted text-sm">No results found. Try a different query or check if the collection has data.</p>
+              ) : (
+                <div className="space-y-2 max-h-80 overflow-y-auto">
+                  {vectorResults.results.map((result, idx) => (
+                    <div key={result.id} className="bg-surface-overlay rounded-lg p-3 border border-border">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-mono text-xs text-text-muted">#{idx + 1}</span>
+                        <span className={`text-sm font-medium px-2 py-0.5 rounded ${
+                          result.score > 0.8 ? 'bg-success-subtle text-success' :
+                          result.score > 0.5 ? 'bg-warning-subtle text-warning' :
+                          'bg-surface text-text-muted'
+                        }`}>
+                          Score: {result.score.toFixed(4)}
+                        </span>
+                      </div>
+                      <p className="text-xs font-mono text-text-muted mb-2">ID: {result.id}</p>
+                      <CodeBlock>{JSON.stringify(result.payload, null, 2)}</CodeBlock>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </Card>
+
+        {/* User Onboarding Test */}
+        <Card className="mt-6">
+          <h3 className="text-lg font-semibold text-text mb-2">8. User Onboarding Test</h3>
+          <p className="text-sm text-text-secondary mb-4">
+            Test the user creation flow with dynamic fields based on user type.
+          </p>
+          <InfoBox>
+            <strong className="text-text">GET /user-types</strong> — Fetch available user types. <br />
+            <strong className="text-text">GET /admin/user-fields</strong> — Get field definitions for a type. <br />
+            <strong className="text-text">POST /users</strong> — Create a new user with fields.
+          </InfoBox>
+
+          <div className="space-y-4">
+            {/* Fetch User Types */}
+            <div>
+              <Button onClick={fetchUserTypes} disabled={userTypesLoading}>
+                {userTypesLoading ? 'Fetching...' : '1. Fetch User Types'}
+              </Button>
+              {userTypes && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {userTypes.length === 0 ? (
+                    <p className="text-text-muted text-sm">No user types configured. Go to Admin Setup to create some.</p>
+                  ) : (
+                    userTypes.map((type) => (
+                      <button
+                        key={type.id}
+                        onClick={() => {
+                          setSelectedUserTypeId(type.id)
+                          fetchFieldDefinitions(type.id)
+                        }}
+                        className={`px-3 py-2 rounded-lg text-sm transition-colors ${
+                          selectedUserTypeId === type.id
+                            ? 'bg-accent text-accent-text'
+                            : 'bg-surface-overlay text-text border border-border hover:border-accent'
+                        }`}
+                      >
+                        {type.name}
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Field Definitions & Input */}
+            {selectedUserTypeId && fieldDefinitions && (
+              <div className="border-t border-border pt-4">
+                <p className="text-sm font-medium text-text mb-3">2. Fill in fields for selected type:</p>
+                {fieldDefinitions.length === 0 ? (
+                  <p className="text-text-muted text-sm">No fields defined for this type.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {fieldDefinitions.map((field) => (
+                      <div key={field.id} className="flex items-center gap-3">
+                        <label className="text-sm text-text-secondary w-32">
+                          {field.field_name}
+                          {field.required && <span className="text-error ml-1">*</span>}
+                        </label>
+                        <input
+                          type={field.field_type === 'number' ? 'number' : 'text'}
+                          value={userFields[field.field_name] || ''}
+                          onChange={(e) => setUserFields(prev => ({ ...prev, [field.field_name]: e.target.value }))}
+                          placeholder={`Enter ${field.field_name}...`}
+                          className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
+                        />
+                        <span className="text-xs text-text-muted">{field.field_type}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Create User */}
+            {selectedUserTypeId && (
+              <div className="border-t border-border pt-4">
+                <p className="text-sm font-medium text-text mb-3">3. Enter pubkey and create user:</p>
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={testPubkey}
+                    onChange={(e) => setTestPubkey(e.target.value)}
+                    placeholder="Enter test pubkey (e.g., npub1... or hex)"
+                    className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
+                  />
+                  <Button onClick={createTestUser} disabled={createUserLoading || !testPubkey.trim()}>
+                    {createUserLoading ? 'Creating...' : 'Create User'}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Result */}
+            {createUserResult && (
+              <div className="mt-4">
+                <p className="text-sm font-medium text-text mb-2">Result:</p>
+                <CodeBlock>{JSON.stringify(createUserResult, null, 2)}</CodeBlock>
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* Neo4j Graph Query */}
+        <Card className="mt-6">
+          <h3 className="text-lg font-semibold text-text mb-2">9. Neo4j Graph Query</h3>
+          <p className="text-sm text-text-secondary mb-4">
+            Run read-only Cypher queries against the knowledge graph.
+          </p>
+          <InfoBox>
+            <strong className="text-text">POST /admin/neo4j/query</strong> — Execute a Cypher query (MATCH only, no writes).
+            Useful for exploring entities and relationships after ingestion.
+          </InfoBox>
+
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-2 mb-2">
+              <span className="text-xs text-text-muted">Examples:</span>
+              <button
+                onClick={() => setCypherQuery('MATCH (n) RETURN n LIMIT 10')}
+                className="text-xs text-accent hover:text-accent-hover underline"
+              >
+                All nodes
+              </button>
+              <button
+                onClick={() => setCypherQuery('MATCH (c:Claim)-[r:SUPPORTED_BY]->(s:Source) RETURN c, r, s LIMIT 10')}
+                className="text-xs text-accent hover:text-accent-hover underline"
+              >
+                Claims + Sources
+              </button>
+              <button
+                onClick={() => setCypherQuery('MATCH (n) RETURN labels(n) AS type, count(*) AS count')}
+                className="text-xs text-accent hover:text-accent-hover underline"
+              >
+                Node counts by type
+              </button>
+              <button
+                onClick={() => setCypherQuery('MATCH ()-[r]->() RETURN type(r) AS rel_type, count(*) AS count')}
+                className="text-xs text-accent hover:text-accent-hover underline"
+              >
+                Relationship counts
+              </button>
+            </div>
+            <textarea
+              value={cypherQuery}
+              onChange={(e) => setCypherQuery(e.target.value)}
+              placeholder="MATCH (n) RETURN n LIMIT 10"
+              className="w-full h-24 px-4 py-3 bg-surface border border-border rounded-lg text-text font-mono text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent resize-none"
+            />
+            <Button onClick={runNeo4jQuery} disabled={neo4jLoading || !cypherQuery.trim()}>
+              {neo4jLoading ? 'Executing...' : 'Run Query'}
+            </Button>
+
+            {neo4jResult && (
+              <div className="mt-4">
+                {neo4jResult.error ? (
+                  <div className="bg-error-subtle border border-error/20 text-error rounded-lg px-4 py-3">
+                    Error: {neo4jResult.error}
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-sm text-text-secondary mb-2">
+                      {neo4jResult.rows.length} row(s) returned | Columns: {neo4jResult.columns.join(', ')}
+                    </p>
+                    {neo4jResult.rows.length === 0 ? (
+                      <p className="text-text-muted text-sm">No results.</p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-border">
+                              {neo4jResult.columns.map((col) => (
+                                <th key={col} className="text-left py-2 px-2 text-text-muted font-medium">{col}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {neo4jResult.rows.map((row, idx) => (
+                              <tr key={idx} className="border-b border-border/50">
+                                {neo4jResult.columns.map((col) => (
+                                  <td key={col} className="py-2 px-2 text-text font-mono text-xs">
+                                    {typeof row[col] === 'object'
+                                      ? JSON.stringify(row[col], null, 1)
+                                      : String(row[col])}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>

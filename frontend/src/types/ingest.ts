@@ -77,8 +77,8 @@ export interface IngestStats {
   ontologies_available: string[]
 }
 
-// API base URL
-export const INGEST_API_BASE = 'http://localhost:8000'
+// API base URL - uses Vite proxy in development
+export const INGEST_API_BASE = import.meta.env.VITE_API_BASE || '/api'
 
 // Allowed file extensions (matching backend)
 export const ALLOWED_EXTENSIONS = ['.pdf', '.txt', '.md'] as const

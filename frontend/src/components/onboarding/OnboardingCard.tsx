@@ -31,9 +31,9 @@ export function OnboardingCard({ children, footer, title, subtitle }: Onboarding
       <div className="w-full max-w-2xl">
         <InstanceLogo />
 
-        <div className="bg-surface-raised border border-border rounded-2xl p-8 shadow-lg animate-fade-in-up">
+        <div className="bg-surface-raised border border-border rounded-2xl p-10 shadow-lg animate-fade-in-up">
           {(title || subtitle) && (
-            <div className="text-center mb-6">
+            <div className="text-center mb-8">
               {title && <h1 className="text-xl font-semibold text-text">{title}</h1>}
               {subtitle && <p className="text-sm text-text-muted mt-1.5">{subtitle}</p>}
             </div>

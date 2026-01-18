@@ -120,6 +120,12 @@ def verify_session_token(token: str) -> Optional[dict]:
     Verify a session token.
     Returns {"user_id": ..., "email": ...} if valid, None otherwise.
     """
+    # Dev mode: accept mock token for frontend testing
+    if MOCK_EMAIL and token == "dev-mode-mock-token":
+        logger.debug("Accepting dev-mode-mock-token (MOCK_EMAIL=true)")
+        # Return a placeholder that get_current_user will handle
+        return {"user_id": -1, "email": "dev-mode", "dev_mode": True}
+
     try:
         data = _session_serializer.loads(
             token,
@@ -262,6 +268,17 @@ async def get_current_user(authorization: Optional[str] = Header(None)) -> dict:
     if not data:
         raise HTTPException(status_code=401, detail="Invalid or expired session token")
 
+    # Dev mode: return a mock approved user for testing
+    if data.get("dev_mode"):
+        logger.debug("Returning dev mode mock user")
+        return {
+            "id": -1,
+            "email": "dev@localhost",
+            "name": "Dev User",
+            "approved": True,
+            "dev_mode": True
+        }
+
     user = database.get_user(data["user_id"])
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
@@ -304,11 +321,23 @@ async def require_admin_or_approved_user(authorization: Optional[str] = Header(N
     # Try user token
     user_data = verify_session_token(token)
     if user_data:
+        # Dev mode: return mock user
+        if user_data.get("dev_mode"):
+            logger.debug("Returning dev mode mock user for admin_or_approved")
+            return {
+                "id": -1,
+                "email": "dev@localhost",
+                "name": "Dev User",
+                "approved": True,
+                "type": "user",
+                "dev_mode": True
+            }
+
         user = database.get_user(user_data["user_id"])
         if user:
             if not user.get("approved"):
                 raise HTTPException(status_code=403, detail="User not approved")
             user["type"] = "user"
             return user
-    
+
     raise HTTPException(status_code=401, detail="Invalid or expired token")

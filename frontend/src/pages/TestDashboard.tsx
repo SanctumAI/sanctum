@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Sun, Moon, Settings, Upload, Database, User, MessageCircle, ChevronDown, Key, Shield, Users, Sliders, FileText, Zap } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Sun, Moon, Settings, Database, ChevronDown, Key, Shield, Users, Sliders, FileText, Zap } from 'lucide-react'
 import { useTheme } from '../theme'
 import {
   API_BASE,
@@ -15,7 +15,7 @@ import {
   UserWithFieldsResponse
 } from '../types/onboarding'
 import { authenticateWithNostr, hasNostrExtension, AuthResult } from '../utils/nostrAuth'
-import { adminFetch, clearAdminAuth } from '../utils/adminApi'
+import { adminFetch, clearAdminAuth, isAdminAuthenticated } from '../utils/adminApi'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -250,6 +250,15 @@ function StatusBadge({ status }: { status: 'success' | 'warning' | 'error' | 'in
 }
 
 export function TestDashboard() {
+  const navigate = useNavigate()
+
+  // Admin guard - redirect non-admins to home
+  useEffect(() => {
+    if (!isAdminAuthenticated()) {
+      navigate('/')
+    }
+  }, [navigate])
+
   // Health check state
   const [health, setHealth] = useState<Record<string, unknown> | null>(null)
   const [healthLoading, setHealthLoading] = useState(false)
@@ -1185,45 +1194,28 @@ export function TestDashboard() {
       {/* Header */}
       <header className="border-b border-border bg-surface-raised">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-text">Sanctum</h1>
-            <p className="text-sm text-text-muted">Test Dashboard</p>
+          <div className="flex items-center gap-4">
+            <Link
+              to="/chat"
+              className="p-2 -ml-2 rounded-lg text-text-muted hover:text-text hover:bg-surface-overlay transition-all"
+              title="Back to Chat"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-semibold text-text">Test Dashboard</h1>
+              <p className="text-sm text-text-muted">Admin tools for testing the RAG pipeline</p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <Link
-              to="/admin"
+              to="/admin/setup"
               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-text-secondary border border-border hover:bg-surface-overlay hover:text-text transition-colors text-sm"
             >
               <Settings className="w-4 h-4" />
-              Admin
-            </Link>
-            <Link
-              to="/admin/upload"
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-text-secondary border border-border hover:bg-surface-overlay hover:text-text transition-colors text-sm"
-            >
-              <Upload className="w-4 h-4" />
-              Upload
-            </Link>
-            <Link
-              to="/admin/database"
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-text-secondary border border-border hover:bg-surface-overlay hover:text-text transition-colors text-sm"
-            >
-              <Database className="w-4 h-4" />
-              Database
-            </Link>
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-text-secondary border border-border hover:bg-surface-overlay hover:text-text transition-colors text-sm"
-            >
-              <User className="w-4 h-4" />
-              User Login
-            </Link>
-            <Link
-              to="/chat"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-accent text-accent-text hover:bg-accent-hover transition-colors"
-            >
-              <MessageCircle className="w-5 h-5" />
-              Open Chat
+              Instance Config
             </Link>
             <ThemeToggle />
           </div>

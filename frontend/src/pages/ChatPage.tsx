@@ -46,57 +46,12 @@ export function ChatPage() {
   const [selectedTools, setSelectedTools] = useState<string[]>([])
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([])
 
-  // Check authentication and approval status on mount
-  // Admins (with admin token) OR approved users (with session token) can access chat
+  // Check approval status on mount
   useEffect(() => {
-    const userToken = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
-    const adminToken = localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN)
-    
-    // Admin token = admin is logged in, they can access chat
-    if (adminToken) {
-      // Admins are automatically approved, no further checks needed
-      return
-    }
-    
-    // No user token and no admin token = not authenticated
-    if (!userToken) {
-      navigate('/login')
-      return
-    }
-    
-    // Check if user is approved
     const approved = localStorage.getItem(STORAGE_KEYS.USER_APPROVED)
     if (approved === 'false') {
       navigate('/pending')
-      return
     }
-
-    // Optionally verify user token is still valid with backend
-    async function verifySession() {
-      try {
-        const res = await fetch(`${API_BASE}/auth/me?token=${encodeURIComponent(userToken)}`)
-        const data = await res.json()
-        
-        if (!data.authenticated) {
-          // Token invalid/expired, clear and redirect
-          localStorage.removeItem(STORAGE_KEYS.SESSION_TOKEN)
-          localStorage.removeItem(STORAGE_KEYS.USER_APPROVED)
-          navigate('/login')
-          return
-        }
-
-        // Update approval status from server
-        if (data.user && data.user.approved === false) {
-          localStorage.setItem(STORAGE_KEYS.USER_APPROVED, 'false')
-          navigate('/pending')
-        }
-      } catch (err) {
-        // Network error - don't force logout, let the chat request handle it
-        console.warn('Session verification failed:', err)
-      }
-    }
-
-    verifySession()
   }, [navigate])
 
   const handleToolToggle = useCallback((toolId: string) => {
@@ -132,10 +87,8 @@ export function ChatPage() {
         ? { question: content, top_k: 5 }
         : { message: content }
 
-      // Use admin token if available, otherwise user token
-      const adminToken = localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN)
-      const userToken = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
-      const token = adminToken || userToken
+      // Admin token takes priority, fall back to user token
+      const token = localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN) || localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
 
       const res = await fetch(`${API_BASE}${endpoint}`, {
         method: 'POST',

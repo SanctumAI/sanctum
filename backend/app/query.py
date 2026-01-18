@@ -16,11 +16,12 @@ import logging
 import uuid
 from typing import Optional
 from datetime import datetime
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
 import httpx
 
+import auth
 from store import (
     embed_texts,
     get_neo4j_driver,
@@ -70,9 +71,10 @@ class QueryResponse(BaseModel):
 
 
 @router.post("", response_model=QueryResponse)
-async def query(request: QueryRequest):
+async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_or_approved_user)):
     """
     Empathetic RAG query with session support.
+    Requires authenticated admin OR approved user.
     
     1. Load/create session for conversation history
     2. Embed query with conversation context
@@ -395,16 +397,16 @@ This advice draws from: {source_citation}
 
 
 @router.get("/session/{session_id}")
-async def get_session(session_id: str):
-    """Get session history and state."""
+async def get_session(session_id: str, user: dict = Depends(auth.require_admin_or_approved_user)):
+    """Get session history and state. Requires auth."""
     if session_id not in _sessions:
         raise HTTPException(status_code=404, detail="Session not found")
     return _sessions[session_id]
 
 
 @router.delete("/session/{session_id}")
-async def delete_session(session_id: str):
-    """Delete a session."""
+async def delete_session(session_id: str, user: dict = Depends(auth.require_admin_or_approved_user)):
+    """Delete a session. Requires auth."""
     if session_id in _sessions:
         del _sessions[session_id]
     return {"status": "deleted"}

@@ -52,11 +52,6 @@ class MapleProvider(LLMProvider):
 
         IMPORTANT: Maple requires stream=True - it only supports streaming responses.
         This method collects the streamed chunks into a single response.
-        
-        Args:
-            prompt: The prompt to send
-            model: Model to use (default: MAPLE_MODEL env var)
-            temperature: Sampling temperature (default: 0.1 for factual responses)
         """
         model = model or self.default_model
 
@@ -65,7 +60,7 @@ class MapleProvider(LLMProvider):
             model=model,
             messages=[{"role": "user", "content": prompt}],
             stream=True,
-            temperature=temperature,  # Low temperature for factual, consistent responses
+            temperature=temperature,
         )
 
         # Collect streamed chunks

@@ -285,8 +285,7 @@ async def require_admin_or_approved_user(authorization: Optional[str] = Header(N
     - A valid admin session token, OR
     - A valid approved user session token
     
-    Use this on endpoints that should be accessible to both admins and regular users.
-    Returns the admin or user dict.
+    Use this on endpoints (like /llm/chat) that should be accessible to both admins and users.
     """
     import database
 
@@ -300,7 +299,6 @@ async def require_admin_or_approved_user(authorization: Optional[str] = Header(N
     if admin_data:
         admin = database.get_admin_by_pubkey(admin_data["pubkey"])
         if admin:
-            # Return admin as a "user" with admin flag
             return {"id": admin["id"], "type": "admin", "approved": True, "pubkey": admin_data["pubkey"]}
     
     # Try user token

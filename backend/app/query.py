@@ -131,6 +131,7 @@ async def query(request: QueryRequest):
         
         # 4. Build context and call LLM with empathetic prompt
         context = _build_context(chunk_texts, graph_context, sources)
+        session["_last_sources"] = sources  # For dynamic citation
         answer, clarifying_questions, full_prompt = _call_llm_empathetic(
             question, context, session
         )
@@ -272,30 +273,43 @@ def _build_context(chunk_texts: list[str], graph_context: dict, sources: list[di
     """Build context string with source relevance scores."""
     parts = []
     
+    # Urgent relationship patterns - these indicate time-sensitivity or escalation
+    URGENT_PATTERNS = ['WORSENS', 'TIME_SENSITIVE', 'REQUIRES_FIRST', 'ESCALATES_TO', 'BLOCKED_BY']
+    
+    # Extract urgent facts FIRST (put at top of context for emphasis)
+    urgent_facts = []
+    regular_facts = []
+    for src in sources:
+        text = src.get("text", "")
+        if src.get("type") == "fact" and any(p in text for p in URGENT_PATTERNS):
+            urgent_facts.append(text)
+        elif src.get("type") == "fact":
+            regular_facts.append(text)
+    
+    # Put urgent/timing facts at the TOP
+    if urgent_facts:
+        parts.append("=== IMPORTANT TIMING ===")
+        parts.append("(Address these points calmly but make sure the user understands their importance)")
+        for fact in urgent_facts[:3]:
+            parts.append(f"• {fact[:200]}")
+        parts.append("")
+    
     # Include full chunk texts with relevance scores
     if chunk_texts:
-        parts.append("=== RELEVANT PASSAGES FROM HANDBOOK ===")
-        for i, text in enumerate(chunk_texts[:6], 1):
-            score = sources[i-1]["score"] if i <= len(sources) else 0
-            # Higher score = more relevant, note this for the LLM
-            relevance = "HIGH" if score > 0.55 else "MEDIUM" if score > 0.45 else "LOW"
-            parts.append(f"[{relevance} relevance] {text[:600]}")
+        parts.append("=== RELEVANT PASSAGES ===")
+        for i, text in enumerate(chunk_texts[:4], 1):
+            parts.append(f"{text[:500]}")
             parts.append("")
     
     # Graph context
     if graph_context.get("actions"):
-        parts.append("=== RECOMMENDED ACTIONS ===")
-        parts.extend(f"• {a}" for a in graph_context["actions"])
+        parts.append("=== ACTIONS ===")
+        parts.extend(f"• {a}" for a in graph_context["actions"][:5])
         parts.append("")
     
     if graph_context.get("risks"):
-        parts.append("=== RISKS TO BE AWARE OF ===")
-        parts.extend(f"• {r}" for r in graph_context["risks"])
-        parts.append("")
-    
-    if graph_context.get("warnings"):
-        parts.append("=== CAUTIONS ===")
-        parts.extend(f"⚠️ {w}" for w in graph_context["warnings"])
+        parts.append("=== RISKS ===")
+        parts.extend(f"• {r}" for r in graph_context["risks"][:5])
         parts.append("")
     
     return "\n".join(parts)
@@ -323,59 +337,46 @@ def _call_llm_empathetic(question: str, context: str, session: dict) -> tuple[st
     else:
         jurisdiction_note = "IMPORTANT: We don't know the user's jurisdiction yet. Laws vary widely. Ask about their location."
     
-    prompt = f"""You are a compassionate crisis counselor helping someone whose loved one may have been detained for political reasons.
+    # Extract source files from context for citation
+    source_files = set()
+    for src in session.get("_last_sources", []):
+        sf = src.get("source_file", "")
+        if sf and "Pathway" in sf:
+            source_files.add("Pathway to Freedom Handbook (World Liberty Congress)")
+        elif sf:
+            source_files.add(sf.replace(".pdf", "").replace("-", " ").replace("_", " "))
+    source_citation = ", ".join(source_files) if source_files else "human rights guidance materials"
+    
+    prompt = f"""You are a calm, caring helper for someone in crisis. They may be scared, exhausted, or overwhelmed.
 
-=== CRITICAL GUIDELINES ===
+=== STYLE - THIS IS CRITICAL ===
+- VERY SHORT. 5 sentences max per idea. Max 2 short paragraphs + questions.
+- Plain words. No jargon. Talk like a trusted friend, not a lawyer.
+- ONE thing to do first. Then offer to continue.
+- If they need more detail: "You can search online for [specific term] to learn more."
 
-1. EMPATHY FIRST: This person is under extreme stress. Be warm, calm, and reassuring. Don't overwhelm them with information. Focus on ONE OR TWO immediate priorities.
+=== RULES ===
+1. Warmth first. Acknowledge their feelings in ONE sentence.
+2. If you see "IMPORTANT TIMING" in context, calmly but clearly explain why timing matters. Don't alarm them - just help them understand it's worth acting soon.
+3. Give ONE clear next step.
+4. Ask 1-2 questions if you need more info (start line with "?").
+5. NEVER invent organization names. Say "search online for human rights help in [country]."
+6. Personal choices (leave? go public?): brief pros/cons, then "Only you can decide."
+7. {jurisdiction_note}
 
-2. ASK CLARIFYING QUESTIONS: Before giving detailed advice, gather essential facts:
-   - What country/jurisdiction are they in?
-   - When did the detention happen? (hours, days, weeks ago?)
-   - Do they know where the person is being held?
-   - Has there been any official communication?
+=== SOURCE ===
+This advice draws from: {source_citation}
 
-3. **NEVER INVENT ORGANIZATION NAMES**: Do NOT make up names of NGOs, legal aid groups, or human rights organizations. Organizations change, get shut down, or may never have existed.
-   - WRONG: "Contact the Nicaraguan Center for Human Rights"
-   - RIGHT: "Search for a local human rights organization or legal aid group in your area. Verify they are currently operating before sharing sensitive information."
-   - If the user needs a referral, tell them to search for "human rights legal aid [their country]" and verify the organization is active and trustworthy.
+=== CONVERSATION ===
+{history_str if history_str else "(Start)"}
 
-4. **PERSONAL DECISIONS ARE THEIRS TO MAKE**: For deeply personal questions like "should I leave the country?" or "should I go public?":
-   - Present the pros and cons from the knowledge base
-   - Offer emotional support
-   - DO NOT push them toward either option
-   - Say something like: "This is a deeply personal decision that only you can make. Here are some considerations..."
-   - Acknowledge the weight of the decision and validate their feelings
-
-5. NUANCED RECOMMENDATIONS: The handbook contains guidance that may seem contradictory. When this happens:
-   - Acknowledge the nuance explicitly
-   - Explain the trade-offs
-   - For factual guidance (documentation, timing), give clear recommendations
-   - For personal choices (leaving, publicizing), present options without pushing
-   
-6. JURISDICTION MATTERS: {jurisdiction_note}
-
-7. ONE STEP AT A TIME: Don't give a 10-step plan. Give the FIRST thing they should do, then offer to continue.
-
-8. VERIFY BEFORE TRUSTING: When suggesting the user contact organizations, remind them:
-   - "Verify any organization is currently active before sharing details"
-   - "Political situations change - groups that existed years ago may be shut down"
-
-=== CONVERSATION HISTORY ===
-{history_str if history_str else "(This is the start of the conversation)"}
-
-=== KNOWLEDGE BASE CONTEXT (from handbook) ===
+=== CONTEXT ===
 {context}
 
-=== CURRENT QUESTION ===
+=== QUESTION ===
 {question}
 
-=== YOUR RESPONSE ===
-Respond with empathy. If you need more information before giving specific advice, ask 1-2 clarifying questions. 
-End your response with any clarifying questions on their own lines starting with "?" so they can be extracted.
-
-Remember: This person needs calm support, not a wall of text. Be concise but warm.
-NEVER invent organization names. For personal decisions, support but don't push."""
+=== RESPOND (keep it short!) ==="""
 
     response = llm.complete(prompt, temperature=0.1)
     answer = response.content

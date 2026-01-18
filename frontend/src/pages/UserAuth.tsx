@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Mail } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
+import { API_BASE, STORAGE_KEYS } from '../types/onboarding'
 
 type TabType = 'signup' | 'login'
 type FormState = 'idle' | 'submitting' | 'success' | 'error'
@@ -184,17 +185,49 @@ export function UserAuth() {
 
     setFormState('submitting')
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    try {
+      // Call the magic link API
+      const response = await fetch(`${API_BASE}/auth/magic-link`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          name: activeTab === 'signup' ? formData.name : '',
+        }),
+      })
 
-    // Store email for verification
-    localStorage.setItem('sanctum_pending_email', formData.email)
-    if (activeTab === 'signup') {
-      localStorage.setItem('sanctum_pending_name', formData.name)
+      if (!response.ok) {
+        let errorMessage = 'Failed to send magic link'
+        try {
+          const contentType = response.headers.get('content-type')
+          if (contentType && contentType.includes('application/json')) {
+            const error = await response.json()
+            errorMessage = error.detail || error.message || errorMessage
+          } else {
+            const text = await response.text()
+            errorMessage = text || errorMessage
+          }
+        } catch (parseError) {
+          // If JSON parsing fails, use status text or default message
+          errorMessage = response.statusText || errorMessage
+        }
+        throw new Error(errorMessage)
+      }
+
+      // Store email for verification page
+      localStorage.setItem(STORAGE_KEYS.PENDING_EMAIL, formData.email)
+      if (activeTab === 'signup') {
+        localStorage.setItem(STORAGE_KEYS.PENDING_NAME, formData.name)
+      }
+
+      setSubmittedEmail(formData.email)
+      setFormState('success')
+    } catch (error) {
+      console.error('Magic link error:', error)
+      setFormState('error')
     }
-
-    setSubmittedEmail(formData.email)
-    setFormState('success')
   }
 
   const footer = (

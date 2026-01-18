@@ -1,19 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft, SquareTerminal, RefreshCw, Loader2, Play, Database, Key, X, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
-import { STORAGE_KEYS } from '../types/onboarding'
 import {
   TableInfo,
-  ColumnInfo,
   QueryResponse,
-  DB_API_BASE,
   formatCellValue,
   truncateValue,
   isJsonValue,
 } from '../types/database'
-
-// TODO: Replace localStorage check with proper auth token validation
-// Current implementation only checks for admin pubkey in localStorage
+import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
 
 export function AdminDatabaseExplorer() {
   const navigate = useNavigate()
@@ -49,8 +44,7 @@ export function AdminDatabaseExplorer() {
 
   // Check if admin is logged in
   useEffect(() => {
-    const pubkey = localStorage.getItem(STORAGE_KEYS.ADMIN_PUBKEY)
-    if (!pubkey) {
+    if (!isAdminAuthenticated()) {
       navigate('/admin')
     } else {
       setIsAuthorized(true)
@@ -61,7 +55,7 @@ export function AdminDatabaseExplorer() {
   const fetchTables = useCallback(async () => {
     setIsLoadingTables(true)
     try {
-      const response = await fetch(`${DB_API_BASE}/admin/db/tables`)
+      const response = await adminFetch('/admin/db/tables')
       if (!response.ok) throw new Error('Failed to fetch tables')
       const data = await response.json()
       setTables(data.tables)
@@ -88,8 +82,8 @@ export function AdminDatabaseExplorer() {
   const fetchTableData = useCallback(async (tableName: string, page: number = 1) => {
     setIsLoadingData(true)
     try {
-      const response = await fetch(
-        `${DB_API_BASE}/admin/db/tables/${tableName}?page=${page}&page_size=${pageSize}`
+      const response = await adminFetch(
+        `/admin/db/tables/${tableName}?page=${page}&page_size=${pageSize}`
       )
       if (!response.ok) throw new Error('Failed to fetch table data')
       const data = await response.json()
@@ -117,9 +111,8 @@ export function AdminDatabaseExplorer() {
     setQueryResult(null)
 
     try {
-      const response = await fetch(`${DB_API_BASE}/admin/db/query`, {
+      const response = await adminFetch('/admin/db/query', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sql: sqlQuery }),
       })
       const data = await response.json()
@@ -171,9 +164,8 @@ export function AdminDatabaseExplorer() {
 
     try {
       if (isCreatingRecord) {
-        const response = await fetch(`${DB_API_BASE}/admin/db/tables/${selectedTable}/rows`, {
+        const response = await adminFetch(`/admin/db/tables/${selectedTable}/rows`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ data: recordFormData }),
         })
         const result = await response.json()
@@ -182,9 +174,8 @@ export function AdminDatabaseExplorer() {
         }
       } else if (editingRecord) {
         const recordId = editingRecord.id
-        const response = await fetch(`${DB_API_BASE}/admin/db/tables/${selectedTable}/rows/${recordId}`, {
+        const response = await adminFetch(`/admin/db/tables/${selectedTable}/rows/${recordId}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ data: recordFormData }),
         })
         const result = await response.json()
@@ -215,7 +206,7 @@ export function AdminDatabaseExplorer() {
 
     try {
       const recordId = record.id
-      const response = await fetch(`${DB_API_BASE}/admin/db/tables/${selectedTable}/rows/${recordId}`, {
+      const response = await adminFetch(`/admin/db/tables/${selectedTable}/rows/${recordId}`, {
         method: 'DELETE',
       })
       const result = await response.json()
@@ -742,7 +733,6 @@ export function AdminDatabaseExplorer() {
 
 /**
  * Future enhancements:
- * - Add admin authentication middleware (verify pubkey on /admin/* routes)
  * - Add audit logging for write operations
  * - Add query history (localStorage)
  * - Add saved queries feature

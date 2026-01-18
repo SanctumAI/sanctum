@@ -5,7 +5,8 @@ import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { FieldEditor } from '../components/onboarding/FieldEditor'
 import { ColorPicker } from '../components/onboarding/ColorPicker'
 import { IconPicker } from '../components/onboarding/IconPicker'
-import { CustomField, UserType, STORAGE_KEYS, API_BASE } from '../types/onboarding'
+import { CustomField, UserType } from '../types/onboarding'
+import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
 import { useInstanceConfig } from '../context/InstanceConfigContext'
 import { AccentColor } from '../types/instance'
 
@@ -37,8 +38,7 @@ export function AdminSetup() {
 
   // Check if admin is logged in
   useEffect(() => {
-    const pubkey = localStorage.getItem(STORAGE_KEYS.ADMIN_PUBKEY)
-    if (!pubkey) {
+    if (!isAdminAuthenticated()) {
       navigate('/admin')
     }
   }, [navigate])
@@ -48,8 +48,8 @@ export function AdminSetup() {
     async function fetchData() {
       try {
         const [typesRes, fieldsRes] = await Promise.all([
-          fetch(`${API_BASE}/admin/user-types`),
-          fetch(`${API_BASE}/admin/user-fields`),
+          adminFetch('/admin/user-types'),
+          adminFetch('/admin/user-fields'),
         ])
 
         if (typesRes.ok) {
@@ -104,9 +104,8 @@ export function AdminSetup() {
     if (!newTypeName.trim()) return
 
     try {
-      const response = await fetch(`${API_BASE}/admin/user-types`, {
+      const response = await adminFetch('/admin/user-types', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: newTypeName.trim(),
           description: newTypeDescription.trim() || null,
@@ -128,7 +127,7 @@ export function AdminSetup() {
 
   const handleRemoveUserType = async (typeId: number) => {
     try {
-      const response = await fetch(`${API_BASE}/admin/user-types/${typeId}`, {
+      const response = await adminFetch(`/admin/user-types/${typeId}`, {
         method: 'DELETE',
       })
 
@@ -144,9 +143,8 @@ export function AdminSetup() {
 
   const handleAddField = async (field: CustomField) => {
     try {
-      const response = await fetch(`${API_BASE}/admin/user-fields`, {
+      const response = await adminFetch('/admin/user-fields', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           field_name: field.name,
           field_type: field.type,
@@ -179,9 +177,8 @@ export function AdminSetup() {
 
   const handleUpdateField = async (field: CustomField) => {
     try {
-      const response = await fetch(`${API_BASE}/admin/user-fields/${field.id}`, {
+      const response = await adminFetch(`/admin/user-fields/${field.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           field_name: field.name,
           field_type: field.type,
@@ -203,7 +200,7 @@ export function AdminSetup() {
 
   const handleRemoveField = async (id: string) => {
     try {
-      const response = await fetch(`${API_BASE}/admin/user-fields/${id}`, {
+      const response = await adminFetch(`/admin/user-fields/${id}`, {
         method: 'DELETE',
       })
 

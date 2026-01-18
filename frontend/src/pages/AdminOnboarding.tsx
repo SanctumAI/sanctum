@@ -3,18 +3,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Link2, AlertCircle, Check } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { NostrInfo, NostrExtensionLinks } from '../components/onboarding/NostrInfo'
+import { STORAGE_KEYS } from '../types/onboarding'
+import { authenticateWithNostr, hasNostrExtension, type AuthResult } from '../utils/nostrAuth'
+
+// DEV_MODE enables mock authentication for testing without a real Nostr extension
+const DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true'
 
 type ConnectionState = 'idle' | 'connecting' | 'success' | 'no-extension' | 'error'
-
-// Extend window type for NIP-07
-declare global {
-  interface Window {
-    nostr?: {
-      getPublicKey: () => Promise<string>
-      signEvent?: (event: unknown) => Promise<unknown>
-    }
-  }
-}
 
 function NostrIcon() {
   return (
@@ -42,18 +37,28 @@ export function AdminOnboarding() {
     setError(null)
 
     // Check if NIP-07 extension is available
-    if (!window.nostr) {
-      // Mock: Simulate extension check delay
+    if (!hasNostrExtension()) {
+      // Give extension time to inject
       await new Promise((resolve) => setTimeout(resolve, 800))
-      setState('no-extension')
-      return
+      if (!hasNostrExtension()) {
+        setState('no-extension')
+        return
+      }
     }
 
     try {
-      // Try to get public key from extension
-      const pk = await window.nostr.getPublicKey()
-      setPubkey(pk)
-      localStorage.setItem('sanctum_admin_pubkey', pk)
+      // Full auth flow: create event, sign with extension, verify on backend
+      const result: AuthResult = await authenticateWithNostr()
+
+      setPubkey(result.admin.pubkey)
+      localStorage.setItem(STORAGE_KEYS.ADMIN_PUBKEY, result.admin.pubkey)
+      localStorage.setItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN, result.session_token)
+
+      // Track if this is a new admin (first time setup)
+      if (result.is_new) {
+        localStorage.setItem('sanctum_admin_is_new', 'true')
+      }
+
       setState('success')
 
       // Redirect after showing success
@@ -73,13 +78,16 @@ export function AdminOnboarding() {
     // Simulate connection delay
     await new Promise((resolve) => setTimeout(resolve, 1200))
 
-    // Generate mock pubkey (looks like a real npub hex)
-    const mockPubkey = 'npub1' + Array.from({ length: 59 }, () =>
+    // Generate mock pubkey (64 hex chars like a real nostr pubkey)
+    const mockPubkey = Array.from({ length: 64 }, () =>
       '0123456789abcdef'[Math.floor(Math.random() * 16)]
     ).join('')
 
     setPubkey(mockPubkey)
-    localStorage.setItem('sanctum_admin_pubkey', mockPubkey)
+    localStorage.setItem(STORAGE_KEYS.ADMIN_PUBKEY, mockPubkey)
+    // Note: Mock mode has no valid session token - admin API calls will fail with 401
+    // Use a real Nostr extension for full functionality
+    localStorage.setItem('sanctum_admin_is_new', 'true')
     setState('success')
 
     // Redirect after showing success
@@ -122,21 +130,26 @@ export function AdminOnboarding() {
             Connect with Nostr
           </button>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="px-3 bg-surface-raised text-text-muted">or for testing</span>
-            </div>
-          </div>
+          {/* Mock auth only available in DEV_MODE */}
+          {DEV_MODE && (
+            <>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="px-3 bg-surface-raised text-text-muted">or for testing</span>
+                </div>
+              </div>
 
-          <button
-            onClick={handleMockConnect}
-            className="w-full text-sm text-text-muted hover:text-text py-2 transition-colors"
-          >
-            Continue with mock identity
-          </button>
+              <button
+                onClick={handleMockConnect}
+                className="w-full text-sm text-text-muted hover:text-text py-2 transition-colors"
+              >
+                Continue with mock identity
+              </button>
+            </>
+          )}
 
           <NostrInfo />
         </div>
@@ -164,16 +177,19 @@ export function AdminOnboarding() {
           <div className="flex gap-3">
             <button
               onClick={handleRetry}
-              className="flex-1 bg-surface-overlay border border-border text-text rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-surface-raised transition-all"
+              className={`${DEV_MODE ? 'flex-1' : 'w-full'} bg-surface-overlay border border-border text-text rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-surface-raised transition-all`}
             >
               Try again
             </button>
-            <button
-              onClick={handleMockConnect}
-              className="flex-1 bg-accent text-accent-text rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-accent-hover transition-all active-press"
-            >
-              Use mock
-            </button>
+            {/* Mock auth only available in DEV_MODE */}
+            {DEV_MODE && (
+              <button
+                onClick={handleMockConnect}
+                className="flex-1 bg-accent text-accent-text rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-accent-hover transition-all active-press"
+              >
+                Use mock
+              </button>
+            )}
           </div>
         </div>
       )}

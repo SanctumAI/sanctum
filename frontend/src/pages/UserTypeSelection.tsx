@@ -126,9 +126,7 @@ export function UserTypeSelection() {
       <div className="min-h-screen bg-surface flex items-center justify-center p-4">
         <OnboardingCard
           title="Error"
-          description={error}
-          showBack
-          backTo="/auth"
+          subtitle={error}
         >
           <button
             onClick={() => window.location.reload()}
@@ -146,9 +144,7 @@ export function UserTypeSelection() {
     <div className="min-h-screen bg-surface flex items-center justify-center p-4">
       <OnboardingCard
         title={t('onboarding.userType.title', 'What describes you best?')}
-        description={t('onboarding.userType.description', 'Select the option that best fits your needs')}
-        showBack
-        backTo="/auth"
+        subtitle={t('onboarding.userType.description', 'Select the option that best fits your needs')}
       >
         <div
           className="space-y-4 mb-10"

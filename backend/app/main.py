@@ -10,7 +10,7 @@ import logging
 import time
 import re
 import math
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from neo4j import GraphDatabase
 from qdrant_client import QdrantClient
@@ -22,6 +22,7 @@ from llm import get_provider
 import database
 from models import (
     AdminAuth, AdminResponse, AdminListResponse,
+    AdminAuthRequest, AdminAuthResponse,
     InstanceSettings, InstanceSettingsResponse,
     # User Type models
     UserTypeCreate, UserTypeUpdate, UserTypeResponse, UserTypeListResponse,
@@ -32,8 +33,14 @@ from models import (
     # Database Explorer models
     ColumnInfo, TableInfo, TablesListResponse,
     TableDataResponse, DBQueryRequest, DBQueryResponse,
-    RowMutationRequest, RowMutationResponse
+    RowMutationRequest, RowMutationResponse,
+    # Magic Link Auth models
+    MagicLinkRequest, MagicLinkResponse,
+    VerifyTokenResponse, AuthUserResponse, SessionUserResponse
 )
+from nostr import verify_auth_event, get_pubkey_from_event
+import auth
+from rate_limit import RateLimiter
 
 # Embedding model config
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "intfloat/multilingual-e5-base")
@@ -69,6 +76,10 @@ app.add_middleware(
 # Include routers
 app.include_router(ingest_router)
 app.include_router(query_router)
+
+# Rate limiters for auth endpoints
+magic_link_limiter = RateLimiter(limit=5, window_seconds=60)   # 5 per minute
+admin_auth_limiter = RateLimiter(limit=10, window_seconds=60)  # 10 per minute
 
 # Configuration from environment
 NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
@@ -398,11 +409,12 @@ async def llm_smoke_test():
 
 
 @app.post("/llm/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, user: dict = Depends(auth.require_approved_user)):
     """
     Simple chat endpoint for smoke testing LLM provider.
 
     Takes a user message and returns the LLM response.
+    Requires authenticated and approved user.
     """
     try:
         provider = get_provider()
@@ -417,9 +429,9 @@ async def chat(request: ChatRequest):
 
 
 @app.post("/query", response_model=QueryResponse)
-async def query(request: QueryRequest):
+async def query(request: QueryRequest, user: dict = Depends(auth.require_approved_user)):
     """
-    RAG query endpoint.
+    RAG query endpoint. Requires authenticated and approved user.
 
     1. Embeds the question using the same model as ingestion
     2. Searches Qdrant for semantically similar claims
@@ -556,9 +568,9 @@ async def vector_search(request: VectorSearchRequest):
 
 
 @app.post("/admin/neo4j/query", response_model=Neo4jQueryResponse)
-async def neo4j_query(request: Neo4jQueryRequest):
+async def neo4j_query(request: Neo4jQueryRequest, admin: dict = Depends(auth.require_admin)):
     """
-    Execute a read-only Cypher query against Neo4j.
+    Execute a read-only Cypher query against Neo4j (requires admin auth).
 
     Only MATCH queries are allowed for safety.
     Useful for exploring the knowledge graph after ingestion.
@@ -613,37 +625,183 @@ async def neo4j_query(request: Neo4jQueryRequest):
 
 
 # =============================================================================
+# Magic Link Authentication Endpoints
+# =============================================================================
+
+@app.post("/auth/magic-link", response_model=MagicLinkResponse)
+async def send_magic_link(
+    request: Request,
+    body: MagicLinkRequest,
+    _: None = Depends(magic_link_limiter)
+):
+    """
+    Send a magic link to the user's email for authentication.
+    Creates a signed, time-limited token and sends it via email.
+    Rate limited to 5 requests per minute per IP.
+    """
+    email = body.email.strip().lower()
+    name = body.name.strip()
+
+    if not email:
+        raise HTTPException(status_code=400, detail="Email is required")
+
+    # Generate token
+    token = auth.create_magic_link_token(email, name)
+
+    # Send email (or log in mock mode)
+    success = auth.send_magic_link_email(email, token)
+
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to send magic link email")
+
+    return MagicLinkResponse(
+        success=True,
+        message="Magic link sent. Check your email."
+    )
+
+
+@app.get("/auth/verify", response_model=VerifyTokenResponse)
+async def verify_magic_link(token: str = Query(..., description="Magic link token")):
+    """
+    Verify a magic link token and create/return the user.
+    Returns a session token for subsequent authenticated requests.
+    """
+    # Verify token
+    data = auth.verify_magic_link_token(token)
+    if not data:
+        raise HTTPException(status_code=401, detail="Invalid or expired magic link")
+
+    email = data["email"]
+    name = data.get("name", "")
+
+    # Get or create user
+    user = database.get_user_by_email(email)
+    if not user:
+        # Create new user
+        user_id = database.create_user(email=email, name=name)
+        user = database.get_user(user_id)
+
+    # Create session token
+    session_token = auth.create_session_token(user["id"], email)
+
+    return VerifyTokenResponse(
+        success=True,
+        user=AuthUserResponse(
+            id=user["id"],
+            email=email,
+            name=user.get("name"),
+            user_type_id=user.get("user_type_id"),
+            approved=bool(user.get("approved", 1)),
+            created_at=user.get("created_at")
+        ),
+        session_token=session_token
+    )
+
+
+@app.get("/auth/me", response_model=SessionUserResponse)
+async def get_current_user(token: str = Query(None, description="Session token")):
+    """
+    Get the current authenticated user from session token.
+    Returns authenticated: false if no valid session.
+    """
+    if not token:
+        return SessionUserResponse(authenticated=False)
+
+    # Verify session
+    data = auth.verify_session_token(token)
+    if not data:
+        return SessionUserResponse(authenticated=False)
+
+    # Get user
+    user = database.get_user(data["user_id"])
+    if not user:
+        return SessionUserResponse(authenticated=False)
+
+    return SessionUserResponse(
+        authenticated=True,
+        user=AuthUserResponse(
+            id=user["id"],
+            email=user.get("email", data["email"]),
+            name=user.get("name"),
+            user_type_id=user.get("user_type_id"),
+            approved=bool(user.get("approved", 1)),
+            created_at=user.get("created_at")
+        )
+    )
+
+
+# =============================================================================
 # Admin & User Management Endpoints (SQLite)
 # =============================================================================
 
 # --- Admin Authentication ---
 
-@app.post("/admin/auth", response_model=AdminResponse)
-async def admin_auth(request: AdminAuth):
+@app.post("/admin/auth", response_model=AdminAuthResponse)
+async def admin_auth(
+    request: Request,
+    body: AdminAuthRequest,
+    _: None = Depends(admin_auth_limiter)
+):
     """
-    Authenticate or register an admin by Nostr pubkey.
-    If the pubkey exists, returns the admin.
-    If not, creates a new admin entry.
-    """
-    existing = database.get_admin_by_pubkey(request.pubkey)
-    if existing:
-        return AdminResponse(**existing)
+    Authenticate or register an admin by verifying a signed Nostr event.
 
-    admin_id = database.add_admin(request.pubkey)
-    admin = database.get_admin_by_pubkey(request.pubkey)
-    return AdminResponse(**admin)
+    The event must:
+    - Be kind 22242 (Sanctum auth event)
+    - Have action tag = "admin_auth"
+    - Have valid BIP-340 Schnorr signature
+    - Be signed within the last 5 minutes
+
+    Rate limited to 10 requests per minute per IP.
+    """
+    # Convert Pydantic model to dict for verification
+    event = body.event.model_dump()
+
+    # Verify the signed event
+    valid, error = verify_auth_event(event)
+    if not valid:
+        raise HTTPException(status_code=401, detail=error)
+
+    # Extract pubkey from verified event
+    pubkey = get_pubkey_from_event(event)
+    if not pubkey:
+        raise HTTPException(status_code=401, detail="Missing pubkey in event")
+
+    # Check if admin exists
+    existing = database.get_admin_by_pubkey(pubkey)
+    is_new = existing is None
+
+    if is_new:
+        # Create new admin
+        database.add_admin(pubkey)
+        admin = database.get_admin_by_pubkey(pubkey)
+    else:
+        admin = existing
+
+    # Instance is initialized if there's at least one admin
+    all_admins = database.list_admins()
+    instance_initialized = len(all_admins) > 0
+
+    # Create session token for subsequent authenticated requests
+    session_token = auth.create_admin_session_token(admin["id"], pubkey)
+
+    return AdminAuthResponse(
+        admin=AdminResponse(**admin),
+        is_new=is_new,
+        instance_initialized=instance_initialized,
+        session_token=session_token
+    )
 
 
 @app.get("/admin/list", response_model=AdminListResponse)
-async def list_admins():
-    """List all admins"""
+async def list_admins(admin: dict = Depends(auth.require_admin)):
+    """List all admins (requires admin auth)"""
     admins = database.list_admins()
     return AdminListResponse(admins=[AdminResponse(**a) for a in admins])
 
 
 @app.delete("/admin/{pubkey}", response_model=SuccessResponse)
-async def remove_admin(pubkey: str):
-    """Remove an admin by pubkey"""
+async def remove_admin(pubkey: str, admin: dict = Depends(auth.require_admin)):
+    """Remove an admin by pubkey (requires admin auth)"""
     if database.remove_admin(pubkey):
         return SuccessResponse(success=True, message="Admin removed")
     raise HTTPException(status_code=404, detail="Admin not found")
@@ -652,15 +810,15 @@ async def remove_admin(pubkey: str):
 # --- Instance Settings ---
 
 @app.get("/admin/settings", response_model=InstanceSettingsResponse)
-async def get_settings():
-    """Get all instance settings"""
+async def get_settings(admin: dict = Depends(auth.require_admin)):
+    """Get all instance settings (requires admin auth)"""
     settings = database.get_all_settings()
     return InstanceSettingsResponse(settings=settings)
 
 
 @app.put("/admin/settings", response_model=InstanceSettingsResponse)
-async def update_settings(settings: InstanceSettings):
-    """Update instance settings"""
+async def update_settings(settings: InstanceSettings, admin: dict = Depends(auth.require_admin)):
+    """Update instance settings (requires admin auth)"""
     settings_dict = settings.model_dump(exclude_unset=True)
     database.update_settings(settings_dict)
     return InstanceSettingsResponse(settings=database.get_all_settings())
@@ -675,16 +833,32 @@ async def get_user_types_public():
     return UserTypeListResponse(types=[UserTypeResponse(**t) for t in types])
 
 
+@app.get("/user-fields", response_model=FieldDefinitionListResponse)
+async def get_user_fields_public(
+    user_type_id: Optional[int] = Query(None),
+    include_global: bool = Query(True)
+):
+    """
+    Public endpoint: Get user field definitions for onboarding UI.
+    If user_type_id is provided, returns type-specific fields.
+    If include_global is True (default), also includes global fields.
+    """
+    fields = database.get_field_definitions(user_type_id=user_type_id, include_global=include_global)
+    return FieldDefinitionListResponse(
+        fields=[FieldDefinitionResponse(**f) for f in fields]
+    )
+
+
 @app.get("/admin/user-types", response_model=UserTypeListResponse)
-async def list_user_types():
-    """Get all user types"""
+async def list_user_types(admin: dict = Depends(auth.require_admin)):
+    """Get all user types (requires admin auth)"""
     types = database.list_user_types()
     return UserTypeListResponse(types=[UserTypeResponse(**t) for t in types])
 
 
 @app.post("/admin/user-types", response_model=UserTypeResponse)
-async def create_user_type(user_type: UserTypeCreate):
-    """Create a new user type"""
+async def create_user_type(user_type: UserTypeCreate, admin: dict = Depends(auth.require_admin)):
+    """Create a new user type (requires admin auth)"""
     try:
         type_id = database.create_user_type(
             name=user_type.name,
@@ -700,8 +874,8 @@ async def create_user_type(user_type: UserTypeCreate):
 
 
 @app.put("/admin/user-types/{type_id}", response_model=UserTypeResponse)
-async def update_user_type(type_id: int, user_type: UserTypeUpdate):
-    """Update a user type"""
+async def update_user_type(type_id: int, user_type: UserTypeUpdate, admin: dict = Depends(auth.require_admin)):
+    """Update a user type (requires admin auth)"""
     existing = database.get_user_type(type_id)
     if not existing:
         raise HTTPException(status_code=404, detail="User type not found")
@@ -717,8 +891,8 @@ async def update_user_type(type_id: int, user_type: UserTypeUpdate):
 
 
 @app.delete("/admin/user-types/{type_id}", response_model=SuccessResponse)
-async def delete_user_type(type_id: int):
-    """Delete a user type (cascades to field definitions)"""
+async def delete_user_type(type_id: int, admin: dict = Depends(auth.require_admin)):
+    """Delete a user type (requires admin auth, cascades to field definitions)"""
     if database.delete_user_type(type_id):
         return SuccessResponse(success=True, message="User type deleted")
     raise HTTPException(status_code=404, detail="User type not found")
@@ -727,8 +901,8 @@ async def delete_user_type(type_id: int):
 # --- User Field Definitions ---
 
 @app.get("/admin/user-fields", response_model=FieldDefinitionListResponse)
-async def get_field_definitions(user_type_id: Optional[int] = Query(None)):
-    """Get user field definitions, optionally filtered by type.
+async def get_field_definitions(user_type_id: Optional[int] = Query(None), admin: dict = Depends(auth.require_admin)):
+    """Get user field definitions (requires admin auth).
     If user_type_id is provided, returns global fields + type-specific fields.
     """
     fields = database.get_field_definitions(user_type_id=user_type_id, include_global=True)
@@ -738,8 +912,8 @@ async def get_field_definitions(user_type_id: Optional[int] = Query(None)):
 
 
 @app.post("/admin/user-fields", response_model=FieldDefinitionResponse)
-async def create_field_definition(field: FieldDefinitionCreate):
-    """Create a new user field definition.
+async def create_field_definition(field: FieldDefinitionCreate, admin: dict = Depends(auth.require_admin)):
+    """Create a new user field definition (requires admin auth).
     user_type_id: null = global field (shown for all types), or ID for type-specific
     """
     # Validate user_type_id if provided
@@ -764,8 +938,8 @@ async def create_field_definition(field: FieldDefinitionCreate):
 
 
 @app.put("/admin/user-fields/{field_id}", response_model=FieldDefinitionResponse)
-async def update_field_definition(field_id: int, field: FieldDefinitionUpdate):
-    """Update a field definition"""
+async def update_field_definition(field_id: int, field: FieldDefinitionUpdate, admin: dict = Depends(auth.require_admin)):
+    """Update a field definition (requires admin auth)"""
     existing = database.get_field_definition_by_id(field_id)
     if not existing:
         raise HTTPException(status_code=404, detail="Field definition not found")
@@ -788,8 +962,8 @@ async def update_field_definition(field_id: int, field: FieldDefinitionUpdate):
 
 
 @app.delete("/admin/user-fields/{field_id}", response_model=SuccessResponse)
-async def delete_field_definition(field_id: int):
-    """Delete a user field definition"""
+async def delete_field_definition(field_id: int, admin: dict = Depends(auth.require_admin)):
+    """Delete a user field definition (requires admin auth)"""
     if database.delete_field_definition(field_id):
         return SuccessResponse(success=True, message="Field definition deleted")
     raise HTTPException(status_code=404, detail="Field definition not found")
@@ -798,8 +972,8 @@ async def delete_field_definition(field_id: int):
 # --- Users ---
 
 @app.get("/admin/users", response_model=UserListResponse)
-async def list_users():
-    """List all users with their field values"""
+async def list_users(admin: dict = Depends(auth.require_admin)):
+    """List all users with their field values (requires admin auth)"""
     users = database.list_users()
     return UserListResponse(users=[UserResponse(**u) for u in users])
 
@@ -931,9 +1105,9 @@ def get_table_row_count(table_name: str) -> int:
 
 
 @app.get("/admin/db/tables", response_model=TablesListResponse)
-async def list_db_tables():
+async def list_db_tables(admin: dict = Depends(auth.require_admin)):
     """
-    List all tables with metadata.
+    List all tables with metadata (requires admin auth).
     Returns table names, column info, and row counts.
     """
     conn = database.get_connection()
@@ -964,10 +1138,11 @@ async def list_db_tables():
 async def get_db_table_data(
     table_name: str,
     page: int = Query(1, ge=1),
-    page_size: int = Query(50, ge=1, le=500)
+    page_size: int = Query(50, ge=1, le=500),
+    admin: dict = Depends(auth.require_admin)
 ):
     """
-    Get table schema and paginated data.
+    Get table schema and paginated data (requires admin auth).
     """
     if table_name not in ALLOWED_TABLES:
         raise HTTPException(status_code=403, detail=f"Access to table '{table_name}' is not allowed")
@@ -999,8 +1174,8 @@ async def get_db_table_data(
 
 
 @app.get("/admin/db/tables/{table_name}/schema")
-async def get_db_table_schema(table_name: str):
-    """Get just the table schema without data"""
+async def get_db_table_schema(table_name: str, admin: dict = Depends(auth.require_admin)):
+    """Get just the table schema without data (requires admin auth)"""
     if table_name not in ALLOWED_TABLES:
         raise HTTPException(status_code=403, detail=f"Access to table '{table_name}' is not allowed")
 
@@ -1011,9 +1186,9 @@ async def get_db_table_schema(table_name: str):
 
 
 @app.post("/admin/db/query", response_model=DBQueryResponse)
-async def execute_db_query(request: DBQueryRequest):
+async def execute_db_query(request: DBQueryRequest, admin: dict = Depends(auth.require_admin)):
     """
-    Execute a read-only SQL query.
+    Execute a read-only SQL query (requires admin auth).
     Only SELECT statements are allowed for safety.
     """
     sql = request.sql.strip()
@@ -1068,8 +1243,8 @@ async def execute_db_query(request: DBQueryRequest):
 
 
 @app.post("/admin/db/tables/{table_name}/rows", response_model=RowMutationResponse)
-async def insert_db_row(table_name: str, request: RowMutationRequest):
-    """Insert a new row into a table"""
+async def insert_db_row(table_name: str, request: RowMutationRequest, admin: dict = Depends(auth.require_admin)):
+    """Insert a new row into a table (requires admin auth)"""
     if table_name not in ALLOWED_TABLES:
         raise HTTPException(status_code=403, detail=f"Access to table '{table_name}' is not allowed")
 
@@ -1099,8 +1274,8 @@ async def insert_db_row(table_name: str, request: RowMutationRequest):
 
 
 @app.put("/admin/db/tables/{table_name}/rows/{row_id}", response_model=RowMutationResponse)
-async def update_db_row(table_name: str, row_id: int, request: RowMutationRequest):
-    """Update an existing row in a table"""
+async def update_db_row(table_name: str, row_id: int, request: RowMutationRequest, admin: dict = Depends(auth.require_admin)):
+    """Update an existing row in a table (requires admin auth)"""
     if table_name not in ALLOWED_TABLES:
         raise HTTPException(status_code=403, detail=f"Access to table '{table_name}' is not allowed")
 
@@ -1130,8 +1305,8 @@ async def update_db_row(table_name: str, row_id: int, request: RowMutationReques
 
 
 @app.delete("/admin/db/tables/{table_name}/rows/{row_id}", response_model=RowMutationResponse)
-async def delete_db_row(table_name: str, row_id: int):
-    """Delete a row from a table"""
+async def delete_db_row(table_name: str, row_id: int, admin: dict = Depends(auth.require_admin)):
+    """Delete a row from a table (requires admin auth)"""
     if table_name not in ALLOWED_TABLES:
         raise HTTPException(status_code=403, detail=f"Access to table '{table_name}' is not allowed")
 

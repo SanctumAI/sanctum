@@ -158,18 +158,6 @@ export function ChatPage() {
         if (data.session_id) {
           setRagSessionId(data.session_id)
         }
-        
-        // Show clarifying questions if any
-        if (data.clarifying_questions && data.clarifying_questions.length > 0) {
-          // Questions are already in the answer from the LLM
-        }
-        
-        // Show sources if available
-        if (data.sources && data.sources.length > 0) {
-          responseContent += '\n\n---\n**Sources:** '
-          const sourceFiles = [...new Set(data.sources.map((s: { source_file: string }) => s.source_file).filter(Boolean))]
-          responseContent += sourceFiles.slice(0, 3).join(', ')
-        }
       } else {
         responseContent = data.message
       }

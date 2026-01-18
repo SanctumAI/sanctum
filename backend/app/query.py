@@ -359,7 +359,7 @@ def _call_llm_empathetic(question: str, context: str, session: dict) -> tuple[st
 1. Warmth first. Acknowledge their feelings in ONE sentence.
 2. If you see "IMPORTANT TIMING" in context, calmly but clearly explain why timing matters. Don't alarm them - just help them understand it's worth acting soon.
 3. Give ONE clear next step.
-4. Ask 1-2 questions if you need more info (start line with "?").
+4. If you need more info, ask 1-2 questions at the end. Put each question on its own line, like a normal sentence. Do NOT start with "?" symbol.
 5. NEVER invent organization names. Say "search online for human rights help in [country]."
 6. Personal choices (leave? go public?): brief pros/cons, then "Only you can decide."
 7. {jurisdiction_note}

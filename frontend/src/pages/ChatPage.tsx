@@ -87,7 +87,8 @@ export function ChatPage() {
         ? { question: content, top_k: 5 }
         : { message: content }
 
-      const token = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
+      // Admin token takes priority, fall back to user token
+      const token = localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN) || localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
 
       const res = await fetch(`${API_BASE}${endpoint}`, {
         method: 'POST',

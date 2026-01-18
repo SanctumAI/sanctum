@@ -1,0 +1,3 @@
+# Sanctum ingest logs directory
+# Job logs: job_{job_id}.log
+# Main ingest log: ingest.log

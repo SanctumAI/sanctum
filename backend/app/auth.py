@@ -277,3 +277,38 @@ async def require_approved_user(user: dict = Depends(get_current_user)) -> dict:
     if not user.get("approved"):
         raise HTTPException(status_code=403, detail="User not approved")
     return user
+
+
+async def require_admin_or_approved_user(authorization: Optional[str] = Header(None)) -> dict:
+    """
+    FastAPI dependency that accepts EITHER:
+    - A valid admin session token, OR
+    - A valid approved user session token
+    
+    Use this on endpoints (like /llm/chat) that should be accessible to both admins and users.
+    """
+    import database
+
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+
+    token = authorization[7:]
+    
+    # Try admin token first
+    admin_data = verify_admin_session_token(token)
+    if admin_data:
+        admin = database.get_admin_by_pubkey(admin_data["pubkey"])
+        if admin:
+            return {"id": admin["id"], "type": "admin", "approved": True, "pubkey": admin_data["pubkey"]}
+    
+    # Try user token
+    user_data = verify_session_token(token)
+    if user_data:
+        user = database.get_user(user_data["user_id"])
+        if user:
+            if not user.get("approved"):
+                raise HTTPException(status_code=403, detail="User not approved")
+            user["type"] = "user"
+            return user
+    
+    raise HTTPException(status_code=401, detail="Invalid or expired token")

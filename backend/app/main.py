@@ -407,12 +407,12 @@ async def llm_smoke_test():
 
 
 @app.post("/llm/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest, user: dict = Depends(auth.require_approved_user)):
+async def chat(request: ChatRequest, user: dict = Depends(auth.require_admin_or_approved_user)):
     """
     Simple chat endpoint for smoke testing LLM provider.
 
     Takes a user message and returns the LLM response.
-    Requires authenticated and approved user.
+    Requires authenticated admin OR approved user.
     """
     try:
         provider = get_provider()
@@ -427,9 +427,9 @@ async def chat(request: ChatRequest, user: dict = Depends(auth.require_approved_
 
 
 @app.post("/query", response_model=QueryResponse)
-async def query(request: QueryRequest, user: dict = Depends(auth.require_approved_user)):
+async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_or_approved_user)):
     """
-    RAG query endpoint. Requires authenticated and approved user.
+    RAG query endpoint. Requires authenticated admin OR approved user.
 
     1. Embeds the question using the same model as ingestion
     2. Searches Qdrant for semantically similar claims
@@ -442,10 +442,10 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_approve
         model = get_embedding_model()
         query_embedding = model.encode(f"query: {request.question}").tolist()
 
-        # 2. Search Qdrant for similar vectors
+        # 2. Search Qdrant for similar vectors - use sanctum_knowledge for real data
         qdrant = get_qdrant_client()
         results = qdrant.search(
-            collection_name=COLLECTION_NAME,
+            collection_name="sanctum_knowledge",
             query_vector=query_embedding,
             limit=request.top_k
         )
@@ -458,55 +458,79 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_approve
                 provider="none"
             )
 
-        # 3. Resolve to Neo4j for full claim + source data
-        claim_ids = [r.payload["claim_id"] for r in results]
-        driver = get_neo4j_driver()
-        with driver.session() as session:
-            records = session.run("""
-                MATCH (c:Claim)-[:SUPPORTED_BY]->(s:Source)
-                WHERE c.id IN $claim_ids
-                RETURN c.id as claim_id, c.text as claim_text,
-                       s.title as source_title, s.url as source_url
-            """, claim_ids=claim_ids)
-            claims = [dict(r) for r in records]
-        driver.close()
+        # 3. Extract facts directly from Qdrant payload (ingested data structure)
+        facts = []
+        for r in results:
+            payload = r.payload
+            # Handle fact-type entries from ingested documents
+            if payload.get("type") == "fact":
+                facts.append({
+                    "fact_text": payload.get("fact_text", ""),
+                    "from_entity": payload.get("from_entity", ""),
+                    "to_entity": payload.get("to_entity", ""),
+                    "rel_type": payload.get("rel_type", ""),
+                    "source_file": payload.get("source_file", "Unknown"),
+                    "evidence": payload.get("evidence", ""),
+                    "score": r.score
+                })
+            # Handle chunk-type entries
+            elif payload.get("type") == "chunk":
+                facts.append({
+                    "fact_text": payload.get("text", "")[:500],
+                    "source_file": payload.get("source_file", "Unknown"),
+                    "score": r.score
+                })
+            # Fallback for smoke test data structure
+            elif "claim_id" in payload:
+                facts.append({
+                    "fact_text": payload.get("text", ""),
+                    "source_file": "smoke_test",
+                    "score": r.score
+                })
 
-        if not claims:
+        if not facts:
             return QueryResponse(
-                answer="Retrieved vectors but could not resolve to graph data.",
+                answer="Retrieved vectors but could not extract fact data.",
                 citations=[],
                 model="none",
                 provider="none"
             )
 
-        # 4. Build context from retrieved claims
-        context = "\n".join([
-            f"- {c['claim_text']} (Source: {c['source_title']})"
-            for c in claims
-        ])
+        # 4. Build context from retrieved facts
+        context_lines = []
+        for i, f in enumerate(facts, 1):
+            if f.get("rel_type"):
+                # Structured fact
+                context_lines.append(f"[{i}] {f['from_entity']} {f['rel_type']} {f['to_entity']}")
+                if f.get("evidence"):
+                    context_lines.append(f"    Evidence: {f['evidence']}")
+            else:
+                # Plain text chunk
+                context_lines.append(f"[{i}] {f['fact_text']}")
+        context = "\n".join(context_lines)
 
         # 5. Generate answer using LLM
-        prompt = f"""Answer the question using ONLY the context below. Cite your sources.
+        prompt = f"""Answer the question using ONLY the facts below. Reference facts by their number [1], [2], etc.
 
-Context:
+FACTS:
 {context}
 
 Question: {request.question}
 
-Answer:"""
+Answer (cite fact numbers):"""
 
         provider = get_provider()
         result = provider.complete(prompt)
 
-        # Build citations from retrieved claims
+        # Build citations from retrieved facts
         citations = [
             Citation(
-                claim_id=c["claim_id"],
-                claim_text=c["claim_text"],
-                source_title=c["source_title"],
-                source_url=c.get("source_url")
+                claim_id=f"fact_{i}",
+                claim_text=f.get("fact_text", f"{f.get('from_entity', '')} {f.get('rel_type', '')} {f.get('to_entity', '')}"),
+                source_title=f.get("source_file", "Unknown"),
+                source_url=None
             )
-            for c in claims
+            for i, f in enumerate(facts, 1)
         ]
 
         return QueryResponse(

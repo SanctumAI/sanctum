@@ -1,8 +1,21 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Sun, Moon, Settings, Upload, Database, User, MessageCircle } from 'lucide-react'
+import { Sun, Moon, Settings, Upload, Database, User, MessageCircle, ChevronDown, Key, Shield, Users, Sliders, FileText, Zap } from 'lucide-react'
 import { useTheme } from '../theme'
-import { API_BASE } from '../types/onboarding'
+import {
+  API_BASE,
+  STORAGE_KEYS,
+  AdminResponse,
+  InstanceSettingsResponse,
+  MagicLinkResponse,
+  SessionCheckResponse,
+  TableInfo,
+  DBQueryResponse,
+  FieldDefinitionResponse,
+  UserWithFieldsResponse
+} from '../types/onboarding'
+import { authenticateWithNostr, hasNostrExtension, AuthResult } from '../utils/nostrAuth'
+import { adminFetch, clearAdminAuth } from '../utils/adminApi'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -171,6 +184,71 @@ function CodeBlock({ children }: { children: React.ReactNode }) {
   )
 }
 
+function CollapsibleSection({
+  title,
+  moduleNumber,
+  defaultOpen = false,
+  badge,
+  icon: Icon,
+  children
+}: {
+  title: string
+  moduleNumber: number
+  defaultOpen?: boolean
+  badge?: string
+  icon?: React.ComponentType<{ className?: string }>
+  children: React.ReactNode
+}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen)
+
+  return (
+    <Card className="mb-6">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between text-left"
+      >
+        <div className="flex items-center gap-2">
+          {Icon && <Icon className="w-5 h-5 text-accent" />}
+          <span className="text-lg font-semibold text-text">
+            {moduleNumber}. {title}
+          </span>
+          {badge && (
+            <span className="text-xs px-2 py-0.5 rounded bg-accent-subtle text-accent">
+              {badge}
+            </span>
+          )}
+        </div>
+        <ChevronDown className={`w-5 h-5 text-text-muted transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+      {isOpen && <div className="mt-4 pt-4 border-t border-border">{children}</div>}
+    </Card>
+  )
+}
+
+function SectionHeader({ title, icon: Icon }: { title: string; icon?: React.ComponentType<{ className?: string }> }) {
+  return (
+    <div className="flex items-center gap-2 mb-4 mt-8">
+      {Icon && <Icon className="w-5 h-5 text-accent" />}
+      <h2 className="text-xl font-bold text-text">{title}</h2>
+    </div>
+  )
+}
+
+function StatusBadge({ status }: { status: 'success' | 'warning' | 'error' | 'info' }) {
+  const classes = {
+    success: 'bg-success-subtle text-success',
+    warning: 'bg-warning-subtle text-warning',
+    error: 'bg-error-subtle text-error',
+    info: 'bg-accent-subtle text-accent'
+  }
+  return (
+    <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded ${classes[status]}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${status === 'success' ? 'bg-success' : status === 'warning' ? 'bg-warning' : status === 'error' ? 'bg-error' : 'bg-accent'}`} />
+      {status}
+    </span>
+  )
+}
+
 export function TestDashboard() {
   // Health check state
   const [health, setHealth] = useState<Record<string, unknown> | null>(null)
@@ -244,7 +322,6 @@ export function TestDashboard() {
   const [userTypesLoading, setUserTypesLoading] = useState(false)
   const [selectedUserTypeId, setSelectedUserTypeId] = useState<number | null>(null)
   const [fieldDefinitions, setFieldDefinitions] = useState<FieldDefinition[] | null>(null)
-  const [fieldsLoading, setFieldsLoading] = useState(false)
   const [userFields, setUserFields] = useState<Record<string, string>>({})
   const [testPubkey, setTestPubkey] = useState('')
   const [createUserResult, setCreateUserResult] = useState<Record<string, unknown> | null>(null)
@@ -254,6 +331,100 @@ export function TestDashboard() {
   const [cypherQuery, setCypherQuery] = useState('MATCH (n) RETURN n LIMIT 10')
   const [neo4jResult, setNeo4jResult] = useState<Neo4jQueryResult | null>(null)
   const [neo4jLoading, setNeo4jLoading] = useState(false)
+
+  // === NEW MODULE STATE ===
+
+  // Admin session state (shared across admin modules)
+  const [adminToken, setAdminToken] = useState<string>(() => {
+    return localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN) || ''
+  })
+  const [, setAdminPubkey] = useState<string>(() => {
+    return localStorage.getItem(STORAGE_KEYS.ADMIN_PUBKEY) || ''
+  })
+
+  // Module 10: Authentication Testing state
+  const [magicLinkEmail, setMagicLinkEmail] = useState('')
+  const [magicLinkName, setMagicLinkName] = useState('')
+  const [magicLinkResult, setMagicLinkResult] = useState<MagicLinkResponse | null>(null)
+  const [magicLinkLoading, setMagicLinkLoading] = useState(false)
+
+  const [verifyToken, setVerifyToken] = useState('')
+  const [verifyResult, setVerifyResult] = useState<Record<string, unknown> | null>(null)
+  const [verifyLoading, setVerifyLoading] = useState(false)
+
+  const [sessionCheckToken, setSessionCheckToken] = useState('')
+  const [sessionCheckResult, setSessionCheckResult] = useState<SessionCheckResponse | null>(null)
+  const [sessionCheckLoading, setSessionCheckLoading] = useState(false)
+
+  const [nostrAuthLoading, setNostrAuthLoading] = useState(false)
+  const [nostrAuthResult, setNostrAuthResult] = useState<AuthResult | null>(null)
+  const [nostrAuthError, setNostrAuthError] = useState<string | null>(null)
+
+  const [adminsList, setAdminsList] = useState<AdminResponse[] | null>(null)
+  const [adminsLoading, setAdminsLoading] = useState(false)
+  const [removeAdminPubkey, setRemoveAdminPubkey] = useState('')
+  const [removeAdminLoading, setRemoveAdminLoading] = useState(false)
+  const [removeAdminResult, setRemoveAdminResult] = useState<Record<string, unknown> | null>(null)
+
+  // Module 11: Instance Settings state
+  const [instanceSettings, setInstanceSettings] = useState<Record<string, string> | null>(null)
+  const [settingsLoading, setSettingsLoading] = useState(false)
+  const [settingsForm, setSettingsForm] = useState<Record<string, string>>({})
+  const [saveSettingsLoading, setSaveSettingsLoading] = useState(false)
+  const [saveSettingsResult, setSaveSettingsResult] = useState<Record<string, unknown> | null>(null)
+
+  // Module 12: User Type Management state
+  const [adminUserTypes, setAdminUserTypes] = useState<UserType[] | null>(null)
+  const [adminUserTypesLoading, setAdminUserTypesLoading] = useState(false)
+  const [newTypeName, setNewTypeName] = useState('')
+  const [newTypeDescription, setNewTypeDescription] = useState('')
+  const [newTypeOrder, setNewTypeOrder] = useState(0)
+  const [createTypeLoading, setCreateTypeLoading] = useState(false)
+  const [createTypeResult, setCreateTypeResult] = useState<Record<string, unknown> | null>(null)
+  const [editingTypeId, setEditingTypeId] = useState<number | null>(null)
+  const [editTypeName, setEditTypeName] = useState('')
+  const [editTypeDescription, setEditTypeDescription] = useState('')
+  const [editTypeOrder, setEditTypeOrder] = useState(0)
+  const [updateTypeLoading, setUpdateTypeLoading] = useState(false)
+  const [deleteTypeLoading, setDeleteTypeLoading] = useState(false)
+
+  // Module 13: User Field Definitions state
+  const [adminFieldDefs, setAdminFieldDefs] = useState<FieldDefinitionResponse[] | null>(null)
+  const [fieldDefsLoading, setFieldDefsLoading] = useState(false)
+  const [fieldTypeFilter, setFieldTypeFilter] = useState<number | string>('all')
+  const [newFieldName, setNewFieldName] = useState('')
+  const [newFieldType, setNewFieldType] = useState('text')
+  const [newFieldRequired, setNewFieldRequired] = useState(false)
+  const [newFieldOrder, setNewFieldOrder] = useState(0)
+  const [newFieldUserTypeId, setNewFieldUserTypeId] = useState<number | string>('global')
+  const [createFieldLoading, setCreateFieldLoading] = useState(false)
+  const [createFieldResult, setCreateFieldResult] = useState<Record<string, unknown> | null>(null)
+  const [deleteFieldLoading, setDeleteFieldLoading] = useState(false)
+
+  // Module 14: User Management state
+  const [allUsers, setAllUsers] = useState<UserWithFieldsResponse[] | null>(null)
+  const [usersLoading, setUsersLoading] = useState(false)
+  const [lookupUserId, setLookupUserId] = useState('')
+  const [singleUser, setSingleUser] = useState<UserWithFieldsResponse | null>(null)
+  const [lookupLoading, setLookupLoading] = useState(false)
+  const [updateUserLoading, setUpdateUserLoading] = useState(false)
+  const [updateUserResult, setUpdateUserResult] = useState<Record<string, unknown> | null>(null)
+  const [deleteUserLoading, setDeleteUserLoading] = useState(false)
+
+  // Module 15: Database Explorer state
+  const [dbTables, setDbTables] = useState<TableInfo[] | null>(null)
+  const [dbTablesLoading, setDbTablesLoading] = useState(false)
+  const [selectedDbTable, setSelectedDbTable] = useState<string | null>(null)
+  const [tableData, setTableData] = useState<{ columns: string[]; rows: Record<string, unknown>[] } | null>(null)
+  const [tableDataLoading, setTableDataLoading] = useState(false)
+  const [dbQuery, setDbQuery] = useState('SELECT * FROM users LIMIT 10')
+  const [dbQueryResult, setDbQueryResult] = useState<DBQueryResponse | null>(null)
+  const [dbQueryLoading, setDbQueryLoading] = useState(false)
+
+  // Module 16: Rate Limiting Test state
+  const [rateLimitTestType, setRateLimitTestType] = useState<'magic_link' | 'admin_auth'>('magic_link')
+  const [rateLimitResults, setRateLimitResults] = useState<{ success: number; blocked: number; responses: string[] }>({ success: 0, blocked: 0, responses: [] })
+  const [rateLimitTesting, setRateLimitTesting] = useState(false)
 
   // API calls
   const checkHealth = async () => {
@@ -519,7 +690,6 @@ export function TestDashboard() {
   }
 
   const fetchFieldDefinitions = async (typeId: number | null) => {
-    setFieldsLoading(true)
     try {
       const url = typeId
         ? `${API_BASE}/admin/user-fields?user_type_id=${typeId}`
@@ -531,8 +701,6 @@ export function TestDashboard() {
       setUserFields({})
     } catch (e) {
       setFieldDefinitions(null)
-    } finally {
-      setFieldsLoading(false)
     }
   }
 
@@ -575,6 +743,441 @@ export function TestDashboard() {
     } finally {
       setNeo4jLoading(false)
     }
+  }
+
+  // === NEW MODULE API CALLS ===
+
+  // Admin session helpers
+  const saveAdminSession = (token: string, pubkey: string) => {
+    localStorage.setItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN, token)
+    localStorage.setItem(STORAGE_KEYS.ADMIN_PUBKEY, pubkey)
+    setAdminToken(token)
+    setAdminPubkey(pubkey)
+  }
+
+  const clearAdminSession = () => {
+    clearAdminAuth()
+    setAdminToken('')
+    setAdminPubkey('')
+  }
+
+  // Module 10: Authentication API calls
+  const sendMagicLink = async () => {
+    if (!magicLinkEmail.trim()) return
+    setMagicLinkLoading(true)
+    setMagicLinkResult(null)
+    try {
+      const res = await fetch(`${API_BASE}/auth/magic-link`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: magicLinkEmail.trim(), name: magicLinkName.trim() || null })
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setMagicLinkResult({ success: false, message: data.detail || `HTTP ${res.status}` })
+      } else {
+        setMagicLinkResult(data)
+      }
+    } catch (e) {
+      setMagicLinkResult({ success: false, message: e instanceof Error ? e.message : 'Failed' })
+    } finally {
+      setMagicLinkLoading(false)
+    }
+  }
+
+  const verifyMagicLink = async () => {
+    if (!verifyToken.trim()) return
+    setVerifyLoading(true)
+    setVerifyResult(null)
+    try {
+      const res = await fetch(`${API_BASE}/auth/verify?token=${encodeURIComponent(verifyToken.trim())}`)
+      setVerifyResult(await res.json())
+    } catch (e) {
+      setVerifyResult({ error: e instanceof Error ? e.message : 'Failed' })
+    } finally {
+      setVerifyLoading(false)
+    }
+  }
+
+  const checkAuthStatus = async () => {
+    if (!sessionCheckToken.trim()) return
+    setSessionCheckLoading(true)
+    setSessionCheckResult(null)
+    try {
+      const res = await fetch(`${API_BASE}/auth/me?token=${encodeURIComponent(sessionCheckToken.trim())}`)
+      setSessionCheckResult(await res.json())
+    } catch (e) {
+      setSessionCheckResult({ authenticated: false, user: null })
+    } finally {
+      setSessionCheckLoading(false)
+    }
+  }
+
+  const authenticateAdmin = async () => {
+    setNostrAuthLoading(true)
+    setNostrAuthResult(null)
+    setNostrAuthError(null)
+    try {
+      const result = await authenticateWithNostr()
+      setNostrAuthResult(result)
+      saveAdminSession(result.session_token, result.admin.pubkey)
+    } catch (e) {
+      setNostrAuthError(e instanceof Error ? e.message : 'Failed')
+    } finally {
+      setNostrAuthLoading(false)
+    }
+  }
+
+  const fetchAdmins = async () => {
+    setAdminsLoading(true)
+    setAdminsList(null)
+    try {
+      const res = await adminFetch('/admin/list')
+      const data = await res.json()
+      setAdminsList(data.admins)
+    } catch (e) {
+      setAdminsList(null)
+    } finally {
+      setAdminsLoading(false)
+    }
+  }
+
+  const removeAdmin = async () => {
+    if (!removeAdminPubkey.trim()) return
+    setRemoveAdminLoading(true)
+    setRemoveAdminResult(null)
+    try {
+      const res = await adminFetch(`/admin/${removeAdminPubkey.trim()}`, { method: 'DELETE' })
+      setRemoveAdminResult(await res.json())
+      // Refresh admins list
+      fetchAdmins()
+    } catch (e) {
+      setRemoveAdminResult({ error: e instanceof Error ? e.message : 'Failed' })
+    } finally {
+      setRemoveAdminLoading(false)
+    }
+  }
+
+  // Module 11: Instance Settings API calls
+  const fetchInstanceSettings = async () => {
+    setSettingsLoading(true)
+    setInstanceSettings(null)
+    try {
+      const res = await adminFetch('/admin/settings')
+      const data: InstanceSettingsResponse = await res.json()
+      setInstanceSettings(data.settings)
+      setSettingsForm(data.settings)
+    } catch (e) {
+      setInstanceSettings(null)
+    } finally {
+      setSettingsLoading(false)
+    }
+  }
+
+  const saveInstanceSettings = async () => {
+    setSaveSettingsLoading(true)
+    setSaveSettingsResult(null)
+    try {
+      const res = await adminFetch('/admin/settings', {
+        method: 'PUT',
+        body: JSON.stringify({ settings: settingsForm })
+      })
+      const data = await res.json()
+      setSaveSettingsResult(data)
+      setInstanceSettings(settingsForm)
+    } catch (e) {
+      setSaveSettingsResult({ error: e instanceof Error ? e.message : 'Failed' })
+    } finally {
+      setSaveSettingsLoading(false)
+    }
+  }
+
+  // Module 12: User Type Management API calls
+  const fetchAdminUserTypes = async () => {
+    setAdminUserTypesLoading(true)
+    setAdminUserTypes(null)
+    try {
+      const res = await adminFetch('/admin/user-types')
+      const data = await res.json()
+      setAdminUserTypes(data.types)
+    } catch (e) {
+      setAdminUserTypes(null)
+    } finally {
+      setAdminUserTypesLoading(false)
+    }
+  }
+
+  const createUserType = async () => {
+    if (!newTypeName.trim()) return
+    setCreateTypeLoading(true)
+    setCreateTypeResult(null)
+    try {
+      const res = await adminFetch('/admin/user-types', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: newTypeName.trim(),
+          description: newTypeDescription.trim() || null,
+          display_order: newTypeOrder
+        })
+      })
+      setCreateTypeResult(await res.json())
+      setNewTypeName('')
+      setNewTypeDescription('')
+      setNewTypeOrder(0)
+      fetchAdminUserTypes()
+    } catch (e) {
+      setCreateTypeResult({ error: e instanceof Error ? e.message : 'Failed' })
+    } finally {
+      setCreateTypeLoading(false)
+    }
+  }
+
+  const updateUserType = async () => {
+    if (!editingTypeId || !editTypeName.trim()) return
+    setUpdateTypeLoading(true)
+    try {
+      await adminFetch(`/admin/user-types/${editingTypeId}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          name: editTypeName.trim(),
+          description: editTypeDescription.trim() || null,
+          display_order: editTypeOrder
+        })
+      })
+      setEditingTypeId(null)
+      fetchAdminUserTypes()
+    } catch (e) {
+      // Handle error silently or add error state
+    } finally {
+      setUpdateTypeLoading(false)
+    }
+  }
+
+  const deleteUserType = async (typeId: number) => {
+    setDeleteTypeLoading(true)
+    try {
+      await adminFetch(`/admin/user-types/${typeId}`, { method: 'DELETE' })
+      fetchAdminUserTypes()
+    } catch (e) {
+      // Handle error
+    } finally {
+      setDeleteTypeLoading(false)
+    }
+  }
+
+  // Module 13: User Field Definitions API calls
+  const fetchAdminFieldDefs = async () => {
+    setFieldDefsLoading(true)
+    setAdminFieldDefs(null)
+    try {
+      const url = fieldTypeFilter === 'all'
+        ? '/admin/user-fields'
+        : fieldTypeFilter === 'global'
+          ? '/admin/user-fields?user_type_id=null'
+          : `/admin/user-fields?user_type_id=${fieldTypeFilter}`
+      const res = await adminFetch(url)
+      const data = await res.json()
+      setAdminFieldDefs(data.fields)
+    } catch (e) {
+      setAdminFieldDefs(null)
+    } finally {
+      setFieldDefsLoading(false)
+    }
+  }
+
+  const createFieldDef = async () => {
+    if (!newFieldName.trim()) return
+    setCreateFieldLoading(true)
+    setCreateFieldResult(null)
+    try {
+      const res = await adminFetch('/admin/user-fields', {
+        method: 'POST',
+        body: JSON.stringify({
+          field_name: newFieldName.trim(),
+          field_type: newFieldType,
+          required: newFieldRequired,
+          display_order: newFieldOrder,
+          user_type_id: newFieldUserTypeId === 'global' ? null : Number(newFieldUserTypeId)
+        })
+      })
+      setCreateFieldResult(await res.json())
+      setNewFieldName('')
+      setNewFieldType('text')
+      setNewFieldRequired(false)
+      setNewFieldOrder(0)
+      setNewFieldUserTypeId('global')
+      fetchAdminFieldDefs()
+    } catch (e) {
+      setCreateFieldResult({ error: e instanceof Error ? e.message : 'Failed' })
+    } finally {
+      setCreateFieldLoading(false)
+    }
+  }
+
+  const deleteFieldDef = async (fieldId: number) => {
+    setDeleteFieldLoading(true)
+    try {
+      await adminFetch(`/admin/user-fields/${fieldId}`, { method: 'DELETE' })
+      fetchAdminFieldDefs()
+    } catch (e) {
+      // Handle error
+    } finally {
+      setDeleteFieldLoading(false)
+    }
+  }
+
+  // Module 14: User Management API calls
+  const fetchAllUsers = async () => {
+    setUsersLoading(true)
+    setAllUsers(null)
+    try {
+      const res = await adminFetch('/admin/users')
+      const data = await res.json()
+      setAllUsers(data.users)
+    } catch (e) {
+      setAllUsers(null)
+    } finally {
+      setUsersLoading(false)
+    }
+  }
+
+  const lookupUser = async () => {
+    if (!lookupUserId.trim()) return
+    setLookupLoading(true)
+    setSingleUser(null)
+    try {
+      const res = await fetch(`${API_BASE}/users/${lookupUserId.trim()}`)
+      if (res.ok) {
+        const data = await res.json()
+        setSingleUser(data.user)
+      } else {
+        setSingleUser(null)
+      }
+    } catch (e) {
+      setSingleUser(null)
+    } finally {
+      setLookupLoading(false)
+    }
+  }
+
+  const updateUser = async (userId: number, approved: boolean) => {
+    setUpdateUserLoading(true)
+    setUpdateUserResult(null)
+    try {
+      const res = await fetch(`${API_BASE}/users/${userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ approved })
+      })
+      setUpdateUserResult(await res.json())
+      // Refresh
+      if (singleUser?.id === userId) {
+        lookupUser()
+      }
+      fetchAllUsers()
+    } catch (e) {
+      setUpdateUserResult({ error: e instanceof Error ? e.message : 'Failed' })
+    } finally {
+      setUpdateUserLoading(false)
+    }
+  }
+
+  const deleteUser = async (userId: number) => {
+    setDeleteUserLoading(true)
+    try {
+      await fetch(`${API_BASE}/users/${userId}`, { method: 'DELETE' })
+      fetchAllUsers()
+      if (singleUser?.id === userId) {
+        setSingleUser(null)
+      }
+    } catch (e) {
+      // Handle error
+    } finally {
+      setDeleteUserLoading(false)
+    }
+  }
+
+  // Module 15: Database Explorer API calls
+  const fetchDbTables = async () => {
+    setDbTablesLoading(true)
+    setDbTables(null)
+    try {
+      const res = await adminFetch('/admin/db/tables')
+      const data = await res.json()
+      setDbTables(data.tables)
+    } catch (e) {
+      setDbTables(null)
+    } finally {
+      setDbTablesLoading(false)
+    }
+  }
+
+  const fetchTableData = async (tableName: string) => {
+    setTableDataLoading(true)
+    setTableData(null)
+    setSelectedDbTable(tableName)
+    try {
+      const res = await adminFetch(`/admin/db/tables/${tableName}?page=1&page_size=20`)
+      const data = await res.json()
+      setTableData({ columns: data.columns?.map((c: { name: string }) => c.name) || [], rows: data.rows || [] })
+    } catch (e) {
+      setTableData(null)
+    } finally {
+      setTableDataLoading(false)
+    }
+  }
+
+  const runDbQuery = async () => {
+    if (!dbQuery.trim()) return
+    setDbQueryLoading(true)
+    setDbQueryResult(null)
+    try {
+      const res = await adminFetch('/admin/db/query', {
+        method: 'POST',
+        body: JSON.stringify({ query: dbQuery.trim() })
+      })
+      setDbQueryResult(await res.json())
+    } catch (e) {
+      setDbQueryResult({ success: false, columns: [], rows: [], error: e instanceof Error ? e.message : 'Failed' })
+    } finally {
+      setDbQueryLoading(false)
+    }
+  }
+
+  // Module 16: Rate Limiting Test
+  const runRateLimitTest = async () => {
+    setRateLimitTesting(true)
+    setRateLimitResults({ success: 0, blocked: 0, responses: [] })
+
+    const endpoint = rateLimitTestType === 'magic_link' ? '/auth/magic-link' : '/admin/auth'
+    const limit = rateLimitTestType === 'magic_link' ? 6 : 11 // Test slightly over limit
+    const results: string[] = []
+    let success = 0
+    let blocked = 0
+
+    for (let i = 0; i < limit; i++) {
+      try {
+        const res = await fetch(`${API_BASE}${endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: rateLimitTestType === 'magic_link'
+            ? JSON.stringify({ email: `test${i}@ratelimit.test`, name: 'Rate Test' })
+            : JSON.stringify({ event: {} }) // Invalid event, but tests rate limit
+        })
+        if (res.status === 429) {
+          blocked++
+          results.push(`Request ${i + 1}: 429 Too Many Requests`)
+        } else {
+          success++
+          results.push(`Request ${i + 1}: ${res.status}`)
+        }
+      } catch (e) {
+        results.push(`Request ${i + 1}: Error - ${e instanceof Error ? e.message : 'Unknown'}`)
+      }
+    }
+
+    setRateLimitResults({ success, blocked, responses: results })
+    setRateLimitTesting(false)
   }
 
   return (
@@ -1440,6 +2043,851 @@ export function TestDashboard() {
             )}
           </div>
         </Card>
+
+        {/* ============================================ */}
+        {/* NEW MODULES: Authentication & Admin Testing */}
+        {/* ============================================ */}
+
+        <SectionHeader title="Authentication Testing" icon={Key} />
+
+        {/* Admin Session Panel */}
+        <Card className="mb-6 border-accent/30">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-accent" />
+              <h3 className="text-lg font-semibold text-text">Admin Session</h3>
+            </div>
+            {adminToken ? (
+              <StatusBadge status="success" />
+            ) : (
+              <StatusBadge status="warning" />
+            )}
+          </div>
+          <p className="text-sm text-text-secondary mb-4">
+            Admin authentication is required for admin-only endpoints below. Authenticate via Nostr or paste a token.
+          </p>
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-3 items-center">
+              <Button
+                onClick={authenticateAdmin}
+                disabled={nostrAuthLoading || !hasNostrExtension()}
+              >
+                {nostrAuthLoading ? 'Authenticating...' : hasNostrExtension() ? 'Login with Nostr' : 'No Nostr Extension'}
+              </Button>
+              <Button variant="secondary" onClick={clearAdminSession} disabled={!adminToken}>
+                Clear Session
+              </Button>
+            </div>
+            {nostrAuthError && (
+              <div className="bg-error-subtle border border-error/20 text-error rounded-lg px-4 py-3 text-sm">
+                {nostrAuthError}
+              </div>
+            )}
+            {nostrAuthResult && (
+              <div className="bg-success-subtle border border-success/20 rounded-lg px-4 py-3 text-sm">
+                <p className="text-success font-medium">Authenticated as admin!</p>
+                <p className="text-text-secondary mt-1 font-mono text-xs">Pubkey: {nostrAuthResult.admin.pubkey.slice(0, 16)}...</p>
+              </div>
+            )}
+            <div className="border-t border-border pt-4">
+              <p className="text-xs text-text-muted mb-2">Or paste an existing admin session token:</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={adminToken}
+                  onChange={(e) => setAdminToken(e.target.value)}
+                  placeholder="Paste admin session token..."
+                  className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm font-mono placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
+                />
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    if (adminToken) {
+                      localStorage.setItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN, adminToken)
+                    }
+                  }}
+                >
+                  Save
+                </Button>
+              </div>
+            </div>
+            {adminToken && (
+              <p className="text-xs text-text-muted">
+                Token stored: {adminToken.slice(0, 20)}...
+              </p>
+            )}
+          </div>
+        </Card>
+
+        {/* Module 10: Authentication Testing */}
+        <CollapsibleSection title="Authentication Testing" moduleNumber={10} icon={Key}>
+          <p className="text-sm text-text-secondary mb-4">
+            Test magic link and Nostr authentication flows.
+          </p>
+
+          {/* Magic Link */}
+          <div className="mb-6">
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Magic Link Authentication</p>
+            <InfoBox>
+              <strong className="text-text">POST /auth/magic-link</strong> — Send a magic link to the provided email. Rate limited: 5 requests/minute.
+            </InfoBox>
+            <div className="flex flex-wrap gap-3 mb-3">
+              <input
+                type="email"
+                value={magicLinkEmail}
+                onChange={(e) => setMagicLinkEmail(e.target.value)}
+                placeholder="Email address"
+                className="flex-1 min-w-[200px] px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
+              />
+              <input
+                type="text"
+                value={magicLinkName}
+                onChange={(e) => setMagicLinkName(e.target.value)}
+                placeholder="Name (optional)"
+                className="w-40 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
+              />
+              <Button onClick={sendMagicLink} disabled={magicLinkLoading || !magicLinkEmail.trim()}>
+                {magicLinkLoading ? 'Sending...' : 'Send Magic Link'}
+              </Button>
+            </div>
+            {magicLinkResult && (
+              <CodeBlock>{JSON.stringify(magicLinkResult, null, 2)}</CodeBlock>
+            )}
+          </div>
+
+          {/* Token Verification */}
+          <div className="border-t border-border pt-6 mb-6">
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Verify Magic Link Token</p>
+            <InfoBox>
+              <strong className="text-text">GET /auth/verify?token=...</strong> — Verify a magic link token and get session token.
+            </InfoBox>
+            <div className="flex gap-3 mb-3">
+              <input
+                type="text"
+                value={verifyToken}
+                onChange={(e) => setVerifyToken(e.target.value)}
+                placeholder="Paste magic link token..."
+                className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm font-mono placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
+              />
+              <Button onClick={verifyMagicLink} disabled={verifyLoading || !verifyToken.trim()}>
+                {verifyLoading ? 'Verifying...' : 'Verify Token'}
+              </Button>
+            </div>
+            {verifyResult && (
+              <CodeBlock>{JSON.stringify(verifyResult, null, 2)}</CodeBlock>
+            )}
+          </div>
+
+          {/* Session Check */}
+          <div className="border-t border-border pt-6 mb-6">
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Check Session Status</p>
+            <InfoBox>
+              <strong className="text-text">GET /auth/me?token=...</strong> — Check if a session token is valid and get user info.
+            </InfoBox>
+            <div className="flex gap-3 mb-3">
+              <input
+                type="text"
+                value={sessionCheckToken}
+                onChange={(e) => setSessionCheckToken(e.target.value)}
+                placeholder="Paste session token..."
+                className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm font-mono placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
+              />
+              <Button onClick={checkAuthStatus} disabled={sessionCheckLoading || !sessionCheckToken.trim()}>
+                {sessionCheckLoading ? 'Checking...' : 'Check Status'}
+              </Button>
+            </div>
+            {sessionCheckResult && (
+              <CodeBlock>{JSON.stringify(sessionCheckResult, null, 2)}</CodeBlock>
+            )}
+          </div>
+
+          {/* Admin List */}
+          <div className="border-t border-border pt-6 mb-6">
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Admin List</p>
+            <InfoBox>
+              <strong className="text-text">GET /admin/list</strong> — List all admins. Requires admin authentication.
+            </InfoBox>
+            <Button onClick={fetchAdmins} disabled={adminsLoading || !adminToken}>
+              {adminsLoading ? 'Fetching...' : 'Fetch Admins'}
+            </Button>
+            {!adminToken && <p className="text-xs text-warning mt-2">Requires admin session above</p>}
+            {adminsList && (
+              <div className="mt-4">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-2 px-2 text-text-muted font-medium">ID</th>
+                      <th className="text-left py-2 px-2 text-text-muted font-medium">Pubkey</th>
+                      <th className="text-left py-2 px-2 text-text-muted font-medium">Created</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {adminsList.map((admin) => (
+                      <tr key={admin.id} className="border-b border-border/50">
+                        <td className="py-2 px-2 text-text">{admin.id}</td>
+                        <td className="py-2 px-2 font-mono text-xs text-text">{admin.pubkey.slice(0, 20)}...</td>
+                        <td className="py-2 px-2 text-text-secondary text-xs">{admin.created_at || 'N/A'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Remove Admin */}
+          <div className="border-t border-border pt-6">
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Remove Admin</p>
+            <InfoBox>
+              <strong className="text-text">DELETE /admin/&#123;pubkey&#125;</strong> — Remove an admin by pubkey. Requires admin authentication.
+            </InfoBox>
+            <div className="flex gap-3 mb-3">
+              <input
+                type="text"
+                value={removeAdminPubkey}
+                onChange={(e) => setRemoveAdminPubkey(e.target.value)}
+                placeholder="Admin pubkey to remove..."
+                className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm font-mono placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
+              />
+              <Button onClick={removeAdmin} disabled={removeAdminLoading || !removeAdminPubkey.trim() || !adminToken}>
+                {removeAdminLoading ? 'Removing...' : 'Remove Admin'}
+              </Button>
+            </div>
+            {removeAdminResult && (
+              <CodeBlock>{JSON.stringify(removeAdminResult, null, 2)}</CodeBlock>
+            )}
+          </div>
+        </CollapsibleSection>
+
+        {/* Module 16: Rate Limiting Test */}
+        <CollapsibleSection title="Rate Limiting Test" moduleNumber={16} icon={Zap}>
+          <p className="text-sm text-text-secondary mb-4">
+            Test rate limiting by sending rapid requests to rate-limited endpoints.
+          </p>
+          <InfoBox>
+            <strong className="text-text">Magic Link:</strong> 5 requests/minute | <strong className="text-text">Admin Auth:</strong> 10 requests/minute
+          </InfoBox>
+          <div className="flex flex-wrap gap-3 items-center mb-4">
+            <select
+              value={rateLimitTestType}
+              onChange={(e) => setRateLimitTestType(e.target.value as 'magic_link' | 'admin_auth')}
+              className="px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm focus:border-accent focus:ring-1 focus:ring-accent"
+            >
+              <option value="magic_link">Magic Link (5/min)</option>
+              <option value="admin_auth">Admin Auth (10/min)</option>
+            </select>
+            <Button onClick={runRateLimitTest} disabled={rateLimitTesting}>
+              {rateLimitTesting ? 'Testing...' : `Send ${rateLimitTestType === 'magic_link' ? '6' : '11'} Rapid Requests`}
+            </Button>
+          </div>
+          {rateLimitResults.responses.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex gap-4">
+                <div className="bg-success-subtle border border-success/20 rounded-lg p-3 flex-1 text-center">
+                  <p className="text-2xl font-bold text-success">{rateLimitResults.success}</p>
+                  <p className="text-xs text-text-secondary">Successful</p>
+                </div>
+                <div className="bg-error-subtle border border-error/20 rounded-lg p-3 flex-1 text-center">
+                  <p className="text-2xl font-bold text-error">{rateLimitResults.blocked}</p>
+                  <p className="text-xs text-text-secondary">Blocked (429)</p>
+                </div>
+              </div>
+              <div className="max-h-40 overflow-y-auto bg-surface-overlay rounded-lg p-3">
+                {rateLimitResults.responses.map((r, i) => (
+                  <p key={i} className={`text-xs font-mono ${r.includes('429') ? 'text-error' : 'text-text-secondary'}`}>
+                    {r}
+                  </p>
+                ))}
+              </div>
+            </div>
+          )}
+        </CollapsibleSection>
+
+        <SectionHeader title="Admin: Instance & User Management" icon={Sliders} />
+
+        {/* Module 11: Instance Settings */}
+        <CollapsibleSection title="Instance Settings" moduleNumber={11} badge="Admin" icon={Settings}>
+          <p className="text-sm text-text-secondary mb-4">
+            View and update instance-wide configuration settings.
+          </p>
+          <InfoBox>
+            <strong className="text-text">GET /admin/settings</strong> — Fetch all settings. <br />
+            <strong className="text-text">PUT /admin/settings</strong> — Update settings.
+          </InfoBox>
+          <Button onClick={fetchInstanceSettings} disabled={settingsLoading || !adminToken}>
+            {settingsLoading ? 'Fetching...' : 'Fetch Settings'}
+          </Button>
+          {!adminToken && <p className="text-xs text-warning mt-2">Requires admin session</p>}
+          {instanceSettings && (
+            <div className="mt-4 space-y-4">
+              <div className="grid gap-3">
+                {Object.entries(settingsForm).map(([key, value]) => (
+                  <div key={key} className="flex items-center gap-3">
+                    <label className="text-sm text-text-secondary w-40">{key}</label>
+                    {key === 'primary_color' ? (
+                      <div className="flex gap-2 items-center flex-1">
+                        <input
+                          type="color"
+                          value={value}
+                          onChange={(e) => setSettingsForm(prev => ({ ...prev, [key]: e.target.value }))}
+                          className="w-10 h-10 rounded cursor-pointer"
+                        />
+                        <input
+                          type="text"
+                          value={value}
+                          onChange={(e) => setSettingsForm(prev => ({ ...prev, [key]: e.target.value }))}
+                          className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm font-mono"
+                        />
+                      </div>
+                    ) : key === 'description' ? (
+                      <textarea
+                        value={value}
+                        onChange={(e) => setSettingsForm(prev => ({ ...prev, [key]: e.target.value }))}
+                        className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm resize-none h-20"
+                      />
+                    ) : key === 'auto_approve_users' ? (
+                      <select
+                        value={value}
+                        onChange={(e) => setSettingsForm(prev => ({ ...prev, [key]: e.target.value }))}
+                        className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
+                      >
+                        <option value="true">true (auto-approve new users)</option>
+                        <option value="false">false (require manual approval)</option>
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={value}
+                        onChange={(e) => setSettingsForm(prev => ({ ...prev, [key]: e.target.value }))}
+                        className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+              <Button onClick={saveInstanceSettings} disabled={saveSettingsLoading}>
+                {saveSettingsLoading ? 'Saving...' : 'Save Settings'}
+              </Button>
+              {saveSettingsResult && (
+                <CodeBlock>{JSON.stringify(saveSettingsResult, null, 2)}</CodeBlock>
+              )}
+            </div>
+          )}
+        </CollapsibleSection>
+
+        {/* Module 12: User Type Management */}
+        <CollapsibleSection title="User Type Management" moduleNumber={12} badge="Admin" icon={Users}>
+          <p className="text-sm text-text-secondary mb-4">
+            Manage user types for categorizing users during onboarding.
+          </p>
+          <InfoBox>
+            <strong className="text-text">GET/POST /admin/user-types</strong> — List and create user types. <br />
+            <strong className="text-text">PUT/DELETE /admin/user-types/&#123;id&#125;</strong> — Update and delete.
+          </InfoBox>
+          <Button onClick={fetchAdminUserTypes} disabled={adminUserTypesLoading || !adminToken}>
+            {adminUserTypesLoading ? 'Fetching...' : 'Fetch User Types'}
+          </Button>
+          {!adminToken && <p className="text-xs text-warning mt-2">Requires admin session</p>}
+          {adminUserTypes && (
+            <div className="mt-4 space-y-4">
+              {adminUserTypes.length === 0 ? (
+                <p className="text-text-muted text-sm">No user types defined.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">ID</th>
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">Name</th>
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">Description</th>
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">Order</th>
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {adminUserTypes.map((type) => (
+                        <tr key={type.id} className="border-b border-border/50">
+                          <td className="py-2 px-2 text-text">{type.id}</td>
+                          <td className="py-2 px-2 text-text font-medium">{type.name}</td>
+                          <td className="py-2 px-2 text-text-secondary text-xs">{type.description || '-'}</td>
+                          <td className="py-2 px-2 text-text-secondary">{type.display_order}</td>
+                          <td className="py-2 px-2">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => {
+                                  setEditingTypeId(type.id)
+                                  setEditTypeName(type.name)
+                                  setEditTypeDescription(type.description || '')
+                                  setEditTypeOrder(type.display_order)
+                                }}
+                                className="text-xs text-accent hover:text-accent-hover"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => deleteUserType(type.id)}
+                                className="text-xs text-error hover:text-error/80"
+                                disabled={deleteTypeLoading}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Edit Form */}
+              {editingTypeId && (
+                <div className="bg-accent-subtle border border-accent/20 rounded-lg p-4">
+                  <p className="text-sm font-medium text-text mb-3">Edit User Type #{editingTypeId}</p>
+                  <div className="grid gap-3">
+                    <input
+                      type="text"
+                      value={editTypeName}
+                      onChange={(e) => setEditTypeName(e.target.value)}
+                      placeholder="Name"
+                      className="px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
+                    />
+                    <input
+                      type="text"
+                      value={editTypeDescription}
+                      onChange={(e) => setEditTypeDescription(e.target.value)}
+                      placeholder="Description"
+                      className="px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
+                    />
+                    <input
+                      type="number"
+                      value={editTypeOrder}
+                      onChange={(e) => setEditTypeOrder(Number(e.target.value))}
+                      placeholder="Display order"
+                      className="w-32 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
+                    />
+                    <div className="flex gap-2">
+                      <Button onClick={updateUserType} disabled={updateTypeLoading}>
+                        {updateTypeLoading ? 'Saving...' : 'Save'}
+                      </Button>
+                      <Button variant="secondary" onClick={() => setEditingTypeId(null)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Create Form */}
+              <div className="border-t border-border pt-4">
+                <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Create New User Type</p>
+                <div className="flex flex-wrap gap-3 items-end">
+                  <div>
+                    <label className="text-xs text-text-muted">Name</label>
+                    <input
+                      type="text"
+                      value={newTypeName}
+                      onChange={(e) => setNewTypeName(e.target.value)}
+                      placeholder="Developer"
+                      className="block mt-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-text-muted">Description</label>
+                    <input
+                      type="text"
+                      value={newTypeDescription}
+                      onChange={(e) => setNewTypeDescription(e.target.value)}
+                      placeholder="Software developers"
+                      className="block mt-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-text-muted">Order</label>
+                    <input
+                      type="number"
+                      value={newTypeOrder}
+                      onChange={(e) => setNewTypeOrder(Number(e.target.value))}
+                      className="block mt-1 w-20 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
+                    />
+                  </div>
+                  <Button onClick={createUserType} disabled={createTypeLoading || !newTypeName.trim()}>
+                    {createTypeLoading ? 'Creating...' : 'Create'}
+                  </Button>
+                </div>
+                {createTypeResult && (
+                  <div className="mt-3">
+                    <CodeBlock>{JSON.stringify(createTypeResult, null, 2)}</CodeBlock>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </CollapsibleSection>
+
+        {/* Module 13: User Field Definitions */}
+        <CollapsibleSection title="User Field Definitions" moduleNumber={13} badge="Admin" icon={FileText}>
+          <p className="text-sm text-text-secondary mb-4">
+            Manage custom fields that users fill out during onboarding.
+          </p>
+          <InfoBox>
+            <strong className="text-text">GET/POST /admin/user-fields</strong> — List and create fields. <br />
+            <strong className="text-text">PUT/DELETE /admin/user-fields/&#123;id&#125;</strong> — Update and delete.
+          </InfoBox>
+          <div className="flex flex-wrap gap-3 items-center mb-4">
+            <select
+              value={fieldTypeFilter}
+              onChange={(e) => setFieldTypeFilter(e.target.value === 'all' ? 'all' : e.target.value === 'global' ? 'global' : Number(e.target.value))}
+              className="px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
+            >
+              <option value="all">All Fields</option>
+              <option value="global">Global Only</option>
+              {adminUserTypes?.map((t) => (
+                <option key={t.id} value={t.id}>{t.name} Only</option>
+              ))}
+            </select>
+            <Button onClick={fetchAdminFieldDefs} disabled={fieldDefsLoading || !adminToken}>
+              {fieldDefsLoading ? 'Fetching...' : 'Fetch Fields'}
+            </Button>
+          </div>
+          {!adminToken && <p className="text-xs text-warning mt-2">Requires admin session</p>}
+          {adminFieldDefs && (
+            <div className="mt-4 space-y-4">
+              {adminFieldDefs.length === 0 ? (
+                <p className="text-text-muted text-sm">No field definitions found.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">ID</th>
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">Name</th>
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">Type</th>
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">Required</th>
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">User Type</th>
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {adminFieldDefs.map((field) => (
+                        <tr key={field.id} className="border-b border-border/50">
+                          <td className="py-2 px-2 text-text">{field.id}</td>
+                          <td className="py-2 px-2 text-text font-medium">{field.field_name}</td>
+                          <td className="py-2 px-2 text-text-secondary">
+                            <span className="text-xs px-2 py-0.5 rounded bg-surface-overlay">{field.field_type}</span>
+                          </td>
+                          <td className="py-2 px-2">
+                            {field.required ? (
+                              <span className="text-xs text-success">Yes</span>
+                            ) : (
+                              <span className="text-xs text-text-muted">No</span>
+                            )}
+                          </td>
+                          <td className="py-2 px-2 text-text-secondary text-xs">
+                            {field.user_type_id ? `Type #${field.user_type_id}` : 'Global'}
+                          </td>
+                          <td className="py-2 px-2">
+                            <button
+                              onClick={() => deleteFieldDef(field.id)}
+                              className="text-xs text-error hover:text-error/80"
+                              disabled={deleteFieldLoading}
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Create Form */}
+              <div className="border-t border-border pt-4">
+                <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Create New Field</p>
+                <div className="flex flex-wrap gap-3 items-end">
+                  <div>
+                    <label className="text-xs text-text-muted">Name</label>
+                    <input
+                      type="text"
+                      value={newFieldName}
+                      onChange={(e) => setNewFieldName(e.target.value)}
+                      placeholder="company_name"
+                      className="block mt-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-text-muted">Type</label>
+                    <select
+                      value={newFieldType}
+                      onChange={(e) => setNewFieldType(e.target.value)}
+                      className="block mt-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
+                    >
+                      <option value="text">text</option>
+                      <option value="email">email</option>
+                      <option value="number">number</option>
+                      <option value="textarea">textarea</option>
+                      <option value="url">url</option>
+                      <option value="date">date</option>
+                      <option value="checkbox">checkbox</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-text-muted">User Type</label>
+                    <select
+                      value={newFieldUserTypeId}
+                      onChange={(e) => setNewFieldUserTypeId(e.target.value === 'global' ? 'global' : Number(e.target.value))}
+                      className="block mt-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
+                    >
+                      <option value="global">Global (all types)</option>
+                      {adminUserTypes?.map((t) => (
+                        <option key={t.id} value={t.id}>{t.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="newFieldRequired"
+                      checked={newFieldRequired}
+                      onChange={(e) => setNewFieldRequired(e.target.checked)}
+                      className="w-4 h-4"
+                    />
+                    <label htmlFor="newFieldRequired" className="text-xs text-text-muted">Required</label>
+                  </div>
+                  <Button onClick={createFieldDef} disabled={createFieldLoading || !newFieldName.trim()}>
+                    {createFieldLoading ? 'Creating...' : 'Create'}
+                  </Button>
+                </div>
+                {createFieldResult && (
+                  <div className="mt-3">
+                    <CodeBlock>{JSON.stringify(createFieldResult, null, 2)}</CodeBlock>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </CollapsibleSection>
+
+        {/* Module 14: User Management */}
+        <CollapsibleSection title="User Management" moduleNumber={14} badge="Admin" icon={Users}>
+          <p className="text-sm text-text-secondary mb-4">
+            View all users, manage approval status, and delete users.
+          </p>
+          <InfoBox>
+            <strong className="text-text">GET /admin/users</strong> — List all users (admin only). <br />
+            <strong className="text-text">GET/PUT/DELETE /users/&#123;id&#125;</strong> — Manage individual users.
+          </InfoBox>
+          <Button onClick={fetchAllUsers} disabled={usersLoading || !adminToken}>
+            {usersLoading ? 'Fetching...' : 'Fetch All Users'}
+          </Button>
+          {!adminToken && <p className="text-xs text-warning mt-2">Requires admin session</p>}
+          {allUsers && (
+            <div className="mt-4 space-y-4">
+              {allUsers.length === 0 ? (
+                <p className="text-text-muted text-sm">No users found.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">ID</th>
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">Email</th>
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">Name</th>
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">Type</th>
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">Approved</th>
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allUsers.map((user) => (
+                        <tr key={user.id} className="border-b border-border/50">
+                          <td className="py-2 px-2 text-text">{user.id}</td>
+                          <td className="py-2 px-2 text-text">{user.email || '-'}</td>
+                          <td className="py-2 px-2 text-text-secondary">{user.name || '-'}</td>
+                          <td className="py-2 px-2 text-text-secondary">{user.user_type_id || '-'}</td>
+                          <td className="py-2 px-2">
+                            {user.approved ? (
+                              <span className="text-xs px-2 py-0.5 rounded bg-success-subtle text-success">Yes</span>
+                            ) : (
+                              <span className="text-xs px-2 py-0.5 rounded bg-warning-subtle text-warning">Pending</span>
+                            )}
+                          </td>
+                          <td className="py-2 px-2">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => updateUser(user.id, !user.approved)}
+                                className="text-xs text-accent hover:text-accent-hover"
+                                disabled={updateUserLoading}
+                              >
+                                {user.approved ? 'Revoke' : 'Approve'}
+                              </button>
+                              <button
+                                onClick={() => deleteUser(user.id)}
+                                className="text-xs text-error hover:text-error/80"
+                                disabled={deleteUserLoading}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Single User Lookup */}
+              <div className="border-t border-border pt-4">
+                <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Lookup Single User</p>
+                <div className="flex gap-3 mb-3">
+                  <input
+                    type="text"
+                    value={lookupUserId}
+                    onChange={(e) => setLookupUserId(e.target.value)}
+                    placeholder="User ID"
+                    className="w-32 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
+                  />
+                  <Button onClick={lookupUser} disabled={lookupLoading || !lookupUserId.trim()}>
+                    {lookupLoading ? 'Looking...' : 'Lookup'}
+                  </Button>
+                </div>
+                {singleUser && (
+                  <CodeBlock>{JSON.stringify(singleUser, null, 2)}</CodeBlock>
+                )}
+              </div>
+            </div>
+          )}
+          {updateUserResult && (
+            <div className="mt-4">
+              <CodeBlock>{JSON.stringify(updateUserResult, null, 2)}</CodeBlock>
+            </div>
+          )}
+        </CollapsibleSection>
+
+        <SectionHeader title="Admin: Database" icon={Database} />
+
+        {/* Module 15: Database Explorer */}
+        <CollapsibleSection title="Database Explorer (Quick View)" moduleNumber={15} badge="Admin" icon={Database}>
+          <p className="text-sm text-text-secondary mb-4">
+            Quick view of SQLite database. For full explorer, visit{' '}
+            <Link to="/admin/database" className="text-accent hover:text-accent-hover underline">/admin/database</Link>.
+          </p>
+          <InfoBox>
+            <strong className="text-text">GET /admin/db/tables</strong> — List tables. <br />
+            <strong className="text-text">POST /admin/db/query</strong> — Execute read-only SQL.
+          </InfoBox>
+          <Button onClick={fetchDbTables} disabled={dbTablesLoading || !adminToken}>
+            {dbTablesLoading ? 'Fetching...' : 'Fetch Tables'}
+          </Button>
+          {!adminToken && <p className="text-xs text-warning mt-2">Requires admin session</p>}
+          {dbTables && (
+            <div className="mt-4 space-y-4">
+              <div className="flex flex-wrap gap-2">
+                {dbTables.map((table) => (
+                  <button
+                    key={table.name}
+                    onClick={() => fetchTableData(table.name)}
+                    className={`px-3 py-2 rounded-lg text-sm transition-colors ${
+                      selectedDbTable === table.name
+                        ? 'bg-accent text-accent-text'
+                        : 'bg-surface-overlay text-text border border-border hover:border-accent'
+                    }`}
+                  >
+                    {table.name} <span className="text-xs opacity-70">({table.rowCount})</span>
+                  </button>
+                ))}
+              </div>
+
+              {tableDataLoading && <p className="text-text-muted text-sm">Loading table data...</p>}
+              {tableData && selectedDbTable && (
+                <div>
+                  <p className="text-sm font-medium text-text mb-2">
+                    {selectedDbTable} (first 20 rows)
+                  </p>
+                  <div className="overflow-x-auto max-h-60">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="border-b border-border">
+                          {tableData.columns.map((col) => (
+                            <th key={col} className="text-left py-2 px-2 text-text-muted font-medium">{col}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {tableData.rows.map((row, idx) => (
+                          <tr key={idx} className="border-b border-border/50">
+                            {tableData.columns.map((col) => (
+                              <td key={col} className="py-2 px-2 text-text font-mono">
+                                {String(row[col] ?? '')}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Quick Query */}
+              <div className="border-t border-border pt-4">
+                <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Quick SQL Query</p>
+                <textarea
+                  value={dbQuery}
+                  onChange={(e) => setDbQuery(e.target.value)}
+                  placeholder="SELECT * FROM users LIMIT 10"
+                  className="w-full h-20 px-4 py-3 bg-surface border border-border rounded-lg text-text font-mono text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent resize-none"
+                />
+                <div className="flex gap-2 mt-2">
+                  <Button onClick={runDbQuery} disabled={dbQueryLoading || !dbQuery.trim()}>
+                    {dbQueryLoading ? 'Running...' : 'Run Query'}
+                  </Button>
+                </div>
+                {dbQueryResult && (
+                  <div className="mt-4">
+                    {dbQueryResult.error ? (
+                      <div className="bg-error-subtle border border-error/20 text-error rounded-lg px-4 py-3 text-sm">
+                        {dbQueryResult.error}
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-sm text-text-secondary mb-2">
+                          {dbQueryResult.rows.length} row(s) returned
+                        </p>
+                        <div className="overflow-x-auto max-h-60">
+                          <table className="w-full text-xs">
+                            <thead>
+                              <tr className="border-b border-border">
+                                {dbQueryResult.columns.map((col) => (
+                                  <th key={col} className="text-left py-2 px-2 text-text-muted font-medium">{col}</th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {dbQueryResult.rows.map((row, idx) => (
+                                <tr key={idx} className="border-b border-border/50">
+                                  {dbQueryResult.columns.map((col) => (
+                                    <td key={col} className="py-2 px-2 text-text font-mono">
+                                      {typeof row[col] === 'object'
+                                        ? JSON.stringify(row[col])
+                                        : String(row[col] ?? '')}
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </CollapsibleSection>
       </main>
 
       {/* Footer */}

@@ -105,7 +105,10 @@ def init_schema():
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             pubkey TEXT UNIQUE,
+            email TEXT UNIQUE,
+            name TEXT,
             user_type_id INTEGER,
+            approved INTEGER DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_type_id) REFERENCES user_types(id)
         )
@@ -132,6 +135,26 @@ def init_schema():
     conn.commit()
     logger.info("SQLite schema initialized")
 
+    # Run migrations for existing tables
+    _migrate_add_approved_column()
+
+
+def _migrate_add_approved_column():
+    """Add approved column to users table if it doesn't exist (for existing deployments)"""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Check if column exists
+    cursor.execute("PRAGMA table_info(users)")
+    columns = [row[1] for row in cursor.fetchall()]
+
+    if 'approved' not in columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN approved INTEGER DEFAULT 1")
+        conn.commit()
+        logger.info("Migration: Added 'approved' column to users table")
+
+    cursor.close()
+
 
 def seed_default_settings():
     """Seed default instance settings if not present"""
@@ -139,6 +162,7 @@ def seed_default_settings():
         "instance_name": "Sanctum",
         "primary_color": "#3B82F6",
         "description": "A privacy-first RAG knowledge base",
+        "auto_approve_users": "true",  # true = auto-approve, false = require manual approval
     }
 
     with get_cursor() as cursor:
@@ -223,6 +247,12 @@ def update_settings(settings: dict):
     """Update multiple settings at once"""
     for key, value in settings.items():
         update_setting(key, value)
+
+
+def get_auto_approve_users() -> bool:
+    """Get whether new users should be auto-approved"""
+    setting = get_setting("auto_approve_users")
+    return setting != "false"  # Default to true if not set or not "false"
 
 
 # --- User Type Operations ---
@@ -437,12 +467,21 @@ def delete_field_definition(field_id: int) -> bool:
 
 # --- User Operations ---
 
-def create_user(pubkey: str | None = None, user_type_id: int | None = None) -> int:
-    """Create a user. Returns user id."""
+def create_user(
+    pubkey: str | None = None,
+    email: str | None = None,
+    name: str | None = None,
+    user_type_id: int | None = None
+) -> int:
+    """Create a user. Returns user id.
+    Approval status is based on auto_approve_users instance setting.
+    """
+    approved = 1 if get_auto_approve_users() else 0
+
     with get_cursor() as cursor:
         cursor.execute(
-            "INSERT INTO users (pubkey, user_type_id) VALUES (?, ?)",
-            (pubkey, user_type_id)
+            "INSERT INTO users (pubkey, email, name, user_type_id, approved) VALUES (?, ?, ?, ?, ?)",
+            (pubkey, email, name, user_type_id, approved)
         )
         return cursor.lastrowid
 
@@ -481,6 +520,16 @@ def get_user_by_pubkey(pubkey: str) -> dict | None:
     """Get user by pubkey"""
     with get_cursor() as cursor:
         cursor.execute("SELECT id FROM users WHERE pubkey = ?", (pubkey,))
+        row = cursor.fetchone()
+        if row:
+            return get_user(row["id"])
+        return None
+
+
+def get_user_by_email(email: str) -> dict | None:
+    """Get user by email"""
+    with get_cursor() as cursor:
+        cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
         row = cursor.fetchone()
         if row:
             return get_user(row["id"])

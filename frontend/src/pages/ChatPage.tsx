@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useCallback, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '../theme'
 import { useInstanceConfig } from '../context/InstanceConfigContext'
 import { ChatContainer } from '../components/chat/ChatContainer'
@@ -10,7 +10,7 @@ import { DocumentScope } from '../components/chat/DocumentScope'
 import { ExportButton } from '../components/chat/ExportButton'
 import { DynamicIcon } from '../components/shared/DynamicIcon'
 import { Message } from '../components/chat/ChatMessage'
-import { API_BASE } from '../types/onboarding'
+import { API_BASE, STORAGE_KEYS } from '../types/onboarding'
 
 function ThemeToggle() {
   const { setTheme, resolvedTheme } = useTheme()
@@ -38,12 +38,21 @@ function ThemeToggle() {
 }
 
 export function ChatPage() {
+  const navigate = useNavigate()
   const { config } = useInstanceConfig()
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedTools, setSelectedTools] = useState<string[]>([])
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([])
+
+  // Check approval status on mount
+  useEffect(() => {
+    const approved = localStorage.getItem(STORAGE_KEYS.USER_APPROVED)
+    if (approved === 'false') {
+      navigate('/pending')
+    }
+  }, [navigate])
 
   const handleToolToggle = useCallback((toolId: string) => {
     setSelectedTools((prev) =>
@@ -78,11 +87,29 @@ export function ChatPage() {
         ? { question: content, top_k: 5 }
         : { message: content }
 
+      const token = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
+
       const res = await fetch(`${API_BASE}${endpoint}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
         body: JSON.stringify(body),
       })
+
+      // Handle auth errors
+      if (res.status === 401) {
+        // Token invalid/expired - redirect to login
+        navigate('/login')
+        return
+      }
+      if (res.status === 403) {
+        // Not approved - update localStorage and redirect
+        localStorage.setItem(STORAGE_KEYS.USER_APPROVED, 'false')
+        navigate('/pending')
+        return
+      }
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
 

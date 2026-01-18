@@ -2,6 +2,8 @@
 
 This document describes the SQLite-based admin and user management system in Sanctum.
 
+> **See also:** [Authentication](./authentication.md) for detailed documentation on admin (Nostr NIP-07) and user (magic link email) authentication flows.
+
 ## Overview
 
 SQLite provides persistent storage for:
@@ -13,14 +15,32 @@ SQLite provides persistent storage for:
 ## User Onboarding Flow
 
 ```
-┌─────────┐    ┌─────────┐    ┌─────────────┐    ┌─────────┐    ┌──────┐
-│  /login │ -> │  /auth  │ -> │ /user-type  │ -> │/profile │ -> │/chat │
-└─────────┘    └─────────┘    └─────────────┘    └─────────┘    └──────┘
-   Language       Email           Type             Custom         Chat
-   Selection    Magic Link      Selection*         Fields*       Interface
+┌─────────┐    ┌─────────┐    ┌──────────┐
+│  /login │ -> │  /auth  │ -> │ /verify  │
+└─────────┘    └─────────┘    └────┬─────┘
+   Language       Email           │
+   Selection    Magic Link        │
+                                  │
+         ┌────────────────────────┴────────────────────────┐
+         │                                                 │
+         v                                                 v
+   ┌───────────┐                              ┌─────────────────┐
+   │ /pending  │  (if approved = false)       │   /user-type    │  (if approved = true)
+   │  Waiting  │                              └────────┬────────┘
+   └───────────┘                                       │
+                                                       v
+                                              ┌─────────────────┐
+                                              │    /profile     │
+                                              └────────┬────────┘
+                                                       │
+                                                       v
+                                              ┌─────────────────┐
+                                              │     /chat       │
+                                              └─────────────────┘
 
-* Conditional: user-type only shown if >1 types exist
-              profile only shown if custom fields exist
+* /user-type: only shown if >1 types exist, otherwise auto-selected
+* /profile: only shown if custom fields exist for the user's type
+* /pending: shown when user.approved = false (controlled by auto_approve_users setting)
 ```
 
 ### Conditional Flow Logic
@@ -60,6 +80,7 @@ Key-value store for instance configuration.
 - `instance_name`: "Sanctum"
 - `primary_color`: "#3B82F6"
 - `description`: "A privacy-first RAG knowledge base"
+- `auto_approve_users`: "true" - When "true", new users are automatically approved; when "false", users wait at `/pending` for admin approval
 
 #### `user_types`
 Groups of users with different onboarding question sets.
@@ -94,7 +115,10 @@ Onboarded users.
 |--------|------|-------------|
 | `id` | INTEGER | Primary key (auto-increment) |
 | `pubkey` | TEXT | Optional Nostr pubkey (unique) |
+| `email` | TEXT | User email address (unique) |
+| `name` | TEXT | User display name |
 | `user_type_id` | INTEGER | Foreign key to user_types |
+| `approved` | INTEGER | 1=approved, 0=pending (default: per `auto_approve_users` setting) |
 | `created_at` | TIMESTAMP | Creation timestamp |
 
 #### `user_field_values`
@@ -270,6 +294,16 @@ Get a user by ID with all field values.
 #### `PUT /users/{user_id}`
 Update a user's field values.
 
+**Note on User Approval:**
+This endpoint can also update the `approved` field to manually approve/reject users:
+```bash
+curl -X PUT http://localhost:8000/users/1 \
+  -H "Content-Type: application/json" \
+  -d '{"approved": true}'
+```
+
+> There is currently no dedicated `/admin/users/{id}/approve` endpoint. See [security-hardening.md](./security-hardening.md) for planned improvements.
+
 #### `DELETE /users/{user_id}`
 Delete a user and all their field values.
 
@@ -409,6 +443,7 @@ curl -X POST http://localhost:8000/users \
 | `frontend/src/types/onboarding.ts` | TypeScript types, storage keys, helper functions |
 | `frontend/src/pages/UserTypeSelection.tsx` | User type selection page |
 | `frontend/src/pages/UserProfile.tsx` | Dynamic profile form based on fields |
+| `frontend/src/pages/PendingApproval.tsx` | Waiting page for unapproved users |
 | `frontend/src/pages/AdminSetup.tsx` | Admin configuration UI (types + fields) |
 | `frontend/src/pages/AdminDatabaseExplorer.tsx` | SQLite database browser UI |
 | `frontend/src/components/onboarding/FieldEditor.tsx` | Field creation/editing form |
@@ -421,6 +456,7 @@ The frontend uses localStorage for temporary state during onboarding:
 | Key | Description |
 |-----|-------------|
 | `sanctum_admin_pubkey` | Admin Nostr pubkey (after login) |
+| `sanctum_session_token` | User session token (after magic link verification) |
 | `sanctum_user_email` | Verified user email |
 | `sanctum_user_name` | User display name |
 | `sanctum_user_type_id` | Selected user type ID |

@@ -359,11 +359,22 @@ def _call_llm_empathetic(question: str, context: str, session: dict, tools: list
     if "web-search" in tools:
         search_instruction = """
 === AUTO-SEARCH ===
-If a web search would help the user find local resources, contacts, or current info:
-- Add [SEARCH: search term here] at the very end of your response
-- Do NOT tell them to search - we will do it automatically for them
-- Only trigger search when it would genuinely help (e.g., finding local legal aid, embassy contacts)
-- The search term should be specific and actionable (e.g., "Cuba human rights lawyers Havana")
+You can trigger a web search by adding [SEARCH: term] at the END of your response.
+
+TRIGGER A SEARCH when the user:
+- Says they don't know any lawyers/contacts/resources
+- Asks "where can I find..." or "how do I contact..."
+- Needs specific local contacts (lawyers, NGOs, embassies, hotlines)
+- Needs help with secure tools (VPN, Signal, encrypted messaging)
+- Is in a location and needs local resources
+
+DO NOT search when:
+- User asks "what should I say/do" (answer from knowledge base)
+- You're still gathering basic info about their situation
+- The question is about advice/guidance, not finding contacts
+
+Example: If user says "I don't know any lawyers here" → [SEARCH: Venezuela human rights lawyers Caracas]
+Make search terms specific with location: "Venezuela human rights lawyers Caracas" not just "lawyers"
 """
     
     prompt = f"""You are a calm, caring helper for someone in crisis. They may be scared, exhausted, or overwhelmed.

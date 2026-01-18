@@ -182,7 +182,7 @@ export function ChatPage() {
     }
   }
   
-  // Auto-search triggered by backend
+  // Auto-search triggered by backend - injects results back into RAG session
   const triggerAutoSearch = async (searchTerm: string, token: string | null) => {
     try {
       // Show searching indicator
@@ -194,6 +194,15 @@ export function ChatPage() {
       }
       setMessages((prev) => [...prev, searchingMessage])
       
+      // Build context-aware search prompt with condensing instructions
+      const searchPrompt = `Search for: ${searchTerm}
+
+IMPORTANT: Return a CONDENSED response:
+- A brief table (3-5 rows max) with Name, Contact, and Notes columns
+- 2-3 sentences of practical advice
+- NO lengthy explanations or backgrounds
+- Focus on actionable contacts and next steps`
+      
       // Call the chat endpoint with web-search tool
       const searchRes = await fetch(`${API_BASE}/llm/chat`, {
         method: 'POST',
@@ -202,7 +211,7 @@ export function ChatPage() {
           ...(token && { 'Authorization': `Bearer ${token}` })
         },
         body: JSON.stringify({
-          message: searchTerm,
+          message: searchPrompt,
           tools: ['web-search']
         }),
       })
@@ -212,12 +221,13 @@ export function ChatPage() {
       }
       
       const searchData = await searchRes.json()
+      const searchResults = searchData.message
       
-      // Replace searching message with results
+      // Replace searching message with condensed results
       const searchResultMessage: Message = {
         id: generateMessageId(),
         role: 'assistant',
-        content: `I went ahead and searched "${searchTerm}" for you based on our conversation:\n\n${searchData.message}`,
+        content: `I searched "${searchTerm}" for you:\n\n${searchResults}`,
         timestamp: new Date(),
       }
       
@@ -226,6 +236,26 @@ export function ChatPage() {
         const withoutSearching = prev.filter(m => !m.content.startsWith('🔍 Searching'))
         return [...withoutSearching, searchResultMessage]
       })
+      
+      // Inject search results back into RAG session for context continuity
+      if (ragSessionId && selectedDocuments.length > 0) {
+        // Send a silent update to the RAG session with search results
+        await fetch(`${API_BASE}/query`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          },
+          body: JSON.stringify({
+            question: `[SYSTEM: Search results for "${searchTerm}" have been provided to the user. The results included: ${searchResults.slice(0, 500)}...]`,
+            session_id: ragSessionId,
+            top_k: 1,  // Minimal retrieval since this is just context injection
+            tools: []  // No tools for this update
+          }),
+        }).catch(() => {
+          // Silent failure - session update is best-effort
+        })
+      }
     } catch (e) {
       console.error('Auto-search failed:', e)
       // Remove searching message on error

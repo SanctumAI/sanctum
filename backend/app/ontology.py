@@ -297,7 +297,7 @@ TEXT CHUNK:
 
 HUMAN_RIGHTS_ASSISTANCE_ONTOLOGY = Ontology(
     id="HumanRightsAssistance",
-    name="Human Rights Assistance",
+    name="WLC Pathway to Freedom Guide",
     description="Guidance for victims/families under stress in high-risk contexts",
     version="1.0.0",
     entity_types=[

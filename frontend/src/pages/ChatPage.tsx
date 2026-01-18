@@ -46,6 +46,7 @@ export function ChatPage() {
   const [error, setError] = useState<string | null>(null)
   const [selectedTools, setSelectedTools] = useState<string[]>([])
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([])
+  const [ragSessionId, setRagSessionId] = useState<string | null>(null)
 
   // Build available tools list - db-query only visible to admins
   const availableTools = useMemo<Tool[]>(() => {
@@ -117,7 +118,7 @@ export function ChatPage() {
       const useRag = selectedDocuments.length > 0
       const endpoint = useRag ? '/query' : '/llm/chat'
       const body = useRag
-        ? { question: content, top_k: 5, tools: selectedTools }
+        ? { question: content, top_k: 8, tools: selectedTools, ...(ragSessionId && { session_id: ragSessionId }) }
         : { message: content, tools: selectedTools }
 
       // Admin token takes priority, fall back to user token
@@ -152,15 +153,10 @@ export function ChatPage() {
       let responseContent: string
       if (useRag) {
         responseContent = data.answer
-        if (data.citations && data.citations.length > 0) {
-          responseContent += '\n\n---\n\n**Sources:**\n'
-          data.citations.forEach((c: { claim_text: string; source_title: string; source_url?: string }, i: number) => {
-            responseContent += `\n${i + 1}. **${c.source_title}**`
-            if (c.source_url) {
-              responseContent += ` - [link](${c.source_url})`
-            }
-            responseContent += `\n   > ${c.claim_text}\n`
-          })
+        
+        // Save session_id for conversation continuity
+        if (data.session_id) {
+          setRagSessionId(data.session_id)
         }
       } else {
         responseContent = data.message
@@ -174,16 +170,103 @@ export function ChatPage() {
       }
 
       setMessages((prev) => [...prev, assistantMessage])
+      
+      // Handle auto-search if backend returned a search term
+      if (useRag && data.search_term) {
+        await triggerAutoSearch(data.search_term, token)
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to send message')
     } finally {
       setIsLoading(false)
     }
   }
+  
+  // Auto-search triggered by backend - injects results back into RAG session
+  const triggerAutoSearch = async (searchTerm: string, token: string | null) => {
+    try {
+      // Show searching indicator
+      const searchingMessage: Message = {
+        id: generateMessageId(),
+        role: 'assistant',
+        content: `🔍 Searching for "${searchTerm}"...`,
+        timestamp: new Date(),
+      }
+      setMessages((prev) => [...prev, searchingMessage])
+      
+      // Build context-aware search prompt with condensing instructions
+      const searchPrompt = `Search for: ${searchTerm}
+
+IMPORTANT: Return a CONDENSED response:
+- A brief table (3-5 rows max) with Name, Contact, and Notes columns
+- 2-3 sentences of practical advice
+- NO lengthy explanations or backgrounds
+- Focus on actionable contacts and next steps`
+      
+      // Call the chat endpoint with web-search tool
+      const searchRes = await fetch(`${API_BASE}/llm/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
+        body: JSON.stringify({
+          message: searchPrompt,
+          tools: ['web-search']
+        }),
+      })
+      
+      if (!searchRes.ok) {
+        throw new Error(`Search failed: HTTP ${searchRes.status}`)
+      }
+      
+      const searchData = await searchRes.json()
+      const searchResults = searchData.message
+      
+      // Replace searching message with condensed results
+      const searchResultMessage: Message = {
+        id: generateMessageId(),
+        role: 'assistant',
+        content: `I searched "${searchTerm}" for you:\n\n${searchResults}`,
+        timestamp: new Date(),
+      }
+      
+      // Remove the "Searching..." message and add results
+      setMessages((prev) => {
+        const withoutSearching = prev.filter(m => !m.content.startsWith('🔍 Searching'))
+        return [...withoutSearching, searchResultMessage]
+      })
+      
+      // Inject search results back into RAG session for context continuity
+      if (ragSessionId && selectedDocuments.length > 0) {
+        // Send a silent update to the RAG session with search results
+        await fetch(`${API_BASE}/query`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          },
+          body: JSON.stringify({
+            question: `[SYSTEM: Search results for "${searchTerm}" have been provided to the user. The results included: ${searchResults.slice(0, 500)}...]`,
+            session_id: ragSessionId,
+            top_k: 1,  // Minimal retrieval since this is just context injection
+            tools: []  // No tools for this update
+          }),
+        }).catch(() => {
+          // Silent failure - session update is best-effort
+        })
+      }
+    } catch (e) {
+      console.error('Auto-search failed:', e)
+      // Remove searching message on error
+      setMessages((prev) => prev.filter(m => !m.content.startsWith('🔍 Searching')))
+    }
+  }
 
   const handleNewChat = () => {
     setMessages([])
     setError(null)
+    setRagSessionId(null) // Reset session for new conversation
   }
 
   const handleSuggestedPrompt = (prompt: string) => {

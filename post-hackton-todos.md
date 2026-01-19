@@ -23,3 +23,6 @@
 
 ## DevOps
 - [ ] **Deployment wizard** - Guided setup for self-hosting (env vars, secrets, domain config)
+
+## chores
+- [ ] TOS

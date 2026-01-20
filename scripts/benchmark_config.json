@@ -1,0 +1,21 @@
+{
+  "backend_url": "http://localhost:8000",
+  "top_k": 8,
+  "enable_web_search": true,
+  "enable_auto_search_followup": true,
+  "grading": {
+    "enabled": true,
+    "model": "gpt-4o",
+    "temperature": 0.1
+  },
+  "output_dir": "evals",
+  "design_principles": [
+    "**Brevity** - Short responses (2-3 paragraphs max) for users under duress",
+    "**Plain language** - No jargon; speak like a trusted friend",
+    "**One step at a time** - Give ONE clear next action",
+    "**Never invent organizations** - Say \"search online for human rights help in [country]\"",
+    "**Personal decisions respected** - Present pros/cons, never push",
+    "**Urgency surfaced calmly** - When timing matters, explain why without alarming",
+    "**Clarifying questions** - Ask 1-2 follow-ups when needed"
+  ]
+}

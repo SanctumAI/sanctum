@@ -520,10 +520,16 @@ def run_benchmark():
             session_id = response.get("session_id")
             actual = response.get("answer", "")
             sources = response.get("sources", [])
+            context_used = response.get("context_used", "")
             
             print(f"📥 SANCTUM ({elapsed:.1f}s):\n")
             print(actual)
             print(f"\n📎 Sources: {len(sources)} retrieved")
+            
+            # Show source files for visibility
+            source_files = set(s.get("source_file", "") for s in sources if s.get("source_file"))
+            if source_files:
+                print(f"   Files: {', '.join(source_files)}")
             
             # Track history for grading context
             conversation_history.append({
@@ -558,12 +564,24 @@ def run_benchmark():
             else:
                 print(f"   Grading skipped: {grade.get('reasoning', 'Unknown error')}")
             
+            # Build condensed sources for output (text snippets + file names)
+            sources_summary = [
+                {
+                    "file": s.get("source_file", "unknown"),
+                    "score": round(s.get("score", 0), 3),
+                    "text_preview": s.get("text", "")[:200] + "..." if len(s.get("text", "")) > 200 else s.get("text", "")
+                }
+                for s in sources[:6]  # Top 6 that are actually used
+            ]
+            
             results.append({
                 "turn": turn_num,
                 "user_message": user_msg,
                 "expected_response": expected,
                 "actual_response": actual,
                 "sources_count": len(sources),
+                "sources": sources_summary,
+                "rag_context_preview": context_used[-2000:] if len(context_used) > 2000 else context_used,  # Last 2000 chars shows the actual context
                 "elapsed_seconds": elapsed,
                 "grade": grade
             })

@@ -322,8 +322,14 @@ def run_benchmark():
             session_id = response.get("session_id")
             actual = response.get("answer", "")
             sources = response.get("sources", [])
+            context_used = response.get("context_used", "")
             
             print(f"📥 SANCTUM ({elapsed:.1f}s):\n{actual}\n📎 Sources: {len(sources)}")
+            
+            # Show source files for visibility
+            source_files = set(s.get("source_file", "") for s in sources if s.get("source_file"))
+            if source_files:
+                print(f"   Files: {', '.join(source_files)}")
             
             conversation_history.append({"user": user_msg, "expected": expected, "actual": actual})
             
@@ -332,7 +338,27 @@ def run_benchmark():
             if score >= 0:
                 print(f"\n🎯 SCORE: {score}/100 - {grade.get('reasoning', 'N/A')}")
             
-            results.append({"turn": turn_num, "user_message": user_msg, "expected_response": expected, "actual_response": actual, "sources_count": len(sources), "elapsed_seconds": elapsed, "grade": grade})
+            # Build condensed sources for output
+            sources_summary = [
+                {
+                    "file": s.get("source_file", "unknown"),
+                    "score": round(s.get("score", 0), 3),
+                    "text_preview": s.get("text", "")[:200] + "..." if len(s.get("text", "")) > 200 else s.get("text", "")
+                }
+                for s in sources[:6]
+            ]
+            
+            results.append({
+                "turn": turn_num,
+                "user_message": user_msg,
+                "expected_response": expected,
+                "actual_response": actual,
+                "sources_count": len(sources),
+                "sources": sources_summary,
+                "rag_context_preview": context_used[-2000:] if len(context_used) > 2000 else context_used,
+                "elapsed_seconds": elapsed,
+                "grade": grade
+            })
         except Exception as e:
             print(f"✗ Error: {e}")
             results.append({"turn": turn_num, "error": str(e)})

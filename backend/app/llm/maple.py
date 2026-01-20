@@ -24,7 +24,7 @@ class MapleProvider(LLMProvider):
     def __init__(self):
         self.base_url = os.getenv("MAPLE_BASE_URL", "http://maple-proxy:8080/v1")
         self.api_key = os.getenv("MAPLE_API_KEY", "")
-        self.default_model = os.getenv("MAPLE_MODEL", "gpt-oss-120b")
+        self.default_model = os.getenv("MAPLE_MODEL", "kimi-k2-thinking")
 
         # Initialize OpenAI client with Maple endpoint
         self.client = OpenAI(

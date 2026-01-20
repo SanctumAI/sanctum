@@ -1,69 +1,32 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { API_BASE } from '../../types/onboarding'
 
-export interface Ontology {
+export interface DocumentSource {
   id: string
   name: string
   description: string
-  entity_types: string[]
-  relationship_types: string[]
+  tags: string[]
 }
 
 interface DocumentScopeProps {
   selectedDocuments: string[]
   onToggle: (docId: string) => void
-  apiBase?: string
+  documents: DocumentSource[]
   compact?: boolean
 }
 
 export function DocumentScope({
   selectedDocuments,
   onToggle,
-  apiBase = API_BASE,
+  documents,
   compact = false,
 }: DocumentScopeProps) {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
-  const [ontologies, setOntologies] = useState<Ontology[]>([])
-  const [loading, setLoading] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, openUpward: false })
-
-  useEffect(() => {
-    const fetchOntologies = async () => {
-      setLoading(true)
-      try {
-        const res = await fetch(`${apiBase}/ingest/ontologies`)
-        if (!res.ok) throw new Error('Failed to fetch ontologies')
-        const data = await res.json()
-        setOntologies(data.ontologies || [])
-      } catch {
-        setOntologies([
-          {
-            id: 'bitcoin_technical',
-            name: 'Bitcoin Technical',
-            description: 'Technical concepts, protocols, and algorithms',
-            entity_types: ['Concept', 'Protocol', 'Algorithm'],
-            relationship_types: ['USES', 'ENABLES', 'COMPOSED_OF'],
-          },
-          {
-            id: 'human_rights',
-            name: 'Human Rights',
-            description: 'Claims, actors, events, and legal instruments',
-            entity_types: ['Claim', 'Actor', 'Event'],
-            relationship_types: ['SUPPORTED_BY', 'PARTICIPATES_IN'],
-          },
-        ])
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchOntologies()
-  }, [apiBase])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -133,20 +96,16 @@ export function DocumentScope({
       </div>
 
       <div className="overflow-y-auto flex-1 min-h-0">
-        {loading ? (
-          <div className="p-4 text-center">
-            <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin mx-auto" />
-          </div>
-        ) : ontologies.length === 0 ? (
+        {documents.length === 0 ? (
           <div className="p-4 text-center text-text-muted text-xs">{t('chat.documentScope.noSources')}</div>
         ) : (
           <div className="p-1.5">
-            {ontologies.map((ontology) => {
-              const isSelected = selectedDocuments.includes(ontology.id)
+            {documents.map((source) => {
+              const isSelected = selectedDocuments.includes(source.id)
               return (
                 <button
-                  key={ontology.id}
-                  onClick={() => onToggle(ontology.id)}
+                  key={source.id}
+                  onClick={() => onToggle(source.id)}
                   className={`w-full text-left p-2.5 rounded-lg mb-1 last:mb-0 transition-all ${
                     isSelected
                       ? 'bg-accent/10 border border-accent/30'
@@ -166,22 +125,22 @@ export function DocumentScope({
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-text">{ontology.name}</p>
+                      <p className="text-xs font-medium text-text">{source.name}</p>
                       <p className="text-[10px] text-text-muted mt-0.5 line-clamp-1">
-                        {ontology.description}
+                        {source.description}
                       </p>
                       <div className="flex flex-wrap gap-1 mt-1.5">
-                        {ontology.entity_types.slice(0, 2).map((type) => (
+                        {source.tags.slice(0, 2).map((tag) => (
                           <span
-                            key={type}
+                            key={tag}
                             className="text-[9px] bg-surface-overlay text-text-muted px-1.5 py-0.5 rounded"
                           >
-                            {type}
+                            {tag}
                           </span>
                         ))}
-                        {ontology.entity_types.length > 2 && (
+                        {source.tags.length > 2 && (
                           <span className="text-[9px] text-text-muted">
-                            +{ontology.entity_types.length - 2}
+                            +{source.tags.length - 2}
                           </span>
                         )}
                       </div>

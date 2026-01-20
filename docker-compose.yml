@@ -16,27 +16,6 @@ services:
     networks:
       - sanctum-net
 
-  neo4j:
-    image: neo4j:5.15.0
-    container_name: sanctum-neo4j
-    ports:
-      - "7474:7474"  # HTTP
-      - "7687:7687"  # Bolt
-    environment:
-      - NEO4J_AUTH=neo4j/sanctum_dev_password
-      - NEO4J_PLUGINS=["apoc"]
-      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
-    volumes:
-      - neo4j_data:/data
-      - neo4j_logs:/logs
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - sanctum-net
-
   qdrant:
     image: qdrant/qdrant:v1.12.6
     container_name: sanctum-qdrant
@@ -78,9 +57,6 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - NEO4J_URI=bolt://neo4j:7687
-      - NEO4J_USER=neo4j
-      - NEO4J_PASSWORD=sanctum_dev_password
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
       - EMBEDDING_PROVIDER=openai
@@ -90,7 +66,7 @@ services:
       - LLM_PROVIDER=maple
       - MAPLE_BASE_URL=http://maple-proxy:8080/v1
       - MAPLE_API_KEY=${MAPLE_API_KEY:-}
-      - MAPLE_MODEL=gpt-oss-120b
+      - MAPLE_MODEL=kimi-k2-thinking
       - SEARXNG_URL=http://searxng:8080
       - SQLITE_PATH=/data/sanctum.db
       # Magic Link Auth configuration
@@ -110,8 +86,6 @@ services:
       retries: 5
       start_period: 30s
     depends_on:
-      neo4j:
-        condition: service_healthy
       qdrant:
         condition: service_healthy
       maple-proxy:
@@ -145,8 +119,6 @@ services:
       - sanctum-net
 
 volumes:
-  neo4j_data:
-  neo4j_logs:
   qdrant_data:
   embedding_cache:
   sqlite_data:

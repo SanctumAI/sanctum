@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Tag, Upload, FileText, X, CloudUpload, Loader2, Clock, ArrowLeft } from 'lucide-react'
+import { Upload, FileText, X, CloudUpload, Loader2, Clock, ArrowLeft } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { STORAGE_KEYS } from '../types/onboarding'
 import {
-  Ontology,
-  OntologiesResponse,
   UploadResponse,
   JobStatus,
   JobsListResponse,
@@ -22,14 +20,11 @@ export function AdminDocumentUpload() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // State
-  const [ontologies, setOntologies] = useState<Ontology[]>([])
-  const [selectedOntology, setSelectedOntology] = useState<string>('bitcoin_technical')
   const [isDragging, setIsDragging] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [recentJobs, setRecentJobs] = useState<JobStatus[]>([])
-  const [isLoadingOntologies, setIsLoadingOntologies] = useState(true)
   const [isLoadingJobs, setIsLoadingJobs] = useState(true)
 
   // Check if admin is logged in
@@ -39,25 +34,6 @@ export function AdminDocumentUpload() {
       navigate('/admin')
     }
   }, [navigate])
-
-  // Fetch available ontologies
-  useEffect(() => {
-    async function fetchOntologies() {
-      try {
-        const response = await fetch(`${INGEST_API_BASE}/ingest/ontologies`)
-        if (!response.ok) throw new Error('Failed to fetch ontologies')
-        const data: OntologiesResponse = await response.json()
-        setOntologies(data.ontologies)
-        setSelectedOntology(data.default)
-      } catch (error) {
-        console.error('Error fetching ontologies:', error)
-        // TODO: Show user-friendly error message
-      } finally {
-        setIsLoadingOntologies(false)
-      }
-    }
-    fetchOntologies()
-  }, [])
 
   // Fetch recent jobs
   const fetchJobs = useCallback(async () => {
@@ -152,7 +128,6 @@ export function AdminDocumentUpload() {
     try {
       const formData = new FormData()
       formData.append('file', selectedFile)
-      formData.append('ontology_id', selectedOntology)
 
       const response = await fetch(`${INGEST_API_BASE}/ingest/upload`, {
         method: 'POST',
@@ -223,42 +198,6 @@ export function AdminDocumentUpload() {
       footer={footer}
     >
       <div className="space-y-6">
-        {/* Ontology Selection */}
-        <div className="bg-surface-overlay border border-border rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-text mb-4 flex items-center gap-2">
-            <Tag className="w-4 h-4 text-text-muted" />
-            Ontology
-          </h3>
-
-          <div>
-            <label className="text-sm font-medium text-text mb-1.5 block">
-              Knowledge Schema
-            </label>
-            <div className="border border-border rounded-xl px-4 py-3 bg-surface focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20 transition-all">
-              {isLoadingOntologies ? (
-                <div className="text-text-muted text-sm">Loading ontologies...</div>
-              ) : (
-                <select
-                  value={selectedOntology}
-                  onChange={(e) => setSelectedOntology(e.target.value)}
-                  className="w-full bg-transparent outline-none text-text text-sm cursor-pointer"
-                >
-                  {ontologies.map((ontology) => (
-                    <option key={ontology.id} value={ontology.id}>
-                      {ontology.name}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-            {ontologies.find((o) => o.id === selectedOntology)?.description && (
-              <p className="text-xs text-text-muted mt-1.5">
-                {ontologies.find((o) => o.id === selectedOntology)?.description}
-              </p>
-            )}
-          </div>
-        </div>
-
         {/* File Upload Zone */}
         <div className="bg-surface-overlay border border-border rounded-xl p-5">
           <h3 className="text-sm font-semibold text-text mb-4 flex items-center gap-2">
@@ -403,9 +342,6 @@ export function AdminDocumentUpload() {
                           </p>
                         )}
                       </div>
-                      <span className="text-xs text-text-muted shrink-0">
-                        {job.ontology_id}
-                      </span>
                     </div>
                   </div>
                 )

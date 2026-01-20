@@ -37,19 +37,10 @@ interface RAGResponse {
 }
 
 // Ingestion pipeline interfaces
-interface OntologyInfo {
-  id: string
-  name: string
-  description: string
-  entity_types: string[]
-  relationship_types: string[]
-}
-
 interface IngestJob {
   job_id: string
   filename: string
   status: string
-  ontology_id: string
   total_chunks: number
   created_at: string
 }
@@ -67,7 +58,6 @@ interface ChunkInfo {
 interface IngestStats {
   jobs: { total: number; by_status: Record<string, number> }
   chunks: { total: number; by_status: Record<string, number> }
-  ontologies_available: string[]
 }
 
 // Vector Search interfaces
@@ -284,10 +274,6 @@ export function TestDashboard() {
   const [chatError, setChatError] = useState<string | null>(null)
 
   // Ingestion pipeline state
-  const [ontologies, setOntologies] = useState<OntologyInfo[] | null>(null)
-  const [ontologiesLoading, setOntologiesLoading] = useState(false)
-
-  const [selectedOntology, setSelectedOntology] = useState<string>('bitcoin_technical')
   const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [uploadLoading, setUploadLoading] = useState(false)
   const [uploadResult, setUploadResult] = useState<Record<string, unknown> | null>(null)
@@ -315,9 +301,6 @@ export function TestDashboard() {
 
   const [ingestStats, setIngestStats] = useState<IngestStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(false)
-
-  // Ontology detail state
-  const [selectedOntologyId, setSelectedOntologyId] = useState<string | null>(null)
 
   // Vector search state
   const [vectorQuery, setVectorQuery] = useState('')
@@ -515,19 +498,6 @@ export function TestDashboard() {
   }
 
   // Ingestion pipeline API calls
-  const fetchOntologies = async () => {
-    setOntologiesLoading(true)
-    try {
-      const res = await fetch(`${API_BASE}/ingest/ontologies`)
-      const data = await res.json()
-      setOntologies(data.ontologies)
-    } catch (e) {
-      setOntologies(null)
-    } finally {
-      setOntologiesLoading(false)
-    }
-  }
-
   const uploadDocument = async () => {
     if (!uploadFile) return
     setUploadLoading(true)
@@ -535,7 +505,6 @@ export function TestDashboard() {
     try {
       const formData = new FormData()
       formData.append('file', uploadFile)
-      formData.append('ontology_id', selectedOntology)
       const res = await fetch(`${API_BASE}/ingest/upload`, {
         method: 'POST',
         body: formData,
@@ -1431,54 +1400,8 @@ export function TestDashboard() {
             Document upload, chunking, and manual LLM extraction workflow.
           </p>
 
-          {/* ONTOLOGIES */}
-          <div className="mb-6">
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Ontologies</p>
-            <InfoBox>
-              <strong className="text-text">GET /ingest/ontologies</strong> — Lists available ontologies with their entity and relationship types.
-            </InfoBox>
-            <Button onClick={fetchOntologies} disabled={ontologiesLoading}>
-              {ontologiesLoading ? 'Fetching...' : 'Fetch Ontologies'}
-            </Button>
-            {ontologies && (
-              <div className="mt-4 space-y-2">
-                {ontologies.map((ont) => (
-                  <div
-                    key={ont.id}
-                    className={`bg-surface-overlay rounded-lg p-3 cursor-pointer transition-colors ${
-                      selectedOntologyId === ont.id ? 'ring-2 ring-accent' : 'hover:bg-surface'
-                    }`}
-                    onClick={() => setSelectedOntologyId(selectedOntologyId === ont.id ? null : ont.id)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <p className="font-medium text-text">{ont.name} <span className="text-text-muted font-mono text-sm">({ont.id})</span></p>
-                      <span className="text-text-muted text-sm">{selectedOntologyId === ont.id ? '▼' : '▶'}</span>
-                    </div>
-                    <p className="text-sm text-text-secondary mt-1">{ont.description}</p>
-                    {selectedOntologyId === ont.id && (
-                      <div className="mt-3 pt-3 border-t border-border">
-                        <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-2">Entity Types ({ont.entity_types.length})</p>
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {ont.entity_types.map((t) => (
-                            <span key={t} className="text-xs bg-accent-subtle text-accent px-2 py-0.5 rounded">{t}</span>
-                          ))}
-                        </div>
-                        <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-2">Relationship Types ({ont.relationship_types.length})</p>
-                        <div className="flex flex-wrap gap-1">
-                          {ont.relationship_types.map((t) => (
-                            <span key={t} className="text-xs bg-surface text-text-muted px-2 py-0.5 rounded border border-border">{t}</span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
           {/* UPLOAD DOCUMENT */}
-          <div className="border-t border-border pt-6 mb-6">
+          <div className="mb-6">
             <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Upload Document</p>
             <InfoBox>
               <strong className="text-text">POST /ingest/upload</strong> — Upload PDF, TXT, or MD files for processing. Returns a job_id to track progress.
@@ -1490,14 +1413,6 @@ export function TestDashboard() {
                 onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
                 className="text-sm text-text file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent file:text-accent-text file:font-medium file:cursor-pointer hover:file:bg-accent-hover"
               />
-              <select
-                value={selectedOntology}
-                onChange={(e) => setSelectedOntology(e.target.value)}
-                className="px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm focus:border-accent focus:ring-1 focus:ring-accent"
-              >
-                <option value="bitcoin_technical">bitcoin_technical</option>
-                <option value="human_rights">human_rights</option>
-              </select>
               <Button onClick={uploadDocument} disabled={uploadLoading || !uploadFile}>
                 {uploadLoading ? 'Uploading...' : 'Upload'}
               </Button>

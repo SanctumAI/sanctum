@@ -24,7 +24,6 @@ import httpx
 import auth
 from store import (
     embed_texts,
-    get_neo4j_driver,
     COLLECTION_NAME,
     QDRANT_HOST,
     QDRANT_PORT,
@@ -127,14 +126,14 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         search_response.raise_for_status()
         search_results = search_response.json().get("result", [])
         
-        # Extract sources and entity names
+        # Extract sources and chunk texts
         sources, entity_names, chunk_texts = _process_search_results(search_results)
-        
-        # 3. Graph traversal (2 hops from matched entities)
-        graph_context = _traverse_graph(list(entity_names)[:10], hops)
-        
+
+        # Graph context no longer used - simple vector search only
+        graph_context = {"actions": [], "risks": [], "guidance": [], "warnings": [], "resources": [], "preconditions": []}
+
         # 4. Build context and call LLM with empathetic prompt
-        context = _build_context(chunk_texts, graph_context, sources)
+        context = _build_context(chunk_texts, sources)
         session["_last_sources"] = sources  # For dynamic citation
         answer, clarifying_questions, full_prompt, search_term = _call_llm_empathetic(
             question, context, session, tools=request.tools
@@ -230,93 +229,17 @@ def _process_search_results(search_results: list) -> tuple[list, set, list]:
     return sources, entity_names, chunk_texts
 
 
-def _traverse_graph(entity_names: list[str], hops: int) -> dict:
-    """Traverse Neo4j graph from entry point entities."""
-    if not entity_names:
-        return {"actions": [], "risks": [], "guidance": [], "warnings": [], "resources": [], "preconditions": []}
-    
-    driver = get_neo4j_driver()
-    
-    cypher = """
-    UNWIND $names AS name
-    MATCH (entry)
-    WHERE toLower(entry.name) CONTAINS toLower(name)
-    MATCH path = (entry)-[*1..%d]-(related)
-    WITH DISTINCT related, labels(related)[0] AS type
-    RETURN type, collect(DISTINCT related.name)[0..5] AS names
-    ORDER BY type
-    """ % hops
-    
-    with driver.session() as session:
-        result = session.run(cypher, names=entity_names)
-        
-        context = {
-            "actions": [], "risks": [], "guidance": [],
-            "warnings": [], "resources": [], "preconditions": [],
-        }
-        
-        type_map = {
-            "Action": "actions", "Risk": "risks", "Guidance": "guidance",
-            "Contraindication": "warnings", "Pitfall": "warnings",
-            "Resource": "resources", "Precondition": "preconditions",
-        }
-        
-        for record in result:
-            node_type = record["type"]
-            names = record["names"] or []
-            key = type_map.get(node_type)
-            if key:
-                context[key].extend(names)
-        
-        for key in context:
-            context[key] = list(set(context[key]))[:10]
-        
-        return context
-
-
-def _build_context(chunk_texts: list[str], graph_context: dict, sources: list[dict]) -> str:
-    """Build context string with source relevance scores."""
+def _build_context(chunk_texts: list[str], sources: list[dict]) -> str:
+    """Build context string from retrieved chunks."""
     parts = []
-    
-    # Urgent relationship patterns - these indicate time-sensitivity or escalation
-    URGENT_PATTERNS = ['WORSENS', 'TIME_SENSITIVE', 'REQUIRES_FIRST', 'ESCALATES_TO', 'BLOCKED_BY']
-    
-    # Extract urgent facts FIRST (put at top of context for emphasis)
-    urgent_facts = []
-    regular_facts = []
-    for src in sources:
-        text = src.get("text", "")
-        if src.get("type") == "fact" and any(p in text for p in URGENT_PATTERNS):
-            urgent_facts.append(text)
-        elif src.get("type") == "fact":
-            regular_facts.append(text)
-    
-    # Put urgent/timing facts at the TOP
-    if urgent_facts:
-        parts.append("=== IMPORTANT TIMING ===")
-        parts.append("(Address these points calmly but make sure the user understands their importance)")
-        for fact in urgent_facts[:3]:
-            parts.append(f"• {fact[:200]}")
-        parts.append("")
-    
-    # Include full chunk texts with relevance scores
+
+    # Include full chunk texts
     if chunk_texts:
         parts.append("=== RELEVANT PASSAGES ===")
-        for i, text in enumerate(chunk_texts[:4], 1):
-            parts.append(f"{text[:500]}")
+        for i, text in enumerate(chunk_texts[:6], 1):
+            parts.append(f"[{i}] {text[:800]}")
             parts.append("")
-    
-    # Graph context
-    if graph_context.get("actions"):
-        parts.append("=== ACTIONS ===")
-        parts.extend(f"• {a}" for a in graph_context["actions"][:5])
-        parts.append("")
-    
-    if graph_context.get("risks"):
-        parts.append("=== RISKS ===")
-        parts.extend(f"• {r}" for r in graph_context["risks"][:5])
-        parts.append("")
-    
+
     return "\n".join(parts)
 
 

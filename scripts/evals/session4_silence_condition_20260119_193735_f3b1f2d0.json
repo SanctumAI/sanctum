@@ -1,0 +1,181 @@
+{
+  "benchmark": {
+    "name": "WLC Session 4 - Brother Released with Silence Condition (Nicaragua)",
+    "source_doc": "docs/WLC_BENCHMARK_Q_AND_A.md",
+    "design_principles": "\n1. **Brevity** - Short responses (2-3 paragraphs max) for users under duress\n2. **Plain language** - No jargon; speak like a trusted friend\n3. **One step at a time** - Give ONE clear next action\n4. **Never invent organizations** - Say \"search online for human rights help in [country]\"\n5. **Personal decisions respected** - Present pros/cons, never push\n6. **Urgency surfaced calmly** - When timing matters, explain why without alarming\n7. **Clarifying questions** - Ask 1-2 follow-ups when needed\n"
+  },
+  "metadata": {
+    "timestamp": "2026-01-19T19:34:28.551640",
+    "timestamp_utc": "2026-01-20T01:34:28.551657Z",
+    "backend_url": "http://localhost:8000",
+    "grading_enabled": true,
+    "git": {
+      "commit_hash": "f3b1f2d0f30ac228adcbd94ab34a8ada8f6e6262",
+      "commit_short": "f3b1f2d0",
+      "branch": "jc/post-hackathon-tweaks",
+      "commit_date": "2026-01-19 19:24:02 -0600",
+      "dirty": true
+    },
+    "ingest": {
+      "last_job_id": "6d86e47e91c71271",
+      "last_job_time": null,
+      "last_job_status": "completed",
+      "total_chunks": null
+    },
+    "config": {
+      "embedding_provider": "openai",
+      "embedding_model": "text-embedding-3-small",
+      "embedding_dimensions": "768",
+      "llm_provider": "maple",
+      "llm_model": "gpt-oss-120b",
+      "llm_provider_active": "maple",
+      "llm_model_active": "kimi-k2-thinking",
+      "llm_health": true
+    },
+    "python_version": "3.9.16 (main, May 15 2023, 18:51:40) \n[Clang 14.0.6 ]"
+  },
+  "results": [
+    {
+      "turn": 1,
+      "user_message": "My brother was released but they told him not to talk. What now?",
+      "expected_response": "I'm really glad to hear your brother is out, and I can hear how heavy it feels to be told to stay silent. It's normal to feel unsure about what to do next, especially when the pressure to keep quiet is still there.\n\nFirst, can you tell me a bit about his current situation? Is he living at home, under any kind of house\u2011arrest or monitoring, and does he have any way to talk to family or friends safely? Knowing that will help us pick the safest first step.\n\nIf he's free to move but still feels unsafe speaking, the safest immediate thing is to create a private, written record of what happened\u2014just a notebook he keeps hidden or a note on his phone that only he can see. This can be useful later if he decides to share his story or needs it for legal help, and it doesn't expose him right now.",
+      "actual_response": "I'm so relieved he's out - that must be a huge weight lifted. Let's make sure he stays safe now.\n\nFirst, he should assume his phone and online accounts are monitored. Use Signal or another encrypted app on a new device if possible, and avoid discussing sensitive details over any channel that could be tracked.\n\nWhat country is your brother in now, what country detained him, and what is his citizenship?",
+      "sources_count": 8,
+      "elapsed_seconds": 50.525481939315796,
+      "grade": {
+        "score": 75,
+        "reasoning": "The response shows empathy and acknowledges the user's relief, but it could be warmer. It is concise and offers a clear next step regarding communication safety. However, it lacks a personal touch and doesn't fully respect the user's decision-making process. The clarifying questions are relevant but could be more focused on the brother's immediate safety and emotional state.",
+        "strengths": [
+          "Concise and clear",
+          "Provides a practical safety tip"
+        ],
+        "weaknesses": [
+          "Lacks warmth and personal touch",
+          "Could better respect personal decision-making"
+        ],
+        "principle_scores": {
+          "empathy_tone": 15,
+          "brevity": 18,
+          "single_action": 18,
+          "clarifying_questions": 12,
+          "safety_accuracy": 12
+        }
+      }
+    },
+    {
+      "turn": 2,
+      "user_message": "He is home but he has to check in with police every week. He is scared and barely talks to anyone. He was in El Chipote for 6 months. He looks different.",
+      "expected_response": "I'm really glad your brother is home, but I can hear how heavy the fear and silence feel right now. Being told not to talk and having to check in with police every week can make anyone feel isolated and on edge.\n\nCan you tell me if he has any trusted family member or friend he feels safe talking to, even just for a few minutes?  \nIs he experiencing any physical health problems or strong anxiety that feels hard to manage on his own?\n\nA good first step is to create a tiny \"safe space\" for him to let out what's inside\u2014maybe a private notebook, a voice memo on his phone, or a short chat with someone he trusts. Even writing a few lines about how he feels each day can help break the pressure of keeping everything inside.\n\nAt the same time, it's wise to keep a simple record of any police check\u2011ins: date, time, what was asked, and how he felt. This can be useful later if he needs legal advice.",
+      "actual_response": "I'm glad he's home with you, but I can see how hard this still is - let's help him feel safe again.\n\nFirst, he needs a completely new phone that hasn't been linked to him before, with a new number, and Signal installed for any sensitive conversations - assume his current devices are monitored.\n\nIs your brother a Nicaraguan citizen, or is he from another country?",
+      "sources_count": 8,
+      "elapsed_seconds": 16.728475332260132,
+      "grade": {
+        "score": 65,
+        "reasoning": "The response acknowledges the user's situation and suggests a practical step for safety, but it lacks empathy and warmth. It also misses an opportunity to ask relevant follow-up questions that could help understand the brother's emotional state better.",
+        "strengths": [
+          "Provides a clear action for ensuring communication safety.",
+          "Avoids inventing organizations and maintains accuracy."
+        ],
+        "weaknesses": [
+          "Lacks empathy and warmth in tone, which is crucial for crisis support.",
+          "Does not ask relevant follow-up questions to understand the brother's emotional and physical state."
+        ],
+        "principle_scores": {
+          "empathy_tone": 10,
+          "brevity": 15,
+          "single_action": 15,
+          "clarifying_questions": 5,
+          "safety_accuracy": 20
+        }
+      }
+    },
+    {
+      "turn": 3,
+      "user_message": "He talks to me but not much. He has nightmares. I want to help him but I also want the world to know what happened to him. He says no. What do I do?",
+      "expected_response": "I'm really sorry you're both carrying this weight. It sounds like your brother is still feeling the fear and the trauma from his time in El Chipote, and you want to protect him while also making sure his story isn't lost.\n\nFirst, can you tell me if there's anyone he trusts\u2014a close family member, a friend, or a counselor\u2014who could be a safe ear for him when he's ready to talk?\n\nIf he's not ready to speak publicly, a gentle way to start is to help him keep a private record of what happened\u2014like a notebook he can lock away or a password\u2011protected note on his phone. He can write in it whenever he feels up to it, and you can keep it safe for him. This gives him control over his story and creates a factual account you can use later if he decides to share it.\n\nWhen you think about telling the world, weigh the pros and cons: sharing can bring pressure on the authorities, but it can also increase the risk of surveillance or more police check\u2011ins for him. **Only he can decide** which risk feels acceptable.",
+      "actual_response": "I hear how much you want justice for him\u2014that feeling is completely valid when you see someone you love suffering. But his safety has to come first.\n\n**Respect his \"no\" completely and help him get confidential trauma support.** Pushing him to speak publicly could put him back in police custody and worsen his nightmares. Contact international organizations like Physicians for Human Rights or the Center for Victims of Torture, which have secure ways to provide psychosocial support for survivors of political detention without any public exposure.\n\nWhat kind of support has he shown he's willing to accept, even in small ways?",
+      "sources_count": 8,
+      "elapsed_seconds": 29.08246397972107,
+      "grade": {
+        "score": 85,
+        "reasoning": "The response effectively acknowledges the user's emotions and prioritizes the brother's safety, aligning with the design principles. It provides a clear next step by suggesting confidential trauma support and respects the brother's decision not to speak publicly. However, it could improve by avoiding the mention of specific organizations and by asking more clarifying questions.",
+        "strengths": [
+          "Empathetic tone",
+          "Clear focus on safety and confidentiality"
+        ],
+        "weaknesses": [
+          "Mentions specific organizations, which could be seen as inventing",
+          "Lacks sufficient clarifying questions"
+        ],
+        "principle_scores": {
+          "empathy_tone": 23,
+          "brevity": 18,
+          "single_action": 18,
+          "clarifying_questions": 10,
+          "safety_accuracy": 16
+        }
+      }
+    },
+    {
+      "turn": 4,
+      "user_message": "I understand. But what if something happens to him again? I want there to be a record somewhere safe outside Nicaragua. Is that possible without him knowing?",
+      "expected_response": "I hear how worried you are that something could happen again, and how important it feels to keep a record of what he went through in a place he can't reach. The first thing to do is to write down the key facts\u2014dates, places, what he was told, any medical notes\u2014on paper that only you can see. When you feel safe, make a copy (a photo or a scan) and store it in a personal cloud drive or email that only you can open.\n\nDo you have regular internet access or a trusted device you can use for a private cloud or email?  \nIs there anyone else you trust (a close friend or relative) who could help keep a backup if you need it?\n\nIf you decide to share the record later, you can search online for \"human\u2011rights legal help in Nicaragua\" and verify the groups are still active before sending anything.",
+      "actual_response": "I hear how much you want to protect him\u2014that fear of him disappearing again is completely valid. Let's find a way to prepare that keeps him safe.\n\n**Do NOT create any records without his knowledge.** If police discover them during a check-in, it could be used as evidence against him and send him back to El Chipote. Instead, contact a reputable international human rights organization that works with Nicaraguan survivors. They can provide encrypted communication channels and guide you on secure, consent-based documentation that protects both of you.\n\nCan you safely research which international human rights groups provide confidential support to families of Nicaraguan detainees, or do you need guidance on what to look for in a trustworthy organization?",
+      "sources_count": 8,
+      "elapsed_seconds": 39.15976881980896,
+      "grade": {
+        "score": 85,
+        "reasoning": "The response effectively acknowledges the user's emotions and provides a clear next step, emphasizing safety and accuracy. However, it could be more concise and include a follow-up question to better align with the design principles.",
+        "strengths": [
+          "Empathetic tone",
+          "Focus on safety and accuracy"
+        ],
+        "weaknesses": [
+          "Lacks brevity",
+          "Missing a clarifying question"
+        ],
+        "principle_scores": {
+          "empathy_tone": 23,
+          "brevity": 15,
+          "single_action": 18,
+          "clarifying_questions": 10,
+          "safety_accuracy": 19
+        }
+      }
+    },
+    {
+      "turn": 5,
+      "user_message": "Yes I have internet and my cousin lives in Miami. One more thing - he was tortured. Should I write that down too? Will anyone believe us?",
+      "expected_response": "I'm really sorry you're carrying this weight for both of you. It's understandable to want a record of what happened, especially when the pain is so real and the fear of it happening again is strong.\n\nThe first step is to write down the key facts\u2014dates, places, what was said, and the torture you know about. Keep that paper in a safe spot only you can reach (a locked drawer, a hidden notebook, or a password\u2011protected file on a personal device). If you feel comfortable, give a copy to your cousin in Miami so there's a backup outside the country.\n\nIf you ever consider making the story public, think about two things:\n- **Pros:** It can bring attention and pressure, and maybe help protect your brother by making the abuse harder to hide\n- **Cons:** It could increase the risk of retaliation, especially if authorities see it as \"spreading false information\"\n\n**Only you and your brother can decide what feels right.** What matters most right now is his safety and your own well\u2011being.\n\nDo you have any medical notes or other paperwork that confirm what he endured?",
+      "actual_response": "I hear how scary it is to think he could be taken again, and that doubt about being believed is normal after trauma. Let's create a record that can't be used against him.\n\nCall your cousin in Miami on Signal and have her write down everything you tell her\u2014keep no records yourself.\n\nHas he agreed to let you share his story with your cousin?",
+      "sources_count": 8,
+      "elapsed_seconds": 27.16453790664673,
+      "grade": {
+        "score": 75,
+        "reasoning": "The response shows empathy and acknowledges the user's fear and doubt, maintaining a warm tone. It is concise and provides a clear next step, but it lacks a comprehensive view of the pros and cons of sharing the story. The response includes a relevant follow-up question but could have been more thorough in addressing safety concerns.",
+        "strengths": [
+          "Empathetic tone",
+          "Concise and focused"
+        ],
+        "weaknesses": [
+          "Lacks discussion of pros and cons",
+          "Could better address safety concerns"
+        ],
+        "principle_scores": {
+          "empathy_tone": 20,
+          "brevity": 18,
+          "single_action": 18,
+          "clarifying_questions": 12,
+          "safety_accuracy": 17
+        }
+      }
+    }
+  ],
+  "summary": {
+    "average_score": 77.0,
+    "turns_graded": 5,
+    "total_turns": 5,
+    "min_score": 65,
+    "max_score": 85
+  }
+}

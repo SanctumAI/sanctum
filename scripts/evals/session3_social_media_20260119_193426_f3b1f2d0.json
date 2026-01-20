@@ -1,0 +1,181 @@
+{
+  "benchmark": {
+    "name": "WLC Session 3 - Friend Taken for Social Media Post (Nicaragua)",
+    "source_doc": "docs/WLC_BENCHMARK_Q_AND_A.md",
+    "design_principles": "\n1. **Brevity** - Short responses (2-3 paragraphs max) for users under duress\n2. **Plain language** - No jargon; speak like a trusted friend\n3. **One step at a time** - Give ONE clear next action\n4. **Never invent organizations** - Say \"search online for human rights help in [country]\"\n5. **Personal decisions respected** - Present pros/cons, never push\n6. **Urgency surfaced calmly** - When timing matters, explain why without alarming\n7. **Clarifying questions** - Ask 1-2 follow-ups when needed\n"
+  },
+  "metadata": {
+    "timestamp": "2026-01-19T19:31:04.385429",
+    "timestamp_utc": "2026-01-20T01:31:04.385454Z",
+    "backend_url": "http://localhost:8000",
+    "grading_enabled": true,
+    "git": {
+      "commit_hash": "f3b1f2d0f30ac228adcbd94ab34a8ada8f6e6262",
+      "commit_short": "f3b1f2d0",
+      "branch": "jc/post-hackathon-tweaks",
+      "commit_date": "2026-01-19 19:24:02 -0600",
+      "dirty": true
+    },
+    "ingest": {
+      "last_job_id": "6d86e47e91c71271",
+      "last_job_time": null,
+      "last_job_status": "completed",
+      "total_chunks": null
+    },
+    "config": {
+      "embedding_provider": "openai",
+      "embedding_model": "text-embedding-3-small",
+      "embedding_dimensions": "768",
+      "llm_provider": "maple",
+      "llm_model": "gpt-oss-120b",
+      "llm_provider_active": "maple",
+      "llm_model_active": "kimi-k2-thinking",
+      "llm_health": true
+    },
+    "python_version": "3.9.16 (main, May 15 2023, 18:51:40) \n[Clang 14.0.6 ]"
+  },
+  "results": [
+    {
+      "turn": 1,
+      "user_message": "My friend was taken for posting on social media. What can I do?",
+      "expected_response": "I'm so sorry you're going through this. It must feel terrifying and overwhelming to see a friend taken away just for speaking out. I'm here to listen and help you think through the next steps, one small step at a time.\n\nTo give you the most useful guidance, could you share a bit more about the situation?\n\nIn which city or region of Nicaragua did the detention occur?  \nHow long ago was your friend taken, and do you know where they are being held?",
+      "actual_response": "This is really frightening - I'm here to help you through this safely.\n\nFirst, protect yourself: immediately stop discussing your friend's case on any social media or normal messaging apps. Download Signal, turn on disappearing messages, and only communicate with people you trust completely.\n\nWhat country are you in right now?",
+      "sources_count": 8,
+      "elapsed_seconds": 30.920273065567017,
+      "grade": {
+        "score": 75,
+        "reasoning": "The response shows empathy and provides a clear action for safety, which is crucial in a crisis. However, it could be more concise and includes multiple steps instead of focusing on one. It also lacks specific clarifying questions about the friend's situation.",
+        "strengths": [
+          "Empathetic tone",
+          "Focus on safety"
+        ],
+        "weaknesses": [
+          "Multiple actions instead of one",
+          "Lacks specific clarifying questions"
+        ],
+        "principle_scores": {
+          "empathy_tone": 20,
+          "brevity": 15,
+          "single_action": 10,
+          "clarifying_questions": 10,
+          "safety_accuracy": 20
+        }
+      }
+    },
+    {
+      "turn": 2,
+      "user_message": "It was in Managua two days ago. She posted a video criticizing the government. Men in civilian clothes came to her apartment. Her roommate saw it happen but was too scared to do anything.",
+      "expected_response": "I'm so sorry you're facing this. It must feel terrifying and overwhelming to see your friend taken away so suddenly, especially after she spoke out. I'm here to listen and help you think through the next steps, one small step at a time.\n\nDo you know where she is being held or have any official notice about her detention?  \nHave you been able to contact any lawyer, family member, or local human\u2011rights group about her situation?",
+      "actual_response": "That's really hard - I'm here to help you through this safely.\n\nImmediately secure all communication: download Signal, turn on disappearing messages, and only discuss your friend's case with trusted contacts. Do not post about this on social media or use normal messaging apps.\n\nIs your friend Nicaraguan or a foreign citizen?",
+      "sources_count": 8,
+      "elapsed_seconds": 37.08052396774292,
+      "grade": {
+        "score": 75,
+        "reasoning": "The response shows empathy and provides clear safety advice, but it lacks warmth and could be perceived as overly directive. It offers multiple actions instead of focusing on one, and the clarifying question could be more relevant to the immediate situation.",
+        "strengths": [
+          "Empathy is present",
+          "Safety advice is accurate"
+        ],
+        "weaknesses": [
+          "Multiple actions given",
+          "Clarifying question could be more relevant"
+        ],
+        "principle_scores": {
+          "empathy_tone": 15,
+          "brevity": 15,
+          "single_action": 10,
+          "clarifying_questions": 10,
+          "safety_accuracy": 25
+        }
+      }
+    },
+    {
+      "turn": 3,
+      "user_message": "We dont know where she is. Her family lives in Esteli and they are panicking. I am her closest friend here in Managua. I have the video she posted saved on my phone. Should I delete it? Should I post it to get attention?",
+      "expected_response": "I'm so sorry you're carrying this fear and uncertainty. It's heartbreaking to see a friend taken away for speaking out, and the unknown can feel overwhelming. You're not alone in this\u2014let's focus on one concrete step you can take right now while we gather a bit more information.\n\n**First priority:** try to find out where she is being held. Even a small clue\u2014like a name of a police unit, a detention center, or a reference in a phone call or text\u2014can open the door to legal help and family contact.\n\nI understand the urge to delete the video or share it publicly. Both choices carry serious risks and potential benefits, and the best course depends on what you know about her current situation and any legal advice you can obtain.\n\nHave you been able to speak with any of her family members or receive any official communication about her whereabouts?  \nDo you have access to a lawyer or trusted human\u2011rights contact who could advise on the risks of keeping or sharing the video?",
+      "actual_response": "I can hear how terrified you are - I'm here to help you stay safe.\n\nDo NOT post the video publicly. Immediately upload it to a secure encrypted cloud service like Proton Drive or Tresorit, then permanently delete it from your phone.\n\nAre you and your friend Nicaraguan citizens, or are either of you foreign nationals?",
+      "sources_count": 8,
+      "elapsed_seconds": 40.11607599258423,
+      "grade": {
+        "score": 75,
+        "reasoning": "The response shows empathy and provides a clear next step regarding the video, but it lacks a broader perspective on the situation and does not address the urgency of finding the friend's location. It also misses an opportunity to ask more relevant follow-up questions about the friend's whereabouts.",
+        "strengths": [
+          "Empathetic tone",
+          "Clear action regarding video security"
+        ],
+        "weaknesses": [
+          "Lacks focus on finding the friend's location",
+          "Limited clarifying questions"
+        ],
+        "principle_scores": {
+          "empathy_tone": 20,
+          "brevity": 18,
+          "single_action": 18,
+          "clarifying_questions": 7,
+          "safety_accuracy": 12
+        }
+      }
+    },
+    {
+      "turn": 4,
+      "user_message": "I talked to her mom. They have no information. No one will tell them anything. I dont have a lawyer. What are the risks of posting the video vs deleting it? I need to understand so I can decide.",
+      "expected_response": "I'm holding space for you as you navigate this terrifying uncertainty. It's understandable to feel torn between protecting yourself and trying to draw attention to what happened.\n\n**Risks of posting the video publicly:**\n* **Security for you** \u2013 Authorities have been known to target people who amplify criticism\n* **Potential impact on detainee** \u2013 Public exposure sometimes pressures officials, but can also make them more defensive\n* **Digital trace** \u2013 Even if you delete later, copies may exist and metadata can identify you\n\n**Risks of deleting the video:**\n* **Loss of evidence** \u2013 The video is a concrete record useful for lawyers or future investigations\n* **Limited visibility** \u2013 Without any record, it may be harder for allies to mobilize support\n\n**What many people find helpful:**\n1. **Secure the evidence first** \u2013 Keep the video on a password\u2011protected device or cloud storage you control\n2. **Reach out discreetly for legal help** \u2013 Search online for \"human rights legal aid Nicaragua\" and verify they're still active\n3. **Consider a low\u2011profile way to alert allies** \u2013 Share privately with a reputable international organization rather than posting publicly\n\nDo you have access to a password\u2011protected cloud service where you could store the video safely?  \nIs there anyone you trust who might help you contact a local legal\u2011aid group?",
+      "actual_response": "I hear you - this is an impossible choice to face alone. I'm here to help you weigh these risks carefully.\n\nFirst, secure the video: upload it immediately to an encrypted cloud service like Proton Drive or Tresorit, then permanently delete it from your phone. This preserves evidence while protecting you from possession charges.\n\nAre you and your friend both Nicaraguan citizens, or is either of you from another country?",
+      "sources_count": 8,
+      "elapsed_seconds": 24.677369117736816,
+      "grade": {
+        "score": 78,
+        "reasoning": "The response demonstrates empathy and provides a clear action to secure the video, which is crucial for safety. However, it lacks a comprehensive discussion of the risks involved in posting or deleting the video, which is important for informed decision-making. The follow-up question about citizenship is relevant but could be more directly tied to the user's immediate concerns.",
+        "strengths": [
+          "Empathetic tone",
+          "Clear next step provided"
+        ],
+        "weaknesses": [
+          "Lacks detailed risk analysis",
+          "Follow-up question could be more relevant"
+        ],
+        "principle_scores": {
+          "empathy_tone": 20,
+          "brevity": 18,
+          "single_action": 18,
+          "clarifying_questions": 10,
+          "safety_accuracy": 12
+        }
+      }
+    },
+    {
+      "turn": 5,
+      "user_message": "I backed up the video to my google drive with a password. Her mom is begging me to do something. She says every hour matters. Is there anything I can do RIGHT NOW that might help find her or protect her?",
+      "expected_response": "I'm holding space for you and your friend's family\u2014it's incredibly painful not knowing where she is and feeling the pressure to act right now. You've already taken an important step by keeping the video safe.\n\n**A concrete first step you can take right now:**\n\nReach out to a trusted legal or human\u2011rights contact in Nicaragua\u2014call or message them immediately and let them know you have a video that could be evidence. When you speak, share only the fact that you have a recording and ask: *\"Can you help me find out where she is being held and what the next legal steps are?\"*\n\nKeep the video stored securely until you get guidance on whether it should be shared.\n\nDo you know which office or organization is closest to you?  \nDo you have any written details you can prepare before reaching out?",
+      "actual_response": "This is an unbearable waiting game, and her mom is right that every hour matters\u2014I'm here to help you take the next safe step that actually helps.\n\nImmediately move that video from Google Drive to an end-to-end encrypted service like Proton Drive or Tresorit, then permanently delete it from Google Drive and your phone's gallery. Google Drive is not secure against state surveillance, and keeping it there puts you and your friend at risk while achieving nothing.\n\nAre you and your friend Nicaraguan citizens, or is either of you from another country?",
+      "sources_count": 8,
+      "elapsed_seconds": 44.57357406616211,
+      "grade": {
+        "score": 75,
+        "reasoning": "The response demonstrates empathy and acknowledges the urgency of the situation, but it lacks a clear single action focus and provides multiple steps instead. The response includes a relevant clarifying question, but it could have been more directly related to immediate actions. The advice on data security is appropriate, but it could have been more concise.",
+        "strengths": [
+          "Empathetic tone",
+          "Appropriate safety advice regarding data security"
+        ],
+        "weaknesses": [
+          "Lacks a single clear action focus",
+          "Could be more concise"
+        ],
+        "principle_scores": {
+          "empathy_tone": 20,
+          "brevity": 15,
+          "single_action": 10,
+          "clarifying_questions": 10,
+          "safety_accuracy": 20
+        }
+      }
+    }
+  ],
+  "summary": {
+    "average_score": 75.6,
+    "turns_graded": 5,
+    "total_turns": 5,
+    "min_score": 75,
+    "max_score": 78
+  }
+}

@@ -24,7 +24,6 @@ import httpx
 import auth
 from store import (
     embed_texts,
-    get_neo4j_driver,
     COLLECTION_NAME,
     QDRANT_HOST,
     QDRANT_PORT,
@@ -127,14 +126,14 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         search_response.raise_for_status()
         search_results = search_response.json().get("result", [])
         
-        # Extract sources and entity names
+        # Extract sources and chunk texts
         sources, entity_names, chunk_texts = _process_search_results(search_results)
-        
-        # 3. Graph traversal (2 hops from matched entities)
-        graph_context = _traverse_graph(list(entity_names)[:10], hops)
-        
+
+        # Graph context no longer used - simple vector search only
+        graph_context = {"actions": [], "risks": [], "guidance": [], "warnings": [], "resources": [], "preconditions": []}
+
         # 4. Build context and call LLM with empathetic prompt
-        context = _build_context(chunk_texts, graph_context, sources)
+        context = _build_context(chunk_texts, sources)
         session["_last_sources"] = sources  # For dynamic citation
         answer, clarifying_questions, full_prompt, search_term = _call_llm_empathetic(
             question, context, session, tools=request.tools
@@ -147,11 +146,22 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
             "timestamp": datetime.utcnow().isoformat()
         })
         
+        # Run dedicated fact extraction after response (more reliable than in-response tags)
+        session["facts_gathered"] = _extract_facts_from_conversation(session)
+        
+        # Update jurisdiction from extracted facts if we got location/country
+        if not session.get("jurisdiction"):
+            facts = session.get("facts_gathered", {})
+            if facts.get("detention_country"):
+                session["jurisdiction"] = facts["detention_country"]
+            elif facts.get("location"):
+                session["jurisdiction"] = facts["location"]
+        
         # Track what we still need to know
         if clarifying_questions:
             session["pending_questions"] = clarifying_questions
         
-        logger.info(f"RAG complete. Answer: {len(answer)} chars, {len(clarifying_questions)} clarifying Qs, search_term={search_term}")
+        logger.info(f"RAG complete. Answer: {len(answer)} chars, {len(clarifying_questions)} clarifying Qs, search_term={search_term}, facts={session.get('facts_gathered', {})}")
         
         return QueryResponse(
             answer=answer,
@@ -182,6 +192,74 @@ def _get_or_create_session(session_id: str) -> dict:
             "pending_questions": [],
         }
     return _sessions[session_id]
+
+
+def _extract_facts_from_conversation(session: dict) -> dict:
+    """
+    Dedicated fact extraction pass - runs after main response.
+    Uses a focused prompt to reliably extract structured facts from conversation.
+    """
+    import json as json_module
+    llm = get_provider()
+    
+    # Format conversation for fact extraction
+    messages = session.get("messages", [])
+    if not messages:
+        return {}
+    
+    conversation_text = "\n".join([
+        f"{'User' if m['role']=='user' else 'Assistant'}: {m['content']}"
+        for m in messages[-8:]  # Last 4 exchanges max
+    ])
+    
+    # Get existing facts to avoid overwriting with "unknown"
+    existing_facts = session.get("facts_gathered", {})
+    
+    prompt = f"""Extract ONLY facts that are EXPLICITLY stated in this conversation.
+Do NOT guess or infer. If something is not clearly stated, use null.
+
+Conversation:
+{conversation_text}
+
+Extract these facts (use null if not explicitly mentioned):
+- location: Where is the USER currently located? (city/country)
+- nationality: What is the USER's citizenship/nationality?
+- detention_country: In which country did the detention happen?
+- detention_location: Specific place of detention if mentioned (e.g., "El Chipote", "Bentiu")
+- victim_relation: Who was detained? (husband, wife, brother, sister, son, daughter, friend, etc.)
+- victim_name: Name of detained person if mentioned
+- detention_timeframe: When did it happen? (e.g., "3 days ago", "2 weeks ago")
+- is_foreigner: Is the user in a different country than their citizenship? (true/false/null)
+
+Return ONLY valid JSON, no explanation:
+{{"location": ..., "nationality": ..., "detention_country": ..., "detention_location": ..., "victim_relation": ..., "victim_name": ..., "detention_timeframe": ..., "is_foreigner": ...}}"""
+
+    try:
+        response = llm.complete(prompt, temperature=0.0)
+        content = response.content.strip()
+        
+        # Try to extract JSON from response (handle markdown code blocks)
+        if "```" in content:
+            # Extract from code block
+            import re
+            json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', content, re.DOTALL)
+            if json_match:
+                content = json_match.group(1)
+        
+        # Parse JSON
+        extracted = json_module.loads(content)
+        
+        # Merge with existing facts, only updating non-null values
+        for key, value in extracted.items():
+            if value is not None and value != "null" and value != "":
+                existing_facts[key] = value
+        
+        logger.info(f"Fact extraction complete: {existing_facts}")
+        return existing_facts
+        
+    except Exception as e:
+        logger.warning(f"Fact extraction failed: {e}")
+        return existing_facts
 
 
 def _build_search_query(question: str, session: dict) -> str:
@@ -230,93 +308,17 @@ def _process_search_results(search_results: list) -> tuple[list, set, list]:
     return sources, entity_names, chunk_texts
 
 
-def _traverse_graph(entity_names: list[str], hops: int) -> dict:
-    """Traverse Neo4j graph from entry point entities."""
-    if not entity_names:
-        return {"actions": [], "risks": [], "guidance": [], "warnings": [], "resources": [], "preconditions": []}
-    
-    driver = get_neo4j_driver()
-    
-    cypher = """
-    UNWIND $names AS name
-    MATCH (entry)
-    WHERE toLower(entry.name) CONTAINS toLower(name)
-    MATCH path = (entry)-[*1..%d]-(related)
-    WITH DISTINCT related, labels(related)[0] AS type
-    RETURN type, collect(DISTINCT related.name)[0..5] AS names
-    ORDER BY type
-    """ % hops
-    
-    with driver.session() as session:
-        result = session.run(cypher, names=entity_names)
-        
-        context = {
-            "actions": [], "risks": [], "guidance": [],
-            "warnings": [], "resources": [], "preconditions": [],
-        }
-        
-        type_map = {
-            "Action": "actions", "Risk": "risks", "Guidance": "guidance",
-            "Contraindication": "warnings", "Pitfall": "warnings",
-            "Resource": "resources", "Precondition": "preconditions",
-        }
-        
-        for record in result:
-            node_type = record["type"]
-            names = record["names"] or []
-            key = type_map.get(node_type)
-            if key:
-                context[key].extend(names)
-        
-        for key in context:
-            context[key] = list(set(context[key]))[:10]
-        
-        return context
-
-
-def _build_context(chunk_texts: list[str], graph_context: dict, sources: list[dict]) -> str:
-    """Build context string with source relevance scores."""
+def _build_context(chunk_texts: list[str], sources: list[dict]) -> str:
+    """Build context string from retrieved chunks."""
     parts = []
-    
-    # Urgent relationship patterns - these indicate time-sensitivity or escalation
-    URGENT_PATTERNS = ['WORSENS', 'TIME_SENSITIVE', 'REQUIRES_FIRST', 'ESCALATES_TO', 'BLOCKED_BY']
-    
-    # Extract urgent facts FIRST (put at top of context for emphasis)
-    urgent_facts = []
-    regular_facts = []
-    for src in sources:
-        text = src.get("text", "")
-        if src.get("type") == "fact" and any(p in text for p in URGENT_PATTERNS):
-            urgent_facts.append(text)
-        elif src.get("type") == "fact":
-            regular_facts.append(text)
-    
-    # Put urgent/timing facts at the TOP
-    if urgent_facts:
-        parts.append("=== IMPORTANT TIMING ===")
-        parts.append("(Address these points calmly but make sure the user understands their importance)")
-        for fact in urgent_facts[:3]:
-            parts.append(f"• {fact[:200]}")
-        parts.append("")
-    
-    # Include full chunk texts with relevance scores
+
+    # Include full chunk texts
     if chunk_texts:
         parts.append("=== RELEVANT PASSAGES ===")
-        for i, text in enumerate(chunk_texts[:4], 1):
-            parts.append(f"{text[:500]}")
+        for i, text in enumerate(chunk_texts[:6], 1):
+            parts.append(f"[{i}] {text[:800]}")
             parts.append("")
-    
-    # Graph context
-    if graph_context.get("actions"):
-        parts.append("=== ACTIONS ===")
-        parts.extend(f"• {a}" for a in graph_context["actions"][:5])
-        parts.append("")
-    
-    if graph_context.get("risks"):
-        parts.append("=== RISKS ===")
-        parts.extend(f"• {r}" for r in graph_context["risks"][:5])
-        parts.append("")
-    
+
     return "\n".join(parts)
 
 
@@ -338,12 +340,6 @@ def _call_llm_empathetic(question: str, context: str, session: dict, tools: list
             for m in recent[:-1]  # Exclude current message
         ])
     
-    jurisdiction_note = ""
-    if session.get("jurisdiction"):
-        jurisdiction_note = f"User is in: {session['jurisdiction']}. Tailor advice to this context where possible."
-    else:
-        jurisdiction_note = "IMPORTANT: We don't know the user's jurisdiction yet. Laws vary widely. Ask about their location."
-    
     # Extract source files from context for citation
     source_files = set()
     for src in session.get("_last_sources", []):
@@ -354,9 +350,18 @@ def _call_llm_empathetic(question: str, context: str, session: dict, tools: list
             source_files.add(sf.replace(".pdf", "").replace("-", " ").replace("_", " "))
     source_citation = ", ".join(source_files) if source_files else "human rights guidance materials"
     
-    # Build known facts from session for context continuity
+    # Build known facts section - treat these as CONFIRMED, do not re-ask
     facts = session.get("facts_gathered", {})
-    known_facts_str = ", ".join(f"{k}={v}" for k, v in facts.items()) if facts else ""
+    if facts:
+        facts_lines = []
+        for key, value in facts.items():
+            if value:
+                facts_lines.append(f"  - {key}: {value}")
+        known_facts_section = "=== CONFIRMED FACTS (do NOT re-ask these) ===\n" + "\n".join(facts_lines)
+        jurisdiction_note = "Use the confirmed facts above. Only ask clarifying questions about things NOT already known."
+    else:
+        known_facts_section = "=== NO FACTS CONFIRMED YET ===\nAsk about location and nationality early, but only once per conversation."
+        jurisdiction_note = "We don't know location yet. Ask about it, but don't repeatedly ask if user doesn't answer."
     
     # Auto-search instruction if web-search tool is enabled
     search_instruction = ""
@@ -381,13 +386,7 @@ In authoritarian countries (China, Russia, Iran, Belarus, Venezuela, Cuba, North
 - Prioritize: secure communication, international human rights orgs, documenting privately
 - If person is a FOREIGN citizen (like Cuban in Venezuela), their home embassy CAN help
 
-=== CRITICAL: FACT TRACKING ===
-At the END of your response, add: [FACTS: key=value, key=value]
-Only include NEW facts. Keys: nationality, location, detention_country, is_foreigner (true if in different country than citizenship)
-Example: [FACTS: nationality=Cuban, location=Caracas, detention_country=Venezuela, is_foreigner=true]
-
-=== KNOWN FACTS FROM THIS CONVERSATION ===
-{known_facts_str if known_facts_str else "(None yet - gather nationality and location early)"}
+{known_facts_section}
 
 === STYLE ===
 - ONE action at a time. Not a list. Just the single most important next step.
@@ -395,7 +394,7 @@ Example: [FACTS: nationality=Cuban, location=Caracas, detention_country=Venezuel
   GOOD: "That's really hard - I'm here to help." / "I hear you, let's figure this out together." / "This is tough, but we'll work through it step by step."
   BAD: "That's terrifying." (cold, no support offered)
 - Vary between warm and direct, but always include the supportive second half.
-- Format: Warm opener with support → ONE specific action → 1 clarifying question
+- Format: Warm opener with support → ONE specific action → 1 clarifying question (only if needed)
 {search_instruction}
 === RULES ===
 1. ONE action per response. Not a list. The single most urgent thing.
@@ -404,6 +403,7 @@ Example: [FACTS: nationality=Cuban, location=Caracas, detention_country=Venezuel
 4. If user says "I don't know anyone/who to call" → TRIGGER A SEARCH.
 5. When recommending orgs/lawyers, give 2-3 options when possible. Organizations get shut down, people become unavailable. Backup contacts save lives.
 6. {jurisdiction_note}
+7. Do NOT ask about location/nationality/country if it's already in CONFIRMED FACTS above.
 
 === SOURCE ===
 {source_citation}

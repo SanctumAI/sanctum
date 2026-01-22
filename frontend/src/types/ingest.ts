@@ -3,20 +3,6 @@
  * Used by AdminDocumentUpload page
  */
 
-// Ontology types
-export interface Ontology {
-  id: string
-  name: string
-  description: string
-  entity_types: string[]
-  relationship_types: string[]
-}
-
-export interface OntologiesResponse {
-  ontologies: Ontology[]
-  default: string
-}
-
 // Upload response
 export interface UploadResponse {
   job_id: string
@@ -30,7 +16,6 @@ export interface JobStatus {
   job_id: string
   filename: string
   status: 'pending' | 'processing' | 'chunked' | 'completed' | 'failed'
-  ontology_id: string
   created_at: string
   updated_at: string
   total_chunks: number
@@ -45,7 +30,6 @@ export interface JobsListResponse {
     job_id: string
     filename: string
     status: string
-    ontology_id: string
     total_chunks: number
     created_at: string
   }[]
@@ -59,8 +43,6 @@ export interface ChunkInfo {
   text: string
   char_count: number
   status: 'pending' | 'extracted' | 'stored'
-  ontology_id: string
-  extraction_prompt: string
   source_file: string
 }
 
@@ -74,7 +56,6 @@ export interface IngestStats {
     total: number
     by_status: Record<string, number>
   }
-  ontologies_available: string[]
 }
 
 // API base URL - uses Vite proxy in development

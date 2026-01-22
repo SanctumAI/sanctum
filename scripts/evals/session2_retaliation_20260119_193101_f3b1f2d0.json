@@ -1,0 +1,181 @@
+{
+  "benchmark": {
+    "name": "WLC Session 2 - Protection from Retaliation (Nicaragua)",
+    "source_doc": "docs/WLC_BENCHMARK_Q_AND_A.md",
+    "design_principles": "\n1. **Brevity** - Short responses (2-3 paragraphs max) for users under duress\n2. **Plain language** - No jargon; speak like a trusted friend\n3. **One step at a time** - Give ONE clear next action\n4. **Never invent organizations** - Say \"search online for human rights help in [country]\"\n5. **Personal decisions respected** - Present pros/cons, never push\n6. **Urgency surfaced calmly** - When timing matters, explain why without alarming\n7. **Clarifying questions** - Ask 1-2 follow-ups when needed\n"
+  },
+  "metadata": {
+    "timestamp": "2026-01-19T19:27:39.343705",
+    "timestamp_utc": "2026-01-20T01:27:39.343725Z",
+    "backend_url": "http://localhost:8000",
+    "grading_enabled": true,
+    "git": {
+      "commit_hash": "f3b1f2d0f30ac228adcbd94ab34a8ada8f6e6262",
+      "commit_short": "f3b1f2d0",
+      "branch": "jc/post-hackathon-tweaks",
+      "commit_date": "2026-01-19 19:24:02 -0600",
+      "dirty": true
+    },
+    "ingest": {
+      "last_job_id": "6d86e47e91c71271",
+      "last_job_time": null,
+      "last_job_status": "completed",
+      "total_chunks": null
+    },
+    "config": {
+      "embedding_provider": "openai",
+      "embedding_model": "text-embedding-3-small",
+      "embedding_dimensions": "768",
+      "llm_provider": "maple",
+      "llm_model": "gpt-oss-120b",
+      "llm_provider_active": "maple",
+      "llm_model_active": "kimi-k2-thinking",
+      "llm_health": true
+    },
+    "python_version": "3.9.16 (main, May 15 2023, 18:51:40) \n[Clang 14.0.6 ]"
+  },
+  "results": [
+    {
+      "turn": 1,
+      "user_message": "How can I protect myself from retaliation by authorities?",
+      "expected_response": "I'm really sorry you're having to live with that fear. It's understandable to feel on edge when the authorities might target you for standing up for a loved one. Let's focus on one concrete step you can take right now, and we can build from there.\n\n**First step:** Start a secure, private record of everything that's happening\u2014dates, places, names of officials you've spoken with, any threats you've received, and any documents you have (court notices, medical reports, etc.). Keep this log in a place that only you can access (for example, an encrypted note on your phone or a password\u2011protected document stored offline).\n\nWhen did the detention occur, and how long have you been dealing with the authorities' pressure?  \nHave you received any direct threats or notices from officials, and do you know where your loved one is being held?",
+      "actual_response": "I understand that fear, and it's completely valid. Let's focus on what you can do right now.\n\nSwitch all sensitive communication to a secure, encrypted platform like Signal with disappearing messages enabled.\n\nWhere are you located, and what's your nationality?",
+      "sources_count": 8,
+      "elapsed_seconds": 51.23997211456299,
+      "grade": {
+        "score": 75,
+        "reasoning": "The response shows empathy and provides a clear next step, but it lacks a bit in warmth and could be more supportive. The follow-up questions are relevant but could be more focused on the immediate situation rather than personal details.",
+        "strengths": [
+          "Empathetic tone",
+          "Clear next step provided"
+        ],
+        "weaknesses": [
+          "Lacks warmth",
+          "Follow-up questions could be more relevant to the immediate situation"
+        ],
+        "principle_scores": {
+          "empathy_tone": 18,
+          "brevity": 18,
+          "single_action": 20,
+          "clarifying_questions": 9,
+          "safety_accuracy": 10
+        }
+      }
+    },
+    {
+      "turn": 2,
+      "user_message": "My husband was arrested 2 weeks ago for participating in a protest. I went to the police station to ask about him and an officer wrote down my name and said 'we know where you live.' I have two young children.",
+      "expected_response": "I'm so sorry you're going through this. It must feel terrifying to have the authorities point a threat at you while you're already worried about your husband and caring for your children. You deserve safety and support right now.\n\nTo be able to give you the most helpful next step, could you let me know a little more about your situation?\n\nDo you know where your husband is being held or have any official communication from the authorities about his case?  \nHave you been able to contact a lawyer, a trusted family member, or a local human\u2011rights or legal\u2011aid group for advice?",
+      "actual_response": "That's incredibly frightening, and you're being so brave for your children. I'm here to help you stay safe.\n\nStart a completely private, offline log RIGHT NOW: write down the officer's name, exact threat, date/time, your husband's case number, and every future interaction. Use a paper notebook hidden in a safe place, or an encrypted file with cloud sync completely disabled.\n\nWhat country are you in, and what's your nationality?",
+      "sources_count": 8,
+      "elapsed_seconds": 25.709367036819458,
+      "grade": {
+        "score": 85,
+        "reasoning": "The response effectively acknowledges the user's fear and provides a clear, actionable step to document interactions with authorities. However, it could have been slightly more empathetic and included a follow-up question to better understand the user's situation.",
+        "strengths": [
+          "Acknowledges the user's fear",
+          "Provides a clear, actionable step"
+        ],
+        "weaknesses": [
+          "Could be more empathetic",
+          "Lacks a follow-up question to gather more context"
+        ],
+        "principle_scores": {
+          "empathy_tone": 20,
+          "brevity": 18,
+          "single_action": 20,
+          "clarifying_questions": 10,
+          "safety_accuracy": 17
+        }
+      }
+    },
+    {
+      "turn": 3,
+      "user_message": "We think he is in El Chipote but we are not sure. I dont have a lawyer. I dont know who to trust. What should I do first?",
+      "expected_response": "I'm so sorry you're carrying this fear for yourself, your children, and your husband. It's understandable to feel overwhelmed when the authorities have singled you out. Let's focus on one concrete step you can take right now to protect yourself and start gathering reliable help.\n\n**First step \u2013 Secure a safe, private record of everything you know:**\n\n1. **Date, time, and place** of every interaction with police or officials (including the officer who wrote your name)\n2. **Exact words or threats** you were given\n3. Any **information you have about where your husband might be held** (e.g., \"El Chipote\" and any dates you've seen his name on a visitation list)\n4. **Names and contact numbers** of any relatives, friends, or neighbors you trust and can reach out to for support\n\nKeep this record in a place only you can access\u2014under a mattress, in a locked drawer, or on a password\u2011protected device that you can hide quickly.\n\nDo you have any contact with a lawyer, legal aid service, or a trusted community organization in Nicaragua that you think might be able to help?  \nAre you able to safely leave your home for a short period to meet someone you trust without raising further suspicion?",
+      "actual_response": "That's terrifying, and you're showing incredible strength protecting your children. I'm here to help you take this step by step.\n\nInstall Signal on your phone immediately, enable disappearing messages for 24 hours, and use it for any conversation about your husband's case.\n\nWhat is your nationality, and are you currently in Nicaragua?",
+      "sources_count": 8,
+      "elapsed_seconds": 20.164201259613037,
+      "grade": {
+        "score": 70,
+        "reasoning": "The response shows empathy and provides a clear next step, but it lacks a comprehensive approach to the user's situation. It also misses an opportunity to ask more relevant clarifying questions that could guide the user towards additional support.",
+        "strengths": [
+          "Empathetic tone",
+          "Clear next step provided"
+        ],
+        "weaknesses": [
+          "Lacks comprehensive guidance",
+          "Insufficient clarifying questions"
+        ],
+        "principle_scores": {
+          "empathy_tone": 20,
+          "brevity": 18,
+          "single_action": 18,
+          "clarifying_questions": 5,
+          "safety_accuracy": 9
+        }
+      }
+    },
+    {
+      "turn": 4,
+      "user_message": "I documented everything like you said. My sister lives in Costa Rica and I told her what is happening. She wants me to come there with the kids. But I dont want to abandon my husband. What should I do?",
+      "expected_response": "I'm really sorry you're caught between caring for your children, staying close to your husband, and feeling unsafe. It's understandable to feel torn\u2014there's no \"right\" answer, only what feels most bearable for you and your family right now.\n\nIf you feel that staying puts you or the kids in immediate danger (for example, if the police have threatened you again or you're being followed), the very first step is to secure a safe place for you and the children, even if it's just a trusted neighbor's home for a night while you figure out the next move.\n\nIf you're not under an immediate threat, you might consider keeping a low profile in Nicaragua while you explore ways to get reliable legal help and keep your sister updated on any developments.\n\nAre you currently experiencing any direct threats or intimidation that make staying at home feel unsafe?  \nDo you have any contact for a lawyer, legal\u2011aid service, or a trusted human\u2011rights organization in Nicaragua that you could reach out to for confidential advice?",
+      "actual_response": "This is an impossible choice, and your love for your husband is so clear. I'm here to help you protect your children while we keep fighting for him.\n\nContact your sister in Costa Rica via Signal to plan your safe departure - but tell NO ONE else in Nicaragua.\n\nDo you and your children have valid passports?",
+      "sources_count": 8,
+      "elapsed_seconds": 31.4363751411438,
+      "grade": {
+        "score": 78,
+        "reasoning": "The response shows empathy and provides a clear next step, but it lacks a calm explanation of urgency and doesn't fully respect the user's personal decision-making process. It also misses an opportunity to ask more clarifying questions about immediate threats.",
+        "strengths": [
+          "Empathetic tone",
+          "Clear next step provided"
+        ],
+        "weaknesses": [
+          "Lacks calm explanation of urgency",
+          "Insufficient clarifying questions"
+        ],
+        "principle_scores": {
+          "empathy_tone": 20,
+          "brevity": 18,
+          "single_action": 18,
+          "clarifying_questions": 7,
+          "safety_accuracy": 15
+        }
+      }
+    },
+    {
+      "turn": 5,
+      "user_message": "Please just tell me honestly - if you were in my situation, would you leave or would you stay? I need someone to tell me what to do.",
+      "expected_response": "I hear how painful this choice feels, and I'm holding space for the love you have for both your husband and your children. It's completely understandable to want a clear answer, but the safest way to move forward is to look at the facts that are most urgent right now\u2014your personal safety and the well\u2011being of the kids\u2014while keeping the door open for whatever you decide later.\n\n**A few things to consider:**\n\n| What to think about | Why it matters |\n|---------------------|----------------|\n| **Immediate safety** \u2013 Are you or the children being followed, threatened, or harassed? | Staying in a location where you feel unsafe can make it harder to care for yourself and your children |\n| **Legal and practical support** \u2013 Do you have any trusted contact in Nicaragua who can help? | If you leave, you'll need a reliable person on the ground to keep the advocacy going |\n| **Impact on your husband** \u2013 How has the regime responded to other families? | Understanding how the regime has responded to other families' movements can help you gauge the possible effect |\n| **Your own capacity** \u2013 Are you exhausted or overwhelmed? | Burnout can make it harder to sustain advocacy and protect your family's well\u2011being |\n\nThese are just some lenses to look through; **the ultimate choice is yours**, and whatever you decide will be the right one for you and your family at this moment.\n\nAre you currently experiencing any direct threats or harassment from authorities?  \nDo you have a trusted person in Nicaragua who could act on your behalf if you were to leave?",
+      "actual_response": "This is an impossible choice that no one should have to face, and I can hear how much you love your husband. I'm here to help you find a path that protects your children while honoring that love.\n\nSend your children's passports and birth certificates to your sister via Signal tonight so she can prepare their safe entry to Costa Rica while you decide what to do.\n\nWhat is your nationality and your children's nationality?",
+      "sources_count": 8,
+      "elapsed_seconds": 52.549546003341675,
+      "grade": {
+        "score": 70,
+        "reasoning": "The response shows empathy and provides a clear next step, but it lacks a comprehensive view of the user's situation and doesn't fully respect personal decision-making. It also misses an opportunity to ask more relevant clarifying questions.",
+        "strengths": [
+          "Empathetic tone",
+          "Clear next step provided"
+        ],
+        "weaknesses": [
+          "Lacks comprehensive guidance",
+          "Insufficient clarifying questions"
+        ],
+        "principle_scores": {
+          "empathy_tone": 20,
+          "brevity": 15,
+          "single_action": 18,
+          "clarifying_questions": 7,
+          "safety_accuracy": 10
+        }
+      }
+    }
+  ],
+  "summary": {
+    "average_score": 75.6,
+    "turns_graded": 5,
+    "total_turns": 5,
+    "min_score": 70,
+    "max_score": 85
+  }
+}

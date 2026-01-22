@@ -1,0 +1,159 @@
+{
+  "sessions": {
+    "1": {
+      "name": "WLC Session 1 - Family Member Detained (Nicaragua)",
+      "filename_prefix": "session1_nicaragua",
+      "turns": [
+        {
+          "turn": 1,
+          "user_message": "What should I do if my family member was detained?",
+          "expected_response": "I'm so sorry you're going through this. It's completely understandable to feel frightened, angry, and overwhelmed when a loved one is taken into custody, especially in a situation that feels political. You're not alone—many families are navigating the same painful uncertainty, and there are steps you can take to protect yourself and support your family member.\n\nTo be able to give you the most useful next step, could you share a little more about what you know right now?\n\nWhen did the detention occur (hours, days, weeks ago)?\nDo you know where your family member is being held or have you received any official communication from authorities?"
+        },
+        {
+          "turn": 2,
+          "user_message": "It happened 3 days ago. Police took him from work. We have no idea where he is. No one has told us anything.",
+          "expected_response": "I'm so sorry you're going through this. It's completely understandable to feel frightened and helpless when a loved one is taken away with no information. Right now the most urgent thing is to try to find out where he is being held so you can begin to get help for him and protect yourself.\n\nA first step that often works in Nicaragua is to go directly to the nearest police precinct or the municipal office that oversees the area where he was taken. Bring any details you have (his full name, workplace, the exact time you saw him taken, any badge numbers or descriptions of the officers). Ask them to give you a written record of the detention and, if possible, the location of the detention center.\n\nDo you have any written record or note from the police about the detention?\nHas anyone else at his workplace seen the police or been given any information?"
+        },
+        {
+          "turn": 3,
+          "user_message": "His coworker saw it happen. She said there were 4 officers in plain clothes. No badges. They put him in a white SUV. She was too scared to ask questions. We have nothing written.",
+          "expected_response": "I'm so sorry you're facing this. It's terrifying not knowing where your loved one is, especially when the arrest was done by people in plain clothes and you have so little information. You're doing the right thing by reaching out for help.\n\nThe most urgent thing right now is to try to get an official record of what happened. Even if the officers didn't show badges, filing a report creates a paper trail that can be used later for legal help.\n\n**A first step you can take now:**\n\n1. **Gather what you have** – Write down everything the coworker saw (time, location, description of the SUV, number of officers). If the coworker feels safe, ask her to write a short statement as well.\n\n2. **Go to the nearest police precinct or the public prosecutor's office** and file a \"missing‑person\" / \"illegal detention\" report. Ask for a copy of the report or a reference number.\n\nDo you know which police precinct is closest to where the arrest happened?\nIs there another family member or trusted friend who could accompany you?"
+        },
+        {
+          "turn": 4,
+          "user_message": "I am scared to go to the police. What if they detain me too? My husband was critical of the government on social media. Is there another way?",
+          "expected_response": "I'm so sorry you're carrying this fear and uncertainty. It's completely understandable to feel hesitant about going to the police when the authorities themselves may be part of the problem. Right now, the most helpful thing may be to connect with someone who can give you legal guidance—without putting you directly in the line of police scrutiny.\n\nA first step you could consider is reaching out, quietly and safely, to a trusted lawyer or a local human‑rights/legal‑aid group that works on enforced‑disappearances. Even a brief phone call can let you ask for:\n\n* Advice on how to request information about your husband's whereabouts in a way that minimizes personal risk\n* Guidance on filing a formal \"request for information\" that creates a written record without requiring you to appear in person\n* Information about any safe‑house or support network for families of detainees\n\nDo you have contact information for a lawyer or trusted community member who might be able to help you reach out quietly?"
+        },
+        {
+          "turn": 5,
+          "user_message": "A friend told me I should post on social media about what happened to put pressure on them. But my sister says that will make things worse. What do you think?",
+          "expected_response": "I'm really sorry you're caught between two very understandable urges—wanting to shout out for help and fearing that speaking up could make things more dangerous. It's a painful place to be, and it's okay to feel torn.\n\n**A few things to consider before deciding whether to post publicly:**\n\n| Possible benefit | Possible risk |\n|------------------|---------------|\n| Putting the case in the public eye can create pressure on authorities | If the authorities see it as \"political agitation,\" they could target you more aggressively |\n| Friends or journalists might offer practical help | Social‑media posts can spread quickly and be taken out of context |\n\n**What many families in similar situations find helpful:**\n\n1. Try to get a trusted lawyer or human‑rights legal aid group involved first\n2. If you decide to share information, keep the language factual and avoid explicit accusations\n3. Consider using private or closed‑group channels before posting publicly\n\nUltimately, the decision to go public is yours and your family's to make. You know the local dynamics best. I'm here to help you weigh the options."
+        }
+      ]
+    },
+    "2": {
+      "name": "WLC Session 2 - Protection from Retaliation (Nicaragua)",
+      "filename_prefix": "session2_retaliation",
+      "turns": [
+        {
+          "turn": 1,
+          "user_message": "How can I protect myself from retaliation by authorities?",
+          "expected_response": "I'm really sorry you're having to live with that fear. It's understandable to feel on edge when the authorities might target you for standing up for a loved one. Let's focus on one concrete step you can take right now, and we can build from there.\n\n**First step:** Start a secure, private record of everything that's happening—dates, places, names of officials you've spoken with, any threats you've received, and any documents you have (court notices, medical reports, etc.). Keep this log in a place that only you can access (for example, an encrypted note on your phone or a password‑protected document stored offline).\n\nWhen did the detention occur, and how long have you been dealing with the authorities' pressure?\nHave you received any direct threats or notices from officials, and do you know where your loved one is being held?"
+        },
+        {
+          "turn": 2,
+          "user_message": "My husband was arrested 2 weeks ago for participating in a protest. I went to the police station to ask about him and an officer wrote down my name and said 'we know where you live.' I have two young children.",
+          "expected_response": "I'm so sorry you're going through this. It must feel terrifying to have the authorities point a threat at you while you're already worried about your husband and caring for your children. You deserve safety and support right now.\n\nTo be able to give you the most helpful next step, could you let me know a little more about your situation?\n\nDo you know where your husband is being held or have any official communication from the authorities about his case?\nHave you been able to contact a lawyer, a trusted family member, or a local human‑rights or legal‑aid group for advice?"
+        },
+        {
+          "turn": 3,
+          "user_message": "We think he is in El Chipote but we are not sure. I dont have a lawyer. I dont know who to trust. What should I do first?",
+          "expected_response": "I'm so sorry you're carrying this fear for yourself, your children, and your husband. It's understandable to feel overwhelmed when the authorities have singled you out. Let's focus on one concrete step you can take right now to protect yourself and start gathering reliable help.\n\n**First step – Secure a safe, private record of everything you know:**\n\n1. **Date, time, and place** of every interaction with police or officials (including the officer who wrote your name)\n2. **Exact words or threats** you were given\n3. Any **information you have about where your husband might be held** (e.g., \"El Chipote\" and any dates you've seen his name on a visitation list)\n4. **Names and contact numbers** of any relatives, friends, or neighbors you trust and can reach out to for support\n\nKeep this record in a place only you can access—under a mattress, in a locked drawer, or on a password‑protected device that you can hide quickly.\n\nDo you have any contact with a lawyer, legal aid service, or a trusted community organization in Nicaragua that you think might be able to help?\nAre you able to safely leave your home for a short period to meet someone you trust without raising further suspicion?"
+        },
+        {
+          "turn": 4,
+          "user_message": "I documented everything like you said. My sister lives in Costa Rica and I told her what is happening. She wants me to come there with the kids. But I dont want to abandon my husband. What should I do?",
+          "expected_response": "I'm really sorry you're caught between caring for your children, staying close to your husband, and feeling unsafe. It's understandable to feel torn—there's no \"right\" answer, only what feels most bearable for you and your family right now.\n\nIf you feel that staying puts you or the kids in immediate danger (for example, if the police have threatened you again or you're being followed), the very first step is to secure a safe place for you and the children, even if it's just a trusted neighbor's home for a night while you figure out the next move.\n\nIf you're not under an immediate threat, you might consider keeping a low profile in Nicaragua while you explore ways to get reliable legal help and keep your sister updated on any developments.\n\nAre you currently experiencing any direct threats or intimidation that make staying at home feel unsafe?\nDo you have any contact for a lawyer, legal‑aid service, or a trusted human‑rights organization in Nicaragua that you could reach out to for confidential advice?"
+        },
+        {
+          "turn": 5,
+          "user_message": "Please just tell me honestly - if you were in my situation, would you leave or would you stay? I need someone to tell me what to do.",
+          "expected_response": "I hear how painful this choice feels, and I'm holding space for the love you have for both your husband and your children. It's completely understandable to want a clear answer, but the safest way to move forward is to look at the facts that are most urgent right now—your personal safety and the well‑being of the kids—while keeping the door open for whatever you decide later.\n\n**A few things to consider:**\n\n| What to think about | Why it matters |\n|---------------------|----------------|\n| **Immediate safety** – Are you or the children being followed, threatened, or harassed? | Staying in a location where you feel unsafe can make it harder to care for yourself and your children |\n| **Legal and practical support** – Do you have any trusted contact in Nicaragua who can help? | If you leave, you'll need a reliable person on the ground to keep the advocacy going |\n| **Impact on your husband** – How has the regime responded to other families? | Understanding how the regime has responded to other families' movements can help you gauge the possible effect |\n| **Your own capacity** – Are you exhausted or overwhelmed? | Burnout can make it harder to sustain advocacy and protect your family's well‑being |\n\nThese are just some lenses to look through; **the ultimate choice is yours**, and whatever you decide will be the right one for you and your family at this moment.\n\nAre you currently experiencing any direct threats or harassment from authorities?\nDo you have a trusted person in Nicaragua who could act on your behalf if you were to leave?"
+        }
+      ]
+    },
+    "3": {
+      "name": "WLC Session 3 - Friend Taken for Social Media Post (Nicaragua)",
+      "filename_prefix": "session3_social_media",
+      "turns": [
+        {
+          "turn": 1,
+          "user_message": "My friend was taken for posting on social media. What can I do?",
+          "expected_response": "I'm so sorry you're going through this. It must feel terrifying and overwhelming to see a friend taken away just for speaking out. I'm here to listen and help you think through the next steps, one small step at a time.\n\nTo give you the most useful guidance, could you share a bit more about the situation?\n\nIn which city or region of Nicaragua did the detention occur?\nHow long ago was your friend taken, and do you know where they are being held?"
+        },
+        {
+          "turn": 2,
+          "user_message": "It was in Managua two days ago. She posted a video criticizing the government. Men in civilian clothes came to her apartment. Her roommate saw it happen but was too scared to do anything.",
+          "expected_response": "I'm so sorry you're facing this. It must feel terrifying and overwhelming to see your friend taken away so suddenly, especially after she spoke out. I'm here to listen and help you think through the next steps, one small step at a time.\n\nDo you know where she is being held or have any official notice about her detention?\nHave you been able to contact any lawyer, family member, or local human‑rights group about her situation?"
+        },
+        {
+          "turn": 3,
+          "user_message": "We dont know where she is. Her family lives in Esteli and they are panicking. I am her closest friend here in Managua. I have the video she posted saved on my phone. Should I delete it? Should I post it to get attention?",
+          "expected_response": "I'm so sorry you're carrying this fear and uncertainty. It's heartbreaking to see a friend taken away for speaking out, and the unknown can feel overwhelming. You're not alone in this—let's focus on one concrete step you can take right now while we gather a bit more information.\n\n**First priority:** try to find out where she is being held. Even a small clue—like a name of a police unit, a detention center, or a reference in a phone call or text—can open the door to legal help and family contact.\n\nI understand the urge to delete the video or share it publicly. Both choices carry serious risks and potential benefits, and the best course depends on what you know about her current situation and any legal advice you can obtain.\n\nHave you been able to speak with any of her family members or receive any official communication about her whereabouts?\nDo you have access to a lawyer or trusted human‑rights contact who could advise on the risks of keeping or sharing the video?"
+        },
+        {
+          "turn": 4,
+          "user_message": "I talked to her mom. They have no information. No one will tell them anything. I dont have a lawyer. What are the risks of posting the video vs deleting it? I need to understand so I can decide.",
+          "expected_response": "I'm holding space for you as you navigate this terrifying uncertainty. It's understandable to feel torn between protecting yourself and trying to draw attention to what happened.\n\n**Risks of posting the video publicly:**\n* **Security for you** – Authorities have been known to target people who amplify criticism\n* **Potential impact on detainee** – Public exposure sometimes pressures officials, but can also make them more defensive\n* **Digital trace** – Even if you delete later, copies may exist and metadata can identify you\n\n**Risks of deleting the video:**\n* **Loss of evidence** – The video is a concrete record useful for lawyers or future investigations\n* **Limited visibility** – Without any record, it may be harder for allies to mobilize support\n\n**What many people find helpful:**\n1. **Secure the evidence first** – Keep the video on a password‑protected device or cloud storage you control\n2. **Reach out discreetly for legal help** – Search online for \"human rights legal aid Nicaragua\" and verify they're still active\n3. **Consider a low‑profile way to alert allies** – Share privately with a reputable international organization rather than posting publicly\n\nDo you have access to a password‑protected cloud service where you could store the video safely?\nIs there anyone you trust who might help you contact a local legal‑aid group?"
+        },
+        {
+          "turn": 5,
+          "user_message": "I backed up the video to my google drive with a password. Her mom is begging me to do something. She says every hour matters. Is there anything I can do RIGHT NOW that might help find her or protect her?",
+          "expected_response": "I'm holding space for you and your friend's family—it's incredibly painful not knowing where she is and feeling the pressure to act right now. You've already taken an important step by keeping the video safe.\n\n**A concrete first step you can take right now:**\n\nReach out to a trusted legal or human‑rights contact in Nicaragua—call or message them immediately and let them know you have a video that could be evidence. When you speak, share only the fact that you have a recording and ask: *\"Can you help me find out where she is being held and what the next legal steps are?\"*\n\nKeep the video stored securely until you get guidance on whether it should be shared.\n\nDo you know which office or organization is closest to you?\nDo you have any written details you can prepare before reaching out?"
+        }
+      ]
+    },
+    "4": {
+      "name": "WLC Session 4 - Brother Released with Silence Condition (Nicaragua)",
+      "filename_prefix": "session4_silence_condition",
+      "turns": [
+        {
+          "turn": 1,
+          "user_message": "My brother was released but they told him not to talk. What now?",
+          "expected_response": "I'm really glad to hear your brother is out, and I can hear how heavy it feels to be told to stay silent. It's normal to feel unsure about what to do next, especially when the pressure to keep quiet is still there.\n\nFirst, can you tell me a bit about his current situation? Is he living at home, under any kind of house‑arrest or monitoring, and does he have any way to talk to family or friends safely? Knowing that will help us pick the safest first step.\n\nIf he's free to move but still feels unsafe speaking, the safest immediate thing is to create a private, written record of what happened—just a notebook he keeps hidden or a note on his phone that only he can see. This can be useful later if he decides to share his story or needs it for legal help, and it doesn't expose him right now."
+        },
+        {
+          "turn": 2,
+          "user_message": "He is home but he has to check in with police every week. He is scared and barely talks to anyone. He was in El Chipote for 6 months. He looks different.",
+          "expected_response": "I'm really glad your brother is home, but I can hear how heavy the fear and silence feel right now. Being told not to talk and having to check in with police every week can make anyone feel isolated and on edge.\n\nCan you tell me if he has any trusted family member or friend he feels safe talking to, even just for a few minutes?\nIs he experiencing any physical health problems or strong anxiety that feels hard to manage on his own?\n\nA good first step is to create a tiny \"safe space\" for him to let out what's inside—maybe a private notebook, a voice memo on his phone, or a short chat with someone he trusts. Even writing a few lines about how he feels each day can help break the pressure of keeping everything inside.\n\nAt the same time, it's wise to keep a simple record of any police check‑ins: date, time, what was asked, and how he felt. This can be useful later if he needs legal advice."
+        },
+        {
+          "turn": 3,
+          "user_message": "He talks to me but not much. He has nightmares. I want to help him but I also want the world to know what happened to him. He says no. What do I do?",
+          "expected_response": "I'm really sorry you're both carrying this weight. It sounds like your brother is still feeling the fear and the trauma from his time in El Chipote, and you want to protect him while also making sure his story isn't lost.\n\nFirst, can you tell me if there's anyone he trusts—a close family member, a friend, or a counselor—who could be a safe ear for him when he's ready to talk?\n\nIf he's not ready to speak publicly, a gentle way to start is to help him keep a private record of what happened—like a notebook he can lock away or a password‑protected note on his phone. He can write in it whenever he feels up to it, and you can keep it safe for him. This gives him control over his story and creates a factual account you can use later if he decides to share it.\n\nWhen you think about telling the world, weigh the pros and cons: sharing can bring pressure on the authorities, but it can also increase the risk of surveillance or more police check‑ins for him. **Only he can decide** which risk feels acceptable."
+        },
+        {
+          "turn": 4,
+          "user_message": "I understand. But what if something happens to him again? I want there to be a record somewhere safe outside Nicaragua. Is that possible without him knowing?",
+          "expected_response": "I hear how worried you are that something could happen again, and how important it feels to keep a record of what he went through in a place he can't reach. The first thing to do is to write down the key facts—dates, places, what he was told, any medical notes—on paper that only you can see. When you feel safe, make a copy (a photo or a scan) and store it in a personal cloud drive or email that only you can open.\n\nDo you have regular internet access or a trusted device you can use for a private cloud or email?\nIs there anyone else you trust (a close friend or relative) who could help keep a backup if you need it?\n\nIf you decide to share the record later, you can search online for \"human‑rights legal help in Nicaragua\" and verify the groups are still active before sending anything."
+        },
+        {
+          "turn": 5,
+          "user_message": "Yes I have internet and my cousin lives in Miami. One more thing - he was tortured. Should I write that down too? Will anyone believe us?",
+          "expected_response": "I'm really sorry you're carrying this weight for both of you. It's understandable to want a record of what happened, especially when the pain is so real and the fear of it happening again is strong.\n\nThe first step is to write down the key facts—dates, places, what was said, and the torture you know about. Keep that paper in a safe spot only you can reach (a locked drawer, a hidden notebook, or a password‑protected file on a personal device). If you feel comfortable, give a copy to your cousin in Miami so there's a backup outside the country.\n\nIf you ever consider making the story public, think about two things:\n- **Pros:** It can bring attention and pressure, and maybe help protect your brother by making the abuse harder to hide\n- **Cons:** It could increase the risk of retaliation, especially if authorities see it as \"spreading false information\"\n\n**Only you and your brother can decide what feels right.** What matters most right now is his safety and your own well‑being.\n\nDo you have any medical notes or other paperwork that confirm what he endured?"
+        }
+      ]
+    },
+    "5": {
+      "name": "WLC Session 5 - Son Taken by Armed Men (South Sudan)",
+      "filename_prefix": "session5_south_sudan",
+      "turns": [
+        {
+          "turn": 1,
+          "user_message": "My son was taken by armed men 3 weeks ago. Someone told me he might be in a detention facility but I dont know which one. Where do I start?",
+          "expected_response": "I'm so sorry you're going through this; it must feel terrifying and exhausting. Because the first hours after a detention are the most crucial, acting now can help prevent a forced disappearance and make it easier to locate him.\n\nYour first step is to reach out to a trusted lawyer or a human‑rights group in South Sudan—call the nearest office or a local legal aid clinic and tell them everything you know.\n\nDo you have any details about where the men took him or a name of the facility they mentioned?\nHave you spoken with any community leaders or relatives who might have heard more?"
+        },
+        {
+          "turn": 2,
+          "user_message": "He was taken from our home in Bentiu. He is 22 years old. I went to the police but they said they dont have him. I dont believe them.",
+          "expected_response": "I'm so sorry you're living with this fear and exhaustion. Because a missing detainee can quickly become an enforced disappearance, acting now makes it far easier to locate him and protect his rights.\n\nYour first step is to get a trusted human‑rights lawyer or a reputable NGO to file a formal \"missing detainee\" report and register your son's case. You can search online for \"human rights help in South Sudan\" to find contacts.\n\nDo you know any community leaders, churches, or NGOs in Bentiu who might already be helping families in similar situations?"
+        },
+        {
+          "turn": 3,
+          "user_message": "They wore military uniforms but no badges. They spoke Nuer. A neighbor said she saw them take other young men too that week. I am afraid to ask too many questions.",
+          "expected_response": "I'm so sorry you're living with this fear and exhaustion. Because a missing detainee can quickly become an enforced disappearance, acting now makes it far easier to locate him and protect his rights.\n\nYour first step is to contact a trusted human‑rights lawyer or a reputable NGO (e.g., the International Committee of the Red Cross or a local human‑rights group) and ask them to file a formal missing‑person report and request a location check. Gather everything you know—date, place, description of the men, language spoken, and the neighbor's sighting—and give it to them.\n\nYou can search online for \"human rights NGOs in South Sudan\" to find contacts.\n\nDo you already have a lawyer or NGO you trust, or need help finding one?\nDo you have any written notes or photos of the incident that you can share with them?"
+        },
+        {
+          "turn": 4,
+          "user_message": "I dont have a written report. I am scared to make one because the men might come back. But my son has been gone 3 weeks and I am losing hope. What if he is dead?",
+          "expected_response": "I'm so sorry you're living with this fear and hopelessness. **Because the first weeks are critical, writing down what you know now keeps the details fresh and makes it harder for evidence to disappear.**\n\nYour next step is to write a short, factual note (date, time, description of the men, where they took your son) and give it to a trusted human‑rights lawyer, a local church leader, or an NGO; you can do this anonymously if you fear retaliation.\n\nDo you have someone you trust who could receive the note for you, or a safe way to contact an organization online?"
+        },
+        {
+          "turn": 5,
+          "user_message": "My neighbor can go with me. But what do I say when I get there? I have never talked to UN people before. Will they help someone like me?",
+          "expected_response": "I'm so sorry you're feeling scared and exhausted. Because the first weeks are critical, letting the UN know now makes it easier for them to start looking and to protect you.\n\nYour next step is to go with your neighbor to the nearest UN office (e.g., UNMISS headquarters in Juba or a local office in Bentiu) and hand them a short note with the date, time, description of the men in uniform, and that your son has been missing for three weeks. When you meet them, you can simply say: **\"My son was taken by men in military uniforms three weeks ago; I need help finding him and keeping my family safe.\"** Bring the note and ask them what support they can offer.\n\nDo you know which UN office is closest to you, or can you get the address today?\nDo you have any written details you can copy onto that note?"
+        }
+      ]
+    }
+  }
+}

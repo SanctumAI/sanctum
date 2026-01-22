@@ -5,7 +5,7 @@ import { ChatContainer } from '../components/chat/ChatContainer'
 import { MessageList } from '../components/chat/MessageList'
 import { ChatInput } from '../components/chat/ChatInput'
 import { ToolSelector, Tool } from '../components/chat/ToolSelector'
-import { DocumentScope } from '../components/chat/DocumentScope'
+import { DocumentScope, DocumentSource } from '../components/chat/DocumentScope'
 import { ExportButton } from '../components/chat/ExportButton'
 import { AppHeader } from '../components/shared/AppHeader'
 import { Message } from '../components/chat/ChatMessage'
@@ -19,8 +19,9 @@ export function ChatPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedTools, setSelectedTools] = useState<string[]>(['web-search'])
-  const [selectedDocuments, setSelectedDocuments] = useState<string[]>(['HumanRightsAssistance'])
+  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([])
   const [ragSessionId, setRagSessionId] = useState<string | null>(null)
+  const [documents, setDocuments] = useState<DocumentSource[]>([])
 
   // Build available tools list - db-query only visible to admins
   const availableTools = useMemo<Tool[]>(() => {
@@ -71,6 +72,34 @@ export function ChatPage() {
       navigate('/pending')
     }
   }, [navigate])
+
+  // Fetch available documents from ingest jobs
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      const token = localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN) ||
+                    localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
+      try {
+        const res = await fetch(`${API_BASE}/ingest/jobs`, {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        })
+        if (res.ok) {
+          const data = await res.json()
+          const docs: DocumentSource[] = (data.jobs || [])
+            .filter((job: { status: string }) => job.status === 'completed' || job.status === 'completed_with_errors')
+            .map((job: { job_id: string; filename: string; total_chunks: number }) => ({
+              id: job.job_id,
+              name: job.filename.replace(/\.(pdf|txt|md)$/i, ''),
+              description: `${job.total_chunks} chunks`,
+              tags: [job.filename.split('.').pop()?.toUpperCase() || 'DOC']
+            }))
+          setDocuments(docs)
+        }
+      } catch (e) {
+        console.error('Failed to fetch documents:', e)
+      }
+    }
+    fetchDocuments()
+  }, [])
 
   const handleToolToggle = useCallback((toolId: string) => {
     setSelectedTools((prev) =>
@@ -274,7 +303,7 @@ IMPORTANT: Return a CONDENSED response:
     <>
       <ToolSelector tools={availableTools} selectedTools={selectedTools} onToggle={handleToolToggle} />
       <div className="w-px h-4 bg-border mx-1" />
-      <DocumentScope selectedDocuments={selectedDocuments} onToggle={handleDocumentToggle} />
+      <DocumentScope selectedDocuments={selectedDocuments} onToggle={handleDocumentToggle} documents={documents} />
     </>
   )
 

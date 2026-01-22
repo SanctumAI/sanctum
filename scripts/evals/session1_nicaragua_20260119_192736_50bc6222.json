@@ -1,0 +1,190 @@
+{
+  "benchmark": {
+    "name": "WLC Session 1 - Family Member Detained (Nicaragua)",
+    "source_doc": "docs/WLC_BENCHMARK_Q_AND_A.md",
+    "design_principles": "\n1. **Brevity** - Short responses (2-3 paragraphs max) for users under duress\n2. **Plain language** - No jargon; speak like a trusted friend\n3. **One step at a time** - Give ONE clear next action\n4. **Never invent organizations** - Say \"search online for human rights help in [country]\"\n5. **Personal decisions respected** - Present pros/cons, never push\n6. **Urgency surfaced calmly** - When timing matters, explain why without alarming\n7. **Clarifying questions** - Ask 1-2 follow-ups when needed\n"
+  },
+  "metadata": {
+    "timestamp": "2026-01-19T19:23:43.229434",
+    "timestamp_utc": "2026-01-20T01:23:43.229470Z",
+    "backend_url": "http://localhost:8000",
+    "grading_enabled": true,
+    "git": {
+      "commit_hash": "50bc622230360f07231a63284905e39d172a0b01",
+      "commit_short": "50bc6222",
+      "branch": "jc/post-hackathon-tweaks",
+      "commit_date": "2026-01-19 19:03:23 -0600",
+      "dirty": true
+    },
+    "ingest": {
+      "last_job_id": "6d86e47e91c71271",
+      "last_job_time": null,
+      "last_job_status": "completed",
+      "total_chunks": null
+    },
+    "config": {
+      "embedding_provider": "openai",
+      "embedding_model": "text-embedding-3-small",
+      "embedding_dimensions": "768",
+      "llm_provider": "maple",
+      "llm_model": "gpt-oss-120b",
+      "rag_top_k": null,
+      "rag_graph_hops": null,
+      "llm_provider_active": "maple",
+      "llm_model_active": "kimi-k2-thinking",
+      "llm_health": true
+    },
+    "python_version": "3.9.16 (main, May 15 2023, 18:51:40) \n[Clang 14.0.6 ]",
+    "backend_health": {
+      "status": "healthy",
+      "services": {
+        "neo4j": "healthy",
+        "qdrant": "healthy"
+      }
+    }
+  },
+  "results": [
+    {
+      "turn": 1,
+      "user_message": "What should I do if my family member was detained?",
+      "expected_response": "I'm so sorry you're going through this. It's completely understandable to feel frightened, angry, and overwhelmed when a loved one is taken into custody, especially in a situation that feels political. You're not alone\u2014many families are navigating the same painful uncertainty, and there are steps you can take to protect yourself and support your family member.\n\nTo be able to give you the most useful next step, could you share a little more about what you know right now?\n\nWhen did the detention occur (hours, days, weeks ago)?  \nDo you know where your family member is being held or have you received any official communication from authorities?",
+      "actual_response": "This must be overwhelming for you - let's focus on what we can control, and I'll stay with you through each step.\n\nYour first priority is secure documentation: write down everything you know about the detention\u2014date, time, exact location, who took them, and any witnesses. Keep this record offline, on paper if possible, in a safe place.\n\nTo help you safely, I need to know: what country are you in, what is your family member's nationality, and where were they detained?",
+      "sources_count": 8,
+      "elapsed_seconds": 43.372056007385254,
+      "grade": {
+        "score": 85,
+        "reasoning": "The response is empathetic and acknowledges the user's emotions, providing a clear next step by focusing on documentation. It asks relevant clarifying questions but could be slightly more concise. The response avoids inventing organizations and is appropriate for the context.",
+        "strengths": [
+          "Empathetic tone",
+          "Clear next step provided"
+        ],
+        "weaknesses": [
+          "Slightly lengthy",
+          "Could simplify language further"
+        ],
+        "principle_scores": {
+          "empathy_tone": 23,
+          "brevity": 16,
+          "single_action": 18,
+          "clarifying_questions": 14,
+          "safety_accuracy": 20
+        }
+      }
+    },
+    {
+      "turn": 2,
+      "user_message": "It happened 3 days ago. Police took him from work. We have no idea where he is. No one has told us anything.",
+      "expected_response": "I'm so sorry you're going through this. It's completely understandable to feel frightened and helpless when a loved one is taken away with no information. Right now the most urgent thing is to try to find out where he is being held so you can begin to get help for him and protect yourself.\n\nA first step that often works in Nicaragua is to go directly to the nearest police precinct or the municipal office that oversees the area where he was taken. Bring any details you have (his full name, workplace, the exact time you saw him taken, any badge numbers or descriptions of the officers). Ask them to give you a written record of the detention and, if possible, the location of the detention center.\n\nDo you have any written record or note from the police about the detention?  \nHas anyone else at his workplace seen the police or been given any information?",
+      "actual_response": "Three days without a word must be agonizing - I'm here to help you find him, and we'll take this one step at a time.\n\nGo today to the police station and detention centers nearest his workplace, in person, and ask for him by name. Bring someone you trust with you.\n\nWhich city and country are you in, and what's your nationality?",
+      "sources_count": 8,
+      "elapsed_seconds": 52.34774708747864,
+      "grade": {
+        "score": 85,
+        "reasoning": "The response effectively acknowledges the user's distress and provides a clear, actionable step. It maintains a warm tone and asks relevant follow-up questions. However, it could benefit from a slightly more detailed explanation of why the suggested action is important.",
+        "strengths": [
+          "Empathetic tone",
+          "Clear next step"
+        ],
+        "weaknesses": [
+          "Lacks explanation of urgency",
+          "Could provide more context on the action"
+        ],
+        "principle_scores": {
+          "empathy_tone": 23,
+          "brevity": 18,
+          "single_action": 19,
+          "clarifying_questions": 13,
+          "safety_accuracy": 12
+        }
+      }
+    },
+    {
+      "turn": 3,
+      "user_message": "His coworker saw it happen. She said there were 4 officers in plain clothes. No badges. They put him in a white SUV. She was too scared to ask questions. We have nothing written.",
+      "expected_response": "I'm so sorry you're facing this. It's terrifying not knowing where your loved one is, especially when the arrest was done by people in plain clothes and you have so little information. You're doing the right thing by reaching out for help.\n\nThe most urgent thing right now is to try to get an official record of what happened. Even if the officers didn't show badges, filing a report creates a paper trail that can be used later for legal help.\n\n**A first step you can take now:**\n\n1. **Gather what you have** \u2013 Write down everything the coworker saw (time, location, description of the SUV, number of officers). If the coworker feels safe, ask her to write a short statement as well.\n\n2. **Go to the nearest police precinct or the public prosecutor's office** and file a \"missing\u2011person\" / \"illegal detention\" report. Ask for a copy of the report or a reference number.\n\nDo you know which police precinct is closest to where the arrest happened?  \nIs there another family member or trusted friend who could accompany you?",
+      "actual_response": "A witness who saw the actual detention is incredibly important\u2014and also at risk. Let's get her account secured immediately, and I'll help you keep her safe too.\n\nYour one action today: Get your coworker to write down everything she remembers\u2014date, time, descriptions of the 4 officers, the SUV, exactly what they said and did. You keep the only copy, stored completely offline and encrypted if possible. She should not keep a copy that could endanger her.\n\nWhich country are you in? This determines our next safe steps.",
+      "sources_count": 8,
+      "elapsed_seconds": 39.047605991363525,
+      "grade": {
+        "score": 85,
+        "reasoning": "The response effectively acknowledges the emotional weight of the situation and provides a clear, single action for the user to take. It maintains brevity and avoids overwhelming the user with too much information. However, it could improve by offering a bit more guidance on the next steps after securing the witness account.",
+        "strengths": [
+          "Empathetic tone",
+          "Clear single action focus"
+        ],
+        "weaknesses": [
+          "Lacks guidance on subsequent steps",
+          "Could include more clarifying questions"
+        ],
+        "principle_scores": {
+          "empathy_tone": 23,
+          "brevity": 18,
+          "single_action": 18,
+          "clarifying_questions": 10,
+          "safety_accuracy": 16
+        }
+      }
+    },
+    {
+      "turn": 4,
+      "user_message": "I am scared to go to the police. What if they detain me too? My husband was critical of the government on social media. Is there another way?",
+      "expected_response": "I'm so sorry you're carrying this fear and uncertainty. It's completely understandable to feel hesitant about going to the police when the authorities themselves may be part of the problem. Right now, the most helpful thing may be to connect with someone who can give you legal guidance\u2014without putting you directly in the line of police scrutiny.\n\nA first step you could consider is reaching out, quietly and safely, to a trusted lawyer or a local human\u2011rights/legal\u2011aid group that works on enforced\u2011disappearances. Even a brief phone call can let you ask for:\n\n* Advice on how to request information about your husband's whereabouts in a way that minimizes personal risk\n* Guidance on filing a formal \"request for information\" that creates a written record without requiring you to appear in person\n* Information about any safe\u2011house or support network for families of detainees\n\nDo you have contact information for a lawyer or trusted community member who might be able to help you reach out quietly?",
+      "actual_response": "Your fear is completely justified\u2014if they targeted him for his views, approaching them directly could put you in danger too. I'm here to help you find a safer path forward.\n\nGet your coworker to immediately write down everything she remembers about the detention, and help her store this record securely offline\u2014only on paper or an encrypted device, never at work or home, and don't discuss it over phone or text.\n\nWhich city and country are you in? This determines which international human rights organizations can safely intervene on your behalf.",
+      "sources_count": 8,
+      "elapsed_seconds": 55.13287091255188,
+      "grade": {
+        "score": 78,
+        "reasoning": "The response effectively acknowledges the user's fear and provides a clear action regarding securing the coworker's account. However, it lacks guidance on legal or human rights support and doesn't fully address the user's concern about personal safety when dealing with authorities.",
+        "strengths": [
+          "Empathetic tone that acknowledges the user's fear",
+          "Clear action regarding securing the coworker's account"
+        ],
+        "weaknesses": [
+          "Does not provide guidance on legal or human rights support",
+          "Lacks a direct response to the user's concern about personal safety"
+        ],
+        "principle_scores": {
+          "empathy_tone": 20,
+          "brevity": 18,
+          "single_action": 18,
+          "clarifying_questions": 10,
+          "safety_accuracy": 12
+        }
+      }
+    },
+    {
+      "turn": 5,
+      "user_message": "A friend told me I should post on social media about what happened to put pressure on them. But my sister says that will make things worse. What do you think?",
+      "expected_response": "I'm really sorry you're caught between two very understandable urges\u2014wanting to shout out for help and fearing that speaking up could make things more dangerous. It's a painful place to be, and it's okay to feel torn.\n\n**A few things to consider before deciding whether to post publicly:**\n\n| Possible benefit | Possible risk |\n|------------------|---------------|\n| Putting the case in the public eye can create pressure on authorities | If the authorities see it as \"political agitation,\" they could target you more aggressively |\n| Friends or journalists might offer practical help | Social\u2011media posts can spread quickly and be taken out of context |\n\n**What many families in similar situations find helpful:**\n\n1. Try to get a trusted lawyer or human\u2011rights legal aid group involved first\n2. If you decide to share information, keep the language factual and avoid explicit accusations\n3. Consider using private or closed\u2011group channels before posting publicly\n\nUltimately, the decision to go public is yours and your family's to make. You know the local dynamics best. I'm here to help you weigh the options.",
+      "actual_response": "That's an incredibly difficult decision to navigate\u2014both your friend and sister have valid concerns, and I'm here to help you figure out the safest path.\n\n**Before posting anything, contact an international human rights organization that specializes in detention cases.** They can assess whether public pressure would help or put your husband at greater risk in your specific situation. Try reaching out to Amnesty International, Human Rights Watch, or the International Committee of the Red Cross\u2014they have secure channels and experience with these exact decisions.\n\nWhich country are you in, and is your husband a citizen there?",
+      "sources_count": 8,
+      "elapsed_seconds": 19.9958279132843,
+      "grade": {
+        "score": 85,
+        "reasoning": "The response is empathetic and acknowledges the user's difficult situation. It provides a clear next step by suggesting contacting international human rights organizations, which is appropriate and safe. However, it could be slightly more concise and include a brief discussion of the pros and cons of posting on social media.",
+        "strengths": [
+          "Empathetic tone",
+          "Clear next step provided"
+        ],
+        "weaknesses": [
+          "Slightly lengthy",
+          "Lacks discussion of pros and cons of social media posting"
+        ],
+        "principle_scores": {
+          "empathy_tone": 23,
+          "brevity": 16,
+          "single_action": 18,
+          "clarifying_questions": 12,
+          "safety_accuracy": 16
+        }
+      }
+    }
+  ],
+  "summary": {
+    "average_score": 83.6,
+    "turns_graded": 5,
+    "total_turns": 5,
+    "min_score": 78,
+    "max_score": 85
+  }
+}

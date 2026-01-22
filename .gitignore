@@ -54,3 +54,5 @@ logs/
 
 # Claude plans
 .claude/
+/uploads
+/scripts/evals

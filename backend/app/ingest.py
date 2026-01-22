@@ -1,6 +1,6 @@
 """
 Sanctum Ingest Router
-Handles document upload, chunking, and manual LLM extraction workflow.
+Handles document upload, chunking, and storage to Qdrant.
 """
 
 import os
@@ -11,16 +11,12 @@ import logging
 import math
 import random
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks
 from pydantic import BaseModel
-
-from ontology import get_ontology, list_ontologies, Ontology, DEFAULT_ONTOLOGY
-from llm import get_provider
 
 # Configure logging
 logging.basicConfig(
@@ -31,10 +27,8 @@ logger = logging.getLogger("sanctum.ingest")
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
 
-# LLM processing configuration
-MAX_RETRIES = 3
+# Processing configuration
 MAX_CONCURRENT_CHUNKS = int(os.getenv("MAX_CONCURRENT_CHUNKS", "3"))
-_executor = ThreadPoolExecutor(max_workers=MAX_CONCURRENT_CHUNKS)
 
 # Configuration
 UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/uploads"))
@@ -100,7 +94,7 @@ async def resume_incomplete_jobs():
     """Resume incomplete jobs after a restart so they don't disappear."""
     for job_id, job in list(JOBS.items()):
         status = job.get("status")
-        if status in ("pending", "processing", "extracting", "chunked"):
+        if status in ("pending", "processing"):
             file_path = Path(job.get("file_path", ""))
             if not file_path.exists():
                 job["status"] = "failed"
@@ -114,7 +108,6 @@ async def resume_incomplete_jobs():
                 process_document(
                     job_id=job_id,
                     file_path=file_path,
-                    ontology_id=job.get("ontology_id", DEFAULT_ONTOLOGY),
                     sample_percent=float(job.get("sample_percent", 100.0)),
                 )
             )
@@ -134,8 +127,7 @@ class UploadResponse(BaseModel):
 class JobStatus(BaseModel):
     job_id: str
     filename: str
-    status: str  # pending, processing, chunked, completed, failed
-    ontology_id: str
+    status: str  # pending, processing, completed, failed
     created_at: str
     updated_at: str
     total_chunks: int
@@ -149,9 +141,7 @@ class ChunkInfo(BaseModel):
     index: int
     text: str
     char_count: int
-    status: str  # pending, extracted, stored
-    ontology_id: str
-    extraction_prompt: str
+    status: str  # pending, stored
     source_file: str
 
 
@@ -161,20 +151,6 @@ class ChunkListResponse(BaseModel):
     extracted: int
     stored: int
     chunks: list[ChunkInfo]
-
-
-class ExtractionInput(BaseModel):
-    """LLM extraction results submitted by user"""
-    entities: list[dict]
-    relationships: list[dict]
-
-
-class ExtractionResponse(BaseModel):
-    chunk_id: str
-    status: str
-    entities_count: int
-    relationships_count: int
-    message: str
 
 
 # =============================================================================
@@ -228,74 +204,21 @@ def chunk_text(text: str, chunk_size: int = 1500, overlap: int = 200) -> list[st
     return chunks
 
 
-def parse_llm_json(response_text: str) -> dict:
-    """Parse JSON from LLM response, handling common markdown fences."""
-    text = response_text.strip()
-    if text.startswith("```json"):
-        text = text[7:]
-    elif text.startswith("```"):
-        text = text[3:]
-    if text.endswith("```"):
-        text = text[:-3]
-    text = text.strip()
-    return json.loads(text)
+async def store_chunk(chunk_id: str, chunk_text_content: str, source_file: str) -> dict:
+    """Store chunk directly to Qdrant."""
+    from store import store_chunks_to_qdrant
 
-
-def _sync_llm_call(prompt: str) -> str:
-    """Synchronous LLM call to run in thread pool."""
-    provider = get_provider()
-    response = provider.complete(prompt)
-    return response.content
-
-
-async def extract_chunk_with_llm(chunk_text_content: str, ontology: Ontology) -> dict:
-    """Run LLM extraction with retries."""
-    prompt = ontology.extraction_prompt + chunk_text_content
-    last_error = None
-    for attempt in range(1, MAX_RETRIES + 1):
-        try:
-            content = await asyncio.get_event_loop().run_in_executor(
-                _executor, _sync_llm_call, prompt
-            )
-            extraction = parse_llm_json(content)
-            extraction.setdefault("entities", [])
-            extraction.setdefault("relationships", [])
-            return extraction
-        except Exception as e:
-            last_error = e
-            if attempt == MAX_RETRIES:
-                raise
-    raise last_error
-
-
-async def process_and_store_chunk(
-    chunk_id: str,
-    chunk_text_content: str,
-    ontology: Ontology,
-    source_file: str,
-    ontology_id: str,
-) -> dict:
-    """LLM extract then store to Neo4j/Qdrant."""
-    from store import store_extraction_to_graph
-
-    extraction = await extract_chunk_with_llm(chunk_text_content, ontology)
-    result = await store_extraction_to_graph(
+    result = await store_chunks_to_qdrant(
         chunk_id=chunk_id,
-        extraction={
-            "entities": extraction.get("entities", []),
-            "relationships": extraction.get("relationships", []),
-            "extracted_at": datetime.utcnow().isoformat(),
-        },
         source_text=chunk_text_content,
         source_file=source_file,
-        ontology_id=ontology_id,
     )
     return result
 
 
-async def process_document(job_id: str, file_path: Path, ontology_id: str, sample_percent: float):
+async def process_document(job_id: str, file_path: Path, sample_percent: float):
     """
-    Process an uploaded document: convert to text and chunk.
+    Process an uploaded document: convert to text, chunk, and store to Qdrant.
     This runs as a background task.
     """
     logger.info(f"[{job_id}] Starting document processing: {file_path}")
@@ -303,11 +226,11 @@ async def process_document(job_id: str, file_path: Path, ontology_id: str, sampl
         JOBS[job_id]["status"] = "processing"
         JOBS[job_id]["updated_at"] = datetime.utcnow().isoformat()
         _save_jobs()
-        
+
         # Get file extension
         suffix = file_path.suffix.lower()
         logger.debug(f"[{job_id}] File type: {suffix}")
-        
+
         # Extract text based on file type
         if suffix == ".pdf":
             logger.info(f"[{job_id}] Extracting text from PDF...")
@@ -320,9 +243,9 @@ async def process_document(job_id: str, file_path: Path, ontology_id: str, sampl
             text = file_path.read_text(encoding="utf-8")
         else:
             raise ValueError(f"Unsupported file type: {suffix}")
-        
+
         logger.info(f"[{job_id}] Extracted {len(text)} characters")
-        
+
         # Chunk the text
         logger.info(f"[{job_id}] Chunking text...")
         chunks = chunk_text(text)
@@ -335,12 +258,8 @@ async def process_document(job_id: str, file_path: Path, ontology_id: str, sampl
             logger.info(
                 f"[{job_id}] Sampling {sample_percent}% -> {len(chunks)} chunks selected"
             )
-        
-        # Get ontology for prompt
-        ontology = get_ontology(ontology_id)
-        logger.debug(f"[{job_id}] Using ontology: {ontology_id}")
-        
-        # Store chunks
+
+        # Store chunks metadata
         for i, chunk_text_content in enumerate(chunks):
             chunk_id = generate_chunk_id(job_id, i)
             CHUNKS[chunk_id] = {
@@ -350,20 +269,16 @@ async def process_document(job_id: str, file_path: Path, ontology_id: str, sampl
                 "text": chunk_text_content,
                 "char_count": len(chunk_text_content),
                 "status": "pending",
-                "ontology_id": ontology_id,
-                "extraction_prompt": ontology.extraction_prompt,
                 "source_file": file_path.name,
-                "extracted_data": None,
                 "created_at": datetime.utcnow().isoformat(),
             }
         _save_chunks()
-        
+
         # Update job status
-        JOBS[job_id]["status"] = "extracting"
         JOBS[job_id]["total_chunks"] = len(chunks)
         JOBS[job_id]["updated_at"] = datetime.utcnow().isoformat()
         _save_jobs()
-        logger.info(f"[{job_id}] Document processing complete: {len(chunks)} chunks created")
+        logger.info(f"[{job_id}] Chunking complete: {len(chunks)} chunks created, starting storage...")
 
         # Process chunks with limited concurrency
         semaphore = asyncio.Semaphore(MAX_CONCURRENT_CHUNKS)
@@ -375,12 +290,10 @@ async def process_document(job_id: str, file_path: Path, ontology_id: str, sampl
             async with semaphore:
                 chunk = CHUNKS[chunk_id]
                 try:
-                    result = await process_and_store_chunk(
+                    result = await store_chunk(
                         chunk_id=chunk_id,
                         chunk_text_content=chunk["text"],
-                        ontology=ontology,
                         source_file=chunk["source_file"],
-                        ontology_id=ontology_id,
                     )
                     chunk["status"] = "stored"
                     chunk["store_result"] = result
@@ -399,7 +312,7 @@ async def process_document(job_id: str, file_path: Path, ontology_id: str, sampl
         JOBS[job_id]["status"] = "completed_with_errors" if failed > 0 else "completed"
         JOBS[job_id]["updated_at"] = datetime.utcnow().isoformat()
         _save_jobs()
-        
+
     except Exception as e:
         logger.error(f"[{job_id}] Document processing failed: {e}", exc_info=True)
         JOBS[job_id]["status"] = "failed"
@@ -480,38 +393,16 @@ def _extract_pdf_docling(file_path: Path) -> str:
 # ENDPOINTS
 # =============================================================================
 
-@router.get("/ontologies")
-async def get_available_ontologies():
-    """List all available ontologies"""
-    return {
-        "ontologies": list_ontologies(),
-        "default": DEFAULT_ONTOLOGY
-    }
-
-
 @router.post("/wipe")
 async def wipe_datastores():
     """
-    Wipe all entries in Neo4j and Qdrant collections.
+    Wipe all entries in Qdrant collections.
     This is destructive and intended for local development resets.
     """
-    logger.warning("Wipe requested: clearing Neo4j and Qdrant data")
+    logger.warning("Wipe requested: clearing Qdrant data")
     result = {
-        "neo4j": {"status": "pending"},
         "qdrant": {"status": "pending"},
     }
-
-    # Neo4j: delete all nodes/relationships
-    try:
-        from store import get_neo4j_driver
-        driver = get_neo4j_driver()
-        with driver.session() as session:
-            session.run("MATCH (n) DETACH DELETE n")
-        result["neo4j"] = {"status": "ok", "message": "All nodes deleted"}
-        logger.info("Neo4j wipe complete")
-    except Exception as e:
-        result["neo4j"] = {"status": "error", "message": str(e)}
-        logger.error(f"Neo4j wipe failed: {e}")
 
     # Qdrant: delete collections if they exist
     try:
@@ -535,27 +426,11 @@ async def wipe_datastores():
 @router.get("/stats")
 async def get_datastore_stats():
     """
-    Get quick stats for Neo4j and Qdrant.
+    Get quick stats for Qdrant.
     """
     stats = {
-        "neo4j": {"status": "pending"},
         "qdrant": {"status": "pending"},
     }
-
-    # Neo4j: count nodes and relationships
-    try:
-        from store import get_neo4j_driver
-        driver = get_neo4j_driver()
-        with driver.session() as session:
-            node_count = session.run("MATCH (n) RETURN count(n) AS count").single()["count"]
-            rel_count = session.run("MATCH ()-[r]->() RETURN count(r) AS count").single()["count"]
-        stats["neo4j"] = {
-            "status": "ok",
-            "nodes": node_count,
-            "relationships": rel_count,
-        }
-    except Exception as e:
-        stats["neo4j"] = {"status": "error", "message": str(e)}
 
     # Qdrant: count points per collection
     try:
@@ -579,46 +454,30 @@ async def get_datastore_stats():
 
     return stats
 
-@router.get("/ontology/{ontology_id}")
-async def get_ontology_details(ontology_id: str):
-    """Get full details of a specific ontology including extraction prompt"""
-    try:
-        ontology = get_ontology(ontology_id)
-        return ontology.model_dump()
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-
 
 @router.post("/upload", response_model=UploadResponse)
 async def upload_document(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    ontology_id: str = Form(default=DEFAULT_ONTOLOGY),
     sample_percent: float = Form(default=100.0),
 ):
     """
     Upload a document for processing.
-    
+
     - Accepts PDF, TXT, MD files
-    - Converts to text using Docling (for PDFs)
-    - Chunks the text for LLM processing
+    - Converts to text (PyMuPDF for PDFs)
+    - Chunks and stores embeddings to Qdrant
     - Returns job_id to track progress
     """
     # Validate file type
     allowed_extensions = {".pdf", ".txt", ".md"}
     suffix = Path(file.filename).suffix.lower()
-    
+
     if suffix not in allowed_extensions:
         raise HTTPException(
             status_code=400,
             detail=f"Unsupported file type: {suffix}. Allowed: {allowed_extensions}"
         )
-    
-    # Validate ontology
-    try:
-        get_ontology(ontology_id)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
 
     # Validate sample percent
     if sample_percent <= 0 or sample_percent > 100:
@@ -626,22 +485,21 @@ async def upload_document(
             status_code=400,
             detail="sample_percent must be > 0 and <= 100"
         )
-    
+
     # Generate job ID and save file
     job_id = generate_job_id(file.filename)
     file_path = UPLOADS_DIR / f"{job_id}_{file.filename}"
-    
+
     # Save uploaded file
     content = await file.read()
     file_path.write_bytes(content)
-    
+
     # Create job record
     JOBS[job_id] = {
         "job_id": job_id,
         "filename": file.filename,
         "file_path": str(file_path),
         "status": "pending",
-        "ontology_id": ontology_id,
         "sample_percent": sample_percent,
         "created_at": datetime.utcnow().isoformat(),
         "updated_at": datetime.utcnow().isoformat(),
@@ -651,15 +509,15 @@ async def upload_document(
         "error": None,
     }
     _save_jobs()
-    
+
     # Process document in background (fire-and-forget)
-    asyncio.create_task(process_document(job_id, file_path, ontology_id, sample_percent))
-    
+    asyncio.create_task(process_document(job_id, file_path, sample_percent))
+
     return UploadResponse(
         job_id=job_id,
         filename=file.filename,
         status="pending",
-        message=f"Document queued for processing with ontology '{ontology_id}'"
+        message="Document queued for processing"
     )
 
 
@@ -668,18 +526,17 @@ async def get_job_status(job_id: str):
     """Get the status of an ingest job"""
     if job_id not in JOBS:
         raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
-    
+
     job = JOBS[job_id]
-    
+
     # Count processed chunks
     job_chunks = [c for c in CHUNKS.values() if c["job_id"] == job_id]
-    processed = sum(1 for c in job_chunks if c["status"] in ("extracted", "stored"))
-    
+    processed = sum(1 for c in job_chunks if c["status"] == "stored")
+
     return JobStatus(
         job_id=job["job_id"],
         filename=job["filename"],
         status=job["status"],
-        ontology_id=job["ontology_id"],
         created_at=job["created_at"],
         updated_at=job["updated_at"],
         total_chunks=job["total_chunks"],
@@ -698,7 +555,6 @@ async def list_jobs():
                 "job_id": j["job_id"],
                 "filename": j["filename"],
                 "status": j["status"],
-                "ontology_id": j["ontology_id"],
                 "total_chunks": j["total_chunks"],
                 "created_at": j["created_at"],
             }
@@ -710,22 +566,21 @@ async def list_jobs():
 @router.get("/pending", response_model=ChunkListResponse)
 async def list_pending_chunks(job_id: Optional[str] = None):
     """
-    List chunks awaiting LLM extraction.
+    List chunks and their storage status.
     Optionally filter by job_id.
     """
     chunks = list(CHUNKS.values())
-    
+
     if job_id:
         chunks = [c for c in chunks if c["job_id"] == job_id]
-    
+
     pending = [c for c in chunks if c["status"] == "pending"]
-    extracted = [c for c in chunks if c["status"] == "extracted"]
     stored = [c for c in chunks if c["status"] == "stored"]
-    
+
     return ChunkListResponse(
         total=len(chunks),
         pending=len(pending),
-        extracted=len(extracted),
+        extracted=0,  # No longer used
         stored=len(stored),
         chunks=[
             ChunkInfo(
@@ -735,8 +590,6 @@ async def list_pending_chunks(job_id: Optional[str] = None):
                 text=c["text"],
                 char_count=c["char_count"],
                 status=c["status"],
-                ontology_id=c["ontology_id"],
-                extraction_prompt=c["extraction_prompt"],
                 source_file=c["source_file"],
             )
             for c in chunks
@@ -747,129 +600,40 @@ async def list_pending_chunks(job_id: Optional[str] = None):
 @router.get("/chunk/{chunk_id}")
 async def get_chunk(chunk_id: str):
     """
-    Get a specific chunk with its full extraction prompt.
-    Use this to copy the prompt + text to your LLM.
+    Get a specific chunk details.
     """
     if chunk_id not in CHUNKS:
         raise HTTPException(status_code=404, detail=f"Chunk not found: {chunk_id}")
-    
+
     chunk = CHUNKS[chunk_id]
-    
-    # Build the full prompt for the user to copy
-    full_prompt = chunk["extraction_prompt"] + chunk["text"]
-    
+
     return {
         "chunk_id": chunk["chunk_id"],
         "job_id": chunk["job_id"],
         "index": chunk["index"],
         "source_file": chunk["source_file"],
-        "ontology_id": chunk["ontology_id"],
         "status": chunk["status"],
         "text": chunk["text"],
         "char_count": chunk["char_count"],
-        "full_prompt_for_llm": full_prompt,
-        "extracted_data": chunk.get("extracted_data"),
     }
 
 
-@router.post("/chunk/{chunk_id}/extract", response_model=ExtractionResponse)
-async def submit_extraction(chunk_id: str, extraction: ExtractionInput):
-    """
-    Submit LLM extraction results for a chunk.
-    
-    After copying the prompt from GET /chunk/{chunk_id} to your LLM,
-    paste the JSON response here.
-    """
-    if chunk_id not in CHUNKS:
-        raise HTTPException(status_code=404, detail=f"Chunk not found: {chunk_id}")
-    
-    chunk = CHUNKS[chunk_id]
-    
-    # Validate extraction has required fields
-    if not isinstance(extraction.entities, list):
-        raise HTTPException(status_code=400, detail="entities must be a list")
-    if not isinstance(extraction.relationships, list):
-        raise HTTPException(status_code=400, detail="relationships must be a list")
-    
-    # Store extraction
-    chunk["extracted_data"] = {
-        "entities": extraction.entities,
-        "relationships": extraction.relationships,
-        "extracted_at": datetime.utcnow().isoformat(),
-    }
-    chunk["status"] = "extracted"
-    
-    return ExtractionResponse(
-        chunk_id=chunk_id,
-        status="extracted",
-        entities_count=len(extraction.entities),
-        relationships_count=len(extraction.relationships),
-        message="Extraction stored. Use POST /chunk/{chunk_id}/store to commit to graph."
-    )
-
-
-@router.post("/chunk/{chunk_id}/store")
-async def store_chunk_to_graph(chunk_id: str):
-    """
-    Store extracted entities and relationships to Neo4j and embeddings to Qdrant.
-    Call this after submitting extraction results.
-    """
-    if chunk_id not in CHUNKS:
-        raise HTTPException(status_code=404, detail=f"Chunk not found: {chunk_id}")
-    
-    chunk = CHUNKS[chunk_id]
-    
-    if chunk["status"] != "extracted":
-        raise HTTPException(
-            status_code=400,
-            detail=f"Chunk must be in 'extracted' status. Current: {chunk['status']}"
-        )
-    
-    if not chunk.get("extracted_data"):
-        raise HTTPException(status_code=400, detail="No extraction data found")
-    
-    # Import here to avoid circular imports
-    from store import store_extraction_to_graph
-    
-    try:
-        result = await store_extraction_to_graph(
-            chunk_id=chunk_id,
-            extraction=chunk["extracted_data"],
-            source_text=chunk["text"],
-            source_file=chunk["source_file"],
-            ontology_id=chunk["ontology_id"],
-        )
-        
-        chunk["status"] = "stored"
-        
-        return {
-            "chunk_id": chunk_id,
-            "status": "stored",
-            "neo4j": result.get("neo4j", {}),
-            "qdrant": result.get("qdrant", {}),
-            "message": "Extraction committed to graph and vector store"
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Storage failed: {str(e)}")
-
-
-@router.get("/stats")
-async def get_ingest_stats():
+@router.get("/pipeline-stats")
+async def get_ingest_pipeline_stats():
     """Get overall ingest pipeline statistics"""
     total_jobs = len(JOBS)
     total_chunks = len(CHUNKS)
-    
+
     job_statuses = {}
     for j in JOBS.values():
         status = j["status"]
         job_statuses[status] = job_statuses.get(status, 0) + 1
-    
+
     chunk_statuses = {}
     for c in CHUNKS.values():
         status = c["status"]
         chunk_statuses[status] = chunk_statuses.get(status, 0) + 1
-    
+
     return {
         "jobs": {
             "total": total_jobs,
@@ -879,5 +643,4 @@ async def get_ingest_stats():
             "total": total_chunks,
             "by_status": chunk_statuses,
         },
-        "ontologies_available": list(o["id"] for o in list_ontologies()),
     }

@@ -1,6 +1,6 @@
 """
 Sanctum Backend - FastAPI Application
-Smoke test implementation for verifying Neo4j and Qdrant connectivity.
+RAG system with Qdrant vector search.
 Also provides user/admin management via SQLite.
 """
 
@@ -12,7 +12,6 @@ import re
 import math
 from fastapi import FastAPI, HTTPException, Query, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
-from neo4j import GraphDatabase
 from qdrant_client import QdrantClient
 from pydantic import BaseModel
 from typing import Optional, List
@@ -83,9 +82,6 @@ magic_link_limiter = RateLimiter(limit=5, window_seconds=60)   # 5 per minute
 admin_auth_limiter = RateLimiter(limit=10, window_seconds=60)  # 10 per minute
 
 # Configuration from environment
-NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "sanctum_dev_password")
 QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
 
@@ -95,7 +91,6 @@ COLLECTION_NAME = "sanctum_smoke_test"
 
 class SmokeTestResult(BaseModel):
     """Response model for smoke test endpoint"""
-    neo4j: dict
     qdrant: dict
     message: str
     success: bool
@@ -183,19 +178,6 @@ class VectorSearchResponse(BaseModel):
     collection: str
 
 
-class Neo4jQueryRequest(BaseModel):
-    """Request model for Neo4j query endpoint"""
-    cypher: str
-
-
-class Neo4jQueryResponse(BaseModel):
-    """Response model for Neo4j query endpoint"""
-    success: bool
-    columns: List[str] = []
-    rows: List[dict] = []
-    error: Optional[str] = None
-
-
 # Lazy-loaded embedding model singleton
 _embedding_model = None
 
@@ -239,11 +221,6 @@ def filter_tools_for_user(tools: List[str], user: dict) -> List[str]:
     return [t for t in tools if t not in ADMIN_ONLY_TOOLS]
 
 
-def get_neo4j_driver():
-    """Create Neo4j driver connection"""
-    return GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
-
-
 def get_qdrant_client():
     """Create Qdrant client connection"""
     return QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
@@ -263,20 +240,9 @@ async def root():
 async def health_check():
     """Check health of all services"""
     services = {
-        "neo4j": "unknown",
         "qdrant": "unknown"
     }
-    
-    # Check Neo4j
-    try:
-        driver = get_neo4j_driver()
-        with driver.session() as session:
-            session.run("RETURN 1")
-        services["neo4j"] = "healthy"
-        driver.close()
-    except Exception as e:
-        services["neo4j"] = f"unhealthy: {str(e)}"
-    
+
     # Check Qdrant
     try:
         client = get_qdrant_client()
@@ -284,9 +250,9 @@ async def health_check():
         services["qdrant"] = "healthy"
     except Exception as e:
         services["qdrant"] = f"unhealthy: {str(e)}"
-    
+
     all_healthy = all(s == "healthy" for s in services.values())
-    
+
     return HealthResponse(
         status="healthy" if all_healthy else "degraded",
         services=services
@@ -296,64 +262,18 @@ async def health_check():
 @app.get("/test", response_model=SmokeTestResult)
 async def smoke_test():
     """
-    Smoke test endpoint that verifies:
-    1. Neo4j contains the seeded Spanish claim/fact
-    2. Qdrant contains the corresponding embedding
-    
-    Returns details about the seeded data if found.
+    Smoke test endpoint that verifies Qdrant contains seeded data.
     """
-    neo4j_result = {"status": "error", "claim": None, "source": None}
     qdrant_result = {"status": "error", "vector_id": None, "payload": None}
-    
-    # Test Neo4j - retrieve the seeded claim
-    try:
-        driver = get_neo4j_driver()
-        with driver.session() as session:
-            # Query for the seeded claim and its source
-            result = session.run("""
-                MATCH (c:Claim)-[:SUPPORTED_BY]->(s:Source)
-                WHERE c.id = 'claim_udhr_1948'
-                RETURN c.id as claim_id, 
-                       c.text as claim_text, 
-                       c.language as language,
-                       s.id as source_id, 
-                       s.title as source_title
-            """)
-            record = result.single()
-            
-            if record:
-                neo4j_result = {
-                    "status": "ok",
-                    "claim": {
-                        "id": record["claim_id"],
-                        "text": record["claim_text"],
-                        "language": record["language"]
-                    },
-                    "source": {
-                        "id": record["source_id"],
-                        "title": record["source_title"]
-                    }
-                }
-            else:
-                neo4j_result = {
-                    "status": "error",
-                    "message": "Seeded claim not found. Run seed script."
-                }
-        driver.close()
-    except Exception as e:
-        neo4j_result = {
-            "status": "error",
-            "message": f"Neo4j error: {str(e)}"
-        }
-    
+
     # Test Qdrant - retrieve the seeded embedding
     try:
         client = get_qdrant_client()
-        
+
         # Check if collection exists
         collections = client.get_collections().collections
         collection_exists = any(c.name == COLLECTION_NAME for c in collections)
-        
+
         if collection_exists:
             # Retrieve the seeded point using UUID derived from claim ID
             claim_id = "claim_udhr_1948"
@@ -363,7 +283,7 @@ async def smoke_test():
                 ids=[point_uuid],
                 with_vectors=True
             )
-            
+
             if points:
                 point = points[0]
                 qdrant_result = {
@@ -387,17 +307,12 @@ async def smoke_test():
             "status": "error",
             "message": f"Qdrant error: {str(e)}"
         }
-    
+
     # Determine overall success
-    success = (
-        neo4j_result.get("status") == "ok" and 
-        qdrant_result.get("status") == "ok"
-    )
-    
-    message = "Smoke test passed! ✓" if success else "Smoke test failed. Check component status."
-    
+    success = qdrant_result.get("status") == "ok"
+    message = "Smoke test passed!" if success else "Smoke test failed. Check Qdrant status."
+
     return SmokeTestResult(
-        neo4j=neo4j_result,
         qdrant=qdrant_result,
         message=message,
         success=success
@@ -560,63 +475,6 @@ async def vector_search(request: VectorSearchRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/admin/neo4j/query", response_model=Neo4jQueryResponse)
-async def neo4j_query(request: Neo4jQueryRequest, admin: dict = Depends(auth.require_admin)):
-    """
-    Execute a read-only Cypher query against Neo4j (requires admin auth).
-
-    Only MATCH queries are allowed for safety.
-    Useful for exploring the knowledge graph after ingestion.
-    """
-    cypher = request.cypher.strip()
-
-    # Security: Only allow read queries (MATCH, RETURN, etc.)
-    cypher_upper = cypher.upper()
-    write_keywords = ['CREATE', 'MERGE', 'DELETE', 'REMOVE', 'SET', 'DROP', 'DETACH']
-    for keyword in write_keywords:
-        if keyword in cypher_upper:
-            return Neo4jQueryResponse(
-                success=False,
-                error=f"Write operations not allowed. Query contains '{keyword}'."
-            )
-
-    try:
-        driver = get_neo4j_driver()
-        with driver.session() as session:
-            result = session.run(cypher)
-            # Get column names from keys
-            columns = list(result.keys())
-            # Convert records to dicts
-            rows = []
-            for record in result:
-                row = {}
-                for key in columns:
-                    value = record[key]
-                    # Handle Neo4j node/relationship objects
-                    if hasattr(value, '_properties'):
-                        row[key] = dict(value._properties)
-                        if hasattr(value, 'labels'):
-                            row[key]['_labels'] = list(value.labels)
-                    elif hasattr(value, 'type'):
-                        row[key] = {'_type': value.type, **dict(value._properties)}
-                    else:
-                        row[key] = value
-                rows.append(row)
-        driver.close()
-
-        return Neo4jQueryResponse(
-            success=True,
-            columns=columns,
-            rows=rows
-        )
-
-    except Exception as e:
-        return Neo4jQueryResponse(
-            success=False,
-            error=str(e)
-        )
 
 
 # =============================================================================

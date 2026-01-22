@@ -1,7 +1,7 @@
 export { ChatContainer } from './ChatContainer'
 export { ChatInput } from './ChatInput'
 export { ChatMessage, type Message } from './ChatMessage'
-export { DocumentScope, type Ontology } from './DocumentScope'
+export { DocumentScope, type DocumentSource } from './DocumentScope'
 export { ExportButton } from './ExportButton'
 export { MessageList } from './MessageList'
 export { ToolSelector, type Tool } from './ToolSelector'

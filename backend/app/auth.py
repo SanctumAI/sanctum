@@ -219,10 +219,17 @@ def send_magic_link_email(to_email: str, token: str) -> bool:
     msg.attach(MIMEText(html, "html"))
 
     try:
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-            server.starttls()
-            server.login(SMTP_USER, SMTP_PASS)
-            server.sendmail(SMTP_FROM, [to_email], msg.as_string())
+        if SMTP_PORT == 465:
+            # Port 465 uses implicit SSL (connection starts encrypted)
+            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
+                server.login(SMTP_USER, SMTP_PASS)
+                server.sendmail(SMTP_FROM, [to_email], msg.as_string())
+        else:
+            # Port 587 (and others) use STARTTLS (plain connection upgraded to TLS)
+            with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+                server.starttls()
+                server.login(SMTP_USER, SMTP_PASS)
+                server.sendmail(SMTP_FROM, [to_email], msg.as_string())
         logger.info(f"Magic link email sent to {to_email}")
         return True
     except Exception as e:

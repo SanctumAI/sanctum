@@ -67,6 +67,7 @@ SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USER = os.environ.get("SMTP_USER", "")
 SMTP_PASS = os.environ.get("SMTP_PASS", "")
 SMTP_FROM = os.environ.get("SMTP_FROM", "Sanctum <noreply@localhost>")
+SMTP_TIMEOUT = int(os.environ.get("SMTP_TIMEOUT", "10"))  # seconds
 
 # Token expiration (15 minutes)
 MAGIC_LINK_MAX_AGE = 15 * 60
@@ -77,6 +78,72 @@ SESSION_MAX_AGE = 7 * 24 * 60 * 60
 # Serializers
 _magic_link_serializer = URLSafeTimedSerializer(SECRET_KEY)
 _session_serializer = URLSafeTimedSerializer(SECRET_KEY)
+
+
+def verify_smtp_config() -> dict:
+    """
+    Verify SMTP configuration on startup (no email sent).
+
+    Returns a dict with:
+        - configured: bool - whether SMTP settings are present
+        - mock_mode: bool - whether emails will be mocked (logged only)
+        - connection_ok: bool - whether we can connect to SMTP server
+        - error: str | None - error message if connection failed
+    """
+    result = {
+        "configured": False,
+        "mock_mode": MOCK_EMAIL,
+        "connection_ok": False,
+        "error": None
+    }
+
+    # Check if SMTP is configured
+    if not SMTP_HOST:
+        logger.warning("SMTP not configured: SMTP_HOST is empty")
+        logger.info("Emails will be logged to console (mock mode implicit)")
+        return result
+
+    result["configured"] = True
+
+    # If mock mode is enabled, skip connection test
+    if MOCK_EMAIL:
+        logger.info(f"SMTP configured (host={SMTP_HOST}, port={SMTP_PORT}) but MOCK_EMAIL=true")
+        logger.info("Magic link emails will be logged to console instead of sent")
+        return result
+
+    # Attempt connection test (no email sent)
+    logger.info(f"Testing SMTP connection to {SMTP_HOST}:{SMTP_PORT}...")
+    try:
+        if SMTP_PORT == 465:
+            # Port 465 uses implicit SSL
+            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=SMTP_TIMEOUT) as server:
+                server.login(SMTP_USER, SMTP_PASS)
+                # NOOP command tests the connection without sending
+                server.noop()
+        else:
+            # Port 587 (and others) use STARTTLS
+            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=SMTP_TIMEOUT) as server:
+                server.starttls()
+                server.login(SMTP_USER, SMTP_PASS)
+                server.noop()
+
+        result["connection_ok"] = True
+        logger.info(f"SMTP connection OK: {SMTP_HOST}:{SMTP_PORT} (from: {SMTP_FROM})")
+
+    except smtplib.SMTPAuthenticationError as e:
+        result["error"] = f"SMTP authentication failed: {e}"
+        logger.error(result["error"])
+    except smtplib.SMTPConnectError as e:
+        result["error"] = f"SMTP connection failed: {e}"
+        logger.error(result["error"])
+    except TimeoutError:
+        result["error"] = f"SMTP connection timed out after {SMTP_TIMEOUT}s"
+        logger.error(result["error"])
+    except Exception as e:
+        result["error"] = f"SMTP error: {e}"
+        logger.error(result["error"])
+
+    return result
 
 
 def create_magic_link_token(email: str, name: str = "") -> str:
@@ -221,12 +288,12 @@ def send_magic_link_email(to_email: str, token: str) -> bool:
     try:
         if SMTP_PORT == 465:
             # Port 465 uses implicit SSL (connection starts encrypted)
-            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
+            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=SMTP_TIMEOUT) as server:
                 server.login(SMTP_USER, SMTP_PASS)
                 server.sendmail(SMTP_FROM, [to_email], msg.as_string())
         else:
             # Port 587 (and others) use STARTTLS (plain connection upgraded to TLS)
-            with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=SMTP_TIMEOUT) as server:
                 server.starttls()
                 server.login(SMTP_USER, SMTP_PASS)
                 server.sendmail(SMTP_FROM, [to_email], msg.as_string())

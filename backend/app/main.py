@@ -77,6 +77,15 @@ app.add_middleware(
 app.include_router(ingest_router)
 app.include_router(query_router)
 
+
+@app.on_event("startup")
+async def startup_event():
+    """Run startup checks"""
+    # Verify SMTP configuration (connection test, no email sent)
+    smtp_status = auth.verify_smtp_config()
+    if smtp_status["configured"] and not smtp_status["mock_mode"] and not smtp_status["connection_ok"]:
+        logger.warning("SMTP is configured but connection test failed - email sending may not work")
+
 # Rate limiters for auth endpoints
 magic_link_limiter = RateLimiter(limit=5, window_seconds=60)   # 5 per minute
 admin_auth_limiter = RateLimiter(limit=10, window_seconds=60)  # 10 per minute

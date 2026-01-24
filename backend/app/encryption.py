@@ -47,7 +47,7 @@ def _get_blind_index_key() -> bytes:
     return _blind_index_key
 
 
-def generate_ephemeral_keypair() -> Tuple[bytes, bytes]:
+def generate_ephemeral_keypair() -> Tuple[bytes, str]:
     """
     Generate an ephemeral keypair for one-time encryption.
 
@@ -90,9 +90,6 @@ def compute_shared_secret(
         bytes.fromhex(their_pubkey_hex)
     except ValueError as e:
         raise ValueError("Invalid pubkey hex") from e
-
-    # Parse our private key
-    our_privkey = PrivateKey(our_privkey_bytes)
 
     # Parse their x-only pubkey - need to add prefix for coincurve
     # We assume even y-coordinate (02 prefix) as per BIP-340

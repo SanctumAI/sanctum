@@ -681,8 +681,13 @@ def get_user_by_email(email: str) -> dict | None:
     """
     from encryption import compute_blind_index
 
-    # Compute blind index for the email
-    blind_index = compute_blind_index(email)
+    # Normalize email: strip whitespace and lowercase
+    normalized_email = email.strip().lower() if email else ""
+    if not normalized_email:
+        return None
+
+    # Compute blind index for the normalized email
+    blind_index = compute_blind_index(normalized_email)
 
     with get_cursor() as cursor:
         # Try blind index first (encrypted emails)
@@ -695,7 +700,8 @@ def get_user_by_email(email: str) -> dict | None:
             return get_user(row["id"])
 
         # Fall back to plaintext email (legacy/unencrypted data)
-        cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
+        # Use normalized email for consistent matching
+        cursor.execute("SELECT id FROM users WHERE LOWER(email) = ?", (normalized_email,))
         row = cursor.fetchone()
         if row:
             return get_user(row["id"])
@@ -793,21 +799,23 @@ def migrate_encrypt_existing_data():
         updates = []
         values = []
 
-        # Encrypt email if not already encrypted
-        if email:
-            encrypted_email, ephemeral_pubkey_email = encrypt_for_admin(email)
+        # Encrypt email if not already encrypted (strip whitespace first)
+        trimmed_email = email.strip() if email else None
+        if trimmed_email:
+            encrypted_email, ephemeral_pubkey_email = encrypt_for_admin(trimmed_email)
             if encrypted_email:
                 updates.append("encrypted_email = ?")
                 values.append(encrypted_email)
                 updates.append("ephemeral_pubkey_email = ?")
                 values.append(ephemeral_pubkey_email)
                 updates.append("email_blind_index = ?")
-                values.append(compute_blind_index(email))
+                values.append(compute_blind_index(trimmed_email))
                 updates.append("email = NULL")  # Clear plaintext
 
-        # Encrypt name if not already encrypted
-        if name:
-            encrypted_name, ephemeral_pubkey_name = encrypt_for_admin(name)
+        # Encrypt name if not already encrypted (strip whitespace first)
+        trimmed_name = name.strip() if name else None
+        if trimmed_name:
+            encrypted_name, ephemeral_pubkey_name = encrypt_for_admin(trimmed_name)
             if encrypted_name:
                 updates.append("encrypted_name = ?")
                 values.append(encrypted_name)
@@ -835,14 +843,17 @@ def migrate_encrypt_existing_data():
         field_value_id = row[0]
         value = row[1]
 
-        encrypted_value, ephemeral_pubkey = encrypt_for_admin(value)
-        if encrypted_value:
-            cursor.execute("""
-                UPDATE user_field_values
-                SET encrypted_value = ?, ephemeral_pubkey = ?, value = NULL
-                WHERE id = ?
-            """, (encrypted_value, ephemeral_pubkey, field_value_id))
-            migrated_fields += 1
+        # Strip whitespace before encrypting
+        trimmed_value = value.strip() if value else None
+        if trimmed_value:
+            encrypted_value, ephemeral_pubkey = encrypt_for_admin(trimmed_value)
+            if encrypted_value:
+                cursor.execute("""
+                    UPDATE user_field_values
+                    SET encrypted_value = ?, ephemeral_pubkey = ?, value = NULL
+                    WHERE id = ?
+                """, (encrypted_value, ephemeral_pubkey, field_value_id))
+                migrated_fields += 1
 
     conn.commit()
     cursor.close()

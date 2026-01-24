@@ -711,6 +711,21 @@ async def remove_admin(pubkey: str, admin: dict = Depends(auth.require_admin)):
 
 # --- Instance Settings ---
 
+# Settings safe to expose publicly (branding only)
+SAFE_PUBLIC_SETTINGS = {
+    "instance_name",
+    "primary_color",
+    "description",
+    "logo_url",
+    "favicon_url",
+}
+
+
+def filter_public_settings(settings: dict) -> dict:
+    """Filter settings to only include safe public keys."""
+    return {k: v for k, v in settings.items() if k in SAFE_PUBLIC_SETTINGS}
+
+
 class InstanceStatusResponse(BaseModel):
     """Response model for instance status"""
     initialized: bool  # True if an admin has been registered
@@ -727,7 +742,7 @@ async def get_instance_status():
     - User registration (if initialized)
     """
     admins = database.list_admins()
-    settings = database.get_all_settings()
+    settings = filter_public_settings(database.get_all_settings())
     return InstanceStatusResponse(
         initialized=len(admins) > 0,
         settings=settings
@@ -737,7 +752,7 @@ async def get_instance_status():
 @app.get("/settings/public", response_model=InstanceSettingsResponse)
 async def get_public_settings():
     """Public endpoint: Get instance settings for branding (name, color, etc.)"""
-    settings = database.get_all_settings()
+    settings = filter_public_settings(database.get_all_settings())
     return InstanceSettingsResponse(settings=settings)
 
 

@@ -3,6 +3,7 @@ Sanctum Database Module
 Handles SQLite connection and schema for user/admin management.
 """
 
+import json
 import os
 import sqlite3
 import logging
@@ -800,7 +801,9 @@ def migrate_encrypt_existing_data():
         values = []
 
         # Encrypt email if not already encrypted (strip whitespace first)
-        trimmed_email = email.strip() if email else None
+        # Handle non-string values by serializing to JSON
+        email_str = email if isinstance(email, str) else json.dumps(email, separators=(",", ":"), ensure_ascii=False) if email is not None else None
+        trimmed_email = email_str.strip() if email_str else None
         if trimmed_email:
             encrypted_email, ephemeral_pubkey_email = encrypt_for_admin(trimmed_email)
             if encrypted_email:
@@ -813,7 +816,8 @@ def migrate_encrypt_existing_data():
                 updates.append("email = NULL")  # Clear plaintext
 
         # Encrypt name if not already encrypted (strip whitespace first)
-        trimmed_name = name.strip() if name else None
+        name_str = name if isinstance(name, str) else json.dumps(name, separators=(",", ":"), ensure_ascii=False) if name is not None else None
+        trimmed_name = name_str.strip() if name_str else None
         if trimmed_name:
             encrypted_name, ephemeral_pubkey_name = encrypt_for_admin(trimmed_name)
             if encrypted_name:
@@ -843,8 +847,9 @@ def migrate_encrypt_existing_data():
         field_value_id = row[0]
         value = row[1]
 
-        # Strip whitespace before encrypting
-        trimmed_value = value.strip() if value else None
+        # Handle non-string values by serializing to JSON, then strip whitespace
+        value_str = value if isinstance(value, str) else json.dumps(value, separators=(",", ":"), ensure_ascii=False) if value is not None else None
+        trimmed_value = value_str.strip() if value_str else None
         if trimmed_value:
             encrypted_value, ephemeral_pubkey = encrypt_for_admin(trimmed_value)
             if encrypted_value:

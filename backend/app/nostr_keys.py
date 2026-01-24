@@ -32,10 +32,9 @@ def decode_npub(npub: str) -> str:
 
 def normalize_pubkey(pubkey: str) -> str:
     """Normalize a pubkey as 32-byte hex (accepts npub or hex)."""
-    if not pubkey:
+    key = pubkey.strip().lower() if pubkey else ""
+    if not key:
         raise ValueError("Missing pubkey")
-
-    key = pubkey.strip().lower()
     if key.startswith("npub"):
         return decode_npub(key)
 

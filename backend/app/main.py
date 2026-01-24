@@ -1201,8 +1201,9 @@ def _encrypt_row_for_write(table_name: str, data: dict) -> dict:
     elif table_name == "user_field_values":
         if "value" in updated:
             value_val = updated["value"]
-            if value_val is not None and value_val != "":
-                value_str = serialize_field_value(value_val)
+            # Serialize and strip to check for actual content
+            value_str = serialize_field_value(value_val).strip() if value_val is not None else ""
+            if value_str:
                 encrypted_value, eph = encrypt_for_admin_required(value_str)
                 updated["encrypted_value"] = encrypted_value
                 updated["ephemeral_pubkey"] = eph

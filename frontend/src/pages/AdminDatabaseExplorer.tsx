@@ -117,10 +117,14 @@ export function AdminDatabaseExplorer() {
       return
     }
 
+    let cancelled = false
+
     const decryptRows = async () => {
       const decrypted: Record<number, Record<string, string>> = {}
 
       for (let i = 0; i < tableData.length; i++) {
+        if (cancelled) return
+
         const row = tableData[i]
         decrypted[i] = {}
 
@@ -133,6 +137,7 @@ export function AdminDatabaseExplorer() {
 
             if (ciphertext && ephemeralPubkey) {
               const result = await decryptField({ ciphertext, ephemeral_pubkey: ephemeralPubkey })
+              if (cancelled) return
               decrypted[i][col.name] = result ?? '[Encrypted]'
             } else if (ciphertext) {
               decrypted[i][col.name] = '[Encrypted - Missing Key]'
@@ -140,10 +145,16 @@ export function AdminDatabaseExplorer() {
           }
         }
       }
-      setDecryptedData(decrypted)
+      if (!cancelled) {
+        setDecryptedData(decrypted)
+      }
     }
 
     decryptRows()
+
+    return () => {
+      cancelled = true
+    }
   }, [tableData, currentTableInfo])
 
   // Run SQL query

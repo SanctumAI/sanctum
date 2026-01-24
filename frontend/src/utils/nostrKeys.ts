@@ -12,10 +12,10 @@ export function normalizePubkey(input: string): string {
     return trimmed.toLowerCase()
   }
 
-  if (trimmed.startsWith('npub')) {
+  if (trimmed.toLowerCase().startsWith('npub')) {
     let decoded
     try {
-      decoded = nip19.decode(trimmed)
+      decoded = nip19.decode(trimmed.toLowerCase())
     } catch {
       throw new Error('Invalid npub')
     }

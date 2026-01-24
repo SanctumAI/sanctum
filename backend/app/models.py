@@ -149,6 +149,8 @@ class EncryptedField(BaseModel):
 class UserCreate(BaseModel):
     """Request model for creating a user"""
     pubkey: Optional[str] = None
+    email: Optional[str] = None      # Auth email (encrypted, enables email lookups)
+    name: Optional[str] = None       # User's name (encrypted)
     user_type_id: Optional[int] = None  # Which user type they selected
     fields: dict = {}  # Dynamic fields defined by admin
 

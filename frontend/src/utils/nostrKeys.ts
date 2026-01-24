@@ -13,7 +13,12 @@ export function normalizePubkey(input: string): string {
   }
 
   if (trimmed.startsWith('npub')) {
-    const decoded = nip19.decode(trimmed)
+    let decoded
+    try {
+      decoded = nip19.decode(trimmed)
+    } catch {
+      throw new Error('Invalid npub')
+    }
     if (decoded.type !== 'npub') {
       throw new Error('Invalid npub')
     }

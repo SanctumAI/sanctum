@@ -8,17 +8,10 @@
 
 import type { WindowNostr } from 'nostr-tools/nip07'
 
-type WindowNostrWithNip04 = WindowNostr & {
-  nip04?: {
-    encrypt: (pubkey: string, plaintext: string) => Promise<string>
-    decrypt: (pubkey: string, ciphertext: string) => Promise<string>
-  }
-}
-
-// Extend window type for NIP-07 with NIP-04 support
+// Extend window type for NIP-07 (WindowNostr already includes nip04 support)
 declare global {
   interface Window {
-    nostr?: WindowNostrWithNip04
+    nostr?: WindowNostr
   }
 }
 

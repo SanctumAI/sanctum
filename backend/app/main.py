@@ -913,7 +913,13 @@ async def list_users(admin: dict = Depends(auth.require_admin)):
 @app.post("/users", response_model=UserResponse)
 async def create_user(user: UserCreate):
     """Create/onboard a new user.
-    user_type_id: Optional ID of the user type they selected during onboarding.
+
+    Args:
+        pubkey: Optional Nostr public key (npub or hex)
+        email: Optional email address (encrypted, enables email lookups)
+        name: Optional user name (encrypted)
+        user_type_id: Optional ID of the user type they selected during onboarding
+        fields: Dynamic fields defined by admin for the user type
 
     Requires admin to be configured first (for encryption to work properly).
     """
@@ -967,7 +973,12 @@ async def create_user(user: UserCreate):
 
     # Create user
     try:
-        user_id = database.create_user(pubkey=pubkey, user_type_id=user.user_type_id)
+        user_id = database.create_user(
+            pubkey=pubkey,
+            email=user.email,
+            name=user.name,
+            user_type_id=user.user_type_id
+        )
         if user.fields:
             database.set_user_fields(user_id, user.fields, user_type_id=user.user_type_id)
         return UserResponse(**database.get_user(user_id))

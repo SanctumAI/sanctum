@@ -324,6 +324,8 @@ export function TestDashboard() {
   const [fieldDefinitions, setFieldDefinitions] = useState<FieldDefinition[] | null>(null)
   const [userFields, setUserFields] = useState<Record<string, string>>({})
   const [testPubkey, setTestPubkey] = useState('')
+  const [testEmail, setTestEmail] = useState('')
+  const [testName, setTestName] = useState('')
   const [createUserResult, setCreateUserResult] = useState<Record<string, unknown> | null>(null)
   const [createUserLoading, setCreateUserLoading] = useState(false)
 
@@ -436,14 +438,18 @@ export function TestDashboard() {
       return
     }
 
+    let cancelled = false
+
     const decryptTableRows = async () => {
       const decrypted: Record<number, Record<string, string>> = {}
 
       for (let i = 0; i < tableData.rows.length; i++) {
+        if (cancelled) return
         const row = tableData.rows[i]
         decrypted[i] = {}
 
         for (const col of tableData.columns) {
+          if (cancelled) return
           if (col.startsWith('encrypted_')) {
             const fieldName = col.replace('encrypted_', '')
             const ephemeralCol = `ephemeral_pubkey_${fieldName}`
@@ -451,18 +457,28 @@ export function TestDashboard() {
             const ephemeralPubkey = row[ephemeralCol] as string | null
 
             if (ciphertext && ephemeralPubkey) {
-              const result = await decryptField({ ciphertext, ephemeral_pubkey: ephemeralPubkey })
-              decrypted[i][col] = result ?? '[Encrypted]'
+              try {
+                const result = await decryptField({ ciphertext, ephemeral_pubkey: ephemeralPubkey })
+                decrypted[i][col] = result ?? '[Encrypted]'
+              } catch {
+                decrypted[i][col] = '[Encrypted - Error]'
+              }
             } else if (ciphertext) {
               decrypted[i][col] = '[Encrypted - Missing Key]'
             }
           }
         }
       }
-      setDecryptedTableData(decrypted)
+      if (!cancelled) {
+        setDecryptedTableData(decrypted)
+      }
     }
 
     decryptTableRows()
+
+    return () => {
+      cancelled = true
+    }
   }, [tableData])
 
   // Decrypt query result data when it loads (for Quick Query)
@@ -472,14 +488,18 @@ export function TestDashboard() {
       return
     }
 
+    let cancelled = false
+
     const decryptQueryRows = async () => {
       const decrypted: Record<number, Record<string, string>> = {}
 
       for (let i = 0; i < dbQueryResult.rows.length; i++) {
+        if (cancelled) return
         const row = dbQueryResult.rows[i]
         decrypted[i] = {}
 
         for (const col of dbQueryResult.columns) {
+          if (cancelled) return
           if (col.startsWith('encrypted_')) {
             const fieldName = col.replace('encrypted_', '')
             const ephemeralCol = `ephemeral_pubkey_${fieldName}`
@@ -487,18 +507,28 @@ export function TestDashboard() {
             const ephemeralPubkey = row[ephemeralCol] as string | null
 
             if (ciphertext && ephemeralPubkey) {
-              const result = await decryptField({ ciphertext, ephemeral_pubkey: ephemeralPubkey })
-              decrypted[i][col] = result ?? '[Encrypted]'
+              try {
+                const result = await decryptField({ ciphertext, ephemeral_pubkey: ephemeralPubkey })
+                decrypted[i][col] = result ?? '[Encrypted]'
+              } catch {
+                decrypted[i][col] = '[Encrypted - Error]'
+              }
             } else if (ciphertext) {
               decrypted[i][col] = '[Encrypted - Missing Key]'
             }
           }
         }
       }
-      setDecryptedQueryData(decrypted)
+      if (!cancelled) {
+        setDecryptedQueryData(decrypted)
+      }
     }
 
     decryptQueryRows()
+
+    return () => {
+      cancelled = true
+    }
   }, [dbQueryResult])
 
   // API calls
@@ -785,6 +815,8 @@ export function TestDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           pubkey: normalizedPubkey,
+          email: testEmail || undefined,
+          name: testName || undefined,
           user_type_id: selectedUserTypeId,
           fields: userFields
         })
@@ -1936,15 +1968,31 @@ export function TestDashboard() {
             {/* Create User */}
             {selectedUserTypeId && (
               <div className="border-t border-border pt-4">
-                <p className="text-sm font-medium text-text mb-3">3. Enter pubkey and create user:</p>
-                <div className="flex gap-3">
+                <p className="text-sm font-medium text-text mb-3">3. Enter user details and create user:</p>
+                <div className="space-y-3">
                   <input
                     type="text"
                     value={testPubkey}
                     onChange={(e) => setTestPubkey(e.target.value)}
-                    placeholder="Enter test pubkey (e.g., npub1... or hex)"
-                    className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
+                    placeholder="Pubkey (e.g., npub1... or hex)"
+                    className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
                   />
+                  <div className="flex gap-3">
+                    <input
+                      type="email"
+                      value={testEmail}
+                      onChange={(e) => setTestEmail(e.target.value)}
+                      placeholder="Email (optional)"
+                      className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
+                    />
+                    <input
+                      type="text"
+                      value={testName}
+                      onChange={(e) => setTestName(e.target.value)}
+                      placeholder="Name (optional)"
+                      className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
+                    />
+                  </div>
                   <Button onClick={createTestUser} disabled={createUserLoading || !testPubkey.trim()}>
                     {createUserLoading ? 'Creating...' : 'Create User'}
                   </Button>

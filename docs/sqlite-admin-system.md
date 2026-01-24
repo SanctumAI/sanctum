@@ -283,18 +283,27 @@ curl -X POST http://localhost:8000/users \
   -H "Content-Type: application/json" \
   -d '{
     "pubkey": "npub1user...",
+    "email": "user@example.com",
+    "name": "John Doe",
     "user_type_id": 1,
     "fields": {
-      "email": "user@example.com",
       "institution": "MIT"
     }
   }'
 ```
 
+**Parameters:**
+- `pubkey`: Optional Nostr public key (npub or hex)
+- `email`: Optional email address (encrypted, enables email lookups via `get_user_by_email()`)
+- `name`: Optional user name (encrypted)
+- `user_type_id`: Optional ID of the user type
+- `fields`: Dynamic fields defined by admin for the user type
+
 **Validation:**
 - Required fields (global + type-specific) must be provided
 - Unknown fields are rejected
 - Duplicate pubkeys are rejected
+- Duplicate emails are rejected (via blind index)
 
 #### `GET /users/{user_id}`
 Get a user by ID with all field values.
@@ -410,10 +419,10 @@ curl -X POST http://localhost:8000/admin/user-fields \
 curl -X POST http://localhost:8000/users \
   -H "Content-Type: application/json" \
   -d '{
+    "email": "jane@university.edu",
+    "name": "Dr. Jane Smith",
     "user_type_id": 1,
     "fields": {
-      "email": "jane@university.edu",
-      "name": "Dr. Jane Smith",
       "institution": "MIT",
       "research_area": "Machine Learning"
     }
@@ -423,10 +432,10 @@ curl -X POST http://localhost:8000/users \
 curl -X POST http://localhost:8000/users \
   -H "Content-Type: application/json" \
   -d '{
+    "email": "john@company.com",
+    "name": "John Developer",
     "user_type_id": 2,
     "fields": {
-      "email": "john@company.com",
-      "name": "John Developer",
       "github_username": "johndev",
       "company": "Acme Corp"
     }

@@ -188,7 +188,7 @@ export function formatEncryptedValue(
   plaintext: string | null | undefined,
   encrypted: EncryptedField | null | undefined
 ): string {
-  if (plaintext) {
+  if (plaintext != null) {
     return plaintext
   }
   if (encrypted) {

@@ -702,7 +702,7 @@ async def remove_admin(pubkey: str, admin: dict = Depends(auth.require_admin)):
     try:
         pubkey = normalize_pubkey(pubkey)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
     if database.remove_admin(pubkey):
         return SuccessResponse(success=True, message="Admin removed")
@@ -969,7 +969,7 @@ async def create_user(user: UserCreate):
         try:
             pubkey = normalize_pubkey(user.pubkey)
         except ValueError as e:
-            raise HTTPException(status_code=400, detail=str(e))
+            raise HTTPException(status_code=400, detail=str(e)) from e
 
     # Create user
     try:

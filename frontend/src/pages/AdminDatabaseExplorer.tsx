@@ -631,20 +631,22 @@ export function AdminDatabaseExplorer() {
                       </tr>
                     </thead>
                     <tbody>
-                      {paginatedData.map((row, rowIndex) => (
+                      {paginatedData.map((row, rowIndex) => {
+                        const absoluteIndex = (currentPage - 1) * pageSize + rowIndex
+                        return (
                         <tr
-                          key={rowIndex}
+                          key={absoluteIndex}
                           className="border-b border-border/50 hover:bg-surface-overlay/50 group"
                         >
                           {currentTableInfo?.columns
                             .filter(col => !col.name.startsWith('ephemeral_pubkey_'))
                             .map((col) => {
                             const value = col.name.startsWith('encrypted_')
-                              ? decryptedData[rowIndex]?.[col.name] ?? '[Decrypting...]'
+                              ? decryptedData[absoluteIndex]?.[col.name] ?? '[Decrypting...]'
                               : row[col.name]
                             const displayValue = formatCellValue(value)
                             const isExpanded =
-                              expandedCell?.row === rowIndex && expandedCell?.col === col.name
+                              expandedCell?.row === absoluteIndex && expandedCell?.col === col.name
                             const isLongValue = displayValue.length > 50
                             const isJson = isJsonValue(value)
 
@@ -681,7 +683,7 @@ export function AdminDatabaseExplorer() {
                                     } ${isLongValue ? 'cursor-pointer hover:text-accent' : ''}`}
                                     onClick={() =>
                                       isLongValue &&
-                                      setExpandedCell({ row: rowIndex, col: col.name })
+                                      setExpandedCell({ row: absoluteIndex, col: col.name })
                                     }
                                     title={isLongValue ? 'Click to expand' : undefined}
                                   >
@@ -710,7 +712,8 @@ export function AdminDatabaseExplorer() {
                             </div>
                           </td>
                         </tr>
-                      ))}
+                      )})}
+
                     </tbody>
                   </table>
                 )}

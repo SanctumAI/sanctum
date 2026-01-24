@@ -1158,8 +1158,13 @@ def _encrypt_row_for_write(table_name: str, data: dict) -> dict:
     updated = dict(data)
 
     if table_name == "users":
-        if "pubkey" in updated and updated["pubkey"] is not None:
-            updated["pubkey"] = normalize_pubkey(str(updated["pubkey"]))
+        if "pubkey" in updated:
+            pubkey_val = updated["pubkey"]
+            trimmed_pubkey = str(pubkey_val).strip() if pubkey_val is not None else ""
+            if trimmed_pubkey:
+                updated["pubkey"] = normalize_pubkey(trimmed_pubkey)
+            else:
+                updated["pubkey"] = None
 
         if "email" in updated:
             email_val = updated["email"]

@@ -117,6 +117,9 @@ export function AdminDatabaseExplorer() {
       return
     }
 
+    // Clear stale decrypted data immediately when dependencies change
+    setDecryptedData({})
+
     let cancelled = false
 
     const decryptRows = async () => {

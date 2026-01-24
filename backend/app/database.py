@@ -558,19 +558,21 @@ def create_user(
     if pubkey:
         pubkey = normalize_pubkey(pubkey)
 
-    # Encrypt email if provided
+    # Encrypt email if provided (strip whitespace first)
     encrypted_email = None
     ephemeral_pubkey_email = None
     email_blind_index = None
-    if email:
-        encrypted_email, ephemeral_pubkey_email = encrypt_for_admin_required(email)
-        email_blind_index = compute_blind_index(email)
+    trimmed_email = email.strip() if email else None
+    if trimmed_email:
+        encrypted_email, ephemeral_pubkey_email = encrypt_for_admin_required(trimmed_email)
+        email_blind_index = compute_blind_index(trimmed_email)
 
-    # Encrypt name if provided
+    # Encrypt name if provided (strip whitespace first)
     encrypted_name = None
     ephemeral_pubkey_name = None
-    if name:
-        encrypted_name, ephemeral_pubkey_name = encrypt_for_admin_required(name)
+    trimmed_name = name.strip() if name else None
+    if trimmed_name:
+        encrypted_name, ephemeral_pubkey_name = encrypt_for_admin_required(trimmed_name)
 
     with get_cursor() as cursor:
         cursor.execute(

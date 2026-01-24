@@ -2765,10 +2765,10 @@ export function TestDashboard() {
                         <tr key={user.id} className="border-b border-border/50">
                           <td className="py-2 px-2 text-text">{user.id}</td>
                           <td className="py-2 px-2 text-text">
-                            {formatEncryptedValue(user.email, user.email_encrypted) || '-'}
+                            {formatEncryptedValue(user.email, user.email_encrypted) ?? '-'}
                           </td>
                           <td className="py-2 px-2 text-text-secondary">
-                            {formatEncryptedValue(user.name, user.name_encrypted) || '-'}
+                            {formatEncryptedValue(user.name, user.name_encrypted) ?? '-'}
                           </td>
                           <td className="py-2 px-2 text-text-secondary">{user.user_type_id || '-'}</td>
                           <td className="py-2 px-2">

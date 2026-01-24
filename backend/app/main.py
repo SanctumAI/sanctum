@@ -1163,8 +1163,8 @@ def _encrypt_row_for_write(table_name: str, data: dict) -> dict:
 
         if "email" in updated:
             email_val = updated["email"]
-            if email_val is not None and email_val != "":
-                email_str = str(email_val).strip()
+            email_str = str(email_val).strip() if email_val is not None else ""
+            if email_str:
                 encrypted_email, eph = encrypt_for_admin_required(email_str)
                 updated["encrypted_email"] = encrypted_email
                 updated["ephemeral_pubkey_email"] = eph
@@ -1184,8 +1184,8 @@ def _encrypt_row_for_write(table_name: str, data: dict) -> dict:
 
         if "name" in updated:
             name_val = updated["name"]
-            if name_val is not None and name_val != "":
-                name_str = str(name_val)
+            name_str = str(name_val).strip() if name_val is not None else ""
+            if name_str:
                 encrypted_name, eph = encrypt_for_admin_required(name_str)
                 updated["encrypted_name"] = encrypted_name
                 updated["ephemeral_pubkey_name"] = eph

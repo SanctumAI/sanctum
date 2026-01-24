@@ -101,12 +101,22 @@ def init_schema():
     """)
 
     # Users table
+    # Note: email and name are encrypted using NIP-04
+    # - encrypted_email/encrypted_name: NIP-04 ciphertext
+    # - ephemeral_pubkey_email/name: pubkey for decryption
+    # - email_blind_index: HMAC hash for email lookups
+    # Original email/name columns kept for migration (will be removed later)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             pubkey TEXT UNIQUE,
-            email TEXT UNIQUE,
+            email TEXT,
             name TEXT,
+            encrypted_email TEXT,
+            ephemeral_pubkey_email TEXT,
+            email_blind_index TEXT,
+            encrypted_name TEXT,
+            ephemeral_pubkey_name TEXT,
             user_type_id INTEGER,
             approved INTEGER DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -115,12 +125,18 @@ def init_schema():
     """)
 
     # User field values - dynamic field storage (EAV pattern)
+    # Note: values are encrypted using NIP-04
+    # - encrypted_value: NIP-04 ciphertext
+    # - ephemeral_pubkey: pubkey for decryption
+    # Original value column kept for migration (will be removed later)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS user_field_values (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             field_id INTEGER NOT NULL,
             value TEXT,
+            encrypted_value TEXT,
+            ephemeral_pubkey TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY (field_id) REFERENCES user_field_definitions(id) ON DELETE CASCADE,
             UNIQUE(user_id, field_id)
@@ -131,12 +147,15 @@ def init_schema():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_values_user ON user_field_values(user_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_values_field ON user_field_values(field_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_definitions_type ON user_field_definitions(user_type_id)")
+    cursor.execute("DROP INDEX IF EXISTS idx_users_email_blind_index")
+    cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_blind_index ON users(email_blind_index)")
 
     conn.commit()
     logger.info("SQLite schema initialized")
 
     # Run migrations for existing tables
     _migrate_add_approved_column()
+    _migrate_add_encryption_columns()
 
 
 def _migrate_add_approved_column():
@@ -152,6 +171,58 @@ def _migrate_add_approved_column():
         cursor.execute("ALTER TABLE users ADD COLUMN approved INTEGER DEFAULT 1")
         conn.commit()
         logger.info("Migration: Added 'approved' column to users table")
+
+    cursor.close()
+
+
+def _migrate_add_encryption_columns():
+    """Add encryption columns to users and user_field_values tables if they don't exist"""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Check users table columns
+    cursor.execute("PRAGMA table_info(users)")
+    user_columns = [row[1] for row in cursor.fetchall()]
+
+    # Add encryption columns to users table
+    user_encryption_columns = [
+        ("encrypted_email", "TEXT"),
+        ("ephemeral_pubkey_email", "TEXT"),
+        ("email_blind_index", "TEXT"),
+        ("encrypted_name", "TEXT"),
+        ("ephemeral_pubkey_name", "TEXT"),
+    ]
+
+    for col_name, col_type in user_encryption_columns:
+        if col_name not in user_columns:
+            cursor.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}")
+            logger.info(f"Migration: Added '{col_name}' column to users table")
+
+    # Check user_field_values table columns
+    cursor.execute("PRAGMA table_info(user_field_values)")
+    field_columns = [row[1] for row in cursor.fetchall()]
+
+    # Add encryption columns to user_field_values table
+    field_encryption_columns = [
+        ("encrypted_value", "TEXT"),
+        ("ephemeral_pubkey", "TEXT"),
+    ]
+
+    for col_name, col_type in field_encryption_columns:
+        if col_name not in field_columns:
+            cursor.execute(f"ALTER TABLE user_field_values ADD COLUMN {col_name} {col_type}")
+            logger.info(f"Migration: Added '{col_name}' column to user_field_values table")
+
+    conn.commit()
+
+    # Enforce unique blind index for email lookups
+    try:
+        cursor.execute("DROP INDEX IF EXISTS idx_users_email_blind_index")
+        cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_blind_index ON users(email_blind_index)")
+        conn.commit()
+    except sqlite3.IntegrityError as e:
+        logger.error(f"Migration: Duplicate email_blind_index values detected: {e}")
+        raise
 
     cursor.close()
 
@@ -475,19 +546,61 @@ def create_user(
 ) -> int:
     """Create a user. Returns user id.
     Approval status is based on auto_approve_users instance setting.
+    Email and name are encrypted using NIP-04 if an admin exists.
     """
+    # Import here to avoid circular imports
+    from encryption import encrypt_for_admin_required, compute_blind_index
+    from nostr_keys import normalize_pubkey
+
     approved = 1 if get_auto_approve_users() else 0
+
+    # Normalize pubkey if provided
+    if pubkey:
+        pubkey = normalize_pubkey(pubkey)
+
+    # Encrypt email if provided
+    encrypted_email = None
+    ephemeral_pubkey_email = None
+    email_blind_index = None
+    if email:
+        encrypted_email, ephemeral_pubkey_email = encrypt_for_admin_required(email)
+        email_blind_index = compute_blind_index(email)
+
+    # Encrypt name if provided
+    encrypted_name = None
+    ephemeral_pubkey_name = None
+    if name:
+        encrypted_name, ephemeral_pubkey_name = encrypt_for_admin_required(name)
 
     with get_cursor() as cursor:
         cursor.execute(
-            "INSERT INTO users (pubkey, email, name, user_type_id, approved) VALUES (?, ?, ?, ?, ?)",
-            (pubkey, email, name, user_type_id, approved)
+            """INSERT INTO users (
+                pubkey, email, name, user_type_id, approved,
+                encrypted_email, ephemeral_pubkey_email, email_blind_index,
+                encrypted_name, ephemeral_pubkey_name
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                pubkey,
+                None,  # Never store plaintext email
+                None,  # Never store plaintext name
+                user_type_id,
+                approved,
+                encrypted_email,
+                ephemeral_pubkey_email,
+                email_blind_index,
+                encrypted_name,
+                ephemeral_pubkey_name,
+            )
         )
         return cursor.lastrowid
 
 
 def get_user(user_id: int) -> dict | None:
-    """Get user by id with all field values"""
+    """Get user by id with all field values.
+
+    Returns encrypted fields with their ephemeral pubkeys for frontend decryption.
+    If data is not encrypted (legacy or no admin), returns plaintext in email/name fields.
+    """
     with get_cursor() as cursor:
         cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
         user_row = cursor.fetchone()
@@ -496,15 +609,41 @@ def get_user(user_id: int) -> dict | None:
 
         user = dict(user_row)
 
-        # Get field values
+        # Structure encrypted data for frontend decryption
+        # If encrypted_email exists, frontend will decrypt; otherwise use plaintext
+        if user.get("encrypted_email"):
+            user["email_encrypted"] = {
+                "ciphertext": user["encrypted_email"],
+                "ephemeral_pubkey": user["ephemeral_pubkey_email"]
+            }
+        if user.get("encrypted_name"):
+            user["name_encrypted"] = {
+                "ciphertext": user["encrypted_name"],
+                "ephemeral_pubkey": user["ephemeral_pubkey_name"]
+            }
+
+        # Get field values with encryption info
         cursor.execute("""
-            SELECT fd.field_name, ufv.value
+            SELECT fd.field_name, ufv.value, ufv.encrypted_value, ufv.ephemeral_pubkey
             FROM user_field_values ufv
             JOIN user_field_definitions fd ON fd.id = ufv.field_id
             WHERE ufv.user_id = ?
         """, (user_id,))
 
-        user["fields"] = {row["field_name"]: row["value"] for row in cursor.fetchall()}
+        user["fields"] = {}
+        user["fields_encrypted"] = {}
+        for row in cursor.fetchall():
+            field_name = row["field_name"]
+            if row["encrypted_value"]:
+                # Encrypted field - frontend will decrypt
+                user["fields_encrypted"][field_name] = {
+                    "ciphertext": row["encrypted_value"],
+                    "ephemeral_pubkey": row["ephemeral_pubkey"]
+                }
+                user["fields"][field_name] = None  # Placeholder
+            else:
+                # Legacy unencrypted field
+                user["fields"][field_name] = row["value"]
 
         # Get user type info if set
         if user.get("user_type_id"):
@@ -518,6 +657,13 @@ def get_user(user_id: int) -> dict | None:
 
 def get_user_by_pubkey(pubkey: str) -> dict | None:
     """Get user by pubkey"""
+    from nostr_keys import normalize_pubkey
+
+    try:
+        pubkey = normalize_pubkey(pubkey)
+    except ValueError:
+        return None
+
     with get_cursor() as cursor:
         cursor.execute("SELECT id FROM users WHERE pubkey = ?", (pubkey,))
         row = cursor.fetchone()
@@ -527,12 +673,31 @@ def get_user_by_pubkey(pubkey: str) -> dict | None:
 
 
 def get_user_by_email(email: str) -> dict | None:
-    """Get user by email"""
+    """Get user by email.
+
+    Uses blind index for encrypted emails, falls back to plaintext for legacy data.
+    """
+    from encryption import compute_blind_index
+
+    # Compute blind index for the email
+    blind_index = compute_blind_index(email)
+
     with get_cursor() as cursor:
+        # Try blind index first (encrypted emails)
+        cursor.execute(
+            "SELECT id FROM users WHERE email_blind_index = ?",
+            (blind_index,)
+        )
+        row = cursor.fetchone()
+        if row:
+            return get_user(row["id"])
+
+        # Fall back to plaintext email (legacy/unencrypted data)
         cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
         row = cursor.fetchone()
         if row:
             return get_user(row["id"])
+
         return None
 
 
@@ -543,18 +708,31 @@ def list_users() -> list[dict]:
         return [get_user(row["id"]) for row in cursor.fetchall()]
 
 
-def set_user_field(user_id: int, field_name: str, value: str, user_type_id: int | None = None):
-    """Set a field value for a user"""
+def set_user_field(user_id: int, field_name: str, value: object, user_type_id: int | None = None):
+    """Set a field value for a user.
+
+    Values are encrypted using NIP-04 if an admin exists.
+    """
+    from encryption import encrypt_for_admin_required, serialize_field_value
+
     field_def = get_field_definition_by_name(field_name, user_type_id)
     if not field_def:
         raise ValueError(f"Unknown field: {field_name}")
 
+    # Encrypt the value
+    serialized = serialize_field_value(value)
+    encrypted_value, ephemeral_pubkey = encrypt_for_admin_required(serialized)
+
+    # Store encrypted - clear plaintext
     with get_cursor() as cursor:
         cursor.execute("""
-            INSERT INTO user_field_values (user_id, field_id, value)
-            VALUES (?, ?, ?)
-            ON CONFLICT(user_id, field_id) DO UPDATE SET value = excluded.value
-        """, (user_id, field_def["id"], value))
+            INSERT INTO user_field_values (user_id, field_id, value, encrypted_value, ephemeral_pubkey)
+            VALUES (?, ?, NULL, ?, ?)
+            ON CONFLICT(user_id, field_id) DO UPDATE SET
+                value = NULL,
+                encrypted_value = excluded.encrypted_value,
+                ephemeral_pubkey = excluded.ephemeral_pubkey
+        """, (user_id, field_def["id"], encrypted_value, ephemeral_pubkey))
 
 
 def set_user_fields(user_id: int, fields: dict, user_type_id: int | None = None):
@@ -568,3 +746,103 @@ def delete_user(user_id: int) -> bool:
     with get_cursor() as cursor:
         cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
         return cursor.rowcount > 0
+
+
+# --- Migration: Encrypt Existing Plaintext Data ---
+
+def migrate_encrypt_existing_data():
+    """
+    Encrypt existing plaintext data that was stored before an admin was configured.
+
+    This should be called after the first admin is added to encrypt any
+    pre-existing user data. It encrypts:
+    - users.email → encrypted_email
+    - users.name → encrypted_name
+    - user_field_values.value → encrypted_value
+
+    This is idempotent - it only encrypts data that hasn't been encrypted yet.
+    """
+    from encryption import encrypt_for_admin, compute_blind_index, get_admin_pubkey
+
+    admin_pubkey = get_admin_pubkey()
+    if not admin_pubkey:
+        logger.warning("migrate_encrypt_existing_data: No admin pubkey found, skipping")
+        return
+
+    logger.info("Starting encryption migration for existing plaintext data...")
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Migrate users table
+    cursor.execute("""
+        SELECT id, email, name FROM users
+        WHERE (email IS NOT NULL AND encrypted_email IS NULL)
+           OR (name IS NOT NULL AND encrypted_name IS NULL)
+    """)
+    users_to_migrate = cursor.fetchall()
+
+    migrated_users = 0
+    for row in users_to_migrate:
+        user_id = row[0]
+        email = row[1]
+        name = row[2]
+
+        updates = []
+        values = []
+
+        # Encrypt email if not already encrypted
+        if email:
+            encrypted_email, ephemeral_pubkey_email = encrypt_for_admin(email)
+            if encrypted_email:
+                updates.append("encrypted_email = ?")
+                values.append(encrypted_email)
+                updates.append("ephemeral_pubkey_email = ?")
+                values.append(ephemeral_pubkey_email)
+                updates.append("email_blind_index = ?")
+                values.append(compute_blind_index(email))
+                updates.append("email = NULL")  # Clear plaintext
+
+        # Encrypt name if not already encrypted
+        if name:
+            encrypted_name, ephemeral_pubkey_name = encrypt_for_admin(name)
+            if encrypted_name:
+                updates.append("encrypted_name = ?")
+                values.append(encrypted_name)
+                updates.append("ephemeral_pubkey_name = ?")
+                values.append(ephemeral_pubkey_name)
+                updates.append("name = NULL")  # Clear plaintext
+
+        if updates:
+            values.append(user_id)
+            cursor.execute(
+                f"UPDATE users SET {', '.join(updates)} WHERE id = ?",
+                values
+            )
+            migrated_users += 1
+
+    # Migrate user_field_values table
+    cursor.execute("""
+        SELECT id, value FROM user_field_values
+        WHERE value IS NOT NULL AND encrypted_value IS NULL
+    """)
+    fields_to_migrate = cursor.fetchall()
+
+    migrated_fields = 0
+    for row in fields_to_migrate:
+        field_value_id = row[0]
+        value = row[1]
+
+        encrypted_value, ephemeral_pubkey = encrypt_for_admin(value)
+        if encrypted_value:
+            cursor.execute("""
+                UPDATE user_field_values
+                SET encrypted_value = ?, ephemeral_pubkey = ?, value = NULL
+                WHERE id = ?
+            """, (encrypted_value, ephemeral_pubkey, field_value_id))
+            migrated_fields += 1
+
+    conn.commit()
+    cursor.close()
+
+    logger.info(f"Encryption migration complete: {migrated_users} users, {migrated_fields} field values encrypted")

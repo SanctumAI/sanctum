@@ -11,11 +11,19 @@ import {
   SessionCheckResponse,
   TableInfo,
   DBQueryResponse,
-  FieldDefinitionResponse,
-  UserWithFieldsResponse
+  FieldDefinitionResponse
 } from '../types/onboarding'
 import { authenticateWithNostr, hasNostrExtension, AuthResult } from '../utils/nostrAuth'
 import { adminFetch, clearAdminAuth, isAdminAuthenticated } from '../utils/adminApi'
+import {
+  decryptField,
+  decryptUser,
+  decryptUsers,
+  formatEncryptedValue,
+  type DecryptedUser,
+  type UserWithEncryption
+} from '../utils/encryption'
+import { normalizePubkey } from '../utils/nostrKeys'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -394,10 +402,10 @@ export function TestDashboard() {
   const [deleteFieldLoading, setDeleteFieldLoading] = useState(false)
 
   // Module 14: User Management state
-  const [allUsers, setAllUsers] = useState<UserWithFieldsResponse[] | null>(null)
+  const [allUsers, setAllUsers] = useState<DecryptedUser[] | null>(null)
   const [usersLoading, setUsersLoading] = useState(false)
   const [lookupUserId, setLookupUserId] = useState('')
-  const [singleUser, setSingleUser] = useState<UserWithFieldsResponse | null>(null)
+  const [singleUser, setSingleUser] = useState<DecryptedUser | null>(null)
   const [lookupLoading, setLookupLoading] = useState(false)
   const [updateUserLoading, setUpdateUserLoading] = useState(false)
   const [updateUserResult, setUpdateUserResult] = useState<Record<string, unknown> | null>(null)
@@ -412,11 +420,86 @@ export function TestDashboard() {
   const [dbQuery, setDbQuery] = useState('SELECT * FROM users LIMIT 10')
   const [dbQueryResult, setDbQueryResult] = useState<DBQueryResponse | null>(null)
   const [dbQueryLoading, setDbQueryLoading] = useState(false)
+  // Decrypted values for Database Explorer: maps rowIndex -> { columnName -> decryptedValue }
+  const [decryptedTableData, setDecryptedTableData] = useState<Record<number, Record<string, string>>>({})
+  const [decryptedQueryData, setDecryptedQueryData] = useState<Record<number, Record<string, string>>>({})
 
   // Module 16: Rate Limiting Test state
   const [rateLimitTestType, setRateLimitTestType] = useState<'magic_link' | 'admin_auth'>('magic_link')
   const [rateLimitResults, setRateLimitResults] = useState<{ success: number; blocked: number; responses: string[] }>({ success: 0, blocked: 0, responses: [] })
   const [rateLimitTesting, setRateLimitTesting] = useState(false)
+
+  // Decrypt table data when it loads (for Database Explorer)
+  useEffect(() => {
+    if (!tableData) {
+      setDecryptedTableData({})
+      return
+    }
+
+    const decryptTableRows = async () => {
+      const decrypted: Record<number, Record<string, string>> = {}
+
+      for (let i = 0; i < tableData.rows.length; i++) {
+        const row = tableData.rows[i]
+        decrypted[i] = {}
+
+        for (const col of tableData.columns) {
+          if (col.startsWith('encrypted_')) {
+            const fieldName = col.replace('encrypted_', '')
+            const ephemeralCol = `ephemeral_pubkey_${fieldName}`
+            const ciphertext = row[col] as string | null
+            const ephemeralPubkey = row[ephemeralCol] as string | null
+
+            if (ciphertext && ephemeralPubkey) {
+              const result = await decryptField({ ciphertext, ephemeral_pubkey: ephemeralPubkey })
+              decrypted[i][col] = result ?? '[Encrypted]'
+            } else if (ciphertext) {
+              decrypted[i][col] = '[Encrypted - Missing Key]'
+            }
+          }
+        }
+      }
+      setDecryptedTableData(decrypted)
+    }
+
+    decryptTableRows()
+  }, [tableData])
+
+  // Decrypt query result data when it loads (for Quick Query)
+  useEffect(() => {
+    if (!dbQueryResult || dbQueryResult.error) {
+      setDecryptedQueryData({})
+      return
+    }
+
+    const decryptQueryRows = async () => {
+      const decrypted: Record<number, Record<string, string>> = {}
+
+      for (let i = 0; i < dbQueryResult.rows.length; i++) {
+        const row = dbQueryResult.rows[i]
+        decrypted[i] = {}
+
+        for (const col of dbQueryResult.columns) {
+          if (col.startsWith('encrypted_')) {
+            const fieldName = col.replace('encrypted_', '')
+            const ephemeralCol = `ephemeral_pubkey_${fieldName}`
+            const ciphertext = row[col] as string | null
+            const ephemeralPubkey = row[ephemeralCol] as string | null
+
+            if (ciphertext && ephemeralPubkey) {
+              const result = await decryptField({ ciphertext, ephemeral_pubkey: ephemeralPubkey })
+              decrypted[i][col] = result ?? '[Encrypted]'
+            } else if (ciphertext) {
+              decrypted[i][col] = '[Encrypted - Missing Key]'
+            }
+          }
+        }
+      }
+      setDecryptedQueryData(decrypted)
+    }
+
+    decryptQueryRows()
+  }, [dbQueryResult])
 
   // API calls
   const checkHealth = async () => {
@@ -687,11 +770,21 @@ export function TestDashboard() {
     setCreateUserLoading(true)
     setCreateUserResult(null)
     try {
+      let normalizedPubkey = ''
+      try {
+        normalizedPubkey = normalizePubkey(testPubkey)
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Invalid pubkey'
+        setCreateUserResult({ error: message })
+        setCreateUserLoading(false)
+        return
+      }
+
       const res = await fetch(`${API_BASE}/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          pubkey: testPubkey.trim(),
+          pubkey: normalizedPubkey,
           user_type_id: selectedUserTypeId,
           fields: userFields
         })
@@ -825,7 +918,17 @@ export function TestDashboard() {
     setRemoveAdminLoading(true)
     setRemoveAdminResult(null)
     try {
-      const res = await adminFetch(`/admin/${removeAdminPubkey.trim()}`, { method: 'DELETE' })
+      let normalizedPubkey = ''
+      try {
+        normalizedPubkey = normalizePubkey(removeAdminPubkey)
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Invalid pubkey'
+        setRemoveAdminResult({ error: message })
+        setRemoveAdminLoading(false)
+        return
+      }
+
+      const res = await adminFetch(`/admin/${normalizedPubkey}`, { method: 'DELETE' })
       setRemoveAdminResult(await res.json())
       // Refresh admins list
       fetchAdmins()
@@ -1011,7 +1114,8 @@ export function TestDashboard() {
     try {
       const res = await adminFetch('/admin/users')
       const data = await res.json()
-      setAllUsers(data.users)
+      const decrypted = await decryptUsers(data.users as UserWithEncryption[])
+      setAllUsers(decrypted)
     } catch (e) {
       setAllUsers(null)
     } finally {
@@ -1027,7 +1131,9 @@ export function TestDashboard() {
       const res = await fetch(`${API_BASE}/users/${lookupUserId.trim()}`)
       if (res.ok) {
         const data = await res.json()
-        setSingleUser(data.user)
+        const raw = (data.user ?? data) as UserWithEncryption
+        const decrypted = await decryptUser(raw)
+        setSingleUser(decrypted)
       } else {
         setSingleUser(null)
       }
@@ -2610,8 +2716,12 @@ export function TestDashboard() {
                       {allUsers.map((user) => (
                         <tr key={user.id} className="border-b border-border/50">
                           <td className="py-2 px-2 text-text">{user.id}</td>
-                          <td className="py-2 px-2 text-text">{user.email || '-'}</td>
-                          <td className="py-2 px-2 text-text-secondary">{user.name || '-'}</td>
+                          <td className="py-2 px-2 text-text">
+                            {formatEncryptedValue(user.email, user.email_encrypted) || '-'}
+                          </td>
+                          <td className="py-2 px-2 text-text-secondary">
+                            {formatEncryptedValue(user.name, user.name_encrypted) || '-'}
+                          </td>
                           <td className="py-2 px-2 text-text-secondary">{user.user_type_id || '-'}</td>
                           <td className="py-2 px-2">
                             {user.approved ? (
@@ -2708,35 +2818,43 @@ export function TestDashboard() {
               </div>
 
               {tableDataLoading && <p className="text-text-muted text-sm">Loading table data...</p>}
-              {tableData && selectedDbTable && (
-                <div>
-                  <p className="text-sm font-medium text-text mb-2">
-                    {selectedDbTable} (first 20 rows)
-                  </p>
-                  <div className="overflow-x-auto max-h-60">
-                    <table className="w-full text-xs">
-                      <thead>
-                        <tr className="border-b border-border">
-                          {tableData.columns.map((col) => (
-                            <th key={col} className="text-left py-2 px-2 text-text-muted font-medium">{col}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {tableData.rows.map((row, idx) => (
-                          <tr key={idx} className="border-b border-border/50">
-                            {tableData.columns.map((col) => (
-                              <td key={col} className="py-2 px-2 text-text font-mono">
-                                {String(row[col] ?? '')}
-                              </td>
+              {tableData && selectedDbTable && (() => {
+                // Filter out ephemeral_pubkey_* columns from display (they're technical data)
+                const displayColumns = tableData.columns.filter(col => !col.startsWith('ephemeral_pubkey_'))
+                return (
+                  <div>
+                    <p className="text-sm font-medium text-text mb-2">
+                      {selectedDbTable} (first 20 rows)
+                    </p>
+                    <div className="overflow-x-auto max-h-60">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="border-b border-border">
+                            {displayColumns.map((col) => (
+                              <th key={col} className="text-left py-2 px-2 text-text-muted font-medium">
+                                {col.startsWith('encrypted_') ? col.replace('encrypted_', '') + ' 🔓' : col}
+                              </th>
                             ))}
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {tableData.rows.map((row, idx) => (
+                            <tr key={idx} className="border-b border-border/50">
+                              {displayColumns.map((col) => (
+                                <td key={col} className="py-2 px-2 text-text font-mono">
+                                  {col.startsWith('encrypted_')
+                                    ? (decryptedTableData[idx]?.[col] ?? '[Decrypting...]')
+                                    : String(row[col] ?? '')}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
-              )}
+                )
+              })()}
 
               {/* Quick Query */}
               <div className="border-t border-border pt-4">
@@ -2758,37 +2876,45 @@ export function TestDashboard() {
                       <div className="bg-error-subtle border border-error/20 text-error rounded-lg px-4 py-3 text-sm">
                         {dbQueryResult.error}
                       </div>
-                    ) : (
-                      <div>
-                        <p className="text-sm text-text-secondary mb-2">
-                          {dbQueryResult.rows.length} row(s) returned
-                        </p>
-                        <div className="overflow-x-auto max-h-60">
-                          <table className="w-full text-xs">
-                            <thead>
-                              <tr className="border-b border-border">
-                                {dbQueryResult.columns.map((col) => (
-                                  <th key={col} className="text-left py-2 px-2 text-text-muted font-medium">{col}</th>
-                                ))}
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {dbQueryResult.rows.map((row, idx) => (
-                                <tr key={idx} className="border-b border-border/50">
-                                  {dbQueryResult.columns.map((col) => (
-                                    <td key={col} className="py-2 px-2 text-text font-mono">
-                                      {typeof row[col] === 'object'
-                                        ? JSON.stringify(row[col])
-                                        : String(row[col] ?? '')}
-                                    </td>
+                    ) : (() => {
+                      // Filter out ephemeral_pubkey_* columns from display (they're technical data)
+                      const displayColumns = dbQueryResult.columns.filter(col => !col.startsWith('ephemeral_pubkey_'))
+                      return (
+                        <div>
+                          <p className="text-sm text-text-secondary mb-2">
+                            {dbQueryResult.rows.length} row(s) returned
+                          </p>
+                          <div className="overflow-x-auto max-h-60">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="border-b border-border">
+                                  {displayColumns.map((col) => (
+                                    <th key={col} className="text-left py-2 px-2 text-text-muted font-medium">
+                                      {col.startsWith('encrypted_') ? col.replace('encrypted_', '') + ' 🔓' : col}
+                                    </th>
                                   ))}
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
+                              </thead>
+                              <tbody>
+                                {dbQueryResult.rows.map((row, idx) => (
+                                  <tr key={idx} className="border-b border-border/50">
+                                    {displayColumns.map((col) => (
+                                      <td key={col} className="py-2 px-2 text-text font-mono">
+                                        {col.startsWith('encrypted_')
+                                          ? (decryptedQueryData[idx]?.[col] ?? '[Decrypting...]')
+                                          : typeof row[col] === 'object'
+                                            ? JSON.stringify(row[col])
+                                            : String(row[col] ?? '')}
+                                      </td>
+                                    ))}
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )
+                    })()}
                   </div>
                 )}
               </div>

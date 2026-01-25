@@ -143,7 +143,7 @@ SEARXNG_URL=http://searxng:8080
 
 The `db-query` tool allows admins to ask natural language questions about the database. The AI will generate and execute SQL queries, then explain the results.
 
-> Note: `db-query` runs only via `/llm/chat`. The `/query` (RAG) endpoint does not execute tools.
+> Note: the `db-query` tool runs only via `/llm/chat`; other tools referenced in `/query` examples may still execute as documented.
 
 ### Security
 

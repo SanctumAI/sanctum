@@ -403,6 +403,21 @@ async def chat(request: ChatRequest, user: dict = Depends(auth.require_admin_or_
     try:
         tools_used = []
         prompt = request.message
+        seen_tool_keys = set()
+
+        def _merge_tools_used(existing: list[ToolCallInfoResponse], infos: list[ToolCallInfo]) -> list[ToolCallInfoResponse]:
+            merged = list(existing)
+            for info in infos:
+                key = (info.tool_id, info.query)
+                if key in seen_tool_keys:
+                    continue
+                seen_tool_keys.add(key)
+                merged.append(ToolCallInfoResponse(
+                    tool_id=info.tool_id,
+                    tool_name=info.tool_name,
+                    query=info.query
+                ))
+            return merged
 
         tool_context_parts = []
 
@@ -417,11 +432,14 @@ async def chat(request: ChatRequest, user: dict = Depends(auth.require_admin_or_
             for tool_id in request.tools:
                 tool = _tool_registry.get(tool_id)
                 if tool:
-                    tools_used.append(ToolCallInfoResponse(
-                        tool_id=tool_id,
-                        tool_name=tool.definition.name,
-                        query=request.message
-                    ))
+                    key = (tool_id, request.message)
+                    if key not in seen_tool_keys:
+                        seen_tool_keys.add(key)
+                        tools_used.append(ToolCallInfoResponse(
+                            tool_id=tool_id,
+                            tool_name=tool.definition.name,
+                            query=request.message
+                        ))
 
             # Allow other tools to run server-side (excluding db-query to avoid duplicate encrypted context)
             allowed_tools = filter_tools_for_user(request.tools, user)
@@ -436,6 +454,8 @@ async def chat(request: ChatRequest, user: dict = Depends(auth.require_admin_or_
 
                 if tool_context:
                     tool_context_parts.append(tool_context)
+
+                tools_used = _merge_tools_used(tools_used, tool_infos)
         else:
             # Filter tools based on user permissions (admin-only tools removed for non-admins)
             allowed_tools = filter_tools_for_user(request.tools, user)
@@ -449,14 +469,7 @@ async def chat(request: ChatRequest, user: dict = Depends(auth.require_admin_or_
                 )
 
                 # Convert ToolCallInfo to response format
-                tools_used = [
-                    ToolCallInfoResponse(
-                        tool_id=info.tool_id,
-                        tool_name=info.tool_name,
-                        query=info.query
-                    )
-                    for info in tool_infos
-                ]
+                tools_used = _merge_tools_used([], tool_infos)
 
                 if tool_context:
                     tool_context_parts.append(tool_context)

@@ -52,35 +52,41 @@ def generate_test_admin_keypair(privkey_hex: str) -> tuple[str, str]:
 
 def inspect_raw_database(db_path: str, user_id: int) -> dict:
     """
-    Directly inspect the SQLite database.
+    Directly inspect the SQLite database via docker exec.
     
     Returns raw column values for the user.
     """
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
+    import json
     
-    # Get user record
-    cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
-    user_row = cursor.fetchone()
+    # Get user record via docker
+    user_json = run_docker_sql(f"SELECT * FROM users WHERE id = {user_id}")
     
-    if not user_row:
-        conn.close()
+    # sqlite3 without -json returns plain text, try to parse
+    if not user_json:
         return None
     
-    user_data = dict(user_row)
+    # Run with -json flag for structured output
+    repo_root = SCRIPT_DIR.parent.parent.parent
+    import subprocess
+    
+    cmd = f"docker compose exec -T backend sqlite3 -json {db_path} 'SELECT * FROM users WHERE id = {user_id}'"
+    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=repo_root)
+    
+    if not result.stdout.strip() or result.stdout.strip() == "[]":
+        return None
+    
+    users = json.loads(result.stdout.strip())
+    if not users:
+        return None
+    
+    user_data = users[0]
     
     # Get field values
-    cursor.execute("""
-        SELECT fd.field_name, ufv.value, ufv.encrypted_value, ufv.ephemeral_pubkey
-        FROM user_field_values ufv
-        JOIN user_field_definitions fd ON fd.id = ufv.field_id
-        WHERE ufv.user_id = ?
-    """, (user_id,))
+    cmd = f"""docker compose exec -T backend sqlite3 -json {db_path} 'SELECT fd.field_name, ufv.value, ufv.encrypted_value, ufv.ephemeral_pubkey FROM user_field_values ufv JOIN user_field_definitions fd ON fd.id = ufv.field_id WHERE ufv.user_id = {user_id}'"""
+    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=repo_root)
     
-    user_data["field_values"] = [dict(row) for row in cursor.fetchall()]
+    user_data["field_values"] = json.loads(result.stdout.strip()) if result.stdout.strip() else []
     
-    conn.close()
     return user_data
 
 
@@ -199,11 +205,29 @@ def test_decrypt_and_verify(db_path: str, user_id: int, admin_privkey: str, orig
     return passed
 
 
+def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db") -> str:
+    """Run SQL inside Docker container and return output."""
+    import subprocess
+    
+    repo_root = SCRIPT_DIR.parent.parent.parent
+    escaped_sql = sql.replace("'", "'\\''")
+    cmd = f"docker compose exec -T backend sqlite3 {db_path} '{escaped_sql}'"
+    
+    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=repo_root)
+    return result.stdout.strip()
+
+
+def find_test_user(db_path: str, test_email: str) -> int:
+    """Find a test user by email blind index or most recent user."""
+    output = run_docker_sql("SELECT id FROM users ORDER BY id DESC LIMIT 1")
+    return int(output) if output else None
+
+
 def main():
     parser = argparse.ArgumentParser(description="Test 1B: Decrypt and Verify Fidelity")
     parser.add_argument("--api-base", default="http://localhost:8000", help="API base URL (unused, for compatibility)")
     parser.add_argument("--db-path", default="/data/sanctum.db", help="Path to SQLite database")
-    parser.add_argument("--user-id", type=int, required=True, help="User ID to test (required)")
+    parser.add_argument("--user-id", type=int, help="User ID to test (auto-detected if not provided)")
     parser.add_argument("--token", help="Admin session token (unused, for compatibility)")
     args = parser.parse_args()
     
@@ -213,7 +237,18 @@ def main():
     print("TEST 1B: DECRYPT AND VERIFY DATA FIDELITY")
     print("="*60)
     print(f"DB Path: {args.db_path}")
-    print(f"User ID: {args.user_id}")
+    
+    # Auto-detect user ID if not provided
+    user_id = args.user_id
+    if not user_id:
+        user_id = find_test_user(args.db_path, config["test_user"]["email"])
+        if user_id:
+            print(f"User ID: {user_id} (auto-detected)")
+        else:
+            print("[ERROR] No users found in database. Run Test 1A first.")
+            sys.exit(1)
+    else:
+        print(f"User ID: {user_id}")
     
     # Generate test admin keypair
     admin_privkey, admin_pubkey = generate_test_admin_keypair(
@@ -224,7 +259,7 @@ def main():
     # Run test
     passed = test_decrypt_and_verify(
         args.db_path, 
-        args.user_id, 
+        user_id, 
         admin_privkey, 
         config["test_user"]
     )

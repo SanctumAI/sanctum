@@ -8,7 +8,8 @@ This document describes the integration test suite located in `scripts/tests/`.
 
 ```
 scripts/tests/
-├── run_all_be_tests.py     # Master test runner
+├── run_all_be_tests.py     # Master test runner (with integrated harness)
+├── backups/                # Database backups (auto-created)
 ├── CRM/                    # User data encryption tests (1x)
 │   ├── test-config.json    # Test fixtures and constants
 │   ├── test_1a_verify_encryption.py
@@ -105,11 +106,40 @@ Ensure backend is running:
 docker compose up --build
 ```
 
-### Run All Tests
+### Run All Tests (Default - With Harness)
 
 ```bash
 cd scripts/tests
 python run_all_be_tests.py
+```
+
+**What happens by default:**
+1. Backs up your current database
+2. Resets to clean state (no users, minimal field schema)
+3. Creates a test admin
+4. Runs all tests
+5. **Restores your original database**
+
+### Harness Options
+
+```bash
+# Full test run (default): backup → reset → test → restore
+python run_all_be_tests.py
+
+# Keep test state after run (don't restore)
+python run_all_be_tests.py --no-restore
+
+# Just reset DB to clean state, don't run tests
+python run_all_be_tests.py --reset-only
+
+# Restore from most recent backup
+python run_all_be_tests.py --restore
+
+# Skip harness entirely (test against current DB state)
+python run_all_be_tests.py --no-harness
+
+# Run specific tests only
+python run_all_be_tests.py --pattern "test_2*"  # Only RAG tests
 ```
 
 Options:

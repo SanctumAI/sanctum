@@ -144,19 +144,17 @@ def init_schema():
         )
     """)
 
-    # Create indexes for performance
+    # Create indexes for performance (note: email_blind_index index created in migration)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_values_user ON user_field_values(user_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_values_field ON user_field_values(field_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_definitions_type ON user_field_definitions(user_type_id)")
-    cursor.execute("DROP INDEX IF EXISTS idx_users_email_blind_index")
-    cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_blind_index ON users(email_blind_index)")
 
     conn.commit()
     logger.info("SQLite schema initialized")
 
-    # Run migrations for existing tables
+    # Run migrations for existing tables (must run BEFORE creating indexes on new columns)
     _migrate_add_approved_column()
-    _migrate_add_encryption_columns()
+    _migrate_add_encryption_columns()  # This adds email_blind_index column AND creates its index
 
     # Initialize ingest job tables
     from ingest_db import init_ingest_schema

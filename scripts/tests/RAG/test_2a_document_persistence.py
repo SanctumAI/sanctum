@@ -196,6 +196,60 @@ def run_rag_query(api_base: str, question: str, token: str) -> dict:
     return response.json()
 
 
+def cleanup_test_artifacts(job_id: str, api_base: str = None):
+    """
+    Clean up ALL test artifacts from the backend:
+    1. Delete vectors from Qdrant
+    2. Delete job record from SQLite
+    3. Delete uploaded file from /uploads/
+    """
+    import subprocess
+    
+    repo_root = SCRIPT_DIR.parent.parent.parent
+    
+    print(f"\n[CLEANUP] Removing test artifacts for job {job_id}...")
+    
+    # 1. Delete vectors from Qdrant for this job's source file
+    # The vectors have payload.source_file containing the job_id
+    qdrant_cmd = f'''docker compose exec -T backend python -c "
+from qdrant_client import QdrantClient
+client = QdrantClient(host='qdrant', port=6333)
+try:
+    from qdrant_client.models import Filter, FieldCondition, MatchText
+    # Delete points where source_file contains the job_id
+    result = client.delete(
+        collection_name='sanctum_knowledge',
+        points_selector=Filter(
+            must=[FieldCondition(key='source_file', match=MatchText(text='{job_id}'))]
+        )
+    )
+    print('Deleted vectors from Qdrant')
+except Exception as e:
+    print(f'Qdrant cleanup: {{e}}')
+"'''
+    result = subprocess.run(qdrant_cmd, shell=True, capture_output=True, text=True, cwd=repo_root)
+    if "Deleted" in result.stdout:
+        print(f"  ✓ Removed vectors from Qdrant")
+    else:
+        print(f"  ⚠ Qdrant cleanup: {result.stdout.strip() or result.stderr.strip()}")
+    
+    # 2. Delete job record from ingest_jobs table
+    sql_cmd = f"docker compose exec -T backend sqlite3 /data/sanctum.db \"DELETE FROM ingest_jobs WHERE job_id = '{job_id}'\""
+    result = subprocess.run(sql_cmd, shell=True, capture_output=True, text=True, cwd=repo_root)
+    if result.returncode == 0:
+        print(f"  ✓ Removed job record from database")
+    else:
+        print(f"  ⚠ DB cleanup: {result.stderr.strip()}")
+    
+    # 3. Delete the uploaded file from /uploads/
+    file_cmd = f"docker compose exec -T backend sh -c 'rm -f /uploads/{job_id}_*.pdf'"
+    result = subprocess.run(file_cmd, shell=True, capture_output=True, text=True, cwd=repo_root)
+    if result.returncode == 0:
+        print(f"  ✓ Removed uploaded file from /uploads/")
+    else:
+        print(f"  ⚠ File cleanup: {result.stderr.strip()}")
+
+
 def test_c_document_persistence(api_base: str, config: dict, token: str = None) -> bool:
     """
     Test C: Generate PDF, ingest, and verify via frontend route.
@@ -206,13 +260,15 @@ def test_c_document_persistence(api_base: str, config: dict, token: str = None) 
     3. Wait for processing
     4. Verify job appears in /ingest/jobs (frontend route)
     5. Optionally run RAG query to verify retrieval
+    6. Cleanup test artifacts
     """
     print("\n" + "="*60)
-    print("TEST C: Document Persistence via Frontend Route")
+    print("TEST 2A: Document Persistence via Frontend Route")
     print("="*60)
     
     doc_config = config["test_document"]
     passed = True
+    job_id = None
     
     # Step 1: Generate PDF
     print("\n[STEP 1] Generating test PDF...")
@@ -230,83 +286,89 @@ def test_c_document_persistence(api_base: str, config: dict, token: str = None) 
         print(f"  ✗ PDF generation failed: {e}")
         return False
     
-    # Step 2: Upload document
-    print("\n[STEP 2] Uploading document...")
-    upload_result = upload_document(api_base, pdf_path, token)
-    
-    if not upload_result:
-        print("  ✗ Upload failed")
-        return False
-    
-    job_id = upload_result.get("job_id")
-    print(f"  ✓ Uploaded successfully")
-    print(f"  Job ID: {job_id}")
-    
-    # Step 3: Wait for processing
-    print("\n[STEP 3] Waiting for processing...")
-    job_result = wait_for_job_completion(api_base, job_id, timeout=180)
-    
-    if not job_result:
-        print("  ✗ Job did not complete")
-        passed = False
-    elif job_result.get("status") == "failed":
-        print(f"  ✗ Job failed: {job_result.get('error')}")
-        passed = False
-    else:
-        print(f"  ✓ Job completed: {job_result.get('status')}")
-        print(f"  Chunks: {job_result.get('total_chunks', 0)}")
-    
-    # Step 4: Verify via frontend route
-    print("\n[STEP 4] Verifying job via frontend route (/ingest/jobs)...")
-    jobs = list_jobs_via_frontend_route(api_base, token)
-    
-    job_found = any(j.get("job_id") == job_id for j in jobs)
-    
-    if job_found:
-        print(f"  ✓ Job {job_id} found in job list")
-        print(f"  Total jobs in system: {len(jobs)}")
-    else:
-        print(f"  ✗ Job {job_id} NOT found in job list")
-        print(f"  Available jobs: {[j.get('job_id') for j in jobs]}")
-        passed = False
-    
-    # Step 5: RAG Query (optional, requires auth)
-    if token and passed:
-        print("\n[STEP 5] Running test RAG queries...")
-        
-        for query in config.get("test_queries", [])[:1]:  # Just test first query
-            print(f"\n  Query: \"{query}\"")
-            
-            result = run_rag_query(api_base, query, token)
-            
-            if result:
-                answer = result.get("answer", "")[:200]
-                sources = result.get("sources", [])
-                
-                print(f"  Answer: {answer}...")
-                print(f"  Sources: {len(sources)} found")
-                
-                # Check if our test doc is in sources
-                test_filename = doc_config["filename"]
-                source_files = [s.get("source_file", "") for s in sources]
-                
-                if any(test_filename in sf for sf in source_files):
-                    print(f"  ✓ Test document found in sources")
-                else:
-                    print(f"  ⚠ Test document not in top sources (may be expected)")
-            else:
-                print(f"  ⚠ RAG query failed (may need auth)")
-    else:
-        print("\n[STEP 5] Skipping RAG query (no token provided)")
-    
-    # Cleanup
     try:
-        os.unlink(pdf_path)
-    except:
-        pass
+        # Step 2: Upload document
+        print("\n[STEP 2] Uploading document...")
+        upload_result = upload_document(api_base, pdf_path, token)
+        
+        if not upload_result:
+            print("  ✗ Upload failed")
+            return False
+        
+        job_id = upload_result.get("job_id")
+        print(f"  ✓ Uploaded successfully")
+        print(f"  Job ID: {job_id}")
+        
+        # Step 3: Wait for processing
+        print("\n[STEP 3] Waiting for processing...")
+        job_result = wait_for_job_completion(api_base, job_id, timeout=180)
+        
+        if not job_result:
+            print("  ✗ Job did not complete")
+            passed = False
+        elif job_result.get("status") == "failed":
+            print(f"  ✗ Job failed: {job_result.get('error')}")
+            passed = False
+        else:
+            print(f"  ✓ Job completed: {job_result.get('status')}")
+            print(f"  Chunks: {job_result.get('total_chunks', 0)}")
+        
+        # Step 4: Verify via frontend route
+        print("\n[STEP 4] Verifying job via frontend route (/ingest/jobs)...")
+        jobs = list_jobs_via_frontend_route(api_base, token)
+        
+        job_found = any(j.get("job_id") == job_id for j in jobs)
+        
+        if job_found:
+            print(f"  ✓ Job {job_id} found in job list")
+            print(f"  Total jobs in system: {len(jobs)}")
+        else:
+            print(f"  ✗ Job {job_id} NOT found in job list")
+            print(f"  Available jobs: {[j.get('job_id') for j in jobs]}")
+            passed = False
+        
+        # Step 5: RAG Query (optional, requires auth)
+        if token and passed:
+            print("\n[STEP 5] Running test RAG queries...")
+            
+            for query in config.get("test_queries", [])[:1]:  # Just test first query
+                print(f"\n  Query: \"{query}\"")
+                
+                result = run_rag_query(api_base, query, token)
+                
+                if result:
+                    answer = result.get("answer", "")[:200]
+                    sources = result.get("sources", [])
+                    
+                    print(f"  Answer: {answer}...")
+                    print(f"  Sources: {len(sources)} found")
+                    
+                    # Check if our test doc is in sources
+                    test_filename = doc_config["filename"]
+                    source_files = [s.get("source_file", "") for s in sources]
+                    
+                    if any(test_filename in sf for sf in source_files):
+                        print(f"  ✓ Test document found in sources")
+                    else:
+                        print(f"  ⚠ Test document not in top sources (may be expected)")
+                else:
+                    print(f"  ⚠ RAG query failed (may need auth)")
+        else:
+            print("\n[STEP 5] Skipping RAG query (no token provided)")
+        
+    finally:
+        # Cleanup local temp file
+        try:
+            os.unlink(pdf_path)
+        except:
+            pass
+        
+        # Cleanup uploaded file from backend
+        if job_id:
+            cleanup_test_artifacts(job_id, api_base)
     
     print("\n" + "-"*60)
-    print(f"TEST C RESULT: {'PASSED ✓' if passed else 'FAILED ✗'}")
+    print(f"TEST 2A RESULT: {'PASSED ✓' if passed else 'FAILED ✗'}")
     
     return passed
 

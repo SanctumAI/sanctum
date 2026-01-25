@@ -1,28 +1,23 @@
 {
-  "description": "CRM encryption test configuration - Tests NIP-04 encryption of user PII fields",
+  "description": "CRM encryption test configuration - SOURCE OF TRUTH for test admin and user schema",
   "test_admin": {
-    "description": "Test admin keypair for encryption/decryption verification",
+    "description": "Deterministic test admin keypair. The harness reads this pubkey to create the admin.",
     "private_key_hex": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-    "public_key_hex": "a]PLACEHOLDER_WILL_BE_COMPUTED"
+    "public_key_hex": "4646ae5047316b4230d0086c8acec687f00b1cd9d1dc634f6cb358ac0a9a8fff"
   },
   "test_user": {
+    "description": "Test user data. The 'fields' keys define what user_field_definitions the harness creates.",
     "email": "testuser@example.com",
     "name": "Jane Doe",
     "pubkey": "abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234",
     "fields": {
-      "phone": "+1-555-123-4567",
-      "country": "United States",
-      "organization": "Human Rights Watch"
+      "Phone Number": "+1-555-123-4567",
+      "Country": "United States"
     }
   },
   "expected_behavior": {
     "plaintext_columns_should_be_null": ["email", "name", "value"],
     "encrypted_columns_should_exist": ["encrypted_email", "encrypted_name", "encrypted_value"],
     "blind_index_should_exist": ["email_blind_index"]
-  },
-  "api_endpoints": {
-    "create_user": "POST /users",
-    "get_user": "GET /users/{id}",
-    "admin_auth": "POST /admin/auth"
   }
 }

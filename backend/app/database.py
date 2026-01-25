@@ -138,6 +138,10 @@ def init_schema():
     # Run migrations for existing tables
     _migrate_add_approved_column()
 
+    # Initialize ingest job tables
+    from ingest_db import init_ingest_schema
+    init_ingest_schema()
+
 
 def _migrate_add_approved_column():
     """Add approved column to users table if it doesn't exist (for existing deployments)"""

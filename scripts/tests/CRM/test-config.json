@@ -1,0 +1,28 @@
+{
+  "description": "CRM encryption test configuration - Tests NIP-04 encryption of user PII fields",
+  "test_admin": {
+    "description": "Test admin keypair for encryption/decryption verification",
+    "private_key_hex": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "public_key_hex": "a]PLACEHOLDER_WILL_BE_COMPUTED"
+  },
+  "test_user": {
+    "email": "testuser@example.com",
+    "name": "Jane Doe",
+    "pubkey": "abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234",
+    "fields": {
+      "phone": "+1-555-123-4567",
+      "country": "United States",
+      "organization": "Human Rights Watch"
+    }
+  },
+  "expected_behavior": {
+    "plaintext_columns_should_be_null": ["email", "name", "value"],
+    "encrypted_columns_should_exist": ["encrypted_email", "encrypted_name", "encrypted_value"],
+    "blind_index_should_exist": ["email_blind_index"]
+  },
+  "api_endpoints": {
+    "create_user": "POST /users",
+    "get_user": "GET /users/{id}",
+    "admin_auth": "POST /admin/auth"
+  }
+}

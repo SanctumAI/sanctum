@@ -4,6 +4,7 @@ RAG system with Qdrant vector search.
 Also provides user/admin management via SQLite.
 """
 
+import asyncio
 import os
 import uuid
 import logging
@@ -518,14 +519,24 @@ async def execute_admin_tool(request: ToolExecuteRequest, admin: dict = Depends(
             error="Tool not found"
         )
 
-    result = await tool.execute(query=request.query)
-    return ToolExecuteResponse(
-        success=result.success,
-        tool_id=tool_id,
-        tool_name=tool.definition.name,
-        data=result.data,
-        error=result.error
-    )
+    try:
+        result = await tool.execute(query=request.query)
+        return ToolExecuteResponse(
+            success=result.success,
+            tool_id=tool_id,
+            tool_name=tool.definition.name,
+            data=result.data,
+            error=result.error
+        )
+    except Exception as e:
+        logger.exception(f"Tool execution failed for '{tool_id}': {e}")
+        return ToolExecuteResponse(
+            success=False,
+            tool_id=tool_id,
+            tool_name=tool.definition.name if tool.definition else tool_id,
+            data=None,
+            error=str(e)
+        )
 
 
 # NOTE: /query endpoint moved to query.py router (empathetic session-aware RAG)
@@ -770,7 +781,8 @@ async def admin_auth(
 
         # Migrate any existing plaintext data to encrypted format
         # This happens when users signed up before an admin was configured
-        database.migrate_encrypt_existing_data()
+        # Run in a thread to avoid blocking the event loop
+        await asyncio.to_thread(database.migrate_encrypt_existing_data)
     else:
         admin = existing
 
@@ -1318,9 +1330,9 @@ def _encrypt_row_for_write(table_name: str, data: dict) -> dict:
     elif table_name == "user_field_values":
         if "value" in updated:
             value_val = updated["value"]
-            # Serialize and strip to check for actual content
-            value_str = serialize_field_value(value_val).strip() if value_val is not None else ""
-            if value_str:
+            # Serialize value, use strip() only for emptiness check to preserve whitespace
+            value_str = serialize_field_value(value_val) if value_val is not None else ""
+            if value_str.strip():
                 encrypted_value, eph = encrypt_for_admin_required(value_str)
                 updated["encrypted_value"] = encrypted_value
                 updated["ephemeral_pubkey"] = eph

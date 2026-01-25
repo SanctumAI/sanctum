@@ -492,6 +492,8 @@ Answer:"""
             provider=result.provider,
             tools_used=tools_used
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

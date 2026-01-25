@@ -22,18 +22,23 @@ interface Message {
   content: string
 }
 
-interface Citation {
-  claim_id: string
-  claim_text: string
-  source_title: string
-  source_url: string | null
+interface RAGSource {
+  score: number
+  type: string
+  text: string
+  chunk_id: string
+  source_file: string
 }
 
 interface RAGResponse {
   answer: string
-  citations: Citation[]
-  model: string
-  provider: string
+  session_id: string
+  sources: RAGSource[]
+  graph_context: Record<string, string[]>
+  clarifying_questions: string[]
+  search_term: string | null
+  context_used: string
+  temperature: number
 }
 
 // Ingestion pipeline interfaces
@@ -462,7 +467,10 @@ export function TestDashboard() {
     try {
       const res = await fetch(`${API_BASE}/query`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(adminToken && { 'Authorization': `Bearer ${adminToken}` })
+        },
         body: JSON.stringify({ question: ragInput.trim() }),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -484,7 +492,10 @@ export function TestDashboard() {
     try {
       const res = await fetch(`${API_BASE}/llm/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(adminToken && { 'Authorization': `Bearer ${adminToken}` })
+        },
         body: JSON.stringify({ message: userMessage }),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -672,7 +683,11 @@ export function TestDashboard() {
       const url = typeId
         ? `${API_BASE}/admin/user-fields?user_type_id=${typeId}`
         : `${API_BASE}/admin/user-fields`
-      const res = await fetch(url)
+      const res = await fetch(url, {
+        headers: {
+          ...(adminToken && { 'Authorization': `Bearer ${adminToken}` })
+        }
+      })
       const data = await res.json()
       setFieldDefinitions(data.fields)
       // Reset field values when type changes
@@ -712,7 +727,10 @@ export function TestDashboard() {
     try {
       const res = await fetch(`${API_BASE}/admin/neo4j/query`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(adminToken && { 'Authorization': `Bearer ${adminToken}` })
+        },
         body: JSON.stringify({ cypher: cypherQuery.trim() })
       })
       setNeo4jResult(await res.json())
@@ -1298,36 +1316,56 @@ export function TestDashboard() {
               {/* Answer */}
               <div className="bg-success-subtle border border-success/20 rounded-lg p-4">
                 <p className="font-medium text-success mb-2">Answer:</p>
-                <p className="text-text">{ragResult.answer}</p>
+                <p className="text-text whitespace-pre-wrap">{ragResult.answer}</p>
                 <p className="text-sm text-text-muted mt-2">
-                  Model: {ragResult.model} | Provider: {ragResult.provider}
+                  Session: {ragResult.session_id?.slice(0, 8)}... | Temp: {ragResult.temperature}
                 </p>
               </div>
 
-              {/* Citations */}
-              {ragResult.citations.length > 0 && (
+              {/* Clarifying Questions */}
+              {ragResult.clarifying_questions?.length > 0 && (
+                <div className="bg-warning-subtle border border-warning/20 rounded-lg p-4">
+                  <p className="font-medium text-warning mb-2">Clarifying Questions:</p>
+                  <ul className="list-disc list-inside text-text-secondary">
+                    {ragResult.clarifying_questions.map((q, i) => (
+                      <li key={i}>{q}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Sources */}
+              {ragResult.sources?.length > 0 && (
                 <div>
-                  <p className="font-medium text-text mb-2">Citations:</p>
+                  <p className="font-medium text-text mb-2">Sources ({ragResult.sources.length}):</p>
                   <div className="space-y-2">
-                    {ragResult.citations.map((c, i) => (
+                    {ragResult.sources.slice(0, 5).map((s, i) => (
                       <div key={i} className="bg-accent-subtle border border-accent/20 rounded-lg p-4">
-                        <p className="text-text">
-                          <strong>Claim:</strong> {c.claim_text}
-                        </p>
-                        <p className="text-text-secondary mt-1">
-                          <strong>Source:</strong> {c.source_title}
-                          {c.source_url && (
-                            <a
-                              href={c.source_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="ml-2 text-accent hover:text-accent-hover underline"
-                            >
-                              [link]
-                            </a>
-                          )}
-                        </p>
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="text-xs font-mono bg-surface-secondary px-2 py-1 rounded">
+                            {s.type} | score: {s.score?.toFixed(3)}
+                          </span>
+                          <span className="text-xs text-text-muted">{s.source_file}</span>
+                        </div>
+                        <p className="text-text text-sm">{s.text?.slice(0, 300)}{s.text?.length > 300 ? '...' : ''}</p>
                       </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Graph Context */}
+              {ragResult.graph_context && Object.keys(ragResult.graph_context).some(k => ragResult.graph_context[k]?.length > 0) && (
+                <div>
+                  <p className="font-medium text-text mb-2">Graph Context:</p>
+                  <div className="bg-surface-secondary rounded-lg p-4 text-sm">
+                    {Object.entries(ragResult.graph_context).map(([key, values]) => (
+                      values?.length > 0 && (
+                        <div key={key} className="mb-2">
+                          <strong className="text-text">{key}:</strong>{' '}
+                          <span className="text-text-secondary">{values.join(', ')}</span>
+                        </div>
+                      )
                     ))}
                   </div>
                 </div>

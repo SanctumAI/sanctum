@@ -143,6 +143,8 @@ SEARXNG_URL=http://searxng:8080
 
 The `db-query` tool allows admins to ask natural language questions about the database. The AI will generate and execute SQL queries, then explain the results.
 
+> Note: the `db-query` tool runs only via `/llm/chat`; other tools referenced in `/query` examples may still execute as documented.
+
 ### Security
 
 This tool is **read-only** with multiple layers of protection:
@@ -159,9 +161,30 @@ This tool is **read-only** with multiple layers of protection:
 4. **Row Limit**: Results capped at 100 rows
 5. **Frontend Gating**: Tool button only visible to authenticated admins
 
+### Encryption Behavior
+
+- PII fields are encrypted at rest. Query results include `encrypted_*` columns plus matching `ephemeral_pubkey_*` columns.
+- Legacy plaintext columns (`email`, `name`, `value`) are deprecated and should not be queried.
+- Email lookups must use the `email_blind_index` field for exact matches.
+
+### Decrypted Admin Chat (NIP-07)
+
+Admins with a NIP-07 extension can decrypt query results client-side and pass decrypted context to the chat endpoint.
+This keeps private key usage in the browser while allowing the LLM to see plaintext for that request.
+If other tools are selected (e.g., web-search), the backend will still execute them and merge their context; `db-query` is skipped server-side to avoid duplicate encrypted output.
+
+Flow:
+1. Call `/admin/tools/execute` with `tool_id: "db-query"` and the natural-language question.
+2. Decrypt `encrypted_*` values with `window.nostr.nip04.decrypt(ephemeral_pubkey, ciphertext)`.
+3. Send the decrypted tool context to `/llm/chat` using the `tool_context` field.
+
+If no fields can be decrypted (e.g., admin lacks the correct private key), the frontend falls back to the standard encrypted tool path so ciphertext is still available.
+`tool_context` is admin-only and will be rejected for non-admin users.
+
 ### Usage
 
 The Database tool button only appears in the chat toolbar when logged in as an admin.
+If you have knowledge-base documents selected, the UI will clear those selections when you enable the Database tool so it can run against the live SQLite database.
 
 Example queries:
 - "How many users are registered?"
@@ -177,6 +200,31 @@ curl -X POST http://localhost:8000/llm/chat \
   -d '{
     "message": "How many users are in the system?",
     "tools": ["db-query"]
+  }'
+```
+
+#### Admin Tool Execution (Raw Results)
+
+```bash
+curl -X POST http://localhost:8000/admin/tools/execute \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <admin-token>" \
+  -d '{
+    "tool_id": "db-query",
+    "query": "List the most recent users"
+  }'
+```
+
+#### Chat with Decrypted Tool Context (Admin Only)
+
+```bash
+curl -X POST http://localhost:8000/llm/chat \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <admin-token>" \
+  -d '{
+    "message": "Summarize the most recent users",
+    "tools": ["db-query"],
+    "tool_context": "Executed SQL: ...\\nDatabase query results (3 rows):\\nname | email | created_at\\n..."
   }'
 ```
 

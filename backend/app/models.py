@@ -136,11 +136,21 @@ class FieldDefinitionListResponse(BaseModel):
     fields: list[FieldDefinitionResponse]
 
 
+# --- Encrypted Data Models ---
+
+class EncryptedField(BaseModel):
+    """Encrypted field data for NIP-04 decryption"""
+    ciphertext: str  # NIP-04 format: base64(encrypted)?iv=base64(iv)
+    ephemeral_pubkey: str  # x-only pubkey (hex) for ECDH
+
+
 # --- User Models ---
 
 class UserCreate(BaseModel):
     """Request model for creating a user"""
     pubkey: Optional[str] = None
+    email: Optional[str] = None      # Auth email (encrypted, enables email lookups)
+    name: Optional[str] = None       # User's name (encrypted)
     user_type_id: Optional[int] = None  # Which user type they selected
     fields: dict = {}  # Dynamic fields defined by admin
 
@@ -152,13 +162,23 @@ class UserUpdate(BaseModel):
 
 
 class UserResponse(BaseModel):
-    """Response model for user data"""
+    """Response model for user data.
+
+    Encrypted fields are returned in *_encrypted properties.
+    Plaintext fields (email, name) are only populated for legacy unencrypted data.
+    """
     id: int
     pubkey: Optional[str] = None
+    email: Optional[str] = None  # Plaintext (legacy only)
+    name: Optional[str] = None   # Plaintext (legacy only)
+    email_encrypted: Optional[EncryptedField] = None  # NIP-04 encrypted
+    name_encrypted: Optional[EncryptedField] = None   # NIP-04 encrypted
     user_type_id: Optional[int] = None
     user_type: Optional[UserTypeResponse] = None  # Nested type info
+    approved: bool = True
     created_at: Optional[str] = None
-    fields: dict = {}
+    fields: dict = {}  # Plaintext (legacy only)
+    fields_encrypted: dict = {}  # NIP-04 encrypted field values
 
 
 class UserListResponse(BaseModel):

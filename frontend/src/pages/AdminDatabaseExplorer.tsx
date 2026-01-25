@@ -9,6 +9,7 @@ import {
   isJsonValue,
 } from '../types/database'
 import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
+import { decryptField } from '../utils/encryption'
 
 export function AdminDatabaseExplorer() {
   const navigate = useNavigate()
@@ -41,6 +42,12 @@ export function AdminDatabaseExplorer() {
 
   // Cell detail view
   const [expandedCell, setExpandedCell] = useState<{ row: number; col: string } | null>(null)
+
+  // Decrypted values cache: maps rowIndex -> { columnName -> decryptedValue }
+  const [decryptedData, setDecryptedData] = useState<Record<number, Record<string, string>>>({})
+
+  // Get current table info (moved up so useEffects can reference it)
+  const currentTableInfo = tables.find((t) => t.name === selectedTable)
 
   // Check if admin is logged in
   useEffect(() => {
@@ -102,6 +109,56 @@ export function AdminDatabaseExplorer() {
       fetchTableData(selectedTable)
     }
   }, [selectedTable, fetchTableData])
+
+  // Decrypt encrypted columns when table data loads
+  useEffect(() => {
+    if (!tableData.length || !currentTableInfo) {
+      setDecryptedData({})
+      return
+    }
+
+    // Clear stale decrypted data immediately when dependencies change
+    setDecryptedData({})
+
+    let cancelled = false
+
+    const decryptRows = async () => {
+      const decrypted: Record<number, Record<string, string>> = {}
+
+      for (let i = 0; i < tableData.length; i++) {
+        if (cancelled) return
+
+        const row = tableData[i]
+        decrypted[i] = {}
+
+        for (const col of currentTableInfo.columns) {
+          if (col.name.startsWith('encrypted_')) {
+            const fieldName = col.name.replace('encrypted_', '')
+            const ephemeralCol = `ephemeral_pubkey_${fieldName}`
+            const ciphertext = row[col.name] as string | null
+            const ephemeralPubkey = row[ephemeralCol] as string | null
+
+            if (ciphertext && ephemeralPubkey) {
+              const result = await decryptField({ ciphertext, ephemeral_pubkey: ephemeralPubkey })
+              if (cancelled) return
+              decrypted[i][col.name] = result ?? '[Encrypted]'
+            } else if (ciphertext) {
+              decrypted[i][col.name] = '[Encrypted - Missing Key]'
+            }
+          }
+        }
+      }
+      if (!cancelled) {
+        setDecryptedData(decrypted)
+      }
+    }
+
+    decryptRows()
+
+    return () => {
+      cancelled = true
+    }
+  }, [tableData, currentTableInfo])
 
   // Run SQL query
   const runQuery = async () => {
@@ -228,9 +285,6 @@ export function AdminDatabaseExplorer() {
     setEditingRecord(null)
     setRecordFormData({})
   }
-
-  // Get current table info
-  const currentTableInfo = tables.find((t) => t.name === selectedTable)
 
   // Get paginated data
   const paginatedData = tableData.slice(
@@ -567,7 +621,9 @@ export function AdminDatabaseExplorer() {
                   <table className="w-full text-sm">
                     <thead className="sticky top-0 bg-surface-raised z-10">
                       <tr>
-                        {currentTableInfo?.columns.map((col) => (
+                        {currentTableInfo?.columns
+                          .filter(col => !col.name.startsWith('ephemeral_pubkey_'))
+                          .map((col) => (
                           <th
                             key={col.name}
                             className="text-left px-3 py-2 font-medium text-text-secondary border-b border-border whitespace-nowrap"
@@ -576,7 +632,9 @@ export function AdminDatabaseExplorer() {
                               {col.primaryKey && (
                                 <Key className="w-3 h-3 text-warning" />
                               )}
-                              {col.name}
+                              {col.name.startsWith('encrypted_')
+                                ? col.name.replace('encrypted_', '') + ' 🔓'
+                                : col.name}
                               <span className="text-xs text-text-muted font-normal">
                                 {col.type}
                               </span>
@@ -587,16 +645,22 @@ export function AdminDatabaseExplorer() {
                       </tr>
                     </thead>
                     <tbody>
-                      {paginatedData.map((row, rowIndex) => (
+                      {paginatedData.map((row, rowIndex) => {
+                        const absoluteIndex = (currentPage - 1) * pageSize + rowIndex
+                        return (
                         <tr
-                          key={rowIndex}
+                          key={absoluteIndex}
                           className="border-b border-border/50 hover:bg-surface-overlay/50 group"
                         >
-                          {currentTableInfo?.columns.map((col) => {
-                            const value = row[col.name]
+                          {currentTableInfo?.columns
+                            .filter(col => !col.name.startsWith('ephemeral_pubkey_'))
+                            .map((col) => {
+                            const value = col.name.startsWith('encrypted_')
+                              ? decryptedData[absoluteIndex]?.[col.name] ?? '[Decrypting...]'
+                              : row[col.name]
                             const displayValue = formatCellValue(value)
                             const isExpanded =
-                              expandedCell?.row === rowIndex && expandedCell?.col === col.name
+                              expandedCell?.row === absoluteIndex && expandedCell?.col === col.name
                             const isLongValue = displayValue.length > 50
                             const isJson = isJsonValue(value)
 
@@ -609,7 +673,9 @@ export function AdminDatabaseExplorer() {
                                   <div className="absolute z-20 left-0 top-0 min-w-[300px] max-w-[500px] bg-surface-raised border border-border rounded-lg shadow-lg p-3 animate-fade-in">
                                     <div className="flex items-center justify-between mb-2">
                                       <span className="text-xs font-medium text-text-secondary">
-                                        {col.name}
+                                        {col.name.startsWith('encrypted_')
+                                          ? col.name.replace('encrypted_', '') + ' 🔓'
+                                          : col.name}
                                       </span>
                                       <button
                                         onClick={() => setExpandedCell(null)}
@@ -631,7 +697,7 @@ export function AdminDatabaseExplorer() {
                                     } ${isLongValue ? 'cursor-pointer hover:text-accent' : ''}`}
                                     onClick={() =>
                                       isLongValue &&
-                                      setExpandedCell({ row: rowIndex, col: col.name })
+                                      setExpandedCell({ row: absoluteIndex, col: col.name })
                                     }
                                     title={isLongValue ? 'Click to expand' : undefined}
                                   >
@@ -660,7 +726,8 @@ export function AdminDatabaseExplorer() {
                             </div>
                           </td>
                         </tr>
-                      ))}
+                      )})}
+
                     </tbody>
                   </table>
                 )}

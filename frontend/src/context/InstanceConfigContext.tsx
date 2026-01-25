@@ -12,7 +12,6 @@ import {
   saveInstanceConfig,
   applyAccentColor,
   AccentColor,
-  ACCENT_COLORS,
 } from '../types/instance'
 import { API_BASE } from '../types/onboarding'
 

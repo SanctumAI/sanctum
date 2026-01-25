@@ -121,6 +121,14 @@ DB Explorer:
 - Shows `[Decrypting...]` during async decryption.
 - Shows `[Encrypted]` if decryption fails or NIP-07 unavailable.
 
+Admin Chat (db-query tool):
+- Default tool path returns encrypted values (ciphertext + ephemeral keys).
+- If the admin has NIP-07, the frontend can decrypt results client-side and send a decrypted tool context to `/llm/chat`.
+- This keeps private keys in the browser while allowing the LLM to use plaintext for that request.
+- The `/query` (RAG) endpoint does not execute tools; db-query runs via `/llm/chat`.
+- If decryption fails (missing key or no NIP-07), the frontend falls back to the encrypted tool path.
+- Raw tool results for this flow are fetched via `/admin/tools/execute` (admin-only).
+
 ## Pre-Admin Onboarding Gate
 
 Onboarding is blocked until an admin exists:

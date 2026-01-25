@@ -352,6 +352,8 @@ curl -X POST http://localhost:8000/admin/db/query \
   -d '{"sql": "SELECT * FROM users WHERE user_type_id = 1"}'
 ```
 
+**Encryption note:** This endpoint returns encrypted columns (`encrypted_*`) and their matching `ephemeral_pubkey_*` values. Decryption happens client-side in admin UIs via NIP-07. For the admin chat tool (`db-query`), see `docs/tools.md` for the `/admin/tools/execute` + `tool_context` flow.
+
 #### CRUD Endpoints
 - `POST /admin/db/tables/{table_name}/rows` - Insert row
 - `PUT /admin/db/tables/{table_name}/rows/{row_id}` - Update row

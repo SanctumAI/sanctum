@@ -132,6 +132,7 @@ class ChatRequest(BaseModel):
     """Request model for chat endpoint"""
     message: str
     tools: List[str] = []
+    tool_context: Optional[str] = None
 
 
 class ChatResponse(BaseModel):
@@ -140,6 +141,21 @@ class ChatResponse(BaseModel):
     model: str
     provider: str
     tools_used: List[ToolCallInfoResponse] = []
+
+
+class ToolExecuteRequest(BaseModel):
+    """Request model for executing a tool without LLM response (admin-only)."""
+    tool_id: str
+    query: str
+
+
+class ToolExecuteResponse(BaseModel):
+    """Response model for tool execution (admin-only)."""
+    success: bool
+    tool_id: str
+    tool_name: str
+    data: Optional[dict] = None
+    error: Optional[str] = None
 
 
 class QueryRequest(BaseModel):
@@ -388,32 +404,68 @@ async def chat(request: ChatRequest, user: dict = Depends(auth.require_admin_or_
         tools_used = []
         prompt = request.message
 
-        # Filter tools based on user permissions (admin-only tools removed for non-admins)
-        allowed_tools = filter_tools_for_user(request.tools, user)
+        tool_context_parts = []
 
-        # Execute tools if any are selected
-        if allowed_tools:
-            orchestrator = get_tool_orchestrator()
-            tool_context, tool_infos = await orchestrator.execute_tools(
-                query=request.message,
-                tool_ids=allowed_tools
-            )
+        if request.tool_context:
+            if user.get("type") != "admin":
+                raise HTTPException(status_code=403, detail="Tool context override is admin-only")
 
-            # Convert ToolCallInfo to response format
-            tools_used = [
-                ToolCallInfoResponse(
-                    tool_id=info.tool_id,
-                    tool_name=info.tool_name,
-                    query=info.query
+            tool_context_parts.append(request.tool_context)
+
+            # Build tools_used from provided tool IDs (client-side tool execution)
+            tools_used = []
+            for tool_id in request.tools:
+                tool = _tool_registry.get(tool_id)
+                if tool:
+                    tools_used.append(ToolCallInfoResponse(
+                        tool_id=tool_id,
+                        tool_name=tool.definition.name,
+                        query=request.message
+                    ))
+
+            # Allow other tools to run server-side (excluding db-query to avoid duplicate encrypted context)
+            allowed_tools = filter_tools_for_user(request.tools, user)
+            allowed_tools = [tool_id for tool_id in allowed_tools if tool_id != "db-query"]
+
+            if allowed_tools:
+                orchestrator = get_tool_orchestrator()
+                tool_context, tool_infos = await orchestrator.execute_tools(
+                    query=request.message,
+                    tool_ids=allowed_tools
                 )
-                for info in tool_infos
-            ]
 
-            # Build augmented prompt with tool context
-            if tool_context:
-                prompt = f"""Use the following information to help answer the question.
+                if tool_context:
+                    tool_context_parts.append(tool_context)
+        else:
+            # Filter tools based on user permissions (admin-only tools removed for non-admins)
+            allowed_tools = filter_tools_for_user(request.tools, user)
 
-{tool_context}
+            # Execute tools if any are selected
+            if allowed_tools:
+                orchestrator = get_tool_orchestrator()
+                tool_context, tool_infos = await orchestrator.execute_tools(
+                    query=request.message,
+                    tool_ids=allowed_tools
+                )
+
+                # Convert ToolCallInfo to response format
+                tools_used = [
+                    ToolCallInfoResponse(
+                        tool_id=info.tool_id,
+                        tool_name=info.tool_name,
+                        query=info.query
+                    )
+                    for info in tool_infos
+                ]
+
+                if tool_context:
+                    tool_context_parts.append(tool_context)
+
+        if tool_context_parts:
+            combined_context = "\n\n".join(tool_context_parts)
+            prompt = f"""Use the following information to help answer the question.
+
+{combined_context}
 
 Question: {request.message}
 
@@ -429,6 +481,36 @@ Answer:"""
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/admin/tools/execute", response_model=ToolExecuteResponse)
+async def execute_admin_tool(request: ToolExecuteRequest, admin: dict = Depends(auth.require_admin)):
+    """
+    Execute an admin-only tool and return raw results.
+    Used for client-side decryption flows (e.g., db-query with NIP-07).
+    """
+    tool_id = request.tool_id
+    if tool_id not in ADMIN_ONLY_TOOLS:
+        raise HTTPException(status_code=403, detail=f"Tool '{tool_id}' is not admin-only or not allowed")
+
+    tool = _tool_registry.get(tool_id)
+    if not tool:
+        return ToolExecuteResponse(
+            success=False,
+            tool_id=tool_id,
+            tool_name=tool_id,
+            data=None,
+            error="Tool not found"
+        )
+
+    result = await tool.execute(query=request.query)
+    return ToolExecuteResponse(
+        success=result.success,
+        tool_id=tool_id,
+        tool_name=tool.definition.name,
+        data=result.data,
+        error=result.error
+    )
 
 
 # NOTE: /query endpoint moved to query.py router (empathetic session-aware RAG)

@@ -773,6 +773,9 @@ def migrate_encrypt_existing_data():
     - user_field_values.value → encrypted_value
 
     This is idempotent - it only encrypts data that hasn't been encrypted yet.
+
+    Note: This function creates its own database connection to be thread-safe
+    when called via asyncio.to_thread(). Do not use the global connection here.
     """
     from encryption import encrypt_for_admin, compute_blind_index, get_admin_pubkey
 
@@ -783,87 +786,116 @@ def migrate_encrypt_existing_data():
 
     logger.info("Starting encryption migration for existing plaintext data...")
 
-    conn = get_connection()
+    # Create a dedicated connection for thread-safety (this runs via asyncio.to_thread)
+    conn = sqlite3.connect(SQLITE_PATH)
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
-    # Migrate users table
-    cursor.execute("""
-        SELECT id, email, name FROM users
-        WHERE (email IS NOT NULL AND encrypted_email IS NULL)
-           OR (name IS NOT NULL AND encrypted_name IS NULL)
-    """)
-    users_to_migrate = cursor.fetchall()
-
     migrated_users = 0
-    for row in users_to_migrate:
-        user_id = row[0]
-        email = row[1]
-        name = row[2]
-
-        updates = []
-        values = []
-
-        # Encrypt email if not already encrypted (strip whitespace first)
-        # Handle non-string values by serializing to JSON
-        email_str = email if isinstance(email, str) else json.dumps(email, separators=(",", ":"), ensure_ascii=False) if email is not None else None
-        trimmed_email = email_str.strip() if email_str else None
-        if trimmed_email:
-            encrypted_email, ephemeral_pubkey_email = encrypt_for_admin(trimmed_email)
-            if encrypted_email:
-                updates.append("encrypted_email = ?")
-                values.append(encrypted_email)
-                updates.append("ephemeral_pubkey_email = ?")
-                values.append(ephemeral_pubkey_email)
-                updates.append("email_blind_index = ?")
-                values.append(compute_blind_index(trimmed_email.lower()))
-                updates.append("email = NULL")  # Clear plaintext
-
-        # Encrypt name if not already encrypted (strip whitespace first)
-        name_str = name if isinstance(name, str) else json.dumps(name, separators=(",", ":"), ensure_ascii=False) if name is not None else None
-        trimmed_name = name_str.strip() if name_str else None
-        if trimmed_name:
-            encrypted_name, ephemeral_pubkey_name = encrypt_for_admin(trimmed_name)
-            if encrypted_name:
-                updates.append("encrypted_name = ?")
-                values.append(encrypted_name)
-                updates.append("ephemeral_pubkey_name = ?")
-                values.append(ephemeral_pubkey_name)
-                updates.append("name = NULL")  # Clear plaintext
-
-        if updates:
-            values.append(user_id)
-            cursor.execute(
-                f"UPDATE users SET {', '.join(updates)} WHERE id = ?",
-                values
-            )
-            migrated_users += 1
-
-    # Migrate user_field_values table
-    cursor.execute("""
-        SELECT id, value FROM user_field_values
-        WHERE value IS NOT NULL AND encrypted_value IS NULL
-    """)
-    fields_to_migrate = cursor.fetchall()
-
     migrated_fields = 0
-    for row in fields_to_migrate:
-        field_value_id = row[0]
-        value = row[1]
 
-        # Handle non-string values by serializing to JSON, then strip whitespace
-        value_str = value if isinstance(value, str) else json.dumps(value, separators=(",", ":"), ensure_ascii=False) if value is not None else None
-        trimmed_value = value_str.strip() if value_str else None
-        if trimmed_value:
-            encrypted_value, ephemeral_pubkey = encrypt_for_admin(trimmed_value)
-            if encrypted_value:
-                cursor.execute("""
-                    UPDATE user_field_values
-                    SET encrypted_value = ?, ephemeral_pubkey = ?, value = NULL
-                    WHERE id = ?
-                """, (encrypted_value, ephemeral_pubkey, field_value_id))
-                migrated_fields += 1
+    try:
+        # Migrate users table
+        cursor.execute("""
+            SELECT id, email, name FROM users
+            WHERE (email IS NOT NULL AND encrypted_email IS NULL)
+               OR (name IS NOT NULL AND encrypted_name IS NULL)
+        """)
+        users_to_migrate = cursor.fetchall()
 
-    conn.commit()
-    cursor.close()
+        for row in users_to_migrate:
+            user_id = row[0]
+            email = row[1]
+            name = row[2]
 
-    logger.info(f"Encryption migration complete: {migrated_users} users, {migrated_fields} field values encrypted")
+            updates = []
+            values = []
+
+            # Encrypt email if not already encrypted (strip whitespace first)
+            # Handle non-string values by serializing to JSON
+            email_str = email if isinstance(email, str) else json.dumps(email, separators=(",", ":"), ensure_ascii=False) if email is not None else None
+            trimmed_email = email_str.strip() if email_str else None
+            if email_str is not None:
+                # Always clear plaintext; only encrypt if non-whitespace
+                if trimmed_email:
+                    encrypted_email, ephemeral_pubkey_email = encrypt_for_admin(trimmed_email)
+                    if encrypted_email:
+                        updates.append("encrypted_email = ?")
+                        values.append(encrypted_email)
+                        updates.append("ephemeral_pubkey_email = ?")
+                        values.append(ephemeral_pubkey_email)
+                        updates.append("email_blind_index = ?")
+                        values.append(compute_blind_index(trimmed_email.lower()))
+                updates.append("email = NULL")  # Clear plaintext (even if whitespace-only)
+
+            # Encrypt name if not already encrypted (strip whitespace first)
+            name_str = name if isinstance(name, str) else json.dumps(name, separators=(",", ":"), ensure_ascii=False) if name is not None else None
+            trimmed_name = name_str.strip() if name_str else None
+            if name_str is not None:
+                # Always clear plaintext; only encrypt if non-whitespace
+                if trimmed_name:
+                    encrypted_name, ephemeral_pubkey_name = encrypt_for_admin(trimmed_name)
+                    if encrypted_name:
+                        updates.append("encrypted_name = ?")
+                        values.append(encrypted_name)
+                        updates.append("ephemeral_pubkey_name = ?")
+                        values.append(ephemeral_pubkey_name)
+                updates.append("name = NULL")  # Clear plaintext (even if whitespace-only)
+
+            if updates:
+                values.append(user_id)
+                cursor.execute(
+                    f"UPDATE users SET {', '.join(updates)} WHERE id = ?",
+                    values
+                )
+                migrated_users += 1
+
+        # Migrate user_field_values table
+        cursor.execute("""
+            SELECT id, value FROM user_field_values
+            WHERE value IS NOT NULL AND encrypted_value IS NULL
+        """)
+        fields_to_migrate = cursor.fetchall()
+
+        for row in fields_to_migrate:
+            field_value_id = row[0]
+            value = row[1]
+
+            # Handle non-string values by serializing to JSON, then strip whitespace
+            value_str = value if isinstance(value, str) else json.dumps(value, separators=(",", ":"), ensure_ascii=False) if value is not None else None
+            trimmed_value = value_str.strip() if value_str else None
+            if value_str is not None:
+                # Always clear plaintext; only encrypt if non-whitespace
+                if trimmed_value:
+                    encrypted_value, ephemeral_pubkey = encrypt_for_admin(trimmed_value)
+                    if encrypted_value:
+                        cursor.execute("""
+                            UPDATE user_field_values
+                            SET encrypted_value = ?, ephemeral_pubkey = ?, value = NULL
+                            WHERE id = ?
+                        """, (encrypted_value, ephemeral_pubkey, field_value_id))
+                        migrated_fields += 1
+                    else:
+                        # Encryption failed but still clear plaintext
+                        cursor.execute(
+                            "UPDATE user_field_values SET value = NULL WHERE id = ?",
+                            (field_value_id,)
+                        )
+                else:
+                    # Whitespace-only value: just clear plaintext, no encryption
+                    cursor.execute(
+                        "UPDATE user_field_values SET value = NULL WHERE id = ?",
+                        (field_value_id,)
+                    )
+
+        conn.commit()
+        logger.info(f"Encryption migration complete: {migrated_users} users, {migrated_fields} field values encrypted")
+
+    except Exception as e:
+        conn.rollback()
+        logger.error(f"Encryption migration failed, rolled back: {e}")
+        raise
+
+    finally:
+        cursor.close()
+        conn.close()

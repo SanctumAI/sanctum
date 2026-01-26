@@ -20,8 +20,10 @@ import os
 import sys
 import json
 import sqlite3
+import shlex
 import hashlib
 import argparse
+import subprocess
 import requests
 from pathlib import Path
 
@@ -95,14 +97,11 @@ def create_test_user(api_base: str, user_data: dict, admin_token: str = None) ->
 
 def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db") -> str:
     """Run SQL inside Docker container and return output."""
-    import subprocess
-    
-    # Find repo root (3 levels up from script)
     repo_root = SCRIPT_DIR.parent.parent.parent
-    
+
     escaped_sql = sql.replace("'", "'\\''")
-    cmd = f"docker compose exec -T backend sqlite3 -json {db_path} '{escaped_sql}'"
-    
+    cmd = f"docker compose exec -T backend sqlite3 -json {shlex.quote(db_path)} '{escaped_sql}'"
+
     result = subprocess.run(
         cmd,
         shell=True,
@@ -110,7 +109,7 @@ def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db") -> str:
         text=True,
         cwd=repo_root
     )
-    
+
     return result.stdout.strip()
 
 
@@ -118,32 +117,35 @@ def inspect_raw_database(db_path: str, user_id: int) -> dict:
     """
     Directly inspect the SQLite database to verify encryption.
     Uses docker exec to query the DB inside the container.
-    
+
     Returns raw column values for the user.
     """
+    # Validate user_id is an integer to prevent SQL injection
+    user_id = int(user_id)
+
     # Get user record via docker
-    user_json = run_docker_sql(f"SELECT * FROM users WHERE id = {user_id}")
-    
+    user_json = run_docker_sql(f"SELECT * FROM users WHERE id = {user_id}", db_path)
+
     if not user_json or user_json == "[]":
         return None
-    
-    import json
+
     users = json.loads(user_json)
     if not users:
         return None
-    
+
     user_data = users[0]
-    
+
     # Get field values
-    fields_json = run_docker_sql(f"""
-        SELECT fd.field_name, ufv.value, ufv.encrypted_value, ufv.ephemeral_pubkey
-        FROM user_field_values ufv
-        JOIN user_field_definitions fd ON fd.id = ufv.field_id
-        WHERE ufv.user_id = {user_id}
-    """)
-    
+    fields_json = run_docker_sql(
+        f"SELECT fd.field_name, ufv.value, ufv.encrypted_value, ufv.ephemeral_pubkey "
+        f"FROM user_field_values ufv "
+        f"JOIN user_field_definitions fd ON fd.id = ufv.field_id "
+        f"WHERE ufv.user_id = {user_id}",
+        db_path
+    )
+
     user_data["field_values"] = json.loads(fields_json) if fields_json else []
-    
+
     return user_data
 
 

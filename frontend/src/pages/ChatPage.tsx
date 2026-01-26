@@ -10,7 +10,123 @@ import { ExportButton } from '../components/chat/ExportButton'
 import { AppHeader } from '../components/shared/AppHeader'
 import { Message } from '../components/chat/ChatMessage'
 import { API_BASE, STORAGE_KEYS } from '../types/onboarding'
-import { isAdminAuthenticated } from '../utils/adminApi'
+import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
+import { decryptField, hasNip04Support } from '../utils/encryption'
+
+type DbQueryToolData = {
+  sql?: string
+  columns?: string[]
+  rows?: Record<string, unknown>[]
+  row_count?: number
+  truncated?: boolean
+}
+
+const formatDbCell = (value: unknown) => {
+  if (value === null || value === undefined) return ''
+  if (typeof value === 'object') return JSON.stringify(value)
+  return String(value)
+}
+
+const decryptDbQueryData = async (data: DbQueryToolData) => {
+  const columns = data.columns || []
+  const rows = data.rows || []
+  let encryptedValueCount = 0
+  let decryptedCount = 0
+
+  const outputColumns = columns.reduce<string[]>((acc, col) => {
+    if (col.startsWith('ephemeral_pubkey')) return acc
+    if (col.startsWith('encrypted_')) {
+      const fieldName = col.replace('encrypted_', '')
+      if (!acc.includes(fieldName)) acc.push(fieldName)
+      return acc
+    }
+    if (!acc.includes(col)) acc.push(col)
+    return acc
+  }, [])
+
+  const decryptedRows = await Promise.all(
+    rows.map(async (row) => {
+      const nextRow: Record<string, unknown> = {}
+
+      for (const col of columns) {
+        if (col.startsWith('ephemeral_pubkey')) {
+          continue
+        }
+
+        if (col.startsWith('encrypted_')) {
+          const fieldName = col.replace('encrypted_', '')
+          const ciphertext = row[col]
+          if (typeof ciphertext !== 'string' || !ciphertext) {
+            // No ciphertext - don't set anything; let plaintext column fill in if present
+            continue
+          }
+          encryptedValueCount += 1
+
+          let ephemeral = row[col.replace('encrypted_', 'ephemeral_pubkey_')]
+          if (!ephemeral && col === 'encrypted_value') {
+            ephemeral = row['ephemeral_pubkey']
+          }
+
+          if (typeof ephemeral !== 'string' || !ephemeral) {
+            nextRow[fieldName] = ciphertext
+            continue
+          }
+
+          const decrypted = await decryptField({ ciphertext, ephemeral_pubkey: ephemeral })
+          if (decrypted !== null) {
+            decryptedCount += 1
+          }
+          nextRow[fieldName] = decrypted ?? ciphertext
+          continue
+        }
+
+        // Only set if not already filled by a decrypted value
+        if (nextRow[col] === undefined) {
+          nextRow[col] = row[col]
+        }
+      }
+
+      return nextRow
+    })
+  )
+
+  return { columns: outputColumns, rows: decryptedRows, encryptedValueCount, decryptedCount }
+}
+
+const formatDbQueryContext = (
+  data: DbQueryToolData,
+  columns: string[],
+  rows: Record<string, unknown>[]
+) => {
+  const lines: string[] = []
+
+  if (data.sql) {
+    lines.push(`Executed SQL: ${data.sql}`)
+    lines.push('')
+  }
+
+  if (!rows.length) {
+    lines.push('Query returned no results.')
+    return lines.join('\n')
+  }
+
+  lines.push(`Database query results (${rows.length} rows):`)
+
+  if (data.truncated) {
+    lines.push('(Results truncated to 100 rows)')
+  }
+
+  lines.push('')
+  lines.push(columns.join(' | '))
+  lines.push('-'.repeat(columns.join(' | ').length))
+
+  for (const row of rows) {
+    const values = columns.map((col) => formatDbCell(row[col]))
+    lines.push(values.join(' | '))
+  }
+
+  return lines.join('\n')
+}
 
 export function ChatPage() {
   const navigate = useNavigate()
@@ -102,10 +218,14 @@ export function ChatPage() {
   }, [])
 
   const handleToolToggle = useCallback((toolId: string) => {
+    if (toolId === 'db-query' && !selectedTools.includes('db-query') && selectedDocuments.length > 0) {
+      // db-query runs against /llm/chat only; clear RAG document selection
+      setSelectedDocuments([])
+    }
     setSelectedTools((prev) =>
       prev.includes(toolId) ? prev.filter((id) => id !== toolId) : [...prev, toolId]
     )
-  }, [])
+  }, [selectedDocuments.length, selectedTools])
 
   const handleDocumentToggle = useCallback((docId: string) => {
     setSelectedDocuments((prev) =>
@@ -128,43 +248,99 @@ export function ChatPage() {
     setError(null)
 
     try {
-      const useRag = selectedDocuments.length > 0
-      const endpoint = useRag ? '/query' : '/llm/chat'
-      const body = useRag
-        ? { question: content, top_k: 8, tools: selectedTools, ...(ragSessionId && { session_id: ragSessionId }) }
-        : { message: content, tools: selectedTools }
+      const wantsDbQuery = selectedTools.includes('db-query')
+      const useRag = selectedDocuments.length > 0 && !wantsDbQuery
 
       // Admin token takes priority, fall back to user token
-      const token = localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN) || localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
+      const adminToken = localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN)
+      const userToken = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
+      const token = adminToken || userToken
 
-      const res = await fetch(`${API_BASE}${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        },
-        body: JSON.stringify(body),
-      })
+      const canDecryptDbQuery = !useRag && wantsDbQuery && !!adminToken && hasNip04Support()
+      let response: Response | null = null
+      let responseIsRag = useRag
+
+      if (canDecryptDbQuery) {
+        try {
+          const toolResponse = await adminFetch('/admin/tools/execute', {
+            method: 'POST',
+            body: JSON.stringify({ tool_id: 'db-query', query: content })
+          })
+
+          if (toolResponse.ok) {
+            const toolPayload = await toolResponse.json()
+            if (toolPayload?.success && toolPayload?.data) {
+              const decrypted = await decryptDbQueryData(toolPayload.data as DbQueryToolData)
+              const hasEncryptedValues = decrypted.encryptedValueCount > 0
+
+              if (!hasEncryptedValues || decrypted.decryptedCount > 0) {
+                const toolContext = formatDbQueryContext(
+                  toolPayload.data as DbQueryToolData,
+                  decrypted.columns,
+                  decrypted.rows
+                )
+
+                response = await fetch(`${API_BASE}/llm/chat`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                  },
+                  body: JSON.stringify({
+                    message: content,
+                    tools: selectedTools,
+                    tool_context: toolContext
+                  }),
+                })
+                responseIsRag = false
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Falling back to encrypted db-query tool path:', e)
+        }
+      }
+
+      if (!response) {
+        const endpoint = useRag ? '/query' : '/llm/chat'
+        const body = useRag
+          ? { question: content, top_k: 8, tools: selectedTools, ...(ragSessionId && { session_id: ragSessionId }) }
+          : { message: content, tools: selectedTools }
+
+        response = await fetch(`${API_BASE}${endpoint}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          },
+          body: JSON.stringify(body),
+        })
+        responseIsRag = useRag
+      }
+
+      if (!response) {
+        throw new Error('No response from server')
+      }
 
       // Handle auth errors
-      if (res.status === 401) {
+      if (response.status === 401) {
         // Token invalid/expired - redirect to login
         navigate('/login')
         return
       }
-      if (res.status === 403) {
+      if (response.status === 403) {
         // Not approved - update localStorage and redirect
         localStorage.setItem(STORAGE_KEYS.USER_APPROVED, 'false')
         navigate('/pending')
         return
       }
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
 
-      const data = await res.json()
+      const data = await response.json()
 
       let responseContent: string
-      if (useRag) {
+      if (responseIsRag) {
         responseContent = data.answer
         
         // Save session_id for conversation continuity
@@ -185,7 +361,7 @@ export function ChatPage() {
       setMessages((prev) => [...prev, assistantMessage])
       
       // Handle auto-search if backend returned a search term
-      if (useRag && data.search_term) {
+      if (responseIsRag && data.search_term) {
         await triggerAutoSearch(data.search_term, token)
       }
     } catch (e) {

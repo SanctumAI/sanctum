@@ -170,6 +170,8 @@ export function UserProfile() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          email: localStorage.getItem(STORAGE_KEYS.USER_EMAIL) || undefined,
+          name: localStorage.getItem(STORAGE_KEYS.USER_NAME) || undefined,
           user_type_id: userTypeId,
           fields: values,
         }),

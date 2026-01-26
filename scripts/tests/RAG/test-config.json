@@ -1,0 +1,38 @@
+{
+  "description": "RAG document ingestion test configuration - Tests document persistence across restarts",
+  "test_document": {
+    "filename": "test-human-rights-guide.pdf",
+    "title": "Emergency Guide for Detained Persons",
+    "content": "When a person is arbitrarily detained by state authorities, immediate action is critical. The first 48 hours are often the most dangerous period, as this is when forced confessions and mistreatment are most likely to occur.\n\nKey protective actions include:\n\n1. DOCUMENT EVERYTHING: Note the time, location, and names or badge numbers of arresting officers. Mental notes count if writing is impossible.\n\n2. CONTACT FAMILY: Request to notify a family member immediately. Under international law (ICCPR Article 9), detainees have the right to inform someone of their detention.\n\n3. REQUEST LEGAL COUNSEL: Demand access to a lawyer before any questioning. Do not sign any documents without legal review.\n\n4. MEDICAL EXAMINATION: Request an independent medical exam, especially if mistreated. Document any injuries with photos if possible.\n\n5. EMBASSY NOTIFICATION: Foreign nationals must be informed of their right to contact their embassy (Vienna Convention on Consular Relations).\n\nOrganizations that can help:\n- Amnesty International Urgent Action Network\n- Human Rights Watch Emergency Response\n- International Committee of the Red Cross (ICRC)\n- Local bar associations often have pro-bono detention response teams\n\nRemember: Silence is a right. You are not required to answer questions without a lawyer present. Stay calm, be respectful, but assert your rights firmly."
+  },
+  "expected_entities": [
+    "Arbitrary Detention",
+    "Forced Confession",
+    "Legal Counsel",
+    "Embassy Notification",
+    "Vienna Convention",
+    "ICCPR Article 9",
+    "Amnesty International",
+    "Human Rights Watch",
+    "ICRC",
+    "Foreign National",
+    "Medical Examination",
+    "Mistreatment"
+  ],
+  "expected_relationships": [
+    "Arbitrary Detention REQUIRES Legal Counsel",
+    "Foreign National ENTITLED_TO Embassy Notification",
+    "Mistreatment REQUIRES Medical Examination"
+  ],
+  "api_endpoints": {
+    "upload": "POST /ingest/upload",
+    "list_jobs": "GET /ingest/jobs",
+    "job_status": "GET /ingest/status/{job_id}",
+    "rag_query": "POST /query"
+  },
+  "test_queries": [
+    "What should I do if my family member is detained?",
+    "Can I contact my embassy if arrested abroad?",
+    "What are my rights during the first 48 hours of detention?"
+  ]
+}

@@ -109,6 +109,11 @@ services:
       - "5173:5173"
     environment:
       - VITE_DEV_MODE=${VITE_DEV_MODE:-true}
+    dns:
+      - 127.0.0.11  # Docker's embedded DNS server
+    dns_opt:
+      - attempts:3
+      - timeout:2
     depends_on:
       backend:
         condition: service_healthy

@@ -24,6 +24,12 @@ itsdangerous>=2.0.0
 # Nostr signature verification (BIP-340 Schnorr)
 coincurve>=20.0.0
 
+# NIP-04 encryption (AES-256-CBC)
+pycryptodome>=3.20.0
+
+# NIP-19 bech32 decoding (npub)
+bech32>=1.2.0
+
 # LLM provider (OpenAI-compatible SDK)
 openai>=1.12.0
 httpx>=0.25.0

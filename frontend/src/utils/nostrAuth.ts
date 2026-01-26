@@ -4,6 +4,7 @@
  */
 
 import type { Event, EventTemplate } from 'nostr-tools'
+import type { WindowNostr } from 'nostr-tools/nip07'
 import { API_BASE } from '../types/onboarding'
 
 // Sanctum admin auth event kind (ephemeral auth event)
@@ -12,10 +13,7 @@ const AUTH_KIND = 22242
 // Extend window type for NIP-07
 declare global {
   interface Window {
-    nostr?: {
-      getPublicKey: () => Promise<string>
-      signEvent: (event: EventTemplate) => Promise<Event>
-    }
+    nostr?: WindowNostr
   }
 }
 

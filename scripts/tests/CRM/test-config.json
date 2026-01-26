@@ -1,0 +1,22 @@
+{
+  "description": "CRM encryption test configuration - SOURCE OF TRUTH for test admin and user schema",
+  "test_admin": {
+    "description": "Well-known test keypair (SHA256 of seed = private key). DO NOT use in production.",
+    "keypair_seed": "sanctum-test-admin-keypair-v1"
+  },
+  "test_user": {
+    "description": "Test user data. The 'fields' keys define what user_field_definitions the harness creates.",
+    "email": "testuser@example.com",
+    "name": "Jane Doe",
+    "pubkey": "abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234",
+    "fields": {
+      "Phone Number": "+1-555-123-4567",
+      "Country": "United States"
+    }
+  },
+  "expected_behavior": {
+    "plaintext_columns_should_be_null": ["email", "name", "value"],
+    "encrypted_columns_should_exist": ["encrypted_email", "encrypted_name", "encrypted_value"],
+    "blind_index_should_exist": ["email_blind_index"]
+  }
+}

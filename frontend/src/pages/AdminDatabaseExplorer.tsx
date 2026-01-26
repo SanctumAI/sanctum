@@ -9,6 +9,7 @@ import {
   isJsonValue,
 } from '../types/database'
 import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
+import { decryptField } from '../utils/encryption'
 
 export function AdminDatabaseExplorer() {
   const navigate = useNavigate()
@@ -25,6 +26,8 @@ export function AdminDatabaseExplorer() {
   const [tableData, setTableData] = useState<Record<string, unknown>[]>([])
   const [isLoadingData, setIsLoadingData] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalRows, setTotalRows] = useState(0)
   const [pageSize] = useState(10)
 
   // Query state
@@ -41,6 +44,12 @@ export function AdminDatabaseExplorer() {
 
   // Cell detail view
   const [expandedCell, setExpandedCell] = useState<{ row: number; col: string } | null>(null)
+
+  // Decrypted values cache: maps rowIndex -> { columnName -> decryptedValue }
+  const [decryptedData, setDecryptedData] = useState<Record<number, Record<string, string>>>({})
+
+  // Get current table info (moved up so useEffects can reference it)
+  const currentTableInfo = tables.find((t) => t.name === selectedTable)
 
   // Check if admin is logged in
   useEffect(() => {
@@ -79,19 +88,35 @@ export function AdminDatabaseExplorer() {
   }, [isAuthorized, fetchTables])
 
   // Fetch table data when selection changes
-  const fetchTableData = useCallback(async (tableName: string, page: number = 1) => {
+  const fetchTableData = useCallback(async (tableName: string, page: number = 1, isRetry: boolean = false): Promise<void> => {
     setIsLoadingData(true)
+    setExpandedCell(null)  // Clear expanded cell on any data fetch to avoid stale row index references
     try {
       const response = await adminFetch(
         `/admin/db/tables/${tableName}?page=${page}&page_size=${pageSize}`
       )
       if (!response.ok) throw new Error('Failed to fetch table data')
       const data = await response.json()
+
+      // Handle out-of-range page (e.g., after deleting the last record on a page)
+      if (data.page > data.totalPages && data.totalPages > 0) {
+        if (isRetry) {
+          console.error('Page still out of range after retry, using returned data')
+        } else {
+          // Refetch the last valid page instead of showing invalid state
+          return await fetchTableData(tableName, data.totalPages, true)
+        }
+      }
+
       setTableData(data.rows)
       setCurrentPage(data.page)
+      setTotalPages(data.totalPages)
+      setTotalRows(data.totalRows)
     } catch (error) {
       console.error('Error fetching table data:', error)
       setTableData([])
+      setTotalPages(1)
+      setTotalRows(0)
     } finally {
       setIsLoadingData(false)
     }
@@ -102,6 +127,56 @@ export function AdminDatabaseExplorer() {
       fetchTableData(selectedTable)
     }
   }, [selectedTable, fetchTableData])
+
+  // Decrypt encrypted columns when table data loads
+  useEffect(() => {
+    if (!tableData.length || !currentTableInfo) {
+      setDecryptedData({})
+      return
+    }
+
+    // Clear stale decrypted data immediately when dependencies change
+    setDecryptedData({})
+
+    let cancelled = false
+
+    const decryptRows = async () => {
+      const decrypted: Record<number, Record<string, string>> = {}
+
+      for (let i = 0; i < tableData.length; i++) {
+        if (cancelled) return
+
+        const row = tableData[i]
+        decrypted[i] = {}
+
+        for (const col of currentTableInfo.columns) {
+          if (col.name.startsWith('encrypted_')) {
+            const fieldName = col.name.replace('encrypted_', '')
+            const ephemeralCol = `ephemeral_pubkey_${fieldName}`
+            const ciphertext = row[col.name] as string | null
+            const ephemeralPubkey = row[ephemeralCol] as string | null
+
+            if (ciphertext && ephemeralPubkey) {
+              const result = await decryptField({ ciphertext, ephemeral_pubkey: ephemeralPubkey })
+              if (cancelled) return
+              decrypted[i][col.name] = result ?? '[Encrypted]'
+            } else if (ciphertext) {
+              decrypted[i][col.name] = '[Encrypted - Missing Key]'
+            }
+          }
+        }
+      }
+      if (!cancelled) {
+        setDecryptedData(decrypted)
+      }
+    }
+
+    decryptRows()
+
+    return () => {
+      cancelled = true
+    }
+  }, [tableData, currentTableInfo])
 
   // Run SQL query
   const runQuery = async () => {
@@ -189,8 +264,8 @@ export function AdminDatabaseExplorer() {
       setEditingRecord(null)
       setRecordFormData({})
 
-      // Refresh table data after save
-      fetchTableData(selectedTable)
+      // Refresh table data after save (preserve current page)
+      fetchTableData(selectedTable, currentPage)
     } catch (error) {
       console.error('Error saving record:', error)
       alert(error instanceof Error ? error.message : 'Failed to save record')
@@ -214,8 +289,8 @@ export function AdminDatabaseExplorer() {
         throw new Error(result.error || 'Failed to delete record')
       }
 
-      // Refresh table data after delete
-      fetchTableData(selectedTable)
+      // Refresh table data after delete (preserve current page)
+      fetchTableData(selectedTable, currentPage)
     } catch (error) {
       console.error('Error deleting record:', error)
       alert(error instanceof Error ? error.message : 'Failed to delete record')
@@ -229,15 +304,7 @@ export function AdminDatabaseExplorer() {
     setRecordFormData({})
   }
 
-  // Get current table info
-  const currentTableInfo = tables.find((t) => t.name === selectedTable)
-
-  // Get paginated data
-  const paginatedData = tableData.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  )
-  const totalPages = Math.ceil(tableData.length / pageSize)
+  // tableData is already server-paginated, so use it directly
 
   if (!isAuthorized) {
     return null // Will redirect
@@ -466,7 +533,7 @@ export function AdminDatabaseExplorer() {
                 <div>
                   <h2 className="text-base font-semibold text-text">{selectedTable}</h2>
                   <p className="text-xs text-text-muted">
-                    {currentTableInfo?.columns.length} columns, {tableData.length} rows
+                    {currentTableInfo?.columns.length} columns, {totalRows} rows
                   </p>
                 </div>
 
@@ -567,7 +634,9 @@ export function AdminDatabaseExplorer() {
                   <table className="w-full text-sm">
                     <thead className="sticky top-0 bg-surface-raised z-10">
                       <tr>
-                        {currentTableInfo?.columns.map((col) => (
+                        {currentTableInfo?.columns
+                          .filter(col => !col.name.startsWith('ephemeral_pubkey_'))
+                          .map((col) => (
                           <th
                             key={col.name}
                             className="text-left px-3 py-2 font-medium text-text-secondary border-b border-border whitespace-nowrap"
@@ -576,7 +645,9 @@ export function AdminDatabaseExplorer() {
                               {col.primaryKey && (
                                 <Key className="w-3 h-3 text-warning" />
                               )}
-                              {col.name}
+                              {col.name.startsWith('encrypted_')
+                                ? col.name.replace('encrypted_', '') + ' 🔓'
+                                : col.name}
                               <span className="text-xs text-text-muted font-normal">
                                 {col.type}
                               </span>
@@ -587,13 +658,19 @@ export function AdminDatabaseExplorer() {
                       </tr>
                     </thead>
                     <tbody>
-                      {paginatedData.map((row, rowIndex) => (
+                      {tableData.map((row, rowIndex) => {
+                        // Use page-local rowIndex for decryptedData since tableData is already server-paginated
+                        return (
                         <tr
                           key={rowIndex}
                           className="border-b border-border/50 hover:bg-surface-overlay/50 group"
                         >
-                          {currentTableInfo?.columns.map((col) => {
-                            const value = row[col.name]
+                          {currentTableInfo?.columns
+                            .filter(col => !col.name.startsWith('ephemeral_pubkey_'))
+                            .map((col) => {
+                            const value = col.name.startsWith('encrypted_')
+                              ? decryptedData[rowIndex]?.[col.name] ?? '[Decrypting...]'
+                              : row[col.name]
                             const displayValue = formatCellValue(value)
                             const isExpanded =
                               expandedCell?.row === rowIndex && expandedCell?.col === col.name
@@ -609,7 +686,9 @@ export function AdminDatabaseExplorer() {
                                   <div className="absolute z-20 left-0 top-0 min-w-[300px] max-w-[500px] bg-surface-raised border border-border rounded-lg shadow-lg p-3 animate-fade-in">
                                     <div className="flex items-center justify-between mb-2">
                                       <span className="text-xs font-medium text-text-secondary">
-                                        {col.name}
+                                        {col.name.startsWith('encrypted_')
+                                          ? col.name.replace('encrypted_', '') + ' 🔓'
+                                          : col.name}
                                       </span>
                                       <button
                                         onClick={() => setExpandedCell(null)}
@@ -660,23 +739,29 @@ export function AdminDatabaseExplorer() {
                             </div>
                           </td>
                         </tr>
-                      ))}
+                      )})}
+
                     </tbody>
                   </table>
                 )}
               </div>
 
               {/* Pagination */}
-              {tableData.length > pageSize && (
+              {totalRows > pageSize && (
                 <div className="px-4 py-2 border-t border-border bg-surface-raised flex items-center justify-between shrink-0">
                   <span className="text-xs text-text-muted">
                     Showing {(currentPage - 1) * pageSize + 1} to{' '}
-                    {Math.min(currentPage * pageSize, tableData.length)} of {tableData.length}
+                    {Math.min(currentPage * pageSize, totalRows)} of {totalRows}
                   </span>
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
+                      onClick={() => {
+                        const newPage = Math.max(1, currentPage - 1)
+                        if (selectedTable) {
+                          fetchTableData(selectedTable, newPage)
+                        }
+                      }}
+                      disabled={currentPage === 1 || isLoadingData}
                       className="p-1.5 rounded text-text-secondary hover:text-text hover:bg-surface-overlay disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                     >
                       <ChevronLeft className="w-4 h-4" />
@@ -685,8 +770,13 @@ export function AdminDatabaseExplorer() {
                       {currentPage} / {totalPages}
                     </span>
                     <button
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
+                      onClick={() => {
+                        const newPage = Math.min(totalPages, currentPage + 1)
+                        if (selectedTable) {
+                          fetchTableData(selectedTable, newPage)
+                        }
+                      }}
+                      disabled={currentPage === totalPages || isLoadingData}
                       className="p-1.5 rounded text-text-secondary hover:text-text hover:bg-surface-overlay disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                     >
                       <ChevronRight className="w-4 h-4" />
@@ -716,7 +806,7 @@ export function AdminDatabaseExplorer() {
           </span>
           {selectedTable && (
             <span>
-              {tableData.length} row{tableData.length !== 1 ? 's' : ''} in {selectedTable}
+              {totalRows} row{totalRows !== 1 ? 's' : ''} in {selectedTable}
             </span>
           )}
         </div>

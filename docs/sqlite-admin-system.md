@@ -3,6 +3,7 @@
 This document describes the SQLite-based admin and user management system in Sanctum.
 
 > **See also:** [Authentication](./authentication.md) for detailed documentation on admin (Nostr NIP-07) and user (magic link email) authentication flows.
+> **See also:** [Encrypted SQLite Data Model (NIP-04)](./sqlite-encryption.md) for the full encryption design and updated schema details.
 
 ## Overview
 
@@ -115,8 +116,13 @@ Onboarded users.
 |--------|------|-------------|
 | `id` | INTEGER | Primary key (auto-increment) |
 | `pubkey` | TEXT | Optional Nostr pubkey (unique) |
-| `email` | TEXT | User email address (unique) |
-| `name` | TEXT | User display name |
+| `encrypted_email` | TEXT | NIP-04 encrypted email |
+| `ephemeral_pubkey_email` | TEXT | Ephemeral key for email decryption |
+| `email_blind_index` | TEXT | HMAC hash for email lookups (UNIQUE) |
+| `encrypted_name` | TEXT | NIP-04 encrypted name |
+| `ephemeral_pubkey_name` | TEXT | Ephemeral key for name decryption |
+| `email` | TEXT | **Legacy** (deprecated, always NULL) |
+| `name` | TEXT | **Legacy** (deprecated, always NULL) |
 | `user_type_id` | INTEGER | Foreign key to user_types |
 | `approved` | INTEGER | 1=approved, 0=pending (default: per `auto_approve_users` setting) |
 | `created_at` | TIMESTAMP | Creation timestamp |
@@ -129,7 +135,9 @@ Dynamic field values for users (EAV pattern).
 | `id` | INTEGER | Primary key (auto-increment) |
 | `user_id` | INTEGER | Foreign key to users |
 | `field_id` | INTEGER | Foreign key to user_field_definitions |
-| `value` | TEXT | Field value |
+| `encrypted_value` | TEXT | NIP-04 encrypted field value |
+| `ephemeral_pubkey` | TEXT | Ephemeral key for decryption |
+| `value` | TEXT | **Legacy** (deprecated, always NULL) |
 
 ## Field Scoping
 
@@ -275,18 +283,27 @@ curl -X POST http://localhost:8000/users \
   -H "Content-Type: application/json" \
   -d '{
     "pubkey": "npub1user...",
+    "email": "user@example.com",
+    "name": "John Doe",
     "user_type_id": 1,
     "fields": {
-      "email": "user@example.com",
       "institution": "MIT"
     }
   }'
 ```
 
+**Parameters:**
+- `pubkey`: Optional Nostr public key (npub or hex)
+- `email`: Optional email address — send as **plaintext**; server encrypts it (stored in `encrypted_email`) and computes a blind index for lookups
+- `name`: Optional name — send as **plaintext**; server encrypts it (stored in `encrypted_name`)
+- `user_type_id`: Optional ID of the user type
+- `fields`: Dynamic fields defined by admin for the user type — send values as **plaintext**; server encrypts each (stored in `encrypted_value`)
+
 **Validation:**
 - Required fields (global + type-specific) must be provided
 - Unknown fields are rejected
 - Duplicate pubkeys are rejected
+- Duplicate emails are rejected (via blind index)
 
 #### `GET /users/{user_id}`
 Get a user by ID with all field values.
@@ -334,6 +351,8 @@ curl -X POST http://localhost:8000/admin/db/query \
   -H "Content-Type: application/json" \
   -d '{"sql": "SELECT * FROM users WHERE user_type_id = 1"}'
 ```
+
+**Encryption note:** This endpoint returns encrypted columns (`encrypted_*`) and their matching `ephemeral_pubkey_*` values. Decryption happens client-side in admin UIs via NIP-07. For the admin chat tool (`db-query`), see `docs/tools.md` for the `/admin/tools/execute` + `tool_context` flow.
 
 #### CRUD Endpoints
 - `POST /admin/db/tables/{table_name}/rows` - Insert row
@@ -402,10 +421,10 @@ curl -X POST http://localhost:8000/admin/user-fields \
 curl -X POST http://localhost:8000/users \
   -H "Content-Type: application/json" \
   -d '{
+    "email": "jane@university.edu",
+    "name": "Dr. Jane Smith",
     "user_type_id": 1,
     "fields": {
-      "email": "jane@university.edu",
-      "name": "Dr. Jane Smith",
       "institution": "MIT",
       "research_area": "Machine Learning"
     }
@@ -415,10 +434,10 @@ curl -X POST http://localhost:8000/users \
 curl -X POST http://localhost:8000/users \
   -H "Content-Type: application/json" \
   -d '{
+    "email": "john@company.com",
+    "name": "John Developer",
     "user_type_id": 2,
     "fields": {
-      "email": "john@company.com",
-      "name": "John Developer",
       "github_username": "johndev",
       "company": "Acme Corp"
     }
@@ -435,6 +454,8 @@ curl -X POST http://localhost:8000/users \
 | `backend/app/models.py` | Pydantic request/response models |
 | `backend/app/seed.py` | Database initialization on startup |
 | `backend/app/main.py` | API endpoint definitions |
+| `backend/app/encryption.py` | NIP-04 encryption, ECDH, blind index |
+| `backend/app/nostr_keys.py` | Pubkey normalization (npub/hex) |
 
 ### Frontend
 
@@ -445,9 +466,11 @@ curl -X POST http://localhost:8000/users \
 | `frontend/src/pages/UserProfile.tsx` | Dynamic profile form based on fields |
 | `frontend/src/pages/PendingApproval.tsx` | Waiting page for unapproved users |
 | `frontend/src/pages/AdminSetup.tsx` | Admin configuration UI (types + fields) |
-| `frontend/src/pages/AdminDatabaseExplorer.tsx` | SQLite database browser UI |
+| `frontend/src/pages/AdminDatabaseExplorer.tsx` | SQLite database browser UI (with encryption support) |
 | `frontend/src/components/onboarding/FieldEditor.tsx` | Field creation/editing form |
 | `frontend/src/components/onboarding/DynamicField.tsx` | Dynamic field renderer |
+| `frontend/src/utils/encryption.ts` | NIP-07 decryption utilities |
+| `frontend/src/utils/nostrKeys.ts` | Pubkey normalization |
 
 ## Frontend Storage Keys
 
@@ -483,6 +506,12 @@ The frontend uses localStorage for temporary state during onboarding:
 - View paginated data with schema info
 - Execute read-only SQL queries
 - Insert/update/delete rows (admin only)
+
+**Encryption handling:**
+- Encrypted columns (`encrypted_*`) are decrypted client-side via NIP-07
+- Column headers display as `fieldname 🔓` for encrypted fields
+- `ephemeral_pubkey_*` columns are hidden from the table view
+- Requires admin's Nostr wallet extension (e.g., Alby, nos2x) for decryption
 
 ## Troubleshooting
 

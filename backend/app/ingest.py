@@ -1,6 +1,9 @@
 """
 Sanctum Ingest Router
 Handles document upload, chunking, and storage to Qdrant.
+
+Job state is persisted to SQLite (via ingest_db module) to survive container restarts.
+Chunks remain in-memory during processing for performance.
 """
 
 import os
@@ -18,6 +21,8 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks
 from pydantic import BaseModel
 
+import ingest_db
+
 # Configure logging
 logging.basicConfig(
     level=logging.DEBUG,
@@ -34,64 +39,97 @@ MAX_CONCURRENT_CHUNKS = int(os.getenv("MAX_CONCURRENT_CHUNKS", "3"))
 UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/uploads"))
 CHUNKS_DIR = UPLOADS_DIR / "chunks"
 PROCESSED_DIR = UPLOADS_DIR / "processed"
-LOGS_DIR = Path(os.getenv("LOGS_DIR", "/logs"))
 
 # Ensure directories exist
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 CHUNKS_DIR.mkdir(parents=True, exist_ok=True)
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
-LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
-# Persist job state so restarts don't lose jobs
-JOBS_FILE = LOGS_DIR / "jobs_state.json"
-CHUNKS_FILE = LOGS_DIR / "chunks_state.json"
+# In-memory state for active processing
+# Jobs are persisted to SQLite; CHUNKS remain in-memory during processing
+JOBS: dict = {}  # Loaded from SQLite on startup
+CHUNKS: dict = {}  # In-memory only (not persisted for now)
 
 
-def _load_state() -> tuple[dict, dict]:
+def _load_jobs_from_db() -> dict:
+    """Load all jobs from SQLite into memory."""
     jobs = {}
-    chunks = {}
-    try:
-        if JOBS_FILE.exists():
-            jobs = json.loads(JOBS_FILE.read_text(encoding="utf-8"))
-    except Exception as e:
-        logger.warning(f"Failed to load jobs state: {e}")
-    try:
-        if CHUNKS_FILE.exists():
-            chunks = json.loads(CHUNKS_FILE.read_text(encoding="utf-8"))
-    except Exception as e:
-        logger.warning(f"Failed to load chunks state: {e}")
-    return jobs, chunks
+    for job in ingest_db.list_jobs(limit=1000):
+        jobs[job["job_id"]] = {
+            "job_id": job["job_id"],
+            "filename": job["filename"],
+            "file_path": job["file_path"],
+            "status": job["status"],
+            "ontology_id": job.get("ontology_id", "HumanRightsAssistance"),
+            "sample_percent": job.get("sample_percent", 100.0),
+            "created_at": job["created_at"],
+            "updated_at": job["updated_at"],
+            "total_chunks": job["total_chunks"],
+            "processed_chunks": job["processed_chunks"],
+            "failed_chunks": job["failed_chunks"],
+            "error": job["error"],
+        }
+    return jobs
 
 
-def _save_jobs() -> None:
-    try:
-        JOBS_FILE.write_text(json.dumps(JOBS, indent=2), encoding="utf-8")
-    except Exception as e:
-        logger.error(f"Failed to save jobs state: {e}")
-
-
-def _save_chunks() -> None:
-    try:
-        CHUNKS_FILE.write_text(json.dumps(CHUNKS, indent=2), encoding="utf-8")
-    except Exception as e:
-        logger.error(f"Failed to save chunks state: {e}")
-
-
-JOBS, CHUNKS = _load_state()
+def _sync_job_to_db(job_id: str) -> None:
+    """Sync a single job's state to SQLite."""
+    job = JOBS.get(job_id)
+    if not job:
+        return
+    
+    # Check if job exists in DB
+    if not ingest_db.job_exists(job_id):
+        # Create new job
+        ingest_db.create_job(
+            job_id=job_id,
+            filename=job["filename"],
+            file_path=job["file_path"],
+            ontology_id=job.get("ontology_id", "HumanRightsAssistance"),
+            sample_percent=job.get("sample_percent", 100.0),
+        )
+    
+    # Update status
+    ingest_db.update_job_status(
+        job_id=job_id,
+        status=job["status"],
+        total_chunks=job.get("total_chunks"),
+        processed_chunks=job.get("processed_chunks"),
+        failed_chunks=job.get("failed_chunks"),
+        error=job.get("error"),
+    )
 
 
 def _clear_job_chunks(job_id: str) -> None:
-    """Remove any persisted chunks for a job (used on resume)."""
+    """Remove in-memory chunks for a job (used on resume)."""
     to_delete = [cid for cid, c in CHUNKS.items() if c.get("job_id") == job_id]
     for cid in to_delete:
         CHUNKS.pop(cid, None)
-    if to_delete:
-        _save_chunks()
 
 
 @router.on_event("startup")
-async def resume_incomplete_jobs():
-    """Resume incomplete jobs after a restart so they don't disappear."""
+async def load_jobs_and_resume():
+    """Load jobs from SQLite on startup, migrate JSON if needed, and resume incomplete jobs."""
+    global JOBS
+    
+    # One-time migration: import from legacy JSON file if exists and DB is empty
+    json_file = Path(os.getenv("LOGS_DIR", "/logs")) / "jobs_state.json"
+    if json_file.exists():
+        existing_jobs = ingest_db.list_jobs(limit=1)
+        if len(existing_jobs) == 0:
+            logger.info("SQLite empty, migrating from legacy JSON file...")
+            try:
+                legacy_jobs = json.loads(json_file.read_text(encoding="utf-8"))
+                migrated = ingest_db.migrate_from_json(legacy_jobs)
+                logger.info(f"Migrated {migrated} jobs from JSON to SQLite")
+            except Exception as e:
+                logger.error(f"Failed to migrate from JSON: {e}")
+    
+    # Load from SQLite
+    JOBS = _load_jobs_from_db()
+    logger.info(f"Loaded {len(JOBS)} jobs from SQLite")
+    
+    # Resume incomplete jobs
     for job_id, job in list(JOBS.items()):
         status = job.get("status")
         if status in ("pending", "processing"):
@@ -100,7 +138,7 @@ async def resume_incomplete_jobs():
                 job["status"] = "failed"
                 job["error"] = "Source file missing; cannot resume"
                 job["updated_at"] = datetime.utcnow().isoformat()
-                _save_jobs()
+                _sync_job_to_db(job_id)
                 continue
             logger.warning(f"[{job_id}] Resuming job after restart")
             _clear_job_chunks(job_id)
@@ -225,7 +263,7 @@ async def process_document(job_id: str, file_path: Path, sample_percent: float):
     try:
         JOBS[job_id]["status"] = "processing"
         JOBS[job_id]["updated_at"] = datetime.utcnow().isoformat()
-        _save_jobs()
+        _sync_job_to_db(job_id)
 
         # Get file extension
         suffix = file_path.suffix.lower()
@@ -272,12 +310,11 @@ async def process_document(job_id: str, file_path: Path, sample_percent: float):
                 "source_file": file_path.name,
                 "created_at": datetime.utcnow().isoformat(),
             }
-        _save_chunks()
 
         # Update job status
         JOBS[job_id]["total_chunks"] = len(chunks)
         JOBS[job_id]["updated_at"] = datetime.utcnow().isoformat()
-        _save_jobs()
+        _sync_job_to_db(job_id)
         logger.info(f"[{job_id}] Chunking complete: {len(chunks)} chunks created, starting storage...")
 
         # Process chunks with limited concurrency
@@ -305,20 +342,21 @@ async def process_document(job_id: str, file_path: Path, sample_percent: float):
                 JOBS[job_id]["processed_chunks"] = processed
                 JOBS[job_id]["failed_chunks"] = failed
                 JOBS[job_id]["updated_at"] = datetime.utcnow().isoformat()
-                _save_jobs()
-                _save_chunks()
+                # Sync every 10 chunks to reduce DB writes
+                if processed % 10 == 0:
+                    _sync_job_to_db(job_id)
 
         await asyncio.gather(*(run_chunk(cid) for cid in list(CHUNKS.keys()) if CHUNKS[cid]["job_id"] == job_id))
         JOBS[job_id]["status"] = "completed_with_errors" if failed > 0 else "completed"
         JOBS[job_id]["updated_at"] = datetime.utcnow().isoformat()
-        _save_jobs()
+        _sync_job_to_db(job_id)
 
     except Exception as e:
         logger.error(f"[{job_id}] Document processing failed: {e}", exc_info=True)
         JOBS[job_id]["status"] = "failed"
         JOBS[job_id]["error"] = str(e)
         JOBS[job_id]["updated_at"] = datetime.utcnow().isoformat()
-        _save_jobs()
+        _sync_job_to_db(job_id)
 
 
 # PDF extraction mode: "fast" (PyMuPDF) or "quality" (Docling)
@@ -494,12 +532,13 @@ async def upload_document(
     content = await file.read()
     file_path.write_bytes(content)
 
-    # Create job record
+    # Create job record (in memory and SQLite)
     JOBS[job_id] = {
         "job_id": job_id,
         "filename": file.filename,
         "file_path": str(file_path),
         "status": "pending",
+        "ontology_id": "HumanRightsAssistance",  # Default ontology
         "sample_percent": sample_percent,
         "created_at": datetime.utcnow().isoformat(),
         "updated_at": datetime.utcnow().isoformat(),
@@ -508,7 +547,7 @@ async def upload_document(
         "failed_chunks": 0,
         "error": None,
     }
-    _save_jobs()
+    _sync_job_to_db(job_id)
 
     # Process document in background (fire-and-forget)
     asyncio.create_task(process_document(job_id, file_path, sample_percent))
@@ -547,9 +586,11 @@ async def get_job_status(job_id: str):
 
 @router.get("/jobs")
 async def list_jobs():
-    """List all ingest jobs"""
+    """List all ingest jobs (from SQLite for persistence across restarts)"""
+    # Read directly from SQLite to ensure we get persisted data
+    jobs_from_db = ingest_db.list_jobs(limit=500)
     return {
-        "total": len(JOBS),
+        "total": len(jobs_from_db),
         "jobs": [
             {
                 "job_id": j["job_id"],
@@ -558,7 +599,7 @@ async def list_jobs():
                 "total_chunks": j["total_chunks"],
                 "created_at": j["created_at"],
             }
-            for j in JOBS.values()
+            for j in jobs_from_db
         ]
     }
 

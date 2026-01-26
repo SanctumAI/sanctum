@@ -4,6 +4,7 @@ RAG system with Qdrant vector search.
 Also provides user/admin management via SQLite.
 """
 
+import asyncio
 import os
 import uuid
 import logging
@@ -132,6 +133,7 @@ class ChatRequest(BaseModel):
     """Request model for chat endpoint"""
     message: str
     tools: List[str] = []
+    tool_context: Optional[str] = None
 
 
 class ChatResponse(BaseModel):
@@ -140,6 +142,21 @@ class ChatResponse(BaseModel):
     model: str
     provider: str
     tools_used: List[ToolCallInfoResponse] = []
+
+
+class ToolExecuteRequest(BaseModel):
+    """Request model for executing a tool without LLM response (admin-only)."""
+    tool_id: str
+    query: str
+
+
+class ToolExecuteResponse(BaseModel):
+    """Response model for tool execution (admin-only)."""
+    success: bool
+    tool_id: str
+    tool_name: str
+    data: Optional[dict] = None
+    error: Optional[str] = None
 
 
 class QueryRequest(BaseModel):
@@ -387,33 +404,82 @@ async def chat(request: ChatRequest, user: dict = Depends(auth.require_admin_or_
     try:
         tools_used = []
         prompt = request.message
+        seen_tool_keys = set()
 
-        # Filter tools based on user permissions (admin-only tools removed for non-admins)
-        allowed_tools = filter_tools_for_user(request.tools, user)
-
-        # Execute tools if any are selected
-        if allowed_tools:
-            orchestrator = get_tool_orchestrator()
-            tool_context, tool_infos = await orchestrator.execute_tools(
-                query=request.message,
-                tool_ids=allowed_tools
-            )
-
-            # Convert ToolCallInfo to response format
-            tools_used = [
-                ToolCallInfoResponse(
+        def _merge_tools_used(existing: list[ToolCallInfoResponse], infos: list[ToolCallInfo]) -> list[ToolCallInfoResponse]:
+            merged = list(existing)
+            for info in infos:
+                key = (info.tool_id, info.query)
+                if key in seen_tool_keys:
+                    continue
+                seen_tool_keys.add(key)
+                merged.append(ToolCallInfoResponse(
                     tool_id=info.tool_id,
                     tool_name=info.tool_name,
                     query=info.query
+                ))
+            return merged
+
+        tool_context_parts = []
+
+        if request.tool_context:
+            if user.get("type") != "admin":
+                raise HTTPException(status_code=403, detail="Tool context override is admin-only")
+
+            tool_context_parts.append(request.tool_context)
+
+            # Build tools_used from provided tool IDs (client-side tool execution)
+            tools_used = []
+            for tool_id in request.tools:
+                tool = _tool_registry.get(tool_id)
+                if tool:
+                    key = (tool_id, request.message)
+                    if key not in seen_tool_keys:
+                        seen_tool_keys.add(key)
+                        tools_used.append(ToolCallInfoResponse(
+                            tool_id=tool_id,
+                            tool_name=tool.definition.name,
+                            query=request.message
+                        ))
+
+            # Allow other tools to run server-side (excluding db-query to avoid duplicate encrypted context)
+            allowed_tools = filter_tools_for_user(request.tools, user)
+            allowed_tools = [tool_id for tool_id in allowed_tools if tool_id != "db-query"]
+
+            if allowed_tools:
+                orchestrator = get_tool_orchestrator()
+                tool_context, tool_infos = await orchestrator.execute_tools(
+                    query=request.message,
+                    tool_ids=allowed_tools
                 )
-                for info in tool_infos
-            ]
 
-            # Build augmented prompt with tool context
-            if tool_context:
-                prompt = f"""Use the following information to help answer the question.
+                if tool_context:
+                    tool_context_parts.append(tool_context)
 
-{tool_context}
+                tools_used = _merge_tools_used(tools_used, tool_infos)
+        else:
+            # Filter tools based on user permissions (admin-only tools removed for non-admins)
+            allowed_tools = filter_tools_for_user(request.tools, user)
+
+            # Execute tools if any are selected
+            if allowed_tools:
+                orchestrator = get_tool_orchestrator()
+                tool_context, tool_infos = await orchestrator.execute_tools(
+                    query=request.message,
+                    tool_ids=allowed_tools
+                )
+
+                # Convert ToolCallInfo to response format
+                tools_used = _merge_tools_used([], tool_infos)
+
+                if tool_context:
+                    tool_context_parts.append(tool_context)
+
+        if tool_context_parts:
+            combined_context = "\n\n".join(tool_context_parts)
+            prompt = f"""Use the following information to help answer the question.
+
+{combined_context}
 
 Question: {request.message}
 
@@ -427,8 +493,50 @@ Answer:"""
             provider=result.provider,
             tools_used=tools_used
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/admin/tools/execute", response_model=ToolExecuteResponse)
+async def execute_admin_tool(request: ToolExecuteRequest, admin: dict = Depends(auth.require_admin)):
+    """
+    Execute an admin-only tool and return raw results.
+    Used for client-side decryption flows (e.g., db-query with NIP-07).
+    """
+    tool_id = request.tool_id
+    if tool_id not in ADMIN_ONLY_TOOLS:
+        raise HTTPException(status_code=403, detail=f"Tool '{tool_id}' is not admin-only or not allowed")
+
+    tool = _tool_registry.get(tool_id)
+    if not tool:
+        return ToolExecuteResponse(
+            success=False,
+            tool_id=tool_id,
+            tool_name=tool_id,
+            data=None,
+            error="Tool not found"
+        )
+
+    try:
+        result = await tool.execute(query=request.query)
+        return ToolExecuteResponse(
+            success=result.success,
+            tool_id=tool_id,
+            tool_name=tool.definition.name,
+            data=result.data,
+            error=result.error
+        )
+    except Exception as e:
+        logger.exception(f"Tool execution failed for '{tool_id}': {e}")
+        return ToolExecuteResponse(
+            success=False,
+            tool_id=tool_id,
+            tool_name=tool.definition.name if tool.definition else tool_id,
+            data=None,
+            error=str(e)
+        )
 
 
 # NOTE: /query endpoint moved to query.py router (empathetic session-aware RAG)
@@ -507,6 +615,13 @@ async def send_magic_link(
     if not email:
         raise HTTPException(status_code=400, detail="Email is required")
 
+    # Require admin to be configured before onboarding
+    if not database.list_admins():
+        raise HTTPException(
+            status_code=503,
+            detail="Instance not configured. An admin must be registered before users can sign up."
+        )
+
     # Generate token
     token = auth.create_magic_link_token(email, name)
 
@@ -528,6 +643,13 @@ async def verify_magic_link(token: str = Query(..., description="Magic link toke
     Verify a magic link token and create/return the user.
     Returns a session token for subsequent authenticated requests.
     """
+    # Require admin to be configured before onboarding
+    if not database.list_admins():
+        raise HTTPException(
+            status_code=503,
+            detail="Instance not configured. An admin must be registered before users can sign up."
+        )
+
     # Verify token
     data = auth.verify_magic_link_token(token)
     if not data:
@@ -551,7 +673,7 @@ async def verify_magic_link(token: str = Query(..., description="Magic link toke
         user=AuthUserResponse(
             id=user["id"],
             email=email,
-            name=user.get("name"),
+            name=name or user.get("name"),
             user_type_id=user.get("user_type_id"),
             approved=bool(user.get("approved", 1)),
             created_at=user.get("created_at")
@@ -656,6 +778,11 @@ async def admin_auth(
         # First admin creation - only happens when no admins exist yet
         database.add_admin(pubkey)
         admin = database.get_admin_by_pubkey(pubkey)
+
+        # Migrate any existing plaintext data to encrypted format
+        # This happens when users signed up before an admin was configured
+        # Run in a thread to avoid blocking the event loop
+        await asyncio.to_thread(database.migrate_encrypt_existing_data)
     else:
         admin = existing
 
@@ -680,6 +807,12 @@ async def list_admins(admin: dict = Depends(auth.require_admin)):
 @app.delete("/admin/{pubkey}", response_model=SuccessResponse)
 async def remove_admin(pubkey: str, admin: dict = Depends(auth.require_admin)):
     """Remove an admin by pubkey (requires admin auth)"""
+    from nostr_keys import normalize_pubkey
+    try:
+        pubkey = normalize_pubkey(pubkey)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
     if database.remove_admin(pubkey):
         return SuccessResponse(success=True, message="Admin removed")
     raise HTTPException(status_code=404, detail="Admin not found")
@@ -687,10 +820,48 @@ async def remove_admin(pubkey: str, admin: dict = Depends(auth.require_admin)):
 
 # --- Instance Settings ---
 
+# Settings safe to expose publicly (branding only)
+SAFE_PUBLIC_SETTINGS = {
+    "instance_name",
+    "primary_color",
+    "description",
+    "logo_url",
+    "favicon_url",
+}
+
+
+def filter_public_settings(settings: dict) -> dict:
+    """Filter settings to only include safe public keys."""
+    return {k: v for k, v in settings.items() if k in SAFE_PUBLIC_SETTINGS}
+
+
+class InstanceStatusResponse(BaseModel):
+    """Response model for instance status"""
+    initialized: bool  # True if an admin has been registered
+    settings: dict
+
+
+@app.get("/instance/status", response_model=InstanceStatusResponse)
+async def get_instance_status():
+    """
+    Public endpoint: Check if instance is initialized (has an admin).
+
+    Used by frontend to determine whether to show:
+    - Admin setup flow (if not initialized)
+    - User registration (if initialized)
+    """
+    admins = database.list_admins()
+    settings = filter_public_settings(database.get_all_settings())
+    return InstanceStatusResponse(
+        initialized=len(admins) > 0,
+        settings=settings
+    )
+
+
 @app.get("/settings/public", response_model=InstanceSettingsResponse)
 async def get_public_settings():
     """Public endpoint: Get instance settings for branding (name, color, etc.)"""
-    settings = database.get_all_settings()
+    settings = filter_public_settings(database.get_all_settings())
     return InstanceSettingsResponse(settings=settings)
 
 
@@ -866,8 +1037,24 @@ async def list_users(admin: dict = Depends(auth.require_admin)):
 @app.post("/users", response_model=UserResponse)
 async def create_user(user: UserCreate):
     """Create/onboard a new user.
-    user_type_id: Optional ID of the user type they selected during onboarding.
+
+    Args:
+        pubkey: Optional Nostr public key (npub or hex)
+        email: Optional email address (encrypted, enables email lookups)
+        name: Optional user name (encrypted)
+        user_type_id: Optional ID of the user type they selected during onboarding
+        fields: Dynamic fields defined by admin for the user type
+
+    Requires admin to be configured first (for encryption to work properly).
     """
+    # Check if admin is configured (required for data encryption)
+    admins = database.list_admins()
+    if not admins:
+        raise HTTPException(
+            status_code=503,
+            detail="Instance not configured. An admin must be registered before users can sign up."
+        )
+
     # Validate user_type_id if provided
     if user.user_type_id is not None:
         if not database.get_user_type(user.user_type_id):
@@ -899,9 +1086,23 @@ async def create_user(user: UserCreate):
             detail=f"Unknown fields: {', '.join(unknown)}"
         )
 
+    # Normalize pubkey if provided
+    pubkey = None
+    if user.pubkey:
+        from nostr_keys import normalize_pubkey
+        try:
+            pubkey = normalize_pubkey(user.pubkey)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+
     # Create user
     try:
-        user_id = database.create_user(pubkey=user.pubkey, user_type_id=user.user_type_id)
+        user_id = database.create_user(
+            pubkey=pubkey,
+            email=user.email,
+            name=user.name,
+            user_type_id=user.user_type_id
+        )
         if user.fields:
             database.set_user_fields(user_id, user.fields, user_type_id=user.user_type_id)
         return UserResponse(**database.get_user(user_id))
@@ -1070,6 +1271,83 @@ async def get_db_table_schema(table_name: str, admin: dict = Depends(auth.requir
     }
 
 
+def _encrypt_row_for_write(table_name: str, data: dict) -> dict:
+    """Encrypt PII fields for DB explorer writes."""
+    from encryption import encrypt_for_admin_required, compute_blind_index, serialize_field_value
+    from nostr_keys import normalize_pubkey
+
+    if not data:
+        return data
+
+    updated = dict(data)
+
+    if table_name == "users":
+        if "pubkey" in updated:
+            pubkey_val = updated["pubkey"]
+            trimmed_pubkey = str(pubkey_val).strip() if pubkey_val is not None else ""
+            if trimmed_pubkey:
+                updated["pubkey"] = normalize_pubkey(trimmed_pubkey)
+            else:
+                updated["pubkey"] = None
+
+        if "email" in updated:
+            email_val = updated["email"]
+            email_str = str(email_val).strip() if email_val is not None else ""
+            if email_str:
+                encrypted_email, eph = encrypt_for_admin_required(email_str)
+                updated["encrypted_email"] = encrypted_email
+                updated["ephemeral_pubkey_email"] = eph
+                updated["email_blind_index"] = compute_blind_index(email_str.lower())
+                updated["email"] = None
+            else:
+                updated["email"] = None
+                updated["encrypted_email"] = None
+                updated["ephemeral_pubkey_email"] = None
+                updated["email_blind_index"] = None
+
+        if "encrypted_email" in updated and updated.get("encrypted_email") and not updated.get("ephemeral_pubkey_email"):
+            raise ValueError("ephemeral_pubkey_email required when encrypted_email is provided")
+
+        if "encrypted_email" in updated and updated.get("encrypted_email") and updated.get("email_blind_index") is None:
+            raise ValueError("email_blind_index required when encrypted_email is provided")
+
+        if "name" in updated:
+            name_val = updated["name"]
+            name_str = str(name_val).strip() if name_val is not None else ""
+            if name_str:
+                encrypted_name, eph = encrypt_for_admin_required(name_str)
+                updated["encrypted_name"] = encrypted_name
+                updated["ephemeral_pubkey_name"] = eph
+                updated["name"] = None
+            else:
+                updated["name"] = None
+                updated["encrypted_name"] = None
+                updated["ephemeral_pubkey_name"] = None
+
+        if "encrypted_name" in updated and updated.get("encrypted_name") and not updated.get("ephemeral_pubkey_name"):
+            raise ValueError("ephemeral_pubkey_name required when encrypted_name is provided")
+
+    elif table_name == "user_field_values":
+        if "value" in updated:
+            value_val = updated["value"]
+            # Serialize value, use strip() only for emptiness check to preserve whitespace
+            value_str = serialize_field_value(value_val) if value_val is not None else ""
+            if value_str.strip():
+                encrypted_value, eph = encrypt_for_admin_required(value_str)
+                updated["encrypted_value"] = encrypted_value
+                updated["ephemeral_pubkey"] = eph
+                updated["value"] = None
+            else:
+                updated["value"] = None
+                updated["encrypted_value"] = None
+                updated["ephemeral_pubkey"] = None
+
+        if "encrypted_value" in updated and updated.get("encrypted_value") and not updated.get("ephemeral_pubkey"):
+            raise ValueError("ephemeral_pubkey required when encrypted_value is provided")
+
+    return updated
+
+
 @app.post("/admin/db/query", response_model=DBQueryResponse)
 async def execute_db_query(request: DBQueryRequest, admin: dict = Depends(auth.require_admin)):
     """
@@ -1137,10 +1415,14 @@ async def insert_db_row(table_name: str, request: RowMutationRequest, admin: dic
         return RowMutationResponse(success=False, error="No data provided")
 
     try:
-        columns = list(request.data.keys())
+        data = _encrypt_row_for_write(table_name, request.data)
+        if not data:
+            return RowMutationResponse(success=False, error="No data provided")
+
+        columns = list(data.keys())
         placeholders = ", ".join(["?" for _ in columns])
         col_names = ", ".join(columns)
-        values = list(request.data.values())
+        values = list(data.values())
 
         conn = database.get_connection()
         cursor = conn.cursor()
@@ -1154,6 +1436,8 @@ async def insert_db_row(table_name: str, request: RowMutationRequest, admin: dic
         cursor.close()
 
         return RowMutationResponse(success=True, id=row_id)
+    except ValueError as e:
+        return RowMutationResponse(success=False, error=str(e))
     except Exception as e:
         return RowMutationResponse(success=False, error=str(e))
 
@@ -1168,8 +1452,12 @@ async def update_db_row(table_name: str, row_id: int, request: RowMutationReques
         return RowMutationResponse(success=False, error="No data provided")
 
     try:
-        set_clause = ", ".join([f"{k} = ?" for k in request.data.keys()])
-        values = list(request.data.values()) + [row_id]
+        data = _encrypt_row_for_write(table_name, request.data)
+        if not data:
+            return RowMutationResponse(success=False, error="No data provided")
+
+        set_clause = ", ".join([f"{k} = ?" for k in data.keys()])
+        values = list(data.values()) + [row_id]
 
         conn = database.get_connection()
         cursor = conn.cursor()
@@ -1185,6 +1473,8 @@ async def update_db_row(table_name: str, row_id: int, request: RowMutationReques
 
         cursor.close()
         return RowMutationResponse(success=True, id=row_id)
+    except ValueError as e:
+        return RowMutationResponse(success=False, error=str(e))
     except Exception as e:
         return RowMutationResponse(success=False, error=str(e))
 

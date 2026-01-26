@@ -141,7 +141,7 @@ class SQLiteQueryTool(BaseTool):
 
         lines = ["EMAIL LOOKUP HELP:", "If the question includes one of these emails, use the blind index for exact matching:"]
         for email in sorted(set(emails)):
-            blind_index = compute_blind_index(email)
+            blind_index = compute_blind_index(email.strip().lower())
             lines.append(f"- {email} -> {blind_index}")
         return "\n".join(lines)
 

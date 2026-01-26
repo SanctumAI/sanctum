@@ -459,7 +459,8 @@ export function TestDashboard() {
             const fieldName = col.replace('encrypted_', '')
             const ephemeralCol = `ephemeral_pubkey_${fieldName}`
             const ciphertext = row[col] as string | null
-            const ephemeralPubkey = row[ephemeralCol] as string | null
+            // Try field-specific key first, then fall back to generic ephemeral_pubkey
+            const ephemeralPubkey = (row[ephemeralCol] as string | null) ?? (row['ephemeral_pubkey'] as string | null)
 
             if (ciphertext && ephemeralPubkey) {
               try {
@@ -509,7 +510,8 @@ export function TestDashboard() {
             const fieldName = col.replace('encrypted_', '')
             const ephemeralCol = `ephemeral_pubkey_${fieldName}`
             const ciphertext = row[col] as string | null
-            const ephemeralPubkey = row[ephemeralCol] as string | null
+            // Try field-specific key first, then fall back to generic ephemeral_pubkey
+            const ephemeralPubkey = (row[ephemeralCol] as string | null) ?? (row['ephemeral_pubkey'] as string | null)
 
             if (ciphertext && ephemeralPubkey) {
               try {

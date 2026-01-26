@@ -6,7 +6,7 @@ Tests document ingestion and retrieval across server restarts:
 - Test C: Generate PDF from config, ingest, verify via frontend route
 
 Usage:
-    python test_document_persistence.py [--api-base http://localhost:8000]
+    python test_2a_document_persistence.py [--api-base http://localhost:8000]
 
 Requirements:
     - Backend must be running
@@ -19,6 +19,8 @@ import json
 import time
 import argparse
 import tempfile
+import subprocess
+import re
 import requests
 from pathlib import Path
 from datetime import datetime
@@ -196,6 +198,26 @@ def run_rag_query(api_base: str, question: str, token: str) -> dict:
     return response.json()
 
 
+def validate_job_id(job_id: str) -> str:
+    """
+    Validate that job_id matches the expected format to prevent injection attacks.
+
+    Job IDs are 16-character hex strings (truncated SHA256 hash from generate_job_id).
+
+    Args:
+        job_id: The job ID string to validate
+
+    Returns:
+        The validated job_id string
+
+    Raises:
+        ValueError: If job_id is not a valid 16-char hex string
+    """
+    if not job_id or not re.match(r'^[a-f0-9]{16}$', job_id):
+        raise ValueError(f"Invalid job_id format (must be 16 hex chars): {job_id}")
+    return job_id
+
+
 def cleanup_test_artifacts(job_id: str, api_base: str = None):
     """
     Clean up ALL test artifacts from the backend:
@@ -203,20 +225,25 @@ def cleanup_test_artifacts(job_id: str, api_base: str = None):
     2. Delete job record from SQLite
     3. Delete uploaded file from /uploads/
     """
-    import subprocess
-    
+    # Validate job_id to prevent shell injection
+    try:
+        job_id = validate_job_id(job_id)
+    except ValueError as e:
+        print(f"[ERROR] {e}")
+        return
+
     repo_root = SCRIPT_DIR.parent.parent.parent
-    
+
     print(f"\n[CLEANUP] Removing test artifacts for job {job_id}...")
-    
+
     # 1. Delete vectors from Qdrant for this job's source file
     # The vectors have payload.source_file containing the job_id
-    qdrant_cmd = f'''docker compose exec -T backend python -c "
+    # Using argument list to avoid shell injection
+    qdrant_script = f"""
 from qdrant_client import QdrantClient
 client = QdrantClient(host='qdrant', port=6333)
 try:
     from qdrant_client.models import Filter, FieldCondition, MatchText
-    # Delete points where source_file contains the job_id
     result = client.delete(
         collection_name='sanctum_knowledge',
         points_selector=Filter(
@@ -226,24 +253,35 @@ try:
     print('Deleted vectors from Qdrant')
 except Exception as e:
     print(f'Qdrant cleanup: {{e}}')
-"'''
-    result = subprocess.run(qdrant_cmd, shell=True, capture_output=True, text=True, cwd=repo_root)
+"""
+    result = subprocess.run(
+        ["docker", "compose", "exec", "-T", "backend", "python", "-c", qdrant_script],
+        capture_output=True, text=True, cwd=repo_root
+    )
     if "Deleted" in result.stdout:
         print(f"  ✓ Removed vectors from Qdrant")
     else:
         print(f"  ⚠ Qdrant cleanup: {result.stdout.strip() or result.stderr.strip()}")
-    
+
     # 2. Delete job record from ingest_jobs table
-    sql_cmd = f"docker compose exec -T backend sqlite3 /data/sanctum.db \"DELETE FROM ingest_jobs WHERE job_id = '{job_id}'\""
-    result = subprocess.run(sql_cmd, shell=True, capture_output=True, text=True, cwd=repo_root)
+    # job_id is pre-validated to 16 hex chars only, safe for interpolation
+    sql_delete = f"DELETE FROM ingest_jobs WHERE job_id = '{job_id}'"
+    result = subprocess.run(
+        ["docker", "compose", "exec", "-T", "backend", "sqlite3", "/data/sanctum.db", sql_delete],
+        capture_output=True, text=True, cwd=repo_root
+    )
     if result.returncode == 0:
         print(f"  ✓ Removed job record from database")
     else:
         print(f"  ⚠ DB cleanup: {result.stderr.strip()}")
-    
+
     # 3. Delete the uploaded file from /uploads/
-    file_cmd = f"docker compose exec -T backend sh -c 'rm -f /uploads/{job_id}_*.pdf'"
-    result = subprocess.run(file_cmd, shell=True, capture_output=True, text=True, cwd=repo_root)
+    # Using argument list and validated job_id
+    file_pattern = f"/uploads/{job_id}_*.pdf"
+    result = subprocess.run(
+        ["docker", "compose", "exec", "-T", "backend", "sh", "-c", f"rm -f {file_pattern}"],
+        capture_output=True, text=True, cwd=repo_root
+    )
     if result.returncode == 0:
         print(f"  ✓ Removed uploaded file from /uploads/")
     else:
@@ -373,19 +411,19 @@ def test_c_document_persistence(api_base: str, config: dict, token: str = None) 
     return passed
 
 
-def test_persistence_after_restart(api_base: str, expected_job_id: str) -> bool:
+def test_persistence_after_restart(api_base: str, expected_job_id: str, token: str = None) -> bool:
     """
     Verify that a previously created job still exists.
-    
+
     This test should be run AFTER restarting the server.
     """
     print("\n" + "="*60)
     print("TEST C.2: Persistence After Restart")
     print("="*60)
-    
+
     print(f"\n[CHECK] Looking for job: {expected_job_id}")
-    
-    jobs = list_jobs_via_frontend_route(api_base)
+
+    jobs = list_jobs_via_frontend_route(api_base, token)
     
     job_found = any(j.get("job_id") == expected_job_id for j in jobs)
     
@@ -418,7 +456,7 @@ def main():
     
     if args.verify_job:
         # Post-restart verification mode
-        passed = test_persistence_after_restart(args.api_base, args.verify_job)
+        passed = test_persistence_after_restart(args.api_base, args.verify_job, args.token)
     else:
         # Full test mode
         if not REPORTLAB_AVAILABLE:
@@ -438,7 +476,7 @@ def main():
         print("To verify persistence across restarts:")
         print("  1. Note the job_id from above")
         print("  2. Restart the server: docker compose down && docker compose up --build")
-        print("  3. Run: python test_document_persistence.py --verify-job <job_id>")
+        print("  3. Run: python test_2a_document_persistence.py --verify-job <job_id>")
     
     sys.exit(0 if passed else 1)
 

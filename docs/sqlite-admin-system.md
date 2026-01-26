@@ -294,10 +294,10 @@ curl -X POST http://localhost:8000/users \
 
 **Parameters:**
 - `pubkey`: Optional Nostr public key (npub or hex)
-- `email`: Optional email address (encrypted, enables email lookups via `get_user_by_email()`)
-- `name`: Optional user name (encrypted)
+- `email`: Optional email address — send as **plaintext**; server encrypts it (stored in `encrypted_email`) and computes a blind index for lookups
+- `name`: Optional name — send as **plaintext**; server encrypts it (stored in `encrypted_name`)
 - `user_type_id`: Optional ID of the user type
-- `fields`: Dynamic fields defined by admin for the user type
+- `fields`: Dynamic fields defined by admin for the user type — send values as **plaintext**; server encrypts each (stored in `encrypted_value`)
 
 **Validation:**
 - Required fields (global + type-specific) must be provided

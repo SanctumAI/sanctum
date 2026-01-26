@@ -14,7 +14,10 @@
     "ICCPR Article 9",
     "Amnesty International",
     "Human Rights Watch",
-    "ICRC"
+    "ICRC",
+    "Foreign National",
+    "Medical Examination",
+    "Mistreatment"
   ],
   "expected_relationships": [
     "Arbitrary Detention REQUIRES Legal Counsel",

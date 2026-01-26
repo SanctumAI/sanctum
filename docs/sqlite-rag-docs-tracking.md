@@ -100,6 +100,13 @@ CREATE TABLE IF NOT EXISTS ingest_jobs (
 3. Final sync on completion or failure
 ```
 
+**Durability vs. Performance Trade-off:** The 10-chunk sync interval is a tunable heuristic balancing write frequency against throughput. If the container crashes mid-job, up to 10 chunks of progress may be lost (the job resumes from the last synced state).
+
+**Mitigations:**
+- Reduce the sync interval for critical/large documents (adjust in `ingest.py`)
+- Enable [Chunk Persistence](#chunk-persistence-optional) for crash recovery at the individual chunk level
+- Consider enabling SQLite WAL mode for better concurrent write performance under heavy ingest loads
+
 ### On List Jobs (`GET /ingest/jobs`)
 
 ```

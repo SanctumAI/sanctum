@@ -20,6 +20,7 @@ import os
 import sys
 import json
 import sqlite3
+import hashlib
 import argparse
 import requests
 from pathlib import Path
@@ -39,15 +40,21 @@ def load_config() -> dict:
         return json.load(f)
 
 
-def generate_test_admin_keypair(privkey_hex: str) -> tuple[str, str]:
-    """Generate admin keypair from private key hex."""
+def generate_test_admin_keypair(seed: str) -> tuple[str, str]:
+    """
+    Generate admin keypair from a seed string.
+
+    Derives private key deterministically from seed (not stored in VCS).
+    """
+    # Derive 32-byte private key from seed
+    privkey_hex = hashlib.sha256(seed.encode()).hexdigest()
     privkey_bytes = bytes.fromhex(privkey_hex)
     privkey = PrivateKey(privkey_bytes)
-    
+
     # Get x-only public key (32 bytes)
     pubkey_compressed = privkey.public_key.format(compressed=True)
     pubkey_x_only = pubkey_compressed[1:].hex()
-    
+
     return privkey_hex, pubkey_x_only
 
 
@@ -64,11 +71,19 @@ def create_test_user(api_base: str, user_data: dict, admin_token: str = None) ->
         "fields": user_data.get("fields", {})
     }
     
-    response = requests.post(
-        f"{api_base}/users",
-        json=payload,
-        headers=headers
-    )
+    try:
+        response = requests.post(
+            f"{api_base}/users",
+            json=payload,
+            headers=headers,
+            timeout=10
+        )
+    except requests.exceptions.Timeout as e:
+        print(f"[ERROR] Request timed out: {e}")
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"[ERROR] Request failed: {e}")
+        return None
     
     if response.status_code != 200:
         print(f"[ERROR] Failed to create user: {response.status_code}")
@@ -222,9 +237,9 @@ def main():
     print(f"API Base: {args.api_base}")
     print(f"DB Path: {args.db_path}")
     
-    # Generate test admin keypair
+    # Generate test admin keypair from seed
     admin_privkey, admin_pubkey = generate_test_admin_keypair(
-        config["test_admin"]["private_key_hex"]
+        config["test_admin"]["keypair_seed"]
     )
     print(f"Test Admin Pubkey: {admin_pubkey}")
     

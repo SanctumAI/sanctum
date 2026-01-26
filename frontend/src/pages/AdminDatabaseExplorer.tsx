@@ -26,6 +26,8 @@ export function AdminDatabaseExplorer() {
   const [tableData, setTableData] = useState<Record<string, unknown>[]>([])
   const [isLoadingData, setIsLoadingData] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalRows, setTotalRows] = useState(0)
   const [pageSize] = useState(10)
 
   // Query state
@@ -86,19 +88,35 @@ export function AdminDatabaseExplorer() {
   }, [isAuthorized, fetchTables])
 
   // Fetch table data when selection changes
-  const fetchTableData = useCallback(async (tableName: string, page: number = 1) => {
+  const fetchTableData = useCallback(async (tableName: string, page: number = 1, isRetry: boolean = false): Promise<void> => {
     setIsLoadingData(true)
+    setExpandedCell(null)  // Clear expanded cell on any data fetch to avoid stale row index references
     try {
       const response = await adminFetch(
         `/admin/db/tables/${tableName}?page=${page}&page_size=${pageSize}`
       )
       if (!response.ok) throw new Error('Failed to fetch table data')
       const data = await response.json()
+
+      // Handle out-of-range page (e.g., after deleting the last record on a page)
+      if (data.page > data.totalPages && data.totalPages > 0) {
+        if (isRetry) {
+          console.error('Page still out of range after retry, using returned data')
+        } else {
+          // Refetch the last valid page instead of showing invalid state
+          return await fetchTableData(tableName, data.totalPages, true)
+        }
+      }
+
       setTableData(data.rows)
       setCurrentPage(data.page)
+      setTotalPages(data.totalPages)
+      setTotalRows(data.totalRows)
     } catch (error) {
       console.error('Error fetching table data:', error)
       setTableData([])
+      setTotalPages(1)
+      setTotalRows(0)
     } finally {
       setIsLoadingData(false)
     }
@@ -246,8 +264,8 @@ export function AdminDatabaseExplorer() {
       setEditingRecord(null)
       setRecordFormData({})
 
-      // Refresh table data after save
-      fetchTableData(selectedTable)
+      // Refresh table data after save (preserve current page)
+      fetchTableData(selectedTable, currentPage)
     } catch (error) {
       console.error('Error saving record:', error)
       alert(error instanceof Error ? error.message : 'Failed to save record')
@@ -271,8 +289,8 @@ export function AdminDatabaseExplorer() {
         throw new Error(result.error || 'Failed to delete record')
       }
 
-      // Refresh table data after delete
-      fetchTableData(selectedTable)
+      // Refresh table data after delete (preserve current page)
+      fetchTableData(selectedTable, currentPage)
     } catch (error) {
       console.error('Error deleting record:', error)
       alert(error instanceof Error ? error.message : 'Failed to delete record')
@@ -286,12 +304,7 @@ export function AdminDatabaseExplorer() {
     setRecordFormData({})
   }
 
-  // Get paginated data
-  const paginatedData = tableData.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  )
-  const totalPages = Math.ceil(tableData.length / pageSize)
+  // tableData is already server-paginated, so use it directly
 
   if (!isAuthorized) {
     return null // Will redirect
@@ -520,7 +533,7 @@ export function AdminDatabaseExplorer() {
                 <div>
                   <h2 className="text-base font-semibold text-text">{selectedTable}</h2>
                   <p className="text-xs text-text-muted">
-                    {currentTableInfo?.columns.length} columns, {tableData.length} rows
+                    {currentTableInfo?.columns.length} columns, {totalRows} rows
                   </p>
                 </div>
 
@@ -645,22 +658,22 @@ export function AdminDatabaseExplorer() {
                       </tr>
                     </thead>
                     <tbody>
-                      {paginatedData.map((row, rowIndex) => {
-                        const absoluteIndex = (currentPage - 1) * pageSize + rowIndex
+                      {tableData.map((row, rowIndex) => {
+                        // Use page-local rowIndex for decryptedData since tableData is already server-paginated
                         return (
                         <tr
-                          key={absoluteIndex}
+                          key={rowIndex}
                           className="border-b border-border/50 hover:bg-surface-overlay/50 group"
                         >
                           {currentTableInfo?.columns
                             .filter(col => !col.name.startsWith('ephemeral_pubkey_'))
                             .map((col) => {
                             const value = col.name.startsWith('encrypted_')
-                              ? decryptedData[absoluteIndex]?.[col.name] ?? '[Decrypting...]'
+                              ? decryptedData[rowIndex]?.[col.name] ?? '[Decrypting...]'
                               : row[col.name]
                             const displayValue = formatCellValue(value)
                             const isExpanded =
-                              expandedCell?.row === absoluteIndex && expandedCell?.col === col.name
+                              expandedCell?.row === rowIndex && expandedCell?.col === col.name
                             const isLongValue = displayValue.length > 50
                             const isJson = isJsonValue(value)
 
@@ -697,7 +710,7 @@ export function AdminDatabaseExplorer() {
                                     } ${isLongValue ? 'cursor-pointer hover:text-accent' : ''}`}
                                     onClick={() =>
                                       isLongValue &&
-                                      setExpandedCell({ row: absoluteIndex, col: col.name })
+                                      setExpandedCell({ row: rowIndex, col: col.name })
                                     }
                                     title={isLongValue ? 'Click to expand' : undefined}
                                   >
@@ -734,16 +747,21 @@ export function AdminDatabaseExplorer() {
               </div>
 
               {/* Pagination */}
-              {tableData.length > pageSize && (
+              {totalRows > pageSize && (
                 <div className="px-4 py-2 border-t border-border bg-surface-raised flex items-center justify-between shrink-0">
                   <span className="text-xs text-text-muted">
                     Showing {(currentPage - 1) * pageSize + 1} to{' '}
-                    {Math.min(currentPage * pageSize, tableData.length)} of {tableData.length}
+                    {Math.min(currentPage * pageSize, totalRows)} of {totalRows}
                   </span>
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
+                      onClick={() => {
+                        const newPage = Math.max(1, currentPage - 1)
+                        if (selectedTable) {
+                          fetchTableData(selectedTable, newPage)
+                        }
+                      }}
+                      disabled={currentPage === 1 || isLoadingData}
                       className="p-1.5 rounded text-text-secondary hover:text-text hover:bg-surface-overlay disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                     >
                       <ChevronLeft className="w-4 h-4" />
@@ -752,8 +770,13 @@ export function AdminDatabaseExplorer() {
                       {currentPage} / {totalPages}
                     </span>
                     <button
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
+                      onClick={() => {
+                        const newPage = Math.min(totalPages, currentPage + 1)
+                        if (selectedTable) {
+                          fetchTableData(selectedTable, newPage)
+                        }
+                      }}
+                      disabled={currentPage === totalPages || isLoadingData}
                       className="p-1.5 rounded text-text-secondary hover:text-text hover:bg-surface-overlay disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                     >
                       <ChevronRight className="w-4 h-4" />
@@ -783,7 +806,7 @@ export function AdminDatabaseExplorer() {
           </span>
           {selectedTable && (
             <span>
-              {tableData.length} row{tableData.length !== 1 ? 's' : ''} in {selectedTable}
+              {totalRows} row{totalRows !== 1 ? 's' : ''} in {selectedTable}
             </span>
           )}
         </div>

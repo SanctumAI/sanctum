@@ -65,17 +65,18 @@ Each subdirectory contains a `test-config.json` with:
 ```json
 {
   "test_admin": {
-    "private_key_hex": "...",  // For encryption/decryption
-    "public_key_hex": "..."    // Admin pubkey
+    "keypair_seed": "..."
   },
   "test_user": {
     "email": "...",
     "name": "...",
-    "fields": { ... }
+    "fields": { }
   },
-  "expected_behavior": { ... }
+  "expected_behavior": { }
 }
 ```
+
+The `keypair_seed` is used to derive an admin keypair deterministically using SHA-256. Both the private key (for decryption tests) and public key (for admin creation) are generated at runtime, avoiding storage of actual key material in version control.
 
 ### RAG/test-config.json
 
@@ -84,12 +85,14 @@ Each subdirectory contains a `test-config.json` with:
   "test_document": {
     "filename": "...",
     "title": "...",
-    "content": "..."  // Will be converted to PDF
+    "content": "..."
   },
-  "expected_entities": [...],
-  "test_queries": [...]
+  "expected_entities": [],
+  "test_queries": []
 }
 ```
+
+The `content` field is converted to a PDF at test runtime for upload testing.
 
 ---
 
@@ -115,8 +118,8 @@ python run_all_be_tests.py
 
 **What happens by default:**
 1. Backs up your current database
-2. Resets to clean state (no users, minimal field schema)
-3. Creates a test admin
+2. Resets to clean state (clears users, admins, user fields, and ingest_jobs)
+3. Creates a test admin (keypair derived from config seed)
 4. Runs all tests
 5. **Restores your original database**
 

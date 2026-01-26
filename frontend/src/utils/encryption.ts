@@ -25,6 +25,7 @@ export interface EncryptedField {
  */
 export function hasNip04Support(): boolean {
   return (
+    typeof window !== 'undefined' &&
     typeof window.nostr !== 'undefined' &&
     typeof window.nostr.nip04?.decrypt === 'function'
   )
@@ -161,7 +162,8 @@ export async function decryptUser(user: UserWithEncryption): Promise<DecryptedUs
     email,
     name,
     fields,
-    approved: user.approved ?? true,
+    // Default to false (fail-closed) if API omits approved field
+    approved: user.approved ?? false,
     user_type_id: user.user_type_id,
     created_at: user.created_at,
     email_encrypted: user.email_encrypted ?? null,

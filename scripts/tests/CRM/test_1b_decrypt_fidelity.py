@@ -19,8 +19,11 @@ Requirements:
 import os
 import sys
 import json
+import shlex
 import sqlite3
+import hashlib
 import argparse
+import subprocess
 from pathlib import Path
 
 # Add backend to path for imports
@@ -38,55 +41,55 @@ def load_config() -> dict:
         return json.load(f)
 
 
-def generate_test_admin_keypair(privkey_hex: str) -> tuple[str, str]:
-    """Generate admin keypair from private key hex."""
+def generate_test_admin_keypair(seed: str) -> tuple[str, str]:
+    """
+    Generate admin keypair from a seed string.
+
+    Derives private key deterministically from seed (not stored in VCS).
+    """
+    # Derive 32-byte private key from seed
+    privkey_hex = hashlib.sha256(seed.encode()).hexdigest()
     privkey_bytes = bytes.fromhex(privkey_hex)
     privkey = PrivateKey(privkey_bytes)
-    
+
     # Get x-only public key (32 bytes)
     pubkey_compressed = privkey.public_key.format(compressed=True)
     pubkey_x_only = pubkey_compressed[1:].hex()
-    
+
     return privkey_hex, pubkey_x_only
 
 
 def inspect_raw_database(db_path: str, user_id: int) -> dict:
     """
     Directly inspect the SQLite database via docker exec.
-    
+
     Returns raw column values for the user.
     """
-    import json
-    
-    # Get user record via docker
-    user_json = run_docker_sql(f"SELECT * FROM users WHERE id = {user_id}")
-    
-    # sqlite3 without -json returns plain text, try to parse
-    if not user_json:
-        return None
-    
-    # Run with -json flag for structured output
+    # Validate user_id is an integer to prevent SQL injection
+    user_id = int(user_id)
+
     repo_root = SCRIPT_DIR.parent.parent.parent
-    import subprocess
-    
-    cmd = f"docker compose exec -T backend sqlite3 -json {db_path} 'SELECT * FROM users WHERE id = {user_id}'"
+
+    # Get user record with -json flag for structured output
+    # Use shlex.quote for db_path to handle paths with spaces/special chars
+    cmd = f"docker compose exec -T backend sqlite3 -json {shlex.quote(db_path)} 'SELECT * FROM users WHERE id = {user_id}'"
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=repo_root)
-    
+
     if not result.stdout.strip() or result.stdout.strip() == "[]":
         return None
-    
+
     users = json.loads(result.stdout.strip())
     if not users:
         return None
-    
+
     user_data = users[0]
-    
+
     # Get field values
-    cmd = f"""docker compose exec -T backend sqlite3 -json {db_path} 'SELECT fd.field_name, ufv.value, ufv.encrypted_value, ufv.ephemeral_pubkey FROM user_field_values ufv JOIN user_field_definitions fd ON fd.id = ufv.field_id WHERE ufv.user_id = {user_id}'"""
+    cmd = f"docker compose exec -T backend sqlite3 -json {shlex.quote(db_path)} 'SELECT fd.field_name, ufv.value, ufv.encrypted_value, ufv.ephemeral_pubkey FROM user_field_values ufv JOIN user_field_definitions fd ON fd.id = ufv.field_id WHERE ufv.user_id = {user_id}'"
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=repo_root)
-    
+
     user_data["field_values"] = json.loads(result.stdout.strip()) if result.stdout.strip() else []
-    
+
     return user_data
 
 
@@ -207,19 +210,82 @@ def test_decrypt_and_verify(db_path: str, user_id: int, admin_privkey: str, orig
 
 def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db") -> str:
     """Run SQL inside Docker container and return output."""
-    import subprocess
-    
     repo_root = SCRIPT_DIR.parent.parent.parent
     escaped_sql = sql.replace("'", "'\\''")
-    cmd = f"docker compose exec -T backend sqlite3 {db_path} '{escaped_sql}'"
+    cmd = f"docker compose exec -T backend sqlite3 {shlex.quote(db_path)} '{escaped_sql}'"
     
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=repo_root)
     return result.stdout.strip()
 
 
-def find_test_user(db_path: str, test_email: str) -> int:
-    """Find a test user by email blind index or most recent user."""
-    output = run_docker_sql("SELECT id FROM users ORDER BY id DESC LIMIT 1")
+def compute_blind_index_in_docker(email: str) -> str | None:
+    """
+    Compute blind index inside Docker container where SECRET_KEY is available.
+
+    The blind index key is derived from SECRET_KEY, which only exists inside
+    the container (via env var or /data/.secret_key). Running compute_blind_index
+    on the host would use a different (randomly generated) key.
+    """
+    # Escape for Python string inside shell
+    escaped_email = email.replace("\\", "\\\\").replace("'", "\\'")
+
+    script = f"from encryption import compute_blind_index; print(compute_blind_index('{escaped_email}'))"
+    result = subprocess.run(
+        ["docker", "compose", "exec", "-T", "backend", "python", "-c", script],
+        capture_output=True, text=True, cwd=REPO_ROOT
+    )
+
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip()
+
+
+def find_test_user(db_path: str, test_email: str) -> int | None:
+    """
+    Find a test user by email blind index or most recent user.
+
+    First attempts to find the user by blind index lookup using the provided
+    test_email. If that fails, falls back to plaintext email lookup (for legacy
+    data). If both fail, returns the most recent user. Returns None if no user
+    is found.
+
+    Args:
+        db_path: Path to SQLite database file
+        test_email: Email address to search for
+
+    Returns:
+        User ID if found, None otherwise
+    """
+    # Normalize email: lowercase and strip whitespace
+    normalized_email = test_email.strip().lower() if test_email else ""
+    if not normalized_email:
+        # If no email provided, fall back to most recent user
+        output = run_docker_sql("SELECT id FROM users ORDER BY id DESC LIMIT 1", db_path)
+        return int(output) if output else None
+
+    # Compute blind index inside Docker where SECRET_KEY is available
+    blind_index = compute_blind_index_in_docker(normalized_email)
+    if blind_index:
+        # Escape single quotes in blind_index for SQL
+        escaped_blind_index = blind_index.replace("'", "''")
+        output = run_docker_sql(
+            f"SELECT id FROM users WHERE email_blind_index = '{escaped_blind_index}' LIMIT 1",
+            db_path
+        )
+        if output:
+            return int(output)
+
+    # Fall back to plaintext email lookup (for legacy/unencrypted data)
+    escaped_email = normalized_email.replace("'", "''")
+    output = run_docker_sql(
+        f"SELECT id FROM users WHERE LOWER(email) = '{escaped_email}' LIMIT 1",
+        db_path
+    )
+    if output:
+        return int(output)
+
+    # Final fallback: most recent user
+    output = run_docker_sql("SELECT id FROM users ORDER BY id DESC LIMIT 1", db_path)
     return int(output) if output else None
 
 
@@ -250,9 +316,9 @@ def main():
     else:
         print(f"User ID: {user_id}")
     
-    # Generate test admin keypair
+    # Generate test admin keypair from seed
     admin_privkey, admin_pubkey = generate_test_admin_keypair(
-        config["test_admin"]["private_key_hex"]
+        config["test_admin"]["keypair_seed"]
     )
     print(f"Test Admin Pubkey: {admin_pubkey}")
     

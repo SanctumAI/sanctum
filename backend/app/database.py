@@ -568,7 +568,8 @@ def create_user(
     trimmed_email = email.strip() if email else None
     if trimmed_email:
         encrypted_email, ephemeral_pubkey_email = encrypt_for_admin_required(trimmed_email)
-        email_blind_index = compute_blind_index(trimmed_email)
+        # Blind index uses lowercased email for case-insensitive lookups (matches get_user_by_email)
+        email_blind_index = compute_blind_index(trimmed_email.lower())
 
     # Encrypt name if provided (strip whitespace first)
     encrypted_name = None
@@ -814,7 +815,7 @@ def migrate_encrypt_existing_data():
                 updates.append("ephemeral_pubkey_email = ?")
                 values.append(ephemeral_pubkey_email)
                 updates.append("email_blind_index = ?")
-                values.append(compute_blind_index(trimmed_email))
+                values.append(compute_blind_index(trimmed_email.lower()))
                 updates.append("email = NULL")  # Clear plaintext
 
         # Encrypt name if not already encrypted (strip whitespace first)

@@ -1297,7 +1297,7 @@ def _encrypt_row_for_write(table_name: str, data: dict) -> dict:
                 encrypted_email, eph = encrypt_for_admin_required(email_str)
                 updated["encrypted_email"] = encrypted_email
                 updated["ephemeral_pubkey_email"] = eph
-                updated["email_blind_index"] = compute_blind_index(email_str)
+                updated["email_blind_index"] = compute_blind_index(email_str.lower())
                 updated["email"] = None
             else:
                 updated["email"] = None

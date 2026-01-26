@@ -56,9 +56,8 @@ def generate_ephemeral_keypair() -> Tuple[bytes, str]:
         - private_key_bytes: 32-byte private key (discard after encryption!)
         - public_key_hex: hex-encoded x-only public key (store with ciphertext)
     """
-    # Generate random 32-byte private key
-    privkey_bytes = secrets.token_bytes(32)
-    privkey = PrivateKey(privkey_bytes)
+    # Let coincurve generate a guaranteed-valid secp256k1 private key
+    privkey = PrivateKey()
 
     # Get x-only public key (32 bytes, no prefix)
     # coincurve gives us 33-byte compressed format, we need x-only
@@ -66,7 +65,7 @@ def generate_ephemeral_keypair() -> Tuple[bytes, str]:
     # Remove the prefix byte (02 or 03) to get x-only
     pubkey_x_only = pubkey_compressed[1:]
 
-    return privkey_bytes, pubkey_x_only.hex()
+    return privkey.secret, pubkey_x_only.hex()
 
 
 def compute_shared_secret(
@@ -139,8 +138,12 @@ def nip04_encrypt(plaintext: str, receiver_pubkey_hex: str) -> Tuple[str, str]:
     # Format as NIP-04: base64(ciphertext)?iv=base64(iv)
     ciphertext = f"{b64encode(encrypted).decode()}?iv={b64encode(iv).decode()}"
 
-    # Securely discard ephemeral private key (it's only needed once)
-    # Python doesn't have secure memory wiping, but we ensure it's not stored
+    # SECURITY NOTE: Secure memory wiping is not possible in CPython for immutable
+    # bytes objects. The ephemeral private key may persist in memory until the GC
+    # reclaims and the OS reuses the page. This is an accepted limitation because:
+    # 1. The key is ephemeral and used only once for this encryption
+    # 2. An attacker with memory access already has broader compromise
+    # 3. Process memory isolation provides the primary protection
     del ephemeral_privkey
 
     return ciphertext, ephemeral_pubkey
@@ -166,10 +169,11 @@ def nip04_decrypt(
         Decrypted plaintext
     """
     # Parse NIP-04 format
-    if "?iv=" not in ciphertext:
-        raise ValueError("Invalid NIP-04 ciphertext format")
+    parts = ciphertext.split("?iv=", 1)
+    if len(parts) != 2:
+        raise ValueError("Invalid NIP-04 ciphertext format: missing '?iv=' separator")
 
-    encrypted_b64, iv_part = ciphertext.split("?iv=")
+    encrypted_b64, iv_part = parts
     encrypted = b64decode(encrypted_b64)
     iv = b64decode(iv_part)
 

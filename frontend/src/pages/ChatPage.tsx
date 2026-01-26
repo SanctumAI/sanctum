@@ -57,7 +57,7 @@ const decryptDbQueryData = async (data: DbQueryToolData) => {
           const fieldName = col.replace('encrypted_', '')
           const ciphertext = row[col]
           if (typeof ciphertext !== 'string' || !ciphertext) {
-            nextRow[fieldName] = null
+            // No ciphertext - don't set anything; let plaintext column fill in if present
             continue
           }
           encryptedValueCount += 1
@@ -80,7 +80,10 @@ const decryptDbQueryData = async (data: DbQueryToolData) => {
           continue
         }
 
-        nextRow[col] = row[col]
+        // Only set if not already filled by a decrypted value
+        if (nextRow[col] === undefined) {
+          nextRow[col] = row[col]
+        }
       }
 
       return nextRow

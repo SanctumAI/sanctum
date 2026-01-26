@@ -1,9 +1,8 @@
 {
   "description": "CRM encryption test configuration - SOURCE OF TRUTH for test admin and user schema",
   "test_admin": {
-    "description": "Deterministic test admin keypair. The harness reads this pubkey to create the admin.",
-    "private_key_hex": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-    "public_key_hex": "4646ae5047316b4230d0086c8acec687f00b1cd9d1dc634f6cb358ac0a9a8fff"
+    "description": "Well-known test keypair (SHA256 of seed = private key). DO NOT use in production.",
+    "keypair_seed": "sanctum-test-admin-keypair-v1"
   },
   "test_user": {
     "description": "Test user data. The 'fields' keys define what user_field_definitions the harness creates.",

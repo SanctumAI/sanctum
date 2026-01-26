@@ -23,12 +23,15 @@ import sys
 import re
 import json
 import shutil
+import hashlib
 import argparse
 import subprocess
 import time
 from pathlib import Path
 from datetime import datetime
 from typing import List, Tuple, Optional
+
+from coincurve import PrivateKey
 
 
 SCRIPT_DIR = Path(__file__).parent
@@ -135,49 +138,59 @@ def get_latest_backup() -> Optional[Path]:
 def reset_database() -> bool:
     """Reset the database to a clean state."""
     print(f"  [HARNESS] Resetting database...")
-    
+
     # Delete from tables that definitely exist, ignore errors for optional tables
     core_tables_sql = """
     DELETE FROM user_field_values;
     DELETE FROM user_field_definitions;
     DELETE FROM users;
     DELETE FROM admins;
+    DELETE FROM ingest_jobs;
     """
-    
+
     code, output = run_sql(core_tables_sql)
     if code != 0:
         print(f"  [HARNESS] ✗ Reset failed: {output}")
         return False
-    
+
     # Try optional tables (may not exist in all deployments)
     for optional_table in ["pending_users", "magic_links"]:
         run_sql(f"DELETE FROM {optional_table};")  # Ignore errors
-    
+
     # Reset auto-increment counters
-    run_sql("DELETE FROM sqlite_sequence WHERE name IN ('users', 'admins', 'user_field_definitions', 'user_field_values');")
-    
+    run_sql("DELETE FROM sqlite_sequence WHERE name IN ('users', 'admins', 'user_field_definitions', 'user_field_values', 'ingest_jobs');")
+
     print(f"  [HARNESS] ✓ Tables cleared")
     return True
 
 
+def derive_pubkey_from_seed(seed: str) -> str:
+    """Derive x-only public key from a seed string."""
+    privkey_hex = hashlib.sha256(seed.encode()).hexdigest()
+    privkey = PrivateKey(bytes.fromhex(privkey_hex))
+    pubkey_compressed = privkey.public_key.format(compressed=True)
+    return pubkey_compressed[1:].hex()  # x-only (32 bytes)
+
+
 def create_test_admin() -> bool:
-    """Create a test admin using pubkey from CRM config."""
+    """Create a test admin using keypair derived from seed in CRM config."""
     print(f"  [HARNESS] Creating test admin...")
-    
+
     config = load_crm_config()
-    pubkey = config["test_admin"]["public_key_hex"]
-    
+    seed = config["test_admin"]["keypair_seed"]
+    pubkey = derive_pubkey_from_seed(seed)
+
     sql = f"""
-    INSERT OR REPLACE INTO admins (pubkey, created_at) 
+    INSERT OR REPLACE INTO admins (pubkey, created_at)
     VALUES ('{pubkey}', datetime('now'));
     """
-    
+
     code, output = run_sql(sql)
-    
+
     if code != 0:
         print(f"  [HARNESS] ✗ Admin creation failed: {output}")
         return False
-    
+
     print(f"  [HARNESS] ✓ Test admin created ({pubkey[:16]}...)")
     return True
 
@@ -185,23 +198,25 @@ def create_test_admin() -> bool:
 def create_user_fields_from_config() -> bool:
     """Create user field definitions based on CRM test config."""
     print(f"  [HARNESS] Creating user fields from config...")
-    
+
     config = load_crm_config()
     test_fields = config.get("test_user", {}).get("fields", {})
-    
+
     if not test_fields:
         print(f"  [HARNESS] ✗ No fields defined in CRM test-config.json")
         return False
-    
+
     # Clear existing and insert fields from config
     sql_parts = ["DELETE FROM user_field_definitions;"]
-    
+
     for i, field_name in enumerate(test_fields.keys(), start=1):
         # First field is required, rest are optional
         required = 1 if i == 1 else 0
+        # Escape single quotes in field names for SQL safety
+        escaped_name = field_name.replace("'", "''")
         sql_parts.append(
             f"INSERT INTO user_field_definitions (field_name, field_type, required, display_order) "
-            f"VALUES ('{field_name}', 'text', {required}, {i});"
+            f"VALUES ('{escaped_name}', 'text', {required}, {i});"
         )
     
     sql = " ".join(sql_parts)

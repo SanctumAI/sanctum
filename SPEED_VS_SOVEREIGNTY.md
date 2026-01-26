@@ -1,5 +1,7 @@
 # Speed vs. Sovereignty: Hackathon Trade-offs
 
+> ⚠️ **Note (Jan 2026):** Neo4j graph database has been **temporarily disabled** to simplify deployment. The tables below reflect the original hackathon architecture. Current deployment uses Qdrant vector search only. Graph-based retrieval is planned for re-integration in a future release.
+
 ## The Core Tension
 
 Sanctum is designed as a **privacy-first, sovereignty-first** RAG system. In production, all processing happens on-device or on infrastructure the user controls. No data leaves the user's environment.
@@ -15,18 +17,18 @@ However, during this hackathon, we face a hard constraint: **time**.
 | Embeddings | SentenceTransformer | Local CPU | ~2-13 sec/chunk |
 | LLM Extraction | Local LLM / Maple | Self-hosted | ~10-30 sec/chunk |
 | Vector Store | Qdrant | Local container | Fast |
-| Graph Store | Neo4j | Local container | Fast |
+| Graph Store | Neo4j | Local container | Fast *(planned)* |
 
 **Total for 150-chunk document: 30-60+ minutes**
 
-### Hackathon Mode (Current)
+### Current Mode (Post-Hackathon)
 | Component | Provider | Location | Speed |
 |-----------|----------|----------|-------|
 | PDF Extraction | PyMuPDF | Local | ~1 sec total |
-| Embeddings | **OpenAI API** | ⚠️ External | ~0.2 sec/batch |
-| LLM Extraction | Maple Proxy | HRF-hosted | ~10-20 sec/chunk |
+| Embeddings | Local (E5) or OpenAI | Configurable | ~0.2-2 sec/batch |
+| LLM | Maple Proxy | HRF-hosted | ~10-20 sec/chunk |
 | Vector Store | Qdrant | Local container | Fast |
-| Graph Store | Neo4j | Local container | Fast |
+| Graph Store | *(disabled)* | — | — |
 
 **Total for 15-chunk sample: ~2.5 minutes**
 

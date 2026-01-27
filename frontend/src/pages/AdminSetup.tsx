@@ -228,14 +228,14 @@ export function AdminSetup() {
 
   // Helper to get user type name by id
   const getUserTypeName = (typeId: number | null | undefined): string => {
-    if (typeId === null || typeId === undefined) return 'Global'
-    const userType = userTypes.find((t) => t.id === typeId)
+    if (typeId === null || typeId === undefined) return t('admin.global')
+    const userType = userTypes.find((ut) => ut.id === typeId)
     return userType?.name || 'Unknown'
   }
 
   const handleSave = () => {
     // Save instance config
-    updateConfig({ name: instanceName.trim() || 'Sanctum', accentColor, icon })
+    updateConfig({ name: instanceName.trim() || t('admin.setup.defaultName'), accentColor, icon })
     navigate('/chat')
   }
 

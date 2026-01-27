@@ -195,7 +195,7 @@ export function UserAuth() {
       })
 
       if (!response.ok) {
-        let errorMessage = 'Failed to send magic link'
+        let errorMessage = t('errors.failedToSendMagicLink')
         try {
           const contentType = response.headers.get('content-type')
           if (contentType && contentType.includes('application/json')) {

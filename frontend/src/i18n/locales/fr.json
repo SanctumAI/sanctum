@@ -1,9 +1,28 @@
 {
   "onboarding": {
+    "nostr": {
+      "whatIsNostr": "Qu'est-ce que Nostr ?",
+      "whatIsNostrDesc": "Nostr est un protocole décentralisé pour les réseaux sociaux et l'identité. Contrairement aux connexions traditionnelles, votre identité n'est pas contrôlée par une entreprise — vous possédez vos clés.",
+      "whatIsNip07": "Qu'est-ce que NIP-07 ?",
+      "whatIsNip07Desc": "NIP-07 est une norme qui permet aux sites web de demander votre clé publique Nostr à partir d'une extension de navigateur. Cela signifie :",
+      "noPasswords": "Aucun mot de passe à retenir",
+      "noEmailVerification": "Aucune vérification d'e-mail nécessaire",
+      "cryptoSecure": "Votre identité est cryptographiquement sécurisée",
+      "controlKeys": "Vous contrôlez vos propres clés",
+      "howItWorks": "Comment ça fonctionne",
+      "step1": "Installez une extension de signature Nostr (nous recommandons Alby)",
+      "step2": "Cliquez sur \"Se connecter avec Nostr\" ci-dessus",
+      "step3": "Approuvez la connexion dans votre extension",
+      "step4": "Vous êtes connecté !",
+      "dontHaveExtension": "Vous n'avez pas d'extension Nostr ? Obtenez-en une ici :",
+      "alby": "Alby",
+      "nos2x": "nos2x"
+    },
     "userType": {
       "title": "Qu'est-ce qui vous décrit le mieux ?",
       "description": "Sélectionnez l'option qui correspond le mieux à vos besoins",
-      "loadError": "Échec du chargement des types d'utilisateurs. Veuillez réessayer."
+      "loadError": "Échec du chargement des types d'utilisateurs. Veuillez réessayer.",
+      "selectionLabel": "Sélection du type d'utilisateur"
     },
     "language": {
       "selectLabel": "Sélectionner une langue",
@@ -92,7 +111,9 @@
     "tools": {
       "label": "Outils",
       "webSearch": "Rechercher sur le web des informations actuelles",
+      "webSearchName": "Web",
       "database": "Interroger la base de données SQLite",
+      "databaseName": "Base de données",
       "knowledgeGraph": "Interroger le graphe de connaissances"
     },
     "documentScope": {
@@ -151,7 +172,9 @@
     "continue": "Continuer",
     "unexpectedError": "Une erreur inattendue s'est produite",
     "nullPlaceholder": "NULL",
-    "error": "Erreur"
+    "error": "Erreur",
+    "back": "Retour",
+    "loading": "Chargement..."
   },
   "settings": {
     "title": "Paramètres",
@@ -171,6 +194,7 @@
   },
   "admin": {
     "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet enregistrement ?",
+    "global": "Global",
     "setup": {
       "backToChat": "Retour au chat",
       "title": "Configurez votre instance",
@@ -298,5 +322,43 @@
     "connectedAs": "Connecté en tant que",
     "redirecting": "Redirection vers le tableau de bord...",
     "connectionFailed": "Échec de la connexion"
+  },
+  "errors": {
+    "failedToFetchDocuments": "Échec de la récupération des documents",
+    "noResponseFromServer": "Aucune réponse du serveur",
+    "failedToSendMessage": "Échec de l'envoi du message",
+    "searchFailed": "Échec de la recherche : HTTP {{status}}",
+    "failedToSendMagicLink": "Échec de l'envoi du lien magique",
+    "failedToFetchJobs": "Échec de la récupération des tâches",
+    "errorFetchingJobs": "Erreur lors de la récupération des tâches",
+    "failedToFetchTables": "Échec de la récupération des tables",
+    "errorFetchingTables": "Erreur lors de la récupération des tables",
+    "failedToFetchTableData": "Échec de la récupération des données de la table",
+    "verificationFailed": "Échec de la vérification",
+    "failedToFetchFields": "Échec de la récupération des champs",
+    "errorFetchingFields": "Erreur lors de la récupération des champs"
+  },
+  "upload": {
+    "title": "Télécharger des documents",
+    "subtitle": "Ajoutez des documents à votre base de connaissances pour RAG",
+    "uploadFile": "Télécharger un fichier",
+    "dropFileHere": "Déposez le fichier ici",
+    "dropOrBrowse": "Déposez le fichier ici ou cliquez pour parcourir",
+    "supported": "Pris en charge : {{extensions}}",
+    "removeFile": "Supprimer le fichier",
+    "uploading": "Téléchargement...",
+    "uploadDocument": "Télécharger le document",
+    "recentUploads": "Téléchargements récents",
+    "noUploads": "Aucun téléchargement pour le moment",
+    "backToDashboard": "Retour au tableau de bord",
+    "backToSetup": "Retour à la configuration",
+    "status": {
+      "queued": "En file d'attente",
+      "processing": "En cours",
+      "chunked": "Découpé",
+      "complete": "Terminé",
+      "failed": "Échoué"
+    },
+    "chunks": "{{processed}}/{{total}} morceaux"
   }
 }

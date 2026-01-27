@@ -124,7 +124,8 @@
     "database": {
       "executedSql": "Ausgeführtes SQL: {{sql}}",
       "noResults": "Die Abfrage lieferte keine Ergebnisse.",
-      "resultsCount": "Datenbankabfrage-Ergebnisse ({{count}} Zeilen):",
+      "resultsCount_one": "Datenbankabfrage-Ergebnisse ({{count}} Zeile):",
+      "resultsCount_other": "Datenbankabfrage-Ergebnisse ({{count}} Zeilen):",
       "resultsTruncated": "(Ergebnisse auf 100 Zeilen gekürzt)"
     }
   },
@@ -234,7 +235,8 @@
       "tableCount_other": "{{count}} Tabellen",
       "rowCount_one": "{{count}} Zeile",
       "rowCount_other": "{{count}} Zeilen",
-      "rowsInTable": "{{count}} Zeilen in {{table}}",
+      "rowsInTable_one": "{{count}} Zeile in {{table}}",
+      "rowsInTable_other": "{{count}} Zeilen in {{table}}",
       "connected": "SQLite verbunden",
       "selectTable": "Wähle eine Tabelle aus der Seitenleiste",
       "orUseSqlQuery": "oder nutze den SQL-Abfragemodus"

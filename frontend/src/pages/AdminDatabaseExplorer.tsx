@@ -67,7 +67,7 @@ export function AdminDatabaseExplorer() {
     setIsLoadingTables(true)
     try {
       const response = await adminFetch('/admin/db/tables')
-      if (!response.ok) throw new Error('Failed to fetch tables')
+      if (!response.ok) throw new Error(t('errors.failedToFetchTables'))
       const data = await response.json()
       setTables(data.tables)
 
@@ -76,7 +76,7 @@ export function AdminDatabaseExplorer() {
         setSelectedTable(data.tables[0].name)
       }
     } catch (error) {
-      console.error('Error fetching tables:', error)
+      console.error(t('errors.errorFetchingTables'), error)
       setTables([])
     } finally {
       setIsLoadingTables(false)
@@ -97,7 +97,7 @@ export function AdminDatabaseExplorer() {
       const response = await adminFetch(
         `/admin/db/tables/${tableName}?page=${page}&page_size=${pageSize}`
       )
-      if (!response.ok) throw new Error('Failed to fetch table data')
+      if (!response.ok) throw new Error(t('errors.failedToFetchTableData'))
       const data = await response.json()
 
       // Handle out-of-range page (e.g., after deleting the last record on a page)

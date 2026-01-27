@@ -145,7 +145,7 @@ export function ChatPage() {
     const tools: Tool[] = [
       {
         id: 'web-search',
-        name: 'Web',
+        name: t('chat.tools.webSearchName'),
         description: t('chat.tools.webSearch'),
         icon: (
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -159,7 +159,7 @@ export function ChatPage() {
     if (isAdminAuthenticated()) {
       tools.push({
         id: 'db-query',
-        name: 'Database',
+        name: t('chat.tools.databaseName'),
         description: t('chat.tools.database'),
         icon: (
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -212,7 +212,7 @@ export function ChatPage() {
           setDocuments(docs)
         }
       } catch (e) {
-        console.error('Failed to fetch documents:', e)
+        console.error(t('errors.failedToFetchDocuments'), e)
       }
     }
     fetchDocuments()
@@ -321,7 +321,7 @@ export function ChatPage() {
       }
 
       if (!response) {
-        throw new Error('No response from server')
+        throw new Error(t('errors.noResponseFromServer'))
       }
 
       // Handle auth errors
@@ -367,7 +367,7 @@ export function ChatPage() {
         await triggerAutoSearch(data.search_term, token)
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to send message')
+      setError(e instanceof Error ? e.message : t('errors.failedToSendMessage'))
     } finally {
       setIsLoading(false)
     }
@@ -408,7 +408,7 @@ IMPORTANT: Return a CONDENSED response:
       })
       
       if (!searchRes.ok) {
-        throw new Error(`Search failed: HTTP ${searchRes.status}`)
+        throw new Error(t('errors.searchFailed', { status: searchRes.status }))
       }
       
       const searchData = await searchRes.json()

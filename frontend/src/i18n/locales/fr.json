@@ -289,7 +289,7 @@
     "connecting": "Connexion à l'extension...",
     "noExtension": "Aucune extension Nostr trouvée",
     "installExtension": "Installez une extension compatible NIP-07 pour continuer",
-    "useMock": "Utiliser simulée",
+    "useMock": "Utiliser l'identité simulée",
     "welcomeAdmin": "Bienvenue, Administrateur !",
     "connectedAs": "Connecté en tant que",
     "redirecting": "Redirection vers le tableau de bord...",

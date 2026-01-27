@@ -154,7 +154,7 @@ export function UserOnboarding() {
       ) : (
         <div
           role="radiogroup"
-          aria-label="Select a language"
+          aria-label={t('onboarding.language.selectLabel', 'Select a language')}
           className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-80 overflow-y-auto pr-1 -mr-1"
         >
           {filteredLanguages.map((language) => (

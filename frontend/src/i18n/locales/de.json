@@ -2,9 +2,11 @@
   "onboarding": {
     "userType": {
       "title": "Was beschreibt dich am besten?",
-      "description": "Wähle die Option, die am besten zu deinen Bedürfnissen passt"
+      "description": "Wähle die Option, die am besten zu deinen Bedürfnissen passt",
+      "loadError": "Benutzertypen konnten nicht geladen werden. Bitte versuche es erneut."
     },
     "language": {
+      "selectLabel": "Sprache auswählen",
       "title": "Wähle deine Sprache",
       "subtitle": "Wähle deine bevorzugte Sprache, um fortzufahren",
       "searchPlaceholder": "Sprachen suchen...",
@@ -148,7 +150,8 @@
     "tryAgain": "Erneut versuchen",
     "continue": "Weiter",
     "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "Fehler"
   },
   "settings": {
     "title": "Einstellungen",

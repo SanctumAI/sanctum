@@ -2,9 +2,11 @@
   "onboarding": {
     "userType": {
       "title": "あなたに最も当てはまるのは？",
-      "description": "あなたのニーズに最も合うオプションを選択してください"
+      "description": "あなたのニーズに最も合うオプションを選択してください",
+      "loadError": "ユーザータイプの読み込みに失敗しました。もう一度お試しください。"
     },
     "language": {
+      "selectLabel": "言語を選択",
       "title": "言語を選択",
       "subtitle": "続行するには希望の言語を選択してください",
       "searchPlaceholder": "言語を検索...",
@@ -148,7 +150,8 @@
     "tryAgain": "再試行",
     "continue": "続行",
     "unexpectedError": "予期しないエラーが発生しました",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "エラー"
   },
   "settings": {
     "title": "設定",

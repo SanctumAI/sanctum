@@ -2,9 +2,11 @@
   "onboarding": {
     "userType": {
       "title": "Sizi en iyi ne tanımlar?",
-      "description": "İhtiyaçlarınıza en uygun seçeneği seçin"
+      "description": "İhtiyaçlarınıza en uygun seçeneği seçin",
+      "loadError": "Kullanıcı türleri yüklenemedi. Lütfen tekrar deneyin."
     },
     "language": {
+      "selectLabel": "Bir dil seçin",
       "title": "Dilinizi seçin",
       "subtitle": "Devam etmek için tercih ettiğiniz dili seçin",
       "searchPlaceholder": "Dilleri ara...",
@@ -148,7 +150,8 @@
     "tryAgain": "Tekrar dene",
     "continue": "Devam et",
     "unexpectedError": "Beklenmeyen bir hata oluştu",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "Hata"
   },
   "settings": {
     "title": "Ayarlar",

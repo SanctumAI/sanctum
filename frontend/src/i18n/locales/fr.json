@@ -2,9 +2,11 @@
   "onboarding": {
     "userType": {
       "title": "Qu'est-ce qui vous décrit le mieux ?",
-      "description": "Sélectionnez l'option qui correspond le mieux à vos besoins"
+      "description": "Sélectionnez l'option qui correspond le mieux à vos besoins",
+      "loadError": "Échec du chargement des types d'utilisateurs. Veuillez réessayer."
     },
     "language": {
+      "selectLabel": "Sélectionner une langue",
       "title": "Choisissez votre langue",
       "subtitle": "Sélectionnez votre langue préférée pour continuer",
       "searchPlaceholder": "Rechercher des langues...",
@@ -148,7 +150,8 @@
     "tryAgain": "Réessayer",
     "continue": "Continuer",
     "unexpectedError": "Une erreur inattendue s'est produite",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "Erreur"
   },
   "settings": {
     "title": "Paramètres",
@@ -187,7 +190,8 @@
       "addType": "Ajouter un type",
       "addUserType": "Ajouter un type d'utilisateur",
       "onboardingFields": "Champs d'intégration utilisateur",
-      "optionsCount": "{{count}} options",
+      "optionsCount_one": "{{count}} option",
+      "optionsCount_other": "{{count}} options",
       "noFields": "Aucun champ personnalisé",
       "addField": "Ajouter un champ",
       "knowledgeBase": "Base de connaissances",
@@ -249,7 +253,7 @@
       "options": "Options",
       "optionPlaceholder": "Option {{number}}",
       "addOption": "+ Ajouter une option",
-      "placeholder": "Placeholder",
+      "placeholder": "Texte indicatif",
       "placeholderOptional": "(facultatif)",
       "placeholderHint": "Texte d'aide affiché dans le champ",
       "requiredField": "Champ requis"

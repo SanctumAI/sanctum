@@ -2,9 +2,11 @@
   "onboarding": {
     "userType": {
       "title": "哪个最能描述你？",
-      "description": "选择最符合你需求的选项"
+      "description": "选择最符合你需求的选项",
+      "loadError": "加载用户类型失败。请重试。"
     },
     "language": {
+      "selectLabel": "选择语言",
       "title": "选择你的语言",
       "subtitle": "选择首选语言以继续",
       "searchPlaceholder": "搜索语言...",
@@ -148,7 +150,8 @@
     "tryAgain": "重试",
     "continue": "继续",
     "unexpectedError": "发生意外错误",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "错误"
   },
   "settings": {
     "title": "设置",

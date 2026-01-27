@@ -1,6 +1,12 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "מה מתאר אותך הכי טוב?",
+      "description": "בחר את האפשרות המתאימה ביותר לצרכיך",
+      "loadError": "טעינת סוגי המשתמשים נכשלה. אנא נסה שוב."
+    },
     "language": {
+      "selectLabel": "בחר שפה",
       "title": "בחר את השפה שלך",
       "subtitle": "בחר את השפה המועדפת כדי להמשיך",
       "searchPlaceholder": "חפש שפות...",
@@ -138,7 +144,8 @@
     "tryAgain": "נסה שוב",
     "continue": "המשך",
     "unexpectedError": "אירעה שגיאה בלתי צפויה",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "שגיאה"
   },
   "settings": {
     "title": "הגדרות",

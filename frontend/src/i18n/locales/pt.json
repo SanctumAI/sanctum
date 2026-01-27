@@ -2,9 +2,11 @@
   "onboarding": {
     "userType": {
       "title": "O que melhor descreve você?",
-      "description": "Selecione a opção que melhor se adapta às suas necessidades"
+      "description": "Selecione a opção que melhor se adapta às suas necessidades",
+      "loadError": "Falha ao carregar tipos de usuário. Por favor, tente novamente."
     },
     "language": {
+      "selectLabel": "Selecione um idioma",
       "title": "Escolha seu idioma",
       "subtitle": "Selecione seu idioma preferido para continuar",
       "searchPlaceholder": "Pesquisar idiomas...",
@@ -148,7 +150,8 @@
     "tryAgain": "Tentar novamente",
     "continue": "Continuar",
     "unexpectedError": "Ocorreu um erro inesperado",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "Erro"
   },
   "settings": {
     "title": "Configurações",

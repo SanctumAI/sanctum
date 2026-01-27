@@ -2,9 +2,11 @@
   "onboarding": {
     "userType": {
       "title": "Vad beskriver dig bäst?",
-      "description": "Välj det alternativ som bäst passar dina behov"
+      "description": "Välj det alternativ som bäst passar dina behov",
+      "loadError": "Kunde inte ladda användartyper. Försök igen."
     },
     "language": {
+      "selectLabel": "Välj ett språk",
       "title": "Välj ditt språk",
       "subtitle": "Välj ditt föredragna språk för att fortsätta",
       "searchPlaceholder": "Sök språk...",
@@ -148,7 +150,8 @@
     "tryAgain": "Försök igen",
     "continue": "Fortsätt",
     "unexpectedError": "Ett oväntat fel inträffade",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "Fel"
   },
   "settings": {
     "title": "Inställningar",

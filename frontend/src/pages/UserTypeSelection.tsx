@@ -93,7 +93,7 @@ export function UserTypeSelection() {
         }
       } catch (err) {
         console.error('Error fetching user types:', err)
-        setError('Failed to load user types. Please try again.')
+        setError(t('onboarding.userType.loadError', 'Failed to load user types. Please try again.'))
       } finally {
         setIsLoading(false)
       }
@@ -125,14 +125,14 @@ export function UserTypeSelection() {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center p-4">
         <OnboardingCard
-          title="Error"
+          title={t('common.error', 'Error')}
           subtitle={error}
         >
           <button
             onClick={() => window.location.reload()}
             className="w-full py-3 rounded-xl bg-accent text-accent-text font-medium transition-all hover:opacity-90"
           >
-            Try Again
+            {t('common.tryAgain', 'Try Again')}
           </button>
         </OnboardingCard>
       </div>

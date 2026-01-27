@@ -2,9 +2,11 @@
   "onboarding": {
     "userType": {
       "title": "Co vás nejlépe vystihuje?",
-      "description": "Vyberte možnost, která nejlépe odpovídá vašim potřebám"
+      "description": "Vyberte možnost, která nejlépe odpovídá vašim potřebám",
+      "loadError": "Nepodařilo se načíst typy uživatelů. Zkuste to prosím znovu."
     },
     "language": {
+      "selectLabel": "Vyberte jazyk",
       "title": "Vyberte svůj jazyk",
       "subtitle": "Vyberte preferovaný jazyk pro pokračování",
       "searchPlaceholder": "Hledat jazyky...",
@@ -148,7 +150,8 @@
     "tryAgain": "Zkusit znovu",
     "continue": "Pokračovat",
     "unexpectedError": "Došlo k neočekávané chybě",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "Chyba"
   },
   "settings": {
     "title": "Nastavení",

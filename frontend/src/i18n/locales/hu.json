@@ -1,6 +1,12 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "Mi jellemez a legjobban?",
+      "description": "Válaszd ki az igényeidnek leginkább megfelelő lehetőséget",
+      "loadError": "A felhasználótípusok betöltése sikertelen. Kérlek, próbáld újra."
+    },
     "language": {
+      "selectLabel": "Válassz nyelvet",
       "title": "Válaszd ki a nyelvedet",
       "subtitle": "Válaszd ki a folytatáshoz a kívánt nyelvet",
       "searchPlaceholder": "Nyelvek keresése...",
@@ -138,7 +144,8 @@
     "tryAgain": "Próbáld újra",
     "continue": "Tovább",
     "unexpectedError": "Váratlan hiba történt",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "Hiba"
   },
   "settings": {
     "title": "Beállítások",

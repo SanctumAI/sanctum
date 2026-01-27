@@ -2,9 +2,11 @@
   "onboarding": {
     "userType": {
       "title": "Hvad beskriver dig bedst?",
-      "description": "Vælg den mulighed, der passer bedst til dine behov"
+      "description": "Vælg den mulighed, der passer bedst til dine behov",
+      "loadError": "Kunne ikke indlæse brugertyper. Prøv igen."
     },
     "language": {
+      "selectLabel": "Vælg et sprog",
       "title": "Vælg dit sprog",
       "subtitle": "Vælg dit foretrukne sprog for at fortsætte",
       "searchPlaceholder": "Søg sprog...",
@@ -148,7 +150,8 @@
     "tryAgain": "Prøv igen",
     "continue": "Fortsæt",
     "unexpectedError": "Der opstod en uventet fejl",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "Fejl"
   },
   "settings": {
     "title": "Indstillinger",

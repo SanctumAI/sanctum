@@ -2,9 +2,11 @@
   "onboarding": {
     "userType": {
       "title": "당신을 가장 잘 설명하는 것은?",
-      "description": "당신의 필요에 가장 맞는 옵션을 선택하세요"
+      "description": "당신의 필요에 가장 맞는 옵션을 선택하세요",
+      "loadError": "사용자 유형을 불러오지 못했습니다. 다시 시도해 주세요."
     },
     "language": {
+      "selectLabel": "언어 선택",
       "title": "언어를 선택하세요",
       "subtitle": "계속하려면 선호하는 언어를 선택하세요",
       "searchPlaceholder": "언어 검색...",
@@ -148,7 +150,8 @@
     "tryAgain": "다시 시도",
     "continue": "계속",
     "unexpectedError": "예기치 않은 오류가 발생했습니다",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "오류"
   },
   "settings": {
     "title": "설정",

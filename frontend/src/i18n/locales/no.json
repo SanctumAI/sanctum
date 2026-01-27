@@ -1,6 +1,12 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "Hva beskriver deg best?",
+      "description": "Velg alternativet som passer best til dine behov",
+      "loadError": "Kunne ikke laste brukertyper. Prøv igjen."
+    },
     "language": {
+      "selectLabel": "Velg et språk",
       "title": "Velg språk",
       "subtitle": "Velg ønsket språk for å fortsette",
       "searchPlaceholder": "Søk etter språk...",
@@ -138,7 +144,8 @@
     "tryAgain": "Prøv igjen",
     "continue": "Fortsett",
     "unexpectedError": "En uventet feil oppstod",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "Feil"
   },
   "settings": {
     "title": "Innstillinger",

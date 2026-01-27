@@ -1,6 +1,12 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "چه چیزی شما را بهتر توصیف می‌کند؟",
+      "description": "گزینه‌ای را انتخاب کنید که بهترین تناسب را با نیازهای شما دارد",
+      "loadError": "بارگذاری انواع کاربر ناموفق بود. لطفاً دوباره تلاش کنید."
+    },
     "language": {
+      "selectLabel": "یک زبان انتخاب کنید",
       "title": "زبان خود را انتخاب کنید",
       "subtitle": "برای ادامه، زبان دلخواه خود را انتخاب کنید",
       "searchPlaceholder": "جستجوی زبان‌ها...",
@@ -138,7 +144,8 @@
     "tryAgain": "تلاش مجدد",
     "continue": "ادامه",
     "unexpectedError": "یک خطای غیرمنتظره رخ داد",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "خطا"
   },
   "settings": {
     "title": "تنظیمات",

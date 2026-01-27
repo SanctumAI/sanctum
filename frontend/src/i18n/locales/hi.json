@@ -1,6 +1,12 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "आपको सबसे अच्छा क्या वर्णित करता है?",
+      "description": "वह विकल्प चुनें जो आपकी आवश्यकताओं के लिए सबसे उपयुक्त हो",
+      "loadError": "उपयोगकर्ता प्रकार लोड करने में विफल। कृपया पुनः प्रयास करें।"
+    },
     "language": {
+      "selectLabel": "एक भाषा चुनें",
       "title": "अपनी भाषा चुनें",
       "subtitle": "आगे बढ़ने के लिए अपनी पसंदीदा भाषा चुनें",
       "searchPlaceholder": "भाषाएँ खोजें...",
@@ -138,7 +144,8 @@
     "tryAgain": "पुनः प्रयास करें",
     "continue": "जारी रखें",
     "unexpectedError": "एक अप्रत्याशित त्रुटि हुई",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "त्रुटि"
   },
   "settings": {
     "title": "सेटिंग्स",

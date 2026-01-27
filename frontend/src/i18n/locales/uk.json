@@ -1,6 +1,12 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "Що найкраще вас описує?",
+      "description": "Виберіть варіант, який найкраще відповідає вашим потребам",
+      "loadError": "Не вдалося завантажити типи користувачів. Будь ласка, спробуйте знову."
+    },
     "language": {
+      "selectLabel": "Виберіть мову",
       "title": "Виберіть мову",
       "subtitle": "Виберіть бажану мову, щоб продовжити",
       "searchPlaceholder": "Пошук мов...",
@@ -138,7 +144,8 @@
     "tryAgain": "Спробувати знову",
     "continue": "Продовжити",
     "unexpectedError": "Сталася непередбачена помилка",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "Помилка"
   },
   "settings": {
     "title": "Налаштування",

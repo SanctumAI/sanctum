@@ -1,6 +1,12 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "Mikä kuvaa sinua parhaiten?",
+      "description": "Valitse vaihtoehto, joka vastaa parhaiten tarpeitasi",
+      "loadError": "Käyttäjätyyppien lataaminen epäonnistui. Yritä uudelleen."
+    },
     "language": {
+      "selectLabel": "Valitse kieli",
       "title": "Valitse kieli",
       "subtitle": "Valitse haluamasi kieli jatkaaksesi",
       "searchPlaceholder": "Hae kieliä...",
@@ -138,7 +144,8 @@
     "tryAgain": "Yritä uudelleen",
     "continue": "Jatka",
     "unexpectedError": "Odottamaton virhe tapahtui",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "Virhe"
   },
   "settings": {
     "title": "Asetukset",

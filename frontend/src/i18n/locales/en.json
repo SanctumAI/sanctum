@@ -21,7 +21,8 @@
     "tryAgain": "Try again",
     "continue": "Continue",
     "unexpectedError": "An unexpected error occurred",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "Error"
   },
   "settings": {
     "title": "Settings",
@@ -171,9 +172,11 @@
   "onboarding": {
     "userType": {
       "title": "What describes you best?",
-      "description": "Select the option that best fits your needs"
+      "description": "Select the option that best fits your needs",
+      "loadError": "Failed to load user types. Please try again."
     },
     "language": {
+      "selectLabel": "Select a language",
       "title": "Choose your language",
       "subtitle": "Select your preferred language to continue",
       "searchPlaceholder": "Search languages...",

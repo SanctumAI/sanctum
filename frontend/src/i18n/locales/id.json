@@ -1,6 +1,12 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "Apa yang paling menggambarkan Anda?",
+      "description": "Pilih opsi yang paling sesuai dengan kebutuhan Anda",
+      "loadError": "Gagal memuat tipe pengguna. Silakan coba lagi."
+    },
     "language": {
+      "selectLabel": "Pilih bahasa",
       "title": "Pilih bahasa Anda",
       "subtitle": "Pilih bahasa yang Anda inginkan untuk melanjutkan",
       "searchPlaceholder": "Cari bahasa...",
@@ -138,7 +144,8 @@
     "tryAgain": "Coba lagi",
     "continue": "Lanjutkan",
     "unexpectedError": "Terjadi kesalahan yang tidak terduga",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "Kesalahan"
   },
   "settings": {
     "title": "Pengaturan",

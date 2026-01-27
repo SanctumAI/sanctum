@@ -2,9 +2,11 @@
   "onboarding": {
     "userType": {
       "title": "ما الذي يصفك بشكل أفضل؟",
-      "description": "اختر الخيار الذي يناسب احتياجاتك"
+      "description": "اختر الخيار الذي يناسب احتياجاتك",
+      "loadError": "فشل تحميل أنواع المستخدمين. يرجى المحاولة مرة أخرى."
     },
     "language": {
+      "selectLabel": "اختر لغة",
       "title": "اختر لغتك",
       "subtitle": "اختر لغتك المفضلة للمتابعة",
       "searchPlaceholder": "ابحث عن اللغات...",
@@ -148,7 +150,8 @@
     "tryAgain": "حاول مرة أخرى",
     "continue": "متابعة",
     "unexpectedError": "حدث خطأ غير متوقع",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "خطأ"
   },
   "settings": {
     "title": "الإعدادات",

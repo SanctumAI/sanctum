@@ -1,6 +1,12 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "Điều gì mô tả bạn tốt nhất?",
+      "description": "Chọn tùy chọn phù hợp nhất với nhu cầu của bạn",
+      "loadError": "Không thể tải loại người dùng. Vui lòng thử lại."
+    },
     "language": {
+      "selectLabel": "Chọn ngôn ngữ",
       "title": "Chọn ngôn ngữ của bạn",
       "subtitle": "Chọn ngôn ngữ bạn muốn để tiếp tục",
       "searchPlaceholder": "Tìm kiếm ngôn ngữ...",
@@ -138,7 +144,8 @@
     "tryAgain": "Thử lại",
     "continue": "Tiếp tục",
     "unexpectedError": "Đã xảy ra lỗi không mong đợi",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "Lỗi"
   },
   "settings": {
     "title": "Cài đặt",

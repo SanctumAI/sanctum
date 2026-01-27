@@ -2,9 +2,11 @@
   "onboarding": {
     "userType": {
       "title": "Wat beschrijft jou het best?",
-      "description": "Selecteer de optie die het best bij je behoeften past"
+      "description": "Selecteer de optie die het best bij je behoeften past",
+      "loadError": "Kan gebruikerstypen niet laden. Probeer het opnieuw."
     },
     "language": {
+      "selectLabel": "Selecteer een taal",
       "title": "Kies je taal",
       "subtitle": "Selecteer je voorkeurstaal om verder te gaan",
       "searchPlaceholder": "Talen zoeken...",
@@ -148,7 +150,8 @@
     "tryAgain": "Probeer opnieuw",
     "continue": "Doorgaan",
     "unexpectedError": "Er is een onverwachte fout opgetreden",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "Fout"
   },
   "settings": {
     "title": "Instellingen",

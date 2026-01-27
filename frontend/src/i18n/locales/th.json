@@ -1,6 +1,12 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "อะไรอธิบายคุณได้ดีที่สุด?",
+      "description": "เลือกตัวเลือกที่เหมาะสมกับความต้องการของคุณมากที่สุด",
+      "loadError": "ไม่สามารถโหลดประเภทผู้ใช้ได้ กรุณาลองอีกครั้ง"
+    },
     "language": {
+      "selectLabel": "เลือกภาษา",
       "title": "เลือกภาษาของคุณ",
       "subtitle": "เลือกภาษาที่ต้องการเพื่อดำเนินการต่อ",
       "searchPlaceholder": "ค้นหาภาษา...",
@@ -138,7 +144,8 @@
     "tryAgain": "ลองอีกครั้ง",
     "continue": "ดำเนินการต่อ",
     "unexpectedError": "เกิดข้อผิดพลาดที่ไม่คาดคิด",
-    "nullPlaceholder": "NULL"
+    "nullPlaceholder": "NULL",
+    "error": "ข้อผิดพลาด"
   },
   "settings": {
     "title": "การตั้งค่า",

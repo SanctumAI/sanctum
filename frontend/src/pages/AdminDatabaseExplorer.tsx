@@ -592,7 +592,7 @@ export function AdminDatabaseExplorer() {
                                   }))
                                 }
                                 disabled={col.primaryKey}
-                                placeholder={col.nullable ? 'NULL' : ''}
+                                placeholder={col.nullable ? t('common.nullPlaceholder') : ''}
                                 className="input-field text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                               />
                             </div>

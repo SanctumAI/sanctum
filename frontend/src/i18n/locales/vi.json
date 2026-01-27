@@ -135,7 +135,9 @@
     "moveUp": "Di chuyển lên",
     "moveDown": "Di chuyển xuống",
     "logout": "Đăng xuất",
-    "tryAgain": "Thử lại"
+    "tryAgain": "Thử lại",
+    "continue": "Tiếp tục",
+    "unexpectedError": "Đã xảy ra lỗi không mong đợi"
   },
   "settings": {
     "title": "Cài đặt",
@@ -154,6 +156,7 @@
     }
   },
   "admin": {
+    "confirmDelete": "Bạn có chắc chắn muốn xóa bản ghi này không?",
     "setup": {
       "backToChat": "Quay lại Chat",
       "title": "Cấu hình phiên bản của bạn",

@@ -41,7 +41,7 @@ export function ExportButton({ messages, disabled, iconOnly = false }: ExportBut
           iconOnly ? 'p-2' : 'px-2.5 py-1.5'
         } ${
           isDisabled
-            ? '!text-text-muted cursor-not-allowed'
+            ? 'text-text-muted! cursor-not-allowed'
             : ''
         }`}
         title={isDisabled ? t('chat.export.disabled') : t('chat.export.title')}

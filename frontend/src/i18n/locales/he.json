@@ -135,7 +135,9 @@
     "moveUp": "הזז למעלה",
     "moveDown": "הזז למטה",
     "logout": "התנתק",
-    "tryAgain": "נסה שוב"
+    "tryAgain": "נסה שוב",
+    "continue": "המשך",
+    "unexpectedError": "אירעה שגיאה בלתי צפויה"
   },
   "settings": {
     "title": "הגדרות",
@@ -154,6 +156,7 @@
     }
   },
   "admin": {
+    "confirmDelete": "האם אתה בטוח שברצונך למחוק רשומה זו?",
     "setup": {
       "backToChat": "חזרה לצ'אט",
       "title": "הגדר את המופע שלך",

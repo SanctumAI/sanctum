@@ -20,7 +20,8 @@
     "signInNostr": "Sign in with Nostr",
     "tryAgain": "Try again",
     "continue": "Continue",
-    "unexpectedError": "An unexpected error occurred"
+    "unexpectedError": "An unexpected error occurred",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Settings",

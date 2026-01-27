@@ -135,7 +135,9 @@
     "moveUp": "Flytt opp",
     "moveDown": "Flytt ned",
     "logout": "Logg ut",
-    "tryAgain": "Prøv igjen"
+    "tryAgain": "Prøv igjen",
+    "continue": "Fortsett",
+    "unexpectedError": "En uventet feil oppstod"
   },
   "settings": {
     "title": "Innstillinger",
@@ -154,6 +156,7 @@
     }
   },
   "admin": {
+    "confirmDelete": "Er du sikker på at du vil slette denne oppføringen?",
     "setup": {
       "backToChat": "Tilbake til chat",
       "title": "Konfigurer instansen din",

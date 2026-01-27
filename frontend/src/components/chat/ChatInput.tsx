@@ -41,7 +41,7 @@ export function ChatInput({ onSend, disabled, placeholder, toolbar }: ChatInputP
   return (
     <div className="border-t border-border bg-surface px-3 py-3 sm:px-4 shadow-[0_-1px_3px_rgba(0,0,0,0.03)]">
       <div className="max-w-3xl mx-auto">
-        <div className="input-container rounded-2xl overflow-hidden !bg-surface-raised">
+        <div className="input-container rounded-2xl overflow-hidden bg-surface-raised!">
           {/* Toolbar row */}
           {toolbar && (
             <div className="px-3 py-2.5 border-b border-border/50 flex items-center gap-2 bg-surface-overlay/30">

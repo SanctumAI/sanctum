@@ -101,7 +101,7 @@
       "docsLabel": "Dokumenter"
     },
     "messages": {
-      "searching": "Søger efter \"{{term}}\"...",
+      "searching": "🔍 Søger efter \"{{term}}\"...",
       "searchResults": "Jeg søgte efter \"{{term}}\" for dig:",
       "newConversation": "Ny samtale"
     },

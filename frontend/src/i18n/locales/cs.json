@@ -101,7 +101,7 @@
       "docsLabel": "Dokumenty"
     },
     "messages": {
-      "searching": "Hledám \"{{term}}\"...",
+      "searching": "🔍 Hledám \"{{term}}\"...",
       "searchResults": "Vyhledal jsem \"{{term}}\" pro vás:",
       "newConversation": "Nová konverzace"
     },

@@ -135,7 +135,9 @@
     "moveUp": "Mută în sus",
     "moveDown": "Mută în jos",
     "logout": "Deconectare",
-    "tryAgain": "Încearcă din nou"
+    "tryAgain": "Încearcă din nou",
+    "continue": "Continuă",
+    "unexpectedError": "A apărut o eroare neașteptată"
   },
   "settings": {
     "title": "Setări",
@@ -154,6 +156,7 @@
     }
   },
   "admin": {
+    "confirmDelete": "Sigur doriți să ștergeți această înregistrare?",
     "setup": {
       "backToChat": "Înapoi la chat",
       "title": "Configurează instanța ta",

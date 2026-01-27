@@ -137,7 +137,8 @@
     "logout": "Вийти",
     "tryAgain": "Спробувати знову",
     "continue": "Продовжити",
-    "unexpectedError": "Сталася непередбачена помилка"
+    "unexpectedError": "Сталася непередбачена помилка",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Налаштування",

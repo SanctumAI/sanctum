@@ -147,7 +147,8 @@
     "logout": "লগ আউট",
     "tryAgain": "আবার চেষ্টা করুন",
     "continue": "চালিয়ে যান",
-    "unexpectedError": "একটি অপ্রত্যাশিত ত্রুটি ঘটেছে"
+    "unexpectedError": "একটি অপ্রত্যাশিত ত্রুটি ঘটেছে",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "সেটিংস",

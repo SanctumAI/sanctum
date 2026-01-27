@@ -135,7 +135,10 @@
     "moveUp": "Fel",
     "moveDown": "Le",
     "logout": "Kijelentkezés",
-    "tryAgain": "Próbáld újra"
+    "tryAgain": "Próbáld újra",
+    "continue": "Tovább",
+    "unexpectedError": "Váratlan hiba történt",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Beállítások",

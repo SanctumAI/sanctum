@@ -147,7 +147,8 @@
     "logout": "Odhlásit se",
     "tryAgain": "Zkusit znovu",
     "continue": "Pokračovat",
-    "unexpectedError": "Došlo k neočekávané chybě"
+    "unexpectedError": "Došlo k neočekávané chybě",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Nastavení",

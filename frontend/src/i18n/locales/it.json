@@ -147,7 +147,8 @@
     "logout": "Esci",
     "tryAgain": "Riprova",
     "continue": "Continua",
-    "unexpectedError": "Si è verificato un errore imprevisto"
+    "unexpectedError": "Si è verificato un errore imprevisto",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Impostazioni",

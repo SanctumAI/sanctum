@@ -137,7 +137,8 @@
     "logout": "خروج",
     "tryAgain": "تلاش مجدد",
     "continue": "ادامه",
-    "unexpectedError": "یک خطای غیرمنتظره رخ داد"
+    "unexpectedError": "یک خطای غیرمنتظره رخ داد",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "تنظیمات",

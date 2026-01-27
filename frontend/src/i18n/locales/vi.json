@@ -137,7 +137,8 @@
     "logout": "Đăng xuất",
     "tryAgain": "Thử lại",
     "continue": "Tiếp tục",
-    "unexpectedError": "Đã xảy ra lỗi không mong đợi"
+    "unexpectedError": "Đã xảy ra lỗi không mong đợi",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Cài đặt",

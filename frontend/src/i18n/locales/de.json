@@ -147,7 +147,8 @@
     "logout": "Abmelden",
     "tryAgain": "Erneut versuchen",
     "continue": "Weiter",
-    "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten"
+    "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Einstellungen",

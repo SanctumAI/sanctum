@@ -147,7 +147,8 @@
     "logout": "登出",
     "tryAgain": "重试",
     "continue": "继续",
-    "unexpectedError": "发生意外错误"
+    "unexpectedError": "发生意外错误",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "设置",

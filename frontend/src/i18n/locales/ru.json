@@ -147,7 +147,8 @@
     "logout": "Выйти",
     "tryAgain": "Попробовать снова",
     "continue": "Продолжить",
-    "unexpectedError": "Произошла непредвиденная ошибка"
+    "unexpectedError": "Произошла непредвиденная ошибка",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Настройки",

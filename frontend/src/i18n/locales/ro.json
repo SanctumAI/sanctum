@@ -137,7 +137,8 @@
     "logout": "Deconectare",
     "tryAgain": "Încearcă din nou",
     "continue": "Continuă",
-    "unexpectedError": "A apărut o eroare neașteptată"
+    "unexpectedError": "A apărut o eroare neașteptată",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Setări",

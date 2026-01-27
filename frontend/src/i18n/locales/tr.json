@@ -147,7 +147,8 @@
     "logout": "Çıkış yap",
     "tryAgain": "Tekrar dene",
     "continue": "Devam et",
-    "unexpectedError": "Beklenmeyen bir hata oluştu"
+    "unexpectedError": "Beklenmeyen bir hata oluştu",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Ayarlar",

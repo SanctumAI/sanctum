@@ -147,7 +147,8 @@
     "logout": "تسجيل الخروج",
     "tryAgain": "حاول مرة أخرى",
     "continue": "متابعة",
-    "unexpectedError": "حدث خطأ غير متوقع"
+    "unexpectedError": "حدث خطأ غير متوقع",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "الإعدادات",

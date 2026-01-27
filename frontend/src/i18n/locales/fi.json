@@ -135,7 +135,10 @@
     "moveUp": "Siirrä ylös",
     "moveDown": "Siirrä alas",
     "logout": "Kirjaudu ulos",
-    "tryAgain": "Yritä uudelleen"
+    "tryAgain": "Yritä uudelleen",
+    "continue": "Jatka",
+    "unexpectedError": "Odottamaton virhe tapahtui",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Asetukset",

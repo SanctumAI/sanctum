@@ -147,7 +147,8 @@
     "logout": "로그아웃",
     "tryAgain": "다시 시도",
     "continue": "계속",
-    "unexpectedError": "예기치 않은 오류가 발생했습니다"
+    "unexpectedError": "예기치 않은 오류가 발생했습니다",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "설정",

@@ -135,7 +135,10 @@
     "moveUp": "ऊपर ले जाएं",
     "moveDown": "नीचे ले जाएं",
     "logout": "लॉग आउट",
-    "tryAgain": "पुनः प्रयास करें"
+    "tryAgain": "पुनः प्रयास करें",
+    "continue": "जारी रखें",
+    "unexpectedError": "एक अप्रत्याशित त्रुटि हुई",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "सेटिंग्स",

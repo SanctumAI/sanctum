@@ -147,7 +147,8 @@
     "logout": "Sair",
     "tryAgain": "Tentar novamente",
     "continue": "Continuar",
-    "unexpectedError": "Ocorreu um erro inesperado"
+    "unexpectedError": "Ocorreu um erro inesperado",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Configurações",

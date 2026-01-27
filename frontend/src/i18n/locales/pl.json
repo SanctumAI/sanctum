@@ -147,7 +147,8 @@
     "logout": "Wyloguj się",
     "tryAgain": "Spróbuj ponownie",
     "continue": "Kontynuuj",
-    "unexpectedError": "Wystąpił nieoczekiwany błąd"
+    "unexpectedError": "Wystąpił nieoczekiwany błąd",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Ustawienia",

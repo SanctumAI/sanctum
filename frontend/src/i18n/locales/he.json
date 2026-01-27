@@ -137,7 +137,8 @@
     "logout": "התנתק",
     "tryAgain": "נסה שוב",
     "continue": "המשך",
-    "unexpectedError": "אירעה שגיאה בלתי צפויה"
+    "unexpectedError": "אירעה שגיאה בלתי צפויה",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "הגדרות",

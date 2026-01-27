@@ -147,7 +147,8 @@
     "logout": "Logga ut",
     "tryAgain": "Försök igen",
     "continue": "Fortsätt",
-    "unexpectedError": "Ett oväntat fel inträffade"
+    "unexpectedError": "Ett oväntat fel inträffade",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Inställningar",

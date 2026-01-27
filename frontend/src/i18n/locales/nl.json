@@ -147,7 +147,8 @@
     "logout": "Uitloggen",
     "tryAgain": "Probeer opnieuw",
     "continue": "Doorgaan",
-    "unexpectedError": "Er is een onverwachte fout opgetreden"
+    "unexpectedError": "Er is een onverwachte fout opgetreden",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Instellingen",

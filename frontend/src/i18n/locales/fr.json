@@ -147,7 +147,8 @@
     "logout": "Se déconnecter",
     "tryAgain": "Réessayer",
     "continue": "Continuer",
-    "unexpectedError": "Une erreur inattendue s'est produite"
+    "unexpectedError": "Une erreur inattendue s'est produite",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Paramètres",

@@ -137,7 +137,8 @@
     "logout": "ออกจากระบบ",
     "tryAgain": "ลองอีกครั้ง",
     "continue": "ดำเนินการต่อ",
-    "unexpectedError": "เกิดข้อผิดพลาดที่ไม่คาดคิด"
+    "unexpectedError": "เกิดข้อผิดพลาดที่ไม่คาดคิด",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "การตั้งค่า",

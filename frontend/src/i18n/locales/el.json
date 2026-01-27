@@ -147,7 +147,8 @@
     "logout": "Αποσύνδεση",
     "tryAgain": "Δοκιμάστε ξανά",
     "continue": "Συνέχεια",
-    "unexpectedError": "Παρουσιάστηκε απροσδόκητο σφάλμα"
+    "unexpectedError": "Παρουσιάστηκε απροσδόκητο σφάλμα",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Ρυθμίσεις",

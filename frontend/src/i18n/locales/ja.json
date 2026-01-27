@@ -147,7 +147,8 @@
     "logout": "ログアウト",
     "tryAgain": "再試行",
     "continue": "続行",
-    "unexpectedError": "予期しないエラーが発生しました"
+    "unexpectedError": "予期しないエラーが発生しました",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "設定",

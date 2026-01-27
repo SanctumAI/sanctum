@@ -147,7 +147,8 @@
     "logout": "Log ud",
     "tryAgain": "Prøv igen",
     "continue": "Fortsæt",
-    "unexpectedError": "Der opstod en uventet fejl"
+    "unexpectedError": "Der opstod en uventet fejl",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Indstillinger",

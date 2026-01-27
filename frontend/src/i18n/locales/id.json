@@ -137,7 +137,8 @@
     "logout": "Keluar",
     "tryAgain": "Coba lagi",
     "continue": "Lanjutkan",
-    "unexpectedError": "Terjadi kesalahan yang tidak terduga"
+    "unexpectedError": "Terjadi kesalahan yang tidak terduga",
+    "nullPlaceholder": "NULL"
   },
   "settings": {
     "title": "Pengaturan",

@@ -1,5 +1,9 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "あなたに最も当てはまるのは？",
+      "description": "あなたのニーズに最も合うオプションを選択してください"
+    },
     "language": {
       "title": "言語を選択",
       "subtitle": "続行するには希望の言語を選択してください",
@@ -53,7 +57,15 @@
       "fieldRequired": "{{field}}は必須です",
       "invalidEmail": "有効なメールアドレスを入力してください",
       "invalidUrl": "有効なURLを入力してください",
-      "invalidNumber": "有効な数字を入力してください"
+      "invalidNumber": "有効な数字を入力してください",
+      "enterField": "{{field}}を入力",
+      "selectOption": "オプションを選択"
+    },
+    "pending": {
+      "title": "承認待ち",
+      "heading": "アカウントは承認待ちです",
+      "message": "管理者があなたの登録を確認し、アクセスを承認します。",
+      "checkBack": "後でもう一度ご確認ください。"
     }
   },
   "chat": {
@@ -106,10 +118,180 @@
       "markdownExt": ".mdファイル",
       "plainText": "プレーンテキスト",
       "plainTextExt": ".txtファイル"
+    },
+    "database": {
+      "executedSql": "実行されたSQL: {{sql}}",
+      "noResults": "クエリは結果を返しませんでした。",
+      "resultsCount": "データベースクエリ結果（{{count}}行）:",
+      "resultsTruncated": "（結果は100行に切り詰められました）"
     }
   },
   "common": {
     "adminQuestion": "管理者ですか？",
-    "signInNostr": "Nostrでサインイン"
+    "signInNostr": "Nostrでサインイン",
+    "close": "閉じる",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "saving": "保存中...",
+    "saveChanges": "変更を保存",
+    "edit": "編集",
+    "delete": "削除",
+    "remove": "削除",
+    "required": "必須",
+    "settings": "設定",
+    "toggleTheme": "テーマを切り替え",
+    "switchToLight": "ライトモードに切り替え",
+    "switchToDark": "ダークモードに切り替え",
+    "moveUp": "上へ移動",
+    "moveDown": "下へ移動",
+    "logout": "ログアウト",
+    "tryAgain": "再試行",
+    "continue": "続行",
+    "unexpectedError": "予期しないエラーが発生しました"
+  },
+  "settings": {
+    "title": "設定",
+    "signedInAs": "サインイン中",
+    "signOut": "サインアウト",
+    "adminTools": "管理ツール",
+    "admin": {
+      "instanceConfig": "インスタンス設定",
+      "instanceConfigDesc": "ブランディング、ユーザータイプ、フィールド",
+      "testDashboard": "テストダッシュボード",
+      "testDashboardDesc": "APIテスト、デバッグツール",
+      "documentUpload": "ドキュメントアップロード",
+      "documentUploadDesc": "ナレッジベースにドキュメントを追加",
+      "databaseExplorer": "データベースエクスプローラー",
+      "databaseExplorerDesc": "SQLiteデータベースを閲覧"
+    }
+  },
+  "admin": {
+    "confirmDelete": "このレコードを削除してもよろしいですか？",
+    "setup": {
+      "backToChat": "チャットに戻る",
+      "title": "インスタンスを設定",
+      "subtitle": "ブランディングとユーザーオンボーディング体験をカスタマイズ",
+      "branding": "インスタンスブランディング",
+      "displayName": "表示名",
+      "defaultName": "Sanctum",
+      "displayNameHint": "この名前はヘッダーとオンボーディング画面に表示されます",
+      "icon": "アイコン",
+      "accentColor": "アクセントカラー",
+      "userTypes": "ユーザータイプ",
+      "userTypesHint": "タイプ別のオンボーディング質問を表示するために、異なるユーザータイプを定義します。複数のタイプがある場合、ユーザーはオンボーディング中にタイプを選択します。",
+      "typeName": "タイプ名",
+      "typeNamePlaceholder": "例：研究者、学生",
+      "typeDescription": "説明（オプション）",
+      "typeDescPlaceholder": "例：学術研究者向け",
+      "addType": "タイプを追加",
+      "addUserType": "ユーザータイプを追加",
+      "onboardingFields": "ユーザーオンボーディングフィールド",
+      "optionsCount": "{{count}}個のオプション",
+      "noFields": "カスタムフィールドなし",
+      "addField": "フィールドを追加",
+      "knowledgeBase": "ナレッジベース",
+      "knowledgeBaseHint": "AIによる回答のためのRAGナレッジベースを構築するドキュメントをアップロードします。",
+      "uploadDocuments": "ドキュメントをアップロード",
+      "database": "データベース",
+      "databaseHint": "SQLiteデータベースでインスタンスデータを直接表示・管理します。",
+      "openDatabase": "データベースエクスプローラーを開く",
+      "save": "設定を保存"
+    },
+    "database": {
+      "backToSetup": "管理設定に戻る",
+      "title": "データベースエクスプローラー",
+      "subtitle": "SQLiteデータを表示・管理",
+      "sqlQuery": "SQLクエリ",
+      "refreshTables": "テーブルを更新",
+      "tables": "テーブル",
+      "noTables": "テーブルが見つかりません",
+      "notInitialized": "データベースが初期化されていない可能性があります",
+      "columns": "列",
+      "sqlQueryLabel": "SQLクエリ",
+      "sqlPlaceholder": "SELECT * FROM users WHERE role = 'admin';",
+      "runHint": "Cmd/Ctrl + Enterで実行",
+      "running": "実行中...",
+      "runQuery": "クエリを実行",
+      "results": "結果",
+      "error": "エラー",
+      "rowsAffected": "行が影響を受けました",
+      "lastInsertId": "最後に挿入されたID:",
+      "noResults": "結果なし",
+      "tableInfo": "{{columns}}列、{{rows}}行",
+      "addRow": "行を追加",
+      "newRecord": "新規レコード",
+      "editRecord": "レコードを編集",
+      "noData": "このテーブルにデータがありません",
+      "addFirstRecord": "最初のレコードを追加",
+      "clickToExpand": "クリックして展開",
+      "pagination": "{{from}}から{{to}}を表示（全{{total}}件）",
+      "tableCount_one": "{{count}}テーブル",
+      "tableCount_other": "{{count}}テーブル",
+      "rowCount_one": "{{count}}行",
+      "rowCount_other": "{{count}}行",
+      "rowsInTable": "{{table}}に{{count}}行",
+      "connected": "SQLite接続済み",
+      "selectTable": "サイドバーからテーブルを選択",
+      "orUseSqlQuery": "またはSQLクエリモードを使用"
+    },
+    "fields": {
+      "nameRequired": "フィールド名は必須です",
+      "optionsRequired": "少なくとも2つのオプションが必要です",
+      "editField": "フィールドを編集",
+      "addField": "新規フィールドを追加",
+      "fieldName": "フィールド名",
+      "fieldNamePlaceholder": "例：会社名",
+      "applyTo": "適用先",
+      "allUsers": "全ユーザー（グローバル）",
+      "globalHint": "グローバルフィールドは全ユーザーに表示されます。タイプ固有のフィールドはそのユーザータイプにのみ表示されます。",
+      "fieldType": "フィールドタイプ",
+      "options": "オプション",
+      "optionPlaceholder": "オプション {{number}}",
+      "addOption": "+ オプションを追加",
+      "placeholder": "プレースホルダー",
+      "placeholderOptional": "（オプション）",
+      "placeholderHint": "入力欄に表示されるヒントテキスト",
+      "requiredField": "必須フィールド"
+    },
+    "fieldTypes": {
+      "text": "テキスト",
+      "textDesc": "単一行テキスト入力",
+      "email": "メール",
+      "emailDesc": "バリデーション付きメール",
+      "number": "数値",
+      "numberDesc": "数値入力",
+      "textarea": "テキストエリア",
+      "textareaDesc": "複数行テキスト",
+      "select": "ドロップダウン",
+      "selectDesc": "オプションから選択",
+      "checkbox": "チェックボックス",
+      "checkboxDesc": "はい/いいえ切り替え",
+      "date": "日付",
+      "dateDesc": "日付選択",
+      "url": "URL",
+      "urlDesc": "ウェブリンク"
+    },
+    "icons": {
+      "searchPlaceholder": "アイコンを検索...",
+      "noMatch": "「{{search}}」に一致するアイコンがありません",
+      "selected": "選択中:"
+    }
+  },
+  "adminOnboarding": {
+    "notAdmin": "管理者ではありませんか？",
+    "signInAsUser": "ユーザーとしてサインイン",
+    "title": "管理者セットアップ",
+    "subtitle": "Nostr IDで接続してこのインスタンスを管理",
+    "connectNostr": "Nostrで接続",
+    "orForTesting": "またはテスト用",
+    "continueMock": "モックIDで続行",
+    "connecting": "拡張機能に接続中...",
+    "noExtension": "Nostr拡張機能が見つかりません",
+    "installExtension": "続行するにはNIP-07互換の拡張機能をインストールしてください",
+    "useMock": "モックを使用",
+    "welcomeAdmin": "ようこそ、管理者！",
+    "connectedAs": "接続中",
+    "redirecting": "ダッシュボードにリダイレクト中...",
+    "connectionFailed": "接続失敗"
   }
 }

@@ -24,29 +24,29 @@ function EmptyState({ onSuggestedPrompt }: { onSuggestedPrompt?: (prompt: string
     <div className="flex-1 flex items-center justify-center p-4">
       <div className="text-center max-w-lg animate-fade-in">
         {/* Icon */}
-        <div className="relative mx-auto mb-6 w-16 h-16">
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 rotate-6" />
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center shadow-lg">
-            <MessageCircle className="w-8 h-8 text-white" strokeWidth={2} />
+        <div className="relative mx-auto mb-8 w-20 h-20">
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 rotate-6 scale-95" />
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center shadow-xl ring-1 ring-white/10">
+            <MessageCircle className="w-10 h-10 text-white" strokeWidth={1.75} />
           </div>
         </div>
 
         {/* Text */}
-        <h2 className="text-xl font-semibold text-text mb-2">{t('chat.emptyState.title')}</h2>
-        <p className="text-text-secondary text-sm mb-6">
+        <h2 className="heading-xl mb-2">{t('chat.emptyState.title')}</h2>
+        <p className="text-text-secondary text-sm mb-8">
           {t('chat.emptyState.description')}
         </p>
 
         {/* Suggested prompts */}
         {onSuggestedPrompt && (
-          <div className="space-y-2">
-            <p className="text-xs text-text-muted uppercase tracking-wide font-medium mb-3">{t('chat.emptyState.tryAsking')}</p>
-            <div className="flex flex-wrap justify-center gap-2">
+          <div className="space-y-3">
+            <p className="label mb-3">{t('chat.emptyState.tryAsking')}</p>
+            <div className="flex flex-wrap justify-center gap-2 stagger-children">
               {suggestedPromptKeys.map((key, i) => (
                 <button
                   key={i}
                   onClick={() => onSuggestedPrompt(t(key))}
-                  className="px-3 py-1.5 text-sm text-text-secondary bg-surface-raised border border-border rounded-full hover:border-accent hover:text-accent hover:bg-accent/5 transition-all hover-scale active-press"
+                  className="px-4 py-2 text-sm text-text-secondary bg-surface-raised border border-border rounded-full hover:border-accent hover:text-accent hover:bg-accent/5 hover:-translate-y-0.5 hover:shadow-md transition-all active:scale-95"
                 >
                   {t(key)}
                 </button>
@@ -66,7 +66,7 @@ function TypingIndicator() {
     <div className="animate-fade-in-up mb-4">
       <div className="flex gap-3">
         {/* Avatar */}
-        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center shrink-0 shadow-sm">
+        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center shrink-0 shadow-md ring-1 ring-white/10">
           <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
           </svg>

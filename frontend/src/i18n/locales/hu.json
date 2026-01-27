@@ -53,25 +53,33 @@
       "fieldRequired": "{{field}} megadása kötelező",
       "invalidEmail": "Kérjük, adj meg érvényes e-mail címet",
       "invalidUrl": "Kérjük, adj meg érvényes URL-t",
-      "invalidNumber": "Kérjük, adj meg érvényes számot"
+      "invalidNumber": "Kérjük, adj meg érvényes számot",
+      "enterField": "Add meg: {{field}}",
+      "selectOption": "Válassz egy opciót"
+    },
+    "pending": {
+      "title": "Jóváhagyásra vár",
+      "heading": "Fiókod jóváhagyásra vár",
+      "message": "Egy adminisztrátor átnézi a regisztrációdat és jóváhagyja a hozzáférésed.",
+      "checkBack": "Kérjük, nézz vissza később."
     }
   },
   "chat": {
     "emptyState": {
-      "title": "Mit szeretne tudni?",
-      "description": "Kérdezzen a tudásbázisáról, vagy kezdjen általános beszélgetést",
-      "tryAsking": "Próbálja megkérdezni"
+      "title": "Mit szeretnél tudni?",
+      "description": "Kérdezz a tudásbázisodról, vagy kezdj általános beszélgetést",
+      "tryAsking": "Próbáld megkérdezni"
     },
     "suggestedPrompts": {
       "documents": "Milyen dokumentumok vannak a tudásbázisban?",
-      "summarize": "Foglalja össze a kulcsfogalmakat",
+      "summarize": "Foglald össze a kulcsfogalmakat",
       "ragPipeline": "Hogyan működik a RAG pipeline?",
       "entities": "Mik a fő entitások és kapcsolatok?"
     },
     "typing": "Gondolkodom...",
     "input": {
-      "placeholder": "Kérdezzen bármit...",
-      "placeholderWithDocs": "Kérdezzen a kiválasztott dokumentumokról...",
+      "placeholder": "Kérdezz bármit...",
+      "placeholderWithDocs": "Kérdezz a kiválasztott dokumentumokról...",
       "sendTitle": "Üzenet küldése (Enter)",
       "sendLabel": "Üzenet küldése"
     },
@@ -83,14 +91,14 @@
     },
     "documentScope": {
       "title": "Tudásbázisok",
-      "description": "Válassza ki a kontextusba bevonandó forrásokat",
+      "description": "Válaszd ki a kontextusba bevonandó forrásokat",
       "noSources": "Nincsenek elérhető források",
       "clearAll": "Összes törlése",
       "docsLabel": "Dokumentumok"
     },
     "messages": {
       "searching": "🔍 Keresés: \"{{term}}\"...",
-      "searchResults": "Ezt kerestem önnek: \"{{term}}\":",
+      "searchResults": "Ezt kerestem neked: \"{{term}}\":",
       "newConversation": "Új beszélgetés"
     },
     "code": {
@@ -109,7 +117,168 @@
     }
   },
   "common": {
-    "adminQuestion": "Ön adminisztrátor?",
-    "signInNostr": "Bejelentkezés Nostr használatával"
+    "adminQuestion": "Adminisztrátor vagy?",
+    "signInNostr": "Bejelentkezés Nostr használatával",
+    "close": "Bezárás",
+    "cancel": "Mégse",
+    "save": "Mentés",
+    "saving": "Mentés...",
+    "saveChanges": "Változtatások mentése",
+    "edit": "Szerkesztés",
+    "delete": "Törlés",
+    "remove": "Eltávolítás",
+    "required": "Kötelező",
+    "settings": "Beállítások",
+    "toggleTheme": "Téma váltása",
+    "switchToLight": "Váltás világos módra",
+    "switchToDark": "Váltás sötét módra",
+    "moveUp": "Fel",
+    "moveDown": "Le",
+    "logout": "Kijelentkezés",
+    "tryAgain": "Próbáld újra"
+  },
+  "settings": {
+    "title": "Beállítások",
+    "signedInAs": "Bejelentkezve mint",
+    "signOut": "Kijelentkezés",
+    "adminTools": "Admin eszközök",
+    "admin": {
+      "instanceConfig": "Példány beállítások",
+      "instanceConfigDesc": "Márkaépítés, felhasználótípusok, mezők",
+      "testDashboard": "Teszt vezérlőpult",
+      "testDashboardDesc": "API tesztelés, hibakeresési eszközök",
+      "documentUpload": "Dokumentum feltöltés",
+      "documentUploadDesc": "Dokumentumok hozzáadása a tudásbázishoz",
+      "databaseExplorer": "Adatbázis böngésző",
+      "databaseExplorerDesc": "SQLite adatbázis böngészése"
+    }
+  },
+  "admin": {
+    "setup": {
+      "backToChat": "Vissza a csevegéshez",
+      "title": "Példány konfigurálása",
+      "subtitle": "Szabd testre a márkaépítést és a felhasználói bevezetési élményt",
+      "branding": "Példány márkaépítés",
+      "displayName": "Megjelenített név",
+      "defaultName": "Sanctum",
+      "displayNameHint": "Ez a név jelenik meg a fejlécben és a bevezetési képernyőkön",
+      "icon": "Ikon",
+      "accentColor": "Kiemelő szín",
+      "userTypes": "Felhasználótípusok",
+      "userTypesHint": "Határozz meg különböző felhasználótípusokat a típus-specifikus bevezetési kérdések megjelenítéséhez. Ha egynél több típusod van, a felhasználók a bevezetés során választják ki a típusukat.",
+      "typeName": "Típus neve",
+      "typeNamePlaceholder": "pl. Kutató, Diák",
+      "typeDescription": "Leírás (opcionális)",
+      "typeDescPlaceholder": "pl. Akadémiai kutatók számára",
+      "addType": "Típus hozzáadása",
+      "addUserType": "Felhasználótípus hozzáadása",
+      "onboardingFields": "Felhasználói bevezetési mezők",
+      "optionsCount": "{{count}} opció",
+      "noFields": "Nincsenek egyéni mezők",
+      "addField": "Mező hozzáadása",
+      "knowledgeBase": "Tudásbázis",
+      "knowledgeBaseHint": "Tölts fel dokumentumokat a RAG tudásbázis építéséhez az AI-alapú válaszokhoz.",
+      "uploadDocuments": "Dokumentumok feltöltése",
+      "database": "Adatbázis",
+      "databaseHint": "Tekintsd meg és kezeld a példány adatait közvetlenül az SQLite adatbázisban.",
+      "openDatabase": "Adatbázis böngésző megnyitása",
+      "save": "Konfiguráció mentése"
+    },
+    "database": {
+      "backToSetup": "Vissza az admin beállításokhoz",
+      "title": "Adatbázis böngésző",
+      "subtitle": "SQLite adatok megtekintése és kezelése",
+      "sqlQuery": "SQL lekérdezés",
+      "refreshTables": "Táblák frissítése",
+      "tables": "Táblák",
+      "noTables": "Nem találhatók táblák",
+      "notInitialized": "Az adatbázis lehet, hogy nincs inicializálva",
+      "columns": "oszlop",
+      "sqlQueryLabel": "SQL lekérdezés",
+      "sqlPlaceholder": "SELECT * FROM users WHERE role = 'admin';",
+      "runHint": "Nyomd meg a Cmd/Ctrl + Enter billentyűket a futtatáshoz",
+      "running": "Futtatás...",
+      "runQuery": "Lekérdezés futtatása",
+      "results": "Eredmények",
+      "error": "Hiba",
+      "rowsAffected": "érintett sor",
+      "lastInsertId": "Utolsó beszúrási azonosító:",
+      "noResults": "Nincs visszaadott eredmény",
+      "tableInfo": "{{columns}} oszlop, {{rows}} sor",
+      "addRow": "Sor hozzáadása",
+      "newRecord": "Új rekord",
+      "editRecord": "Rekord szerkesztése",
+      "noData": "Nincs adat ebben a táblában",
+      "addFirstRecord": "Add hozzá az első rekordot",
+      "clickToExpand": "Kattints a kibontáshoz",
+      "pagination": "{{from}} - {{to}} megjelenítése (összesen: {{total}})",
+      "tableCount_one": "{{count}} tábla",
+      "tableCount_other": "{{count}} tábla",
+      "rowCount_one": "{{count}} sor",
+      "rowCount_other": "{{count}} sor",
+      "rowsInTable": "{{count}} sor a(z) {{table}} táblában",
+      "connected": "SQLite csatlakoztatva",
+      "selectTable": "Válassz táblát az oldalsávból",
+      "orUseSqlQuery": "vagy használd az SQL lekérdezési módot"
+    },
+    "fields": {
+      "nameRequired": "A mező neve kötelező",
+      "optionsRequired": "Legalább 2 opció szükséges",
+      "editField": "Mező szerkesztése",
+      "addField": "Új mező hozzáadása",
+      "fieldName": "Mező neve",
+      "fieldNamePlaceholder": "pl. Cégnév",
+      "applyTo": "Alkalmazás",
+      "allUsers": "Minden felhasználó (globális)",
+      "globalHint": "A globális mezők minden felhasználónak megjelennek. A típus-specifikus mezők csak az adott felhasználótípusnál jelennek meg.",
+      "fieldType": "Mező típusa",
+      "options": "Opciók",
+      "optionPlaceholder": "{{number}}. opció",
+      "addOption": "+ Opció hozzáadása",
+      "placeholder": "Helyőrző szöveg",
+      "placeholderOptional": "(opcionális)",
+      "placeholderHint": "A beviteli mezőben megjelenő tipp szöveg",
+      "requiredField": "Kötelező mező"
+    },
+    "fieldTypes": {
+      "text": "Szöveg",
+      "textDesc": "Egysoros szövegbevitel",
+      "email": "E-mail",
+      "emailDesc": "E-mail ellenőrzéssel",
+      "number": "Szám",
+      "numberDesc": "Számérték bevitel",
+      "textarea": "Szövegterület",
+      "textareaDesc": "Többsoros szöveg",
+      "select": "Legördülő lista",
+      "selectDesc": "Választás opciók közül",
+      "checkbox": "Jelölőnégyzet",
+      "checkboxDesc": "Igen/nem kapcsoló",
+      "date": "Dátum",
+      "dateDesc": "Dátumválasztó",
+      "url": "URL",
+      "urlDesc": "Weboldal link"
+    },
+    "icons": {
+      "searchPlaceholder": "Ikonok keresése...",
+      "noMatch": "Nincs találat a(z) \"{{search}}\" keresésre",
+      "selected": "Kiválasztva:"
+    }
+  },
+  "adminOnboarding": {
+    "notAdmin": "Nem vagy admin?",
+    "signInAsUser": "Bejelentkezés felhasználóként",
+    "title": "Admin beállítás",
+    "subtitle": "Csatlakozz a Nostr identitásoddal a példány kezeléséhez",
+    "connectNostr": "Csatlakozás Nostrral",
+    "orForTesting": "vagy teszteléshez",
+    "continueMock": "Folytatás teszt identitással",
+    "connecting": "Csatlakozás a bővítményhez...",
+    "noExtension": "Nem található Nostr bővítmény",
+    "installExtension": "Telepíts egy NIP-07 kompatibilis bővítményt a folytatáshoz",
+    "useMock": "Teszt identitás használata",
+    "welcomeAdmin": "Üdv, Admin!",
+    "connectedAs": "Csatlakozva mint",
+    "redirecting": "Átirányítás a vezérlőpultra...",
+    "connectionFailed": "Csatlakozás sikertelen"
   }
 }

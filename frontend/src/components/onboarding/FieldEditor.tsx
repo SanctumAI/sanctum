@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CustomField, FieldType, UserType } from '../../types/onboarding'
 
 interface FieldEditorProps {
@@ -8,18 +9,16 @@ interface FieldEditorProps {
   userTypes?: UserType[]
 }
 
-const FIELD_TYPES: { value: FieldType; label: string; description: string }[] = [
-  { value: 'text', label: 'Text', description: 'Single-line text input' },
-  { value: 'email', label: 'Email', description: 'Email with validation' },
-  { value: 'number', label: 'Number', description: 'Numeric input' },
-  { value: 'textarea', label: 'Text Area', description: 'Multi-line text' },
-  { value: 'select', label: 'Dropdown', description: 'Select from options' },
-  { value: 'checkbox', label: 'Checkbox', description: 'Yes/no toggle' },
-  { value: 'date', label: 'Date', description: 'Date picker' },
-  { value: 'url', label: 'URL', description: 'Website link' },
-]
+const FIELD_TYPE_VALUES: FieldType[] = ['text', 'email', 'number', 'textarea', 'select', 'checkbox', 'date', 'url']
 
 export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: FieldEditorProps) {
+  const { t } = useTranslation()
+
+  const FIELD_TYPES = FIELD_TYPE_VALUES.map((value) => ({
+    value,
+    label: t(`admin.fieldTypes.${value}`),
+    description: t(`admin.fieldTypes.${value}Desc`),
+  }))
   const [name, setName] = useState(initialField?.name || '')
   const [type, setType] = useState<FieldType>(initialField?.type || 'text')
   const [required, setRequired] = useState(initialField?.required ?? true)
@@ -46,13 +45,13 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
     const newErrors: { name?: string; options?: string } = {}
 
     if (!name.trim()) {
-      newErrors.name = 'Field name is required'
+      newErrors.name = t('admin.fields.nameRequired')
     }
 
     if (type === 'select') {
       const validOptions = options.filter((o) => o.trim())
       if (validOptions.length < 2) {
-        newErrors.options = 'At least 2 options required'
+        newErrors.options = t('admin.fields.optionsRequired')
       }
     }
 
@@ -77,24 +76,18 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
   }
 
   return (
-    <div className="bg-surface-raised border border-border rounded-xl p-6 animate-fade-in">
-      <h3 className="text-lg font-semibold text-text mb-4">
-        {initialField ? 'Edit Field' : 'Add New Field'}
+    <div className="card card-sm animate-fade-in p-6">
+      <h3 className="heading-lg mb-4">
+        {initialField ? t('admin.fields.editField') : t('admin.fields.addField')}
       </h3>
 
       <div className="space-y-4">
         {/* Field Name */}
         <div>
           <label className="text-sm font-medium text-text mb-1.5 block">
-            Field Name <span className="text-error">*</span>
+            {t('admin.fields.fieldName')} <span className="text-error">*</span>
           </label>
-          <div
-            className={`border rounded-xl px-4 py-3 bg-surface transition-all ${
-              errors.name
-                ? 'border-error focus-within:ring-2 focus-within:ring-error/20'
-                : 'border-border focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20'
-            }`}
-          >
+          <div className={`input-container px-4 py-3 ${errors.name ? 'has-error' : ''}`}>
             <input
               type="text"
               value={name}
@@ -102,18 +95,18 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
                 setName(e.target.value)
                 if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }))
               }}
-              placeholder="e.g., Company Name"
-              className="w-full bg-transparent outline-none text-text placeholder:text-text-muted text-sm"
+              placeholder={t('admin.fields.fieldNamePlaceholder')}
+              className="input-field text-sm"
             />
           </div>
-          {errors.name && <p className="text-xs text-error mt-1">{errors.name}</p>}
+          {errors.name && <p className="text-xs text-error mt-1.5">{errors.name}</p>}
         </div>
 
         {/* User Type Selector - only show if there are user types */}
         {userTypes.length > 0 && (
           <div>
             <label className="text-sm font-medium text-text mb-1.5 block">
-              Apply To
+              {t('admin.fields.applyTo')}
             </label>
             <div className="flex flex-wrap gap-2">
               <button
@@ -125,7 +118,7 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
                     : 'border-border hover:border-accent/50 text-text-secondary hover:text-text'
                 }`}
               >
-                All Users (Global)
+                {t('admin.fields.allUsers')}
               </button>
               {userTypes.map((ut) => (
                 <button
@@ -143,14 +136,14 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
               ))}
             </div>
             <p className="text-xs text-text-muted mt-1.5">
-              Global fields are shown to all users. Type-specific fields only appear for that user type.
+              {t('admin.fields.globalHint')}
             </p>
           </div>
         )}
 
         {/* Field Type */}
         <div>
-          <label className="text-sm font-medium text-text mb-1.5 block">Field Type</label>
+          <label className="text-sm font-medium text-text mb-1.5 block">{t('admin.fields.fieldType')}</label>
           <div className="grid grid-cols-2 gap-2">
             {FIELD_TYPES.map((ft) => (
               <button
@@ -174,7 +167,7 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
         {type === 'select' && (
           <div>
             <label className="text-sm font-medium text-text mb-1.5 block">
-              Options <span className="text-error">*</span>
+              {t('admin.fields.options')} <span className="text-error">*</span>
             </label>
             <div className="space-y-2">
               {options.map((option, index) => (
@@ -184,7 +177,7 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
                       type="text"
                       value={option}
                       onChange={(e) => handleOptionChange(index, e.target.value)}
-                      placeholder={`Option ${index + 1}`}
+                      placeholder={t('admin.fields.optionPlaceholder', { number: index + 1 })}
                       className="w-full bg-transparent outline-none text-text placeholder:text-text-muted text-sm"
                     />
                   </div>
@@ -206,7 +199,7 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
                 onClick={handleAddOption}
                 className="text-sm text-accent hover:text-accent-hover transition-colors"
               >
-                + Add option
+                {t('admin.fields.addOption')}
               </button>
             </div>
             {errors.options && <p className="text-xs text-error mt-1">{errors.options}</p>}
@@ -217,14 +210,14 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
         {type !== 'checkbox' && type !== 'select' && (
           <div>
             <label className="text-sm font-medium text-text mb-1.5 block">
-              Placeholder <span className="text-text-muted">(optional)</span>
+              {t('admin.fields.placeholder')} <span className="text-text-muted">{t('admin.fields.placeholderOptional')}</span>
             </label>
             <div className="border border-border rounded-xl px-4 py-3 bg-surface focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20 transition-all">
               <input
                 type="text"
                 value={placeholder}
                 onChange={(e) => setPlaceholder(e.target.value)}
-                placeholder="Hint text shown in the input"
+                placeholder={t('admin.fields.placeholderHint')}
                 className="w-full bg-transparent outline-none text-text placeholder:text-text-muted text-sm"
               />
             </div>
@@ -245,7 +238,7 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
               </svg>
             )}
           </div>
-          <span className="text-sm text-text">Required field</span>
+          <span className="text-sm text-text">{t('admin.fields.requiredField')}</span>
         </label>
       </div>
 
@@ -254,16 +247,16 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 bg-surface-overlay border border-border text-text rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-surface transition-all"
+          className="btn btn-secondary btn-md flex-1"
         >
-          Cancel
+          {t('common.cancel')}
         </button>
         <button
           type="button"
           onClick={handleSave}
-          className="flex-1 bg-accent text-accent-text rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-accent-hover transition-all active-press"
+          className="btn btn-primary btn-md flex-1"
         >
-          {initialField ? 'Save Changes' : 'Add Field'}
+          {initialField ? t('common.saveChanges') : t('admin.fields.addField')}
         </button>
       </div>
     </div>

@@ -1,5 +1,9 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "Vad beskriver dig bäst?",
+      "description": "Välj det alternativ som bäst passar dina behov"
+    },
     "language": {
       "title": "Välj ditt språk",
       "subtitle": "Välj ditt föredragna språk för att fortsätta",
@@ -53,7 +57,15 @@
       "fieldRequired": "{{field}} krävs",
       "invalidEmail": "Ange en giltig e-postadress",
       "invalidUrl": "Ange en giltig URL",
-      "invalidNumber": "Ange ett giltigt nummer"
+      "invalidNumber": "Ange ett giltigt nummer",
+      "enterField": "Ange {{field}}",
+      "selectOption": "Välj ett alternativ"
+    },
+    "pending": {
+      "title": "Väntar på godkännande",
+      "heading": "Ditt konto väntar på godkännande",
+      "message": "En administratör kommer att granska din registrering och godkänna din åtkomst.",
+      "checkBack": "Vänligen kom tillbaka senare."
     }
   },
   "chat": {
@@ -89,7 +101,7 @@
       "docsLabel": "Dokument"
     },
     "messages": {
-      "searching": "🔍 Söker efter \"{{term}}\"...",
+      "searching": "Söker efter \"{{term}}\"...",
       "searchResults": "Jag sökte efter \"{{term}}\" åt dig:",
       "newConversation": "Ny konversation"
     },
@@ -106,10 +118,180 @@
       "markdownExt": ".md fil",
       "plainText": "Ren text",
       "plainTextExt": ".txt fil"
+    },
+    "database": {
+      "executedSql": "Utförd SQL: {{sql}}",
+      "noResults": "Frågan returnerade inga resultat.",
+      "resultsCount": "Databasfrågans resultat ({{count}} rader):",
+      "resultsTruncated": "(Resultaten trunkerade till 100 rader)"
     }
   },
   "common": {
     "adminQuestion": "Är du administratör?",
-    "signInNostr": "Logga in med Nostr"
+    "signInNostr": "Logga in med Nostr",
+    "close": "Stäng",
+    "cancel": "Avbryt",
+    "save": "Spara",
+    "saving": "Sparar...",
+    "saveChanges": "Spara ändringar",
+    "edit": "Redigera",
+    "delete": "Ta bort",
+    "remove": "Ta bort",
+    "required": "Obligatoriskt",
+    "settings": "Inställningar",
+    "toggleTheme": "Växla tema",
+    "switchToLight": "Växla till ljust läge",
+    "switchToDark": "Växla till mörkt läge",
+    "moveUp": "Flytta upp",
+    "moveDown": "Flytta ner",
+    "logout": "Logga ut",
+    "tryAgain": "Försök igen",
+    "continue": "Fortsätt",
+    "unexpectedError": "Ett oväntat fel inträffade"
+  },
+  "settings": {
+    "title": "Inställningar",
+    "signedInAs": "Inloggad som",
+    "signOut": "Logga ut",
+    "adminTools": "Adminverktyg",
+    "admin": {
+      "instanceConfig": "Instanskonfiguration",
+      "instanceConfigDesc": "Varumärke, användartyper, fält",
+      "testDashboard": "Testpanel",
+      "testDashboardDesc": "API-testning, felsökningsverktyg",
+      "documentUpload": "Dokumentuppladdning",
+      "documentUploadDesc": "Lägg till dokument i kunskapsbasen",
+      "databaseExplorer": "Databasutforskare",
+      "databaseExplorerDesc": "Bläddra i SQLite-databasen"
+    }
+  },
+  "admin": {
+    "confirmDelete": "Är du säker på att du vill ta bort denna post?",
+    "setup": {
+      "backToChat": "Tillbaka till chatten",
+      "title": "Konfigurera din instans",
+      "subtitle": "Anpassa varumärket och användarregistreringsupplevelsen",
+      "branding": "Instansvarumärke",
+      "displayName": "Visningsnamn",
+      "defaultName": "Sanctum",
+      "displayNameHint": "Detta namn visas i rubriken och på registreringsskärmarna",
+      "icon": "Ikon",
+      "accentColor": "Accentfärg",
+      "userTypes": "Användartyper",
+      "userTypesHint": "Definiera olika användartyper för att visa typspecifika registreringsfrågor. Om du har mer än en typ kommer användarna att välja sin typ under registreringen.",
+      "typeName": "Typnamn",
+      "typeNamePlaceholder": "t.ex. Forskare, Student",
+      "typeDescription": "Beskrivning (valfritt)",
+      "typeDescPlaceholder": "t.ex. För akademiska forskare",
+      "addType": "Lägg till typ",
+      "addUserType": "Lägg till användartyp",
+      "onboardingFields": "Användarregistreringsfält",
+      "optionsCount": "{{count}} alternativ",
+      "noFields": "Inga anpassade fält",
+      "addField": "Lägg till fält",
+      "knowledgeBase": "Kunskapsbas",
+      "knowledgeBaseHint": "Ladda upp dokument för att bygga din RAG-kunskapsbas för AI-drivna svar.",
+      "uploadDocuments": "Ladda upp dokument",
+      "database": "Databas",
+      "databaseHint": "Visa och hantera dina instansdata direkt i SQLite-databasen.",
+      "openDatabase": "Öppna databasutforskaren",
+      "save": "Spara konfiguration"
+    },
+    "database": {
+      "backToSetup": "Tillbaka till admininställningar",
+      "title": "Databasutforskare",
+      "subtitle": "Visa och hantera SQLite-data",
+      "sqlQuery": "SQL-fråga",
+      "refreshTables": "Uppdatera tabeller",
+      "tables": "Tabeller",
+      "noTables": "Inga tabeller hittades",
+      "notInitialized": "Databasen kanske inte är initierad",
+      "columns": "kolumner",
+      "sqlQueryLabel": "SQL-fråga",
+      "sqlPlaceholder": "SELECT * FROM users WHERE role = 'admin';",
+      "runHint": "Tryck Cmd/Ctrl + Enter för att köra",
+      "running": "Kör...",
+      "runQuery": "Kör fråga",
+      "results": "Resultat",
+      "error": "Fel",
+      "rowsAffected": "rad(er) påverkade",
+      "lastInsertId": "Senaste insättnings-ID:",
+      "noResults": "Inga resultat",
+      "tableInfo": "{{columns}} kolumner, {{rows}} rader",
+      "addRow": "Lägg till rad",
+      "newRecord": "Ny post",
+      "editRecord": "Redigera post",
+      "noData": "Ingen data i denna tabell",
+      "addFirstRecord": "Lägg till din första post",
+      "clickToExpand": "Klicka för att expandera",
+      "pagination": "Visar {{from}} till {{to}} av {{total}}",
+      "tableCount_one": "{{count}} tabell",
+      "tableCount_other": "{{count}} tabeller",
+      "rowCount_one": "{{count}} rad",
+      "rowCount_other": "{{count}} rader",
+      "rowsInTable": "{{count}} rader i {{table}}",
+      "connected": "SQLite ansluten",
+      "selectTable": "Välj en tabell från sidofältet",
+      "orUseSqlQuery": "eller använd SQL-frågeläget"
+    },
+    "fields": {
+      "nameRequired": "Fältnamn krävs",
+      "optionsRequired": "Minst 2 alternativ krävs",
+      "editField": "Redigera fält",
+      "addField": "Lägg till nytt fält",
+      "fieldName": "Fältnamn",
+      "fieldNamePlaceholder": "t.ex. Företagsnamn",
+      "applyTo": "Tillämpa på",
+      "allUsers": "Alla användare (Global)",
+      "globalHint": "Globala fält visas för alla användare. Typspecifika fält visas endast för den användartypen.",
+      "fieldType": "Fälttyp",
+      "options": "Alternativ",
+      "optionPlaceholder": "Alternativ {{number}}",
+      "addOption": "+ Lägg till alternativ",
+      "placeholder": "Platshållare",
+      "placeholderOptional": "(valfritt)",
+      "placeholderHint": "Ledtext som visas i inmatningsfältet",
+      "requiredField": "Obligatoriskt fält"
+    },
+    "fieldTypes": {
+      "text": "Text",
+      "textDesc": "Enradig textinmatning",
+      "email": "E-post",
+      "emailDesc": "E-post med validering",
+      "number": "Nummer",
+      "numberDesc": "Numerisk inmatning",
+      "textarea": "Textområde",
+      "textareaDesc": "Flerradig text",
+      "select": "Rullgardinsmeny",
+      "selectDesc": "Välj från alternativ",
+      "checkbox": "Kryssruta",
+      "checkboxDesc": "Ja/nej-växel",
+      "date": "Datum",
+      "dateDesc": "Datumväljare",
+      "url": "URL",
+      "urlDesc": "Webbplatslänk"
+    },
+    "icons": {
+      "searchPlaceholder": "Sök ikoner...",
+      "noMatch": "Inga ikoner matchar \"{{search}}\"",
+      "selected": "Vald:"
+    }
+  },
+  "adminOnboarding": {
+    "notAdmin": "Inte administratör?",
+    "signInAsUser": "Logga in som användare",
+    "title": "Admininställning",
+    "subtitle": "Anslut med din Nostr-identitet för att hantera denna instans",
+    "connectNostr": "Anslut med Nostr",
+    "orForTesting": "eller för testning",
+    "continueMock": "Fortsätt med testidentitet",
+    "connecting": "Ansluter till tillägg...",
+    "noExtension": "Inget Nostr-tillägg hittades",
+    "installExtension": "Installera ett NIP-07-kompatibelt tillägg för att fortsätta",
+    "useMock": "Använd testläge",
+    "welcomeAdmin": "Välkommen, Admin!",
+    "connectedAs": "Ansluten som",
+    "redirecting": "Omdirigerar till instrumentpanelen...",
+    "connectionFailed": "Anslutningen misslyckades"
   }
 }

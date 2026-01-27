@@ -30,12 +30,12 @@ function TabSwitcher({
   logInLabel: string
 }) {
   return (
-    <div className="flex bg-surface-overlay rounded-xl p-1 mb-6">
+    <div className="flex bg-surface-overlay rounded-xl p-1.5 mb-6">
       <button
         onClick={() => onTabChange('signup')}
         className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
           activeTab === 'signup'
-            ? 'bg-surface-raised text-text shadow-sm'
+            ? 'bg-surface text-text shadow-md'
             : 'text-text-muted hover:text-text'
         }`}
       >
@@ -45,7 +45,7 @@ function TabSwitcher({
         onClick={() => onTabChange('login')}
         className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
           activeTab === 'login'
-            ? 'bg-surface-raised text-text shadow-sm'
+            ? 'bg-surface text-text shadow-md'
             : 'text-text-muted hover:text-text'
         }`}
       >
@@ -78,19 +78,13 @@ function InputField({
         {label}
         {required && <span className="text-error ml-1">*</span>}
       </label>
-      <div
-        className={`border rounded-xl px-4 py-3 bg-surface transition-all ${
-          error
-            ? 'border-error focus-within:border-error focus-within:ring-2 focus-within:ring-error/20'
-            : 'border-border focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20'
-        }`}
-      >
+      <div className={`input-container px-4 py-3 ${error ? 'has-error' : ''}`}>
         <input
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full bg-transparent outline-none text-text placeholder:text-text-muted text-sm"
+          className="input-field text-sm"
           required={required}
         />
       </div>
@@ -120,12 +114,12 @@ function SuccessMessage({
 }: SuccessMessageProps) {
   return (
     <div className="text-center py-6 animate-fade-in">
-      <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="w-16 h-16 bg-success/10 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg ring-1 ring-success/20">
         <Mail className="w-8 h-8 text-success" />
       </div>
-      <h3 className="text-lg font-semibold text-text mb-2">{checkEmailTitle}</h3>
+      <h3 className="heading-lg mb-2">{checkEmailTitle}</h3>
       <p className="text-sm text-text-muted mb-4">{sentMagicLink}</p>
-      <p className="inline-block bg-surface-overlay px-4 py-2 rounded-lg text-sm font-medium text-text">
+      <p className="inline-block bg-surface-overlay px-5 py-2.5 rounded-xl text-sm font-medium text-text border border-border">
         {email}
       </p>
       <p className="text-xs text-text-muted mt-4">
@@ -301,7 +295,7 @@ export function UserAuth() {
             <button
               type="submit"
               disabled={formState === 'submitting'}
-              className="w-full flex items-center justify-center gap-2 bg-accent text-accent-text rounded-xl px-6 py-3.5 font-medium hover:bg-accent-hover transition-all active-press disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+              className="btn btn-primary btn-lg w-full mt-6 flex items-center justify-center gap-2"
             >
               {formState === 'submitting' ? (
                 <>

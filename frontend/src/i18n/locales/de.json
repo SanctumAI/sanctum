@@ -1,5 +1,9 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "Was beschreibt dich am besten?",
+      "description": "Wähle die Option, die am besten zu deinen Bedürfnissen passt"
+    },
     "language": {
       "title": "Wähle deine Sprache",
       "subtitle": "Wähle deine bevorzugte Sprache, um fortzufahren",
@@ -53,7 +57,15 @@
       "fieldRequired": "{{field}} ist erforderlich",
       "invalidEmail": "Bitte gib eine gültige E-Mail-Adresse ein",
       "invalidUrl": "Bitte gib eine gültige URL ein",
-      "invalidNumber": "Bitte gib eine gültige Zahl ein"
+      "invalidNumber": "Bitte gib eine gültige Zahl ein",
+      "enterField": "{{field}} eingeben",
+      "selectOption": "Option auswählen"
+    },
+    "pending": {
+      "title": "Genehmigung ausstehend",
+      "heading": "Dein Konto wartet auf Genehmigung",
+      "message": "Ein Administrator wird deine Registrierung prüfen und deinen Zugang freigeben.",
+      "checkBack": "Bitte schau später noch einmal vorbei."
     }
   },
   "chat": {
@@ -106,10 +118,180 @@
       "markdownExt": ".md Datei",
       "plainText": "Klartext",
       "plainTextExt": ".txt Datei"
+    },
+    "database": {
+      "executedSql": "Ausgeführtes SQL: {{sql}}",
+      "noResults": "Die Abfrage lieferte keine Ergebnisse.",
+      "resultsCount": "Datenbankabfrage-Ergebnisse ({{count}} Zeilen):",
+      "resultsTruncated": "(Ergebnisse auf 100 Zeilen gekürzt)"
     }
   },
   "common": {
     "adminQuestion": "Bist du ein Admin?",
-    "signInNostr": "Mit Nostr anmelden"
+    "signInNostr": "Mit Nostr anmelden",
+    "close": "Schließen",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "saving": "Speichern...",
+    "saveChanges": "Änderungen speichern",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "remove": "Entfernen",
+    "required": "Erforderlich",
+    "settings": "Einstellungen",
+    "toggleTheme": "Thema wechseln",
+    "switchToLight": "Zum hellen Modus wechseln",
+    "switchToDark": "Zum dunklen Modus wechseln",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "logout": "Abmelden",
+    "tryAgain": "Erneut versuchen",
+    "continue": "Weiter",
+    "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "signedInAs": "Angemeldet als",
+    "signOut": "Abmelden",
+    "adminTools": "Admin-Werkzeuge",
+    "admin": {
+      "instanceConfig": "Instanz-Konfiguration",
+      "instanceConfigDesc": "Branding, Benutzertypen, Felder",
+      "testDashboard": "Test-Dashboard",
+      "testDashboardDesc": "API-Tests, Debugging-Tools",
+      "documentUpload": "Dokumente hochladen",
+      "documentUploadDesc": "Dokumente zur Wissensbasis hinzufügen",
+      "databaseExplorer": "Datenbank-Explorer",
+      "databaseExplorerDesc": "SQLite-Datenbank durchsuchen"
+    }
+  },
+  "admin": {
+    "confirmDelete": "Bist du sicher, dass du diesen Datensatz löschen möchtest?",
+    "setup": {
+      "backToChat": "Zurück zum Chat",
+      "title": "Konfiguriere deine Instanz",
+      "subtitle": "Passe das Branding und die Benutzer-Onboarding-Erfahrung an",
+      "branding": "Instanz-Branding",
+      "displayName": "Anzeigename",
+      "defaultName": "Sanctum",
+      "displayNameHint": "Dieser Name erscheint im Header und auf den Onboarding-Bildschirmen",
+      "icon": "Symbol",
+      "accentColor": "Akzentfarbe",
+      "userTypes": "Benutzertypen",
+      "userTypesHint": "Definiere verschiedene Benutzertypen, um typspezifische Onboarding-Fragen anzuzeigen. Bei mehreren Typen wählen Benutzer ihren Typ während des Onboardings.",
+      "typeName": "Typname",
+      "typeNamePlaceholder": "z.B. Forscher, Student",
+      "typeDescription": "Beschreibung (optional)",
+      "typeDescPlaceholder": "z.B. Für akademische Forscher",
+      "addType": "Typ hinzufügen",
+      "addUserType": "Benutzertyp hinzufügen",
+      "onboardingFields": "Benutzer-Onboarding-Felder",
+      "optionsCount": "{{count}} Optionen",
+      "noFields": "Keine benutzerdefinierten Felder",
+      "addField": "Feld hinzufügen",
+      "knowledgeBase": "Wissensbasis",
+      "knowledgeBaseHint": "Lade Dokumente hoch, um deine RAG-Wissensbasis für KI-gestützte Antworten aufzubauen.",
+      "uploadDocuments": "Dokumente hochladen",
+      "database": "Datenbank",
+      "databaseHint": "Zeige und verwalte deine Instanzdaten direkt in der SQLite-Datenbank.",
+      "openDatabase": "Datenbank-Explorer öffnen",
+      "save": "Konfiguration speichern"
+    },
+    "database": {
+      "backToSetup": "Zurück zur Admin-Konfiguration",
+      "title": "Datenbank-Explorer",
+      "subtitle": "SQLite-Daten anzeigen und verwalten",
+      "sqlQuery": "SQL-Abfrage",
+      "refreshTables": "Tabellen aktualisieren",
+      "tables": "Tabellen",
+      "noTables": "Keine Tabellen gefunden",
+      "notInitialized": "Datenbank ist möglicherweise nicht initialisiert",
+      "columns": "Spalten",
+      "sqlQueryLabel": "SQL-Abfrage",
+      "sqlPlaceholder": "SELECT * FROM users WHERE role = 'admin';",
+      "runHint": "Drücke Cmd/Ctrl + Enter zum Ausführen",
+      "running": "Wird ausgeführt...",
+      "runQuery": "Abfrage ausführen",
+      "results": "Ergebnisse",
+      "error": "Fehler",
+      "rowsAffected": "Zeile(n) betroffen",
+      "lastInsertId": "Letzte eingefügte ID:",
+      "noResults": "Keine Ergebnisse",
+      "tableInfo": "{{columns}} Spalten, {{rows}} Zeilen",
+      "addRow": "Zeile hinzufügen",
+      "newRecord": "Neuer Datensatz",
+      "editRecord": "Datensatz bearbeiten",
+      "noData": "Keine Daten in dieser Tabelle",
+      "addFirstRecord": "Füge deinen ersten Datensatz hinzu",
+      "clickToExpand": "Klicken zum Erweitern",
+      "pagination": "Zeige {{from}} bis {{to}} von {{total}}",
+      "tableCount_one": "{{count}} Tabelle",
+      "tableCount_other": "{{count}} Tabellen",
+      "rowCount_one": "{{count}} Zeile",
+      "rowCount_other": "{{count}} Zeilen",
+      "rowsInTable": "{{count}} Zeilen in {{table}}",
+      "connected": "SQLite verbunden",
+      "selectTable": "Wähle eine Tabelle aus der Seitenleiste",
+      "orUseSqlQuery": "oder nutze den SQL-Abfragemodus"
+    },
+    "fields": {
+      "nameRequired": "Feldname ist erforderlich",
+      "optionsRequired": "Mindestens 2 Optionen erforderlich",
+      "editField": "Feld bearbeiten",
+      "addField": "Neues Feld hinzufügen",
+      "fieldName": "Feldname",
+      "fieldNamePlaceholder": "z.B. Firmenname",
+      "applyTo": "Anwenden auf",
+      "allUsers": "Alle Benutzer (Global)",
+      "globalHint": "Globale Felder werden allen Benutzern angezeigt. Typspezifische Felder erscheinen nur für diesen Benutzertyp.",
+      "fieldType": "Feldtyp",
+      "options": "Optionen",
+      "optionPlaceholder": "Option {{number}}",
+      "addOption": "+ Option hinzufügen",
+      "placeholder": "Platzhalter",
+      "placeholderOptional": "(optional)",
+      "placeholderHint": "Hilfetext im Eingabefeld",
+      "requiredField": "Pflichtfeld"
+    },
+    "fieldTypes": {
+      "text": "Text",
+      "textDesc": "Einzeilige Texteingabe",
+      "email": "E-Mail",
+      "emailDesc": "E-Mail mit Validierung",
+      "number": "Zahl",
+      "numberDesc": "Numerische Eingabe",
+      "textarea": "Textbereich",
+      "textareaDesc": "Mehrzeiliger Text",
+      "select": "Dropdown",
+      "selectDesc": "Aus Optionen auswählen",
+      "checkbox": "Kontrollkästchen",
+      "checkboxDesc": "Ja/Nein-Schalter",
+      "date": "Datum",
+      "dateDesc": "Datumsauswahl",
+      "url": "URL",
+      "urlDesc": "Weblink"
+    },
+    "icons": {
+      "searchPlaceholder": "Symbole suchen...",
+      "noMatch": "Keine Symbole entsprechen \"{{search}}\"",
+      "selected": "Ausgewählt:"
+    }
+  },
+  "adminOnboarding": {
+    "notAdmin": "Kein Admin?",
+    "signInAsUser": "Als Benutzer anmelden",
+    "title": "Admin-Einrichtung",
+    "subtitle": "Verbinde dich mit deiner Nostr-Identität, um diese Instanz zu verwalten",
+    "connectNostr": "Mit Nostr verbinden",
+    "orForTesting": "oder zum Testen",
+    "continueMock": "Mit Mock-Identität fortfahren",
+    "connecting": "Verbinde mit Erweiterung...",
+    "noExtension": "Keine Nostr-Erweiterung gefunden",
+    "installExtension": "Installiere eine NIP-07-kompatible Erweiterung, um fortzufahren",
+    "useMock": "Mock verwenden",
+    "welcomeAdmin": "Willkommen, Admin!",
+    "connectedAs": "Verbunden als",
+    "redirecting": "Weiterleitung zum Dashboard...",
+    "connectionFailed": "Verbindung fehlgeschlagen"
   }
 }

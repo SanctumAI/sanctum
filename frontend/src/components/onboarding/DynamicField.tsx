@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { CustomField } from '../../types/onboarding'
 
 interface DynamicFieldProps {
@@ -8,12 +9,9 @@ interface DynamicFieldProps {
 }
 
 export function DynamicField({ field, value, onChange, error }: DynamicFieldProps) {
-  const baseInputClasses = `w-full bg-transparent outline-none text-text placeholder:text-text-muted text-sm`
-  const containerClasses = `border rounded-xl px-4 py-3 bg-surface transition-all ${
-    error
-      ? 'border-error focus-within:border-error focus-within:ring-2 focus-within:ring-error/20'
-      : 'border-border focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20'
-  }`
+  const { t } = useTranslation()
+  const baseInputClasses = `input-field text-sm`
+  const containerClasses = `input-container px-4 py-3 ${error ? 'has-error' : ''}`
 
   const renderInput = () => {
     switch (field.type) {
@@ -26,7 +24,7 @@ export function DynamicField({ field, value, onChange, error }: DynamicFieldProp
               type={field.type}
               value={value as string}
               onChange={(e) => onChange(e.target.value)}
-              placeholder={field.placeholder || `Enter ${field.name.toLowerCase()}`}
+              placeholder={field.placeholder || t('onboarding.profile.enterField', { field: field.name.toLowerCase() })}
               className={baseInputClasses}
             />
           </div>
@@ -39,7 +37,7 @@ export function DynamicField({ field, value, onChange, error }: DynamicFieldProp
               type="number"
               value={value as string}
               onChange={(e) => onChange(e.target.value)}
-              placeholder={field.placeholder || `Enter ${field.name.toLowerCase()}`}
+              placeholder={field.placeholder || t('onboarding.profile.enterField', { field: field.name.toLowerCase() })}
               className={baseInputClasses}
             />
           </div>
@@ -63,7 +61,7 @@ export function DynamicField({ field, value, onChange, error }: DynamicFieldProp
             <textarea
               value={value as string}
               onChange={(e) => onChange(e.target.value)}
-              placeholder={field.placeholder || `Enter ${field.name.toLowerCase()}`}
+              placeholder={field.placeholder || t('onboarding.profile.enterField', { field: field.name.toLowerCase() })}
               rows={3}
               className={`${baseInputClasses} resize-none`}
             />
@@ -78,7 +76,7 @@ export function DynamicField({ field, value, onChange, error }: DynamicFieldProp
               onChange={(e) => onChange(e.target.value)}
               className={`${baseInputClasses} cursor-pointer`}
             >
-              <option value="">Select an option</option>
+              <option value="">{t('onboarding.profile.selectOption')}</option>
               {field.options?.map((option) => (
                 <option key={option} value={option}>
                   {option}

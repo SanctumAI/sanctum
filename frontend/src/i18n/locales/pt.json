@@ -1,5 +1,9 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "O que melhor descreve você?",
+      "description": "Selecione a opção que melhor se adapta às suas necessidades"
+    },
     "language": {
       "title": "Escolha seu idioma",
       "subtitle": "Selecione seu idioma preferido para continuar",
@@ -53,7 +57,15 @@
       "fieldRequired": "{{field}} é obrigatório",
       "invalidEmail": "Por favor, insira um e-mail válido",
       "invalidUrl": "Por favor, insira uma URL válida",
-      "invalidNumber": "Por favor, insira um número válido"
+      "invalidNumber": "Por favor, insira um número válido",
+      "enterField": "Insira {{field}}",
+      "selectOption": "Selecione uma opção"
+    },
+    "pending": {
+      "title": "Aguardando aprovação",
+      "heading": "Sua conta está aguardando aprovação",
+      "message": "Um administrador revisará seu cadastro e aprovará seu acesso.",
+      "checkBack": "Por favor, volte mais tarde."
     }
   },
   "chat": {
@@ -106,10 +118,180 @@
       "markdownExt": "arquivo .md",
       "plainText": "Texto simples",
       "plainTextExt": "arquivo .txt"
+    },
+    "database": {
+      "executedSql": "SQL executado: {{sql}}",
+      "noResults": "A consulta não retornou resultados.",
+      "resultsCount": "Resultados da consulta ao banco de dados ({{count}} linhas):",
+      "resultsTruncated": "(Resultados truncados para 100 linhas)"
     }
   },
   "common": {
     "adminQuestion": "Você é um administrador?",
-    "signInNostr": "Entrar com Nostr"
+    "signInNostr": "Entrar com Nostr",
+    "close": "Fechar",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "saveChanges": "Salvar alterações",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "remove": "Remover",
+    "required": "Obrigatório",
+    "settings": "Configurações",
+    "toggleTheme": "Alternar tema",
+    "switchToLight": "Mudar para modo claro",
+    "switchToDark": "Mudar para modo escuro",
+    "moveUp": "Mover para cima",
+    "moveDown": "Mover para baixo",
+    "logout": "Sair",
+    "tryAgain": "Tentar novamente",
+    "continue": "Continuar",
+    "unexpectedError": "Ocorreu um erro inesperado"
+  },
+  "settings": {
+    "title": "Configurações",
+    "signedInAs": "Conectado como",
+    "signOut": "Sair",
+    "adminTools": "Ferramentas de administração",
+    "admin": {
+      "instanceConfig": "Configuração da instância",
+      "instanceConfigDesc": "Marca, tipos de usuário, campos",
+      "testDashboard": "Painel de testes",
+      "testDashboardDesc": "Testes de API, ferramentas de depuração",
+      "documentUpload": "Upload de documentos",
+      "documentUploadDesc": "Adicionar documentos à base de conhecimento",
+      "databaseExplorer": "Explorador de banco de dados",
+      "databaseExplorerDesc": "Navegar no banco de dados SQLite"
+    }
+  },
+  "admin": {
+    "confirmDelete": "Tem certeza de que deseja excluir este registro?",
+    "setup": {
+      "backToChat": "Voltar ao chat",
+      "title": "Configure sua instância",
+      "subtitle": "Personalize a marca e a experiência de integração do usuário",
+      "branding": "Marca da instância",
+      "displayName": "Nome de exibição",
+      "defaultName": "Sanctum",
+      "displayNameHint": "Este nome aparece no cabeçalho e nas telas de integração",
+      "icon": "Ícone",
+      "accentColor": "Cor de destaque",
+      "userTypes": "Tipos de usuário",
+      "userTypesHint": "Defina diferentes tipos de usuário para mostrar perguntas de integração específicas por tipo. Se você tiver mais de um tipo, os usuários escolherão seu tipo durante a integração.",
+      "typeName": "Nome do tipo",
+      "typeNamePlaceholder": "ex.: Pesquisador, Estudante",
+      "typeDescription": "Descrição (opcional)",
+      "typeDescPlaceholder": "ex.: Para pesquisadores acadêmicos",
+      "addType": "Adicionar tipo",
+      "addUserType": "Adicionar tipo de usuário",
+      "onboardingFields": "Campos de integração do usuário",
+      "optionsCount": "{{count}} opções",
+      "noFields": "Nenhum campo personalizado",
+      "addField": "Adicionar campo",
+      "knowledgeBase": "Base de conhecimento",
+      "knowledgeBaseHint": "Faça upload de documentos para construir sua base de conhecimento RAG para respostas com IA.",
+      "uploadDocuments": "Fazer upload de documentos",
+      "database": "Banco de dados",
+      "databaseHint": "Visualize e gerencie os dados da sua instância diretamente no banco de dados SQLite.",
+      "openDatabase": "Abrir explorador de banco de dados",
+      "save": "Salvar configuração"
+    },
+    "database": {
+      "backToSetup": "Voltar para configuração de administrador",
+      "title": "Explorador de banco de dados",
+      "subtitle": "Visualizar e gerenciar dados SQLite",
+      "sqlQuery": "Consulta SQL",
+      "refreshTables": "Atualizar tabelas",
+      "tables": "Tabelas",
+      "noTables": "Nenhuma tabela encontrada",
+      "notInitialized": "O banco de dados pode não estar inicializado",
+      "columns": "colunas",
+      "sqlQueryLabel": "Consulta SQL",
+      "sqlPlaceholder": "SELECT * FROM users WHERE role = 'admin';",
+      "runHint": "Pressione Cmd/Ctrl + Enter para executar",
+      "running": "Executando...",
+      "runQuery": "Executar consulta",
+      "results": "Resultados",
+      "error": "Erro",
+      "rowsAffected": "linha(s) afetada(s)",
+      "lastInsertId": "Último ID inserido:",
+      "noResults": "Nenhum resultado",
+      "tableInfo": "{{columns}} colunas, {{rows}} linhas",
+      "addRow": "Adicionar linha",
+      "newRecord": "Novo registro",
+      "editRecord": "Editar registro",
+      "noData": "Sem dados nesta tabela",
+      "addFirstRecord": "Adicione seu primeiro registro",
+      "clickToExpand": "Clique para expandir",
+      "pagination": "Mostrando {{from}} a {{to}} de {{total}}",
+      "tableCount_one": "{{count}} tabela",
+      "tableCount_other": "{{count}} tabelas",
+      "rowCount_one": "{{count}} linha",
+      "rowCount_other": "{{count}} linhas",
+      "rowsInTable": "{{count}} linhas em {{table}}",
+      "connected": "SQLite conectado",
+      "selectTable": "Selecione uma tabela na barra lateral",
+      "orUseSqlQuery": "ou use o modo de consulta SQL"
+    },
+    "fields": {
+      "nameRequired": "Nome do campo é obrigatório",
+      "optionsRequired": "Pelo menos 2 opções são necessárias",
+      "editField": "Editar campo",
+      "addField": "Adicionar novo campo",
+      "fieldName": "Nome do campo",
+      "fieldNamePlaceholder": "ex.: Nome da empresa",
+      "applyTo": "Aplicar a",
+      "allUsers": "Todos os usuários (Global)",
+      "globalHint": "Campos globais são mostrados a todos os usuários. Campos específicos de tipo aparecem apenas para esse tipo de usuário.",
+      "fieldType": "Tipo de campo",
+      "options": "Opções",
+      "optionPlaceholder": "Opção {{number}}",
+      "addOption": "+ Adicionar opção",
+      "placeholder": "Placeholder",
+      "placeholderOptional": "(opcional)",
+      "placeholderHint": "Texto de dica mostrado no campo",
+      "requiredField": "Campo obrigatório"
+    },
+    "fieldTypes": {
+      "text": "Texto",
+      "textDesc": "Entrada de texto de linha única",
+      "email": "E-mail",
+      "emailDesc": "E-mail com validação",
+      "number": "Número",
+      "numberDesc": "Entrada numérica",
+      "textarea": "Área de texto",
+      "textareaDesc": "Texto de múltiplas linhas",
+      "select": "Menu suspenso",
+      "selectDesc": "Selecionar entre opções",
+      "checkbox": "Caixa de seleção",
+      "checkboxDesc": "Alternância sim/não",
+      "date": "Data",
+      "dateDesc": "Seletor de data",
+      "url": "URL",
+      "urlDesc": "Link de site"
+    },
+    "icons": {
+      "searchPlaceholder": "Pesquisar ícones...",
+      "noMatch": "Nenhum ícone corresponde a \"{{search}}\"",
+      "selected": "Selecionado:"
+    }
+  },
+  "adminOnboarding": {
+    "notAdmin": "Não é administrador?",
+    "signInAsUser": "Entrar como usuário",
+    "title": "Configuração de administrador",
+    "subtitle": "Conecte-se com sua identidade Nostr para gerenciar esta instância",
+    "connectNostr": "Conectar com Nostr",
+    "orForTesting": "ou para testes",
+    "continueMock": "Continuar com identidade simulada",
+    "connecting": "Conectando à extensão...",
+    "noExtension": "Nenhuma extensão Nostr encontrada",
+    "installExtension": "Instale uma extensão compatível com NIP-07 para continuar",
+    "useMock": "Usar simulação",
+    "welcomeAdmin": "Bem-vindo, Administrador!",
+    "connectedAs": "Conectado como",
+    "redirecting": "Redirecionando para o painel...",
+    "connectionFailed": "Falha na conexão"
   }
 }

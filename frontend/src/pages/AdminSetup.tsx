@@ -1,29 +1,26 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Paintbrush, FileText, ChevronUp, ChevronDown, Pencil, Trash2, FilePlus, Plus, Database, Upload, SquareTerminal, Users, Loader2 } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { FieldEditor } from '../components/onboarding/FieldEditor'
 import { ColorPicker } from '../components/onboarding/ColorPicker'
 import { IconPicker } from '../components/onboarding/IconPicker'
-import { CustomField, UserType } from '../types/onboarding'
+import { CustomField, UserType, FieldType } from '../types/onboarding'
 import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
 import { useInstanceConfig } from '../context/InstanceConfigContext'
 import { AccentColor } from '../types/instance'
 
-const FIELD_TYPE_LABELS: Record<string, string> = {
-  text: 'Text',
-  email: 'Email',
-  number: 'Number',
-  textarea: 'Text Area',
-  select: 'Dropdown',
-  checkbox: 'Checkbox',
-  date: 'Date',
-  url: 'URL',
-}
+const FIELD_TYPE_VALUES: FieldType[] = ['text', 'email', 'number', 'textarea', 'select', 'checkbox', 'date', 'url']
 
 export function AdminSetup() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { config, updateConfig } = useInstanceConfig()
+
+  const FIELD_TYPE_LABELS: Record<string, string> = Object.fromEntries(
+    FIELD_TYPE_VALUES.map((type) => [type, t(`admin.fieldTypes.${type}`)])
+  )
   const [instanceName, setInstanceName] = useState(config.name)
   const [accentColor, setAccentColor] = useState<AccentColor>(config.accentColor)
   const [icon, setIcon] = useState(config.icon)
@@ -251,7 +248,7 @@ export function AdminSetup() {
       onClick={handleBack}
       className="text-text-muted hover:text-text transition-colors"
     >
-      Back to Chat
+      {t('admin.setup.backToChat')}
     </button>
   )
 
@@ -265,8 +262,8 @@ export function AdminSetup() {
 
   return (
     <OnboardingCard
-      title="Configure Your Instance"
-      subtitle="Customize the branding and user onboarding experience"
+      title={t('admin.setup.title')}
+      subtitle={t('admin.setup.subtitle')}
       footer={footer}
     >
       {isEditing ? (
@@ -280,38 +277,38 @@ export function AdminSetup() {
           userTypes={userTypes}
         />
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-6 stagger-children">
           {/* Instance Branding Section */}
-          <div className="bg-surface-overlay border border-border rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-text mb-4 flex items-center gap-2">
+          <div className="card card-sm !p-5 !bg-surface-overlay">
+            <h3 className="heading-sm mb-4 flex items-center gap-2">
               <Paintbrush className="w-4 h-4 text-text-muted" />
-              Instance Branding
+              {t('admin.setup.branding')}
             </h3>
 
             <div className="space-y-4">
               {/* Instance Name */}
               <div>
                 <label className="text-sm font-medium text-text mb-1.5 block">
-                  Display Name
+                  {t('admin.setup.displayName')}
                 </label>
-                <div className="border border-border rounded-xl px-4 py-3 bg-surface focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20 transition-all">
+                <div className="input-container px-4 py-3">
                   <input
                     type="text"
                     value={instanceName}
                     onChange={(e) => setInstanceName(e.target.value)}
-                    placeholder="Sanctum"
-                    className="w-full bg-transparent outline-none text-text placeholder:text-text-muted text-sm"
+                    placeholder={t('admin.setup.defaultName')}
+                    className="input-field text-sm"
                   />
                 </div>
                 <p className="text-xs text-text-muted mt-1.5">
-                  This name appears in the header and onboarding screens
+                  {t('admin.setup.displayNameHint')}
                 </p>
               </div>
 
               {/* Icon */}
               <div>
                 <label className="text-sm font-medium text-text mb-2 block">
-                  Icon
+                  {t('admin.setup.icon')}
                 </label>
                 <IconPicker value={icon} onChange={handleIconChange} />
               </div>
@@ -319,7 +316,7 @@ export function AdminSetup() {
               {/* Accent Color */}
               <div>
                 <label className="text-sm font-medium text-text mb-2 block">
-                  Accent Color
+                  {t('admin.setup.accentColor')}
                 </label>
                 <ColorPicker value={accentColor} onChange={handleColorChange} />
               </div>
@@ -327,13 +324,13 @@ export function AdminSetup() {
           </div>
 
           {/* User Types Section */}
-          <div className="bg-surface-overlay border border-border rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-text mb-4 flex items-center gap-2">
+          <div className="card card-sm !p-5 !bg-surface-overlay">
+            <h3 className="heading-sm mb-4 flex items-center gap-2">
               <Users className="w-4 h-4 text-text-muted" />
-              User Types
+              {t('admin.setup.userTypes')}
             </h3>
             <p className="text-xs text-text-muted mb-4">
-              Define different user types to show type-specific onboarding questions. If you have more than one type, users will choose their type during onboarding.
+              {t('admin.setup.userTypesHint')}
             </p>
 
             {/* Types List */}
@@ -342,7 +339,7 @@ export function AdminSetup() {
                 {userTypes.map((userType) => (
                   <div
                     key={userType.id}
-                    className="bg-surface border border-border rounded-lg p-3 flex items-center justify-between"
+                    className="bg-surface border border-border rounded-xl p-3.5 flex items-center justify-between hover:border-border-strong hover:shadow-sm transition-all"
                   >
                     <div>
                       <p className="text-sm font-medium text-text">{userType.name}</p>
@@ -353,7 +350,7 @@ export function AdminSetup() {
                     <button
                       onClick={() => handleRemoveUserType(userType.id)}
                       className="p-1 text-text-muted hover:text-error transition-colors"
-                      title="Remove"
+                      title={t('common.remove')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -366,22 +363,22 @@ export function AdminSetup() {
             {isAddingType ? (
               <div className="bg-surface border border-border rounded-lg p-4 space-y-3">
                 <div>
-                  <label className="text-xs font-medium text-text mb-1 block">Type Name</label>
+                  <label className="text-xs font-medium text-text mb-1 block">{t('admin.setup.typeName')}</label>
                   <input
                     type="text"
                     value={newTypeName}
                     onChange={(e) => setNewTypeName(e.target.value)}
-                    placeholder="e.g., Researcher, Student"
+                    placeholder={t('admin.setup.typeNamePlaceholder')}
                     className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-text mb-1 block">Description (optional)</label>
+                  <label className="text-xs font-medium text-text mb-1 block">{t('admin.setup.typeDescription')}</label>
                   <input
                     type="text"
                     value={newTypeDescription}
                     onChange={(e) => setNewTypeDescription(e.target.value)}
-                    placeholder="e.g., For academic researchers"
+                    placeholder={t('admin.setup.typeDescPlaceholder')}
                     className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                   />
                 </div>
@@ -394,14 +391,14 @@ export function AdminSetup() {
                     }}
                     className="flex-1 bg-surface-overlay border border-border text-text rounded-lg px-3 py-2 text-sm font-medium hover:bg-surface transition-all"
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </button>
                   <button
                     onClick={handleAddUserType}
                     disabled={!newTypeName.trim()}
                     className="flex-1 bg-accent text-accent-text rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Add Type
+                    {t('admin.setup.addType')}
                   </button>
                 </div>
               </div>
@@ -411,16 +408,16 @@ export function AdminSetup() {
                 className="w-full flex items-center justify-center gap-2 border border-dashed border-border hover:border-accent text-text-muted hover:text-accent rounded-lg px-3 py-2 text-sm transition-all"
               >
                 <Plus className="w-4 h-4" />
-                Add User Type
+                {t('admin.setup.addUserType')}
               </button>
             )}
           </div>
 
           {/* User Fields Section */}
-          <div className="bg-surface-overlay border border-border rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-text mb-4 flex items-center gap-2">
+          <div className="card card-sm !p-5 !bg-surface-overlay">
+            <h3 className="heading-sm mb-4 flex items-center gap-2">
               <FileText className="w-4 h-4 text-text-muted" />
-              User Onboarding Fields
+              {t('admin.setup.onboardingFields')}
             </h3>
 
             {/* Fields List */}
@@ -429,7 +426,7 @@ export function AdminSetup() {
                 {fields.map((field, index) => (
                   <div
                     key={field.id}
-                    className="bg-surface border border-border rounded-lg p-3 animate-fade-in"
+                    className="bg-surface border border-border rounded-xl p-3.5 animate-fade-in hover:border-border-strong hover:shadow-sm transition-all"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
@@ -437,7 +434,7 @@ export function AdminSetup() {
                           <p className="text-sm font-medium text-text">{field.name}</p>
                           {field.required && (
                             <span className="text-[10px] bg-error/10 text-error px-1.5 py-0.5 rounded">
-                              Required
+                              {t('common.required')}
                             </span>
                           )}
                         </div>
@@ -447,7 +444,7 @@ export function AdminSetup() {
                           </span>
                           {field.type === 'select' && field.options && (
                             <span className="text-xs text-text-muted">
-                              • {field.options.length} options
+                              • {t('admin.setup.optionsCount', { count: field.options.length })}
                             </span>
                           )}
                           <span className={`text-[10px] px-1.5 py-0.5 rounded ${
@@ -466,7 +463,7 @@ export function AdminSetup() {
                           onClick={() => handleMoveField(index, 'up')}
                           disabled={index === 0}
                           className="p-1 text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                          title="Move up"
+                          title={t('common.moveUp')}
                         >
                           <ChevronUp className="w-4 h-4" />
                         </button>
@@ -475,7 +472,7 @@ export function AdminSetup() {
                           onClick={() => handleMoveField(index, 'down')}
                           disabled={index === fields.length - 1}
                           className="p-1 text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                          title="Move down"
+                          title={t('common.moveDown')}
                         >
                           <ChevronDown className="w-4 h-4" />
                         </button>
@@ -483,7 +480,7 @@ export function AdminSetup() {
                         <button
                           onClick={() => handleEditField(field)}
                           className="p-1 text-text-muted hover:text-accent transition-colors"
-                          title="Edit"
+                          title={t('common.edit')}
                         >
                           <Pencil className="w-4 h-4" />
                         </button>
@@ -491,7 +488,7 @@ export function AdminSetup() {
                         <button
                           onClick={() => handleRemoveField(field.id)}
                           className="p-1 text-text-muted hover:text-error transition-colors"
-                          title="Remove"
+                          title={t('common.remove')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -503,7 +500,7 @@ export function AdminSetup() {
             ) : (
               <div className="text-center py-6 bg-surface border border-border border-dashed rounded-lg mb-4">
                 <FilePlus className="w-8 h-8 text-text-muted mx-auto mb-2" strokeWidth={1.5} />
-                <p className="text-xs text-text-muted">No custom fields</p>
+                <p className="text-xs text-text-muted">{t('admin.setup.noFields')}</p>
               </div>
             )}
 
@@ -513,52 +510,52 @@ export function AdminSetup() {
               className="w-full flex items-center justify-center gap-2 border border-dashed border-border hover:border-accent text-text-muted hover:text-accent rounded-lg px-3 py-2 text-sm transition-all"
             >
               <Plus className="w-4 h-4" />
-              Add Field
+              {t('admin.setup.addField')}
             </button>
           </div>
 
           {/* Knowledge Base Section */}
-          <div className="bg-surface-overlay border border-border rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-text mb-4 flex items-center gap-2">
+          <div className="card card-sm !p-5 !bg-surface-overlay">
+            <h3 className="heading-sm mb-4 flex items-center gap-2">
               <Database className="w-4 h-4 text-text-muted" />
-              Knowledge Base
+              {t('admin.setup.knowledgeBase')}
             </h3>
             <p className="text-xs text-text-muted mb-4">
-              Upload documents to build your RAG knowledge base for AI-powered responses.
+              {t('admin.setup.knowledgeBaseHint')}
             </p>
             <Link
               to="/admin/upload"
               className="w-full flex items-center justify-center gap-2 border border-dashed border-border hover:border-accent text-text-muted hover:text-accent rounded-lg px-3 py-2.5 text-sm transition-all"
             >
               <Upload className="w-4 h-4" />
-              Upload Documents
+              {t('admin.setup.uploadDocuments')}
             </Link>
           </div>
 
           {/* Database Section */}
-          <div className="bg-surface-overlay border border-border rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-text mb-4 flex items-center gap-2">
+          <div className="card card-sm !p-5 !bg-surface-overlay">
+            <h3 className="heading-sm mb-4 flex items-center gap-2">
               <Database className="w-4 h-4 text-text-muted" />
-              Database
+              {t('admin.setup.database')}
             </h3>
             <p className="text-xs text-text-muted mb-4">
-              View and manage your instance data directly in the SQLite database.
+              {t('admin.setup.databaseHint')}
             </p>
             <Link
               to="/admin/database"
               className="w-full flex items-center justify-center gap-2 border border-dashed border-border hover:border-accent text-text-muted hover:text-accent rounded-lg px-3 py-2.5 text-sm transition-all"
             >
               <SquareTerminal className="w-4 h-4" />
-              Open Database Explorer
+              {t('admin.setup.openDatabase')}
             </Link>
           </div>
 
           {/* Save */}
           <button
             onClick={handleSave}
-            className="w-full bg-accent text-accent-text rounded-xl px-6 py-3.5 font-medium hover:bg-accent-hover transition-all active-press"
+            className="btn btn-primary btn-lg w-full"
           >
-            Save Configuration
+            {t('admin.setup.save')}
           </button>
         </div>
       )}

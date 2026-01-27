@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import { Link2, AlertCircle, Check } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
@@ -28,6 +29,7 @@ function truncatePubkey(pubkey: string): string {
 
 export function AdminOnboarding() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [state, setState] = useState<ConnectionState>('idle')
   const [pubkey, setPubkey] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -104,17 +106,17 @@ export function AdminOnboarding() {
 
   const footer = (
     <>
-      <span>Not an admin? </span>
+      <span>{t('adminOnboarding.notAdmin')} </span>
       <Link to="/login" className="text-accent hover:text-accent-hover font-medium transition-colors">
-        Sign in as user
+        {t('adminOnboarding.signInAsUser')}
       </Link>
     </>
   )
 
   return (
     <OnboardingCard
-      title="Admin Setup"
-      subtitle="Connect with your Nostr identity to manage this instance"
+      title={t('adminOnboarding.title')}
+      subtitle={t('adminOnboarding.subtitle')}
       footer={footer}
     >
       <NostrIcon />
@@ -127,7 +129,7 @@ export function AdminOnboarding() {
             className="w-full flex items-center justify-center gap-2 bg-accent text-accent-text rounded-xl px-6 py-3.5 font-medium hover:bg-accent-hover transition-all active-press shadow-md"
           >
             <Link2 className="w-5 h-5" />
-            Connect with Nostr
+            {t('adminOnboarding.connectNostr')}
           </button>
 
           {/* Mock auth only available in DEV_MODE */}
@@ -138,7 +140,7 @@ export function AdminOnboarding() {
                   <div className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="px-3 bg-surface-raised text-text-muted">or for testing</span>
+                  <span className="px-3 bg-surface-raised text-text-muted">{t('adminOnboarding.orForTesting')}</span>
                 </div>
               </div>
 
@@ -146,7 +148,7 @@ export function AdminOnboarding() {
                 onClick={handleMockConnect}
                 className="w-full text-sm text-text-muted hover:text-text py-2 transition-colors"
               >
-                Continue with mock identity
+                {t('adminOnboarding.continueMock')}
               </button>
             </>
           )}
@@ -159,7 +161,7 @@ export function AdminOnboarding() {
       {state === 'connecting' && (
         <div className="text-center py-4 animate-fade-in">
           <div className="w-8 h-8 border-2 border-accent/30 border-t-accent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-text-secondary">Connecting to extension...</p>
+          <p className="text-text-secondary">{t('adminOnboarding.connecting')}</p>
         </div>
       )}
 
@@ -168,8 +170,8 @@ export function AdminOnboarding() {
         <div className="space-y-6 animate-fade-in">
           <div className="bg-warning-subtle border border-warning/20 rounded-xl p-4 text-center">
             <AlertCircle className="w-8 h-8 text-warning mx-auto mb-2" />
-            <p className="text-sm text-text font-medium mb-1">No Nostr extension found</p>
-            <p className="text-xs text-text-muted">Install a NIP-07 compatible extension to continue</p>
+            <p className="text-sm text-text font-medium mb-1">{t('adminOnboarding.noExtension')}</p>
+            <p className="text-xs text-text-muted">{t('adminOnboarding.installExtension')}</p>
           </div>
 
           <NostrExtensionLinks />
@@ -179,7 +181,7 @@ export function AdminOnboarding() {
               onClick={handleRetry}
               className={`${DEV_MODE ? 'flex-1' : 'w-full'} bg-surface-overlay border border-border text-text rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-surface-raised transition-all`}
             >
-              Try again
+              {t('common.tryAgain')}
             </button>
             {/* Mock auth only available in DEV_MODE */}
             {DEV_MODE && (
@@ -187,7 +189,7 @@ export function AdminOnboarding() {
                 onClick={handleMockConnect}
                 className="flex-1 bg-accent text-accent-text rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-accent-hover transition-all active-press"
               >
-                Use mock
+                {t('adminOnboarding.useMock')}
               </button>
             )}
           </div>
@@ -200,12 +202,12 @@ export function AdminOnboarding() {
           <div className="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <Check className="w-6 h-6 text-success" />
           </div>
-          <h3 className="text-lg font-semibold text-text mb-2">Welcome, Admin!</h3>
-          <p className="text-sm text-text-muted mb-3">Connected as</p>
+          <h3 className="text-lg font-semibold text-text mb-2">{t('adminOnboarding.welcomeAdmin')}</h3>
+          <p className="text-sm text-text-muted mb-3">{t('adminOnboarding.connectedAs')}</p>
           <code className="inline-block bg-surface-overlay px-3 py-1.5 rounded-lg text-xs font-mono text-text-secondary break-all">
             {truncatePubkey(pubkey)}
           </code>
-          <p className="text-xs text-text-muted mt-4">Redirecting to dashboard...</p>
+          <p className="text-xs text-text-muted mt-4">{t('adminOnboarding.redirecting')}</p>
         </div>
       )}
 
@@ -214,15 +216,15 @@ export function AdminOnboarding() {
         <div className="space-y-4 animate-fade-in">
           <div className="bg-error-subtle border border-error/20 rounded-xl p-4 text-center">
             <AlertCircle className="w-8 h-8 text-error mx-auto mb-2" />
-            <p className="text-sm text-text font-medium mb-1">Connection failed</p>
-            <p className="text-xs text-text-muted">{error || 'An unexpected error occurred'}</p>
+            <p className="text-sm text-text font-medium mb-1">{t('adminOnboarding.connectionFailed')}</p>
+            <p className="text-xs text-text-muted">{error || t('common.unexpectedError')}</p>
           </div>
 
           <button
             onClick={handleRetry}
             className="w-full bg-accent text-accent-text rounded-xl px-6 py-3 font-medium hover:bg-accent-hover transition-all active-press"
           >
-            Try again
+            {t('common.tryAgain')}
           </button>
         </div>
       )}

@@ -1,5 +1,9 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "Hvad beskriver dig bedst?",
+      "description": "Vælg den mulighed, der passer bedst til dine behov"
+    },
     "language": {
       "title": "Vælg dit sprog",
       "subtitle": "Vælg dit foretrukne sprog for at fortsætte",
@@ -53,7 +57,15 @@
       "fieldRequired": "{{field}} er påkrævet",
       "invalidEmail": "Indtast en gyldig e-mail",
       "invalidUrl": "Indtast en gyldig URL",
-      "invalidNumber": "Indtast et gyldigt tal"
+      "invalidNumber": "Indtast et gyldigt tal",
+      "enterField": "Indtast {{field}}",
+      "selectOption": "Vælg en mulighed"
+    },
+    "pending": {
+      "title": "Afventer godkendelse",
+      "heading": "Din konto afventer godkendelse",
+      "message": "En administrator vil gennemgå din registrering og godkende din adgang.",
+      "checkBack": "Kom venligst tilbage senere."
     }
   },
   "chat": {
@@ -89,7 +101,7 @@
       "docsLabel": "Dokumenter"
     },
     "messages": {
-      "searching": "🔍 Søger efter \"{{term}}\"...",
+      "searching": "Søger efter \"{{term}}\"...",
       "searchResults": "Jeg søgte efter \"{{term}}\" for dig:",
       "newConversation": "Ny samtale"
     },
@@ -106,10 +118,180 @@
       "markdownExt": ".md fil",
       "plainText": "Ren tekst",
       "plainTextExt": ".txt fil"
+    },
+    "database": {
+      "executedSql": "Udført SQL: {{sql}}",
+      "noResults": "Forespørgslen returnerede ingen resultater.",
+      "resultsCount": "Databaseforespørgselsresultater ({{count}} rækker):",
+      "resultsTruncated": "(Resultater afkortet til 100 rækker)"
     }
   },
   "common": {
     "adminQuestion": "Er du administrator?",
-    "signInNostr": "Log ind med Nostr"
+    "signInNostr": "Log ind med Nostr",
+    "close": "Luk",
+    "cancel": "Annuller",
+    "save": "Gem",
+    "saving": "Gemmer...",
+    "saveChanges": "Gem ændringer",
+    "edit": "Rediger",
+    "delete": "Slet",
+    "remove": "Fjern",
+    "required": "Påkrævet",
+    "settings": "Indstillinger",
+    "toggleTheme": "Skift tema",
+    "switchToLight": "Skift til lys tilstand",
+    "switchToDark": "Skift til mørk tilstand",
+    "moveUp": "Flyt op",
+    "moveDown": "Flyt ned",
+    "logout": "Log ud",
+    "tryAgain": "Prøv igen",
+    "continue": "Fortsæt",
+    "unexpectedError": "Der opstod en uventet fejl"
+  },
+  "settings": {
+    "title": "Indstillinger",
+    "signedInAs": "Logget ind som",
+    "signOut": "Log ud",
+    "adminTools": "Admin-værktøjer",
+    "admin": {
+      "instanceConfig": "Instanskonfiguration",
+      "instanceConfigDesc": "Branding, brugertyper, felter",
+      "testDashboard": "Testpanel",
+      "testDashboardDesc": "API-test, fejlfindingsværktøjer",
+      "documentUpload": "Dokumentupload",
+      "documentUploadDesc": "Tilføj dokumenter til vidensbasen",
+      "databaseExplorer": "Databaseudforsker",
+      "databaseExplorerDesc": "Gennemse SQLite-database"
+    }
+  },
+  "admin": {
+    "confirmDelete": "Er du sikker på, at du vil slette denne post?",
+    "setup": {
+      "backToChat": "Tilbage til chat",
+      "title": "Konfigurer din instans",
+      "subtitle": "Tilpas branding og brugeronboarding-oplevelsen",
+      "branding": "Instans-branding",
+      "displayName": "Visningsnavn",
+      "defaultName": "Sanctum",
+      "displayNameHint": "Dette navn vises i headeren og på onboarding-skærme",
+      "icon": "Ikon",
+      "accentColor": "Accentfarve",
+      "userTypes": "Brugertyper",
+      "userTypesHint": "Definer forskellige brugertyper for at vise typespecifikke onboarding-spørgsmål. Hvis du har mere end én type, vil brugerne vælge deres type under onboarding.",
+      "typeName": "Typenavn",
+      "typeNamePlaceholder": "f.eks. Forsker, Studerende",
+      "typeDescription": "Beskrivelse (valgfri)",
+      "typeDescPlaceholder": "f.eks. Til akademiske forskere",
+      "addType": "Tilføj type",
+      "addUserType": "Tilføj brugertype",
+      "onboardingFields": "Bruger-onboarding felter",
+      "optionsCount": "{{count}} muligheder",
+      "noFields": "Ingen brugerdefinerede felter",
+      "addField": "Tilføj felt",
+      "knowledgeBase": "Vidensbase",
+      "knowledgeBaseHint": "Upload dokumenter for at opbygge din RAG-vidensbase til AI-drevne svar.",
+      "uploadDocuments": "Upload dokumenter",
+      "database": "Database",
+      "databaseHint": "Se og administrer dine instansdata direkte i SQLite-databasen.",
+      "openDatabase": "Åbn databaseudforsker",
+      "save": "Gem konfiguration"
+    },
+    "database": {
+      "backToSetup": "Tilbage til admin-opsætning",
+      "title": "Databaseudforsker",
+      "subtitle": "Se og administrer SQLite-data",
+      "sqlQuery": "SQL-forespørgsel",
+      "refreshTables": "Opdater tabeller",
+      "tables": "Tabeller",
+      "noTables": "Ingen tabeller fundet",
+      "notInitialized": "Databasen er muligvis ikke initialiseret",
+      "columns": "kolonner",
+      "sqlQueryLabel": "SQL-forespørgsel",
+      "sqlPlaceholder": "SELECT * FROM users WHERE role = 'admin';",
+      "runHint": "Tryk Cmd/Ctrl + Enter for at køre",
+      "running": "Kører...",
+      "runQuery": "Kør forespørgsel",
+      "results": "Resultater",
+      "error": "Fejl",
+      "rowsAffected": "række(r) påvirket",
+      "lastInsertId": "Sidste indsatte ID:",
+      "noResults": "Ingen resultater",
+      "tableInfo": "{{columns}} kolonner, {{rows}} rækker",
+      "addRow": "Tilføj række",
+      "newRecord": "Ny post",
+      "editRecord": "Rediger post",
+      "noData": "Ingen data i denne tabel",
+      "addFirstRecord": "Tilføj din første post",
+      "clickToExpand": "Klik for at udvide",
+      "pagination": "Viser {{from}} til {{to}} af {{total}}",
+      "tableCount_one": "{{count}} tabel",
+      "tableCount_other": "{{count}} tabeller",
+      "rowCount_one": "{{count}} række",
+      "rowCount_other": "{{count}} rækker",
+      "rowsInTable": "{{count}} rækker i {{table}}",
+      "connected": "SQLite tilsluttet",
+      "selectTable": "Vælg en tabel fra sidepanelet",
+      "orUseSqlQuery": "eller brug SQL-forespørgselstilstand"
+    },
+    "fields": {
+      "nameRequired": "Feltnavn er påkrævet",
+      "optionsRequired": "Mindst 2 muligheder påkrævet",
+      "editField": "Rediger felt",
+      "addField": "Tilføj nyt felt",
+      "fieldName": "Feltnavn",
+      "fieldNamePlaceholder": "f.eks. Firmanavn",
+      "applyTo": "Anvend på",
+      "allUsers": "Alle brugere (Global)",
+      "globalHint": "Globale felter vises for alle brugere. Typespecifikke felter vises kun for den pågældende brugertype.",
+      "fieldType": "Felttype",
+      "options": "Muligheder",
+      "optionPlaceholder": "Mulighed {{number}}",
+      "addOption": "+ Tilføj mulighed",
+      "placeholder": "Pladsholder",
+      "placeholderOptional": "(valgfri)",
+      "placeholderHint": "Hjælpetekst vist i inputfeltet",
+      "requiredField": "Påkrævet felt"
+    },
+    "fieldTypes": {
+      "text": "Tekst",
+      "textDesc": "Enkelt-linje tekstinput",
+      "email": "E-mail",
+      "emailDesc": "E-mail med validering",
+      "number": "Tal",
+      "numberDesc": "Numerisk input",
+      "textarea": "Tekstområde",
+      "textareaDesc": "Flerlinjet tekst",
+      "select": "Rullemenu",
+      "selectDesc": "Vælg fra muligheder",
+      "checkbox": "Afkrydsningsfelt",
+      "checkboxDesc": "Ja/nej-skifte",
+      "date": "Dato",
+      "dateDesc": "Datovælger",
+      "url": "URL",
+      "urlDesc": "Webstedslink"
+    },
+    "icons": {
+      "searchPlaceholder": "Søg ikoner...",
+      "noMatch": "Ingen ikoner matcher \"{{search}}\"",
+      "selected": "Valgt:"
+    }
+  },
+  "adminOnboarding": {
+    "notAdmin": "Ikke administrator?",
+    "signInAsUser": "Log ind som bruger",
+    "title": "Admin-opsætning",
+    "subtitle": "Forbind med din Nostr-identitet for at administrere denne instans",
+    "connectNostr": "Forbind med Nostr",
+    "orForTesting": "eller til test",
+    "continueMock": "Fortsæt med mock-identitet",
+    "connecting": "Forbinder til udvidelse...",
+    "noExtension": "Ingen Nostr-udvidelse fundet",
+    "installExtension": "Installer en NIP-07-kompatibel udvidelse for at fortsætte",
+    "useMock": "Brug mock",
+    "welcomeAdmin": "Velkommen, Admin!",
+    "connectedAs": "Forbundet som",
+    "redirecting": "Omdirigerer til dashboard...",
+    "connectionFailed": "Forbindelse mislykkedes"
   }
 }

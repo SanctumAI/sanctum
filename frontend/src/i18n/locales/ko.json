@@ -1,5 +1,9 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "당신을 가장 잘 설명하는 것은?",
+      "description": "당신의 필요에 가장 맞는 옵션을 선택하세요"
+    },
     "language": {
       "title": "언어를 선택하세요",
       "subtitle": "계속하려면 선호하는 언어를 선택하세요",
@@ -53,7 +57,15 @@
       "fieldRequired": "{{field}}은(는) 필수입니다",
       "invalidEmail": "유효한 이메일을 입력하세요",
       "invalidUrl": "유효한 URL을 입력하세요",
-      "invalidNumber": "유효한 숫자를 입력하세요"
+      "invalidNumber": "유효한 숫자를 입력하세요",
+      "enterField": "{{field}} 입력",
+      "selectOption": "옵션 선택"
+    },
+    "pending": {
+      "title": "승인 대기 중",
+      "heading": "계정이 승인 대기 중입니다",
+      "message": "관리자가 회원가입을 검토하고 접근을 승인할 것입니다.",
+      "checkBack": "나중에 다시 확인해 주세요."
     }
   },
   "chat": {
@@ -106,10 +118,180 @@
       "markdownExt": ".md 파일",
       "plainText": "일반 텍스트",
       "plainTextExt": ".txt 파일"
+    },
+    "database": {
+      "executedSql": "실행된 SQL: {{sql}}",
+      "noResults": "쿼리가 결과를 반환하지 않았습니다.",
+      "resultsCount": "데이터베이스 쿼리 결과 ({{count}}행):",
+      "resultsTruncated": "(결과가 100행으로 잘렸습니다)"
     }
   },
   "common": {
     "adminQuestion": "관리자이신가요?",
-    "signInNostr": "Nostr로 로그인"
+    "signInNostr": "Nostr로 로그인",
+    "close": "닫기",
+    "cancel": "취소",
+    "save": "저장",
+    "saving": "저장 중...",
+    "saveChanges": "변경 사항 저장",
+    "edit": "편집",
+    "delete": "삭제",
+    "remove": "제거",
+    "required": "필수",
+    "settings": "설정",
+    "toggleTheme": "테마 전환",
+    "switchToLight": "라이트 모드로 전환",
+    "switchToDark": "다크 모드로 전환",
+    "moveUp": "위로 이동",
+    "moveDown": "아래로 이동",
+    "logout": "로그아웃",
+    "tryAgain": "다시 시도",
+    "continue": "계속",
+    "unexpectedError": "예기치 않은 오류가 발생했습니다"
+  },
+  "settings": {
+    "title": "설정",
+    "signedInAs": "로그인됨",
+    "signOut": "로그아웃",
+    "adminTools": "관리자 도구",
+    "admin": {
+      "instanceConfig": "인스턴스 설정",
+      "instanceConfigDesc": "브랜딩, 사용자 유형, 필드",
+      "testDashboard": "테스트 대시보드",
+      "testDashboardDesc": "API 테스트, 디버깅 도구",
+      "documentUpload": "문서 업로드",
+      "documentUploadDesc": "지식 베이스에 문서 추가",
+      "databaseExplorer": "데이터베이스 탐색기",
+      "databaseExplorerDesc": "SQLite 데이터베이스 탐색"
+    }
+  },
+  "admin": {
+    "confirmDelete": "이 레코드를 삭제하시겠습니까?",
+    "setup": {
+      "backToChat": "채팅으로 돌아가기",
+      "title": "인스턴스 설정",
+      "subtitle": "브랜딩 및 사용자 온보딩 경험 사용자 지정",
+      "branding": "인스턴스 브랜딩",
+      "displayName": "표시 이름",
+      "defaultName": "Sanctum",
+      "displayNameHint": "이 이름은 헤더와 온보딩 화면에 표시됩니다",
+      "icon": "아이콘",
+      "accentColor": "강조 색상",
+      "userTypes": "사용자 유형",
+      "userTypesHint": "유형별 온보딩 질문을 표시하려면 다른 사용자 유형을 정의하세요. 여러 유형이 있는 경우 사용자가 온보딩 중에 유형을 선택합니다.",
+      "typeName": "유형 이름",
+      "typeNamePlaceholder": "예: 연구원, 학생",
+      "typeDescription": "설명 (선택 사항)",
+      "typeDescPlaceholder": "예: 학술 연구원용",
+      "addType": "유형 추가",
+      "addUserType": "사용자 유형 추가",
+      "onboardingFields": "사용자 온보딩 필드",
+      "optionsCount": "{{count}}개 옵션",
+      "noFields": "사용자 정의 필드 없음",
+      "addField": "필드 추가",
+      "knowledgeBase": "지식 베이스",
+      "knowledgeBaseHint": "AI 기반 응답을 위한 RAG 지식 베이스를 구축하려면 문서를 업로드하세요.",
+      "uploadDocuments": "문서 업로드",
+      "database": "데이터베이스",
+      "databaseHint": "SQLite 데이터베이스에서 인스턴스 데이터를 직접 보고 관리하세요.",
+      "openDatabase": "데이터베이스 탐색기 열기",
+      "save": "설정 저장"
+    },
+    "database": {
+      "backToSetup": "관리 설정으로 돌아가기",
+      "title": "데이터베이스 탐색기",
+      "subtitle": "SQLite 데이터 보기 및 관리",
+      "sqlQuery": "SQL 쿼리",
+      "refreshTables": "테이블 새로고침",
+      "tables": "테이블",
+      "noTables": "테이블을 찾을 수 없음",
+      "notInitialized": "데이터베이스가 초기화되지 않았을 수 있음",
+      "columns": "열",
+      "sqlQueryLabel": "SQL 쿼리",
+      "sqlPlaceholder": "SELECT * FROM users WHERE role = 'admin';",
+      "runHint": "Cmd/Ctrl + Enter를 눌러 실행",
+      "running": "실행 중...",
+      "runQuery": "쿼리 실행",
+      "results": "결과",
+      "error": "오류",
+      "rowsAffected": "행이 영향을 받음",
+      "lastInsertId": "마지막 삽입 ID:",
+      "noResults": "결과 없음",
+      "tableInfo": "{{columns}}열, {{rows}}행",
+      "addRow": "행 추가",
+      "newRecord": "새 레코드",
+      "editRecord": "레코드 편집",
+      "noData": "이 테이블에 데이터 없음",
+      "addFirstRecord": "첫 번째 레코드 추가",
+      "clickToExpand": "클릭하여 확장",
+      "pagination": "{{from}}에서 {{to}}까지 표시 (전체 {{total}}개)",
+      "tableCount_one": "{{count}}개 테이블",
+      "tableCount_other": "{{count}}개 테이블",
+      "rowCount_one": "{{count}}행",
+      "rowCount_other": "{{count}}행",
+      "rowsInTable": "{{table}}에 {{count}}행",
+      "connected": "SQLite 연결됨",
+      "selectTable": "사이드바에서 테이블 선택",
+      "orUseSqlQuery": "또는 SQL 쿼리 모드 사용"
+    },
+    "fields": {
+      "nameRequired": "필드 이름은 필수입니다",
+      "optionsRequired": "최소 2개의 옵션이 필요합니다",
+      "editField": "필드 편집",
+      "addField": "새 필드 추가",
+      "fieldName": "필드 이름",
+      "fieldNamePlaceholder": "예: 회사 이름",
+      "applyTo": "적용 대상",
+      "allUsers": "모든 사용자 (전역)",
+      "globalHint": "전역 필드는 모든 사용자에게 표시됩니다. 유형별 필드는 해당 사용자 유형에만 표시됩니다.",
+      "fieldType": "필드 유형",
+      "options": "옵션",
+      "optionPlaceholder": "옵션 {{number}}",
+      "addOption": "+ 옵션 추가",
+      "placeholder": "플레이스홀더",
+      "placeholderOptional": "(선택 사항)",
+      "placeholderHint": "입력란에 표시되는 힌트 텍스트",
+      "requiredField": "필수 필드"
+    },
+    "fieldTypes": {
+      "text": "텍스트",
+      "textDesc": "한 줄 텍스트 입력",
+      "email": "이메일",
+      "emailDesc": "유효성 검사 포함 이메일",
+      "number": "숫자",
+      "numberDesc": "숫자 입력",
+      "textarea": "텍스트 영역",
+      "textareaDesc": "여러 줄 텍스트",
+      "select": "드롭다운",
+      "selectDesc": "옵션에서 선택",
+      "checkbox": "체크박스",
+      "checkboxDesc": "예/아니오 토글",
+      "date": "날짜",
+      "dateDesc": "날짜 선택기",
+      "url": "URL",
+      "urlDesc": "웹사이트 링크"
+    },
+    "icons": {
+      "searchPlaceholder": "아이콘 검색...",
+      "noMatch": "\"{{search}}\"와 일치하는 아이콘 없음",
+      "selected": "선택됨:"
+    }
+  },
+  "adminOnboarding": {
+    "notAdmin": "관리자가 아니신가요?",
+    "signInAsUser": "사용자로 로그인",
+    "title": "관리자 설정",
+    "subtitle": "이 인스턴스를 관리하려면 Nostr ID로 연결하세요",
+    "connectNostr": "Nostr로 연결",
+    "orForTesting": "또는 테스트용",
+    "continueMock": "모의 ID로 계속",
+    "connecting": "확장 프로그램에 연결 중...",
+    "noExtension": "Nostr 확장 프로그램을 찾을 수 없음",
+    "installExtension": "계속하려면 NIP-07 호환 확장 프로그램을 설치하세요",
+    "useMock": "모의 사용",
+    "welcomeAdmin": "환영합니다, 관리자!",
+    "connectedAs": "연결됨",
+    "redirecting": "대시보드로 이동 중...",
+    "connectionFailed": "연결 실패"
   }
 }

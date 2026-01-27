@@ -80,7 +80,7 @@ export function DocumentScope({
   const dropdownContent = isOpen ? (
     <div
       ref={dropdownRef}
-      className="fixed w-64 bg-surface-raised border border-border rounded-xl shadow-lg z-[9999] flex flex-col animate-fade-in-scale"
+      className="fixed w-64 bg-surface-raised border border-border rounded-xl shadow-xl z-[9999] flex flex-col animate-fade-in-scale backdrop-blur-dropdown"
       style={{
         top: dropdownPosition.openUpward ? 'auto' : `${dropdownPosition.top}px`,
         bottom: dropdownPosition.openUpward ? `${window.innerHeight - dropdownPosition.top}px` : 'auto',
@@ -88,9 +88,9 @@ export function DocumentScope({
         maxHeight: `${dropdownPosition.openUpward ? dropdownPosition.top - 16 : window.innerHeight - dropdownPosition.top - 16}px`,
       }}
     >
-      <div className="px-3 py-2.5 border-b border-border shrink-0">
-        <h4 className="text-xs font-semibold text-text">{t('chat.documentScope.title')}</h4>
-        <p className="text-[10px] text-text-muted mt-0.5">
+      <div className="px-3 py-3 border-b border-border shrink-0">
+        <h4 className="heading-sm">{t('chat.documentScope.title')}</h4>
+        <p className="text-[10px] text-text-muted mt-1">
           {t('chat.documentScope.description')}
         </p>
       </div>
@@ -171,9 +171,9 @@ export function DocumentScope({
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all hover-scale active-press ${
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all active:scale-95 ${
           selectedCount > 0
-            ? 'bg-accent text-accent-text shadow-sm'
+            ? 'bg-accent text-accent-text shadow-md glow-accent'
             : 'text-text-secondary hover:text-text hover:bg-surface-overlay border border-transparent hover:border-border'
         }`}
       >

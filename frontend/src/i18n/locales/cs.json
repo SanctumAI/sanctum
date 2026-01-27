@@ -1,5 +1,9 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "Co vás nejlépe vystihuje?",
+      "description": "Vyberte možnost, která nejlépe odpovídá vašim potřebám"
+    },
     "language": {
       "title": "Vyberte svůj jazyk",
       "subtitle": "Vyberte preferovaný jazyk pro pokračování",
@@ -53,7 +57,15 @@
       "fieldRequired": "{{field}} je povinné",
       "invalidEmail": "Zadejte platný e-mail",
       "invalidUrl": "Zadejte platnou URL",
-      "invalidNumber": "Zadejte platné číslo"
+      "invalidNumber": "Zadejte platné číslo",
+      "enterField": "Zadejte {{field}}",
+      "selectOption": "Vyberte možnost"
+    },
+    "pending": {
+      "title": "Čeká na schválení",
+      "heading": "Váš účet čeká na schválení",
+      "message": "Administrátor posoudí vaši registraci a schválí váš přístup.",
+      "checkBack": "Zkontrolujte to prosím později."
     }
   },
   "chat": {
@@ -89,7 +101,7 @@
       "docsLabel": "Dokumenty"
     },
     "messages": {
-      "searching": "🔍 Hledám \"{{term}}\"...",
+      "searching": "Hledám \"{{term}}\"...",
       "searchResults": "Vyhledal jsem \"{{term}}\" pro vás:",
       "newConversation": "Nová konverzace"
     },
@@ -106,10 +118,180 @@
       "markdownExt": "soubor .md",
       "plainText": "Prostý text",
       "plainTextExt": "soubor .txt"
+    },
+    "database": {
+      "executedSql": "Provedený SQL: {{sql}}",
+      "noResults": "Dotaz nevrátil žádné výsledky.",
+      "resultsCount": "Výsledky databázového dotazu ({{count}} řádků):",
+      "resultsTruncated": "(Výsledky zkráceny na 100 řádků)"
     }
   },
   "common": {
     "adminQuestion": "Jste administrátor?",
-    "signInNostr": "Přihlásit se přes Nostr"
+    "signInNostr": "Přihlásit se přes Nostr",
+    "close": "Zavřít",
+    "cancel": "Zrušit",
+    "save": "Uložit",
+    "saving": "Ukládání...",
+    "saveChanges": "Uložit změny",
+    "edit": "Upravit",
+    "delete": "Smazat",
+    "remove": "Odstranit",
+    "required": "Povinné",
+    "settings": "Nastavení",
+    "toggleTheme": "Přepnout motiv",
+    "switchToLight": "Přepnout na světlý režim",
+    "switchToDark": "Přepnout na tmavý režim",
+    "moveUp": "Posunout nahoru",
+    "moveDown": "Posunout dolů",
+    "logout": "Odhlásit se",
+    "tryAgain": "Zkusit znovu",
+    "continue": "Pokračovat",
+    "unexpectedError": "Došlo k neočekávané chybě"
+  },
+  "settings": {
+    "title": "Nastavení",
+    "signedInAs": "Přihlášen jako",
+    "signOut": "Odhlásit se",
+    "adminTools": "Nástroje správce",
+    "admin": {
+      "instanceConfig": "Konfigurace instance",
+      "instanceConfigDesc": "Branding, typy uživatelů, pole",
+      "testDashboard": "Testovací panel",
+      "testDashboardDesc": "Testování API, ladicí nástroje",
+      "documentUpload": "Nahrání dokumentů",
+      "documentUploadDesc": "Přidat dokumenty do znalostní báze",
+      "databaseExplorer": "Prohlížeč databáze",
+      "databaseExplorerDesc": "Procházet SQLite databázi"
+    }
+  },
+  "admin": {
+    "confirmDelete": "Opravdu chcete smazat tento záznam?",
+    "setup": {
+      "backToChat": "Zpět do chatu",
+      "title": "Nakonfigurujte svou instanci",
+      "subtitle": "Přizpůsobte branding a proces registrace uživatelů",
+      "branding": "Branding instance",
+      "displayName": "Zobrazovaný název",
+      "defaultName": "Sanctum",
+      "displayNameHint": "Tento název se zobrazuje v záhlaví a na obrazovkách registrace",
+      "icon": "Ikona",
+      "accentColor": "Akcentová barva",
+      "userTypes": "Typy uživatelů",
+      "userTypesHint": "Definujte různé typy uživatelů pro zobrazení specifických otázek při registraci. Pokud máte více než jeden typ, uživatelé si vyberou svůj typ během registrace.",
+      "typeName": "Název typu",
+      "typeNamePlaceholder": "např. Výzkumník, Student",
+      "typeDescription": "Popis (volitelný)",
+      "typeDescPlaceholder": "např. Pro akademické výzkumníky",
+      "addType": "Přidat typ",
+      "addUserType": "Přidat typ uživatele",
+      "onboardingFields": "Pole pro registraci uživatelů",
+      "optionsCount": "{{count}} možností",
+      "noFields": "Žádná vlastní pole",
+      "addField": "Přidat pole",
+      "knowledgeBase": "Znalostní báze",
+      "knowledgeBaseHint": "Nahrajte dokumenty pro vytvoření RAG znalostní báze pro odpovědi s podporou AI.",
+      "uploadDocuments": "Nahrát dokumenty",
+      "database": "Databáze",
+      "databaseHint": "Zobrazujte a spravujte data vaší instance přímo v SQLite databázi.",
+      "openDatabase": "Otevřít prohlížeč databáze",
+      "save": "Uložit konfiguraci"
+    },
+    "database": {
+      "backToSetup": "Zpět na nastavení správce",
+      "title": "Prohlížeč databáze",
+      "subtitle": "Zobrazit a spravovat SQLite data",
+      "sqlQuery": "SQL dotaz",
+      "refreshTables": "Obnovit tabulky",
+      "tables": "Tabulky",
+      "noTables": "Nebyly nalezeny žádné tabulky",
+      "notInitialized": "Databáze nemusí být inicializována",
+      "columns": "sloupců",
+      "sqlQueryLabel": "SQL dotaz",
+      "sqlPlaceholder": "SELECT * FROM users WHERE role = 'admin';",
+      "runHint": "Stiskněte Cmd/Ctrl + Enter pro spuštění",
+      "running": "Spouštím...",
+      "runQuery": "Spustit dotaz",
+      "results": "Výsledky",
+      "error": "Chyba",
+      "rowsAffected": "ovlivněných řádků",
+      "lastInsertId": "Poslední vložené ID:",
+      "noResults": "Žádné výsledky",
+      "tableInfo": "{{columns}} sloupců, {{rows}} řádků",
+      "addRow": "Přidat řádek",
+      "newRecord": "Nový záznam",
+      "editRecord": "Upravit záznam",
+      "noData": "V této tabulce nejsou žádná data",
+      "addFirstRecord": "Přidejte svůj první záznam",
+      "clickToExpand": "Klikněte pro rozbalení",
+      "pagination": "Zobrazeno {{from}} až {{to}} z {{total}}",
+      "tableCount_one": "{{count}} tabulka",
+      "tableCount_other": "{{count}} tabulek",
+      "rowCount_one": "{{count}} řádek",
+      "rowCount_other": "{{count}} řádků",
+      "rowsInTable": "{{count}} řádků v {{table}}",
+      "connected": "SQLite připojen",
+      "selectTable": "Vyberte tabulku z postranního panelu",
+      "orUseSqlQuery": "nebo použijte režim SQL dotazu"
+    },
+    "fields": {
+      "nameRequired": "Název pole je povinný",
+      "optionsRequired": "Vyžadovány alespoň 2 možnosti",
+      "editField": "Upravit pole",
+      "addField": "Přidat nové pole",
+      "fieldName": "Název pole",
+      "fieldNamePlaceholder": "např. Název společnosti",
+      "applyTo": "Použít na",
+      "allUsers": "Všichni uživatelé (globální)",
+      "globalHint": "Globální pole se zobrazují všem uživatelům. Pole specifická pro typ se zobrazují pouze pro daný typ uživatele.",
+      "fieldType": "Typ pole",
+      "options": "Možnosti",
+      "optionPlaceholder": "Možnost {{number}}",
+      "addOption": "+ Přidat možnost",
+      "placeholder": "Zástupný text",
+      "placeholderOptional": "(volitelné)",
+      "placeholderHint": "Nápověda zobrazená ve vstupním poli",
+      "requiredField": "Povinné pole"
+    },
+    "fieldTypes": {
+      "text": "Text",
+      "textDesc": "Jednořádkový textový vstup",
+      "email": "E-mail",
+      "emailDesc": "E-mail s validací",
+      "number": "Číslo",
+      "numberDesc": "Číselný vstup",
+      "textarea": "Textová oblast",
+      "textareaDesc": "Víceřádkový text",
+      "select": "Rozbalovací nabídka",
+      "selectDesc": "Výběr z možností",
+      "checkbox": "Zaškrtávací políčko",
+      "checkboxDesc": "Přepínač ano/ne",
+      "date": "Datum",
+      "dateDesc": "Výběr data",
+      "url": "URL",
+      "urlDesc": "Odkaz na web"
+    },
+    "icons": {
+      "searchPlaceholder": "Hledat ikony...",
+      "noMatch": "Žádné ikony neodpovídají \"{{search}}\"",
+      "selected": "Vybráno:"
+    }
+  },
+  "adminOnboarding": {
+    "notAdmin": "Nejste administrátor?",
+    "signInAsUser": "Přihlásit se jako uživatel",
+    "title": "Nastavení správce",
+    "subtitle": "Připojte se svou Nostr identitou pro správu této instance",
+    "connectNostr": "Připojit s Nostr",
+    "orForTesting": "nebo pro testování",
+    "continueMock": "Pokračovat s testovací identitou",
+    "connecting": "Připojování k rozšíření...",
+    "noExtension": "Nebylo nalezeno rozšíření Nostr",
+    "installExtension": "Pro pokračování nainstalujte rozšíření kompatibilní s NIP-07",
+    "useMock": "Použít testovací",
+    "welcomeAdmin": "Vítejte, administrátore!",
+    "connectedAs": "Připojeno jako",
+    "redirecting": "Přesměrování na panel...",
+    "connectionFailed": "Připojení selhalo"
   }
 }

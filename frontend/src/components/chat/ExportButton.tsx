@@ -37,12 +37,12 @@ export function ExportButton({ messages, disabled, iconOnly = false }: ExportBut
       <button
         onClick={() => !isDisabled && setIsOpen(!isOpen)}
         disabled={isDisabled}
-        className={`inline-flex items-center justify-center gap-1.5 rounded-lg text-xs font-medium transition-all active-press ${
+        className={`btn-ghost inline-flex items-center justify-center gap-1.5 rounded-lg text-xs font-medium transition-all ${
           iconOnly ? 'p-2' : 'px-2.5 py-1.5'
         } ${
           isDisabled
-            ? 'text-text-muted cursor-not-allowed'
-            : 'text-text-secondary hover:text-text hover:bg-surface-overlay'
+            ? '!text-text-muted cursor-not-allowed'
+            : ''
         }`}
         title={isDisabled ? t('chat.export.disabled') : t('chat.export.title')}
       >
@@ -53,8 +53,8 @@ export function ExportButton({ messages, disabled, iconOnly = false }: ExportBut
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 mt-1.5 w-40 bg-surface-raised border border-border rounded-xl shadow-lg z-50 overflow-hidden animate-fade-in-scale">
-          <div className="p-1">
+        <div className="absolute top-full right-0 mt-1.5 w-44 bg-surface-raised border border-border rounded-xl shadow-xl z-50 overflow-hidden animate-fade-in-scale backdrop-blur-dropdown">
+          <div className="p-1.5">
             <button
               onClick={() => handleExport('md')}
               className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-text hover:bg-surface-overlay rounded-lg transition-colors text-left"

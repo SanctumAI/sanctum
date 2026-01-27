@@ -1,5 +1,9 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "Τι σας περιγράφει καλύτερα;",
+      "description": "Επιλέξτε την επιλογή που ταιριάζει καλύτερα στις ανάγκες σας"
+    },
     "language": {
       "title": "Επιλέξτε τη γλώσσα σας",
       "subtitle": "Επιλέξτε την προτιμώμενη γλώσσα για να συνεχίσετε",
@@ -53,7 +57,15 @@
       "fieldRequired": "Το πεδίο {{field}} είναι υποχρεωτικό",
       "invalidEmail": "Παρακαλώ εισάγετε ένα έγκυρο email",
       "invalidUrl": "Παρακαλώ εισάγετε ένα έγκυρο URL",
-      "invalidNumber": "Παρακαλώ εισάγετε έναν έγκυρο αριθμό"
+      "invalidNumber": "Παρακαλώ εισάγετε έναν έγκυρο αριθμό",
+      "enterField": "Εισάγετε {{field}}",
+      "selectOption": "Επιλέξτε μια επιλογή"
+    },
+    "pending": {
+      "title": "Σε αναμονή έγκρισης",
+      "heading": "Ο λογαριασμός σας αναμένει έγκριση",
+      "message": "Ένας διαχειριστής θα εξετάσει την εγγραφή σας και θα εγκρίνει την πρόσβασή σας.",
+      "checkBack": "Παρακαλώ ελέγξτε ξανά αργότερα."
     }
   },
   "chat": {
@@ -89,7 +101,7 @@
       "docsLabel": "Έγγραφα"
     },
     "messages": {
-      "searching": "🔍 Αναζήτηση \"{{term}}\"...",
+      "searching": "Αναζήτηση \"{{term}}\"...",
       "searchResults": "Έψαξα \"{{term}}\" για εσάς:",
       "newConversation": "Νέα συνομιλία"
     },
@@ -106,10 +118,180 @@
       "markdownExt": "αρχείο .md",
       "plainText": "Απλό κείμενο",
       "plainTextExt": "αρχείο .txt"
+    },
+    "database": {
+      "executedSql": "Εκτελεσμένο SQL: {{sql}}",
+      "noResults": "Το ερώτημα δεν επέστρεψε αποτελέσματα.",
+      "resultsCount": "Αποτελέσματα ερωτήματος βάσης δεδομένων ({{count}} γραμμές):",
+      "resultsTruncated": "(Τα αποτελέσματα περικόπηκαν σε 100 γραμμές)"
     }
   },
   "common": {
     "adminQuestion": "Είστε διαχειριστής;",
-    "signInNostr": "Σύνδεση με Nostr"
+    "signInNostr": "Σύνδεση με Nostr",
+    "close": "Κλείσιμο",
+    "cancel": "Ακύρωση",
+    "save": "Αποθήκευση",
+    "saving": "Αποθήκευση...",
+    "saveChanges": "Αποθήκευση αλλαγών",
+    "edit": "Επεξεργασία",
+    "delete": "Διαγραφή",
+    "remove": "Αφαίρεση",
+    "required": "Απαιτούμενο",
+    "settings": "Ρυθμίσεις",
+    "toggleTheme": "Εναλλαγή θέματος",
+    "switchToLight": "Μετάβαση σε φωτεινή λειτουργία",
+    "switchToDark": "Μετάβαση σε σκοτεινή λειτουργία",
+    "moveUp": "Μετακίνηση πάνω",
+    "moveDown": "Μετακίνηση κάτω",
+    "logout": "Αποσύνδεση",
+    "tryAgain": "Δοκιμάστε ξανά",
+    "continue": "Συνέχεια",
+    "unexpectedError": "Παρουσιάστηκε απροσδόκητο σφάλμα"
+  },
+  "settings": {
+    "title": "Ρυθμίσεις",
+    "signedInAs": "Συνδεδεμένος ως",
+    "signOut": "Αποσύνδεση",
+    "adminTools": "Εργαλεία Διαχειριστή",
+    "admin": {
+      "instanceConfig": "Ρύθμιση Instance",
+      "instanceConfigDesc": "Branding, τύποι χρηστών, πεδία",
+      "testDashboard": "Πίνακας Δοκιμών",
+      "testDashboardDesc": "Δοκιμή API, εργαλεία αποσφαλμάτωσης",
+      "documentUpload": "Μεταφόρτωση Εγγράφων",
+      "documentUploadDesc": "Προσθήκη εγγράφων στη βάση γνώσεων",
+      "databaseExplorer": "Εξερευνητής Βάσης Δεδομένων",
+      "databaseExplorerDesc": "Περιήγηση στη βάση δεδομένων SQLite"
+    }
+  },
+  "admin": {
+    "confirmDelete": "Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτή την εγγραφή;",
+    "setup": {
+      "backToChat": "Πίσω στη Συνομιλία",
+      "title": "Ρύθμιση του Instance σας",
+      "subtitle": "Προσαρμόστε το branding και την εμπειρία εγγραφής χρηστών",
+      "branding": "Branding Instance",
+      "displayName": "Εμφανιζόμενο Όνομα",
+      "defaultName": "Sanctum",
+      "displayNameHint": "Αυτό το όνομα εμφανίζεται στην κεφαλίδα και στις οθόνες εγγραφής",
+      "icon": "Εικονίδιο",
+      "accentColor": "Χρώμα Έμφασης",
+      "userTypes": "Τύποι Χρηστών",
+      "userTypesHint": "Ορίστε διαφορετικούς τύπους χρηστών για να εμφανίζονται ερωτήσεις ειδικές για τον τύπο κατά την εγγραφή. Αν έχετε περισσότερους από έναν τύπους, οι χρήστες θα επιλέξουν τον τύπο τους κατά την εγγραφή.",
+      "typeName": "Όνομα Τύπου",
+      "typeNamePlaceholder": "π.χ. Ερευνητής, Φοιτητής",
+      "typeDescription": "Περιγραφή (προαιρετική)",
+      "typeDescPlaceholder": "π.χ. Για ακαδημαϊκούς ερευνητές",
+      "addType": "Προσθήκη Τύπου",
+      "addUserType": "Προσθήκη Τύπου Χρήστη",
+      "onboardingFields": "Πεδία Εγγραφής Χρηστών",
+      "optionsCount": "{{count}} επιλογές",
+      "noFields": "Χωρίς προσαρμοσμένα πεδία",
+      "addField": "Προσθήκη Πεδίου",
+      "knowledgeBase": "Βάση Γνώσεων",
+      "knowledgeBaseHint": "Ανεβάστε έγγραφα για να δημιουργήσετε τη βάση γνώσεων RAG για απαντήσεις με AI.",
+      "uploadDocuments": "Μεταφόρτωση Εγγράφων",
+      "database": "Βάση Δεδομένων",
+      "databaseHint": "Προβολή και διαχείριση δεδομένων του instance σας απευθείας στη βάση δεδομένων SQLite.",
+      "openDatabase": "Άνοιγμα Εξερευνητή Βάσης Δεδομένων",
+      "save": "Αποθήκευση Ρυθμίσεων"
+    },
+    "database": {
+      "backToSetup": "Πίσω στη Ρύθμιση Διαχειριστή",
+      "title": "Εξερευνητής Βάσης Δεδομένων",
+      "subtitle": "Προβολή και διαχείριση δεδομένων SQLite",
+      "sqlQuery": "Ερώτημα SQL",
+      "refreshTables": "Ανανέωση πινάκων",
+      "tables": "Πίνακες",
+      "noTables": "Δεν βρέθηκαν πίνακες",
+      "notInitialized": "Η βάση δεδομένων μπορεί να μην έχει αρχικοποιηθεί",
+      "columns": "στήλες",
+      "sqlQueryLabel": "Ερώτημα SQL",
+      "sqlPlaceholder": "SELECT * FROM users WHERE role = 'admin';",
+      "runHint": "Πατήστε Cmd/Ctrl + Enter για εκτέλεση",
+      "running": "Εκτελείται...",
+      "runQuery": "Εκτέλεση Ερωτήματος",
+      "results": "Αποτελέσματα",
+      "error": "Σφάλμα",
+      "rowsAffected": "γραμμή(ές) επηρεάστηκαν",
+      "lastInsertId": "Τελευταίο ID εισαγωγής:",
+      "noResults": "Χωρίς αποτελέσματα",
+      "tableInfo": "{{columns}} στήλες, {{rows}} γραμμές",
+      "addRow": "Προσθήκη Γραμμής",
+      "newRecord": "Νέα Εγγραφή",
+      "editRecord": "Επεξεργασία Εγγραφής",
+      "noData": "Δεν υπάρχουν δεδομένα σε αυτόν τον πίνακα",
+      "addFirstRecord": "Προσθέστε την πρώτη σας εγγραφή",
+      "clickToExpand": "Κάντε κλικ για επέκταση",
+      "pagination": "Εμφάνιση {{from}} έως {{to}} από {{total}}",
+      "tableCount_one": "{{count}} πίνακας",
+      "tableCount_other": "{{count}} πίνακες",
+      "rowCount_one": "{{count}} γραμμή",
+      "rowCount_other": "{{count}} γραμμές",
+      "rowsInTable": "{{count}} γραμμές σε {{table}}",
+      "connected": "SQLite Συνδεδεμένο",
+      "selectTable": "Επιλέξτε πίνακα από την πλαϊνή μπάρα",
+      "orUseSqlQuery": "ή χρησιμοποιήστε λειτουργία ερωτήματος SQL"
+    },
+    "fields": {
+      "nameRequired": "Το όνομα πεδίου είναι υποχρεωτικό",
+      "optionsRequired": "Απαιτούνται τουλάχιστον 2 επιλογές",
+      "editField": "Επεξεργασία Πεδίου",
+      "addField": "Προσθήκη Νέου Πεδίου",
+      "fieldName": "Όνομα Πεδίου",
+      "fieldNamePlaceholder": "π.χ. Όνομα Εταιρείας",
+      "applyTo": "Εφαρμογή σε",
+      "allUsers": "Όλοι οι Χρήστες (Καθολικό)",
+      "globalHint": "Τα καθολικά πεδία εμφανίζονται σε όλους τους χρήστες. Τα πεδία ειδικά για τύπο εμφανίζονται μόνο για τον συγκεκριμένο τύπο χρήστη.",
+      "fieldType": "Τύπος Πεδίου",
+      "options": "Επιλογές",
+      "optionPlaceholder": "Επιλογή {{number}}",
+      "addOption": "+ Προσθήκη επιλογής",
+      "placeholder": "Placeholder",
+      "placeholderOptional": "(προαιρετικό)",
+      "placeholderHint": "Κείμενο υπόδειξης που εμφανίζεται στο πεδίο εισαγωγής",
+      "requiredField": "Υποχρεωτικό πεδίο"
+    },
+    "fieldTypes": {
+      "text": "Κείμενο",
+      "textDesc": "Εισαγωγή κειμένου μιας γραμμής",
+      "email": "Email",
+      "emailDesc": "Email με επικύρωση",
+      "number": "Αριθμός",
+      "numberDesc": "Αριθμητική εισαγωγή",
+      "textarea": "Περιοχή Κειμένου",
+      "textareaDesc": "Κείμενο πολλών γραμμών",
+      "select": "Αναπτυσσόμενη λίστα",
+      "selectDesc": "Επιλογή από επιλογές",
+      "checkbox": "Πλαίσιο ελέγχου",
+      "checkboxDesc": "Εναλλαγή ναι/όχι",
+      "date": "Ημερομηνία",
+      "dateDesc": "Επιλογέας ημερομηνίας",
+      "url": "URL",
+      "urlDesc": "Σύνδεσμος ιστοσελίδας"
+    },
+    "icons": {
+      "searchPlaceholder": "Αναζήτηση εικονιδίων...",
+      "noMatch": "Κανένα εικονίδιο δεν ταιριάζει με \"{{search}}\"",
+      "selected": "Επιλεγμένο:"
+    }
+  },
+  "adminOnboarding": {
+    "notAdmin": "Δεν είστε διαχειριστής;",
+    "signInAsUser": "Σύνδεση ως χρήστης",
+    "title": "Ρύθμιση Διαχειριστή",
+    "subtitle": "Συνδεθείτε με την ταυτότητα Nostr σας για να διαχειριστείτε αυτό το instance",
+    "connectNostr": "Σύνδεση με Nostr",
+    "orForTesting": "ή για δοκιμή",
+    "continueMock": "Συνέχεια με εικονική ταυτότητα",
+    "connecting": "Σύνδεση στην επέκταση...",
+    "noExtension": "Δεν βρέθηκε επέκταση Nostr",
+    "installExtension": "Εγκαταστήστε μια επέκταση συμβατή με NIP-07 για να συνεχίσετε",
+    "useMock": "Χρήση εικονικής",
+    "welcomeAdmin": "Καλώς ήρθατε, Διαχειριστή!",
+    "connectedAs": "Συνδεδεμένος ως",
+    "redirecting": "Ανακατεύθυνση στον πίνακα ελέγχου...",
+    "connectionFailed": "Η σύνδεση απέτυχε"
   }
 }

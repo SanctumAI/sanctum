@@ -1,5 +1,9 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "哪个最能描述你？",
+      "description": "选择最符合你需求的选项"
+    },
     "language": {
       "title": "选择你的语言",
       "subtitle": "选择首选语言以继续",
@@ -53,7 +57,15 @@
       "fieldRequired": "{{field}}为必填",
       "invalidEmail": "请输入有效的电子邮箱",
       "invalidUrl": "请输入有效的URL",
-      "invalidNumber": "请输入有效的数字"
+      "invalidNumber": "请输入有效的数字",
+      "enterField": "输入 {{field}}",
+      "selectOption": "选择一个选项"
+    },
+    "pending": {
+      "title": "等待审核",
+      "heading": "您的账户正在等待审核",
+      "message": "管理员将审核您的注册并批准您的访问权限。",
+      "checkBack": "请稍后再回来查看。"
     }
   },
   "chat": {
@@ -106,10 +118,180 @@
       "markdownExt": ".md 文件",
       "plainText": "纯文本",
       "plainTextExt": ".txt 文件"
+    },
+    "database": {
+      "executedSql": "已执行 SQL：{{sql}}",
+      "noResults": "查询未返回结果。",
+      "resultsCount": "数据库查询结果（{{count}} 行）：",
+      "resultsTruncated": "（结果已截断至 100 行）"
     }
   },
   "common": {
     "adminQuestion": "你是管理员吗？",
-    "signInNostr": "使用 Nostr 登录"
+    "signInNostr": "使用 Nostr 登录",
+    "close": "关闭",
+    "cancel": "取消",
+    "save": "保存",
+    "saving": "保存中...",
+    "saveChanges": "保存更改",
+    "edit": "编辑",
+    "delete": "删除",
+    "remove": "移除",
+    "required": "必填",
+    "settings": "设置",
+    "toggleTheme": "切换主题",
+    "switchToLight": "切换到浅色模式",
+    "switchToDark": "切换到深色模式",
+    "moveUp": "上移",
+    "moveDown": "下移",
+    "logout": "登出",
+    "tryAgain": "重试",
+    "continue": "继续",
+    "unexpectedError": "发生意外错误"
+  },
+  "settings": {
+    "title": "设置",
+    "signedInAs": "已登录为",
+    "signOut": "登出",
+    "adminTools": "管理员工具",
+    "admin": {
+      "instanceConfig": "实例配置",
+      "instanceConfigDesc": "品牌、用户类型、字段",
+      "testDashboard": "测试仪表板",
+      "testDashboardDesc": "API 测试、调试工具",
+      "documentUpload": "文档上传",
+      "documentUploadDesc": "将文档添加到知识库",
+      "databaseExplorer": "数据库浏览器",
+      "databaseExplorerDesc": "浏览 SQLite 数据库"
+    }
+  },
+  "admin": {
+    "confirmDelete": "你确定要删除此记录吗？",
+    "setup": {
+      "backToChat": "返回聊天",
+      "title": "配置你的实例",
+      "subtitle": "自定义品牌和用户入门体验",
+      "branding": "实例品牌",
+      "displayName": "显示名称",
+      "defaultName": "Sanctum",
+      "displayNameHint": "此名称显示在标题和入门屏幕中",
+      "icon": "图标",
+      "accentColor": "强调色",
+      "userTypes": "用户类型",
+      "userTypesHint": "定义不同的用户类型以显示特定类型的入门问题。如果你有多个类型，用户将在入门时选择他们的类型。",
+      "typeName": "类型名称",
+      "typeNamePlaceholder": "例如：研究员、学生",
+      "typeDescription": "描述（可选）",
+      "typeDescPlaceholder": "例如：适用于学术研究人员",
+      "addType": "添加类型",
+      "addUserType": "添加用户类型",
+      "onboardingFields": "用户入门字段",
+      "optionsCount": "{{count}} 个选项",
+      "noFields": "没有自定义字段",
+      "addField": "添加字段",
+      "knowledgeBase": "知识库",
+      "knowledgeBaseHint": "上传文档以构建你的 RAG 知识库，用于 AI 驱动的响应。",
+      "uploadDocuments": "上传文档",
+      "database": "数据库",
+      "databaseHint": "直接在 SQLite 数据库中查看和管理你的实例数据。",
+      "openDatabase": "打开数据库浏览器",
+      "save": "保存配置"
+    },
+    "database": {
+      "backToSetup": "返回管理设置",
+      "title": "数据库浏览器",
+      "subtitle": "查看和管理 SQLite 数据",
+      "sqlQuery": "SQL 查询",
+      "refreshTables": "刷新表",
+      "tables": "表",
+      "noTables": "未找到表",
+      "notInitialized": "数据库可能未初始化",
+      "columns": "列",
+      "sqlQueryLabel": "SQL 查询",
+      "sqlPlaceholder": "SELECT * FROM users WHERE role = 'admin';",
+      "runHint": "按 Cmd/Ctrl + Enter 运行",
+      "running": "运行中...",
+      "runQuery": "运行查询",
+      "results": "结果",
+      "error": "错误",
+      "rowsAffected": "行受影响",
+      "lastInsertId": "最后插入 ID：",
+      "noResults": "无结果",
+      "tableInfo": "{{columns}} 列，{{rows}} 行",
+      "addRow": "添加行",
+      "newRecord": "新记录",
+      "editRecord": "编辑记录",
+      "noData": "此表无数据",
+      "addFirstRecord": "添加你的第一条记录",
+      "clickToExpand": "点击展开",
+      "pagination": "显示 {{from}} 至 {{to}}，共 {{total}} 条",
+      "tableCount_one": "{{count}} 个表",
+      "tableCount_other": "{{count}} 个表",
+      "rowCount_one": "{{count}} 行",
+      "rowCount_other": "{{count}} 行",
+      "rowsInTable": "{{table}} 中有 {{count}} 行",
+      "connected": "SQLite 已连接",
+      "selectTable": "从侧边栏选择一个表",
+      "orUseSqlQuery": "或使用 SQL 查询模式"
+    },
+    "fields": {
+      "nameRequired": "字段名称为必填",
+      "optionsRequired": "至少需要 2 个选项",
+      "editField": "编辑字段",
+      "addField": "添加新字段",
+      "fieldName": "字段名称",
+      "fieldNamePlaceholder": "例如：公司名称",
+      "applyTo": "应用于",
+      "allUsers": "所有用户（全局）",
+      "globalHint": "全局字段对所有用户显示。特定类型字段仅对该用户类型显示。",
+      "fieldType": "字段类型",
+      "options": "选项",
+      "optionPlaceholder": "选项 {{number}}",
+      "addOption": "+ 添加选项",
+      "placeholder": "占位符",
+      "placeholderOptional": "（可选）",
+      "placeholderHint": "显示在输入框中的提示文本",
+      "requiredField": "必填字段"
+    },
+    "fieldTypes": {
+      "text": "文本",
+      "textDesc": "单行文本输入",
+      "email": "电子邮件",
+      "emailDesc": "带验证的电子邮件",
+      "number": "数字",
+      "numberDesc": "数字输入",
+      "textarea": "文本区域",
+      "textareaDesc": "多行文本",
+      "select": "下拉菜单",
+      "selectDesc": "从选项中选择",
+      "checkbox": "复选框",
+      "checkboxDesc": "是/否切换",
+      "date": "日期",
+      "dateDesc": "日期选择器",
+      "url": "URL",
+      "urlDesc": "网页链接"
+    },
+    "icons": {
+      "searchPlaceholder": "搜索图标...",
+      "noMatch": "没有匹配「{{search}}」的图标",
+      "selected": "已选择："
+    }
+  },
+  "adminOnboarding": {
+    "notAdmin": "不是管理员？",
+    "signInAsUser": "以用户身份登录",
+    "title": "管理员设置",
+    "subtitle": "使用你的 Nostr 身份连接以管理此实例",
+    "connectNostr": "使用 Nostr 连接",
+    "orForTesting": "或用于测试",
+    "continueMock": "使用模拟身份继续",
+    "connecting": "正在连接扩展...",
+    "noExtension": "未找到 Nostr 扩展",
+    "installExtension": "请安装 NIP-07 兼容扩展以继续",
+    "useMock": "使用模拟",
+    "welcomeAdmin": "欢迎，管理员！",
+    "connectedAs": "已连接为",
+    "redirecting": "正在跳转到仪表板...",
+    "connectionFailed": "连接失败"
   }
 }

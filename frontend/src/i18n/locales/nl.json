@@ -1,5 +1,9 @@
 {
   "onboarding": {
+    "userType": {
+      "title": "Wat beschrijft jou het best?",
+      "description": "Selecteer de optie die het best bij je behoeften past"
+    },
     "language": {
       "title": "Kies je taal",
       "subtitle": "Selecteer je voorkeurstaal om verder te gaan",
@@ -53,7 +57,15 @@
       "fieldRequired": "{{field}} is verplicht",
       "invalidEmail": "Vul een geldig e-mailadres in",
       "invalidUrl": "Vul een geldige URL in",
-      "invalidNumber": "Vul een geldig nummer in"
+      "invalidNumber": "Vul een geldig nummer in",
+      "enterField": "Voer {{field}} in",
+      "selectOption": "Selecteer een optie"
+    },
+    "pending": {
+      "title": "Wacht op goedkeuring",
+      "heading": "Je account wacht op goedkeuring",
+      "message": "Een beheerder zal je registratie beoordelen en je toegang goedkeuren.",
+      "checkBack": "Kom later terug."
     }
   },
   "chat": {
@@ -106,10 +118,180 @@
       "markdownExt": ".md bestand",
       "plainText": "Platte tekst",
       "plainTextExt": ".txt bestand"
+    },
+    "database": {
+      "executedSql": "Uitgevoerde SQL: {{sql}}",
+      "noResults": "Query leverde geen resultaten op.",
+      "resultsCount": "Databasequery resultaten ({{count}} rijen):",
+      "resultsTruncated": "(Resultaten afgekapt tot 100 rijen)"
     }
   },
   "common": {
     "adminQuestion": "Ben je een beheerder?",
-    "signInNostr": "Inloggen met Nostr"
+    "signInNostr": "Inloggen met Nostr",
+    "close": "Sluiten",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "saving": "Opslaan...",
+    "saveChanges": "Wijzigingen opslaan",
+    "edit": "Bewerken",
+    "delete": "Verwijderen",
+    "remove": "Verwijderen",
+    "required": "Verplicht",
+    "settings": "Instellingen",
+    "toggleTheme": "Thema wisselen",
+    "switchToLight": "Naar lichte modus",
+    "switchToDark": "Naar donkere modus",
+    "moveUp": "Omhoog",
+    "moveDown": "Omlaag",
+    "logout": "Uitloggen",
+    "tryAgain": "Probeer opnieuw",
+    "continue": "Doorgaan",
+    "unexpectedError": "Er is een onverwachte fout opgetreden"
+  },
+  "settings": {
+    "title": "Instellingen",
+    "signedInAs": "Ingelogd als",
+    "signOut": "Uitloggen",
+    "adminTools": "Beheertools",
+    "admin": {
+      "instanceConfig": "Instance-configuratie",
+      "instanceConfigDesc": "Branding, gebruikerstypen, velden",
+      "testDashboard": "Testdashboard",
+      "testDashboardDesc": "API-tests, debugging tools",
+      "documentUpload": "Documenten uploaden",
+      "documentUploadDesc": "Documenten toevoegen aan kennisbank",
+      "databaseExplorer": "Database-verkenner",
+      "databaseExplorerDesc": "SQLite-database bekijken"
+    }
+  },
+  "admin": {
+    "confirmDelete": "Weet je zeker dat je dit record wilt verwijderen?",
+    "setup": {
+      "backToChat": "Terug naar chat",
+      "title": "Configureer je instance",
+      "subtitle": "Pas de branding en gebruikerservaring aan",
+      "branding": "Instance branding",
+      "displayName": "Weergavenaam",
+      "defaultName": "Sanctum",
+      "displayNameHint": "Deze naam verschijnt in de header en onboarding-schermen",
+      "icon": "Pictogram",
+      "accentColor": "Accentkleur",
+      "userTypes": "Gebruikerstypen",
+      "userTypesHint": "Definieer verschillende gebruikerstypen om type-specifieke onboarding-vragen te tonen. Als je meer dan één type hebt, kiezen gebruikers hun type tijdens de onboarding.",
+      "typeName": "Typenaam",
+      "typeNamePlaceholder": "bijv. Onderzoeker, Student",
+      "typeDescription": "Beschrijving (optioneel)",
+      "typeDescPlaceholder": "bijv. Voor academische onderzoekers",
+      "addType": "Type toevoegen",
+      "addUserType": "Gebruikerstype toevoegen",
+      "onboardingFields": "Gebruikers onboarding-velden",
+      "optionsCount": "{{count}} opties",
+      "noFields": "Geen aangepaste velden",
+      "addField": "Veld toevoegen",
+      "knowledgeBase": "Kennisbank",
+      "knowledgeBaseHint": "Upload documenten om je RAG-kennisbank voor AI-gestuurde antwoorden op te bouwen.",
+      "uploadDocuments": "Documenten uploaden",
+      "database": "Database",
+      "databaseHint": "Bekijk en beheer je instance-gegevens direct in de SQLite-database.",
+      "openDatabase": "Database-verkenner openen",
+      "save": "Configuratie opslaan"
+    },
+    "database": {
+      "backToSetup": "Terug naar beheerconfiguratie",
+      "title": "Database-verkenner",
+      "subtitle": "SQLite-gegevens bekijken en beheren",
+      "sqlQuery": "SQL-query",
+      "refreshTables": "Tabellen vernieuwen",
+      "tables": "Tabellen",
+      "noTables": "Geen tabellen gevonden",
+      "notInitialized": "Database is mogelijk niet geïnitialiseerd",
+      "columns": "kolommen",
+      "sqlQueryLabel": "SQL-query",
+      "sqlPlaceholder": "SELECT * FROM users WHERE role = 'admin';",
+      "runHint": "Druk op Cmd/Ctrl + Enter om uit te voeren",
+      "running": "Bezig met uitvoeren...",
+      "runQuery": "Query uitvoeren",
+      "results": "Resultaten",
+      "error": "Fout",
+      "rowsAffected": "rij(en) beïnvloed",
+      "lastInsertId": "Laatst ingevoegde ID:",
+      "noResults": "Geen resultaten",
+      "tableInfo": "{{columns}} kolommen, {{rows}} rijen",
+      "addRow": "Rij toevoegen",
+      "newRecord": "Nieuw record",
+      "editRecord": "Record bewerken",
+      "noData": "Geen gegevens in deze tabel",
+      "addFirstRecord": "Voeg je eerste record toe",
+      "clickToExpand": "Klik om uit te vouwen",
+      "pagination": "{{from}} t/m {{to}} van {{total}} weergeven",
+      "tableCount_one": "{{count}} tabel",
+      "tableCount_other": "{{count}} tabellen",
+      "rowCount_one": "{{count}} rij",
+      "rowCount_other": "{{count}} rijen",
+      "rowsInTable": "{{count}} rijen in {{table}}",
+      "connected": "SQLite verbonden",
+      "selectTable": "Selecteer een tabel uit de zijbalk",
+      "orUseSqlQuery": "of gebruik SQL-querymodus"
+    },
+    "fields": {
+      "nameRequired": "Veldnaam is verplicht",
+      "optionsRequired": "Minimaal 2 opties vereist",
+      "editField": "Veld bewerken",
+      "addField": "Nieuw veld toevoegen",
+      "fieldName": "Veldnaam",
+      "fieldNamePlaceholder": "bijv. Bedrijfsnaam",
+      "applyTo": "Toepassen op",
+      "allUsers": "Alle gebruikers (Globaal)",
+      "globalHint": "Globale velden worden aan alle gebruikers getoond. Type-specifieke velden verschijnen alleen voor dat gebruikerstype.",
+      "fieldType": "Veldtype",
+      "options": "Opties",
+      "optionPlaceholder": "Optie {{number}}",
+      "addOption": "+ Optie toevoegen",
+      "placeholder": "Placeholder",
+      "placeholderOptional": "(optioneel)",
+      "placeholderHint": "Hinttekst getoond in het invoerveld",
+      "requiredField": "Verplicht veld"
+    },
+    "fieldTypes": {
+      "text": "Tekst",
+      "textDesc": "Enkelregelige tekstinvoer",
+      "email": "E-mail",
+      "emailDesc": "E-mail met validatie",
+      "number": "Nummer",
+      "numberDesc": "Numerieke invoer",
+      "textarea": "Tekstgebied",
+      "textareaDesc": "Meerregelige tekst",
+      "select": "Dropdown",
+      "selectDesc": "Selecteer uit opties",
+      "checkbox": "Selectievakje",
+      "checkboxDesc": "Ja/nee schakelaar",
+      "date": "Datum",
+      "dateDesc": "Datumkiezer",
+      "url": "URL",
+      "urlDesc": "Website-link"
+    },
+    "icons": {
+      "searchPlaceholder": "Pictogrammen zoeken...",
+      "noMatch": "Geen pictogrammen komen overeen met \"{{search}}\"",
+      "selected": "Geselecteerd:"
+    }
+  },
+  "adminOnboarding": {
+    "notAdmin": "Geen beheerder?",
+    "signInAsUser": "Inloggen als gebruiker",
+    "title": "Beheerderconfiguratie",
+    "subtitle": "Verbind met je Nostr-identiteit om deze instance te beheren",
+    "connectNostr": "Verbinden met Nostr",
+    "orForTesting": "of voor testen",
+    "continueMock": "Doorgaan met mock-identiteit",
+    "connecting": "Verbinden met extensie...",
+    "noExtension": "Geen Nostr-extensie gevonden",
+    "installExtension": "Installeer een NIP-07 compatibele extensie om door te gaan",
+    "useMock": "Mock gebruiken",
+    "welcomeAdmin": "Welkom, Beheerder!",
+    "connectedAs": "Verbonden als",
+    "redirecting": "Doorsturen naar dashboard...",
+    "connectionFailed": "Verbinding mislukt"
   }
 }

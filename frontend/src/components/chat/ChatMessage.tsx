@@ -20,7 +20,7 @@ interface ChatMessageProps {
 
 function UserIcon() {
   return (
-    <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+    <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0 ring-1 ring-accent/20">
       <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
       </svg>
@@ -30,7 +30,7 @@ function UserIcon() {
 
 function AssistantIcon() {
   return (
-    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center shrink-0 shadow-sm">
+    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center shrink-0 shadow-md ring-1 ring-white/10">
       <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
       </svg>
@@ -57,10 +57,10 @@ function CodeBlock({ language, children, resolvedTheme }: CodeBlockProps) {
   const codeStyle = resolvedTheme === 'dark' ? oneDark : oneLight
 
   return (
-    <div className="my-4 rounded-xl overflow-hidden border border-border shadow-sm group">
-      <div className="flex items-center justify-between px-4 py-2 bg-surface-raised border-b border-border">
+    <div className="my-4 rounded-xl overflow-hidden border border-border shadow-md group">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-surface-raised border-b border-border">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-text-secondary uppercase tracking-wide">
+          <span className="label">
             {language || 'code'}
           </span>
         </div>
@@ -120,7 +120,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         {/* Content */}
         <div className={`flex-1 min-w-0 ${isUser ? 'flex justify-end' : ''}`}>
           {isUser ? (
-            <div className="inline-block max-w-[85%] bg-accent text-accent-text rounded-2xl rounded-tr-md px-4 py-2.5 shadow-sm">
+            <div className="inline-block max-w-[85%] bg-accent text-accent-text rounded-2xl rounded-tr-md px-4 py-2.5 shadow-md glow-accent">
               <p className="whitespace-pre-wrap text-[15px] leading-relaxed">{message.content}</p>
             </div>
           ) : (
@@ -192,13 +192,13 @@ export function ChatMessage({ message }: ChatMessageProps) {
                     return <em className="italic text-inherit">{children}</em>
                   },
                   h1({ children }) {
-                    return <h1 className="text-xl font-semibold mb-3 mt-4 first:mt-0 text-text">{children}</h1>
+                    return <h1 className="text-xl font-semibold mb-3 mt-4 first:mt-0 text-text tracking-tight">{children}</h1>
                   },
                   h2({ children }) {
-                    return <h2 className="text-lg font-semibold mb-2 mt-4 first:mt-0 text-text">{children}</h2>
+                    return <h2 className="text-lg font-semibold mb-2 mt-4 first:mt-0 text-text tracking-tight">{children}</h2>
                   },
                   h3({ children }) {
-                    return <h3 className="text-base font-semibold mb-2 mt-3 first:mt-0 text-text">{children}</h3>
+                    return <h3 className="text-base font-semibold mb-2 mt-3 first:mt-0 text-text tracking-tight">{children}</h3>
                   },
                   hr() {
                     return <hr className="my-4 border-border" />
@@ -231,7 +231,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   },
                   tr({ children }) {
                     return (
-                      <tr className="hover:bg-surface-raised/50 transition-colors duration-150 even:bg-surface-overlay/30">
+                      <tr className="hover:bg-surface-overlay transition-colors duration-150 even:bg-surface-raised/50">
                         {children}
                       </tr>
                     )

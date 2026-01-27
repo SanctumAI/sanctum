@@ -1,5 +1,177 @@
 {
+  "common": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "edit": "Edit",
+    "delete": "Delete",
+    "remove": "Remove",
+    "required": "Required",
+    "settings": "Settings",
+    "toggleTheme": "Toggle theme",
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "logout": "Log out",
+    "adminQuestion": "Are you an admin?",
+    "signInNostr": "Sign in with Nostr",
+    "tryAgain": "Try again",
+    "continue": "Continue",
+    "unexpectedError": "An unexpected error occurred"
+  },
+  "settings": {
+    "title": "Settings",
+    "signedInAs": "Signed in as",
+    "signOut": "Sign out",
+    "adminTools": "Admin Tools",
+    "admin": {
+      "instanceConfig": "Instance Configuration",
+      "instanceConfigDesc": "Branding, user types, fields",
+      "testDashboard": "Test Dashboard",
+      "testDashboardDesc": "API testing, debugging tools",
+      "documentUpload": "Document Upload",
+      "documentUploadDesc": "Add documents to knowledge base",
+      "databaseExplorer": "Database Explorer",
+      "databaseExplorerDesc": "Browse SQLite database"
+    }
+  },
+  "admin": {
+    "confirmDelete": "Are you sure you want to delete this record?",
+    "setup": {
+      "backToChat": "Back to Chat",
+      "title": "Configure Your Instance",
+      "subtitle": "Customize the branding and user onboarding experience",
+      "branding": "Instance Branding",
+      "displayName": "Display Name",
+      "defaultName": "Sanctum",
+      "displayNameHint": "This name appears in the header and onboarding screens",
+      "icon": "Icon",
+      "accentColor": "Accent Color",
+      "userTypes": "User Types",
+      "userTypesHint": "Define different user types to show type-specific onboarding questions. If you have more than one type, users will choose their type during onboarding.",
+      "typeName": "Type Name",
+      "typeNamePlaceholder": "e.g., Researcher, Student",
+      "typeDescription": "Description (optional)",
+      "typeDescPlaceholder": "e.g., For academic researchers",
+      "addType": "Add Type",
+      "addUserType": "Add User Type",
+      "onboardingFields": "User Onboarding Fields",
+      "optionsCount": "{{count}} options",
+      "noFields": "No custom fields",
+      "addField": "Add Field",
+      "knowledgeBase": "Knowledge Base",
+      "knowledgeBaseHint": "Upload documents to build your RAG knowledge base for AI-powered responses.",
+      "uploadDocuments": "Upload Documents",
+      "database": "Database",
+      "databaseHint": "View and manage your instance data directly in the SQLite database.",
+      "openDatabase": "Open Database Explorer",
+      "save": "Save Configuration"
+    },
+    "database": {
+      "backToSetup": "Back to Admin Setup",
+      "title": "Database Explorer",
+      "subtitle": "View and manage SQLite data",
+      "sqlQuery": "SQL Query",
+      "refreshTables": "Refresh tables",
+      "tables": "Tables",
+      "noTables": "No tables found",
+      "notInitialized": "Database may not be initialized",
+      "columns": "columns",
+      "sqlQueryLabel": "SQL Query",
+      "sqlPlaceholder": "SELECT * FROM users WHERE role = 'admin';",
+      "runHint": "Press Cmd/Ctrl + Enter to run",
+      "running": "Running...",
+      "runQuery": "Run Query",
+      "results": "Results",
+      "error": "Error",
+      "rowsAffected": "row(s) affected",
+      "lastInsertId": "Last insert ID:",
+      "noResults": "No results returned",
+      "tableInfo": "{{columns}} columns, {{rows}} rows",
+      "addRow": "Add Row",
+      "newRecord": "New Record",
+      "editRecord": "Edit Record",
+      "noData": "No data in this table",
+      "addFirstRecord": "Add your first record",
+      "clickToExpand": "Click to expand",
+      "pagination": "Showing {{from}} to {{to}} of {{total}}",
+      "tableCount_one": "{{count}} table",
+      "tableCount_other": "{{count}} tables",
+      "rowCount_one": "{{count}} row",
+      "rowCount_other": "{{count}} rows",
+      "rowsInTable": "{{count}} rows in {{table}}",
+      "connected": "SQLite Connected",
+      "selectTable": "Select a table from the sidebar",
+      "orUseSqlQuery": "or use SQL Query mode"
+    },
+    "fields": {
+      "nameRequired": "Field name is required",
+      "optionsRequired": "At least 2 options required",
+      "editField": "Edit Field",
+      "addField": "Add New Field",
+      "fieldName": "Field Name",
+      "fieldNamePlaceholder": "e.g., Company Name",
+      "applyTo": "Apply To",
+      "allUsers": "All Users (Global)",
+      "globalHint": "Global fields are shown to all users. Type-specific fields only appear for that user type.",
+      "fieldType": "Field Type",
+      "options": "Options",
+      "optionPlaceholder": "Option {{number}}",
+      "addOption": "+ Add option",
+      "placeholder": "Placeholder",
+      "placeholderOptional": "(optional)",
+      "placeholderHint": "Hint text shown in the input",
+      "requiredField": "Required field"
+    },
+    "fieldTypes": {
+      "text": "Text",
+      "textDesc": "Single-line text input",
+      "email": "Email",
+      "emailDesc": "Email with validation",
+      "number": "Number",
+      "numberDesc": "Numeric input",
+      "textarea": "Text Area",
+      "textareaDesc": "Multi-line text",
+      "select": "Dropdown",
+      "selectDesc": "Select from options",
+      "checkbox": "Checkbox",
+      "checkboxDesc": "Yes/no toggle",
+      "date": "Date",
+      "dateDesc": "Date picker",
+      "url": "URL",
+      "urlDesc": "Website link"
+    },
+    "icons": {
+      "searchPlaceholder": "Search icons...",
+      "noMatch": "No icons match \"{{search}}\"",
+      "selected": "Selected:"
+    }
+  },
+  "adminOnboarding": {
+    "notAdmin": "Not an admin?",
+    "signInAsUser": "Sign in as user",
+    "title": "Admin Setup",
+    "subtitle": "Connect with your Nostr identity to manage this instance",
+    "connectNostr": "Connect with Nostr",
+    "orForTesting": "or for testing",
+    "continueMock": "Continue with mock identity",
+    "connecting": "Connecting to extension...",
+    "noExtension": "No Nostr extension found",
+    "installExtension": "Install a NIP-07 compatible extension to continue",
+    "useMock": "Use mock",
+    "welcomeAdmin": "Welcome, Admin!",
+    "connectedAs": "Connected as",
+    "redirecting": "Redirecting to dashboard...",
+    "connectionFailed": "Connection failed"
+  },
   "onboarding": {
+    "userType": {
+      "title": "What describes you best?",
+      "description": "Select the option that best fits your needs"
+    },
     "language": {
       "title": "Choose your language",
       "subtitle": "Select your preferred language to continue",
@@ -53,7 +225,15 @@
       "fieldRequired": "{{field}} is required",
       "invalidEmail": "Please enter a valid email",
       "invalidUrl": "Please enter a valid URL",
-      "invalidNumber": "Please enter a valid number"
+      "invalidNumber": "Please enter a valid number",
+      "enterField": "Enter {{field}}",
+      "selectOption": "Select an option"
+    },
+    "pending": {
+      "title": "Pending Approval",
+      "heading": "Your account is pending approval",
+      "message": "An administrator will review your registration and approve your access.",
+      "checkBack": "Please check back later."
     }
   },
   "chat": {
@@ -89,7 +269,7 @@
       "docsLabel": "Docs"
     },
     "messages": {
-      "searching": "🔍 Searching for \"{{term}}\"...",
+      "searching": "Searching for \"{{term}}\"...",
       "searchResults": "I searched \"{{term}}\" for you:",
       "newConversation": "New conversation"
     },
@@ -106,10 +286,12 @@
       "markdownExt": ".md file",
       "plainText": "Plain Text",
       "plainTextExt": ".txt file"
+    },
+    "database": {
+      "executedSql": "Executed SQL: {{sql}}",
+      "noResults": "Query returned no results.",
+      "resultsCount": "Database query results ({{count}} rows):",
+      "resultsTruncated": "(Results truncated to 100 rows)"
     }
-  },
-  "common": {
-    "adminQuestion": "Are you an admin?",
-    "signInNostr": "Sign in with Nostr"
   }
 }

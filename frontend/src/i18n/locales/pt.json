@@ -190,7 +190,8 @@
       "addType": "Adicionar tipo",
       "addUserType": "Adicionar tipo de usuário",
       "onboardingFields": "Campos de integração do usuário",
-      "optionsCount": "{{count}} opções",
+      "optionsCount_one": "{{count}} opção",
+      "optionsCount_other": "{{count}} opções",
       "noFields": "Nenhum campo personalizado",
       "addField": "Adicionar campo",
       "knowledgeBase": "Base de conhecimento",
@@ -252,7 +253,7 @@
       "options": "Opções",
       "optionPlaceholder": "Opção {{number}}",
       "addOption": "+ Adicionar opção",
-      "placeholder": "Placeholder",
+      "placeholder": "Texto indicativo",
       "placeholderOptional": "(opcional)",
       "placeholderHint": "Texto de dica mostrado no campo",
       "requiredField": "Campo obrigatório"

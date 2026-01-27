@@ -164,6 +164,7 @@
     }
   },
   "admin": {
+    "confirmDelete": "Biztosan törölni szeretnéd ezt a rekordot?",
     "setup": {
       "backToChat": "Vissza a csevegéshez",
       "title": "Példány konfigurálása",

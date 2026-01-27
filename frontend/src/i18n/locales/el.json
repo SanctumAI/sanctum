@@ -252,7 +252,7 @@
       "options": "Επιλογές",
       "optionPlaceholder": "Επιλογή {{number}}",
       "addOption": "+ Προσθήκη επιλογής",
-      "placeholder": "Placeholder",
+      "placeholder": "Κείμενο υπόδειξης",
       "placeholderOptional": "(προαιρετικό)",
       "placeholderHint": "Κείμενο υπόδειξης που εμφανίζεται στο πεδίο εισαγωγής",
       "requiredField": "Υποχρεωτικό πεδίο"

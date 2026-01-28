@@ -539,12 +539,12 @@ async def execute_admin_tool(request: ToolExecuteRequest, admin: dict = Depends(
         )
 
 
-# NOTE: /query endpoint moved to query.py router (empathetic session-aware RAG)
+# NOTE: /query endpoint moved to query.py router (session-aware RAG)
 # The query.py module provides:
 # - Session-aware conversation history
-# - 2-hop graph traversal
-# - Empathetic crisis support prompts
-# - Clarifying questions for jurisdiction/context
+# - Vector search retrieval
+# - Configurable system prompts
+# - Fact extraction for context
 
 
 @app.post("/vector-search", response_model=VectorSearchResponse)

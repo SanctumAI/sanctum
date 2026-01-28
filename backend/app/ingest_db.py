@@ -287,7 +287,7 @@ def migrate_from_json(jobs_dict: dict) -> int:
                 job_id=job_id,
                 filename=job.get("filename", "unknown"),
                 file_path=job.get("file_path", ""),
-                ontology_id=job.get("ontology_id", "HumanRightsAssistance"),
+                ontology_id=job.get("ontology_id", "general"),
                 sample_percent=job.get("sample_percent", 100.0),
             )
             # Update with final status

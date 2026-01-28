@@ -49,7 +49,7 @@ However, during this hackathon, we face a hard constraint: **time**.
 
 ## Why This Trade-off Is Acceptable for Hackathon
 
-1. **Test Data Only**: We're using public documents (human rights guides, whitepapers) - no sensitive victim data
+1. **Test Data Only**: We're using public documents (guides, whitepapers) - no sensitive data
 2. **One-Time Ingestion**: This is a build/demo phase, not production use
 3. **Reversible**: Switching back to local embeddings is a single env var change:
    ```
@@ -87,6 +87,6 @@ To return to full privacy mode:
 ## The Bottom Line
 
 > **For a hackathon demo with test data, speed wins.**
-> **For production with real victim data, sovereignty is non-negotiable.**
+> **For production with real sensitive data, sovereignty is non-negotiable.**
 
 The architecture supports both. We're just choosing the fast path today.

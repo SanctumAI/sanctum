@@ -1,6 +1,6 @@
 # Sanctum — Private RAG System for Curated Knowledge
 
-Sanctum is a privacy-first Retrieval-Augmented Generation (RAG) system for building, maintaining, and querying curated knowledge bases in sensitive domains such as human rights, international law, journalism, and research.
+Sanctum is a privacy-first Retrieval-Augmented Generation (RAG) system for building, maintaining, and querying curated knowledge bases. Sanctum is designed to be domain-agnostic and fully configurable for any use case requiring privacy, accuracy, and explainability.
 
 Sanctum runs locally as a Docker Compose application. It combines a structured knowledge graph, a vector search index, and a secure LLM provider to produce grounded, explainable answers — without relying on public RAG services or opaque cloud infrastructure.
 

@@ -29,12 +29,12 @@ Expected response:
 
 ## Step 1: Upload a Document
 
-Upload `uploads/Pathway-to-Freedom.pdf` to the ingest endpoint:
+Upload a document to the ingest endpoint (example with a PDF file):
 
 ```bash
 curl -X POST http://localhost:8000/ingest/upload \
-  -F "file=@uploads/Pathway-to-Freedom.pdf" \
-  -F "ontology_id=human_rights"
+  -F "file=@uploads/example-document.pdf" \
+  -F "ontology_id=general"
 ```
 
 ### Upload Parameters
@@ -42,7 +42,7 @@ curl -X POST http://localhost:8000/ingest/upload \
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
 | `file` | Yes | - | The document file (PDF, TXT, or MD) |
-| `ontology_id` | No | `human_rights` | Ontology to use for extraction. See available options below. |
+| `ontology_id` | No | `general` | Ontology to use for extraction. See available options below. |
 | `sample_percent` | No | `100.0` | Percentage of chunks to process (useful for testing with large documents) |
 
 ### Response
@@ -50,9 +50,9 @@ curl -X POST http://localhost:8000/ingest/upload \
 ```json
 {
   "job_id": "ab442f508fae94f8",
-  "filename": "Pathway-to-Freedom.pdf",
+  "filename": "example-document.pdf",
   "status": "pending",
-  "message": "Document queued for processing with ontology 'human_rights'"
+  "message": "Document queued for processing"
 }
 ```
 
@@ -76,9 +76,9 @@ curl http://localhost:8000/ingest/status/ab442f508fae94f8
 ```json
 {
   "job_id": "ab442f508fae94f8",
-  "filename": "Pathway-to-Freedom.pdf",
+  "filename": "example-document.pdf",
   "status": "extracting",
-  "ontology_id": "human_rights",
+  "ontology_id": "general",
   "created_at": "2026-01-17T22:30:00.000000",
   "updated_at": "2026-01-17T22:35:00.000000",
   "total_chunks": 85,
@@ -184,7 +184,7 @@ Test that the embeddings are searchable:
 curl -X POST http://localhost:8000/vector-search \
   -H "Content-Type: application/json" \
   -d '{
-    "query": "political prisoners rights",
+    "query": "example search query",
     "top_k": 5,
     "collection": "sanctum_knowledge"
   }'
@@ -199,7 +199,7 @@ curl http://localhost:8000/ingest/ontologies
 ```
 
 Common ontologies:
-- `human_rights` - Human rights concepts, violations, and advocacy (default)
+- `general` - General-purpose knowledge extraction (default)
 - `bitcoin` - Bitcoin/cryptocurrency concepts
 
 ## Troubleshooting
@@ -239,8 +239,8 @@ curl http://localhost:8000/ingest/jobs
 ```bash
 # 1. Upload the document
 RESPONSE=$(curl -s -X POST http://localhost:8000/ingest/upload \
-  -F "file=@uploads/Pathway-to-Freedom.pdf" \
-  -F "ontology_id=human_rights")
+  -F "file=@uploads/example-document.pdf" \
+  -F "ontology_id=general")
 
 JOB_ID=$(echo "$RESPONSE" | jq -r '.job_id')
 echo "Job started: $JOB_ID"

@@ -209,7 +209,7 @@ What if we could have money without middlemen?
 The answer changed the world forever.
 Bitcoin is hope encoded in mathematics.
 It represents freedom from financial oppression.
-A tool for human rights in the digital age.
+A tool for knowledge management in the digital age.
 The peaceful revolution continues block by block.
 Every ten minutes a new page of history is written.
 The blockchain never forgets and never stops.

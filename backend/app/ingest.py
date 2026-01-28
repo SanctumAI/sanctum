@@ -60,7 +60,7 @@ def _load_jobs_from_db() -> dict:
             "filename": job["filename"],
             "file_path": job["file_path"],
             "status": job["status"],
-            "ontology_id": job.get("ontology_id", "HumanRightsAssistance"),
+            "ontology_id": job.get("ontology_id", "general"),
             "sample_percent": job.get("sample_percent", 100.0),
             "created_at": job["created_at"],
             "updated_at": job["updated_at"],
@@ -85,7 +85,7 @@ def _sync_job_to_db(job_id: str) -> None:
             job_id=job_id,
             filename=job["filename"],
             file_path=job["file_path"],
-            ontology_id=job.get("ontology_id", "HumanRightsAssistance"),
+            ontology_id=job.get("ontology_id", "general"),
             sample_percent=job.get("sample_percent", 100.0),
         )
     
@@ -538,7 +538,7 @@ async def upload_document(
         "filename": file.filename,
         "file_path": str(file_path),
         "status": "pending",
-        "ontology_id": "HumanRightsAssistance",  # Default ontology
+        "ontology_id": "general",  # Default ontology
         "sample_percent": sample_percent,
         "created_at": datetime.utcnow().isoformat(),
         "updated_at": datetime.utcnow().isoformat(),

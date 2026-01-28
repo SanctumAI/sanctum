@@ -1,14 +1,13 @@
 """
 Sanctum RAG Query Module
 
-Empathetic, session-aware RAG for human rights crisis support.
-Pipeline: Query → Embed → Vector Search → 2-hop Graph → LLM → Answer
+Session-aware RAG for querying knowledge bases.
+Pipeline: Query → Embed → Vector Search → LLM → Answer
 
 Key principles:
-- Person is under duress: be calm, empathetic, don't overwhelm
-- Law varies by jurisdiction: ask clarifying questions
-- Capture facts early, handle nuance carefully
-- Weight recommendations based on evidence strength
+- Provide clear, helpful responses
+- Ask clarifying questions when context is needed
+- Cite sources accurately
 """
 
 import os
@@ -54,7 +53,7 @@ class QueryRequest(BaseModel):
     top_k: Optional[int] = None
     graph_hops: Optional[int] = None
     # Optional context the user provides upfront
-    jurisdiction: Optional[str] = None  # e.g., "Venezuela", "Belarus"
+    jurisdiction: Optional[str] = None  # e.g., "California", "Germany"
     situation_details: Optional[str] = None  # Any facts they share
     tools: list[str] = []  # Tool IDs enabled for this request
 
@@ -74,15 +73,14 @@ class QueryResponse(BaseModel):
 @router.post("", response_model=QueryResponse)
 async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_or_approved_user)):
     """
-    Empathetic RAG query with session support.
+    RAG query with session support.
     Requires authenticated admin OR approved user.
-    
+
     1. Load/create session for conversation history
     2. Embed query with conversation context
-    3. Vector search for relevant chunks/facts
-    4. 2-hop graph traversal from matched entities
-    5. Send context + history + query to LLM
-    6. Return answer with clarifying questions if needed
+    3. Vector search for relevant chunks
+    4. Send context + history + query to LLM
+    5. Return answer with clarifying questions if needed
     """
     question = request.question
     top_k = request.top_k or TOP_K_VECTORS
@@ -132,10 +130,10 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         # Graph context no longer used - simple vector search only
         graph_context = {"actions": [], "risks": [], "guidance": [], "warnings": [], "resources": [], "preconditions": []}
 
-        # 4. Build context and call LLM with empathetic prompt
+        # 4. Build context and call LLM with context-aware prompt
         context = _build_context(chunk_texts, sources)
         session["_last_sources"] = sources  # For dynamic citation
-        answer, clarifying_questions, full_prompt, search_term = _call_llm_empathetic(
+        answer, clarifying_questions, full_prompt, search_term = _call_llm_contextual(
             question, context, session, tools=request.tools
         )
         
@@ -152,9 +150,7 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         # Update jurisdiction from extracted facts if we got location/country
         if not session.get("jurisdiction"):
             facts = session.get("facts_gathered", {})
-            if facts.get("detention_country"):
-                session["jurisdiction"] = facts["detention_country"]
-            elif facts.get("location"):
+            if facts.get("location"):
                 session["jurisdiction"] = facts["location"]
         
         # Track what we still need to know
@@ -223,16 +219,12 @@ Conversation:
 
 Extract these facts (use null if not explicitly mentioned):
 - location: Where is the USER currently located? (city/country)
-- nationality: What is the USER's citizenship/nationality?
-- detention_country: In which country did the detention happen?
-- detention_location: Specific place of detention if mentioned (e.g., "El Chipote", "Bentiu")
-- victim_relation: Who was detained? (husband, wife, brother, sister, son, daughter, friend, etc.)
-- victim_name: Name of detained person if mentioned
-- detention_timeframe: When did it happen? (e.g., "3 days ago", "2 weeks ago")
-- is_foreigner: Is the user in a different country than their citizenship? (true/false/null)
+- topic: What is the main topic or subject of the query?
+- context_details: Any relevant context provided by the user
+- timeframe: When did relevant events happen? (e.g., "3 days ago", "last week")
 
 Return ONLY valid JSON, no explanation:
-{{"location": ..., "nationality": ..., "detention_country": ..., "detention_location": ..., "victim_relation": ..., "victim_name": ..., "detention_timeframe": ..., "is_foreigner": ...}}"""
+{{"location": ..., "topic": ..., "context_details": ..., "timeframe": ...}}"""
 
     try:
         response = llm.complete(prompt, temperature=0.0)
@@ -322,9 +314,9 @@ def _build_context(chunk_texts: list[str], sources: list[dict]) -> str:
     return "\n".join(parts)
 
 
-def _call_llm_empathetic(question: str, context: str, session: dict, tools: list[str] = None) -> tuple[str, list[str], str, Optional[str]]:
+def _call_llm_contextual(question: str, context: str, session: dict, tools: list[str] = None) -> tuple[str, list[str], str, Optional[str]]:
     """
-    Call LLM with empathetic, nuanced prompt.
+    Call LLM with context-aware prompt.
     Returns (answer, list of clarifying questions, full_prompt for debugging, search_term or None).
     """
     import re
@@ -344,11 +336,9 @@ def _call_llm_empathetic(question: str, context: str, session: dict, tools: list
     source_files = set()
     for src in session.get("_last_sources", []):
         sf = src.get("source_file", "")
-        if sf and "Pathway" in sf:
-            source_files.add("Pathway to Freedom Handbook (World Liberty Congress)")
-        elif sf:
+        if sf:
             source_files.add(sf.replace(".pdf", "").replace("-", " ").replace("_", " "))
-    source_citation = ", ".join(source_files) if source_files else "human rights guidance materials"
+    source_citation = ", ".join(source_files) if source_files else "knowledge base documents"
     
     # Build known facts section - treat these as CONFIRMED, do not re-ask
     facts = session.get("facts_gathered", {})
@@ -374,36 +364,24 @@ Add [SEARCH: specific term] at the END of your response when:
 - User asks "who do I contact" or "where do I find" → SEARCH NOW
 
 Do NOT tell them to "look up" or "search for" something - just trigger the search.
-Make search terms specific: "[SEARCH: Cuban embassy Caracas Venezuela phone]"
+Make search terms specific: "[SEARCH: local library hours downtown]"
 """
     
-    prompt = f"""You are a calm, caring helper for someone in crisis. They may be scared, exhausted, or overwhelmed.
-
-=== CRITICAL: COUNTRY RISK ===
-In authoritarian countries (China, Russia, Iran, Belarus, Venezuela, Cuba, North Korea, Myanmar, etc.):
-- DO NOT suggest going to police if state may be responsible for detention
-- Citizens of that country have NO embassy to call in their own country
-- Prioritize: secure communication, international human rights orgs, documenting privately
-- If person is a FOREIGN citizen (like Cuban in Venezuela), their home embassy CAN help
+    prompt = f"""You are a helpful, knowledgeable assistant.
 
 {known_facts_section}
 
 === STYLE ===
-- ONE action at a time. Not a list. Just the single most important next step.
-- Opener must have TWO parts: acknowledge + offer support. Never just label the emotion.
-  GOOD: "That's really hard - I'm here to help." / "I hear you, let's figure this out together." / "This is tough, but we'll work through it step by step."
-  BAD: "That's terrifying." (cold, no support offered)
-- Vary between warm and direct, but always include the supportive second half.
-- Format: Warm opener with support → ONE specific action → 1 clarifying question (only if needed)
+- Be concise and direct
+- ONE action at a time when providing guidance
+- Acknowledge the user's question before answering
 {search_instruction}
 === RULES ===
-1. ONE action per response. Not a list. The single most urgent thing.
-2. Vary your tone - don't repeat the same opener.
-3. NEVER invent org names or phone numbers.
-4. If user says "I don't know anyone/who to call" → TRIGGER A SEARCH.
-5. When recommending orgs/lawyers, give 2-3 options when possible. Organizations get shut down, people become unavailable. Backup contacts save lives.
-6. {jurisdiction_note}
-7. Do NOT ask about location/nationality/country if it's already in CONFIRMED FACTS above.
+1. ONE action per response when providing step-by-step guidance
+2. NEVER invent sources, organization names, or contact information
+3. If asked about topics outside your knowledge base, acknowledge limitations
+4. {jurisdiction_note}
+5. Do NOT repeat questions already answered in CONFIRMED FACTS above
 
 === SOURCE ===
 {source_citation}

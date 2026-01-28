@@ -23,13 +23,13 @@ QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
 
 COLLECTION_NAME = "sanctum_smoke_test"
 
-# Seed data - Spanish sentence about the UDHR
+# Seed data - Spanish sentence about knowledge
 SEED_CLAIM = {
-    "id": "claim_udhr_1948",
-    "text": "La Declaración Universal de Derechos Humanos fue adoptada en 1948.",
-    "text_english": "The Universal Declaration of Human Rights was adopted in 1948.",
+    "id": "claim_knowledge_sharing",
+    "text": "El conocimiento es poder cuando se comparte de manera segura.",
+    "text_english": "Knowledge is power when shared securely.",
     "language": "es",
-    "type": "historical_fact"
+    "type": "general_fact"
 }
 
 

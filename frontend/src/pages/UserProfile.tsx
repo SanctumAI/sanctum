@@ -52,7 +52,7 @@ export function UserProfile() {
           : `${API_BASE}/user-fields`
 
         const response = await fetch(url)
-        if (!response.ok) throw new Error('Failed to fetch fields')
+        if (!response.ok) throw new Error(t('errors.failedToFetchFields'))
 
         const data = await response.json()
         const fetchedFields: CustomField[] = (data.fields || []).map((f: any) => ({
@@ -81,7 +81,7 @@ export function UserProfile() {
         })
         setValues(initialValues)
       } catch (err) {
-        console.error('Error fetching fields:', err)
+        console.error(t('errors.errorFetchingFields'), err)
         // On error, proceed to chat (graceful degradation)
         navigate('/chat')
       } finally {

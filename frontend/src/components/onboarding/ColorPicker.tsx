@@ -18,18 +18,18 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
             key={colorKey}
             type="button"
             onClick={() => onChange(colorKey)}
-            className={`relative flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${
+            className={`relative flex items-center gap-3 p-3 rounded-xl border-2 transition-all hover:-translate-y-0.5 ${
               isSelected
-                ? 'border-current bg-surface-overlay shadow-sm'
-                : 'border-transparent hover:bg-surface-overlay/50'
+                ? 'bg-surface-overlay shadow-md'
+                : 'border-transparent hover:bg-surface-overlay/50 hover:shadow-sm'
             }`}
             style={{
-              borderColor: isSelected ? colorConfig.preview : undefined,
+              borderColor: isSelected ? colorConfig.preview : 'transparent',
             }}
           >
             {/* Color swatch */}
             <div
-              className="w-8 h-8 rounded-lg shadow-sm shrink-0"
+              className={`w-8 h-8 rounded-lg shrink-0 transition-shadow ${isSelected ? 'shadow-md' : 'shadow-sm'}`}
               style={{ backgroundColor: colorConfig.preview }}
             >
               {/* Checkmark for selected */}

@@ -86,7 +86,7 @@ export function VerifyMagicLink() {
         const response = await fetch(`${API_BASE}/auth/verify?token=${encodeURIComponent(token)}`)
 
         if (!response.ok) {
-          let errorMessage = 'Verification failed'
+          let errorMessage = t('errors.verificationFailed')
           try {
             const contentType = response.headers.get('content-type')
             if (contentType && contentType.includes('application/json')) {
@@ -99,7 +99,7 @@ export function VerifyMagicLink() {
           } catch (parseError) {
             errorMessage = response.statusText || errorMessage
           }
-          console.error('Verification failed:', errorMessage)
+          console.error(t('errors.verificationFailed'), errorMessage)
           setState('error')
           return
         }

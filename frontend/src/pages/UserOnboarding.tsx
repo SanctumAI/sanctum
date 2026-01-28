@@ -30,7 +30,7 @@ function SearchInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full pl-12 pr-4 py-3 bg-surface border border-border rounded-xl text-text placeholder:text-text-muted text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all"
+        className="input-field w-full pl-12 pr-4 py-3.5 bg-surface border border-border rounded-xl text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all"
         autoComplete="off"
       />
     </div>
@@ -59,10 +59,10 @@ function LanguageButton({
           onSelect()
         }
       }}
-      className={`relative flex flex-col items-start p-4 rounded-xl border-2 transition-all text-left hover-lift cursor-pointer ${
+      className={`relative flex flex-col items-start p-4 rounded-xl border-2 transition-all text-left cursor-pointer hover:-translate-y-0.5 ${
         isSelected
-          ? 'border-accent bg-accent-subtle/30'
-          : 'border-border bg-surface-raised hover:border-accent/50'
+          ? 'border-accent bg-accent-subtle/30 shadow-md'
+          : 'border-border bg-surface-raised hover:border-accent/50 hover:shadow-sm'
       }`}
     >
       {isSelected && (
@@ -154,7 +154,7 @@ export function UserOnboarding() {
       ) : (
         <div
           role="radiogroup"
-          aria-label="Select a language"
+          aria-label={t('onboarding.language.selectLabel', 'Select a language')}
           className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-80 overflow-y-auto pr-1 -mr-1"
         >
           {filteredLanguages.map((language) => (
@@ -173,7 +173,7 @@ export function UserOnboarding() {
         onClick={handleContinue}
         disabled={!selectedLanguage}
         aria-disabled={!selectedLanguage}
-        className="w-full flex items-center justify-center gap-2 bg-accent text-accent-text rounded-xl px-6 py-3.5 font-medium hover:bg-accent-hover transition-all active-press disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+        className="btn btn-primary btn-lg w-full mt-6 flex items-center justify-center gap-2"
       >
         <span>{t('onboarding.language.continue')}</span>
         <ArrowRight className="w-5 h-5" aria-hidden="true" />

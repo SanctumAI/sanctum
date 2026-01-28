@@ -39,12 +39,12 @@ export function ChatInput({ onSend, disabled, placeholder, toolbar }: ChatInputP
   }
 
   return (
-    <div className="border-t border-border bg-surface px-3 py-3 sm:px-4">
+    <div className="border-t border-border bg-surface px-3 py-3 sm:px-4 shadow-[0_-1px_3px_rgba(0,0,0,0.03)]">
       <div className="max-w-3xl mx-auto">
-        <div className="bg-surface-raised border border-border rounded-2xl overflow-hidden focus-within:border-accent transition-all shadow-sm">
+        <div className="input-container rounded-2xl overflow-hidden bg-surface-raised!">
           {/* Toolbar row */}
           {toolbar && (
-            <div className="px-3 py-2 border-b border-border/50 flex items-center gap-2 bg-surface-raised/50">
+            <div className="px-3 py-2.5 border-b border-border/50 flex items-center gap-2 bg-surface-overlay/30">
               {toolbar}
             </div>
           )}
@@ -65,7 +65,7 @@ export function ChatInput({ onSend, disabled, placeholder, toolbar }: ChatInputP
               onClick={handleSubmit}
               disabled={disabled || !input.trim()}
               title={t('chat.input.sendTitle')}
-              className="p-2.5 rounded-xl bg-accent text-accent-text hover:bg-accent-hover disabled:bg-surface-overlay disabled:text-text-muted disabled:cursor-not-allowed transition-all active-press shrink-0 shadow-sm hover:shadow-md disabled:shadow-none"
+              className="p-2.5 rounded-xl bg-accent text-accent-text hover:bg-accent-hover hover:-translate-y-0.5 disabled:bg-surface-overlay disabled:text-text-muted disabled:cursor-not-allowed disabled:translate-y-0 transition-all active:scale-95 shrink-0 shadow-sm hover:shadow-md hover:glow-accent disabled:shadow-none"
               aria-label={t('chat.input.sendLabel')}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">

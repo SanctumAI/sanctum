@@ -93,7 +93,7 @@ export function UserTypeSelection() {
         }
       } catch (err) {
         console.error('Error fetching user types:', err)
-        setError('Failed to load user types. Please try again.')
+        setError(t('onboarding.userType.loadError'))
       } finally {
         setIsLoading(false)
       }
@@ -125,14 +125,14 @@ export function UserTypeSelection() {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center p-4">
         <OnboardingCard
-          title="Error"
+          title={t('common.error')}
           subtitle={error}
         >
           <button
             onClick={() => window.location.reload()}
             className="w-full py-3 rounded-xl bg-accent text-accent-text font-medium transition-all hover:opacity-90"
           >
-            Try Again
+            {t('common.tryAgain')}
           </button>
         </OnboardingCard>
       </div>
@@ -143,13 +143,13 @@ export function UserTypeSelection() {
   return (
     <div className="min-h-screen bg-surface flex items-center justify-center p-4">
       <OnboardingCard
-        title={t('onboarding.userType.title', 'What describes you best?')}
-        subtitle={t('onboarding.userType.description', 'Select the option that best fits your needs')}
+        title={t('onboarding.userType.title')}
+        subtitle={t('onboarding.userType.description')}
       >
         <div
           className="space-y-4 mb-10"
           role="radiogroup"
-          aria-label={t('onboarding.userType.title', 'User type selection')}
+          aria-label={t('onboarding.userType.selectionLabel')}
         >
           {userTypes.map((userType) => (
             <UserTypeCard
@@ -170,7 +170,7 @@ export function UserTypeSelection() {
               : 'bg-border text-text-muted cursor-not-allowed'
           }`}
         >
-          {t('common.continue', 'Continue')}
+          {t('common.continue')}
         </button>
       </OnboardingCard>
     </div>

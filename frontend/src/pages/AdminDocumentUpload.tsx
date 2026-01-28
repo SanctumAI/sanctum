@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Upload, FileText, X, CloudUpload, Loader2, Clock, ArrowLeft } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { STORAGE_KEYS } from '../types/onboarding'
@@ -16,6 +17,7 @@ import {
 // Current implementation only checks for admin pubkey in localStorage
 
 export function AdminDocumentUpload() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -39,7 +41,7 @@ export function AdminDocumentUpload() {
   const fetchJobs = useCallback(async () => {
     try {
       const response = await fetch(`${INGEST_API_BASE}/ingest/jobs`)
-      if (!response.ok) throw new Error('Failed to fetch jobs')
+      if (!response.ok) throw new Error(t('errors.failedToFetchJobs'))
       const data: JobsListResponse = await response.json()
 
       // Fetch full status for each job
@@ -53,11 +55,11 @@ export function AdminDocumentUpload() {
 
       setRecentJobs(jobStatuses.filter((j): j is JobStatus => j !== null))
     } catch (error) {
-      console.error('Error fetching jobs:', error)
+      console.error(t('errors.errorFetchingJobs'), error)
     } finally {
       setIsLoadingJobs(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     fetchJobs()
@@ -171,15 +173,15 @@ export function AdminDocumentUpload() {
   const getStatusDisplay = (status: JobStatus['status']) => {
     switch (status) {
       case 'pending':
-        return { label: 'Queued', color: 'text-text-muted', icon: '○' }
+        return { label: t('upload.status.queued'), color: 'text-text-muted', icon: '○' }
       case 'processing':
-        return { label: 'Processing', color: 'text-warning', icon: '◐' }
+        return { label: t('upload.status.processing'), color: 'text-warning', icon: '◐' }
       case 'chunked':
-        return { label: 'Chunked', color: 'text-info', icon: '◑' }
+        return { label: t('upload.status.chunked'), color: 'text-info', icon: '◑' }
       case 'completed':
-        return { label: 'Complete', color: 'text-success', icon: '●' }
+        return { label: t('upload.status.complete'), color: 'text-success', icon: '●' }
       case 'failed':
-        return { label: 'Failed', color: 'text-error', icon: '✕' }
+        return { label: t('upload.status.failed'), color: 'text-error', icon: '✕' }
       default:
         return { label: status, color: 'text-text-muted', icon: '?' }
     }
@@ -187,14 +189,14 @@ export function AdminDocumentUpload() {
 
   const footer = (
     <Link to="/" className="text-text-muted hover:text-text transition-colors">
-      Back to Dashboard
+      {t('upload.backToDashboard')}
     </Link>
   )
 
   return (
     <OnboardingCard
-      title="Upload Documents"
-      subtitle="Add documents to your knowledge base for RAG"
+      title={t('upload.title')}
+      subtitle={t('upload.subtitle')}
       footer={footer}
     >
       <div className="space-y-6">
@@ -202,7 +204,7 @@ export function AdminDocumentUpload() {
         <div className="bg-surface-overlay border border-border rounded-xl p-5">
           <h3 className="text-sm font-semibold text-text mb-4 flex items-center gap-2">
             <Upload className="w-4 h-4 text-text-muted" />
-            Upload File
+            {t('upload.uploadFile')}
           </h3>
 
           {/* Hidden file input */}
@@ -235,7 +237,7 @@ export function AdminDocumentUpload() {
                 <button
                   onClick={handleCancelFile}
                   className="p-1.5 text-text-muted hover:text-error transition-colors shrink-0"
-                  title="Remove file"
+                  title={t('upload.removeFile')}
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -263,10 +265,10 @@ export function AdminDocumentUpload() {
                 strokeWidth={1.5}
               />
               <p className="text-sm font-medium text-text mb-1">
-                {isDragging ? 'Drop file here' : 'Drop file here or click to browse'}
+                {isDragging ? t('upload.dropFileHere') : t('upload.dropOrBrowse')}
               </p>
               <p className="text-xs text-text-muted">
-                Supported: {getAllowedExtensionsDisplay()}
+                {t('upload.supported', { extensions: getAllowedExtensionsDisplay() })}
               </p>
             </div>
           )}
@@ -288,12 +290,12 @@ export function AdminDocumentUpload() {
               {isUploading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Uploading...
+                  {t('upload.uploading')}
                 </>
               ) : (
                 <>
                   <Upload className="w-4 h-4" />
-                  Upload Document
+                  {t('upload.uploadDocument')}
                 </>
               )}
             </button>
@@ -304,13 +306,13 @@ export function AdminDocumentUpload() {
         <div className="bg-surface-overlay border border-border rounded-xl p-5">
           <h3 className="text-sm font-semibold text-text mb-4 flex items-center gap-2">
             <Clock className="w-4 h-4 text-text-muted" />
-            Recent Uploads
+            {t('upload.recentUploads')}
           </h3>
 
           {isLoadingJobs ? (
             <div className="text-center py-6">
               <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-              <p className="text-xs text-text-muted">Loading...</p>
+              <p className="text-xs text-text-muted">{t('common.loading')}</p>
             </div>
           ) : recentJobs.length > 0 ? (
             <div className="space-y-2">
@@ -332,7 +334,7 @@ export function AdminDocumentUpload() {
                           </span>
                           {job.total_chunks > 0 && (
                             <span className="text-xs text-text-muted">
-                              {job.processed_chunks}/{job.total_chunks} chunks
+                              {t('upload.chunks', { processed: job.processed_chunks, total: job.total_chunks })}
                             </span>
                           )}
                         </div>
@@ -350,7 +352,7 @@ export function AdminDocumentUpload() {
           ) : (
             <div className="text-center py-6 bg-surface border border-border border-dashed rounded-lg">
               <FileText className="w-8 h-8 text-text-muted mx-auto mb-2" strokeWidth={1.5} />
-              <p className="text-xs text-text-muted">No uploads yet</p>
+              <p className="text-xs text-text-muted">{t('upload.noUploads')}</p>
             </div>
           )}
 
@@ -366,7 +368,7 @@ export function AdminDocumentUpload() {
             className="flex-1 flex items-center justify-center gap-2 border border-border hover:border-accent/50 text-text rounded-xl px-4 py-3 text-sm font-medium transition-all hover:bg-surface"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Setup
+            {t('upload.backToSetup')}
           </Link>
           {/* TODO: Support multiple file upload with queue management */}
         </div>

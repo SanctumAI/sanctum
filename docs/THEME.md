@@ -1,18 +1,20 @@
 # Sanctum Design System
 
-A warm, human-centered design system for privacy-first applications.
+A warm, human-centered design system for privacy-first applications, inspired by Linear, Notion, and Vercel.
 
 ---
 
 ## Overview
 
-Sanctum uses a **Warm Neutral** color palette with **Blue** accents, designed to feel trustworthy, secure, and professional. The system supports both light and dark modes with smooth transitions.
+Sanctum uses a **Warm Neutral** color palette with configurable **accent colors**, designed to feel trustworthy, secure, and professional. The system supports both light and dark modes with smooth transitions.
 
 **Key characteristics:**
 - Warm stone grays (not cold blue-grays)
-- Blue accent color for primary actions (conveys trust and security)
-- Inter typeface for clean, modern readability
-- Generous whitespace and clear hierarchy
+- 6 configurable accent colors (blue, purple, green, orange, pink, teal)
+- Inter typeface with stylistic alternates enabled
+- Multi-layer shadows for sophisticated depth
+- WCAG AA compliant color combinations
+- Reduced motion and high contrast support
 
 ---
 
@@ -61,26 +63,26 @@ function ThemeToggle() {
 
 | Token | Light | Dark | Usage |
 |-------|-------|------|-------|
-| `surface` | `#ffffff` | `#1c1917` | Page background |
-| `surface-raised` | `#fafaf9` | `#292524` | Cards, panels |
-| `surface-overlay` | `#f5f5f4` | `#44403c` | Dropdowns, hover states |
+| `surface` | `#ffffff` | `#141311` | Page background |
+| `surface-raised` | `#fafaf8` | `#1e1c1a` | Cards, panels |
+| `surface-overlay` | `#f4f3f1` | `#2a2826` | Dropdowns, hover states |
 
 ### Text
 
 | Token | Light | Dark | Usage |
 |-------|-------|------|-------|
-| `text` | `#1c1917` | `#fafaf9` | Headlines, primary text |
-| `text-secondary` | `#57534e` | `#a8a29e` | Body text, descriptions |
-| `text-muted` | `#a8a29e` | `#78716c` | Captions, hints, metadata |
+| `text` | `#1a1815` | `#f8f7f6` | Headlines, primary text |
+| `text-secondary` | `#5c5550` | `#a9a49d` | Body text, descriptions |
+| `text-muted` | `#9c958c` | `#6b6660` | Captions, hints, metadata |
 
 ### Borders
 
 | Token | Light | Dark | Usage |
 |-------|-------|------|-------|
-| `border` | `#e7e5e4` | `#44403c` | Default borders |
-| `border-strong` | `#d6d3d1` | `#57534e` | Emphasized borders |
+| `border` | `#e8e6e1` | `#2e2c2a` | Default borders |
+| `border-strong` | `#d4d1ca` | `#403d3a` | Emphasized borders |
 
-### Accent (Blue)
+### Accent (Blue - Default)
 
 | Token | Light | Dark | Usage |
 |-------|-------|------|-------|
@@ -102,6 +104,19 @@ function ThemeToggle() {
 | `info` | `#0284c7` | `#38bdf8` | Info states |
 | `info-subtle` | `#e0f2fe` | `#0c4a6e` | Info backgrounds |
 
+### Accent Color Themes
+
+Apply these classes to the root element to change the accent color:
+
+| Class | Light | Dark |
+|-------|-------|------|
+| `accent-blue` | `#2563eb` | `#3b82f6` |
+| `accent-purple` | `#7c3aed` | `#8b5cf6` |
+| `accent-green` | `#059669` | `#10b981` |
+| `accent-orange` | `#ea580c` | `#f97316` |
+| `accent-pink` | `#db2777` | `#ec4899` |
+| `accent-teal` | `#0d9488` | `#14b8a6` |
+
 ---
 
 ## Typography
@@ -112,6 +127,8 @@ function ThemeToggle() {
 |-------|-------|-------|
 | `font-sans` | Inter, system-ui | UI text, body copy |
 | `font-mono` | JetBrains Mono, Fira Code | Code, data |
+
+Inter stylistic alternates are enabled by default (`cv02`, `cv03`, `cv04`, `cv11`) for improved character shapes.
 
 ### Font Sizes
 
@@ -137,6 +154,19 @@ Use Tailwind's default scale:
 | `font-semibold` | 600 | Headings |
 | `font-bold` | 700 | Emphasis |
 
+### Letter Spacing
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--tracking-tight` | -0.015em | Headings |
+| `--tracking-normal` | 0 | Body text |
+| `--tracking-wide` | 0.025em | Labels, small caps |
+
+```tsx
+<h1 className="tracking-tight">Tight heading</h1>
+<span className="tracking-wide uppercase text-xs">Label</span>
+```
+
 ---
 
 ## Spacing
@@ -160,24 +190,66 @@ Use Tailwind's default 4px-based scale:
 
 | Class | Value | Usage |
 |-------|-------|-------|
-| `rounded-sm` | 2px | Subtle rounding |
-| `rounded` | 4px | Default |
-| `rounded-md` | 6px | Buttons |
-| `rounded-lg` | 8px | Cards, inputs |
-| `rounded-xl` | 12px | Large cards |
-| `rounded-2xl` | 16px | Modals |
+| `rounded-sm` | 6px | Subtle rounding |
+| `rounded` | 8px | Default |
+| `rounded-md` | 8px | Buttons |
+| `rounded-lg` | 12px | Cards, inputs |
+| `rounded-xl` | 16px | Large cards |
+| `rounded-2xl` | 24px | Modals |
 | `rounded-full` | 9999px | Pills, avatars |
 
 ---
 
 ## Shadows
 
-| Class | Usage |
+Multi-layer shadows provide sophisticated depth perception:
+
+| Token | Usage |
 |-------|-------|
-| `shadow-sm` | Subtle depth, inputs |
-| `shadow-md` | Cards, dropdowns |
-| `shadow-lg` | Modals, popovers |
-| `shadow-xl` | Elevated elements |
+| `--shadow-xs` | Minimal depth, small elements |
+| `--shadow-sm` | Subtle depth, inputs |
+| `--shadow-md` | Cards, dropdowns |
+| `--shadow-lg` | Modals, popovers |
+| `--shadow-xl` | Elevated elements |
+| `--shadow-inner-sm` | Input fields (inset) |
+
+Dark mode shadows include a subtle light border for definition.
+
+### Accent Shadow
+
+For primary buttons, use the accent shadow utility:
+
+```tsx
+<button className="shadow-accent">Primary Button</button>
+```
+
+---
+
+## Transitions & Easing
+
+### Duration Tokens
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--duration-instant` | 50ms | Cursor feedback |
+| `--duration-fast` | 100ms | Hover states |
+| `--duration-normal` | 150ms | Standard transitions |
+| `--duration-slow` | 250ms | Larger elements |
+
+### Easing Curves
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--ease-spring` | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Micro-interactions, bouncy feel |
+| `--ease-smooth` | `cubic-bezier(0.25, 0.1, 0.25, 1)` | General use, smooth transitions |
+
+### Legacy Tokens (for compatibility)
+
+| Token | Value |
+|-------|-------|
+| `--transition-fast` | 150ms ease |
+| `--transition-base` | 200ms ease |
+| `--transition-slow` | 300ms ease |
 
 ---
 
@@ -192,7 +264,7 @@ Use Tailwind's default 4px-based scale:
   px-4 py-2
   rounded-lg
   font-medium
-  transition-colors
+  btn-primary
 ">
   Submit
 </button>
@@ -224,8 +296,23 @@ Use Tailwind's default 4px-based scale:
   p-6
   shadow-sm
 ">
-  <h3 className="text-lg font-semibold text-text">Card Title</h3>
+  <h3 className="text-lg font-semibold text-text tracking-tight">Card Title</h3>
   <p className="mt-2 text-text-secondary">Card description.</p>
+</div>
+```
+
+### Interactive Card
+
+```tsx
+<div className="
+  bg-surface-raised
+  border border-border
+  rounded-xl
+  p-6
+  card-interactive
+">
+  <h3 className="text-lg font-semibold text-text">Hover me</h3>
+  <p className="mt-2 text-text-secondary">This card lifts on hover.</p>
 </div>
 ```
 
@@ -242,8 +329,8 @@ Use Tailwind's default 4px-based scale:
     px-4 py-2
     text-text
     placeholder:text-text-muted
-    focus:border-accent focus:ring-1 focus:ring-accent
-    transition-colors
+    inner-shadow
+    focus-ring-within
   "
   placeholder="Enter text..."
 />
@@ -274,6 +361,43 @@ Use Tailwind's default 4px-based scale:
   text-error
 ">
   An error occurred.
+</div>
+```
+
+---
+
+## Interactive Utilities
+
+### Hover Effects
+
+```tsx
+// Lift on hover
+<div className="hover-lift">Lifts up slightly</div>
+
+// Scale on hover
+<div className="hover-scale">Scales up slightly</div>
+
+// Press effect
+<button className="active-press">Shrinks when pressed</button>
+```
+
+### Focus Rings
+
+```tsx
+// Layered focus ring
+<button className="focus-ring">Has visible focus ring</button>
+
+// Focus within container (for input wrappers)
+<div className="focus-ring-within">
+  <input type="text" />
+</div>
+```
+
+### Glass Morphism
+
+```tsx
+<div className="glass rounded-lg p-4">
+  Semi-transparent frosted glass effect
 </div>
 ```
 
@@ -317,9 +441,9 @@ function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-      className="p-2 rounded-lg bg-surface-raised hover:bg-surface-overlay"
+      className="p-2 rounded-lg bg-surface-raised hover:bg-surface-overlay focus-ring"
     >
-      {resolvedTheme === 'dark' ? '☀️' : '🌙'}
+      {resolvedTheme === 'dark' ? 'Light' : 'Dark'} Mode
     </button>
   )
 }
@@ -355,30 +479,80 @@ All color combinations meet WCAG AA standards:
 
 | Combination | Ratio | Pass |
 |-------------|-------|------|
-| `text` on `surface` | 15.5:1 (light), 15.5:1 (dark) | AAA |
-| `text-secondary` on `surface` | 7.2:1 (light), 4.5:1 (dark) | AA |
+| `text` on `surface` | 16:1 (light), 15:1 (dark) | AAA |
+| `text-secondary` on `surface` | 7:1 (light), 4.5:1 (dark) | AA |
 | `accent` on `surface` | 4.5:1 (light), 4.7:1 (dark) | AA |
 | `accent-text` on `accent` | 8.6:1 (light), 6.3:1 (dark) | AAA |
 
 ### Focus States
 
-All interactive elements have visible focus indicators:
+All interactive elements have visible, layered focus indicators:
 
 ```css
 :focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--color-surface),
+    0 0 0 4px var(--color-accent);
 }
 ```
 
 ### Reduced Motion
 
-For users who prefer reduced motion, use:
+Animations and transitions are disabled for users who prefer reduced motion:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+Use Tailwind's motion-safe modifier for optional animations:
 
 ```tsx
-<div className="motion-safe:transition-all motion-safe:duration-200">
+<div className="motion-safe:animate-fade-in">
   Respects user preferences.
 </div>
+```
+
+### High Contrast Mode
+
+For users who prefer more contrast, borders and muted text are automatically enhanced:
+
+```css
+@media (prefers-contrast: more) {
+  :root {
+    --color-border: var(--color-border-strong);
+    --color-text-muted: var(--color-text-secondary);
+  }
+}
+```
+
+---
+
+## Scrollbars
+
+Modern "floating" scrollbar design with 2px border creating a gap effect:
+
+- Width: 10px
+- Thumb: Rounded with surface-colored border
+- Track: Transparent
+- Firefox: Uses thin scrollbar-width
+
+---
+
+## Selection
+
+Text selection uses a semi-transparent accent color via `color-mix`:
+
+```css
+::selection {
+  background-color: color-mix(in srgb, var(--color-accent) 25%, transparent);
+  color: var(--color-text);
+}
 ```
 
 ---
@@ -434,15 +608,30 @@ var(--color-info-subtle)
 /* Typography */
 var(--font-sans)
 var(--font-mono)
+var(--tracking-tight)
+var(--tracking-normal)
+var(--tracking-wide)
 
 /* Shadows */
+var(--shadow-xs)
 var(--shadow-sm)
 var(--shadow-md)
 var(--shadow-lg)
 var(--shadow-xl)
+var(--shadow-inner-sm)
 
-/* Transitions */
-var(--transition-fast)   /* 150ms */
-var(--transition-base)   /* 200ms */
-var(--transition-slow)   /* 300ms */
+/* Durations */
+var(--duration-instant)    /* 50ms */
+var(--duration-fast)       /* 100ms */
+var(--duration-normal)     /* 150ms */
+var(--duration-slow)       /* 250ms */
+
+/* Easing */
+var(--ease-spring)         /* Bouncy micro-interactions */
+var(--ease-smooth)         /* General smooth transitions */
+
+/* Legacy Transitions */
+var(--transition-fast)     /* 150ms */
+var(--transition-base)     /* 200ms */
+var(--transition-slow)     /* 300ms */
 ```

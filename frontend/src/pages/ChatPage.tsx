@@ -96,24 +96,25 @@ const decryptDbQueryData = async (data: DbQueryToolData) => {
 const formatDbQueryContext = (
   data: DbQueryToolData,
   columns: string[],
-  rows: Record<string, unknown>[]
+  rows: Record<string, unknown>[],
+  t: (key: string, options?: Record<string, unknown>) => string
 ) => {
   const lines: string[] = []
 
   if (data.sql) {
-    lines.push(`Executed SQL: ${data.sql}`)
+    lines.push(t('chat.database.executedSql', { sql: data.sql }))
     lines.push('')
   }
 
   if (!rows.length) {
-    lines.push('Query returned no results.')
+    lines.push(t('chat.database.noResults'))
     return lines.join('\n')
   }
 
-  lines.push(`Database query results (${rows.length} rows):`)
+  lines.push(t('chat.database.resultsCount', { count: rows.length }))
 
   if (data.truncated) {
-    lines.push('(Results truncated to 100 rows)')
+    lines.push(t('chat.database.resultsTruncated'))
   }
 
   lines.push('')
@@ -144,7 +145,7 @@ export function ChatPage() {
     const tools: Tool[] = [
       {
         id: 'web-search',
-        name: 'Web',
+        name: t('chat.tools.webSearchName'),
         description: t('chat.tools.webSearch'),
         icon: (
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -158,7 +159,7 @@ export function ChatPage() {
     if (isAdminAuthenticated()) {
       tools.push({
         id: 'db-query',
-        name: 'Database',
+        name: t('chat.tools.databaseName'),
         description: t('chat.tools.database'),
         icon: (
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -211,7 +212,7 @@ export function ChatPage() {
           setDocuments(docs)
         }
       } catch (e) {
-        console.error('Failed to fetch documents:', e)
+        console.error(t('errors.failedToFetchDocuments'), e)
       }
     }
     fetchDocuments()
@@ -277,7 +278,8 @@ export function ChatPage() {
                 const toolContext = formatDbQueryContext(
                   toolPayload.data as DbQueryToolData,
                   decrypted.columns,
-                  decrypted.rows
+                  decrypted.rows,
+                  t
                 )
 
                 response = await fetch(`${API_BASE}/llm/chat`, {
@@ -319,7 +321,7 @@ export function ChatPage() {
       }
 
       if (!response) {
-        throw new Error('No response from server')
+        throw new Error(t('errors.noResponseFromServer'))
       }
 
       // Handle auth errors
@@ -365,7 +367,7 @@ export function ChatPage() {
         await triggerAutoSearch(data.search_term, token)
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to send message')
+      setError(e instanceof Error ? e.message : t('errors.failedToSendMessage'))
     } finally {
       setIsLoading(false)
     }
@@ -406,7 +408,7 @@ IMPORTANT: Return a CONDENSED response:
       })
       
       if (!searchRes.ok) {
-        throw new Error(`Search failed: HTTP ${searchRes.status}`)
+        throw new Error(t('errors.searchFailed', { status: searchRes.status }))
       }
       
       const searchData = await searchRes.json()
@@ -462,7 +464,7 @@ IMPORTANT: Return a CONDENSED response:
     <>
       <button
         onClick={handleNewChat}
-        className="p-2 rounded-lg text-text-secondary hover:text-text hover:bg-surface-overlay transition-all"
+        className="btn-ghost p-2 rounded-lg transition-all"
         title={t('chat.messages.newConversation')}
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -493,14 +495,16 @@ IMPORTANT: Return a CONDENSED response:
       {error && (
         <div className="px-3 sm:px-4 pb-2">
           <div className="max-w-3xl mx-auto">
-            <div className="bg-error-subtle border border-error/20 text-error rounded-xl px-4 py-2.5 text-sm flex items-center gap-2 animate-fade-in">
-              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-              </svg>
-              <span>{error}</span>
+            <div className="bg-error-subtle border border-error/20 text-error rounded-xl px-4 py-3 text-sm flex items-center gap-3 animate-fade-in shadow-sm">
+              <div className="w-8 h-8 rounded-lg bg-error/10 flex items-center justify-center shrink-0">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
+              </div>
+              <span className="flex-1">{error}</span>
               <button
                 onClick={() => setError(null)}
-                className="ml-auto p-1 hover:bg-error/10 rounded transition-colors"
+                className="p-1.5 hover:bg-error/10 rounded-lg transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

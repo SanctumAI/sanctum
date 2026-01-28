@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, SquareTerminal, RefreshCw, Loader2, Play, Database, Key, X, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
 import {
   TableInfo,
@@ -12,6 +13,7 @@ import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
 import { decryptField } from '../utils/encryption'
 
 export function AdminDatabaseExplorer() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   // Auth state
@@ -65,7 +67,7 @@ export function AdminDatabaseExplorer() {
     setIsLoadingTables(true)
     try {
       const response = await adminFetch('/admin/db/tables')
-      if (!response.ok) throw new Error('Failed to fetch tables')
+      if (!response.ok) throw new Error(t('errors.failedToFetchTables'))
       const data = await response.json()
       setTables(data.tables)
 
@@ -74,7 +76,7 @@ export function AdminDatabaseExplorer() {
         setSelectedTable(data.tables[0].name)
       }
     } catch (error) {
-      console.error('Error fetching tables:', error)
+      console.error(t('errors.errorFetchingTables'), error)
       setTables([])
     } finally {
       setIsLoadingTables(false)
@@ -95,7 +97,7 @@ export function AdminDatabaseExplorer() {
       const response = await adminFetch(
         `/admin/db/tables/${tableName}?page=${page}&page_size=${pageSize}`
       )
-      if (!response.ok) throw new Error('Failed to fetch table data')
+      if (!response.ok) throw new Error(t('errors.failedToFetchTableData'))
       const data = await response.json()
 
       // Handle out-of-range page (e.g., after deleting the last record on a page)
@@ -277,7 +279,7 @@ export function AdminDatabaseExplorer() {
   // Handle record delete
   const handleDeleteRecord = async (record: Record<string, unknown>) => {
     if (!selectedTable) return
-    if (!confirm('Are you sure you want to delete this record?')) return
+    if (!confirm(t('admin.confirmDelete'))) return
 
     try {
       const recordId = record.id
@@ -318,14 +320,14 @@ export function AdminDatabaseExplorer() {
           <div className="flex items-center gap-3">
             <Link
               to="/admin/setup"
-              className="p-1.5 -ml-1.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-overlay transition-all"
-              title="Back to Admin Setup"
+              className="btn-ghost p-1.5 -ml-1.5 rounded-lg transition-all"
+              title={t('admin.database.backToSetup')}
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
-              <h1 className="text-lg font-semibold text-text">Database Explorer</h1>
-              <p className="text-xs text-text-muted">View and manage SQLite data</p>
+              <h1 className="heading-lg">{t('admin.database.title')}</h1>
+              <p className="text-xs text-text-muted">{t('admin.database.subtitle')}</p>
             </div>
           </div>
 
@@ -335,20 +337,20 @@ export function AdminDatabaseExplorer() {
               onClick={() => setQueryMode(!queryMode)}
               className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 queryMode
-                  ? 'bg-accent text-accent-text'
-                  : 'border border-border text-text-secondary hover:bg-surface-overlay hover:text-text'
+                  ? 'bg-accent text-accent-text shadow-md glow-accent'
+                  : 'btn-secondary'
               }`}
             >
               <SquareTerminal className="w-4 h-4" />
-              SQL Query
+              {t('admin.database.sqlQuery')}
             </button>
 
             {/* Refresh */}
             <button
               onClick={fetchTables}
               disabled={isLoadingTables}
-              className="p-2 rounded-lg text-text-secondary hover:text-text hover:bg-surface-overlay transition-all disabled:opacity-50"
-              title="Refresh tables"
+              className="btn-ghost p-2 rounded-lg transition-all disabled:opacity-50"
+              title={t('admin.database.refreshTables')}
             >
               <RefreshCw className={`w-4 h-4 ${isLoadingTables ? 'animate-spin' : ''}`} />
             </button>
@@ -360,8 +362,8 @@ export function AdminDatabaseExplorer() {
         {/* Sidebar - Tables List */}
         <aside className="w-56 border-r border-border bg-surface-raised shrink-0 overflow-y-auto">
           <div className="p-3">
-            <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-2 px-2">
-              Tables
+            <h2 className="label mb-2 px-2">
+              {t('admin.database.tables')}
             </h2>
 
             {isLoadingTables ? (
@@ -370,9 +372,9 @@ export function AdminDatabaseExplorer() {
               </div>
             ) : tables.length === 0 ? (
               <div className="text-center py-8 px-2">
-                <p className="text-sm text-text-muted">No tables found</p>
+                <p className="text-sm text-text-muted">{t('admin.database.noTables')}</p>
                 <p className="text-xs text-text-muted mt-1">
-                  Database may not be initialized
+                  {t('admin.database.notInitialized')}
                 </p>
               </div>
             ) : (
@@ -398,7 +400,7 @@ export function AdminDatabaseExplorer() {
                     <div className={`text-xs mt-0.5 ${
                       selectedTable === table.name ? 'text-accent-text/70' : 'text-text-muted'
                     }`}>
-                      {table.columns.length} columns
+                      {table.columns.length} {t('admin.database.columns')}
                     </div>
                   </button>
                 ))}
@@ -418,39 +420,41 @@ export function AdminDatabaseExplorer() {
             /* SQL Query Mode */
             <div className="flex-1 flex flex-col p-4 gap-4 overflow-hidden">
               {/* Query Input */}
-              <div className="bg-surface-raised border border-border rounded-xl p-4">
-                <label className="text-sm font-medium text-text mb-2 block">
-                  SQL Query
+              <div className="card card-sm !p-4">
+                <label className="heading-sm mb-3 block">
+                  {t('admin.database.sqlQueryLabel')}
                 </label>
-                <textarea
-                  value={sqlQuery}
-                  onChange={(e) => setSqlQuery(e.target.value)}
-                  placeholder="SELECT * FROM users WHERE role = 'admin';"
-                  className="w-full h-32 px-4 py-3 bg-surface border border-border rounded-lg text-text font-mono text-sm placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/20 resize-none transition-all"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                      runQuery()
-                    }
-                  }}
-                />
-                <div className="flex items-center justify-between mt-3">
+                <div className="input-container !rounded-xl p-0 overflow-hidden">
+                  <textarea
+                    value={sqlQuery}
+                    onChange={(e) => setSqlQuery(e.target.value)}
+                    placeholder={t('admin.database.sqlPlaceholder')}
+                    className="input-field w-full h-32 px-4 py-3 font-mono text-sm resize-none"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                        runQuery()
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex items-center justify-between mt-4">
                   <p className="text-xs text-text-muted">
-                    Press Cmd/Ctrl + Enter to run
+                    {t('admin.database.runHint')}
                   </p>
                   <button
                     onClick={runQuery}
                     disabled={isRunningQuery || !sqlQuery.trim()}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-accent-text rounded-lg text-sm font-medium hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    className="btn btn-primary btn-md inline-flex items-center gap-2"
                   >
                     {isRunningQuery ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        Running...
+                        {t('admin.database.running')}
                       </>
                     ) : (
                       <>
                         <Play className="w-4 h-4" />
-                        Run Query
+                        {t('admin.database.runQuery')}
                       </>
                     )}
                   </button>
@@ -459,10 +463,10 @@ export function AdminDatabaseExplorer() {
 
               {/* Query Results */}
               {queryResult && (
-                <div className="flex-1 bg-surface-raised border border-border rounded-xl overflow-hidden flex flex-col">
-                  <div className="px-4 py-2 border-b border-border bg-surface-overlay flex items-center justify-between">
-                    <span className="text-sm font-medium text-text">
-                      {queryResult.success ? 'Results' : 'Error'}
+                <div className="flex-1 card overflow-hidden flex flex-col !p-0">
+                  <div className="px-4 py-3 border-b border-border bg-surface-overlay flex items-center justify-between">
+                    <span className="heading-sm">
+                      {queryResult.success ? t('admin.database.results') : t('admin.database.error')}
                     </span>
                     {queryResult.executionTimeMs !== undefined && (
                       <span className="text-xs text-text-muted">
@@ -478,10 +482,10 @@ export function AdminDatabaseExplorer() {
                   ) : queryResult.rowsAffected !== undefined ? (
                     <div className="p-4">
                       <p className="text-sm text-success">
-                        {queryResult.rowsAffected} row(s) affected
+                        {queryResult.rowsAffected} {t('admin.database.rowsAffected')}
                         {queryResult.lastInsertId !== undefined && (
                           <span className="text-text-muted ml-2">
-                            (Last insert ID: {queryResult.lastInsertId})
+                            ({t('admin.database.lastInsertId')} {queryResult.lastInsertId})
                           </span>
                         )}
                       </p>
@@ -516,7 +520,7 @@ export function AdminDatabaseExplorer() {
                     </div>
                   ) : (
                     <div className="p-4 text-center text-text-muted text-sm">
-                      No results returned
+                      {t('admin.database.noResults')}
                     </div>
                   )}
                 </div>
@@ -531,9 +535,9 @@ export function AdminDatabaseExplorer() {
               {/* Table Header */}
               <div className="px-4 py-3 border-b border-border bg-surface-raised flex items-center justify-between shrink-0">
                 <div>
-                  <h2 className="text-base font-semibold text-text">{selectedTable}</h2>
-                  <p className="text-xs text-text-muted">
-                    {currentTableInfo?.columns.length} columns, {totalRows} rows
+                  <h2 className="heading-md">{selectedTable}</h2>
+                  <p className="text-xs text-text-muted mt-0.5">
+                    {t('admin.database.tableInfo', { columns: currentTableInfo?.columns.length, rows: totalRows })}
                   </p>
                 </div>
 
@@ -541,74 +545,76 @@ export function AdminDatabaseExplorer() {
                   {/* Add Record Button */}
                   <button
                     onClick={handleCreateRecord}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent text-accent-text rounded-lg text-sm font-medium hover:bg-accent-hover transition-all"
+                    className="btn btn-primary btn-sm inline-flex items-center gap-1.5"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
-                    Add Row
+                    {t('admin.database.addRow')}
                   </button>
                 </div>
               </div>
 
               {/* Record Editor Form */}
               {(isCreatingRecord || editingRecord) && currentTableInfo && (
-                <div className="px-4 py-3 border-b border-border bg-accent-subtle animate-fade-in">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-semibold text-text">
-                      {isCreatingRecord ? 'New Record' : 'Edit Record'}
-                    </h3>
-                    <button
-                      onClick={handleCancelEdit}
-                      className="p-1 text-text-muted hover:text-text transition-colors"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
+                <div className="px-4 py-4 border-b border-border bg-surface-raised animate-fade-in">
+                  <div className="card card-sm !p-4 !bg-surface">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="heading-sm">
+                        {isCreatingRecord ? t('admin.database.newRecord') : t('admin.database.editRecord')}
+                      </h3>
+                      <button
+                        onClick={handleCancelEdit}
+                        className="btn-ghost p-1.5 rounded-lg transition-all"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {currentTableInfo.columns
-                      .filter((col) => !col.primaryKey || !isCreatingRecord)
-                      .map((col) => (
-                        <div key={col.name}>
-                          <label className="text-xs font-medium text-text-secondary mb-1 block">
-                            {col.name}
-                            {!col.nullable && <span className="text-error ml-0.5">*</span>}
-                            <span className="text-text-muted ml-1">({col.type})</span>
-                          </label>
-                          <input
-                            type={col.type === 'INTEGER' || col.type === 'REAL' ? 'number' : 'text'}
-                            value={recordFormData[col.name] || ''}
-                            onChange={(e) =>
-                              setRecordFormData((prev) => ({
-                                ...prev,
-                                [col.name]: e.target.value,
-                              }))
-                            }
-                            disabled={col.primaryKey}
-                            placeholder={col.nullable ? 'NULL' : ''}
-                            className="w-full px-3 py-1.5 bg-surface border border-border rounded-lg text-text text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                          />
-                        </div>
-                      ))}
-                  </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {currentTableInfo.columns
+                        .filter((col) => !col.primaryKey || !isCreatingRecord)
+                        .map((col) => (
+                          <div key={col.name}>
+                            <label className="text-xs font-medium text-text mb-1.5 block">
+                              {col.name}
+                              {!col.nullable && <span className="text-error ml-0.5">*</span>}
+                              <span className="text-text-muted ml-1 font-normal">({col.type})</span>
+                            </label>
+                            <div className="input-container px-3 py-2">
+                              <input
+                                type={col.type === 'INTEGER' || col.type === 'REAL' ? 'number' : 'text'}
+                                value={recordFormData[col.name] || ''}
+                                onChange={(e) =>
+                                  setRecordFormData((prev) => ({
+                                    ...prev,
+                                    [col.name]: e.target.value,
+                                  }))
+                                }
+                                disabled={col.primaryKey}
+                                placeholder={col.nullable ? t('common.nullPlaceholder') : ''}
+                                className="input-field text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                    </div>
 
-                  <div className="flex items-center gap-2 mt-3">
-                    <button
-                      onClick={handleSaveRecord}
-                      disabled={isSavingRecord}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent text-accent-text rounded-lg text-sm font-medium hover:bg-accent-hover disabled:opacity-50 transition-all"
-                    >
-                      {isSavingRecord ? 'Saving...' : 'Save'}
-                    </button>
-                    <button
-                      onClick={handleCancelEdit}
-                      className="px-3 py-1.5 text-text-secondary hover:text-text text-sm transition-colors"
-                    >
-                      Cancel
-                    </button>
+                    <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border">
+                      <button
+                        onClick={handleSaveRecord}
+                        disabled={isSavingRecord}
+                        className="btn btn-primary btn-sm"
+                      >
+                        {isSavingRecord ? t('common.saving') : t('common.save')}
+                      </button>
+                      <button
+                        onClick={handleCancelEdit}
+                        className="btn btn-ghost btn-sm"
+                      >
+                        {t('common.cancel')}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -622,12 +628,12 @@ export function AdminDatabaseExplorer() {
                 ) : tableData.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-text-muted">
                     <Database className="w-12 h-12 mb-3" strokeWidth={1} />
-                    <p className="text-sm">No data in this table</p>
+                    <p className="text-sm">{t('admin.database.noData')}</p>
                     <button
                       onClick={handleCreateRecord}
                       className="mt-3 text-sm text-accent hover:text-accent-hover transition-colors"
                     >
-                      Add your first record
+                      {t('admin.database.addFirstRecord')}
                     </button>
                   </div>
                 ) : (
@@ -712,7 +718,7 @@ export function AdminDatabaseExplorer() {
                                       isLongValue &&
                                       setExpandedCell({ row: rowIndex, col: col.name })
                                     }
-                                    title={isLongValue ? 'Click to expand' : undefined}
+                                    title={isLongValue ? t('admin.database.clickToExpand') : undefined}
                                   >
                                     {truncateValue(displayValue)}
                                   </span>
@@ -725,14 +731,14 @@ export function AdminDatabaseExplorer() {
                               <button
                                 onClick={() => handleEditRecord(row)}
                                 className="p-1 text-text-muted hover:text-accent transition-colors"
-                                title="Edit"
+                                title={t('common.edit')}
                               >
                                 <Pencil className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => handleDeleteRecord(row)}
                                 className="p-1 text-text-muted hover:text-error transition-colors"
-                                title="Delete"
+                                title={t('common.delete')}
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -750,8 +756,11 @@ export function AdminDatabaseExplorer() {
               {totalRows > pageSize && (
                 <div className="px-4 py-2 border-t border-border bg-surface-raised flex items-center justify-between shrink-0">
                   <span className="text-xs text-text-muted">
-                    Showing {(currentPage - 1) * pageSize + 1} to{' '}
-                    {Math.min(currentPage * pageSize, totalRows)} of {totalRows}
+                    {t('admin.database.pagination', {
+                      from: (currentPage - 1) * pageSize + 1,
+                      to: Math.min(currentPage * pageSize, totalRows),
+                      total: totalRows
+                    })}
                   </span>
                   <div className="flex items-center gap-1">
                     <button
@@ -790,8 +799,8 @@ export function AdminDatabaseExplorer() {
             <div className="flex-1 flex items-center justify-center text-text-muted">
               <div className="text-center">
                 <Database className="w-16 h-16 mx-auto mb-4" strokeWidth={1} />
-                <p className="text-sm">Select a table from the sidebar</p>
-                <p className="text-xs mt-1">or use SQL Query mode</p>
+                <p className="text-sm">{t('admin.database.selectTable')}</p>
+                <p className="text-xs mt-1">{t('admin.database.orUseSqlQuery')}</p>
               </div>
             </div>
           )}
@@ -802,18 +811,18 @@ export function AdminDatabaseExplorer() {
       <footer className="border-t border-border bg-surface-raised px-4 py-1.5 flex items-center justify-between text-xs text-text-muted shrink-0">
         <div className="flex items-center gap-4">
           <span>
-            {tables.length} table{tables.length !== 1 ? 's' : ''}
+            {t('admin.database.tableCount', { count: tables.length })}
           </span>
           {selectedTable && (
             <span>
-              {totalRows} row{totalRows !== 1 ? 's' : ''} in {selectedTable}
+              {t('admin.database.rowsInTable', { count: totalRows, table: selectedTable })}
             </span>
           )}
         </div>
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-success" />
-            SQLite Connected
+            {t('admin.database.connected')}
           </span>
         </div>
       </footer>

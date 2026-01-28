@@ -35,6 +35,9 @@ router = APIRouter(prefix="/ingest", tags=["ingest"])
 # Processing configuration
 MAX_CONCURRENT_CHUNKS = int(os.getenv("MAX_CONCURRENT_CHUNKS", "3"))
 
+# Valid ontology IDs for document extraction
+VALID_ONTOLOGIES = {"general", "bitcoin"}
+
 # Configuration
 UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/uploads"))
 CHUNKS_DIR = UPLOADS_DIR / "chunks"
@@ -166,6 +169,7 @@ class JobStatus(BaseModel):
     job_id: str
     filename: str
     status: str  # pending, processing, completed, failed
+    ontology_id: str
     created_at: str
     updated_at: str
     total_chunks: int
@@ -497,6 +501,7 @@ async def get_datastore_stats():
 async def upload_document(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
+    ontology_id: str = Form(default="general"),
     sample_percent: float = Form(default=100.0),
 ):
     """
@@ -524,6 +529,13 @@ async def upload_document(
             detail="sample_percent must be > 0 and <= 100"
         )
 
+    # Validate ontology_id
+    if ontology_id not in VALID_ONTOLOGIES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid ontology_id: {ontology_id}. Valid options: {sorted(VALID_ONTOLOGIES)}"
+        )
+
     # Generate job ID and save file
     job_id = generate_job_id(file.filename)
     file_path = UPLOADS_DIR / f"{job_id}_{file.filename}"
@@ -538,7 +550,7 @@ async def upload_document(
         "filename": file.filename,
         "file_path": str(file_path),
         "status": "pending",
-        "ontology_id": "general",  # Default ontology
+        "ontology_id": ontology_id,
         "sample_percent": sample_percent,
         "created_at": datetime.utcnow().isoformat(),
         "updated_at": datetime.utcnow().isoformat(),
@@ -576,6 +588,7 @@ async def get_job_status(job_id: str):
         job_id=job["job_id"],
         filename=job["filename"],
         status=job["status"],
+        ontology_id=job.get("ontology_id", "general"),
         created_at=job["created_at"],
         updated_at=job["updated_at"],
         total_chunks=job["total_chunks"],

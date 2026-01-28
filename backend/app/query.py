@@ -314,7 +314,7 @@ def _build_context(chunk_texts: list[str], sources: list[dict]) -> str:
     return "\n".join(parts)
 
 
-def _call_llm_contextual(question: str, context: str, session: dict, tools: list[str] = None) -> tuple[str, list[str], str, Optional[str]]:
+def _call_llm_contextual(question: str, context: str, session: dict, tools: Optional[list[str]] = None) -> tuple[str, list[str], str, Optional[str]]:
     """
     Call LLM with context-aware prompt.
     Returns (answer, list of clarifying questions, full_prompt for debugging, search_term or None).

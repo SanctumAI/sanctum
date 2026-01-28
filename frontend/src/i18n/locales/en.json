@@ -108,7 +108,8 @@
       "tableCount_other": "{{count}} tables",
       "rowCount_one": "{{count}} row",
       "rowCount_other": "{{count}} rows",
-      "rowsInTable": "{{count}} rows in {{table}}",
+      "rowsInTable_one": "{{count}} row in {{table}}",
+      "rowsInTable_other": "{{count}} rows in {{table}}",
       "connected": "SQLite Connected",
       "selectTable": "Select a table from the sidebar",
       "orUseSqlQuery": "or use SQL Query mode"
@@ -319,7 +320,8 @@
     "database": {
       "executedSql": "Executed SQL: {{sql}}",
       "noResults": "Query returned no results.",
-      "resultsCount": "Database query results ({{count}} rows):",
+      "resultsCount_one": "Database query result ({{count}} row):",
+      "resultsCount_other": "Database query results ({{count}} rows):",
       "resultsTruncated": "(Results truncated to 100 rows)"
     }
   },

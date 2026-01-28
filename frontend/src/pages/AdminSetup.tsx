@@ -279,7 +279,7 @@ export function AdminSetup() {
       ) : (
         <div className="space-y-6 stagger-children">
           {/* Instance Branding Section */}
-          <div className="card card-sm !p-5 !bg-surface-overlay">
+          <div className="card card-sm p-5! bg-surface-overlay!">
             <h3 className="heading-sm mb-4 flex items-center gap-2">
               <Paintbrush className="w-4 h-4 text-text-muted" />
               {t('admin.setup.branding')}
@@ -324,7 +324,7 @@ export function AdminSetup() {
           </div>
 
           {/* User Types Section */}
-          <div className="card card-sm !p-5 !bg-surface-overlay">
+          <div className="card card-sm p-5! bg-surface-overlay!">
             <h3 className="heading-sm mb-4 flex items-center gap-2">
               <Users className="w-4 h-4 text-text-muted" />
               {t('admin.setup.userTypes')}
@@ -414,7 +414,7 @@ export function AdminSetup() {
           </div>
 
           {/* User Fields Section */}
-          <div className="card card-sm !p-5 !bg-surface-overlay">
+          <div className="card card-sm p-5! bg-surface-overlay!">
             <h3 className="heading-sm mb-4 flex items-center gap-2">
               <FileText className="w-4 h-4 text-text-muted" />
               {t('admin.setup.onboardingFields')}
@@ -515,7 +515,7 @@ export function AdminSetup() {
           </div>
 
           {/* Knowledge Base Section */}
-          <div className="card card-sm !p-5 !bg-surface-overlay">
+          <div className="card card-sm p-5! bg-surface-overlay!">
             <h3 className="heading-sm mb-4 flex items-center gap-2">
               <Database className="w-4 h-4 text-text-muted" />
               {t('admin.setup.knowledgeBase')}
@@ -533,7 +533,7 @@ export function AdminSetup() {
           </div>
 
           {/* Database Section */}
-          <div className="card card-sm !p-5 !bg-surface-overlay">
+          <div className="card card-sm p-5! bg-surface-overlay!">
             <h3 className="heading-sm mb-4 flex items-center gap-2">
               <Database className="w-4 h-4 text-text-muted" />
               {t('admin.setup.database')}

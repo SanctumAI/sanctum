@@ -258,7 +258,8 @@
       "tableCount_other": "{{count}} tables",
       "rowCount_one": "{{count}} ligne",
       "rowCount_other": "{{count}} lignes",
-      "rowsInTable": "{{count}} lignes dans {{table}}",
+      "rowsInTable_one": "{{count}} ligne dans {{table}}",
+      "rowsInTable_other": "{{count}} lignes dans {{table}}",
       "connected": "SQLite connecté",
       "selectTable": "Sélectionnez une table dans la barre latérale",
       "orUseSqlQuery": "ou utilisez le mode requête SQL"

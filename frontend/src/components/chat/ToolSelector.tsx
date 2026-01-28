@@ -27,7 +27,7 @@ export function ToolSelector({
     () => [
       {
         id: 'web-search',
-        name: 'Web',
+        name: t('chat.tools.webSearchName'),
         description: t('chat.tools.webSearch'),
         icon: (
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -37,7 +37,7 @@ export function ToolSelector({
       },
       {
         id: 'db-query',
-        name: 'Database',
+        name: t('chat.tools.databaseName'),
         description: t('chat.tools.database'),
         icon: (
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

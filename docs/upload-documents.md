@@ -1,6 +1,8 @@
 # Document Upload & Ingestion Guide
 
-This guide explains how to upload documents to your locally running Sanctum server and monitor the ingestion process as it populates Qdrant (vector store) and Neo4j (knowledge graph).
+This guide explains how to upload documents to your locally running Sanctum server and monitor the ingestion process as it populates Qdrant (vector store).
+
+> ⚠️ **Note (Jan 2026):** Neo4j graph database has been **temporarily disabled**. Documents are currently stored in Qdrant vector store only. Graph-based storage is planned for re-integration in a future release.
 
 ## Prerequisites
 
@@ -20,10 +22,8 @@ Expected response:
 ```json
 {
   "status": "healthy",
-  "services": {
-    "neo4j": "healthy",
-    "qdrant": "healthy"
-  }
+  "qdrant": "ok",
+  "maple": "ok"
 }
 ```
 
@@ -138,7 +138,7 @@ chmod +x poll_job.sh
 
 Once the job completes, verify the data was stored:
 
-### Check Qdrant & Neo4j Stats
+### Check Qdrant Stats
 
 ```bash
 curl http://localhost:8000/ingest/stats
@@ -147,11 +147,6 @@ curl http://localhost:8000/ingest/stats
 Response:
 ```json
 {
-  "neo4j": {
-    "status": "ok",
-    "nodes": 156,
-    "relationships": 89
-  },
   "qdrant": {
     "status": "ok",
     "collections": {
@@ -163,17 +158,6 @@ Response:
     }
   }
 }
-```
-
-### Query Neo4j Directly (Admin)
-
-If you have admin access, you can run Cypher queries:
-
-```bash
-curl -X POST http://localhost:8000/admin/neo4j/query \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
-  -d '{"cypher": "MATCH (n) RETURN labels(n) AS type, count(n) AS count"}'
 ```
 
 ### Test Vector Search
@@ -220,7 +204,7 @@ PDF_EXTRACT_MODE=quality
 
 ### Reset All Data
 
-To wipe both Neo4j and Qdrant and start fresh:
+To wipe Qdrant and start fresh:
 
 ```bash
 curl -X POST http://localhost:8000/ingest/wipe

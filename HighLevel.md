@@ -2,7 +2,9 @@
 
 Sanctum is a privacy-first Retrieval-Augmented Generation (RAG) system for building, maintaining, and querying curated knowledge bases in sensitive domains such as human rights, international law, journalism, and research.
 
-Sanctum runs locally as a Docker Compose application. It combines a structured knowledge graph, a vector search index, and a secure LLM provider to produce grounded, explainable answers — without relying on public RAG services or opaque cloud infrastructure.
+Sanctum runs locally as a Docker Compose application. It combines a vector search index and a secure LLM provider to produce grounded, explainable answers — without relying on public RAG services or opaque cloud infrastructure.
+
+> ⚠️ **Note (Jan 2026):** The Neo4j graph database and Graphiti knowledge engine have been **temporarily disabled** to simplify deployment and reduce resource requirements. The current release uses Qdrant vector search only. Graph-based retrieval is planned for re-integration in a future release to enable richer entity relationships and multi-hop reasoning. Architecture descriptions below reflect the **planned full system**; current implementation uses vector search only.
 
 ---
 
@@ -19,14 +21,17 @@ Sanctum runs locally as a Docker Compose application. It combines a structured k
 
 Sanctum is composed of the following runtime components:
 
+**Currently Active:**
 - **Frontend**: Vite-based web UI
 - **Backend**: FastAPI application
-- **Graph Store**: Neo4j (canonical structured knowledge)
 - **Vector Store**: Qdrant (semantic recall)
-- **Knowledge Engine**: Graphiti (graph ingestion + retrieval)
 - **LLM Provider**: Maple Proxy (secure, OpenAI-compatible, structured outputs)
 - **Optional Local LLM**: Ollama (local inference alternative)
 - **Deployment**: Docker Compose
+
+**Planned for Future Release:**
+- **Graph Store**: Neo4j (canonical structured knowledge) — *temporarily disabled*
+- **Knowledge Engine**: Graphiti (graph ingestion + retrieval) — *temporarily disabled*
 
 All services communicate over an internal Docker network.
 
@@ -87,7 +92,9 @@ Job execution (ingest, reindex, export) is assumed to be managed asynchronously 
 
 ## RAG Architecture (Recommended Flow)
 
-Sanctum implements a **graph-first RAG pipeline**.
+> ⚠️ **Current State:** The graph-first pipeline described below is the **target architecture**. The current release uses simplified vector-only retrieval. Graph integration is planned for a future release.
+
+Sanctum is designed to implement a **graph-first RAG pipeline**.
 
 ### Ingest Flow
 
@@ -175,14 +182,16 @@ This is optional and configurable via Docker Compose profiles.
 
 Sanctum is deployed via **Docker Compose**.
 
-A typical deployment includes containers for:
+A typical deployment currently includes containers for:
 
 - FastAPI backend
 - Vite frontend
-- Neo4j
 - Qdrant
-- Maple Proxy client configuration
+- Maple Proxy
+- SearXNG (web search)
 - Optional Ollama
+
+*Future releases will add Neo4j for graph-based retrieval.*
 
 All stateful services use persistent volumes.
 
@@ -216,14 +225,20 @@ It is a **curated, explainable RAG system** optimized for correctness, privacy, 
 
 ## Status
 
-Architecture finalized. Implementation in progress.
+Core RAG pipeline operational with vector-only retrieval.
 
-Primary next steps:
-- Finalize ontology v1
-- Implement ingest + query pipelines
-- Wire Maple structured output enforcement
-- Build job tracking endpoints
-- Harden export and reindex paths
+**Completed:**
+- Ingest + query pipelines (vector-based)
+- Maple integration with structured outputs
+- Job tracking endpoints
+- Multi-language support (50+ languages)
+- Admin and user authentication flows
+
+**Planned for Future Releases:**
+- Re-integrate Neo4j graph store
+- Re-enable Graphiti knowledge engine
+- Multi-hop graph traversal in query pipeline
+- Ontology-driven entity extraction
 
 
 

@@ -140,6 +140,8 @@ Typical relationships include:
 - Practice REQUIRES Concept or Tool
 - Concept RELATED_TO Concept
 
+These entity types and relationships are examples. Sanctum's ontology is fully configurable based on your domain's needs.
+
 Provenance is a first-class concern. All claims are expected to reference sources.
 
 ---

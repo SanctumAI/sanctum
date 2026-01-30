@@ -82,8 +82,19 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
     4. Send context + history + query to LLM
     5. Return answer with clarifying questions if needed
     """
+    from ai_config import get_llm_parameters
+
     question = request.question
-    top_k = request.top_k or TOP_K_VECTORS
+    llm_params = get_llm_parameters()
+
+    # Get top_k from config if not specified in request
+    if request.top_k is not None:
+        top_k = request.top_k
+    else:
+        try:
+            top_k = int(llm_params.get("top_k", TOP_K_VECTORS))
+        except (ValueError, TypeError):
+            top_k = TOP_K_VECTORS
     hops = min(request.graph_hops or GRAPH_HOPS, 2)
     
     # Session management
@@ -157,8 +168,14 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         if clarifying_questions:
             session["pending_questions"] = clarifying_questions
         
+        # Get actual temperature for response (same logic as _call_llm_contextual)
+        try:
+            actual_temperature = float(llm_params.get("temperature", 0.1))
+        except (ValueError, TypeError):
+            actual_temperature = 0.1
+
         logger.info(f"RAG complete. Answer: {len(answer)} chars, {len(clarifying_questions)} clarifying Qs, search_term={search_term}, facts={session.get('facts_gathered', {})}")
-        
+
         return QueryResponse(
             answer=answer,
             session_id=session_id,
@@ -167,7 +184,7 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
             clarifying_questions=clarifying_questions,
             search_term=search_term,  # Auto-search trigger (if web-search tool enabled)
             context_used=full_prompt,  # For debugging - see exactly what LLM received
-            temperature=0.1,
+            temperature=actual_temperature,
         )
         
     except Exception as e:
@@ -320,9 +337,20 @@ def _call_llm_contextual(question: str, context: str, session: dict, tools: Opti
     Returns (answer, list of clarifying questions, full_prompt for debugging, search_term or None).
     """
     import re
+    from ai_config import get_prompt_sections, get_llm_parameters
     llm = get_provider()
     tools = tools or []
-    
+
+    # Get prompt sections from database (with defensive fallbacks)
+    prompt_sections = get_prompt_sections() or {}
+    llm_params = get_llm_parameters() or {}
+
+    # Get temperature from config (with fallback and type coercion)
+    try:
+        temperature = float(llm_params.get("temperature", 0.1))
+    except (ValueError, TypeError):
+        temperature = 0.1
+
     # Build conversation history for context
     history_str = ""
     if session["messages"]:
@@ -331,7 +359,7 @@ def _call_llm_contextual(question: str, context: str, session: dict, tools: Opti
             f"{'User' if m['role']=='user' else 'Assistant'}: {m['content'][:300]}"
             for m in recent[:-1]  # Exclude current message
         ])
-    
+
     # Extract source files from context for citation
     source_files = set()
     for src in session.get("_last_sources", []):
@@ -339,7 +367,7 @@ def _call_llm_contextual(question: str, context: str, session: dict, tools: Opti
         if sf:
             source_files.add(sf.replace(".pdf", "").replace("-", " ").replace("_", " "))
     source_citation = ", ".join(source_files) if source_files else "knowledge base documents"
-    
+
     # Build known facts section - treat these as CONFIRMED, do not re-ask
     facts = session.get("facts_gathered", {})
     if facts:
@@ -350,9 +378,9 @@ def _call_llm_contextual(question: str, context: str, session: dict, tools: Opti
         known_facts_section = "=== CONFIRMED FACTS (do NOT re-ask these) ===\n" + "\n".join(facts_lines)
         jurisdiction_note = "Use the confirmed facts above. Only ask clarifying questions about things NOT already known."
     else:
-        known_facts_section = "=== NO FACTS CONFIRMED YET ===\nAsk about location and nationality early, but only once per conversation."
+        known_facts_section = "=== NO FACTS CONFIRMED YET ===\nAsk about location and context early, but only once per conversation."
         jurisdiction_note = "We don't know location yet. Ask about it, but don't repeatedly ask if user doesn't answer."
-    
+
     # Auto-search instruction if web-search tool is enabled
     search_instruction = ""
     if "web-search" in tools:
@@ -366,22 +394,42 @@ Add [SEARCH: specific term] at the END of your response when:
 Do NOT tell them to "look up" or "search for" something - just trigger the search.
 Make search terms specific: "[SEARCH: local library hours downtown]"
 """
-    
-    prompt = f"""You are a helpful, knowledgeable assistant.
 
-{known_facts_section}
+    # Build style section from config
+    prompt_tone = prompt_sections.get("prompt_tone", "Be helpful, concise, and professional.")
+    style_section = f"=== STYLE ===\n{prompt_tone}"
+    if search_instruction:
+        style_section += f"\n{search_instruction}"
 
-=== STYLE ===
-- Be concise and direct
-- ONE action at a time when providing guidance
-- Acknowledge the user's question before answering
-{search_instruction}
-=== RULES ===
+    # Build rules section from config
+    prompt_rules = prompt_sections.get("prompt_rules", [])
+    if isinstance(prompt_rules, list) and prompt_rules:
+        rules_lines = [f"{i}. {rule}" for i, rule in enumerate(prompt_rules, 1)]
+        rules_lines.append(f"{len(prompt_rules) + 1}. {jurisdiction_note}")
+        rules_lines.append(f"{len(prompt_rules) + 2}. Do NOT repeat questions already answered in CONFIRMED FACTS above")
+        rules_section = "=== RULES ===\n" + "\n".join(rules_lines)
+    else:
+        rules_section = f"""=== RULES ===
 1. ONE action per response when providing step-by-step guidance
 2. NEVER invent sources, organization names, or contact information
 3. If asked about topics outside your knowledge base, acknowledge limitations
 4. {jurisdiction_note}
-5. Do NOT repeat questions already answered in CONFIRMED FACTS above
+5. Do NOT repeat questions already answered in CONFIRMED FACTS above"""
+
+    # Build forbidden topics section from config (if any)
+    prompt_forbidden = prompt_sections.get("prompt_forbidden", [])
+    forbidden_section = ""
+    if isinstance(prompt_forbidden, list) and prompt_forbidden:
+        forbidden_section = "\n\n=== FORBIDDEN TOPICS ===\nIf asked about these topics, politely decline:\n"
+        forbidden_section += "\n".join([f"- {topic}" for topic in prompt_forbidden])
+
+    prompt = f"""You are a helpful, knowledgeable assistant.
+
+{known_facts_section}
+
+{style_section}
+
+{rules_section}{forbidden_section}
 
 === SOURCE ===
 {source_citation}
@@ -397,7 +445,7 @@ Make search terms specific: "[SEARCH: local library hours downtown]"
 
 === RESPOND ==="""
 
-    response = llm.complete(prompt, temperature=0.1)
+    response = llm.complete(prompt, temperature=temperature)
     answer = response.content
     
     # Extract search term if present

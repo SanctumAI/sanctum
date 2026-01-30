@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Message } from './ChatMessage'
 import { downloadExport, ExportFormat } from '../../utils/exportChat'
+import { useInstanceConfig } from '../../context/InstanceConfigContext'
 
 interface ExportButtonProps {
   messages: Message[]
@@ -11,6 +12,7 @@ interface ExportButtonProps {
 
 export function ExportButton({ messages, disabled, iconOnly = false }: ExportButtonProps) {
   const { t } = useTranslation()
+  const { config } = useInstanceConfig()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -26,7 +28,18 @@ export function ExportButton({ messages, disabled, iconOnly = false }: ExportBut
   }, [])
 
   const handleExport = (format: ExportFormat) => {
-    downloadExport({ messages, format })
+    downloadExport({
+      messages,
+      format,
+      translations: {
+        defaultTitle: t('chat.export.defaultTitle'),
+        roleUser: t('chat.export.roleUser'),
+        roleAssistant: t('chat.export.roleAssistant'),
+        footer: t('chat.export.footer'),
+        exportedOn: t('chat.export.exportedOn'),
+      },
+      instanceName: config.name,
+    })
     setIsOpen(false)
   }
 

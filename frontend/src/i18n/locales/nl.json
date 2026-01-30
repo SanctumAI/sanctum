@@ -1,9 +1,231 @@
 {
+  "common": {
+    "close": "Sluiten",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "saving": "Opslaan...",
+    "saveChanges": "Wijzigingen opslaan",
+    "edit": "Bewerken",
+    "delete": "Verwijderen",
+    "remove": "Verwijderen",
+    "required": "Verplicht",
+    "settings": "Instellingen",
+    "toggleTheme": "Thema wisselen",
+    "switchToLight": "Naar lichte modus",
+    "switchToDark": "Naar donkere modus",
+    "moveUp": "Omhoog",
+    "moveDown": "Omlaag",
+    "logout": "Uitloggen",
+    "adminQuestion": "Ben je een beheerder?",
+    "signInNostr": "Inloggen met Nostr",
+    "tryAgain": "Probeer opnieuw",
+    "continue": "Doorgaan",
+    "unexpectedError": "Er is een onverwachte fout opgetreden",
+    "nullPlaceholder": "NULL",
+    "error": "Fout",
+    "back": "Terug",
+    "loading": "Laden...",
+    "unknown": "Onbekend",
+    "enabled": "Ingeschakeld",
+    "disabled": "Uitgeschakeld"
+  },
+  "settings": {
+    "title": "Instellingen",
+    "signedInAs": "Ingelogd als",
+    "signOut": "Uitloggen",
+    "adminTools": "Beheertools",
+    "admin": {
+      "instanceConfig": "Instance-configuratie",
+      "instanceConfigDesc": "Branding, gebruikerstypen, velden",
+      "testDashboard": "Testdashboard",
+      "testDashboardDesc": "API-tests, debugging tools",
+      "documentUpload": "Documenten uploaden",
+      "documentUploadDesc": "Documenten toevoegen aan kennisbank",
+      "databaseExplorer": "Database-verkenner",
+      "databaseExplorerDesc": "SQLite-database bekijken",
+      "instanceBranding": "Instantie-branding",
+      "instanceBrandingDesc": "Kleuren, pictogrammen, gebruikerstypen",
+      "aiConfig": "AI-configuratie",
+      "aiConfigDesc": "Prompts, parameters, standaardwaarden",
+      "deploymentConfig": "Implementatieconfiguratie",
+      "deploymentConfigDesc": "Services, SMTP, opslag"
+    }
+  },
+  "admin": {
+    "confirmDelete": "Weet je zeker dat je dit record wilt verwijderen?",
+    "confirmDeleteField": "Veld \"{{name}}\" verwijderen?",
+    "confirmDeleteTypeWithFields": "Gebruikerstype \"{{name}}\" verwijderen? Dit verwijdert ook {{count}} gekoppelde veld(en).",
+    "confirmDeleteType": "Gebruikerstype \"{{name}}\" verwijderen?",
+    "global": "Globaal",
+    "setup": {
+      "backToChat": "Terug naar chat",
+      "title": "Configureer je instance",
+      "subtitle": "Pas de branding en gebruikerservaring aan",
+      "branding": "Instance branding",
+      "displayName": "Weergavenaam",
+      "defaultName": "Sanctum",
+      "displayNameHint": "Deze naam verschijnt in de header en onboarding-schermen",
+      "icon": "Pictogram",
+      "accentColor": "Accentkleur",
+      "userTypes": "Gebruikerstypen",
+      "userTypesHint": "Definieer verschillende gebruikerstypen om type-specifieke onboarding-vragen te tonen. Als je meer dan één type hebt, kiezen gebruikers hun type tijdens de onboarding.",
+      "typeName": "Typenaam",
+      "typeNamePlaceholder": "bijv. Onderzoeker, Student",
+      "typeDescription": "Beschrijving (optioneel)",
+      "typeDescPlaceholder": "bijv. Voor academische onderzoekers",
+      "addType": "Type toevoegen",
+      "addUserType": "Gebruikerstype toevoegen",
+      "onboardingFields": "Gebruikers onboarding-velden",
+      "optionsCount_one": "{{count}} optie",
+      "optionsCount_other": "{{count}} opties",
+      "noFields": "Geen aangepaste velden",
+      "addField": "Veld toevoegen",
+      "knowledgeBase": "Kennisbank",
+      "knowledgeBaseHint": "Upload documenten om je RAG-kennisbank voor AI-gestuurde antwoorden op te bouwen.",
+      "uploadDocuments": "Documenten uploaden",
+      "database": "Database",
+      "databaseHint": "Bekijk en beheer je instance-gegevens direct in de SQLite-database.",
+      "openDatabase": "Database-verkenner openen",
+      "save": "Configuratie opslaan"
+    },
+    "database": {
+      "backToSetup": "Terug naar beheerconfiguratie",
+      "title": "Database-verkenner",
+      "subtitle": "SQLite-gegevens bekijken en beheren",
+      "sqlQuery": "SQL-query",
+      "refreshTables": "Tabellen vernieuwen",
+      "tables": "Tabellen",
+      "noTables": "Geen tabellen gevonden",
+      "notInitialized": "Database is mogelijk niet geïnitialiseerd",
+      "columns": "kolommen",
+      "sqlQueryLabel": "SQL-query",
+      "sqlPlaceholder": "SELECT * FROM users WHERE role = 'admin';",
+      "runHint": "Druk op Cmd/Ctrl + Enter om uit te voeren",
+      "running": "Bezig met uitvoeren...",
+      "runQuery": "Query uitvoeren",
+      "results": "Resultaten",
+      "error": "Fout",
+      "rowsAffected": "rij(en) beïnvloed",
+      "lastInsertId": "Laatst ingevoegde ID:",
+      "noResults": "Geen resultaten",
+      "tableInfo": "{{columns}} kolommen, {{rows}} rijen",
+      "addRow": "Rij toevoegen",
+      "newRecord": "Nieuw record",
+      "editRecord": "Record bewerken",
+      "noData": "Geen gegevens in deze tabel",
+      "addFirstRecord": "Voeg je eerste record toe",
+      "clickToExpand": "Klik om uit te vouwen",
+      "pagination": "{{from}} t/m {{to}} van {{total}} weergeven",
+      "tableCount_one": "{{count}} tabel",
+      "tableCount_other": "{{count}} tabellen",
+      "rowCount_one": "{{count}} rij",
+      "rowCount_other": "{{count}} rijen",
+      "rowsInTable_one": "{{count}} rij in {{table}}",
+      "rowsInTable_other": "{{count}} rijen in {{table}}",
+      "connected": "SQLite verbonden",
+      "selectTable": "Selecteer een tabel uit de zijbalk",
+      "orUseSqlQuery": "of gebruik SQL-querymodus",
+      "encrypted": "[Versleuteld]",
+      "encryptedMissingKey": "[Versleuteld - Sleutel ontbreekt]",
+      "decrypting": "[Ontsleutelen...]",
+      "notSet": "(niet ingesteld)"
+    },
+    "fields": {
+      "nameRequired": "Veldnaam is verplicht",
+      "optionsRequired": "Minimaal 2 opties vereist",
+      "editField": "Veld bewerken",
+      "addField": "Nieuw veld toevoegen",
+      "fieldName": "Veldnaam",
+      "fieldNamePlaceholder": "bijv. Bedrijfsnaam",
+      "applyTo": "Toepassen op",
+      "allUsers": "Alle gebruikers (Globaal)",
+      "globalHint": "Globale velden worden aan alle gebruikers getoond. Type-specifieke velden verschijnen alleen voor dat gebruikerstype.",
+      "fieldType": "Veldtype",
+      "options": "Opties",
+      "optionPlaceholder": "Optie {{number}}",
+      "addOption": "+ Optie toevoegen",
+      "placeholder": "Placeholder",
+      "placeholderOptional": "(optioneel)",
+      "placeholderHint": "Hinttekst getoond in het invoerveld",
+      "requiredField": "Verplicht veld"
+    },
+    "fieldTypes": {
+      "text": "Tekst",
+      "textDesc": "Enkelregelige tekstinvoer",
+      "email": "E-mail",
+      "emailDesc": "E-mail met validatie",
+      "number": "Nummer",
+      "numberDesc": "Numerieke invoer",
+      "textarea": "Tekstgebied",
+      "textareaDesc": "Meerregelige tekst",
+      "select": "Dropdown",
+      "selectDesc": "Selecteer uit opties",
+      "checkbox": "Selectievakje",
+      "checkboxDesc": "Ja/nee schakelaar",
+      "date": "Datum",
+      "dateDesc": "Datumkiezer",
+      "url": "URL",
+      "urlDesc": "Website-link"
+    },
+    "icons": {
+      "searchPlaceholder": "Pictogrammen zoeken...",
+      "noMatch": "Geen pictogrammen komen overeen met \"{{search}}\"",
+      "selected": "Geselecteerd:"
+    },
+    "errors": {
+      "loadTypesFailed": "Kan gebruikerstypen niet laden",
+      "loadFieldsFailed": "Kan gebruikersvelden niet laden",
+      "loadFailed": "Kan gegevens niet laden",
+      "saveFailed": "Opslaan mislukt. Probeer het opnieuw.",
+      "addTypeFailed": "Kan gebruikerstype niet toevoegen",
+      "removeTypeFailed": "Kan gebruikerstype niet verwijderen",
+      "addFieldFailed": "Kan veld niet toevoegen",
+      "updateFieldFailed": "Kan veld niet bijwerken",
+      "removeFieldFailed": "Kan veld niet verwijderen",
+      "reorderFailed": "Kan veld niet herordenen"
+    }
+  },
+  "adminOnboarding": {
+    "notAdmin": "Geen beheerder?",
+    "signInAsUser": "Inloggen als gebruiker",
+    "title": "Beheerderconfiguratie",
+    "subtitle": "Verbind met je Nostr-identiteit om deze instance te beheren",
+    "connectNostr": "Verbinden met Nostr",
+    "orForTesting": "of voor testen",
+    "continueMock": "Doorgaan met mock-identiteit",
+    "connecting": "Verbinden met extensie...",
+    "noExtension": "Geen Nostr-extensie gevonden",
+    "installExtension": "Installeer een NIP-07 compatibele extensie om door te gaan",
+    "useMock": "Mock gebruiken",
+    "welcomeAdmin": "Welkom, Beheerder!",
+    "connectedAs": "Verbonden als",
+    "redirecting": "Doorsturen naar dashboard...",
+    "connectionFailed": "Verbinding mislukt"
+  },
   "onboarding": {
+    "nostr": {
+      "whatIsNostr": "Wat is Nostr?",
+      "whatIsNostrDesc": "Nostr is een gedecentraliseerd protocol voor sociale netwerken en identiteit. In tegenstelling tot traditionele logins wordt je identiteit niet gecontroleerd door een bedrijf — jij bezit je sleutels.",
+      "whatIsNip07": "Wat is NIP-07?",
+      "whatIsNip07Desc": "NIP-07 is een standaard waarmee websites je Nostr publieke sleutel kunnen opvragen via een browserextensie. Dit betekent:",
+      "noPasswords": "Geen wachtwoorden om te onthouden",
+      "noEmailVerification": "Geen e-mailverificatie nodig",
+      "cryptoSecure": "Je identiteit is cryptografisch beveiligd",
+      "controlKeys": "Je beheert je eigen sleutels",
+      "howItWorks": "Hoe het werkt",
+      "step1": "Installeer een Nostr-ondertekeningsextensie (we raden Alby aan)",
+      "step2": "Klik hierboven op \"Verbinden met Nostr\"",
+      "step3": "Keur de verbinding goed in je extensie",
+      "step4": "Je bent binnen!",
+      "dontHaveExtension": "Heb je geen Nostr-extensie? Haal er hier een:",
+      "alby": "Alby",
+      "nos2x": "nos2x"
+    },
     "userType": {
       "title": "Wat beschrijft jou het best?",
       "description": "Selecteer de optie die het best bij je behoeften past",
-      "loadError": "Kan gebruikerstypen niet laden. Probeer het opnieuw."
+      "loadError": "Kan gebruikerstypen niet laden. Probeer het opnieuw.",
+      "selectionLabel": "Gebruikerstype selectie"
     },
     "language": {
       "selectLabel": "Selecteer een taal",
@@ -92,7 +314,9 @@
     "tools": {
       "label": "Tools",
       "webSearch": "Zoek op het web naar actuele informatie",
+      "webSearchName": "Web",
       "database": "Query de SQLite-database",
+      "databaseName": "Database",
       "knowledgeGraph": "Query de kennisgraaf"
     },
     "documentScope": {
@@ -103,7 +327,8 @@
       "docsLabel": "Docs"
     },
     "messages": {
-      "searching": "🔍 Zoeken naar \"{{term}}\"...",
+      "searching": "Zoeken naar \"{{term}}\"...",
+      "searchingPrefix": "Zoeken",
       "searchResults": "Ik heb \"{{term}}\" voor je gezocht:",
       "newConversation": "Nieuw gesprek"
     },
@@ -119,183 +344,318 @@
       "markdown": "Markdown",
       "markdownExt": ".md bestand",
       "plainText": "Platte tekst",
-      "plainTextExt": ".txt bestand"
+      "plainTextExt": ".txt bestand",
+      "defaultTitle": "Chat exporteren",
+      "roleUser": "Jij",
+      "roleAssistant": "Assistent",
+      "footer": "Geëxporteerd van {{instanceName}}",
+      "exportedOn": "Geëxporteerd op {{timestamp}}"
     },
     "database": {
       "executedSql": "Uitgevoerde SQL: {{sql}}",
       "noResults": "Query leverde geen resultaten op.",
-      "resultsCount": "Databasequery resultaten ({{count}} rijen):",
+      "resultsCount_one": "Databasequery resultaat ({{count}} rij):",
+      "resultsCount_other": "Databasequery resultaten ({{count}} rijen):",
       "resultsTruncated": "(Resultaten afgekapt tot 100 rijen)"
     }
   },
-  "common": {
-    "adminQuestion": "Ben je een beheerder?",
-    "signInNostr": "Inloggen met Nostr",
-    "close": "Sluiten",
-    "cancel": "Annuleren",
-    "save": "Opslaan",
-    "saving": "Opslaan...",
-    "saveChanges": "Wijzigingen opslaan",
-    "edit": "Bewerken",
-    "delete": "Verwijderen",
-    "remove": "Verwijderen",
-    "required": "Verplicht",
-    "settings": "Instellingen",
-    "toggleTheme": "Thema wisselen",
-    "switchToLight": "Naar lichte modus",
-    "switchToDark": "Naar donkere modus",
-    "moveUp": "Omhoog",
-    "moveDown": "Omlaag",
-    "logout": "Uitloggen",
-    "tryAgain": "Probeer opnieuw",
-    "continue": "Doorgaan",
-    "unexpectedError": "Er is een onverwachte fout opgetreden",
-    "nullPlaceholder": "NULL",
-    "error": "Fout"
+  "errors": {
+    "requestFailed": "Verzoek mislukt",
+    "invalidServerResponse": "Ongeldige reactie van server",
+    "unknownError": "Onbekende fout",
+    "failedToFetchDocuments": "Kan documenten niet ophalen",
+    "noResponseFromServer": "Geen reactie van server",
+    "failedToSendMessage": "Kan bericht niet verzenden",
+    "searchFailed": "Zoeken mislukt: HTTP {{status}}",
+    "failedToSendMagicLink": "Kan magic link niet verzenden",
+    "failedToFetchJobs": "Kan taken niet ophalen",
+    "errorFetchingJobs": "Fout bij ophalen van taken",
+    "failedToFetchTables": "Kan tabellen niet ophalen",
+    "errorFetchingTables": "Fout bij ophalen van tabellen",
+    "failedToFetchTableData": "Kan tabelgegevens niet ophalen",
+    "verificationFailed": "Verificatie mislukt",
+    "failedToFetchFields": "Kan velden niet ophalen",
+    "errorFetchingFields": "Fout bij ophalen van velden",
+    "failedToFetchAIConfig": "Kon AI-configuratie niet ophalen",
+    "failedToPreviewPrompt": "Kon prompt-voorbeeld niet weergeven",
+    "failedToFetchDocumentDefaults": "Kon documentstandaarden niet ophalen",
+    "failedToUpdateDocument": "Kon document niet bijwerken",
+    "failedToBatchUpdate": "Kon batchupdate niet uitvoeren",
+    "failedToFetchDeploymentConfig": "Kon implementatieconfiguratie niet ophalen",
+    "failedToExport": "Kon niet exporteren",
+    "failedToValidate": "Kon niet valideren",
+    "failedToRevealSecret": "Kon geheim niet onthullen",
+    "failedToFetchServiceHealth": "Kon servicestatus niet ophalen",
+    "failedToFetchAuditLog": "Kon auditlog niet ophalen",
+    "notAuthenticatedAsAdmin": "Niet geverifieerd als beheerder",
+    "adminSessionExpired": "Beheerdersessie verlopen",
+    "authenticationFailed": "Verificatie mislukt",
+    "noNostrExtension": "Geen Nostr-extensie gevonden"
   },
-  "settings": {
-    "title": "Instellingen",
-    "signedInAs": "Ingelogd als",
-    "signOut": "Uitloggen",
-    "adminTools": "Beheertools",
-    "admin": {
-      "instanceConfig": "Instance-configuratie",
-      "instanceConfigDesc": "Branding, gebruikerstypen, velden",
-      "testDashboard": "Testdashboard",
-      "testDashboardDesc": "API-tests, debugging tools",
-      "documentUpload": "Documenten uploaden",
-      "documentUploadDesc": "Documenten toevoegen aan kennisbank",
-      "databaseExplorer": "Database-verkenner",
-      "databaseExplorerDesc": "SQLite-database bekijken"
+  "adminDashboard": {
+    "title": "Beheerdashboard",
+    "subtitle": "Beheer de configuratie van je Sanctum-instance",
+    "instance": "Instance-configuratie",
+    "instanceDesc": "Pas branding, gebruikerstypen en onboarding-velden aan",
+    "ai": "AI-configuratie",
+    "aiDesc": "Configureer prompts, LLM-parameters en documentstandaarden",
+    "deployment": "Deployment-configuratie",
+    "deploymentDesc": "Beheer omgevingsinstellingen en servicestatus",
+    "upload": "Documenten uploaden",
+    "uploadDesc": "Voeg documenten toe aan je kennisbank",
+    "database": "Database-verkenner",
+    "databaseDesc": "Blader door en query de SQLite-database"
+  },
+  "adminAI": {
+    "title": "AI-configuratie",
+    "subtitle": "Bepaal hoe de AI zich gedraagt en reageert op je gebruikers",
+    "promptTemplate": "Prompt-sjabloon",
+    "promptTemplateDesc": "Bepaal hoe de AI communiceert met je gebruikers",
+    "promptTemplateHint": "Deze instellingen definiëren de persoonlijkheid en grenzen van de AI. Wijzigingen worden direct van kracht voor nieuwe gesprekken.",
+    "preview": "Voorbeeld",
+    "parameters": "Reactie-instellingen",
+    "parametersDesc": "Verfijn de reactiekwaliteit van de AI",
+    "parametersHint": "Deze technische instellingen beïnvloeden de snelheid en kwaliteit van reacties. De standaardwaarden werken goed voor de meeste gevallen — pas alleen aan als je problemen opmerkt.",
+    "sessionDefaults": "Functiestandaarden",
+    "sessionDefaultsDesc": "Stel in welke functies standaard aan staan",
+    "sessionDefaultsHint": "Bepaal welke AI-mogelijkheden zijn ingeschakeld wanneer gebruikers een nieuw gesprek starten.",
+    "documentDefaults": "Documenttoegang",
+    "documentDefaultsDesc": "Bepaal naar welke documenten de AI kan verwijzen",
+    "documentDefaultsHint": "Documenten gemarkeerd als \"Beschikbaar\" kunnen door gebruikers worden geselecteerd. Documenten gemarkeerd als \"Standaard actief\" worden automatisch opgenomen in nieuwe gesprekken.",
+    "available": "Beschikbaar",
+    "activeByDefault": "Standaard actief",
+    "noDocuments": "Nog geen documenten geüpload",
+    "promptPreview": "Prompt-voorbeeld",
+    "invalidJson": "Ongeldig JSON-formaat",
+    "chunks": "delen"
+  },
+  "adminDeployment": {
+    "title": "Deployment-configuratie",
+    "subtitle": "Beheer je serververbindingen en infrastructuurinstellingen",
+    "serviceHealth": "Servicestatus",
+    "serviceHealthDesc": "Monitor je verbonden services",
+    "serviceHealthHint": "Groen betekent dat de service normaal reageert. Als een service rood toont, controleer dan de configuratie hieronder.",
+    "refresh": "Vernieuwen",
+    "restartRequired": "Service herstart vereist",
+    "validate": "Configuratie valideren",
+    "exportEnv": "Exporteer .env",
+    "auditLog": "Recente wijzigingen",
+    "configValid": "Configuratie geldig",
+    "configInvalid": "Configuratie ongeldig",
+    "noRecentChanges": "Geen recente wijzigingen",
+    "exportFailed": "Export mislukt",
+    "validationFailed": "Validatieverzoek mislukt",
+    "requiresRestart": "Vereist herstart",
+    "secret": "Geheim",
+    "leaveEmptyForSecret": "Laat leeg om huidige waarde te behouden"
+  },
+  "upload": {
+    "invalidFileType": "Ongeldig bestandstype. Toegestaan: {{extensions}}",
+    "title": "Documenten uploaden",
+    "subtitle": "Voeg documenten toe aan je kennisbank voor RAG",
+    "uploadFile": "Bestand uploaden",
+    "dropFileHere": "Sleep bestand hierheen",
+    "dropOrBrowse": "Sleep bestand hierheen of klik om te bladeren",
+    "supported": "Ondersteund: {{extensions}}",
+    "removeFile": "Bestand verwijderen",
+    "uploading": "Uploaden...",
+    "uploadDocument": "Document uploaden",
+    "recentUploads": "Recente uploads",
+    "noUploads": "Nog geen uploads",
+    "backToDashboard": "Terug naar dashboard",
+    "backToSetup": "Terug naar configuratie",
+    "status": {
+      "queued": "In wachtrij",
+      "processing": "Verwerken",
+      "chunked": "Opgedeeld",
+      "complete": "Voltooid",
+      "failed": "Mislukt"
+    },
+    "chunks": "{{processed}}/{{total}} chunks"
+  },
+  "configCategories": {
+    "llm": {
+      "label": "AI-provider",
+      "description": "Verbind met je AI-service",
+      "hint": "Configureer welke AI-service je assistent aandrijft. Je hebt een API-sleutel nodig van je gekozen provider (bijv. OpenAI, Anthropic). Wijzigingen vereisen een herstart van de service."
+    },
+    "embedding": {
+      "label": "Tekstverwerking",
+      "description": "Configureer hoe documenten worden geanalyseerd",
+      "hint": "Deze instellingen bepalen hoe je documenten worden omgezet in doorzoekbare gegevens. De standaardwaarden werken goed voor de meeste gevallen — wijzig alleen als je een aangepast model gebruikt."
+    },
+    "email": {
+      "label": "E-mailservice",
+      "description": "Stel e-mail in voor gebruikersauthenticatie",
+      "hint": "Configureer e-mail voor het verzenden van magic links naar gebruikers tijdens het inloggen. Je hebt SMTP-inloggegevens nodig van een e-mailservice zoals SendGrid, Mailgun of je eigen mailserver."
+    },
+    "storage": {
+      "label": "Gegevensopslag",
+      "description": "Configureer waar gegevens worden opgeslagen",
+      "hint": "Bepaal bestandspaden voor de database en geüploade documenten. Deze hoeven meestal niet te worden gewijzigd tenzij je je deployment aanpast."
+    },
+    "security": {
+      "label": "Beveiliging & URLs",
+      "description": "Configureer toegangs- en beveiligingsinstellingen",
+      "hint": "Stel je openbare URLs en beveiligingsopties in. De frontend-URL is waar gebruikers de app openen. Zorg ervoor dat deze overeenkomen met je werkelijke deployment."
+    },
+    "search": {
+      "label": "Webzoeken",
+      "description": "Schakel AI-webzoekmogelijkheden in",
+      "hint": "Configureer de zoekmachine die de webzoekfunctie van de AI aandrijft. Wanneer ingeschakeld, kan de AI online naar actuele informatie zoeken."
+    },
+    "general": {
+      "label": "Algemeen",
+      "description": "Overige configuratieopties",
+      "hint": "Diverse instellingen die niet in andere categorieën passen."
     }
   },
-  "admin": {
-    "confirmDelete": "Weet je zeker dat je dit record wilt verwijderen?",
-    "setup": {
-      "backToChat": "Terug naar chat",
-      "title": "Configureer je instance",
-      "subtitle": "Pas de branding en gebruikerservaring aan",
-      "branding": "Instance branding",
-      "displayName": "Weergavenaam",
-      "defaultName": "Sanctum",
-      "displayNameHint": "Deze naam verschijnt in de header en onboarding-schermen",
-      "icon": "Pictogram",
-      "accentColor": "Accentkleur",
-      "userTypes": "Gebruikerstypen",
-      "userTypesHint": "Definieer verschillende gebruikerstypen om type-specifieke onboarding-vragen te tonen. Als je meer dan één type hebt, kiezen gebruikers hun type tijdens de onboarding.",
-      "typeName": "Typenaam",
-      "typeNamePlaceholder": "bijv. Onderzoeker, Student",
-      "typeDescription": "Beschrijving (optioneel)",
-      "typeDescPlaceholder": "bijv. Voor academische onderzoekers",
-      "addType": "Type toevoegen",
-      "addUserType": "Gebruikerstype toevoegen",
-      "onboardingFields": "Gebruikers onboarding-velden",
-      "optionsCount": "{{count}} opties",
-      "noFields": "Geen aangepaste velden",
-      "addField": "Veld toevoegen",
-      "knowledgeBase": "Kennisbank",
-      "knowledgeBaseHint": "Upload documenten om je RAG-kennisbank voor AI-gestuurde antwoorden op te bouwen.",
-      "uploadDocuments": "Documenten uploaden",
-      "database": "Database",
-      "databaseHint": "Bekijk en beheer je instance-gegevens direct in de SQLite-database.",
-      "openDatabase": "Database-verkenner openen",
-      "save": "Configuratie opslaan"
+  "promptSections": {
+    "prompt_tone": {
+      "label": "Toon & Persoonlijkheid",
+      "description": "Hoe de AI moet klinken bij het reageren",
+      "hint": "Dit bepaalt de algehele stem en manier van de AI. Je wilt bijvoorbeeld dat het \"warm en ondersteunend\" is voor een counseling-app, of \"beknopt en professioneel\" voor een zakelijke tool. De AI gebruikt dit als richtlijn voor elke reactie.",
+      "placeholder": "Wees behulpzaam, beknopt en professioneel..."
     },
-    "database": {
-      "backToSetup": "Terug naar beheerconfiguratie",
-      "title": "Database-verkenner",
-      "subtitle": "SQLite-gegevens bekijken en beheren",
-      "sqlQuery": "SQL-query",
-      "refreshTables": "Tabellen vernieuwen",
-      "tables": "Tabellen",
-      "noTables": "Geen tabellen gevonden",
-      "notInitialized": "Database is mogelijk niet geïnitialiseerd",
-      "columns": "kolommen",
-      "sqlQueryLabel": "SQL-query",
-      "sqlPlaceholder": "SELECT * FROM users WHERE role = 'admin';",
-      "runHint": "Druk op Cmd/Ctrl + Enter om uit te voeren",
-      "running": "Bezig met uitvoeren...",
-      "runQuery": "Query uitvoeren",
-      "results": "Resultaten",
-      "error": "Fout",
-      "rowsAffected": "rij(en) beïnvloed",
-      "lastInsertId": "Laatst ingevoegde ID:",
-      "noResults": "Geen resultaten",
-      "tableInfo": "{{columns}} kolommen, {{rows}} rijen",
-      "addRow": "Rij toevoegen",
-      "newRecord": "Nieuw record",
-      "editRecord": "Record bewerken",
-      "noData": "Geen gegevens in deze tabel",
-      "addFirstRecord": "Voeg je eerste record toe",
-      "clickToExpand": "Klik om uit te vouwen",
-      "pagination": "{{from}} t/m {{to}} van {{total}} weergeven",
-      "tableCount_one": "{{count}} tabel",
-      "tableCount_other": "{{count}} tabellen",
-      "rowCount_one": "{{count}} rij",
-      "rowCount_other": "{{count}} rijen",
-      "rowsInTable": "{{count}} rijen in {{table}}",
-      "connected": "SQLite verbonden",
-      "selectTable": "Selecteer een tabel uit de zijbalk",
-      "orUseSqlQuery": "of gebruik SQL-querymodus"
+    "prompt_rules": {
+      "label": "Gedragsregels",
+      "description": "Specifieke instructies die de AI moet volgen",
+      "hint": "Voeg regels toe als een JSON-lijst zoals [\"Citeer altijd bronnen\", \"Houd reacties onder 200 woorden\"]. Dit zijn strikte richtlijnen die de AI probeert te volgen in elk gesprek.",
+      "placeholder": "[\"Regel 1\", \"Regel 2\", ...]"
     },
-    "fields": {
-      "nameRequired": "Veldnaam is verplicht",
-      "optionsRequired": "Minimaal 2 opties vereist",
-      "editField": "Veld bewerken",
-      "addField": "Nieuw veld toevoegen",
-      "fieldName": "Veldnaam",
-      "fieldNamePlaceholder": "bijv. Bedrijfsnaam",
-      "applyTo": "Toepassen op",
-      "allUsers": "Alle gebruikers (Globaal)",
-      "globalHint": "Globale velden worden aan alle gebruikers getoond. Type-specifieke velden verschijnen alleen voor dat gebruikerstype.",
-      "fieldType": "Veldtype",
-      "options": "Opties",
-      "optionPlaceholder": "Optie {{number}}",
-      "addOption": "+ Optie toevoegen",
-      "placeholder": "Placeholder",
-      "placeholderOptional": "(optioneel)",
-      "placeholderHint": "Hinttekst getoond in het invoerveld",
-      "requiredField": "Verplicht veld"
+    "prompt_forbidden": {
+      "label": "Verboden onderwerpen",
+      "description": "Onderwerpen die de AI moet weigeren te bespreken",
+      "hint": "Lijst onderwerpen waarvan je wilt dat de AI er beleefd van afleidt. Bijvoorbeeld [\"medisch advies\", \"juridisch advies\"]. De AI erkent deze verzoeken maar legt uit dat het hier niet mee kan helpen.",
+      "placeholder": "[\"Onderwerp 1\", \"Onderwerp 2\", ...]"
     },
-    "fieldTypes": {
-      "text": "Tekst",
-      "textDesc": "Enkelregelige tekstinvoer",
-      "email": "E-mail",
-      "emailDesc": "E-mail met validatie",
-      "number": "Nummer",
-      "numberDesc": "Numerieke invoer",
-      "textarea": "Tekstgebied",
-      "textareaDesc": "Meerregelige tekst",
-      "select": "Dropdown",
-      "selectDesc": "Selecteer uit opties",
-      "checkbox": "Selectievakje",
-      "checkboxDesc": "Ja/nee schakelaar",
-      "date": "Datum",
-      "dateDesc": "Datumkiezer",
-      "url": "URL",
-      "urlDesc": "Website-link"
-    },
-    "icons": {
-      "searchPlaceholder": "Pictogrammen zoeken...",
-      "noMatch": "Geen pictogrammen komen overeen met \"{{search}}\"",
-      "selected": "Geselecteerd:"
+    "prompt_greeting": {
+      "label": "Reactiestijl",
+      "description": "Hoe de AI zijn reacties structureert",
+      "hint": "Bepaalt opmaakvoorkeuren zoals het gebruik van opsommingstekens, koppen of conversationele paragrafen. Dit beïnvloedt hoe antwoorden visueel worden gepresenteerd.",
+      "placeholder": "Gebruik opsommingstekens voor lijsten, koppen voor secties..."
     }
   },
-  "adminOnboarding": {
-    "notAdmin": "Geen beheerder?",
-    "signInAsUser": "Inloggen als gebruiker",
-    "title": "Beheerderconfiguratie",
-    "subtitle": "Verbind met je Nostr-identiteit om deze instance te beheren",
-    "connectNostr": "Verbinden met Nostr",
-    "orForTesting": "of voor testen",
-    "continueMock": "Doorgaan met mock-identiteit",
-    "connecting": "Verbinden met extensie...",
-    "noExtension": "Geen Nostr-extensie gevonden",
-    "installExtension": "Installeer een NIP-07 compatibele extensie om door te gaan",
-    "useMock": "Mock gebruiken",
-    "welcomeAdmin": "Welkom, Beheerder!",
-    "connectedAs": "Verbonden als",
-    "redirecting": "Doorsturen naar dashboard...",
-    "connectionFailed": "Verbinding mislukt"
+  "parameters": {
+    "temperature": {
+      "label": "Creativiteitsniveau",
+      "description": "Hoe voorspelbaar vs. creatief de AI-reacties zijn",
+      "hint": "Lagere waarden (0.0-0.3) maken reacties meer gefocust en consistent — goed voor feitelijke Q&A. Hogere waarden (0.7-1.0) maken reacties gevarieerder en creatiever — beter voor brainstormen. Standaard: 0.7"
+    },
+    "top_k": {
+      "label": "Kennisdiepte",
+      "description": "Hoeveel documentsecties er worden geraadpleegd",
+      "hint": "Bij het beantwoorden van vragen doorzoekt de AI je geüploade documenten en haalt relevante secties op. Hogere aantallen betekenen meer context maar tragere reacties. Lagere aantallen zijn sneller maar kunnen relevante info missen. Standaard: 5"
+    }
+  },
+  "defaults": {
+    "web_search_default": {
+      "label": "Webzoeken",
+      "description": "Sta de AI toe om op internet te zoeken",
+      "hint": "Wanneer ingeschakeld, kan de AI op het web zoeken naar actuele informatie die niet in je documenten staat. Schakel dit uit als je wilt dat reacties alleen uit je geüploade kennisbank komen."
+    }
+  },
+  "colors": {
+    "blue": "Blauw",
+    "purple": "Paars",
+    "green": "Groen",
+    "orange": "Oranje",
+    "pink": "Roze",
+    "teal": "Blauwgroen"
+  },
+  "promptPreview": {
+    "sampleQuestion": "Wat moet ik weten over dit onderwerp?"
+  },
+  "deploymentConfigItems": {
+    "LLM_PROVIDER": {
+      "label": "AI-service",
+      "description": "LLM-provider (maple, ollama)",
+      "hint": "Kies \"maple\" voor de Maple-proxy (aanbevolen voor privacy) of \"ollama\" voor lokale modellen."
+    },
+    "LLM_MODEL": {
+      "label": "Modelnaam",
+      "description": "Modelnaam/identificatie",
+      "hint": "De modelidentificatie om te gebruiken (bijv. \"kimi-k2-thinking\"). Raadpleeg de documentatie van uw provider voor beschikbare modellen."
+    },
+    "LLM_API_URL": {
+      "label": "API-eindpunt",
+      "description": "Basis-URL voor API-verzoeken",
+      "hint": "De basis-URL voor API-verzoeken. Voor Maple: http://maple-proxy:8080/v1. Voor Ollama: http://localhost:11434."
+    },
+    "RAG_TOP_K": {
+      "label": "Contextfragmenten",
+      "description": "Aantal fragmenten om op te halen",
+      "hint": "Hoeveel documentfragmenten op te halen per query. Hoger = meer context maar langzamer. Standaard: 8."
+    },
+    "PDF_EXTRACT_MODE": {
+      "label": "PDF-verwerking",
+      "description": "PDF-extractiemethode",
+      "hint": "\"fast\" extraheert tekst snel. \"quality\" gebruikt OCR voor betere nauwkeurigheid met gescande documenten maar is langzamer."
+    },
+    "EMBEDDING_MODEL": {
+      "label": "Embedding-model",
+      "description": "HuggingFace-model voor embeddings",
+      "hint": "Het HuggingFace-model voor het converteren van tekst naar vectoren. Wijzig alleen als u een andere taal of domein nodig heeft."
+    },
+    "SMTP_HOST": {
+      "label": "Mailserver",
+      "description": "SMTP-serveradres",
+      "hint": "Uw SMTP-serveradres (bijv. smtp.gmail.com, smtp.sendgrid.net)."
+    },
+    "SMTP_PORT": {
+      "label": "Mailpoort",
+      "description": "SMTP-serverpoort",
+      "hint": "Meestal 587 voor TLS of 465 voor SSL. Controleer de instellingen van uw e-mailprovider."
+    },
+    "SMTP_USER": {
+      "label": "SMTP-gebruikersnaam",
+      "description": "E-mailservice gebruikersnaam",
+      "hint": "Uw e-mailservice gebruikersnaam of API-sleutel."
+    },
+    "SMTP_PASS": {
+      "label": "SMTP-wachtwoord",
+      "description": "E-mailservice wachtwoord",
+      "hint": "Uw e-mailservice wachtwoord of API-sleutelgeheim."
+    },
+    "SMTP_FROM": {
+      "label": "Afzenderadres",
+      "description": "Van-adres voor e-mails",
+      "hint": "Het \"van\"-adres voor uitgaande e-mails (bijv. noreply@uwdomein.com)."
+    },
+    "MOCK_SMTP": {
+      "label": "Testmodus",
+      "description": "Gesimuleerde e-mailverzending",
+      "hint": "Wanneer \"true\", worden e-mails gelogd in plaats van verzonden. Handig voor ontwikkeling."
+    },
+    "SQLITE_PATH": {
+      "label": "Databasebestand",
+      "description": "Pad naar SQLite-database",
+      "hint": "Pad naar het SQLite-databasebestand. Standaard: /data/sanctum.db"
+    },
+    "UPLOADS_DIR": {
+      "label": "Uploadmap",
+      "description": "Map voor documentuploads",
+      "hint": "Map waar geüploade documenten worden opgeslagen. Standaard: /uploads"
+    },
+    "QDRANT_HOST": {
+      "label": "Vector-DB-host",
+      "description": "Qdrant-server hostnaam",
+      "hint": "Hostnaam voor de Qdrant vectordatabase. Standaard: qdrant"
+    },
+    "QDRANT_PORT": {
+      "label": "Vector-DB-poort",
+      "description": "Qdrant REST API-poort",
+      "hint": "Poort voor Qdrant (REST API). Standaard: 6333"
+    },
+    "SEARXNG_URL": {
+      "label": "Zoekmachine-URL",
+      "description": "SearXNG-instantie-URL",
+      "hint": "URL van uw SearXNG-instantie voor webzoekfunctionaliteit."
+    },
+    "FRONTEND_URL": {
+      "label": "App-URL",
+      "description": "Openbare URL van de applicatie",
+      "hint": "De openbare URL waar gebruikers toegang hebben tot de app. Wordt gebruikt voor het genereren van magische links."
+    }
   }
 }

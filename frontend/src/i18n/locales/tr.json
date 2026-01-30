@@ -1,9 +1,28 @@
 {
   "onboarding": {
+    "nostr": {
+      "whatIsNostr": "Nostr nedir?",
+      "whatIsNostrDesc": "Nostr, sosyal ağ ve kimlik için merkezi olmayan bir protokoldür. Geleneksel girişlerin aksine, kimliğiniz herhangi bir şirket tarafından kontrol edilmez — anahtarlarınızın sahibi sizsiniz.",
+      "whatIsNip07": "NIP-07 nedir?",
+      "whatIsNip07Desc": "NIP-07, web sitelerinin tarayıcı uzantısından Nostr genel anahtarınızı istemesine olanak tanıyan bir standarttır. Bu şu anlama gelir:",
+      "noPasswords": "Hatırlanacak parola yok",
+      "noEmailVerification": "E-posta doğrulaması gerekmiyor",
+      "cryptoSecure": "Kimliğiniz kriptografik olarak güvende",
+      "controlKeys": "Kendi anahtarlarınızı siz kontrol ediyorsunuz",
+      "howItWorks": "Nasıl çalışır",
+      "step1": "Bir Nostr imzalama uzantısı yükleyin (Alby öneriyoruz)",
+      "step2": "Yukarıdaki \"Nostr ile Bağlan\" düğmesine tıklayın",
+      "step3": "Uzantınızda bağlantıyı onaylayın",
+      "step4": "Hazırsınız!",
+      "dontHaveExtension": "Nostr uzantınız yok mu? Buradan edinin:",
+      "alby": "Alby",
+      "nos2x": "nos2x"
+    },
     "userType": {
       "title": "Sizi en iyi ne tanımlar?",
       "description": "İhtiyaçlarınıza en uygun seçeneği seçin",
-      "loadError": "Kullanıcı türleri yüklenemedi. Lütfen tekrar deneyin."
+      "loadError": "Kullanıcı türleri yüklenemedi. Lütfen tekrar deneyin.",
+      "selectionLabel": "Kullanıcı türü seçimi"
     },
     "language": {
       "selectLabel": "Bir dil seçin",
@@ -92,7 +111,9 @@
     "tools": {
       "label": "Araçlar",
       "webSearch": "Web'de güncel bilgileri ara",
+      "webSearchName": "Web",
       "database": "SQLite veritabanını sorgula",
+      "databaseName": "Veritabanı",
       "knowledgeGraph": "Bilgi grafiğini sorgula"
     },
     "documentScope": {
@@ -103,7 +124,8 @@
       "docsLabel": "Belgeler"
     },
     "messages": {
-      "searching": "🔍 \"{{term}}\" aranıyor...",
+      "searching": "\"{{term}}\" aranıyor...",
+      "searchingPrefix": "Aranıyor",
       "searchResults": "Sizin için \"{{term}}\" aradım:",
       "newConversation": "Yeni sohbet"
     },
@@ -119,12 +141,18 @@
       "markdown": "Markdown",
       "markdownExt": ".md dosya",
       "plainText": "Düz metin",
-      "plainTextExt": ".txt dosya"
+      "plainTextExt": ".txt dosya",
+      "defaultTitle": "Sohbet Dışa Aktarımı",
+      "roleUser": "Sen",
+      "roleAssistant": "Asistan",
+      "footer": "{{instanceName}} üzerinden dışa aktarıldı",
+      "exportedOn": "{{timestamp}} tarihinde dışa aktarıldı"
     },
     "database": {
       "executedSql": "Yürütülen SQL: {{sql}}",
       "noResults": "Sorgu sonuç döndürmedi.",
-      "resultsCount": "Veritabanı sorgu sonuçları ({{count}} satır):",
+      "resultsCount_one": "Veritabanı sorgu sonucu ({{count}} satır):",
+      "resultsCount_other": "Veritabanı sorgu sonuçları ({{count}} satır):",
       "resultsTruncated": "(Sonuçlar 100 satıra kısaltıldı)"
     }
   },
@@ -151,7 +179,12 @@
     "continue": "Devam et",
     "unexpectedError": "Beklenmeyen bir hata oluştu",
     "nullPlaceholder": "NULL",
-    "error": "Hata"
+    "error": "Hata",
+    "back": "Geri",
+    "loading": "Yükleniyor...",
+    "unknown": "Bilinmiyor",
+    "enabled": "Etkin",
+    "disabled": "Devre dışı"
   },
   "settings": {
     "title": "Ayarlar",
@@ -166,11 +199,21 @@
       "documentUpload": "Belge Yükleme",
       "documentUploadDesc": "Bilgi tabanına belge ekle",
       "databaseExplorer": "Veritabanı Gezgini",
-      "databaseExplorerDesc": "SQLite veritabanına göz at"
+      "databaseExplorerDesc": "SQLite veritabanına göz at",
+      "instanceBranding": "Örnek Markalaması",
+      "instanceBrandingDesc": "Renkler, simgeler, kullanıcı türleri",
+      "aiConfig": "AI Yapılandırması",
+      "aiConfigDesc": "Promptlar, parametreler, varsayılanlar",
+      "deploymentConfig": "Dağıtım Yapılandırması",
+      "deploymentConfigDesc": "Servisler, SMTP, depolama"
     }
   },
   "admin": {
     "confirmDelete": "Bu kaydı silmek istediğinizden emin misiniz?",
+    "confirmDeleteField": "\"{{name}}\" alanını silmek istiyor musunuz?",
+    "confirmDeleteTypeWithFields": "\"{{name}}\" kullanıcı türünü silmek istiyor musunuz? Bu işlem {{count}} ilişkili alanı da silecektir.",
+    "confirmDeleteType": "\"{{name}}\" kullanıcı türünü silmek istiyor musunuz?",
+    "global": "Global",
     "setup": {
       "backToChat": "Sohbete Dön",
       "title": "Örneğinizi Yapılandırın",
@@ -190,7 +233,8 @@
       "addType": "Tür Ekle",
       "addUserType": "Kullanıcı Türü Ekle",
       "onboardingFields": "Kullanıcı Kayıt Alanları",
-      "optionsCount": "{{count}} seçenek",
+      "optionsCount_one": "{{count}} seçenek",
+      "optionsCount_other": "{{count}} seçenek",
       "noFields": "Özel alan yok",
       "addField": "Alan Ekle",
       "knowledgeBase": "Bilgi Tabanı",
@@ -233,10 +277,15 @@
       "tableCount_other": "{{count}} tablo",
       "rowCount_one": "{{count}} satır",
       "rowCount_other": "{{count}} satır",
-      "rowsInTable": "{{table}} tablosunda {{count}} satır",
+      "rowsInTable_one": "{{table}} tablosunda {{count}} satır",
+      "rowsInTable_other": "{{table}} tablosunda {{count}} satır",
       "connected": "SQLite Bağlandı",
       "selectTable": "Kenar çubuğundan bir tablo seçin",
-      "orUseSqlQuery": "veya SQL Sorgu modunu kullanın"
+      "orUseSqlQuery": "veya SQL Sorgu modunu kullanın",
+      "encrypted": "[Şifreli]",
+      "encryptedMissingKey": "[Şifreli - Anahtar eksik]",
+      "decrypting": "[Şifre çözülüyor...]",
+      "notSet": "(ayarlanmadı)"
     },
     "fields": {
       "nameRequired": "Alan adı gerekli",
@@ -279,6 +328,18 @@
       "searchPlaceholder": "Simge ara...",
       "noMatch": "\"{{search}}\" ile eşleşen simge yok",
       "selected": "Seçili:"
+    },
+    "errors": {
+      "loadTypesFailed": "Kullanıcı türleri yüklenemedi",
+      "loadFieldsFailed": "Kullanıcı alanları yüklenemedi",
+      "loadFailed": "Veriler yüklenemedi",
+      "saveFailed": "Ayarlar kaydedilemedi. Lütfen tekrar deneyin.",
+      "addTypeFailed": "Kullanıcı türü eklenemedi",
+      "removeTypeFailed": "Kullanıcı türü kaldırılamadı",
+      "addFieldFailed": "Alan eklenemedi",
+      "updateFieldFailed": "Alan güncellenemedi",
+      "removeFieldFailed": "Alan kaldırılamadı",
+      "reorderFailed": "Alan sıralaması değiştirilemedi"
     }
   },
   "adminOnboarding": {
@@ -297,5 +358,304 @@
     "connectedAs": "Bağlandı:",
     "redirecting": "Panele yönlendiriliyor...",
     "connectionFailed": "Bağlantı başarısız"
+  },
+  "errors": {
+    "requestFailed": "İstek başarısız oldu",
+    "invalidServerResponse": "Sunucudan geçersiz yanıt",
+    "unknownError": "Bilinmeyen hata",
+    "failedToFetchDocuments": "Belgeler alınamadı",
+    "noResponseFromServer": "Sunucudan yanıt alınamadı",
+    "failedToSendMessage": "Mesaj gönderilemedi",
+    "searchFailed": "Arama başarısız: HTTP {{status}}",
+    "failedToSendMagicLink": "Sihirli bağlantı gönderilemedi",
+    "failedToFetchJobs": "İşler alınamadı",
+    "errorFetchingJobs": "İşleri alırken hata oluştu",
+    "failedToFetchTables": "Tablolar alınamadı",
+    "errorFetchingTables": "Tabloları alırken hata oluştu",
+    "failedToFetchTableData": "Tablo verileri alınamadı",
+    "verificationFailed": "Doğrulama başarısız",
+    "failedToFetchFields": "Alanlar alınamadı",
+    "errorFetchingFields": "Alanları alırken hata oluştu",
+    "failedToFetchAIConfig": "AI yapılandırması alınamadı",
+    "failedToPreviewPrompt": "Prompt önizlemesi yapılamadı",
+    "failedToFetchDocumentDefaults": "Belge varsayılanları alınamadı",
+    "failedToUpdateDocument": "Belge güncellenemedi",
+    "failedToBatchUpdate": "Toplu güncelleme yapılamadı",
+    "failedToFetchDeploymentConfig": "Dağıtım yapılandırması alınamadı",
+    "failedToExport": "Dışa aktarılamadı",
+    "failedToValidate": "Doğrulanamadı",
+    "failedToRevealSecret": "Gizli bilgi açıklanamadı",
+    "failedToFetchServiceHealth": "Servis durumu alınamadı",
+    "failedToFetchAuditLog": "Denetim günlüğü alınamadı",
+    "notAuthenticatedAsAdmin": "Yönetici olarak kimlik doğrulanmadı",
+    "adminSessionExpired": "Yönetici oturumu sona erdi",
+    "authenticationFailed": "Kimlik doğrulama başarısız",
+    "noNostrExtension": "Nostr uzantısı bulunamadı"
+  },
+  "adminDashboard": {
+    "title": "Yönetici Paneli",
+    "subtitle": "Sanctum örneğinizin yapılandırmasını yönetin",
+    "instance": "Örnek Yapılandırması",
+    "instanceDesc": "Marka, kullanıcı türleri ve kayıt alanlarını özelleştirin",
+    "ai": "Yapay Zeka Yapılandırması",
+    "aiDesc": "İstem şablonlarını, LLM parametrelerini ve belge varsayılanlarını yapılandırın",
+    "deployment": "Dağıtım Yapılandırması",
+    "deploymentDesc": "Ortam ayarlarını ve servis durumunu yönetin",
+    "upload": "Belge Yükleme",
+    "uploadDesc": "Bilgi tabanınıza belge ekleyin",
+    "database": "Veritabanı Gezgini",
+    "databaseDesc": "SQLite veritabanına göz atın ve sorgulayın"
+  },
+  "adminAI": {
+    "title": "Yapay Zeka Yapılandırması",
+    "subtitle": "Yapay zekanın kullanıcılarınıza nasıl davranacağını ve yanıt vereceğini kontrol edin",
+    "promptTemplate": "İstem Şablonu",
+    "promptTemplateDesc": "Yapay zekanın kullanıcılarınızla nasıl iletişim kuracağını şekillendirin",
+    "promptTemplateHint": "Bu ayarlar yapay zekanın kişiliğini ve sınırlarını tanımlar. Değişiklikler yeni sohbetler için hemen geçerli olur.",
+    "preview": "Önizleme",
+    "parameters": "Yanıt Ayarları",
+    "parametersDesc": "Yapay zekanın yanıt kalitesini ayarlayın",
+    "parametersHint": "Bu teknik ayarlar yanıt hızını ve kalitesini etkiler. Varsayılanlar çoğu kullanım durumu için iyi çalışır — yalnızca sorun fark ederseniz ayarlayın.",
+    "sessionDefaults": "Özellik Varsayılanları",
+    "sessionDefaultsDesc": "Varsayılan olarak hangi özelliklerin açık olacağını ayarlayın",
+    "sessionDefaultsHint": "Kullanıcılar yeni bir sohbet oturumu başlattığında hangi yapay zeka özelliklerinin etkin olacağını kontrol edin.",
+    "documentDefaults": "Belge Erişimi",
+    "documentDefaultsDesc": "Yapay zekanın hangi belgelere başvurabileceğini kontrol edin",
+    "documentDefaultsHint": "\"Kullanılabilir\" olarak işaretlenen belgeler kullanıcılar tarafından seçilebilir. \"Varsayılan olarak etkin\" olarak işaretlenen belgeler yeni sohbetlere otomatik olarak dahil edilir.",
+    "available": "Kullanılabilir",
+    "activeByDefault": "Varsayılan Olarak Etkin",
+    "noDocuments": "Henüz belge yüklenmedi",
+    "promptPreview": "İstem Önizlemesi",
+    "invalidJson": "Geçersiz JSON formatı",
+    "chunks": "parçalar"
+  },
+  "adminDeployment": {
+    "title": "Dağıtım Yapılandırması",
+    "subtitle": "Sunucu bağlantılarınızı ve altyapı ayarlarınızı yönetin",
+    "serviceHealth": "Servis Durumu",
+    "serviceHealthDesc": "Bağlı servislerinizi izleyin",
+    "serviceHealthHint": "Yeşil, servisin normal yanıt verdiği anlamına gelir. Bir servis kırmızı görünüyorsa, aşağıdaki yapılandırmasını kontrol edin.",
+    "refresh": "Yenile",
+    "restartRequired": "Servis yeniden başlatma gerekli",
+    "validate": "Yapılandırmayı Doğrula",
+    "exportEnv": ".env Dışa Aktar",
+    "auditLog": "Son Değişiklikler",
+    "configValid": "Yapılandırma Geçerli",
+    "configInvalid": "Yapılandırma Geçersiz",
+    "noRecentChanges": "Son değişiklik yok",
+    "exportFailed": "Dışa aktarma başarısız",
+    "validationFailed": "Doğrulama isteği başarısız",
+    "requiresRestart": "Yeniden Başlatma Gerekli",
+    "secret": "Gizli",
+    "leaveEmptyForSecret": "Mevcut değeri korumak için boş bırakın"
+  },
+  "upload": {
+    "invalidFileType": "Geçersiz dosya türü. İzin verilen: {{extensions}}",
+    "title": "Belge Yükle",
+    "subtitle": "RAG için bilgi tabanınıza belge ekleyin",
+    "uploadFile": "Dosya Yükle",
+    "dropFileHere": "Dosyayı buraya bırakın",
+    "dropOrBrowse": "Dosyayı buraya bırakın veya göz atmak için tıklayın",
+    "supported": "Desteklenen: {{extensions}}",
+    "removeFile": "Dosyayı kaldır",
+    "uploading": "Yükleniyor...",
+    "uploadDocument": "Belgeyi Yükle",
+    "recentUploads": "Son Yüklemeler",
+    "noUploads": "Henüz yükleme yok",
+    "backToDashboard": "Panele Dön",
+    "backToSetup": "Kuruluma Dön",
+    "status": {
+      "queued": "Sırada",
+      "processing": "İşleniyor",
+      "chunked": "Parçalandı",
+      "complete": "Tamamlandı",
+      "failed": "Başarısız"
+    },
+    "chunks": "{{processed}}/{{total}} parça"
+  },
+  "configCategories": {
+    "llm": {
+      "label": "Yapay Zeka Sağlayıcısı",
+      "description": "Yapay zeka servisinize bağlanın",
+      "hint": "Asistanınızı hangi yapay zeka servisinin çalıştıracağını yapılandırın. Seçtiğiniz sağlayıcıdan (örn. OpenAI, Anthropic) bir API anahtarına ihtiyacınız olacak. Değişikliklerin geçerli olması için servisin yeniden başlatılması gerekir."
+    },
+    "embedding": {
+      "label": "Metin İşleme",
+      "description": "Belgelerin nasıl analiz edileceğini yapılandırın",
+      "hint": "Bu ayarlar belgelerinizin aranabilir verilere nasıl dönüştürüleceğini kontrol eder. Varsayılanlar çoğu durum için iyi çalışır — yalnızca özel bir model kullanıyorsanız değiştirin."
+    },
+    "email": {
+      "label": "E-posta Servisi",
+      "description": "Kullanıcı kimlik doğrulaması için e-posta kurun",
+      "hint": "Kullanıcılara giriş sırasında sihirli bağlantılar göndermek için e-posta yapılandırın. SendGrid, Mailgun gibi bir e-posta servisinden veya kendi posta sunucunuzdan SMTP kimlik bilgilerine ihtiyacınız olacak."
+    },
+    "storage": {
+      "label": "Veri Depolama",
+      "description": "Verilerin nerede saklanacağını yapılandırın",
+      "hint": "Veritabanı ve yüklenen belgeler için dosya yollarını kontrol edin. Dağıtımınızı özelleştirmiyorsanız bunların genellikle değiştirilmesi gerekmez."
+    },
+    "security": {
+      "label": "Güvenlik ve URL'ler",
+      "description": "Erişim ve güvenlik ayarlarını yapılandırın",
+      "hint": "Genel URL'lerinizi ve güvenlik seçeneklerinizi ayarlayın. Ön yüz URL'si kullanıcıların uygulamaya eriştiği yerdir. Bunların gerçek dağıtımınızla eşleştiğinden emin olun."
+    },
+    "search": {
+      "label": "Web Araması",
+      "description": "Yapay zeka web arama özelliklerini etkinleştirin",
+      "hint": "Yapay zekanın web arama özelliğini destekleyen arama motorunu yapılandırın. Etkinleştirildiğinde, yapay zeka çevrimiçi güncel bilgileri arayabilir."
+    },
+    "general": {
+      "label": "Genel",
+      "description": "Diğer yapılandırma seçenekleri",
+      "hint": "Diğer kategorilere uymayan çeşitli ayarlar."
+    }
+  },
+  "promptSections": {
+    "prompt_tone": {
+      "label": "Ton ve Kişilik",
+      "description": "Yapay zekanın yanıt verirken nasıl ses çıkarması gerektiği",
+      "hint": "Bu, yapay zekanın genel ses tonunu ve tavırlarını belirler. Örneğin, bir danışmanlık uygulaması için \"sıcak ve destekleyici\" veya bir iş aracı için \"kısa ve öz ve profesyonel\" isteyebilirsiniz. Yapay zeka bunu her yanıt için rehberlik olarak kullanacaktır.",
+      "placeholder": "Yardımcı, özlü ve profesyonel ol..."
+    },
+    "prompt_rules": {
+      "label": "Davranış Kuralları",
+      "description": "Yapay zekanın uyması gereken belirli talimatlar",
+      "hint": "Kuralları [\"Her zaman kaynak belirt\", \"Yanıtları 200 kelimenin altında tut\"] gibi bir JSON listesi olarak ekleyin. Bunlar, yapay zekanın her sohbette uymaya çalışacağı kesin yönergelerdir.",
+      "placeholder": "[\"Kural 1\", \"Kural 2\", ...]"
+    },
+    "prompt_forbidden": {
+      "label": "Yasak Konular",
+      "description": "Yapay zekanın tartışmayı reddetmesi gereken konular",
+      "hint": "Yapay zekanın kibarca uzak durmasını istediğiniz konuları listeleyin. Örneğin, [\"tıbbi tavsiye\", \"hukuki danışmanlık\"]. Yapay zeka bu istekleri kabul edecek ancak yardımcı olamayacağını açıklayacaktır.",
+      "placeholder": "[\"Konu 1\", \"Konu 2\", ...]"
+    },
+    "prompt_greeting": {
+      "label": "Yanıt Stili",
+      "description": "Yapay zekanın yanıtlarını nasıl yapılandırdığı",
+      "hint": "Madde işaretleri, başlıklar veya konuşma paragrafları kullanılıp kullanılmayacağı gibi biçimlendirme tercihlerini kontrol eder. Bu, yanıtların görsel olarak nasıl sunulacağını etkiler.",
+      "placeholder": "Listeler için madde işaretleri, bölümler için başlıklar kullanın..."
+    }
+  },
+  "parameters": {
+    "temperature": {
+      "label": "Yaratıcılık Seviyesi",
+      "description": "Yapay zeka yanıtlarının ne kadar öngörülebilir veya yaratıcı olduğu",
+      "hint": "Düşük değerler (0.0-0.3) yanıtları daha odaklı ve tutarlı yapar — olgusal soru-cevap için iyi. Yüksek değerler (0.7-1.0) yanıtları daha çeşitli ve yaratıcı yapar — beyin fırtınası için daha iyi. Varsayılan: 0.7"
+    },
+    "top_k": {
+      "label": "Bilgi Derinliği",
+      "description": "Kaç belge bölümüne başvurulacağı",
+      "hint": "Soruları yanıtlarken, yapay zeka yüklediğiniz belgeleri arar ve ilgili bölümleri çeker. Daha yüksek sayılar daha fazla bağlam sağlar ama daha yavaş yanıtlar. Daha düşük sayılar daha hızlıdır ama ilgili bilgileri kaçırabilir. Varsayılan: 5"
+    }
+  },
+  "defaults": {
+    "web_search_default": {
+      "label": "Web Araması",
+      "description": "Yapay zekanın internette arama yapmasına izin ver",
+      "hint": "Etkinleştirildiğinde, yapay zeka belgelerinizde olmayan güncel bilgiler için web'de arama yapabilir. Yanıtların yalnızca yüklediğiniz bilgi tabanından gelmesini istiyorsanız bunu devre dışı bırakın."
+    }
+  },
+  "colors": {
+    "blue": "Mavi",
+    "purple": "Mor",
+    "green": "Yeşil",
+    "orange": "Turuncu",
+    "pink": "Pembe",
+    "teal": "Deniz mavisi"
+  },
+  "promptPreview": {
+    "sampleQuestion": "Bu konu hakkında ne bilmeliyim?"
+  },
+  "deploymentConfigItems": {
+    "LLM_PROVIDER": {
+      "label": "Yapay Zeka Servisi",
+      "description": "LLM sağlayıcısı (maple, ollama)",
+      "hint": "Maple proxy için \"maple\" (gizlilik için önerilir) veya yerel modeller için \"ollama\" seçin."
+    },
+    "LLM_MODEL": {
+      "label": "Model Adı",
+      "description": "Model adı/tanımlayıcısı",
+      "hint": "Kullanılacak model tanımlayıcısı (ör. \"kimi-k2-thinking\"). Mevcut modeller için sağlayıcınızın belgelerini kontrol edin."
+    },
+    "LLM_API_URL": {
+      "label": "API Uç Noktası",
+      "description": "API istekleri için temel URL",
+      "hint": "API istekleri için temel URL. Maple için: http://maple-proxy:8080/v1. Ollama için: http://localhost:11434."
+    },
+    "RAG_TOP_K": {
+      "label": "Bağlam Parçaları",
+      "description": "Alınacak parça sayısı",
+      "hint": "Her sorgu için kaç belge parçası alınacağı. Daha yüksek = daha fazla bağlam ama daha yavaş. Varsayılan: 8."
+    },
+    "PDF_EXTRACT_MODE": {
+      "label": "PDF İşleme",
+      "description": "PDF çıkarma yöntemi",
+      "hint": "\"fast\" metni hızlıca çıkarır. \"quality\" taranmış belgeler için daha iyi doğruluk sağlamak üzere OCR kullanır ama daha yavaştır."
+    },
+    "EMBEDDING_MODEL": {
+      "label": "Gömme Modeli",
+      "description": "Gömmeler için HuggingFace modeli",
+      "hint": "Metni vektörlere dönüştürmek için HuggingFace modeli. Yalnızca farklı bir dil veya alan gerekiyorsa değiştirin."
+    },
+    "SMTP_HOST": {
+      "label": "Posta Sunucusu",
+      "description": "SMTP sunucu adresi",
+      "hint": "SMTP sunucu adresiniz (ör. smtp.gmail.com, smtp.sendgrid.net)."
+    },
+    "SMTP_PORT": {
+      "label": "Posta Portu",
+      "description": "SMTP sunucu portu",
+      "hint": "Genellikle TLS için 587 veya SSL için 465. E-posta sağlayıcınızın ayarlarını kontrol edin."
+    },
+    "SMTP_USER": {
+      "label": "SMTP Kullanıcı Adı",
+      "description": "E-posta servisi kullanıcı adı",
+      "hint": "E-posta servisi kullanıcı adınız veya API anahtarınız."
+    },
+    "SMTP_PASS": {
+      "label": "SMTP Şifresi",
+      "description": "E-posta servisi şifresi",
+      "hint": "E-posta servisi şifreniz veya API anahtarı gizli değeri."
+    },
+    "SMTP_FROM": {
+      "label": "Gönderen Adresi",
+      "description": "E-postalar için gönderen adresi",
+      "hint": "Giden e-postalar için \"kimden\" adresi (ör. noreply@yourdomain.com)."
+    },
+    "MOCK_SMTP": {
+      "label": "Test Modu",
+      "description": "E-posta gönderimini simüle et",
+      "hint": "\"true\" olduğunda, e-postalar gönderilmek yerine günlüğe kaydedilir. Geliştirme için kullanışlıdır."
+    },
+    "SQLITE_PATH": {
+      "label": "Veritabanı Dosyası",
+      "description": "SQLite veritabanı yolu",
+      "hint": "SQLite veritabanı dosyasının yolu. Varsayılan: /data/sanctum.db"
+    },
+    "UPLOADS_DIR": {
+      "label": "Yüklemeler Klasörü",
+      "description": "Belge yüklemeleri dizini",
+      "hint": "Yüklenen belgelerin depolandığı dizin. Varsayılan: /uploads"
+    },
+    "QDRANT_HOST": {
+      "label": "Vektör DB Sunucusu",
+      "description": "Qdrant sunucu ana bilgisayar adı",
+      "hint": "Qdrant vektör veritabanı için ana bilgisayar adı. Varsayılan: qdrant"
+    },
+    "QDRANT_PORT": {
+      "label": "Vektör DB Portu",
+      "description": "Qdrant REST API portu",
+      "hint": "Qdrant için port (REST API). Varsayılan: 6333"
+    },
+    "SEARXNG_URL": {
+      "label": "Arama Motoru URL",
+      "description": "SearXNG örnek URL'si",
+      "hint": "Web arama işlevselliği için SearXNG örneğinizin URL'si."
+    },
+    "FRONTEND_URL": {
+      "label": "Uygulama URL",
+      "description": "Uygulama için genel URL",
+      "hint": "Kullanıcıların uygulamaya eriştiği genel URL. Sihirli bağlantılar oluşturmak için kullanılır."
+    }
   }
 }

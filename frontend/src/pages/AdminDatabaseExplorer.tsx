@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, SquareTerminal, RefreshCw, Loader2, Play, Database, Key, X, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowLeft, SquareTerminal, RefreshCw, Loader2, Play, Database, Key, X, Pencil, Trash2, ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react'
 import {
   TableInfo,
   QueryResponse,
@@ -49,6 +49,12 @@ export function AdminDatabaseExplorer() {
 
   // Decrypted values cache: maps rowIndex -> { columnName -> decryptedValue }
   const [decryptedData, setDecryptedData] = useState<Record<number, Record<string, string>>>({})
+
+  // Database help modal state
+  const [showDbHelpModal, setShowDbHelpModal] = useState(false)
+  const [dbHelpPage, setDbHelpPage] = useState(0)
+  const dbHelpModalRef = useRef<HTMLDivElement>(null)
+  const previousActiveElementRef = useRef<HTMLElement | null>(null)
 
   // Get current table info (moved up so useEffects can reference it)
   const currentTableInfo = tables.find((t) => t.name === selectedTable)
@@ -161,9 +167,9 @@ export function AdminDatabaseExplorer() {
             if (ciphertext && ephemeralPubkey) {
               const result = await decryptField({ ciphertext, ephemeral_pubkey: ephemeralPubkey })
               if (cancelled) return
-              decrypted[i][col.name] = result ?? '[Encrypted]'
+              decrypted[i][col.name] = result ?? t('admin.database.encrypted')
             } else if (ciphertext) {
-              decrypted[i][col.name] = '[Encrypted - Missing Key]'
+              decrypted[i][col.name] = t('admin.database.encryptedMissingKey')
             }
           }
         }
@@ -306,6 +312,122 @@ export function AdminDatabaseExplorer() {
     setRecordFormData({})
   }
 
+  // Close database help modal
+  const handleCloseDbHelpModal = () => {
+    setShowDbHelpModal(false)
+    setDbHelpPage(0)
+    // Restore focus to previously focused element
+    if (previousActiveElementRef.current && document.contains(previousActiveElementRef.current)) {
+      previousActiveElementRef.current.focus()
+    }
+    previousActiveElementRef.current = null
+  }
+
+  // Focus trap for database help modal
+  useEffect(() => {
+    if (!showDbHelpModal || !dbHelpModalRef.current) {
+      return
+    }
+
+    const modal = dbHelpModalRef.current
+
+    /**
+     * Get all focusable elements within the modal
+     * Focusable elements include: button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])
+     */
+    function getFocusableElements(container: HTMLElement): HTMLElement[] {
+      const selector = [
+        'button:not([disabled])',
+        '[href]',
+        'input:not([disabled])',
+        'select:not([disabled])',
+        'textarea:not([disabled])',
+        '[tabindex]:not([tabindex="-1"])',
+      ].join(', ')
+
+      return Array.from(container.querySelectorAll<HTMLElement>(selector)).filter(
+        (el) => {
+          // Filter out elements that are not visible
+          const style = window.getComputedStyle(el)
+          return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0'
+        }
+      )
+    }
+
+    /**
+     * Handle Tab key navigation to trap focus within modal
+     */
+    function handleTabKey(e: KeyboardEvent) {
+      if (e.key !== 'Tab') {
+        return
+      }
+
+      const focusableElements = getFocusableElements(modal)
+      if (focusableElements.length === 0) {
+        e.preventDefault()
+        return
+      }
+
+      const firstElement = focusableElements[0]
+      const lastElement = focusableElements[focusableElements.length - 1]
+      const currentFocusIndex = focusableElements.indexOf(document.activeElement as HTMLElement)
+
+      // If Shift+Tab is pressed and focus is on first element, move to last
+      if (e.shiftKey) {
+        if (currentFocusIndex === 0 || currentFocusIndex === -1) {
+          e.preventDefault()
+          lastElement.focus()
+        }
+      } else {
+        // If Tab is pressed and focus is on last element, move to first
+        if (currentFocusIndex === focusableElements.length - 1 || currentFocusIndex === -1) {
+          e.preventDefault()
+          firstElement.focus()
+        }
+      }
+    }
+
+    // Set initial focus to first focusable element
+    const focusableElements = getFocusableElements(modal)
+    if (focusableElements.length > 0) {
+      // Small delay to ensure modal is fully rendered
+      setTimeout(() => {
+        focusableElements[0].focus()
+      }, 0)
+    } else {
+      // Fallback: focus the modal container itself
+      modal.focus()
+    }
+
+    // Add event listener for Tab key trapping
+    modal.addEventListener('keydown', handleTabKey)
+
+    // Cleanup function: remove event listener
+    return () => {
+      modal.removeEventListener('keydown', handleTabKey)
+    }
+  }, [showDbHelpModal])
+
+  // Database help pages data
+  const DB_HELP_PAGES = [
+    {
+      title: t('admin.database.help.safetyTitle', 'Safety & Permissions'),
+      content: 'safety',
+    },
+    {
+      title: t('admin.database.help.encryptedTitle', 'Encrypted Fields'),
+      content: 'encrypted',
+    },
+    {
+      title: t('admin.database.help.queriesTitle', 'Query Examples'),
+      content: 'queries',
+    },
+    {
+      title: t('admin.database.help.warningsTitle', 'What to Avoid'),
+      content: 'warnings',
+    },
+  ]
+
   // tableData is already server-paginated, so use it directly
 
   if (!isAuthorized) {
@@ -332,6 +454,21 @@ export function AdminDatabaseExplorer() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Help */}
+            <button
+              onClick={() => {
+                // Capture the currently active element before opening modal
+                if (document.activeElement instanceof HTMLElement) {
+                  previousActiveElementRef.current = document.activeElement
+                }
+                setShowDbHelpModal(true)
+              }}
+              className="btn-ghost p-2 rounded-lg transition-all text-text-muted hover:text-accent"
+              aria-label={t('admin.database.help.ariaLabel', 'Database explorer help')}
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
+
             {/* Query Mode Toggle */}
             <button
               onClick={() => setQueryMode(!queryMode)}
@@ -675,7 +812,7 @@ export function AdminDatabaseExplorer() {
                             .filter(col => !col.name.startsWith('ephemeral_pubkey_'))
                             .map((col) => {
                             const value = col.name.startsWith('encrypted_')
-                              ? decryptedData[rowIndex]?.[col.name] ?? '[Decrypting...]'
+                              ? decryptedData[rowIndex]?.[col.name] ?? t('admin.database.decrypting')
                               : row[col.name]
                             const displayValue = formatCellValue(value)
                             const isExpanded =
@@ -826,6 +963,185 @@ export function AdminDatabaseExplorer() {
           </span>
         </div>
       </footer>
+
+      {/* Database Help Modal */}
+      {showDbHelpModal && (
+        <div
+          ref={dbHelpModalRef}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="db-help-modal-title"
+          onKeyDown={(e) => e.key === 'Escape' && handleCloseDbHelpModal()}
+          tabIndex={-1}
+        >
+          <div className="bg-surface border border-border rounded-xl p-6 w-full max-w-lg mx-4 shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 id="db-help-modal-title" className="text-lg font-semibold text-text flex items-center gap-2">
+                <HelpCircle className="w-5 h-5" />
+                {DB_HELP_PAGES[dbHelpPage].title}
+              </h3>
+              <button
+                onClick={handleCloseDbHelpModal}
+                className="text-text-muted hover:text-text transition-colors"
+                aria-label={t('common.close', 'Close')}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="min-h-[280px]">
+              {DB_HELP_PAGES[dbHelpPage].content === 'safety' ? (
+                <div className="space-y-3">
+                  <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
+                    <p className="text-sm font-medium text-warning mb-2">
+                      {t('admin.database.help.advancedWarning', 'This is an advanced feature')}
+                    </p>
+                    <p className="text-xs text-text-muted">
+                      {t('admin.database.help.advancedWarningDesc', 'The database explorer gives direct access to your application data. Changes made here can affect how your application works.')}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                      <p className="text-sm font-medium text-text">{t('admin.database.help.whoFor', 'Who should use this?')}</p>
+                      <ul className="text-xs text-text-muted mt-2 space-y-1 list-disc list-inside">
+                        <li>{t('admin.database.help.whoFor1', 'Technical admins troubleshooting issues')}</li>
+                        <li>{t('admin.database.help.whoFor2', 'Developers debugging data problems')}</li>
+                        <li>{t('admin.database.help.whoFor3', 'Advanced users who need to fix data')}</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              ) : DB_HELP_PAGES[dbHelpPage].content === 'encrypted' ? (
+                <div className="space-y-3">
+                  <p className="text-sm text-text-muted mb-4">
+                    {t('admin.database.help.encryptedDesc', 'Some fields contain sensitive data that is encrypted for privacy.')}
+                  </p>
+                  <div className="space-y-2">
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                      <p className="text-sm font-medium text-text flex items-center gap-2">
+                        <Key className="w-4 h-4" />
+                        {t('admin.database.help.lockIcon', 'The lock icon')}
+                      </p>
+                      <p className="text-xs text-text-muted mt-1">
+                        {t('admin.database.help.lockIconDesc', 'Columns with a lock icon (🔓) store encrypted data. The browser automatically decrypts this using your admin keys.')}
+                      </p>
+                    </div>
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                      <p className="text-sm font-medium text-text">{t('admin.database.help.asyncDecrypt', 'Async Decryption')}</p>
+                      <p className="text-xs text-text-muted mt-1">
+                        {t('admin.database.help.asyncDecryptDesc', 'You may see "Decrypting..." briefly as values are decrypted. This happens in the background.')}
+                      </p>
+                    </div>
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                      <p className="text-sm font-medium text-text">{t('admin.database.help.rawValues', 'Raw vs Decrypted')}</p>
+                      <p className="text-xs text-text-muted mt-1">
+                        {t('admin.database.help.rawValuesDesc', 'The actual database stores encrypted ciphertext. What you see is the decrypted value for convenience.')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : DB_HELP_PAGES[dbHelpPage].content === 'queries' ? (
+                <div className="space-y-3">
+                  <p className="text-sm text-text-muted mb-4">
+                    {t('admin.database.help.queriesDesc', 'Safe query patterns for exploring data:')}
+                  </p>
+                  <div className="bg-surface-overlay border border-border rounded-lg p-3 font-mono text-xs space-y-2">
+                    <div>
+                      <p className="text-text-muted mb-1">-- {t('admin.database.help.viewAll', 'View all rows in a table')}</p>
+                      <p className="text-accent">SELECT * FROM users LIMIT 100;</p>
+                    </div>
+                    <div>
+                      <p className="text-text-muted mb-1">-- {t('admin.database.help.filterRows', 'Filter rows')}</p>
+                      <p className="text-accent">SELECT * FROM sessions WHERE created_at {'>'} date('now', '-7 days');</p>
+                    </div>
+                    <div>
+                      <p className="text-text-muted mb-1">-- {t('admin.database.help.countRows', 'Count rows')}</p>
+                      <p className="text-accent">SELECT COUNT(*) FROM documents;</p>
+                    </div>
+                    <div>
+                      <p className="text-text-muted mb-1">-- {t('admin.database.help.joinTables', 'Join tables')}</p>
+                      <p className="text-accent">SELECT u.*, s.created_at FROM users u JOIN sessions s ON u.id = s.user_id;</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-text-muted mt-3">
+                    {t('admin.database.help.sqliteNote', 'This uses SQLite syntax. Results are limited for safety.')}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-text-muted mb-4">
+                    {t('admin.database.help.warningsDesc', 'Operations that can cause problems:')}
+                  </p>
+                  <div className="space-y-2">
+                    <div className="bg-error/10 border border-error/20 rounded-lg p-3">
+                      <p className="text-sm font-medium text-error">DELETE {t('admin.database.help.without', 'without')} WHERE</p>
+                      <p className="text-xs text-text-muted mt-1">
+                        {t('admin.database.help.deleteWarning', 'Deletes ALL rows in a table. Always use a WHERE clause.')}
+                      </p>
+                    </div>
+                    <div className="bg-error/10 border border-error/20 rounded-lg p-3">
+                      <p className="text-sm font-medium text-error">DROP TABLE</p>
+                      <p className="text-xs text-text-muted mt-1">
+                        {t('admin.database.help.dropWarning', 'Permanently deletes a table and all its data. Cannot be undone.')}
+                      </p>
+                    </div>
+                    <div className="bg-error/10 border border-error/20 rounded-lg p-3">
+                      <p className="text-sm font-medium text-error">UPDATE {t('admin.database.help.without', 'without')} WHERE</p>
+                      <p className="text-xs text-text-muted mt-1">
+                        {t('admin.database.help.updateWarning', 'Changes ALL rows in a table. Always specify which rows to update.')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="bg-warning/10 border border-warning/20 rounded-lg p-3 mt-4">
+                    <p className="text-xs text-warning">
+                      {t('admin.database.help.backupTip', 'Tip: Export your data regularly. There is no undo for destructive operations.')}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
+              <button
+                onClick={() => setDbHelpPage((prev) => Math.max(0, prev - 1))}
+                disabled={dbHelpPage === 0}
+                className="flex items-center gap-1 text-sm text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                {t('common.previous', 'Previous')}
+              </button>
+
+              {/* Page indicators */}
+              <div className="flex items-center gap-1.5">
+                {DB_HELP_PAGES.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setDbHelpPage(index)}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      index === dbHelpPage
+                        ? 'bg-accent'
+                        : 'bg-border hover:bg-text-muted'
+                    }`}
+                    aria-label={`${t('common.goToPage', 'Go to page')} ${index + 1}`}
+                  />
+                ))}
+              </div>
+
+              <button
+                onClick={() => setDbHelpPage((prev) => Math.min(DB_HELP_PAGES.length - 1, prev + 1))}
+                disabled={dbHelpPage === DB_HELP_PAGES.length - 1}
+                className="flex items-center gap-1 text-sm text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                {t('common.next', 'Next')}
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

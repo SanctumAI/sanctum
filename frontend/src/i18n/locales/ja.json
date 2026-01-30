@@ -1,9 +1,28 @@
 {
   "onboarding": {
+    "nostr": {
+      "whatIsNostr": "Nostrとは？",
+      "whatIsNostrDesc": "Nostrはソーシャルネットワーキングとアイデンティティのための分散型プロトコルです。従来のログインとは異なり、あなたのアイデンティティは企業に管理されていません — 自分の鍵を自分で所有します。",
+      "whatIsNip07": "NIP-07とは？",
+      "whatIsNip07Desc": "NIP-07はウェブサイトがブラウザ拡張機能からNostrの公開鍵を要求できる標準です。これにより：",
+      "noPasswords": "パスワードを覚える必要がない",
+      "noEmailVerification": "メール認証が不要",
+      "cryptoSecure": "アイデンティティは暗号的に安全",
+      "controlKeys": "自分の鍵を自分で管理",
+      "howItWorks": "仕組み",
+      "step1": "Nostr署名拡張機能をインストール（Albyをおすすめします）",
+      "step2": "上の「Nostrで接続」をクリック",
+      "step3": "拡張機能で接続を承認",
+      "step4": "完了！",
+      "dontHaveExtension": "Nostr拡張機能をお持ちでないですか？こちらから入手：",
+      "alby": "Alby",
+      "nos2x": "nos2x"
+    },
     "userType": {
       "title": "あなたに最も当てはまるのは？",
       "description": "あなたのニーズに最も合うオプションを選択してください",
-      "loadError": "ユーザータイプの読み込みに失敗しました。もう一度お試しください。"
+      "loadError": "ユーザータイプの読み込みに失敗しました。もう一度お試しください。",
+      "selectionLabel": "ユーザータイプの選択"
     },
     "language": {
       "selectLabel": "言語を選択",
@@ -92,7 +111,9 @@
     "tools": {
       "label": "ツール",
       "webSearch": "ウェブで最新情報を検索",
+      "webSearchName": "ウェブ",
       "database": "SQLiteデータベースをクエリ",
+      "databaseName": "データベース",
       "knowledgeGraph": "ナレッジグラフをクエリ"
     },
     "documentScope": {
@@ -103,7 +124,8 @@
       "docsLabel": "ドキュメント"
     },
     "messages": {
-      "searching": "🔍 「{{term}}」を検索中...",
+      "searching": "「{{term}}」を検索中...",
+      "searchingPrefix": "検索中",
       "searchResults": "「{{term}}」を検索しました：",
       "newConversation": "新しい会話"
     },
@@ -119,12 +141,18 @@
       "markdown": "Markdown",
       "markdownExt": ".mdファイル",
       "plainText": "プレーンテキスト",
-      "plainTextExt": ".txtファイル"
+      "plainTextExt": ".txtファイル",
+      "defaultTitle": "チャットエクスポート",
+      "roleUser": "あなた",
+      "roleAssistant": "アシスタント",
+      "footer": "{{instanceName}}からエクスポート",
+      "exportedOn": "{{timestamp}}にエクスポート"
     },
     "database": {
       "executedSql": "実行されたSQL: {{sql}}",
       "noResults": "クエリは結果を返しませんでした。",
-      "resultsCount": "データベースクエリ結果（{{count}}行）:",
+      "resultsCount_one": "データベースクエリ結果（{{count}}行）:",
+      "resultsCount_other": "データベースクエリ結果（{{count}}行）:",
       "resultsTruncated": "（結果は100行に切り詰められました）"
     }
   },
@@ -151,7 +179,12 @@
     "continue": "続行",
     "unexpectedError": "予期しないエラーが発生しました",
     "nullPlaceholder": "NULL",
-    "error": "エラー"
+    "error": "エラー",
+    "back": "戻る",
+    "loading": "読み込み中...",
+    "unknown": "不明",
+    "enabled": "有効",
+    "disabled": "無効"
   },
   "settings": {
     "title": "設定",
@@ -166,11 +199,21 @@
       "documentUpload": "ドキュメントアップロード",
       "documentUploadDesc": "ナレッジベースにドキュメントを追加",
       "databaseExplorer": "データベースエクスプローラー",
-      "databaseExplorerDesc": "SQLiteデータベースを閲覧"
+      "databaseExplorerDesc": "SQLiteデータベースを閲覧",
+      "instanceBranding": "インスタンスブランディング",
+      "instanceBrandingDesc": "カラー、アイコン、ユーザータイプ",
+      "aiConfig": "AI設定",
+      "aiConfigDesc": "プロンプト、パラメータ、デフォルト",
+      "deploymentConfig": "デプロイメント設定",
+      "deploymentConfigDesc": "サービス、SMTP、ストレージ"
     }
   },
   "admin": {
     "confirmDelete": "このレコードを削除してもよろしいですか？",
+    "confirmDeleteField": "フィールド「{{name}}」を削除しますか？",
+    "confirmDeleteTypeWithFields": "ユーザータイプ「{{name}}」を削除しますか？関連する{{count}}個のフィールドも削除されます。",
+    "confirmDeleteType": "ユーザータイプ「{{name}}」を削除しますか？",
+    "global": "グローバル",
     "setup": {
       "backToChat": "チャットに戻る",
       "title": "インスタンスを設定",
@@ -190,7 +233,8 @@
       "addType": "タイプを追加",
       "addUserType": "ユーザータイプを追加",
       "onboardingFields": "ユーザーオンボーディングフィールド",
-      "optionsCount": "{{count}}個のオプション",
+      "optionsCount_one": "{{count}}個のオプション",
+      "optionsCount_other": "{{count}}個のオプション",
       "noFields": "カスタムフィールドなし",
       "addField": "フィールドを追加",
       "knowledgeBase": "ナレッジベース",
@@ -233,10 +277,15 @@
       "tableCount_other": "{{count}}テーブル",
       "rowCount_one": "{{count}}行",
       "rowCount_other": "{{count}}行",
-      "rowsInTable": "{{table}}に{{count}}行",
+      "rowsInTable_one": "{{table}}に{{count}}行",
+      "rowsInTable_other": "{{table}}に{{count}}行",
       "connected": "SQLite接続済み",
       "selectTable": "サイドバーからテーブルを選択",
-      "orUseSqlQuery": "またはSQLクエリモードを使用"
+      "orUseSqlQuery": "またはSQLクエリモードを使用",
+      "encrypted": "[暗号化済み]",
+      "encryptedMissingKey": "[暗号化済み - キーがありません]",
+      "decrypting": "[復号中...]",
+      "notSet": "(未設定)"
     },
     "fields": {
       "nameRequired": "フィールド名は必須です",
@@ -279,6 +328,18 @@
       "searchPlaceholder": "アイコンを検索...",
       "noMatch": "「{{search}}」に一致するアイコンがありません",
       "selected": "選択中:"
+    },
+    "errors": {
+      "loadTypesFailed": "ユーザータイプの読み込みに失敗しました",
+      "loadFieldsFailed": "ユーザーフィールドの読み込みに失敗しました",
+      "loadFailed": "データの読み込みに失敗しました",
+      "saveFailed": "設定の保存に失敗しました。もう一度お試しください。",
+      "addTypeFailed": "ユーザータイプの追加に失敗しました",
+      "removeTypeFailed": "ユーザータイプの削除に失敗しました",
+      "addFieldFailed": "フィールドの追加に失敗しました",
+      "updateFieldFailed": "フィールドの更新に失敗しました",
+      "removeFieldFailed": "フィールドの削除に失敗しました",
+      "reorderFailed": "フィールドの並び替えに失敗しました"
     }
   },
   "adminOnboarding": {
@@ -297,5 +358,304 @@
     "connectedAs": "接続中",
     "redirecting": "ダッシュボードにリダイレクト中...",
     "connectionFailed": "接続失敗"
+  },
+  "errors": {
+    "requestFailed": "リクエストに失敗しました",
+    "invalidServerResponse": "サーバーからの無効なレスポンス",
+    "unknownError": "不明なエラー",
+    "failedToFetchDocuments": "ドキュメントの取得に失敗しました",
+    "noResponseFromServer": "サーバーからの応答がありません",
+    "failedToSendMessage": "メッセージの送信に失敗しました",
+    "searchFailed": "検索に失敗しました：HTTP {{status}}",
+    "failedToSendMagicLink": "マジックリンクの送信に失敗しました",
+    "failedToFetchJobs": "ジョブの取得に失敗しました",
+    "errorFetchingJobs": "ジョブの取得中にエラーが発生しました",
+    "failedToFetchTables": "テーブルの取得に失敗しました",
+    "errorFetchingTables": "テーブルの取得中にエラーが発生しました",
+    "failedToFetchTableData": "テーブルデータの取得に失敗しました",
+    "verificationFailed": "認証に失敗しました",
+    "failedToFetchFields": "フィールドの取得に失敗しました",
+    "errorFetchingFields": "フィールドの取得中にエラーが発生しました",
+    "failedToFetchAIConfig": "AI設定の取得に失敗しました",
+    "failedToPreviewPrompt": "プロンプトのプレビューに失敗しました",
+    "failedToFetchDocumentDefaults": "ドキュメントのデフォルト設定の取得に失敗しました",
+    "failedToUpdateDocument": "ドキュメントの更新に失敗しました",
+    "failedToBatchUpdate": "一括更新に失敗しました",
+    "failedToFetchDeploymentConfig": "デプロイメント設定の取得に失敗しました",
+    "failedToExport": "エクスポートに失敗しました",
+    "failedToValidate": "検証に失敗しました",
+    "failedToRevealSecret": "シークレットの表示に失敗しました",
+    "failedToFetchServiceHealth": "サービス状態の取得に失敗しました",
+    "failedToFetchAuditLog": "監査ログの取得に失敗しました",
+    "notAuthenticatedAsAdmin": "管理者として認証されていません",
+    "adminSessionExpired": "管理者セッションの有効期限が切れました",
+    "authenticationFailed": "認証に失敗しました",
+    "noNostrExtension": "Nostr拡張機能が見つかりません"
+  },
+  "adminDashboard": {
+    "title": "管理ダッシュボード",
+    "subtitle": "Sanctumインスタンスの設定を管理",
+    "instance": "インスタンス設定",
+    "instanceDesc": "ブランディング、ユーザータイプ、オンボーディングフィールドをカスタマイズ",
+    "ai": "AI設定",
+    "aiDesc": "プロンプト、LLMパラメータ、ドキュメントのデフォルトを設定",
+    "deployment": "デプロイ設定",
+    "deploymentDesc": "環境設定とサービスの状態を管理",
+    "upload": "ドキュメントアップロード",
+    "uploadDesc": "ナレッジベースにドキュメントを追加",
+    "database": "データベースエクスプローラー",
+    "databaseDesc": "SQLiteデータベースを閲覧・クエリ"
+  },
+  "adminAI": {
+    "title": "AI設定",
+    "subtitle": "AIの動作とユーザーへの応答方法を制御",
+    "promptTemplate": "プロンプトテンプレート",
+    "promptTemplateDesc": "AIがユーザーとコミュニケーションする方法を設定",
+    "promptTemplateHint": "これらの設定はAIの性格と境界を定義します。変更は新しい会話にすぐに反映されます。",
+    "preview": "プレビュー",
+    "parameters": "応答設定",
+    "parametersDesc": "AIの応答品質を調整",
+    "parametersHint": "これらの技術設定は応答速度と品質に影響します。ほとんどの場合、デフォルト値で問題ありません — 問題がある場合のみ調整してください。",
+    "sessionDefaults": "機能のデフォルト",
+    "sessionDefaultsDesc": "デフォルトでオンにする機能を設定",
+    "sessionDefaultsHint": "ユーザーが新しいチャットセッションを開始する際に有効にするAI機能を制御します。",
+    "documentDefaults": "ドキュメントアクセス",
+    "documentDefaultsDesc": "AIが参照できるドキュメントを制御",
+    "documentDefaultsHint": "「利用可能」とマークされたドキュメントはユーザーが選択できます。「デフォルトでアクティブ」とマークされたドキュメントは新しい会話に自動的に含まれます。",
+    "available": "利用可能",
+    "activeByDefault": "デフォルトでアクティブ",
+    "noDocuments": "ドキュメントがまだアップロードされていません",
+    "promptPreview": "プロンプトプレビュー",
+    "invalidJson": "無効なJSON形式",
+    "chunks": "チャンク"
+  },
+  "adminDeployment": {
+    "title": "デプロイ設定",
+    "subtitle": "サーバー接続とインフラストラクチャ設定を管理",
+    "serviceHealth": "サービスの状態",
+    "serviceHealthDesc": "接続されているサービスを監視",
+    "serviceHealthHint": "緑色はサービスが正常に応答していることを意味します。サービスが赤色の場合は、以下の設定を確認してください。",
+    "refresh": "更新",
+    "restartRequired": "サービスの再起動が必要",
+    "validate": "設定を検証",
+    "exportEnv": ".envをエクスポート",
+    "auditLog": "最近の変更",
+    "configValid": "設定は有効です",
+    "configInvalid": "設定が無効です",
+    "noRecentChanges": "最近の変更はありません",
+    "exportFailed": "エクスポートに失敗しました",
+    "validationFailed": "検証リクエストに失敗しました",
+    "requiresRestart": "再起動が必要",
+    "secret": "シークレット",
+    "leaveEmptyForSecret": "現在の値を保持するには空のままにしてください"
+  },
+  "upload": {
+    "invalidFileType": "無効なファイルタイプです。許可: {{extensions}}",
+    "title": "ドキュメントをアップロード",
+    "subtitle": "RAG用にナレッジベースにドキュメントを追加",
+    "uploadFile": "ファイルをアップロード",
+    "dropFileHere": "ここにファイルをドロップ",
+    "dropOrBrowse": "ここにファイルをドロップするかクリックして参照",
+    "supported": "対応形式：{{extensions}}",
+    "removeFile": "ファイルを削除",
+    "uploading": "アップロード中...",
+    "uploadDocument": "ドキュメントをアップロード",
+    "recentUploads": "最近のアップロード",
+    "noUploads": "アップロードはまだありません",
+    "backToDashboard": "ダッシュボードに戻る",
+    "backToSetup": "設定に戻る",
+    "status": {
+      "queued": "キュー中",
+      "processing": "処理中",
+      "chunked": "チャンク化済み",
+      "complete": "完了",
+      "failed": "失敗"
+    },
+    "chunks": "{{processed}}/{{total}} チャンク"
+  },
+  "configCategories": {
+    "llm": {
+      "label": "AIプロバイダー",
+      "description": "AIサービスに接続",
+      "hint": "アシスタントを動かすAIサービスを設定します。選択したプロバイダー（例：OpenAI、Anthropic）のAPIキーが必要です。変更を反映するにはサービスの再起動が必要です。"
+    },
+    "embedding": {
+      "label": "テキスト処理",
+      "description": "ドキュメントの分析方法を設定",
+      "hint": "これらの設定はドキュメントを検索可能なデータに変換する方法を制御します。ほとんどの場合、デフォルト値で問題ありません — カスタムモデルを使用する場合のみ変更してください。"
+    },
+    "email": {
+      "label": "メールサービス",
+      "description": "ユーザー認証用のメールを設定",
+      "hint": "サインイン時にユーザーにマジックリンクを送信するためのメールを設定します。SendGrid、Mailgun、または独自のメールサーバーなどのメールサービスのSMTP認証情報が必要です。"
+    },
+    "storage": {
+      "label": "データストレージ",
+      "description": "データの保存場所を設定",
+      "hint": "データベースとアップロードされたドキュメントのファイルパスを制御します。デプロイメントをカスタマイズする場合を除き、通常は変更する必要はありません。"
+    },
+    "security": {
+      "label": "セキュリティとURL",
+      "description": "アクセスとセキュリティ設定を構成",
+      "hint": "公開URLとセキュリティオプションを設定します。フロントエンドURLはユーザーがアプリにアクセスする場所です。実際のデプロイメントと一致していることを確認してください。"
+    },
+    "search": {
+      "label": "ウェブ検索",
+      "description": "AIのウェブ検索機能を有効化",
+      "hint": "AIのウェブ検索機能を動かす検索エンジンを設定します。有効にすると、AIはオンラインで最新の情報を検索できます。"
+    },
+    "general": {
+      "label": "一般",
+      "description": "その他の設定オプション",
+      "hint": "他のカテゴリに該当しないその他の設定。"
+    }
+  },
+  "promptSections": {
+    "prompt_tone": {
+      "label": "トーンと性格",
+      "description": "AIが応答する際の話し方",
+      "hint": "これはAIの全体的な声と話し方を設定します。例えば、カウンセリングアプリでは「温かくサポート的」、ビジネスツールでは「簡潔でプロフェッショナル」などが考えられます。AIはすべての応答でこれをガイダンスとして使用します。",
+      "placeholder": "親切、簡潔、プロフェッショナルに..."
+    },
+    "prompt_rules": {
+      "label": "行動ルール",
+      "description": "AIが従うべき具体的な指示",
+      "hint": "ルールはJSONリストとして追加してください。例：[\"常に情報源を引用する\", \"回答は200語以内に収める\"]。これらはAIがすべての会話で従おうとする厳格なガイドラインです。",
+      "placeholder": "[\"ルール1\", \"ルール2\", ...]"
+    },
+    "prompt_forbidden": {
+      "label": "禁止トピック",
+      "description": "AIが議論を避けるべきトピック",
+      "hint": "AIに丁寧に回避させたいトピックをリストアップします。例：[\"医療アドバイス\", \"法的助言\"]。AIはこれらのリクエストを認識しますが、対応できないことを説明します。",
+      "placeholder": "[\"トピック1\", \"トピック2\", ...]"
+    },
+    "prompt_greeting": {
+      "label": "応答スタイル",
+      "description": "AIが応答を構成する方法",
+      "hint": "箇条書き、見出し、会話調の段落を使用するかなどのフォーマット設定を制御します。これは回答の視覚的な表示方法に影響します。",
+      "placeholder": "リストには箇条書き、セクションには見出しを使用..."
+    }
+  },
+  "parameters": {
+    "temperature": {
+      "label": "創造性レベル",
+      "description": "AI応答の予測可能性と創造性のバランス",
+      "hint": "低い値（0.0-0.3）は応答をより集中的で一貫性のあるものにします — 事実に基づくQ&Aに適しています。高い値（0.7-1.0）は応答をより多様で創造的にします — ブレインストーミングに適しています。デフォルト：0.7"
+    },
+    "top_k": {
+      "label": "知識の深さ",
+      "description": "参照するドキュメントセクションの数",
+      "hint": "質問に回答する際、AIはアップロードされたドキュメントを検索し、関連するセクションを取り込みます。数値が高いとコンテキストが増えますが応答が遅くなります。数値が低いと高速ですが、関連情報を見逃す可能性があります。デフォルト：5"
+    }
+  },
+  "defaults": {
+    "web_search_default": {
+      "label": "ウェブ検索",
+      "description": "AIがインターネットを検索することを許可",
+      "hint": "有効にすると、AIはドキュメントにない最新の情報をウェブで検索できます。アップロードされたナレッジベースからのみ回答させたい場合は無効にしてください。"
+    }
+  },
+  "colors": {
+    "blue": "青",
+    "purple": "紫",
+    "green": "緑",
+    "orange": "オレンジ",
+    "pink": "ピンク",
+    "teal": "ティール"
+  },
+  "promptPreview": {
+    "sampleQuestion": "このトピックについて何を知っておくべきですか？"
+  },
+  "deploymentConfigItems": {
+    "LLM_PROVIDER": {
+      "label": "AIサービス",
+      "description": "LLMプロバイダー（maple、ollama）",
+      "hint": "プライバシー重視なら「maple」（Mapleプロキシ）、ローカルモデルなら「ollama」を選択してください。"
+    },
+    "LLM_MODEL": {
+      "label": "モデル名",
+      "description": "モデル名/識別子",
+      "hint": "使用するモデル識別子（例：「kimi-k2-thinking」）。利用可能なモデルについてはプロバイダーのドキュメントを確認してください。"
+    },
+    "LLM_API_URL": {
+      "label": "APIエンドポイント",
+      "description": "APIリクエストのベースURL",
+      "hint": "APIリクエストのベースURL。Maple: http://maple-proxy:8080/v1、Ollama: http://localhost:11434"
+    },
+    "RAG_TOP_K": {
+      "label": "コンテキストチャンク数",
+      "description": "取得するチャンクの数",
+      "hint": "各クエリで取得するドキュメントチャンクの数。多いほどコンテキストが増えますが、処理が遅くなります。デフォルト：8"
+    },
+    "PDF_EXTRACT_MODE": {
+      "label": "PDF処理",
+      "description": "PDF抽出方式",
+      "hint": "「fast」は高速にテキストを抽出します。「quality」はOCRを使用してスキャン文書の精度を向上させますが、処理が遅くなります。"
+    },
+    "EMBEDDING_MODEL": {
+      "label": "埋め込みモデル",
+      "description": "埋め込み用のHuggingFaceモデル",
+      "hint": "テキストをベクトルに変換するHuggingFaceモデル。異なる言語やドメインが必要な場合のみ変更してください。"
+    },
+    "SMTP_HOST": {
+      "label": "メールサーバー",
+      "description": "SMTPサーバーアドレス",
+      "hint": "SMTPサーバーアドレス（例：smtp.gmail.com、smtp.sendgrid.net）"
+    },
+    "SMTP_PORT": {
+      "label": "メールポート",
+      "description": "SMTPサーバーポート",
+      "hint": "通常、TLSは587、SSLは465です。メールプロバイダーの設定を確認してください。"
+    },
+    "SMTP_USER": {
+      "label": "SMTPユーザー名",
+      "description": "メールサービスのユーザー名",
+      "hint": "メールサービスのユーザー名またはAPIキー。"
+    },
+    "SMTP_PASS": {
+      "label": "SMTPパスワード",
+      "description": "メールサービスのパスワード",
+      "hint": "メールサービスのパスワードまたはAPIキーシークレット。"
+    },
+    "SMTP_FROM": {
+      "label": "送信元アドレス",
+      "description": "メールの送信元アドレス",
+      "hint": "送信メールの「送信元」アドレス（例：noreply@yourdomain.com）"
+    },
+    "MOCK_SMTP": {
+      "label": "テストモード",
+      "description": "メール送信のモック",
+      "hint": "「true」の場合、メールは送信されずログに記録されます。開発時に便利です。"
+    },
+    "SQLITE_PATH": {
+      "label": "データベースファイル",
+      "description": "SQLiteデータベースのパス",
+      "hint": "SQLiteデータベースファイルのパス。デフォルト：/data/sanctum.db"
+    },
+    "UPLOADS_DIR": {
+      "label": "アップロードフォルダ",
+      "description": "ドキュメントアップロードディレクトリ",
+      "hint": "アップロードされたドキュメントが保存されるディレクトリ。デフォルト：/uploads"
+    },
+    "QDRANT_HOST": {
+      "label": "ベクトルDBホスト",
+      "description": "Qdrantサーバーホスト名",
+      "hint": "Qdrantベクトルデータベースのホスト名。デフォルト：qdrant"
+    },
+    "QDRANT_PORT": {
+      "label": "ベクトルDBポート",
+      "description": "Qdrant REST APIポート",
+      "hint": "Qdrant（REST API）のポート。デフォルト：6333"
+    },
+    "SEARXNG_URL": {
+      "label": "検索エンジンURL",
+      "description": "SearXNGインスタンスURL",
+      "hint": "ウェブ検索機能用のSearXNGインスタンスのURL。"
+    },
+    "FRONTEND_URL": {
+      "label": "アプリURL",
+      "description": "アプリケーションの公開URL",
+      "hint": "ユーザーがアプリにアクセスする公開URL。マジックリンクの生成に使用されます。"
+    }
   }
 }

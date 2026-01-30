@@ -1,9 +1,11 @@
 /**
  * Instance Configuration Types & Storage
  *
- * NOTE: Currently stored in localStorage only (browser-local).
- * TODO: Add SQLite backend persistence for shared settings across users.
+ * Settings are persisted to the backend SQLite database and cached in localStorage.
+ * The backend serves as the source of truth; localStorage provides fast initial load.
  */
+
+import type { TFunction } from 'i18next'
 
 export type AccentColor = 'blue' | 'purple' | 'green' | 'orange' | 'pink' | 'teal'
 
@@ -46,41 +48,57 @@ export const CURATED_ICONS = [
 
 export const INSTANCE_CONFIG_KEY = 'sanctum_instance_config'
 
-export const ACCENT_COLORS: Record<AccentColor, {
+export interface AccentColorConfig {
   name: string
   preview: string  // Tailwind color for preview swatch
   gradient: string // Tailwind gradient classes
-}> = {
+}
+
+export const ACCENT_COLORS: Record<AccentColor, Omit<AccentColorConfig, 'name'> & { nameKey: string }> = {
   blue: {
-    name: 'Blue',
+    nameKey: 'colors.blue',
     preview: '#2563eb',
     gradient: 'from-blue-500 to-blue-700',
   },
   purple: {
-    name: 'Purple',
+    nameKey: 'colors.purple',
     preview: '#7c3aed',
     gradient: 'from-violet-500 to-purple-700',
   },
   green: {
-    name: 'Green',
+    nameKey: 'colors.green',
     preview: '#059669',
     gradient: 'from-emerald-500 to-green-700',
   },
   orange: {
-    name: 'Orange',
+    nameKey: 'colors.orange',
     preview: '#ea580c',
     gradient: 'from-orange-500 to-orange-700',
   },
   pink: {
-    name: 'Pink',
+    nameKey: 'colors.pink',
     preview: '#db2777',
     gradient: 'from-pink-500 to-pink-700',
   },
   teal: {
-    name: 'Teal',
+    nameKey: 'colors.teal',
     preview: '#0d9488',
     gradient: 'from-teal-500 to-teal-700',
   },
+}
+
+/** Get accent colors with translated names */
+export function getAccentColors(t: TFunction): Record<AccentColor, AccentColorConfig> {
+  return Object.fromEntries(
+    Object.entries(ACCENT_COLORS).map(([key, value]) => [
+      key,
+      {
+        name: t(value.nameKey),
+        preview: value.preview,
+        gradient: value.gradient,
+      },
+    ])
+  ) as Record<AccentColor, AccentColorConfig>
 }
 
 /** Load config from localStorage (browser-local only for now) */

@@ -1,0 +1,384 @@
+"""
+Sanctum AI Configuration Router
+Handles AI/LLM settings including prompt templates, parameters, and session defaults.
+"""
+
+import json
+import logging
+from fastapi import APIRouter, HTTPException, Depends
+
+import auth
+import database
+from models import (
+    AIConfigItem,
+    AIConfigResponse,
+    AIConfigUpdate,
+    PromptPreviewRequest,
+    PromptPreviewResponse,
+)
+
+logger = logging.getLogger("sanctum.ai_config")
+
+router = APIRouter(prefix="/admin/ai-config", tags=["ai-config"])
+
+
+def _config_to_item(config: dict) -> AIConfigItem:
+    """Convert database row to AIConfigItem"""
+    return AIConfigItem(
+        key=config["key"],
+        value=config["value"],
+        value_type=config["value_type"],
+        category=config["category"],
+        description=config.get("description"),
+        updated_at=config.get("updated_at"),
+    )
+
+
+@router.get("", response_model=AIConfigResponse)
+async def get_ai_config(admin: dict = Depends(auth.require_admin)):
+    """
+    Get all AI configuration grouped by category.
+    Requires admin authentication.
+    """
+    all_config = database.get_all_ai_config()
+
+    response = AIConfigResponse()
+    for config in all_config:
+        item = _config_to_item(config)
+        if config["category"] == "prompt_section":
+            response.prompt_sections.append(item)
+        elif config["category"] == "parameter":
+            response.parameters.append(item)
+        elif config["category"] == "default":
+            response.defaults.append(item)
+
+    return response
+
+
+@router.get("/{key}", response_model=AIConfigItem)
+async def get_ai_config_by_key(key: str, admin: dict = Depends(auth.require_admin)):
+    """
+    Get a single AI config value by key.
+    Requires admin authentication.
+    """
+    config = database.get_ai_config(key)
+    if not config:
+        raise HTTPException(status_code=404, detail=f"Config key not found: {key}")
+
+    return _config_to_item(config)
+
+
+@router.put("/{key}", response_model=AIConfigItem)
+async def update_ai_config_value(
+    key: str,
+    update: AIConfigUpdate,
+    admin: dict = Depends(auth.require_admin)
+):
+    """
+    Update an AI config value.
+    Requires admin authentication.
+    """
+    # Verify key exists
+    existing = database.get_ai_config(key)
+    if not existing:
+        raise HTTPException(status_code=404, detail=f"Config key not found: {key}")
+
+    # Null check first - value cannot be null
+    if update.value is None:
+        raise HTTPException(status_code=400, detail="Value cannot be null")
+
+    # Validate value based on type
+    value_type = existing["value_type"]
+    try:
+        if value_type == "number":
+            float(update.value)  # Validate it's a number
+        elif value_type == "boolean":
+            if update.value.lower() not in ("true", "false"):
+                raise ValueError("Boolean must be 'true' or 'false'")
+        elif value_type == "json":
+            parsed = json.loads(update.value)  # Validate it's valid JSON
+            # Additional validation for list-type keys
+            if key in {"prompt_rules", "prompt_forbidden"}:
+                if not isinstance(parsed, list):
+                    raise ValueError(f"{key} must be a JSON array")
+                if not all(isinstance(item, str) for item in parsed):
+                    raise ValueError(f"{key} must be an array of strings")
+    except (ValueError, json.JSONDecodeError, AttributeError) as e:
+        logger.warning(f"Invalid value for type {value_type}: {e}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid value for type '{value_type}': {str(e)}" if key in {"prompt_rules", "prompt_forbidden"} else f"Invalid value for type '{value_type}'"
+        )
+
+    # Additional validation for specific keys
+    try:
+        if key == "temperature":
+            temp = float(update.value)
+            if temp < 0.0 or temp > 1.0:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Temperature must be between 0.0 and 1.0"
+                )
+        elif key == "top_k":
+            top_k_float = float(update.value)
+            if not top_k_float.is_integer():
+                raise HTTPException(
+                    status_code=400,
+                    detail="Top-K must be a whole number"
+                )
+            top_k = int(top_k_float)
+            if top_k < 1 or top_k > 100:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Top-K must be between 1 and 100"
+                )
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Invalid numeric value for {key}")
+
+    # Validate prompt sections length
+    if existing["category"] == "prompt_section" and len(update.value) > 5000:
+        raise HTTPException(
+            status_code=400,
+            detail="Prompt section must be 5000 characters or less"
+        )
+
+    # Get admin pubkey for audit log - fail if missing (auth integrity check)
+    admin_pubkey = admin.get("pubkey")
+    if not admin_pubkey:
+        logger.error("Admin pubkey missing from authenticated context")
+        raise HTTPException(status_code=500, detail="Authentication context incomplete")
+
+    # Update the config
+    success = database.update_ai_config(key, update.value, changed_by=admin_pubkey)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to update config")
+
+    # Return updated config
+    updated = database.get_ai_config(key)
+    if not updated:
+        raise HTTPException(status_code=500, detail="Config updated but could not be retrieved")
+    return _config_to_item(updated)
+
+
+@router.post("/prompts/preview", response_model=PromptPreviewResponse)
+async def preview_prompt(
+    request: PromptPreviewRequest,
+    admin: dict = Depends(auth.require_admin)
+):
+    """
+    Preview assembled prompt with sample data.
+    Shows how the prompt sections combine into the final system prompt.
+    Requires admin authentication.
+    """
+    # Get prompt sections from config
+    prompt_sections = database.get_ai_config_by_category("prompt_section")
+
+    # Build sections dict
+    sections = {}
+    sections_used = []
+    for config in prompt_sections:
+        key = config["key"]
+        value = config["value"]
+        value_type = config["value_type"]
+
+        # Parse JSON values
+        if value_type == "json":
+            try:
+                value = json.loads(value)
+            except json.JSONDecodeError:
+                value = []
+
+        sections[key] = value
+        sections_used.append(key)
+
+    # Build the assembled prompt
+    parts = []
+
+    # Known facts section
+    if request.sample_facts:
+        facts_lines = [f"  - {k}: {v}" for k, v in request.sample_facts.items() if v]
+        if facts_lines:
+            parts.append("=== CONFIRMED FACTS (do NOT re-ask these) ===")
+            parts.append("\n".join(facts_lines))
+        else:
+            parts.append("=== NO FACTS CONFIRMED YET ===")
+            parts.append("Ask about location and context early, but only once per conversation.")
+
+    # Tone section
+    if sections.get("prompt_tone"):
+        parts.append("")
+        parts.append("=== STYLE ===")
+        parts.append(sections["prompt_tone"])
+
+    # Rules section
+    rules = sections.get("prompt_rules", [])
+    if rules:
+        parts.append("")
+        parts.append("=== RULES ===")
+        for i, rule in enumerate(rules, 1):
+            parts.append(f"{i}. {rule}")
+
+    # Forbidden topics
+    forbidden = sections.get("prompt_forbidden", [])
+    if forbidden:
+        parts.append("")
+        parts.append("=== FORBIDDEN TOPICS ===")
+        parts.append("If asked about these topics, politely decline:")
+        for topic in forbidden:
+            parts.append(f"- {topic}")
+
+    # Question
+    parts.append("")
+    parts.append("=== QUESTION ===")
+    parts.append(request.sample_question)
+
+    parts.append("")
+    parts.append("=== RESPOND ===")
+
+    assembled = "\n".join(parts)
+
+    return PromptPreviewResponse(
+        assembled_prompt=assembled,
+        sections_used=sections_used
+    )
+
+
+# Helper functions for use by other modules
+
+def get_prompt_sections() -> dict:
+    """
+    Get all prompt sections as a dictionary.
+    Used by query.py to build prompts.
+    """
+    prompt_sections = database.get_ai_config_by_category("prompt_section")
+    sections = {}
+
+    for config in prompt_sections:
+        key = config["key"]
+        value = config["value"]
+        value_type = config["value_type"]
+
+        # Parse JSON values
+        if value_type == "json":
+            try:
+                value = json.loads(value)
+            except json.JSONDecodeError:
+                # Explicit mapping of JSON keys that should default to list
+                list_keys = {"prompt_rules", "prompt_forbidden"}
+                value = [] if key in list_keys else ""
+
+        sections[key] = value
+
+    return sections
+
+
+def get_llm_parameters() -> dict:
+    """
+    Get LLM parameters (temperature, top_k, etc).
+    Returns parsed values.
+    """
+    params = database.get_ai_config_by_category("parameter")
+    result = {}
+
+    for config in params:
+        key = config["key"]
+        value = config["value"]
+        value_type = config["value_type"]
+
+        if value_type == "number":
+            try:
+                result[key] = float(value)
+            except (ValueError, TypeError):
+                logger.warning(f"Invalid numeric value for config key {key}: {value}")
+                # Provide safe defaults for critical parameters instead of omitting
+                critical_defaults = {"temperature": 0.7, "top_k": 40, "max_tokens": 2048}
+                if key in critical_defaults:
+                    result[key] = critical_defaults[key]
+                    logger.warning(f"Using default value {critical_defaults[key]} for {key}")
+                continue
+        else:
+            result[key] = value
+
+    return result
+
+
+def get_session_defaults() -> dict:
+    """
+    Get session default settings (web_search_default, etc).
+    Returns parsed values.
+    """
+    defaults = database.get_ai_config_by_category("default")
+    result = {}
+
+    for config in defaults:
+        key = config["key"]
+        value = config["value"]
+        value_type = config["value_type"]
+
+        try:
+            if value_type == "boolean":
+                result[key] = value.lower() == "true" if value else False
+            elif value_type == "number":
+                result[key] = float(value)
+            else:
+                result[key] = value
+        except (ValueError, TypeError, AttributeError) as e:
+            logger.warning(f"Invalid value for config key {key}: {value} - {e}")
+            continue
+
+    return result
+
+
+def build_chat_prompt(message: str, context: str = "") -> str:
+    """
+    Build a chat prompt using AI config settings.
+    Assembles the prompt from configured sections.
+
+    Args:
+        message: The user's message/question
+        context: Optional tool context (search results, database results, etc.)
+
+    Returns:
+        Assembled prompt string for the LLM
+    """
+    sections = get_prompt_sections()
+    parts = []
+
+    # Style/tone section
+    if sections.get("prompt_tone"):
+        parts.append("=== STYLE ===")
+        parts.append(sections["prompt_tone"])
+
+    # Rules section
+    rules = sections.get("prompt_rules", [])
+    if rules:
+        parts.append("")
+        parts.append("=== RULES ===")
+        for i, rule in enumerate(rules, 1):
+            parts.append(f"{i}. {rule}")
+
+    # Forbidden topics
+    forbidden = sections.get("prompt_forbidden", [])
+    if forbidden:
+        parts.append("")
+        parts.append("=== FORBIDDEN TOPICS ===")
+        parts.append("If asked about these topics, politely decline:")
+        for topic in forbidden:
+            parts.append(f"- {topic}")
+
+    # Context from tools (if provided)
+    if context:
+        parts.append("")
+        parts.append("=== REFERENCE INFORMATION ===")
+        parts.append("Use the following information to help answer the question:")
+        parts.append(context)
+
+    # The question
+    parts.append("")
+    parts.append("=== QUESTION ===")
+    parts.append(message)
+
+    parts.append("")
+    parts.append("=== RESPOND ===")
+
+    return "\n".join(parts)

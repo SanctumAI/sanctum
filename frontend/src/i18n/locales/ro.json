@@ -1,9 +1,28 @@
 {
   "onboarding": {
+    "nostr": {
+      "whatIsNostr": "Ce este Nostr?",
+      "whatIsNostrDesc": "Nostr este un protocol descentralizat pentru rețele sociale și identitate. Spre deosebire de autentificările tradiționale, identitatea ta nu este controlată de nicio companie - tu deții cheile tale.",
+      "whatIsNip07": "Ce este NIP-07?",
+      "whatIsNip07Desc": "NIP-07 este un standard care permite site-urilor web să solicite cheia ta publică Nostr dintr-o extensie de browser. Aceasta înseamnă:",
+      "noPasswords": "Fără parole de reținut",
+      "noEmailVerification": "Fără verificare prin email",
+      "cryptoSecure": "Identitatea ta este securizată criptografic",
+      "controlKeys": "Tu controlezi propriile tale chei",
+      "howItWorks": "Cum funcționează",
+      "step1": "Instalează o extensie de semnare Nostr (recomandăm Alby)",
+      "step2": "Clic pe \"Conectează-te cu Nostr\" de mai sus",
+      "step3": "Aprobă conexiunea în extensia ta",
+      "step4": "Ești conectat!",
+      "dontHaveExtension": "Nu ai o extensie Nostr? Obține una aici:",
+      "alby": "Alby",
+      "nos2x": "nos2x"
+    },
     "userType": {
       "title": "Ce te descrie cel mai bine?",
       "description": "Selectează opțiunea care se potrivește cel mai bine nevoilor tale",
-      "loadError": "Nu s-au putut încărca tipurile de utilizatori. Te rugăm să încerci din nou."
+      "loadError": "Nu s-au putut încărca tipurile de utilizatori. Te rugăm să încerci din nou.",
+      "selectionLabel": "Selectare tip utilizator"
     },
     "language": {
       "selectLabel": "Selectează o limbă",
@@ -92,7 +111,9 @@
     "tools": {
       "label": "Instrumente",
       "webSearch": "Caută informații actuale pe web",
+      "webSearchName": "Web",
       "database": "Interogare bază de date SQLite",
+      "databaseName": "Bază de date",
       "knowledgeGraph": "Interogare graf de cunoștințe"
     },
     "documentScope": {
@@ -103,7 +124,8 @@
       "docsLabel": "Documente"
     },
     "messages": {
-      "searching": "🔍 Caut \"{{term}}\"...",
+      "searching": "Caut \"{{term}}\"...",
+      "searchingPrefix": "Se caută",
       "searchResults": "Am căutat \"{{term}}\" pentru tine:",
       "newConversation": "Conversație nouă"
     },
@@ -119,7 +141,20 @@
       "markdown": "Markdown",
       "markdownExt": "fișier .md",
       "plainText": "Text simplu",
-      "plainTextExt": "fișier .txt"
+      "plainTextExt": "fișier .txt",
+      "defaultTitle": "Exportare conversație",
+      "roleUser": "Tu",
+      "roleAssistant": "Asistent",
+      "footer": "Exportat din {{instanceName}}",
+      "exportedOn": "Exportat la {{timestamp}}"
+    },
+    "database": {
+      "executedSql": "SQL executat: {{sql}}",
+      "noResults": "Interogarea nu a returnat rezultate.",
+      "resultsCount_one": "Rezultatul interogării bazei de date ({{count}} rând):",
+      "resultsCount_few": "Rezultatele interogării bazei de date ({{count}} rânduri):",
+      "resultsCount_other": "Rezultatele interogării bazei de date ({{count}} rânduri):",
+      "resultsTruncated": "(Rezultatele au fost limitate la 100 de rânduri)"
     }
   },
   "common": {
@@ -145,7 +180,12 @@
     "continue": "Continuă",
     "unexpectedError": "A apărut o eroare neașteptată",
     "nullPlaceholder": "NULL",
-    "error": "Eroare"
+    "error": "Eroare",
+    "back": "Înapoi",
+    "loading": "Se încarcă...",
+    "unknown": "Necunoscut",
+    "enabled": "Activat",
+    "disabled": "Dezactivat"
   },
   "settings": {
     "title": "Setări",
@@ -160,11 +200,21 @@
       "documentUpload": "Încărcare documente",
       "documentUploadDesc": "Adaugă documente în baza de cunoștințe",
       "databaseExplorer": "Explorator bază de date",
-      "databaseExplorerDesc": "Explorează baza de date SQLite"
+      "databaseExplorerDesc": "Explorează baza de date SQLite",
+      "instanceBranding": "Branding instanță",
+      "instanceBrandingDesc": "Culori, pictograme, tipuri de utilizatori",
+      "aiConfig": "Configurare AI",
+      "aiConfigDesc": "Prompturi, parametri, valori implicite",
+      "deploymentConfig": "Configurare implementare",
+      "deploymentConfigDesc": "Servicii, SMTP, stocare"
     }
   },
   "admin": {
     "confirmDelete": "Sigur doriți să ștergeți această înregistrare?",
+    "confirmDeleteField": "Ștergi câmpul \"{{name}}\"?",
+    "confirmDeleteTypeWithFields": "Ștergi tipul de utilizator \"{{name}}\"? Aceasta va șterge și {{count}} câmp(uri) asociat(e).",
+    "confirmDeleteType": "Ștergi tipul de utilizator \"{{name}}\"?",
+    "global": "Global",
     "setup": {
       "backToChat": "Înapoi la chat",
       "title": "Configurează instanța ta",
@@ -184,7 +234,9 @@
       "addType": "Adaugă tip",
       "addUserType": "Adaugă tip de utilizator",
       "onboardingFields": "Câmpuri pentru înregistrarea utilizatorilor",
-      "optionsCount": "{{count}} opțiuni",
+      "optionsCount_one": "{{count}} opțiune",
+      "optionsCount_few": "{{count}} opțiuni",
+      "optionsCount_other": "{{count}} opțiuni",
       "noFields": "Nu există câmpuri personalizate",
       "addField": "Adaugă câmp",
       "knowledgeBase": "Bază de cunoștințe",
@@ -224,13 +276,21 @@
       "clickToExpand": "Clic pentru a extinde",
       "pagination": "Se afișează {{from}} până la {{to}} din {{total}}",
       "tableCount_one": "{{count}} tabel",
+      "tableCount_few": "{{count}} tabele",
       "tableCount_other": "{{count}} tabele",
       "rowCount_one": "{{count}} rând",
+      "rowCount_few": "{{count}} rânduri",
       "rowCount_other": "{{count}} rânduri",
-      "rowsInTable": "{{count}} rânduri în {{table}}",
+      "rowsInTable_one": "{{count}} rând în {{table}}",
+      "rowsInTable_few": "{{count}} rânduri în {{table}}",
+      "rowsInTable_other": "{{count}} rânduri în {{table}}",
       "connected": "SQLite conectat",
       "selectTable": "Selectează un tabel din bara laterală",
-      "orUseSqlQuery": "sau folosește modul interogare SQL"
+      "orUseSqlQuery": "sau folosește modul interogare SQL",
+      "encrypted": "[Criptat]",
+      "encryptedMissingKey": "[Criptat - Cheie lipsă]",
+      "decrypting": "[Se decriptează...]",
+      "notSet": "(nesetat)"
     },
     "fields": {
       "nameRequired": "Numele câmpului este obligatoriu",
@@ -273,6 +333,18 @@
       "searchPlaceholder": "Caută pictograme...",
       "noMatch": "Nu există pictograme care să corespundă cu \"{{search}}\"",
       "selected": "Selectat:"
+    },
+    "errors": {
+      "loadTypesFailed": "Nu s-au putut încărca tipurile de utilizatori",
+      "loadFieldsFailed": "Nu s-au putut încărca câmpurile utilizatorilor",
+      "loadFailed": "Nu s-au putut încărca datele",
+      "saveFailed": "Nu s-au putut salva setările. Te rugăm să încerci din nou.",
+      "addTypeFailed": "Nu s-a putut adăuga tipul de utilizator",
+      "removeTypeFailed": "Nu s-a putut elimina tipul de utilizator",
+      "addFieldFailed": "Nu s-a putut adăuga câmpul",
+      "updateFieldFailed": "Nu s-a putut actualiza câmpul",
+      "removeFieldFailed": "Nu s-a putut elimina câmpul",
+      "reorderFailed": "Nu s-a putut reordona câmpul"
     }
   },
   "adminOnboarding": {
@@ -291,5 +363,304 @@
     "connectedAs": "Conectat ca",
     "redirecting": "Redirecționare către panou...",
     "connectionFailed": "Conexiunea a eșuat"
+  },
+  "errors": {
+    "requestFailed": "Cererea a eșuat",
+    "invalidServerResponse": "Răspuns invalid de la server",
+    "unknownError": "Eroare necunoscută",
+    "failedToFetchDocuments": "Nu s-au putut obține documentele",
+    "noResponseFromServer": "Niciun răspuns de la server",
+    "failedToSendMessage": "Nu s-a putut trimite mesajul",
+    "searchFailed": "Căutarea a eșuat: HTTP {{status}}",
+    "failedToSendMagicLink": "Nu s-a putut trimite linkul magic",
+    "failedToFetchJobs": "Nu s-au putut obține sarcinile",
+    "errorFetchingJobs": "Eroare la obținerea sarcinilor",
+    "failedToFetchTables": "Nu s-au putut obține tabelele",
+    "errorFetchingTables": "Eroare la obținerea tabelelor",
+    "failedToFetchTableData": "Nu s-au putut obține datele tabelului",
+    "verificationFailed": "Verificarea a eșuat",
+    "failedToFetchFields": "Nu s-au putut obține câmpurile",
+    "errorFetchingFields": "Eroare la obținerea câmpurilor",
+    "failedToFetchAIConfig": "Nu s-a putut prelua configurația AI",
+    "failedToPreviewPrompt": "Nu s-a putut previzualiza promptul",
+    "failedToFetchDocumentDefaults": "Nu s-au putut prelua valorile implicite ale documentelor",
+    "failedToUpdateDocument": "Nu s-a putut actualiza documentul",
+    "failedToBatchUpdate": "Nu s-a putut actualiza în lot",
+    "failedToFetchDeploymentConfig": "Nu s-a putut prelua configurația de implementare",
+    "failedToExport": "Nu s-a putut exporta",
+    "failedToValidate": "Nu s-a putut valida",
+    "failedToRevealSecret": "Nu s-a putut dezvălui secretul",
+    "failedToFetchServiceHealth": "Nu s-a putut prelua starea serviciului",
+    "failedToFetchAuditLog": "Nu s-a putut prelua jurnalul de audit",
+    "notAuthenticatedAsAdmin": "Nu sunteți autentificat ca administrator",
+    "adminSessionExpired": "Sesiunea de administrator a expirat",
+    "authenticationFailed": "Autentificarea a eșuat",
+    "noNostrExtension": "Nu s-a găsit nicio extensie Nostr"
+  },
+  "adminDashboard": {
+    "title": "Panou de administrare",
+    "subtitle": "Gestionează configurația instanței tale Sanctum",
+    "instance": "Configurare instanță",
+    "instanceDesc": "Personalizează brandingul, tipurile de utilizatori și câmpurile de înregistrare",
+    "ai": "Configurare AI",
+    "aiDesc": "Configurează prompturile, parametrii LLM și valorile implicite pentru documente",
+    "deployment": "Configurare implementare",
+    "deploymentDesc": "Gestionează setările de mediu și starea serviciilor",
+    "upload": "Încărcare documente",
+    "uploadDesc": "Adaugă documente în baza ta de cunoștințe",
+    "database": "Explorator bază de date",
+    "databaseDesc": "Explorează și interogează baza de date SQLite"
+  },
+  "adminAI": {
+    "title": "Configurare AI",
+    "subtitle": "Controlează modul în care AI-ul se comportă și răspunde utilizatorilor tăi",
+    "promptTemplate": "Șablon de prompt",
+    "promptTemplateDesc": "Modelează modul în care AI-ul comunică cu utilizatorii tăi",
+    "promptTemplateHint": "Aceste setări definesc personalitatea și limitele AI-ului. Modificările intră în vigoare imediat pentru conversațiile noi.",
+    "preview": "Previzualizare",
+    "parameters": "Setări de răspuns",
+    "parametersDesc": "Ajustează fin calitatea răspunsurilor AI-ului",
+    "parametersHint": "Aceste setări tehnice afectează viteza și calitatea răspunsurilor. Valorile implicite funcționează bine pentru majoritatea cazurilor — ajustează doar dacă observi probleme.",
+    "sessionDefaults": "Funcții implicite",
+    "sessionDefaultsDesc": "Setează ce funcții sunt activate implicit",
+    "sessionDefaultsHint": "Controlează ce capabilități AI sunt activate când utilizatorii încep o nouă sesiune de chat.",
+    "documentDefaults": "Acces la documente",
+    "documentDefaultsDesc": "Controlează ce documente poate referenția AI-ul",
+    "documentDefaultsHint": "Documentele marcate \"Disponibil\" pot fi selectate de utilizatori. Documentele marcate \"Activ implicit\" sunt incluse automat în conversațiile noi.",
+    "available": "Disponibil",
+    "activeByDefault": "Activ implicit",
+    "noDocuments": "Nu există documente încărcate încă",
+    "promptPreview": "Previzualizare prompt",
+    "invalidJson": "Format JSON invalid",
+    "chunks": "fragmente"
+  },
+  "adminDeployment": {
+    "title": "Configurare implementare",
+    "subtitle": "Gestionează conexiunile la server și setările de infrastructură",
+    "serviceHealth": "Starea serviciilor",
+    "serviceHealthDesc": "Monitorizează serviciile tale conectate",
+    "serviceHealthHint": "Verde înseamnă că serviciul răspunde normal. Dacă un serviciu apare roșu, verifică configurația lui mai jos.",
+    "refresh": "Reîmprospătează",
+    "restartRequired": "Este necesară repornirea serviciului",
+    "validate": "Validează configurația",
+    "exportEnv": "Exportă .env",
+    "auditLog": "Modificări recente",
+    "configValid": "Configurație validă",
+    "configInvalid": "Configurație invalidă",
+    "noRecentChanges": "Nicio modificare recentă",
+    "exportFailed": "Exportul a eșuat",
+    "validationFailed": "Solicitarea de validare a eșuat",
+    "requiresRestart": "Necesită repornire",
+    "secret": "Secret",
+    "leaveEmptyForSecret": "Lasă gol pentru a păstra valoarea curentă"
+  },
+  "upload": {
+    "invalidFileType": "Tip de fișier invalid. Permis: {{extensions}}",
+    "title": "Încarcă documente",
+    "subtitle": "Adaugă documente în baza ta de cunoștințe pentru RAG",
+    "uploadFile": "Încarcă fișier",
+    "dropFileHere": "Trage fișierul aici",
+    "dropOrBrowse": "Trage fișierul aici sau clic pentru a răsfoi",
+    "supported": "Suportat: {{extensions}}",
+    "removeFile": "Elimină fișierul",
+    "uploading": "Se încarcă...",
+    "uploadDocument": "Încarcă document",
+    "recentUploads": "Încărcări recente",
+    "noUploads": "Nu există încărcări încă",
+    "backToDashboard": "Înapoi la panou",
+    "backToSetup": "Înapoi la configurare",
+    "status": {
+      "queued": "În așteptare",
+      "processing": "Se procesează",
+      "chunked": "Fragmentat",
+      "complete": "Complet",
+      "failed": "Eșuat"
+    },
+    "chunks": "{{processed}}/{{total}} fragmente"
+  },
+  "configCategories": {
+    "llm": {
+      "label": "Furnizor AI",
+      "description": "Conectează-te la serviciul tău AI",
+      "hint": "Configurează ce serviciu AI alimentează asistentul tău. Vei avea nevoie de o cheie API de la furnizorul ales (ex. OpenAI, Anthropic). Modificările necesită repornirea serviciului pentru a intra în vigoare."
+    },
+    "embedding": {
+      "label": "Procesare text",
+      "description": "Configurează modul în care sunt analizate documentele",
+      "hint": "Aceste setări controlează modul în care documentele tale sunt convertite în date căutabile. Valorile implicite funcționează bine pentru majoritatea cazurilor — modifică doar dacă folosești un model personalizat."
+    },
+    "email": {
+      "label": "Serviciu email",
+      "description": "Configurează emailul pentru autentificarea utilizatorilor",
+      "hint": "Configurează emailul pentru trimiterea linkurilor magice utilizatorilor în timpul autentificării. Vei avea nevoie de credențiale SMTP de la un serviciu de email precum SendGrid, Mailgun sau propriul tău server de mail."
+    },
+    "storage": {
+      "label": "Stocare date",
+      "description": "Configurează unde sunt stocate datele",
+      "hint": "Controlează căile fișierelor pentru baza de date și documentele încărcate. De obicei nu trebuie modificate decât dacă personalizezi implementarea."
+    },
+    "security": {
+      "label": "Securitate și URL-uri",
+      "description": "Configurează setările de acces și securitate",
+      "hint": "Setează URL-urile publice și opțiunile de securitate. URL-ul frontend este locul unde utilizatorii accesează aplicația. Asigură-te că acestea corespund implementării tale reale."
+    },
+    "search": {
+      "label": "Căutare web",
+      "description": "Activează capacitățile de căutare web ale AI-ului",
+      "hint": "Configurează motorul de căutare care alimentează funcția de căutare web a AI-ului. Când este activat, AI-ul poate căuta informații actuale online."
+    },
+    "general": {
+      "label": "General",
+      "description": "Alte opțiuni de configurare",
+      "hint": "Setări diverse care nu se încadrează în alte categorii."
+    }
+  },
+  "promptSections": {
+    "prompt_tone": {
+      "label": "Ton și personalitate",
+      "description": "Cum ar trebui să sune AI-ul când răspunde",
+      "hint": "Aceasta setează vocea și maniera generală a AI-ului. De exemplu, ai putea dori să fie \"cald și suportiv\" pentru o aplicație de consiliere, sau \"concis și profesional\" pentru un instrument de afaceri. AI-ul va folosi aceasta ca ghid pentru fiecare răspuns.",
+      "placeholder": "Fii util, concis și profesional..."
+    },
+    "prompt_rules": {
+      "label": "Reguli de comportament",
+      "description": "Instrucțiuni specifice pe care AI-ul trebuie să le urmeze",
+      "hint": "Adaugă reguli ca o listă JSON precum [\"Citează întotdeauna sursele\", \"Păstrează răspunsurile sub 200 de cuvinte\"]. Acestea sunt linii directoare ferme pe care AI-ul va încerca să le urmeze în fiecare conversație.",
+      "placeholder": "[\"Regula 1\", \"Regula 2\", ...]"
+    },
+    "prompt_forbidden": {
+      "label": "Subiecte interzise",
+      "description": "Subiecte pe care AI-ul ar trebui să refuze să le discute",
+      "hint": "Listează subiectele de la care vrei ca AI-ul să redirecționeze politicos. De exemplu, [\"sfaturi medicale\", \"consiliere juridică\"]. AI-ul va recunoaște aceste cereri dar va explica că nu poate ajuta cu ele.",
+      "placeholder": "[\"Subiect 1\", \"Subiect 2\", ...]"
+    },
+    "prompt_greeting": {
+      "label": "Stil de răspuns",
+      "description": "Cum își structurează AI-ul răspunsurile",
+      "hint": "Controlează preferințele de formatare, cum ar fi dacă să folosească puncte, titluri sau paragrafe conversaționale. Aceasta afectează modul în care sunt prezentate vizual răspunsurile.",
+      "placeholder": "Folosește puncte pentru liste, titluri pentru secțiuni..."
+    }
+  },
+  "parameters": {
+    "temperature": {
+      "label": "Nivel de creativitate",
+      "description": "Cât de predictibile vs. creative sunt răspunsurile AI-ului",
+      "hint": "Valorile mai mici (0.0-0.3) fac răspunsurile mai focalizate și consecvente — bune pentru întrebări și răspunsuri factuale. Valorile mai mari (0.7-1.0) fac răspunsurile mai variate și creative — mai bune pentru brainstorming. Implicit: 0.7"
+    },
+    "top_k": {
+      "label": "Adâncimea cunoștințelor",
+      "description": "Câte secțiuni de documente să fie referențiate",
+      "hint": "Când răspunde la întrebări, AI-ul caută în documentele tale încărcate și extrage secțiuni relevante. Numerele mai mari înseamnă mai mult context dar răspunsuri mai lente. Numerele mai mici sunt mai rapide dar pot rata informații relevante. Implicit: 5"
+    }
+  },
+  "defaults": {
+    "web_search_default": {
+      "label": "Căutare web",
+      "description": "Permite AI-ului să caute pe internet",
+      "hint": "Când este activat, AI-ul poate căuta pe web informații actuale care nu sunt în documentele tale. Dezactivează aceasta dacă vrei ca răspunsurile să provină doar din baza ta de cunoștințe încărcată."
+    }
+  },
+  "colors": {
+    "blue": "Albastru",
+    "purple": "Mov",
+    "green": "Verde",
+    "orange": "Portocaliu",
+    "pink": "Roz",
+    "teal": "Turcoaz"
+  },
+  "promptPreview": {
+    "sampleQuestion": "Ce ar trebui să știu despre acest subiect?"
+  },
+  "deploymentConfigItems": {
+    "LLM_PROVIDER": {
+      "label": "Serviciu AI",
+      "description": "Furnizor LLM (maple, ollama)",
+      "hint": "Alegeți \"maple\" pentru proxy-ul Maple (recomandat pentru confidențialitate) sau \"ollama\" pentru modele locale."
+    },
+    "LLM_MODEL": {
+      "label": "Numele modelului",
+      "description": "Numele/identificatorul modelului",
+      "hint": "Identificatorul modelului de utilizat (de ex. \"kimi-k2-thinking\"). Verificați documentația furnizorului pentru modelele disponibile."
+    },
+    "LLM_API_URL": {
+      "label": "Punct final API",
+      "description": "URL de bază pentru solicitări API",
+      "hint": "URL-ul de bază pentru solicitări API. Pentru Maple: http://maple-proxy:8080/v1. Pentru Ollama: http://localhost:11434."
+    },
+    "RAG_TOP_K": {
+      "label": "Fragmente de context",
+      "description": "Numărul de fragmente de recuperat",
+      "hint": "Câte fragmente de document să se recupereze pentru fiecare interogare. Mai mult = mai mult context dar mai lent. Implicit: 8."
+    },
+    "PDF_EXTRACT_MODE": {
+      "label": "Procesare PDF",
+      "description": "Metodă de extracție PDF",
+      "hint": "\"fast\" extrage textul rapid. \"quality\" folosește OCR pentru o precizie mai bună cu documentele scanate, dar este mai lent."
+    },
+    "EMBEDDING_MODEL": {
+      "label": "Model de încorporare",
+      "description": "Model HuggingFace pentru încorporări",
+      "hint": "Modelul HuggingFace pentru convertirea textului în vectori. Schimbați doar dacă aveți nevoie de o limbă sau un domeniu diferit."
+    },
+    "SMTP_HOST": {
+      "label": "Server de mail",
+      "description": "Adresa serverului SMTP",
+      "hint": "Adresa serverului SMTP (de ex. smtp.gmail.com, smtp.sendgrid.net)."
+    },
+    "SMTP_PORT": {
+      "label": "Port mail",
+      "description": "Portul serverului SMTP",
+      "hint": "De obicei 587 pentru TLS sau 465 pentru SSL. Verificați setările furnizorului de email."
+    },
+    "SMTP_USER": {
+      "label": "Utilizator SMTP",
+      "description": "Numele de utilizator al serviciului de email",
+      "hint": "Numele de utilizator al serviciului de email sau cheia API."
+    },
+    "SMTP_PASS": {
+      "label": "Parolă SMTP",
+      "description": "Parola serviciului de email",
+      "hint": "Parola serviciului de email sau secretul cheii API."
+    },
+    "SMTP_FROM": {
+      "label": "Adresa expeditorului",
+      "description": "Adresa de la pentru emailuri",
+      "hint": "Adresa \"de la\" pentru emailurile trimise (de ex. noreply@yourdomain.com)."
+    },
+    "MOCK_SMTP": {
+      "label": "Mod de testare",
+      "description": "Simulare trimitere email",
+      "hint": "Când este \"true\", emailurile sunt înregistrate în loc să fie trimise. Util pentru dezvoltare."
+    },
+    "SQLITE_PATH": {
+      "label": "Fișier bază de date",
+      "description": "Calea către baza de date SQLite",
+      "hint": "Calea către fișierul bazei de date SQLite. Implicit: /data/sanctum.db"
+    },
+    "UPLOADS_DIR": {
+      "label": "Folder încărcări",
+      "description": "Director pentru încărcarea documentelor",
+      "hint": "Directorul unde sunt stocate documentele încărcate. Implicit: /uploads"
+    },
+    "QDRANT_HOST": {
+      "label": "Gazdă BD vectorială",
+      "description": "Numele gazdei serverului Qdrant",
+      "hint": "Numele gazdei pentru baza de date vectorială Qdrant. Implicit: qdrant"
+    },
+    "QDRANT_PORT": {
+      "label": "Port BD vectorială",
+      "description": "Portul API REST Qdrant",
+      "hint": "Portul pentru Qdrant (API REST). Implicit: 6333"
+    },
+    "SEARXNG_URL": {
+      "label": "URL motor de căutare",
+      "description": "URL-ul instanței SearXNG",
+      "hint": "URL-ul instanței SearXNG pentru funcționalitatea de căutare web."
+    },
+    "FRONTEND_URL": {
+      "label": "URL aplicație",
+      "description": "URL-ul public al aplicației",
+      "hint": "URL-ul public unde utilizatorii accesează aplicația. Folosit pentru generarea linkurilor magice."
+    }
   }
 }

@@ -1,9 +1,28 @@
 {
   "onboarding": {
+    "nostr": {
+      "whatIsNostr": "Hvad er Nostr?",
+      "whatIsNostrDesc": "Nostr er en decentraliseret protokol til sociale netværk og identitet. I modsætning til traditionelle logins er din identitet ikke kontrolleret af nogen virksomhed — du ejer dine nøgler.",
+      "whatIsNip07": "Hvad er NIP-07?",
+      "whatIsNip07Desc": "NIP-07 er en standard, der lader websites anmode om din offentlige Nostr-nøgle fra en browserudvidelse. Det betyder:",
+      "noPasswords": "Ingen adgangskoder at huske",
+      "noEmailVerification": "Ingen e-mailbekræftelse nødvendig",
+      "cryptoSecure": "Din identitet er kryptografisk sikker",
+      "controlKeys": "Du kontrollerer dine egne nøgler",
+      "howItWorks": "Sådan fungerer det",
+      "step1": "Installer en Nostr-signeringsudvidelse (vi anbefaler Alby)",
+      "step2": "Klik på \"Forbind med Nostr\" ovenfor",
+      "step3": "Godkend forbindelsen i din udvidelse",
+      "step4": "Du er inde!",
+      "dontHaveExtension": "Har du ikke en Nostr-udvidelse? Få en her:",
+      "alby": "Alby",
+      "nos2x": "nos2x"
+    },
     "userType": {
       "title": "Hvad beskriver dig bedst?",
       "description": "Vælg den mulighed, der passer bedst til dine behov",
-      "loadError": "Kunne ikke indlæse brugertyper. Prøv igen."
+      "loadError": "Kunne ikke indlæse brugertyper. Prøv igen.",
+      "selectionLabel": "Valg af brugertype"
     },
     "language": {
       "selectLabel": "Vælg et sprog",
@@ -92,7 +111,9 @@
     "tools": {
       "label": "Værktøjer",
       "webSearch": "Søg på nettet efter aktuel information",
+      "webSearchName": "Web",
       "database": "Forespørg SQLite-databasen",
+      "databaseName": "Database",
       "knowledgeGraph": "Forespørg vidensgrafen"
     },
     "documentScope": {
@@ -103,7 +124,8 @@
       "docsLabel": "Dokumenter"
     },
     "messages": {
-      "searching": "🔍 Søger efter \"{{term}}\"...",
+      "searching": "Søger efter \"{{term}}\"...",
+      "searchingPrefix": "Søger",
       "searchResults": "Jeg søgte efter \"{{term}}\" for dig:",
       "newConversation": "Ny samtale"
     },
@@ -119,12 +141,18 @@
       "markdown": "Markdown",
       "markdownExt": ".md fil",
       "plainText": "Ren tekst",
-      "plainTextExt": ".txt fil"
+      "plainTextExt": ".txt fil",
+      "defaultTitle": "Chat-eksport",
+      "roleUser": "Dig",
+      "roleAssistant": "Assistent",
+      "footer": "Eksporteret fra {{instanceName}}",
+      "exportedOn": "Eksporteret {{timestamp}}"
     },
     "database": {
       "executedSql": "Udført SQL: {{sql}}",
       "noResults": "Forespørgslen returnerede ingen resultater.",
-      "resultsCount": "Databaseforespørgselsresultater ({{count}} rækker):",
+      "resultsCount_one": "Databaseforespørgselsresultat ({{count}} række):",
+      "resultsCount_other": "Databaseforespørgselsresultater ({{count}} rækker):",
       "resultsTruncated": "(Resultater afkortet til 100 rækker)"
     }
   },
@@ -151,7 +179,12 @@
     "continue": "Fortsæt",
     "unexpectedError": "Der opstod en uventet fejl",
     "nullPlaceholder": "NULL",
-    "error": "Fejl"
+    "error": "Fejl",
+    "back": "Tilbage",
+    "loading": "Indlæser...",
+    "unknown": "Ukendt",
+    "enabled": "Aktiveret",
+    "disabled": "Deaktiveret"
   },
   "settings": {
     "title": "Indstillinger",
@@ -166,11 +199,21 @@
       "documentUpload": "Dokumentupload",
       "documentUploadDesc": "Tilføj dokumenter til vidensbasen",
       "databaseExplorer": "Databaseudforsker",
-      "databaseExplorerDesc": "Gennemse SQLite-database"
+      "databaseExplorerDesc": "Gennemse SQLite-database",
+      "instanceBranding": "Instans-branding",
+      "instanceBrandingDesc": "Farver, ikoner, brugertyper",
+      "aiConfig": "AI-konfiguration",
+      "aiConfigDesc": "Prompter, parametre, standarder",
+      "deploymentConfig": "Deploymentkonfiguration",
+      "deploymentConfigDesc": "Tjenester, SMTP, lagring"
     }
   },
   "admin": {
     "confirmDelete": "Er du sikker på, at du vil slette denne post?",
+    "confirmDeleteField": "Slet feltet \"{{name}}\"?",
+    "confirmDeleteTypeWithFields": "Slet brugertypen \"{{name}}\"? Dette vil også slette {{count}} tilknyttede felt(er).",
+    "confirmDeleteType": "Slet brugertypen \"{{name}}\"?",
+    "global": "Global",
     "setup": {
       "backToChat": "Tilbage til chat",
       "title": "Konfigurer din instans",
@@ -190,7 +233,8 @@
       "addType": "Tilføj type",
       "addUserType": "Tilføj brugertype",
       "onboardingFields": "Bruger-onboarding felter",
-      "optionsCount": "{{count}} muligheder",
+      "optionsCount_one": "{{count}} mulighed",
+      "optionsCount_other": "{{count}} muligheder",
       "noFields": "Ingen brugerdefinerede felter",
       "addField": "Tilføj felt",
       "knowledgeBase": "Vidensbase",
@@ -233,10 +277,15 @@
       "tableCount_other": "{{count}} tabeller",
       "rowCount_one": "{{count}} række",
       "rowCount_other": "{{count}} rækker",
-      "rowsInTable": "{{count}} rækker i {{table}}",
+      "rowsInTable_one": "{{count}} række i {{table}}",
+      "rowsInTable_other": "{{count}} rækker i {{table}}",
       "connected": "SQLite tilsluttet",
       "selectTable": "Vælg en tabel fra sidepanelet",
-      "orUseSqlQuery": "eller brug SQL-forespørgselstilstand"
+      "orUseSqlQuery": "eller brug SQL-forespørgselstilstand",
+      "encrypted": "[Krypteret]",
+      "encryptedMissingKey": "[Krypteret - manglende nøgle]",
+      "decrypting": "[Dekrypterer...]",
+      "notSet": "(ikke angivet)"
     },
     "fields": {
       "nameRequired": "Feltnavn er påkrævet",
@@ -279,6 +328,18 @@
       "searchPlaceholder": "Søg ikoner...",
       "noMatch": "Ingen ikoner matcher \"{{search}}\"",
       "selected": "Valgt:"
+    },
+    "errors": {
+      "loadTypesFailed": "Kunne ikke indlæse brugertyper",
+      "loadFieldsFailed": "Kunne ikke indlæse brugerfelter",
+      "loadFailed": "Kunne ikke indlæse data",
+      "saveFailed": "Kunne ikke gemme indstillinger. Prøv igen.",
+      "addTypeFailed": "Kunne ikke tilføje brugertype",
+      "removeTypeFailed": "Kunne ikke fjerne brugertype",
+      "addFieldFailed": "Kunne ikke tilføje felt",
+      "updateFieldFailed": "Kunne ikke opdatere felt",
+      "removeFieldFailed": "Kunne ikke fjerne felt",
+      "reorderFailed": "Kunne ikke omarrangere felt"
     }
   },
   "adminOnboarding": {
@@ -297,5 +358,304 @@
     "connectedAs": "Forbundet som",
     "redirecting": "Omdirigerer til dashboard...",
     "connectionFailed": "Forbindelse mislykkedes"
+  },
+  "errors": {
+    "requestFailed": "Anmodning mislykkedes",
+    "invalidServerResponse": "Ugyldigt svar fra server",
+    "unknownError": "Ukendt fejl",
+    "failedToFetchDocuments": "Kunne ikke hente dokumenter",
+    "noResponseFromServer": "Intet svar fra serveren",
+    "failedToSendMessage": "Kunne ikke sende besked",
+    "searchFailed": "Søgning mislykkedes: HTTP {{status}}",
+    "failedToSendMagicLink": "Kunne ikke sende magisk link",
+    "failedToFetchJobs": "Kunne ikke hente opgaver",
+    "errorFetchingJobs": "Fejl ved hentning af opgaver",
+    "failedToFetchTables": "Kunne ikke hente tabeller",
+    "errorFetchingTables": "Fejl ved hentning af tabeller",
+    "failedToFetchTableData": "Kunne ikke hente tabeldata",
+    "verificationFailed": "Bekræftelse mislykkedes",
+    "failedToFetchFields": "Kunne ikke hente felter",
+    "errorFetchingFields": "Fejl ved hentning af felter",
+    "failedToFetchAIConfig": "Kunne ikke hente AI-konfiguration",
+    "failedToPreviewPrompt": "Kunne ikke forhåndsvise prompt",
+    "failedToFetchDocumentDefaults": "Kunne ikke hente dokumentstandarder",
+    "failedToUpdateDocument": "Kunne ikke opdatere dokument",
+    "failedToBatchUpdate": "Kunne ikke udføre masseopdatering",
+    "failedToFetchDeploymentConfig": "Kunne ikke hente implementeringskonfiguration",
+    "failedToExport": "Kunne ikke eksportere",
+    "failedToValidate": "Kunne ikke validere",
+    "failedToRevealSecret": "Kunne ikke afsløre hemmelighed",
+    "failedToFetchServiceHealth": "Kunne ikke hente servicestatus",
+    "failedToFetchAuditLog": "Kunne ikke hente revisionslog",
+    "notAuthenticatedAsAdmin": "Ikke godkendt som administrator",
+    "adminSessionExpired": "Administratorsession udløbet",
+    "authenticationFailed": "Godkendelse mislykkedes",
+    "noNostrExtension": "Ingen Nostr-udvidelse fundet"
+  },
+  "adminDashboard": {
+    "title": "Admin-dashboard",
+    "subtitle": "Administrer din Sanctum-instanskonfiguration",
+    "instance": "Instanskonfiguration",
+    "instanceDesc": "Tilpas branding, brugertyper og onboarding-felter",
+    "ai": "AI-konfiguration",
+    "aiDesc": "Konfigurer prompter, LLM-parametre og dokumentstandarder",
+    "deployment": "Deploymentkonfiguration",
+    "deploymentDesc": "Administrer miljøindstillinger og servicestatus",
+    "upload": "Dokumentupload",
+    "uploadDesc": "Tilføj dokumenter til din vidensbase",
+    "database": "Databaseudforsker",
+    "databaseDesc": "Gennemse og forespørg SQLite-databasen"
+  },
+  "adminAI": {
+    "title": "AI-konfiguration",
+    "subtitle": "Kontroller, hvordan AI'en opfører sig og svarer dine brugere",
+    "promptTemplate": "Prompt-skabelon",
+    "promptTemplateDesc": "Form, hvordan AI'en kommunikerer med dine brugere",
+    "promptTemplateHint": "Disse indstillinger definerer AI'ens personlighed og grænser. Ændringer træder i kraft med det samme for nye samtaler.",
+    "preview": "Forhåndsvisning",
+    "parameters": "Svarindstillinger",
+    "parametersDesc": "Finjuster AI'ens svarkvalitet",
+    "parametersHint": "Disse tekniske indstillinger påvirker svarhastighed og kvalitet. Standardindstillingerne fungerer godt i de fleste tilfælde — juster kun, hvis du oplever problemer.",
+    "sessionDefaults": "Funktionsstandarder",
+    "sessionDefaultsDesc": "Indstil, hvilke funktioner der er aktiveret som standard",
+    "sessionDefaultsHint": "Kontroller, hvilke AI-funktioner der er aktiveret, når brugere starter en ny chatsession.",
+    "documentDefaults": "Dokumentadgang",
+    "documentDefaultsDesc": "Kontroller, hvilke dokumenter AI'en kan referere til",
+    "documentDefaultsHint": "Dokumenter markeret \"Tilgængelig\" kan vælges af brugere. Dokumenter markeret \"Aktiv som standard\" inkluderes automatisk i nye samtaler.",
+    "available": "Tilgængelig",
+    "activeByDefault": "Aktiv som standard",
+    "noDocuments": "Ingen dokumenter uploadet endnu",
+    "promptPreview": "Prompt-forhåndsvisning",
+    "invalidJson": "Ugyldigt JSON-format",
+    "chunks": "dele"
+  },
+  "adminDeployment": {
+    "title": "Deploymentkonfiguration",
+    "subtitle": "Administrer dine serverforbindelser og infrastrukturindstillinger",
+    "serviceHealth": "Servicestatus",
+    "serviceHealthDesc": "Overvåg dine tilsluttede tjenester",
+    "serviceHealthHint": "Grøn betyder, at tjenesten svarer normalt. Hvis en tjeneste viser rød, tjek dens konfiguration nedenfor.",
+    "refresh": "Opdater",
+    "restartRequired": "Genstart af service påkrævet",
+    "validate": "Valider konfiguration",
+    "exportEnv": "Eksportér .env",
+    "auditLog": "Seneste ændringer",
+    "configValid": "Konfiguration gyldig",
+    "configInvalid": "Konfiguration ugyldig",
+    "noRecentChanges": "Ingen seneste ændringer",
+    "exportFailed": "Eksport mislykkedes",
+    "validationFailed": "Valideringsanmodning mislykkedes",
+    "requiresRestart": "Kræver genstart",
+    "secret": "Hemmelig",
+    "leaveEmptyForSecret": "Efterlad tom for at beholde nuværende værdi"
+  },
+  "upload": {
+    "invalidFileType": "Ugyldig filtype. Tilladt: {{extensions}}",
+    "title": "Upload dokumenter",
+    "subtitle": "Tilføj dokumenter til din vidensbase til RAG",
+    "uploadFile": "Upload fil",
+    "dropFileHere": "Slip fil her",
+    "dropOrBrowse": "Slip fil her eller klik for at gennemse",
+    "supported": "Understøttet: {{extensions}}",
+    "removeFile": "Fjern fil",
+    "uploading": "Uploader...",
+    "uploadDocument": "Upload dokument",
+    "recentUploads": "Seneste uploads",
+    "noUploads": "Ingen uploads endnu",
+    "backToDashboard": "Tilbage til dashboard",
+    "backToSetup": "Tilbage til opsætning",
+    "status": {
+      "queued": "I kø",
+      "processing": "Behandler",
+      "chunked": "Opdelt",
+      "complete": "Fuldført",
+      "failed": "Mislykket"
+    },
+    "chunks": "{{processed}}/{{total}} dele"
+  },
+  "configCategories": {
+    "llm": {
+      "label": "AI-udbyder",
+      "description": "Forbind til din AI-tjeneste",
+      "hint": "Konfigurer, hvilken AI-tjeneste der driver din assistent. Du skal bruge en API-nøgle fra din valgte udbyder (f.eks. OpenAI, Anthropic). Ændringer kræver en genstart af tjenesten for at træde i kraft."
+    },
+    "embedding": {
+      "label": "Tekstbehandling",
+      "description": "Konfigurer, hvordan dokumenter analyseres",
+      "hint": "Disse indstillinger styrer, hvordan dine dokumenter konverteres til søgbare data. Standardindstillingerne fungerer godt i de fleste tilfælde — skift kun, hvis du bruger en brugerdefineret model."
+    },
+    "email": {
+      "label": "E-mail-tjeneste",
+      "description": "Opsæt e-mail til brugergodkendelse",
+      "hint": "Konfigurer e-mail til at sende magiske links til brugere under login. Du skal bruge SMTP-legitimationsoplysninger fra en e-mail-tjeneste som SendGrid, Mailgun eller din egen mailserver."
+    },
+    "storage": {
+      "label": "Datalagring",
+      "description": "Konfigurer, hvor data gemmes",
+      "hint": "Kontroller filstier til databasen og uploadede dokumenter. Disse behøver typisk ikke at ændres, medmindre du tilpasser din deployment."
+    },
+    "security": {
+      "label": "Sikkerhed & URL'er",
+      "description": "Konfigurer adgang og sikkerhedsindstillinger",
+      "hint": "Indstil dine offentlige URL'er og sikkerhedsindstillinger. Frontend-URL'en er, hvor brugere tilgår appen. Sørg for, at disse matcher din faktiske deployment."
+    },
+    "search": {
+      "label": "Websøgning",
+      "description": "Aktiver AI-websøgningsfunktioner",
+      "hint": "Konfigurer søgemaskinen, der driver AI'ens websøgningsfunktion. Når aktiveret, kan AI'en søge efter aktuel information online."
+    },
+    "general": {
+      "label": "Generelt",
+      "description": "Andre konfigurationsindstillinger",
+      "hint": "Diverse indstillinger, der ikke passer ind i andre kategorier."
+    }
+  },
+  "promptSections": {
+    "prompt_tone": {
+      "label": "Tone & personlighed",
+      "description": "Hvordan AI'en skal lyde, når den svarer",
+      "hint": "Dette indstiller AI'ens overordnede stemme og måde. For eksempel kan du ønske, at den er \"varm og støttende\" til en rådgivningsapp eller \"kortfattet og professionel\" til et forretningsværktøj. AI'en vil bruge dette som vejledning for hvert svar.",
+      "placeholder": "Vær hjælpsom, kortfattet og professionel..."
+    },
+    "prompt_rules": {
+      "label": "Adfærdsregler",
+      "description": "Specifikke instruktioner, som AI'en skal følge",
+      "hint": "Tilføj regler som en JSON-liste som [\"Citér altid kilder\", \"Hold svar under 200 ord\"]. Dette er faste retningslinjer, som AI'en vil forsøge at følge i hver samtale.",
+      "placeholder": "[\"Regel 1\", \"Regel 2\", ...]"
+    },
+    "prompt_forbidden": {
+      "label": "Forbudte emner",
+      "description": "Emner, som AI'en skal afvise at diskutere",
+      "hint": "List emner, du ønsker, at AI'en høfligt skal omdirigere væk fra. For eksempel [\"medicinsk rådgivning\", \"juridisk rådgivning\"]. AI'en vil anerkende disse anmodninger, men forklare, at den ikke kan hjælpe med dem.",
+      "placeholder": "[\"Emne 1\", \"Emne 2\", ...]"
+    },
+    "prompt_greeting": {
+      "label": "Svarstil",
+      "description": "Hvordan AI'en strukturerer sine svar",
+      "hint": "Styrer formateringspræferencer som om der skal bruges punktlister, overskrifter eller samtaleafsnit. Dette påvirker, hvordan svar præsenteres visuelt.",
+      "placeholder": "Brug punktlister til lister, overskrifter til sektioner..."
+    }
+  },
+  "parameters": {
+    "temperature": {
+      "label": "Kreativitetsniveau",
+      "description": "Hvor forudsigelige vs. kreative AI-svarene er",
+      "hint": "Lavere værdier (0,0-0,3) gør svar mere fokuserede og konsistente — godt til faktuelle spørgsmål og svar. Højere værdier (0,7-1,0) gør svar mere varierede og kreative — bedre til brainstorming. Standard: 0,7"
+    },
+    "top_k": {
+      "label": "Vidensdybde",
+      "description": "Hvor mange dokumentsektioner der skal refereres til",
+      "hint": "Når AI'en besvarer spørgsmål, søger den i dine uploadede dokumenter og henter relevante sektioner. Højere tal betyder mere kontekst, men langsommere svar. Lavere tal er hurtigere, men kan gå glip af relevant information. Standard: 5"
+    }
+  },
+  "defaults": {
+    "web_search_default": {
+      "label": "Websøgning",
+      "description": "Tillad AI at søge på internettet",
+      "hint": "Når aktiveret, kan AI'en søge på nettet efter aktuel information, der ikke er i dine dokumenter. Deaktiver dette, hvis du ønsker, at svar kun skal komme fra din uploadede vidensbase."
+    }
+  },
+  "colors": {
+    "blue": "Blå",
+    "purple": "Lilla",
+    "green": "Grøn",
+    "orange": "Orange",
+    "pink": "Pink",
+    "teal": "Blågrøn"
+  },
+  "promptPreview": {
+    "sampleQuestion": "Hvad bør jeg vide om dette emne?"
+  },
+  "deploymentConfigItems": {
+    "LLM_PROVIDER": {
+      "label": "AI-tjeneste",
+      "description": "LLM-udbyder (maple, ollama)",
+      "hint": "Vælg \"maple\" for Maple-proxy (anbefalet for privatliv) eller \"ollama\" for lokale modeller."
+    },
+    "LLM_MODEL": {
+      "label": "Modelnavn",
+      "description": "Modelnavn/identifikator",
+      "hint": "Model-identifikatoren der skal bruges (f.eks. \"kimi-k2-thinking\"). Tjek din udbyders dokumentation for tilgængelige modeller."
+    },
+    "LLM_API_URL": {
+      "label": "API-endepunkt",
+      "description": "Basis-URL for API-anmodninger",
+      "hint": "Basis-URL for API-anmodninger. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+    },
+    "RAG_TOP_K": {
+      "label": "Kontekstdele",
+      "description": "Antal dele der skal hentes",
+      "hint": "Hvor mange dokumentdele der skal hentes for hver forespørgsel. Højere = mere kontekst men langsommere. Standard: 8."
+    },
+    "PDF_EXTRACT_MODE": {
+      "label": "PDF-behandling",
+      "description": "PDF-udtrækningsmetode",
+      "hint": "\"fast\" udtrækker tekst hurtigt. \"quality\" bruger OCR for bedre nøjagtighed med scannede dokumenter, men er langsommere."
+    },
+    "EMBEDDING_MODEL": {
+      "label": "Embedding-model",
+      "description": "HuggingFace-model til embeddings",
+      "hint": "HuggingFace-modellen til konvertering af tekst til vektorer. Skift kun, hvis du har brug for et andet sprog eller domæne."
+    },
+    "SMTP_HOST": {
+      "label": "Mailserver",
+      "description": "SMTP-serveradresse",
+      "hint": "Din SMTP-serveradresse (f.eks. smtp.gmail.com, smtp.sendgrid.net)."
+    },
+    "SMTP_PORT": {
+      "label": "Mailport",
+      "description": "SMTP-serverport",
+      "hint": "Normalt 587 for TLS eller 465 for SSL. Tjek din e-mailudbyders indstillinger."
+    },
+    "SMTP_USER": {
+      "label": "SMTP-brugernavn",
+      "description": "E-mailtjeneste brugernavn",
+      "hint": "Dit e-mailtjeneste brugernavn eller API-nøgle."
+    },
+    "SMTP_PASS": {
+      "label": "SMTP-adgangskode",
+      "description": "E-mailtjeneste adgangskode",
+      "hint": "Din e-mailtjeneste adgangskode eller API-nøglehemmelighed."
+    },
+    "SMTP_FROM": {
+      "label": "Afsenderadresse",
+      "description": "Fra-adresse for e-mails",
+      "hint": "\"Fra\"-adressen for udgående e-mails (f.eks. noreply@dindomæne.com)."
+    },
+    "MOCK_SMTP": {
+      "label": "Testtilstand",
+      "description": "Simuleret e-mail-afsendelse",
+      "hint": "Når \"true\", logges e-mails i stedet for at blive sendt. Nyttigt til udvikling."
+    },
+    "SQLITE_PATH": {
+      "label": "Databasefil",
+      "description": "Sti til SQLite-database",
+      "hint": "Sti til SQLite-databasefilen. Standard: /data/sanctum.db"
+    },
+    "UPLOADS_DIR": {
+      "label": "Uploadmappe",
+      "description": "Mappe til dokumentuploads",
+      "hint": "Mappe hvor uploadede dokumenter gemmes. Standard: /uploads"
+    },
+    "QDRANT_HOST": {
+      "label": "Vektor-DB-vært",
+      "description": "Qdrant-server værtsnavn",
+      "hint": "Værtsnavn for Qdrant vektordatabasen. Standard: qdrant"
+    },
+    "QDRANT_PORT": {
+      "label": "Vektor-DB-port",
+      "description": "Qdrant REST API-port",
+      "hint": "Port for Qdrant (REST API). Standard: 6333"
+    },
+    "SEARXNG_URL": {
+      "label": "Søgemaskine-URL",
+      "description": "SearXNG-instans-URL",
+      "hint": "URL til din SearXNG-instans for websøgningsfunktionalitet."
+    },
+    "FRONTEND_URL": {
+      "label": "App-URL",
+      "description": "Offentlig URL for applikationen",
+      "hint": "Den offentlige URL, hvor brugere tilgår appen. Bruges til generering af magiske links."
+    }
   }
 }

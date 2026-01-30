@@ -2,10 +2,20 @@ import { Message } from '../components/chat/ChatMessage'
 
 export type ExportFormat = 'md' | 'txt'
 
+interface ExportTranslations {
+  defaultTitle: string
+  roleUser: string
+  roleAssistant: string
+  footer: string
+  exportedOn: string
+}
+
 interface ExportOptions {
   messages: Message[]
   format: ExportFormat
   title?: string
+  translations: ExportTranslations
+  instanceName?: string
 }
 
 function formatTimestamp(date?: Date): string {
@@ -13,15 +23,18 @@ function formatTimestamp(date?: Date): string {
   return date.toLocaleString()
 }
 
-export function generateExport({ messages, format, title = 'Chat Export' }: ExportOptions): string {
+export function generateExport({ messages, format, title, translations, instanceName = 'Sanctum' }: ExportOptions): string {
   const timestamp = new Date().toLocaleString()
+  const exportTitle = title || translations.defaultTitle
+  const footerText = translations.footer.replace('{{instanceName}}', instanceName)
+  const exportedOnText = translations.exportedOn.replace('{{timestamp}}', timestamp)
 
   if (format === 'md') {
-    let content = `# ${title}\n\n`
-    content += `*Exported on ${timestamp}*\n\n---\n\n`
+    let content = `# ${exportTitle}\n\n`
+    content += `*${exportedOnText}*\n\n---\n\n`
 
     messages.forEach((message) => {
-      const role = message.role === 'user' ? '**You**' : '**Assistant**'
+      const role = message.role === 'user' ? `**${translations.roleUser}**` : `**${translations.roleAssistant}**`
       const time = message.timestamp ? ` *(${formatTimestamp(message.timestamp)})*` : ''
 
       content += `### ${role}${time}\n\n`
@@ -37,18 +50,18 @@ export function generateExport({ messages, format, title = 'Chat Export' }: Expo
       content += `---\n\n`
     })
 
-    content += `\n*Exported from Sanctum RAG*`
+    content += `\n*${footerText}*`
     return content
   }
 
   // Plain text format
-  let content = `${title}\n`
-  content += `${'='.repeat(title.length)}\n\n`
-  content += `Exported on ${timestamp}\n\n`
+  let content = `${exportTitle}\n`
+  content += `${'='.repeat(exportTitle.length)}\n\n`
+  content += `${exportedOnText}\n\n`
   content += `${'─'.repeat(40)}\n\n`
 
   messages.forEach((message) => {
-    const role = message.role === 'user' ? 'You' : 'Assistant'
+    const role = message.role === 'user' ? translations.roleUser : translations.roleAssistant
     const time = message.timestamp ? ` (${formatTimestamp(message.timestamp)})` : ''
 
     content += `${role}${time}:\n`
@@ -56,7 +69,7 @@ export function generateExport({ messages, format, title = 'Chat Export' }: Expo
     content += `${'─'.repeat(40)}\n\n`
   })
 
-  content += `\nExported from Sanctum RAG`
+  content += `\n${footerText}`
   return content
 }
 

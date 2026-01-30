@@ -24,7 +24,10 @@
     "nullPlaceholder": "NULL",
     "error": "Error",
     "back": "Back",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "unknown": "Unknown",
+    "enabled": "Enabled",
+    "disabled": "Disabled"
   },
   "settings": {
     "title": "Settings",
@@ -39,11 +42,20 @@
       "documentUpload": "Document Upload",
       "documentUploadDesc": "Add documents to knowledge base",
       "databaseExplorer": "Database Explorer",
-      "databaseExplorerDesc": "Browse SQLite database"
+      "databaseExplorerDesc": "Browse SQLite database",
+      "instanceBranding": "Instance Branding",
+      "instanceBrandingDesc": "Colors, icons, user types",
+      "aiConfig": "AI Configuration",
+      "aiConfigDesc": "Prompts, parameters, defaults",
+      "deploymentConfig": "Deployment Config",
+      "deploymentConfigDesc": "Services, SMTP, storage"
     }
   },
   "admin": {
     "confirmDelete": "Are you sure you want to delete this record?",
+    "confirmDeleteField": "Delete field \"{{name}}\"?",
+    "confirmDeleteTypeWithFields": "Delete user type \"{{name}}\"? This will also delete {{count}} associated field(s).",
+    "confirmDeleteType": "Delete user type \"{{name}}\"?",
     "global": "Global",
     "setup": {
       "backToChat": "Back to Chat",
@@ -112,7 +124,11 @@
       "rowsInTable_other": "{{count}} rows in {{table}}",
       "connected": "SQLite Connected",
       "selectTable": "Select a table from the sidebar",
-      "orUseSqlQuery": "or use SQL Query mode"
+      "orUseSqlQuery": "or use SQL Query mode",
+      "encrypted": "[Encrypted]",
+      "encryptedMissingKey": "[Encrypted - Missing Key]",
+      "decrypting": "[Decrypting...]",
+      "notSet": "(not set)"
     },
     "fields": {
       "nameRequired": "Field name is required",
@@ -155,6 +171,18 @@
       "searchPlaceholder": "Search icons...",
       "noMatch": "No icons match \"{{search}}\"",
       "selected": "Selected:"
+    },
+    "errors": {
+      "loadTypesFailed": "Failed to load user types",
+      "loadFieldsFailed": "Failed to load user fields",
+      "loadFailed": "Failed to load data",
+      "saveFailed": "Failed to save settings. Please try again.",
+      "addTypeFailed": "Failed to add user type",
+      "removeTypeFailed": "Failed to remove user type",
+      "addFieldFailed": "Failed to add field",
+      "updateFieldFailed": "Failed to update field",
+      "removeFieldFailed": "Failed to remove field",
+      "reorderFailed": "Failed to reorder field"
     }
   },
   "adminOnboarding": {
@@ -300,6 +328,7 @@
     },
     "messages": {
       "searching": "Searching for \"{{term}}\"...",
+      "searchingPrefix": "Searching",
       "searchResults": "I searched \"{{term}}\" for you:",
       "newConversation": "New conversation"
     },
@@ -315,7 +344,12 @@
       "markdown": "Markdown",
       "markdownExt": ".md file",
       "plainText": "Plain Text",
-      "plainTextExt": ".txt file"
+      "plainTextExt": ".txt file",
+      "defaultTitle": "Chat Export",
+      "roleUser": "You",
+      "roleAssistant": "Assistant",
+      "footer": "Exported from {{instanceName}}",
+      "exportedOn": "Exported on {{timestamp}}"
     },
     "database": {
       "executedSql": "Executed SQL: {{sql}}",
@@ -326,6 +360,9 @@
     }
   },
   "errors": {
+    "requestFailed": "Request failed",
+    "invalidServerResponse": "Invalid response from server",
+    "unknownError": "Unknown error",
     "failedToFetchDocuments": "Failed to fetch documents",
     "noResponseFromServer": "No response from server",
     "failedToSendMessage": "Failed to send message",
@@ -338,9 +375,82 @@
     "failedToFetchTableData": "Failed to fetch table data",
     "verificationFailed": "Verification failed",
     "failedToFetchFields": "Failed to fetch fields",
-    "errorFetchingFields": "Error fetching fields"
+    "errorFetchingFields": "Error fetching fields",
+    "failedToFetchAIConfig": "Failed to fetch AI config",
+    "failedToPreviewPrompt": "Failed to preview prompt",
+    "failedToFetchDocumentDefaults": "Failed to fetch document defaults",
+    "failedToUpdateDocument": "Failed to update document",
+    "failedToBatchUpdate": "Failed to batch update",
+    "failedToFetchDeploymentConfig": "Failed to fetch deployment config",
+    "failedToExport": "Failed to export",
+    "failedToValidate": "Failed to validate",
+    "failedToRevealSecret": "Failed to reveal secret",
+    "failedToFetchServiceHealth": "Failed to fetch service health",
+    "failedToFetchAuditLog": "Failed to fetch audit log",
+    "notAuthenticatedAsAdmin": "Not authenticated as admin",
+    "adminSessionExpired": "Admin session expired",
+    "authenticationFailed": "Authentication failed",
+    "noNostrExtension": "No Nostr extension found"
+  },
+  "adminDashboard": {
+    "title": "Admin Dashboard",
+    "subtitle": "Manage your Sanctum instance configuration",
+    "instance": "Instance Configuration",
+    "instanceDesc": "Customize branding, user types, and onboarding fields",
+    "ai": "AI Configuration",
+    "aiDesc": "Configure prompts, LLM parameters, and document defaults",
+    "deployment": "Deployment Configuration",
+    "deploymentDesc": "Manage environment settings and service health",
+    "upload": "Document Upload",
+    "uploadDesc": "Add documents to your knowledge base",
+    "database": "Database Explorer",
+    "databaseDesc": "Browse and query the SQLite database"
+  },
+  "adminAI": {
+    "title": "AI Configuration",
+    "subtitle": "Control how the AI behaves and responds to your users",
+    "promptTemplate": "Prompt Template",
+    "promptTemplateDesc": "Shape how the AI communicates with your users",
+    "promptTemplateHint": "These settings define the AI's personality and boundaries. Changes take effect immediately for new conversations.",
+    "preview": "Preview",
+    "parameters": "Response Settings",
+    "parametersDesc": "Fine-tune the AI's response quality",
+    "parametersHint": "These technical settings affect response speed and quality. The defaults work well for most use cases — only adjust if you notice issues.",
+    "sessionDefaults": "Feature Defaults",
+    "sessionDefaultsDesc": "Set which features are on by default",
+    "sessionDefaultsHint": "Control which AI capabilities are enabled when users start a new chat session.",
+    "documentDefaults": "Document Access",
+    "documentDefaultsDesc": "Control which documents the AI can reference",
+    "documentDefaultsHint": "Documents marked \"Available\" can be selected by users. Documents marked \"Active by Default\" are automatically included in new conversations.",
+    "available": "Available",
+    "activeByDefault": "Active by Default",
+    "noDocuments": "No documents uploaded yet",
+    "promptPreview": "Prompt Preview",
+    "invalidJson": "Invalid JSON format",
+    "chunks": "chunks"
+  },
+  "adminDeployment": {
+    "title": "Deployment Configuration",
+    "subtitle": "Manage your server connections and infrastructure settings",
+    "serviceHealth": "Service Health",
+    "serviceHealthDesc": "Monitor your connected services",
+    "serviceHealthHint": "Green means the service is responding normally. If a service shows red, check its configuration below.",
+    "refresh": "Refresh",
+    "restartRequired": "Service restart required",
+    "validate": "Validate Config",
+    "exportEnv": "Export .env",
+    "auditLog": "Recent Changes",
+    "configValid": "Configuration Valid",
+    "configInvalid": "Configuration Invalid",
+    "noRecentChanges": "No recent changes",
+    "exportFailed": "Export failed",
+    "validationFailed": "Validation request failed",
+    "requiresRestart": "Requires Restart",
+    "secret": "Secret",
+    "leaveEmptyForSecret": "Leave empty to keep current value"
   },
   "upload": {
+    "invalidFileType": "Invalid file type. Allowed: {{extensions}}",
     "title": "Upload Documents",
     "subtitle": "Add documents to your knowledge base for RAG",
     "uploadFile": "Upload File",
@@ -362,5 +472,190 @@
       "failed": "Failed"
     },
     "chunks": "{{processed}}/{{total}} chunks"
+  },
+  "configCategories": {
+    "llm": {
+      "label": "AI Provider",
+      "description": "Connect to your AI service",
+      "hint": "Configure which AI service powers your assistant. You'll need an API key from your chosen provider (e.g., OpenAI, Anthropic). Changes require a service restart to take effect."
+    },
+    "embedding": {
+      "label": "Text Processing",
+      "description": "Configure how documents are analyzed",
+      "hint": "These settings control how your documents are converted into searchable data. The defaults work well for most cases — only change if you're using a custom model."
+    },
+    "email": {
+      "label": "Email Service",
+      "description": "Set up email for user authentication",
+      "hint": "Configure email for sending magic links to users during sign-in. You'll need SMTP credentials from an email service like SendGrid, Mailgun, or your own mail server."
+    },
+    "storage": {
+      "label": "Data Storage",
+      "description": "Configure where data is stored",
+      "hint": "Control file paths for the database and uploaded documents. These typically don't need to change unless you're customizing your deployment."
+    },
+    "security": {
+      "label": "Security & URLs",
+      "description": "Configure access and security settings",
+      "hint": "Set your public URLs and security options. The frontend URL is where users access the app. Make sure these match your actual deployment."
+    },
+    "search": {
+      "label": "Web Search",
+      "description": "Enable AI web search capabilities",
+      "hint": "Configure the search engine that powers the AI's web search feature. When enabled, the AI can look up current information online."
+    },
+    "general": {
+      "label": "General",
+      "description": "Other configuration options",
+      "hint": "Miscellaneous settings that don't fit into other categories."
+    }
+  },
+  "promptSections": {
+    "prompt_tone": {
+      "label": "Tone & Personality",
+      "description": "How the AI should sound when responding",
+      "hint": "This sets the overall voice and manner of the AI. For example, you might want it to be \"warm and supportive\" for a counseling app, or \"concise and professional\" for a business tool. The AI will use this as guidance for every response.",
+      "placeholder": "Be helpful, concise, and professional..."
+    },
+    "prompt_rules": {
+      "label": "Behavioral Rules",
+      "description": "Specific instructions the AI must follow",
+      "hint": "Add rules as a JSON list like [\"Always cite sources\", \"Keep responses under 200 words\"]. These are firm guidelines the AI will try to follow in every conversation.",
+      "placeholder": "[\"Rule 1\", \"Rule 2\", ...]"
+    },
+    "prompt_forbidden": {
+      "label": "Forbidden Topics",
+      "description": "Topics the AI should decline to discuss",
+      "hint": "List topics you want the AI to politely redirect away from. For example, [\"medical advice\", \"legal counsel\"]. The AI will acknowledge these requests but explain it cannot help with them.",
+      "placeholder": "[\"Topic 1\", \"Topic 2\", ...]"
+    },
+    "prompt_greeting": {
+      "label": "Response Style",
+      "description": "How the AI structures its responses",
+      "hint": "Controls formatting preferences like whether to use bullet points, headers, or conversational paragraphs. This affects how answers are visually presented.",
+      "placeholder": "Use bullet points for lists, headers for sections..."
+    }
+  },
+  "parameters": {
+    "temperature": {
+      "label": "Creativity Level",
+      "description": "How predictable vs. creative the AI responses are",
+      "hint": "Lower values (0.0-0.3) make responses more focused and consistent — good for factual Q&A. Higher values (0.7-1.0) make responses more varied and creative — better for brainstorming. Default: 0.7"
+    },
+    "top_k": {
+      "label": "Knowledge Depth",
+      "description": "How many document sections to reference",
+      "hint": "When answering questions, the AI searches your uploaded documents and pulls in relevant sections. Higher numbers mean more context but slower responses. Lower numbers are faster but may miss relevant info. Default: 5"
+    }
+  },
+  "defaults": {
+    "web_search_default": {
+      "label": "Web Search",
+      "description": "Allow AI to search the internet",
+      "hint": "When enabled, the AI can search the web for current information not in your documents. Disable this if you want responses to only come from your uploaded knowledge base."
+    }
+  },
+  "deploymentConfigItems": {
+    "LLM_PROVIDER": {
+      "label": "AI Service",
+      "description": "LLM provider (maple, ollama)",
+      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+    },
+    "LLM_MODEL": {
+      "label": "Model Name",
+      "description": "Model name/identifier",
+      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+    },
+    "LLM_API_URL": {
+      "label": "API Endpoint",
+      "description": "Base URL for API requests",
+      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+    },
+    "RAG_TOP_K": {
+      "label": "Context Chunks",
+      "description": "Number of chunks to retrieve",
+      "hint": "How many document chunks to retrieve for each query. Higher = more context but slower. Default: 8."
+    },
+    "PDF_EXTRACT_MODE": {
+      "label": "PDF Processing",
+      "description": "PDF extraction method",
+      "hint": "\"fast\" extracts text quickly. \"quality\" uses OCR for better accuracy with scanned documents but is slower."
+    },
+    "EMBEDDING_MODEL": {
+      "label": "Embedding Model",
+      "description": "HuggingFace model for embeddings",
+      "hint": "The HuggingFace model for converting text to vectors. Only change if you need a different language or domain."
+    },
+    "SMTP_HOST": {
+      "label": "Mail Server",
+      "description": "SMTP server address",
+      "hint": "Your SMTP server address (e.g., smtp.gmail.com, smtp.sendgrid.net)."
+    },
+    "SMTP_PORT": {
+      "label": "Mail Port",
+      "description": "SMTP server port",
+      "hint": "Usually 587 for TLS or 465 for SSL. Check your email provider's settings."
+    },
+    "SMTP_USER": {
+      "label": "SMTP Username",
+      "description": "Email service username",
+      "hint": "Your email service username or API key."
+    },
+    "SMTP_PASS": {
+      "label": "SMTP Password",
+      "description": "Email service password",
+      "hint": "Your email service password or API key secret."
+    },
+    "SMTP_FROM": {
+      "label": "Sender Address",
+      "description": "From address for emails",
+      "hint": "The \"from\" address for outgoing emails (e.g., noreply@yourdomain.com)."
+    },
+    "MOCK_SMTP": {
+      "label": "Test Mode",
+      "description": "Mock email sending",
+      "hint": "When \"true\", emails are logged instead of sent. Useful for development."
+    },
+    "SQLITE_PATH": {
+      "label": "Database File",
+      "description": "Path to SQLite database",
+      "hint": "Path to the SQLite database file. Default: /data/sanctum.db"
+    },
+    "UPLOADS_DIR": {
+      "label": "Uploads Folder",
+      "description": "Document uploads directory",
+      "hint": "Directory where uploaded documents are stored. Default: /uploads"
+    },
+    "QDRANT_HOST": {
+      "label": "Vector DB Host",
+      "description": "Qdrant server hostname",
+      "hint": "Hostname for the Qdrant vector database. Default: qdrant"
+    },
+    "QDRANT_PORT": {
+      "label": "Vector DB Port",
+      "description": "Qdrant REST API port",
+      "hint": "Port for Qdrant (REST API). Default: 6333"
+    },
+    "SEARXNG_URL": {
+      "label": "Search Engine URL",
+      "description": "SearXNG instance URL",
+      "hint": "URL of your SearXNG instance for web search functionality."
+    },
+    "FRONTEND_URL": {
+      "label": "App URL",
+      "description": "Public URL for the application",
+      "hint": "The public URL where users access the app. Used for generating magic links."
+    }
+  },
+  "colors": {
+    "blue": "Blue",
+    "purple": "Purple",
+    "green": "Green",
+    "orange": "Orange",
+    "pink": "Pink",
+    "teal": "Teal"
+  },
+  "promptPreview": {
+    "sampleQuestion": "What should I know about this topic?"
   }
 }

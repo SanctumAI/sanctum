@@ -1,9 +1,28 @@
 {
   "onboarding": {
+    "nostr": {
+      "whatIsNostr": "Nostr란 무엇인가요?",
+      "whatIsNostrDesc": "Nostr는 소셜 네트워킹과 신원 확인을 위한 탈중앙화 프로토콜입니다. 기존 로그인과 달리 귀하의 신원은 어떤 회사도 통제하지 않습니다 - 귀하가 직접 키를 소유합니다.",
+      "whatIsNip07": "NIP-07이란 무엇인가요?",
+      "whatIsNip07Desc": "NIP-07은 웹사이트가 브라우저 확장 프로그램에서 귀하의 Nostr 공개 키를 요청할 수 있게 해주는 표준입니다. 이것은 다음을 의미합니다:",
+      "noPasswords": "기억할 비밀번호 없음",
+      "noEmailVerification": "이메일 인증 불필요",
+      "cryptoSecure": "귀하의 신원은 암호화로 보호됨",
+      "controlKeys": "귀하가 직접 키를 관리",
+      "howItWorks": "작동 방식",
+      "step1": "Nostr 서명 확장 프로그램을 설치하세요 (Alby 추천)",
+      "step2": "위의 \"Nostr로 연결\" 클릭",
+      "step3": "확장 프로그램에서 연결 승인",
+      "step4": "완료!",
+      "dontHaveExtension": "Nostr 확장 프로그램이 없으신가요? 여기서 받으세요:",
+      "alby": "Alby",
+      "nos2x": "nos2x"
+    },
     "userType": {
       "title": "당신을 가장 잘 설명하는 것은?",
       "description": "당신의 필요에 가장 맞는 옵션을 선택하세요",
-      "loadError": "사용자 유형을 불러오지 못했습니다. 다시 시도해 주세요."
+      "loadError": "사용자 유형을 불러오지 못했습니다. 다시 시도해 주세요.",
+      "selectionLabel": "사용자 유형 선택"
     },
     "language": {
       "selectLabel": "언어 선택",
@@ -92,7 +111,9 @@
     "tools": {
       "label": "도구",
       "webSearch": "웹에서 최신 정보 검색",
+      "webSearchName": "웹",
       "database": "SQLite 데이터베이스 쿼리",
+      "databaseName": "데이터베이스",
       "knowledgeGraph": "지식 그래프 쿼리"
     },
     "documentScope": {
@@ -103,7 +124,8 @@
       "docsLabel": "문서"
     },
     "messages": {
-      "searching": "🔍 \"{{term}}\" 검색 중...",
+      "searching": "\"{{term}}\" 검색 중...",
+      "searchingPrefix": "검색 중",
       "searchResults": "\"{{term}}\"을(를) 검색했습니다:",
       "newConversation": "새 대화"
     },
@@ -119,12 +141,18 @@
       "markdown": "Markdown",
       "markdownExt": ".md 파일",
       "plainText": "일반 텍스트",
-      "plainTextExt": ".txt 파일"
+      "plainTextExt": ".txt 파일",
+      "defaultTitle": "채팅 내보내기",
+      "roleUser": "나",
+      "roleAssistant": "어시스턴트",
+      "footer": "{{instanceName}}에서 내보냄",
+      "exportedOn": "{{timestamp}}에 내보냄"
     },
     "database": {
       "executedSql": "실행된 SQL: {{sql}}",
       "noResults": "쿼리가 결과를 반환하지 않았습니다.",
-      "resultsCount": "데이터베이스 쿼리 결과 ({{count}}행):",
+      "resultsCount_one": "데이터베이스 쿼리 결과 ({{count}}행):",
+      "resultsCount_other": "데이터베이스 쿼리 결과 ({{count}}행):",
       "resultsTruncated": "(결과가 100행으로 잘렸습니다)"
     }
   },
@@ -151,7 +179,12 @@
     "continue": "계속",
     "unexpectedError": "예기치 않은 오류가 발생했습니다",
     "nullPlaceholder": "NULL",
-    "error": "오류"
+    "error": "오류",
+    "back": "뒤로",
+    "loading": "로딩 중...",
+    "unknown": "알 수 없음",
+    "enabled": "활성화됨",
+    "disabled": "비활성화됨"
   },
   "settings": {
     "title": "설정",
@@ -166,11 +199,21 @@
       "documentUpload": "문서 업로드",
       "documentUploadDesc": "지식 베이스에 문서 추가",
       "databaseExplorer": "데이터베이스 탐색기",
-      "databaseExplorerDesc": "SQLite 데이터베이스 탐색"
+      "databaseExplorerDesc": "SQLite 데이터베이스 탐색",
+      "instanceBranding": "인스턴스 브랜딩",
+      "instanceBrandingDesc": "색상, 아이콘, 사용자 유형",
+      "aiConfig": "AI 설정",
+      "aiConfigDesc": "프롬프트, 매개변수, 기본값",
+      "deploymentConfig": "배포 설정",
+      "deploymentConfigDesc": "서비스, SMTP, 스토리지"
     }
   },
   "admin": {
     "confirmDelete": "이 레코드를 삭제하시겠습니까?",
+    "confirmDeleteField": "\"{{name}}\" 필드를 삭제하시겠습니까?",
+    "confirmDeleteTypeWithFields": "\"{{name}}\" 사용자 유형을 삭제하시겠습니까? {{count}}개의 관련 필드도 함께 삭제됩니다.",
+    "confirmDeleteType": "\"{{name}}\" 사용자 유형을 삭제하시겠습니까?",
+    "global": "전역",
     "setup": {
       "backToChat": "채팅으로 돌아가기",
       "title": "인스턴스 설정",
@@ -190,7 +233,8 @@
       "addType": "유형 추가",
       "addUserType": "사용자 유형 추가",
       "onboardingFields": "사용자 온보딩 필드",
-      "optionsCount": "{{count}}개 옵션",
+      "optionsCount_one": "{{count}}개 옵션",
+      "optionsCount_other": "{{count}}개 옵션",
       "noFields": "사용자 정의 필드 없음",
       "addField": "필드 추가",
       "knowledgeBase": "지식 베이스",
@@ -233,10 +277,15 @@
       "tableCount_other": "{{count}}개 테이블",
       "rowCount_one": "{{count}}행",
       "rowCount_other": "{{count}}행",
-      "rowsInTable": "{{table}}에 {{count}}행",
+      "rowsInTable_one": "{{table}}에 {{count}}행",
+      "rowsInTable_other": "{{table}}에 {{count}}행",
       "connected": "SQLite 연결됨",
       "selectTable": "사이드바에서 테이블 선택",
-      "orUseSqlQuery": "또는 SQL 쿼리 모드 사용"
+      "orUseSqlQuery": "또는 SQL 쿼리 모드 사용",
+      "encrypted": "[암호화됨]",
+      "encryptedMissingKey": "[암호화됨 - 키 없음]",
+      "decrypting": "[복호화 중...]",
+      "notSet": "(설정되지 않음)"
     },
     "fields": {
       "nameRequired": "필드 이름은 필수입니다",
@@ -279,6 +328,18 @@
       "searchPlaceholder": "아이콘 검색...",
       "noMatch": "\"{{search}}\"와 일치하는 아이콘 없음",
       "selected": "선택됨:"
+    },
+    "errors": {
+      "loadTypesFailed": "사용자 유형을 불러오지 못했습니다",
+      "loadFieldsFailed": "사용자 필드를 불러오지 못했습니다",
+      "loadFailed": "데이터를 불러오지 못했습니다",
+      "saveFailed": "설정을 저장하지 못했습니다. 다시 시도해 주세요.",
+      "addTypeFailed": "사용자 유형을 추가하지 못했습니다",
+      "removeTypeFailed": "사용자 유형을 제거하지 못했습니다",
+      "addFieldFailed": "필드를 추가하지 못했습니다",
+      "updateFieldFailed": "필드를 업데이트하지 못했습니다",
+      "removeFieldFailed": "필드를 제거하지 못했습니다",
+      "reorderFailed": "필드 순서 변경에 실패했습니다"
     }
   },
   "adminOnboarding": {
@@ -297,5 +358,304 @@
     "connectedAs": "연결됨",
     "redirecting": "대시보드로 이동 중...",
     "connectionFailed": "연결 실패"
+  },
+  "errors": {
+    "requestFailed": "요청 실패",
+    "invalidServerResponse": "서버로부터 잘못된 응답",
+    "unknownError": "알 수 없는 오류",
+    "failedToFetchDocuments": "문서를 가져오지 못했습니다",
+    "noResponseFromServer": "서버에서 응답이 없습니다",
+    "failedToSendMessage": "메시지를 보내지 못했습니다",
+    "searchFailed": "검색 실패: HTTP {{status}}",
+    "failedToSendMagicLink": "매직 링크를 보내지 못했습니다",
+    "failedToFetchJobs": "작업을 가져오지 못했습니다",
+    "errorFetchingJobs": "작업 가져오기 오류",
+    "failedToFetchTables": "테이블을 가져오지 못했습니다",
+    "errorFetchingTables": "테이블 가져오기 오류",
+    "failedToFetchTableData": "테이블 데이터를 가져오지 못했습니다",
+    "verificationFailed": "인증 실패",
+    "failedToFetchFields": "필드를 가져오지 못했습니다",
+    "errorFetchingFields": "필드 가져오기 오류",
+    "failedToFetchAIConfig": "AI 설정을 가져오지 못했습니다",
+    "failedToPreviewPrompt": "프롬프트 미리보기에 실패했습니다",
+    "failedToFetchDocumentDefaults": "문서 기본값을 가져오지 못했습니다",
+    "failedToUpdateDocument": "문서 업데이트에 실패했습니다",
+    "failedToBatchUpdate": "일괄 업데이트에 실패했습니다",
+    "failedToFetchDeploymentConfig": "배포 설정을 가져오지 못했습니다",
+    "failedToExport": "내보내기에 실패했습니다",
+    "failedToValidate": "유효성 검사에 실패했습니다",
+    "failedToRevealSecret": "비밀 표시에 실패했습니다",
+    "failedToFetchServiceHealth": "서비스 상태를 가져오지 못했습니다",
+    "failedToFetchAuditLog": "감사 로그를 가져오지 못했습니다",
+    "notAuthenticatedAsAdmin": "관리자로 인증되지 않았습니다",
+    "adminSessionExpired": "관리자 세션이 만료되었습니다",
+    "authenticationFailed": "인증에 실패했습니다",
+    "noNostrExtension": "Nostr 확장을 찾을 수 없습니다"
+  },
+  "adminDashboard": {
+    "title": "관리자 대시보드",
+    "subtitle": "Sanctum 인스턴스 설정 관리",
+    "instance": "인스턴스 설정",
+    "instanceDesc": "브랜딩, 사용자 유형, 온보딩 필드 사용자 지정",
+    "ai": "AI 설정",
+    "aiDesc": "프롬프트, LLM 매개변수, 문서 기본값 설정",
+    "deployment": "배포 설정",
+    "deploymentDesc": "환경 설정 및 서비스 상태 관리",
+    "upload": "문서 업로드",
+    "uploadDesc": "지식 베이스에 문서 추가",
+    "database": "데이터베이스 탐색기",
+    "databaseDesc": "SQLite 데이터베이스 탐색 및 쿼리"
+  },
+  "adminAI": {
+    "title": "AI 설정",
+    "subtitle": "AI가 사용자에게 응답하는 방식을 제어하세요",
+    "promptTemplate": "프롬프트 템플릿",
+    "promptTemplateDesc": "AI가 사용자와 소통하는 방식을 설정하세요",
+    "promptTemplateHint": "이 설정은 AI의 성격과 경계를 정의합니다. 변경 사항은 새 대화에 즉시 적용됩니다.",
+    "preview": "미리보기",
+    "parameters": "응답 설정",
+    "parametersDesc": "AI 응답 품질 미세 조정",
+    "parametersHint": "이 기술적 설정은 응답 속도와 품질에 영향을 미칩니다. 기본값은 대부분의 경우에 잘 작동합니다 - 문제가 발생할 때만 조정하세요.",
+    "sessionDefaults": "기능 기본값",
+    "sessionDefaultsDesc": "기본으로 활성화될 기능 설정",
+    "sessionDefaultsHint": "사용자가 새 채팅 세션을 시작할 때 활성화되는 AI 기능을 제어합니다.",
+    "documentDefaults": "문서 접근",
+    "documentDefaultsDesc": "AI가 참조할 수 있는 문서 제어",
+    "documentDefaultsHint": "\"사용 가능\"으로 표시된 문서는 사용자가 선택할 수 있습니다. \"기본으로 활성화\"로 표시된 문서는 새 대화에 자동으로 포함됩니다.",
+    "available": "사용 가능",
+    "activeByDefault": "기본으로 활성화",
+    "noDocuments": "아직 업로드된 문서가 없습니다",
+    "promptPreview": "프롬프트 미리보기",
+    "invalidJson": "잘못된 JSON 형식",
+    "chunks": "청크"
+  },
+  "adminDeployment": {
+    "title": "배포 설정",
+    "subtitle": "서버 연결 및 인프라 설정 관리",
+    "serviceHealth": "서비스 상태",
+    "serviceHealthDesc": "연결된 서비스 모니터링",
+    "serviceHealthHint": "녹색은 서비스가 정상적으로 응답 중임을 의미합니다. 서비스가 빨간색으로 표시되면 아래 설정을 확인하세요.",
+    "refresh": "새로고침",
+    "restartRequired": "서비스 재시작 필요",
+    "validate": "설정 검증",
+    "exportEnv": ".env 내보내기",
+    "auditLog": "최근 변경 사항",
+    "configValid": "설정 유효",
+    "configInvalid": "설정 무효",
+    "noRecentChanges": "최근 변경 사항 없음",
+    "exportFailed": "내보내기 실패",
+    "validationFailed": "검증 요청 실패",
+    "requiresRestart": "재시작 필요",
+    "secret": "비밀",
+    "leaveEmptyForSecret": "현재 값을 유지하려면 비워두세요"
+  },
+  "upload": {
+    "invalidFileType": "잘못된 파일 형식입니다. 허용: {{extensions}}",
+    "title": "문서 업로드",
+    "subtitle": "RAG용 지식 베이스에 문서 추가",
+    "uploadFile": "파일 업로드",
+    "dropFileHere": "여기에 파일을 놓으세요",
+    "dropOrBrowse": "여기에 파일을 놓거나 클릭하여 찾아보기",
+    "supported": "지원: {{extensions}}",
+    "removeFile": "파일 제거",
+    "uploading": "업로드 중...",
+    "uploadDocument": "문서 업로드",
+    "recentUploads": "최근 업로드",
+    "noUploads": "아직 업로드 없음",
+    "backToDashboard": "대시보드로 돌아가기",
+    "backToSetup": "설정으로 돌아가기",
+    "status": {
+      "queued": "대기 중",
+      "processing": "처리 중",
+      "chunked": "청크 완료",
+      "complete": "완료",
+      "failed": "실패"
+    },
+    "chunks": "{{processed}}/{{total}} 청크"
+  },
+  "configCategories": {
+    "llm": {
+      "label": "AI 공급자",
+      "description": "AI 서비스에 연결",
+      "hint": "어시스턴트를 구동하는 AI 서비스를 설정하세요. 선택한 공급자(예: OpenAI, Anthropic)의 API 키가 필요합니다. 변경 사항을 적용하려면 서비스를 재시작해야 합니다."
+    },
+    "embedding": {
+      "label": "텍스트 처리",
+      "description": "문서 분석 방식 설정",
+      "hint": "이 설정은 문서가 검색 가능한 데이터로 변환되는 방식을 제어합니다. 기본값은 대부분의 경우에 잘 작동합니다 - 사용자 지정 모델을 사용하는 경우에만 변경하세요."
+    },
+    "email": {
+      "label": "이메일 서비스",
+      "description": "사용자 인증을 위한 이메일 설정",
+      "hint": "로그인 시 사용자에게 매직 링크를 보내기 위한 이메일을 설정하세요. SendGrid, Mailgun 또는 자체 메일 서버와 같은 이메일 서비스의 SMTP 자격 증명이 필요합니다."
+    },
+    "storage": {
+      "label": "데이터 저장소",
+      "description": "데이터 저장 위치 설정",
+      "hint": "데이터베이스 및 업로드된 문서의 파일 경로를 제어합니다. 배포를 사용자 지정하지 않는 한 일반적으로 변경할 필요가 없습니다."
+    },
+    "security": {
+      "label": "보안 및 URL",
+      "description": "접근 및 보안 설정 구성",
+      "hint": "공개 URL 및 보안 옵션을 설정하세요. 프론트엔드 URL은 사용자가 앱에 접근하는 위치입니다. 실제 배포와 일치하는지 확인하세요."
+    },
+    "search": {
+      "label": "웹 검색",
+      "description": "AI 웹 검색 기능 활성화",
+      "hint": "AI의 웹 검색 기능을 구동하는 검색 엔진을 설정하세요. 활성화되면 AI가 온라인에서 최신 정보를 검색할 수 있습니다."
+    },
+    "general": {
+      "label": "일반",
+      "description": "기타 설정 옵션",
+      "hint": "다른 카테고리에 맞지 않는 기타 설정입니다."
+    }
+  },
+  "promptSections": {
+    "prompt_tone": {
+      "label": "톤 및 성격",
+      "description": "AI가 응답할 때의 어조",
+      "hint": "이것은 AI의 전반적인 음성과 태도를 설정합니다. 예를 들어, 상담 앱에는 \"따뜻하고 지지적인\", 비즈니스 도구에는 \"간결하고 전문적인\" 톤이 좋습니다. AI는 모든 응답에서 이 지침을 사용합니다.",
+      "placeholder": "도움이 되고, 간결하며, 전문적으로..."
+    },
+    "prompt_rules": {
+      "label": "행동 규칙",
+      "description": "AI가 반드시 따라야 할 특정 지시",
+      "hint": "[\"항상 출처 인용\", \"응답을 200단어 이하로 유지\"]와 같이 JSON 목록으로 규칙을 추가하세요. 이것은 AI가 모든 대화에서 따르려고 하는 확고한 지침입니다.",
+      "placeholder": "[\"규칙 1\", \"규칙 2\", ...]"
+    },
+    "prompt_forbidden": {
+      "label": "금지된 주제",
+      "description": "AI가 논의를 거부해야 할 주제",
+      "hint": "AI가 정중하게 회피해야 할 주제를 나열하세요. 예: [\"의료 조언\", \"법률 상담\"]. AI는 이러한 요청을 인정하지만 도움을 줄 수 없다고 설명합니다.",
+      "placeholder": "[\"주제 1\", \"주제 2\", ...]"
+    },
+    "prompt_greeting": {
+      "label": "응답 스타일",
+      "description": "AI가 응답을 구성하는 방식",
+      "hint": "글머리 기호, 제목, 대화형 문단 사용 여부와 같은 형식 기본 설정을 제어합니다. 이것은 답변이 시각적으로 표시되는 방식에 영향을 미칩니다.",
+      "placeholder": "목록에는 글머리 기호, 섹션에는 제목 사용..."
+    }
+  },
+  "parameters": {
+    "temperature": {
+      "label": "창의성 수준",
+      "description": "AI 응답의 예측 가능성 vs 창의성",
+      "hint": "낮은 값(0.0-0.3)은 응답을 더 집중적이고 일관되게 만듭니다 - 사실적인 Q&A에 적합합니다. 높은 값(0.7-1.0)은 응답을 더 다양하고 창의적으로 만듭니다 - 브레인스토밍에 적합합니다. 기본값: 0.7"
+    },
+    "top_k": {
+      "label": "지식 깊이",
+      "description": "참조할 문서 섹션 수",
+      "hint": "질문에 답할 때 AI는 업로드된 문서를 검색하고 관련 섹션을 가져옵니다. 숫자가 높을수록 더 많은 컨텍스트를 제공하지만 응답이 느려집니다. 숫자가 낮으면 더 빠르지만 관련 정보를 놓칠 수 있습니다. 기본값: 5"
+    }
+  },
+  "defaults": {
+    "web_search_default": {
+      "label": "웹 검색",
+      "description": "AI가 인터넷 검색 허용",
+      "hint": "활성화되면 AI가 문서에 없는 최신 정보를 웹에서 검색할 수 있습니다. 응답이 업로드된 지식 베이스에서만 나오도록 하려면 비활성화하세요."
+    }
+  },
+  "colors": {
+    "blue": "파랑",
+    "purple": "보라",
+    "green": "초록",
+    "orange": "주황",
+    "pink": "분홍",
+    "teal": "청록"
+  },
+  "promptPreview": {
+    "sampleQuestion": "이 주제에 대해 무엇을 알아야 하나요?"
+  },
+  "deploymentConfigItems": {
+    "LLM_PROVIDER": {
+      "label": "AI 서비스",
+      "description": "LLM 제공자 (maple, ollama)",
+      "hint": "개인정보 보호를 위해 \"maple\"(Maple 프록시) 또는 로컬 모델을 위해 \"ollama\"를 선택하세요."
+    },
+    "LLM_MODEL": {
+      "label": "모델 이름",
+      "description": "모델 이름/식별자",
+      "hint": "사용할 모델 식별자 (예: \"kimi-k2-thinking\"). 사용 가능한 모델은 제공자의 문서를 확인하세요."
+    },
+    "LLM_API_URL": {
+      "label": "API 엔드포인트",
+      "description": "API 요청의 기본 URL",
+      "hint": "API 요청의 기본 URL. Maple: http://maple-proxy:8080/v1. Ollama: http://localhost:11434."
+    },
+    "RAG_TOP_K": {
+      "label": "컨텍스트 청크 수",
+      "description": "검색할 청크 수",
+      "hint": "각 쿼리에서 검색할 문서 청크 수. 높을수록 더 많은 컨텍스트를 제공하지만 느려집니다. 기본값: 8"
+    },
+    "PDF_EXTRACT_MODE": {
+      "label": "PDF 처리",
+      "description": "PDF 추출 방식",
+      "hint": "\"fast\"는 텍스트를 빠르게 추출합니다. \"quality\"는 스캔 문서의 정확도를 높이기 위해 OCR을 사용하지만 더 느립니다."
+    },
+    "EMBEDDING_MODEL": {
+      "label": "임베딩 모델",
+      "description": "임베딩용 HuggingFace 모델",
+      "hint": "텍스트를 벡터로 변환하는 HuggingFace 모델. 다른 언어나 도메인이 필요한 경우에만 변경하세요."
+    },
+    "SMTP_HOST": {
+      "label": "메일 서버",
+      "description": "SMTP 서버 주소",
+      "hint": "SMTP 서버 주소 (예: smtp.gmail.com, smtp.sendgrid.net)."
+    },
+    "SMTP_PORT": {
+      "label": "메일 포트",
+      "description": "SMTP 서버 포트",
+      "hint": "일반적으로 TLS는 587, SSL은 465입니다. 이메일 제공자의 설정을 확인하세요."
+    },
+    "SMTP_USER": {
+      "label": "SMTP 사용자 이름",
+      "description": "이메일 서비스 사용자 이름",
+      "hint": "이메일 서비스 사용자 이름 또는 API 키."
+    },
+    "SMTP_PASS": {
+      "label": "SMTP 비밀번호",
+      "description": "이메일 서비스 비밀번호",
+      "hint": "이메일 서비스 비밀번호 또는 API 키 시크릿."
+    },
+    "SMTP_FROM": {
+      "label": "발신자 주소",
+      "description": "이메일 발신 주소",
+      "hint": "발송 이메일의 \"발신자\" 주소 (예: noreply@yourdomain.com)."
+    },
+    "MOCK_SMTP": {
+      "label": "테스트 모드",
+      "description": "이메일 발송 모의 실행",
+      "hint": "\"true\"인 경우 이메일이 전송되지 않고 로그에 기록됩니다. 개발 시 유용합니다."
+    },
+    "SQLITE_PATH": {
+      "label": "데이터베이스 파일",
+      "description": "SQLite 데이터베이스 경로",
+      "hint": "SQLite 데이터베이스 파일 경로. 기본값: /data/sanctum.db"
+    },
+    "UPLOADS_DIR": {
+      "label": "업로드 폴더",
+      "description": "문서 업로드 디렉토리",
+      "hint": "업로드된 문서가 저장되는 디렉토리. 기본값: /uploads"
+    },
+    "QDRANT_HOST": {
+      "label": "벡터 DB 호스트",
+      "description": "Qdrant 서버 호스트명",
+      "hint": "Qdrant 벡터 데이터베이스의 호스트명. 기본값: qdrant"
+    },
+    "QDRANT_PORT": {
+      "label": "벡터 DB 포트",
+      "description": "Qdrant REST API 포트",
+      "hint": "Qdrant (REST API)의 포트. 기본값: 6333"
+    },
+    "SEARXNG_URL": {
+      "label": "검색 엔진 URL",
+      "description": "SearXNG 인스턴스 URL",
+      "hint": "웹 검색 기능을 위한 SearXNG 인스턴스의 URL."
+    },
+    "FRONTEND_URL": {
+      "label": "앱 URL",
+      "description": "애플리케이션의 공개 URL",
+      "hint": "사용자가 앱에 접근하는 공개 URL. 매직 링크 생성에 사용됩니다."
+    }
   }
 }

@@ -12,6 +12,7 @@ import {
   saveInstanceConfig,
   applyAccentColor,
   AccentColor,
+  CURATED_ICONS,
 } from '../types/instance'
 import { API_BASE } from '../types/onboarding'
 
@@ -24,12 +25,21 @@ interface InstanceConfigContextValue {
 const InstanceConfigContext = createContext<InstanceConfigContextValue | undefined>(undefined)
 
 /**
- * Map backend primary_color (hex) to frontend AccentColor
+ * Map backend primary_color (hex or name) to frontend AccentColor.
+ * Returns undefined for invalid/missing values to allow fallback to cached config.
  */
-function hexToAccentColor(hex: string | undefined): AccentColor {
-  if (!hex) return DEFAULT_INSTANCE_CONFIG.accentColor
-  
-  // Direct mapping of known accent color hex values
+function hexToAccentColor(value: string | undefined): AccentColor | undefined {
+  if (!value) return undefined
+
+  const normalized = value.trim().toLowerCase()
+
+  // If it's already a valid accent color name, return it directly
+  const validColors: AccentColor[] = ['blue', 'purple', 'green', 'orange', 'pink', 'teal']
+  if (validColors.includes(normalized as AccentColor)) {
+    return normalized as AccentColor
+  }
+
+  // Otherwise try to match hex values
   const colorMap: Record<string, AccentColor> = {
     '#2563eb': 'blue',
     '#3b82f6': 'blue',
@@ -39,14 +49,30 @@ function hexToAccentColor(hex: string | undefined): AccentColor {
     '#db2777': 'pink',
     '#0d9488': 'teal',
   }
-  
-  const normalized = hex.toLowerCase()
+
   if (colorMap[normalized]) {
     return colorMap[normalized]
   }
-  
-  // Fallback: try to match by color name in the hex string or just use default
-  return DEFAULT_INSTANCE_CONFIG.accentColor
+
+  return undefined
+}
+
+/**
+ * Validate icon name against CURATED_ICONS.
+ * Returns undefined for invalid/missing values to allow fallback to cached config.
+ */
+function validateIcon(value: string | undefined): string | undefined {
+  if (!value) return undefined
+
+  const normalizedValue = value.trim().toLowerCase()
+  const matchedIcon = CURATED_ICONS.find(
+    icon => icon.toLowerCase() === normalizedValue
+  )
+  if (matchedIcon) {
+    return matchedIcon
+  }
+
+  return undefined
 }
 
 export function InstanceConfigProvider({ children }: { children: ReactNode }) {
@@ -69,8 +95,11 @@ export function InstanceConfigProvider({ children }: { children: ReactNode }) {
           
           const newConfig: InstanceConfig = {
             name: settings.instance_name || stored.name || DEFAULT_INSTANCE_CONFIG.name,
-            accentColor: hexToAccentColor(settings.primary_color) || stored.accentColor,
-            icon: settings.icon || stored.icon || DEFAULT_INSTANCE_CONFIG.icon,
+            accentColor:
+              hexToAccentColor(settings.primary_color) ??
+              stored.accentColor ??
+              DEFAULT_INSTANCE_CONFIG.accentColor,
+            icon: validateIcon(settings.icon) ?? stored.icon ?? DEFAULT_INSTANCE_CONFIG.icon,
           }
           
           setConfigState(newConfig)

@@ -22,12 +22,15 @@ Based on `docker-compose.yml` and running deployment:
 | **backend** | FastAPI + SQLite | 8000 |
 | **frontend** | Vite/React app | 5173 |
 
-**Storage**:
+### Storage
+
 - SQLite database (`/data/sanctum.db`) for users, documents, settings
 - Qdrant for vector embeddings
 - Local embedding model: `intfloat/multilingual-e5-base` (768-dim)
 
-**Authentication**: Nostr (admin) + Email magic links (users)
+### Authentication
+
+Nostr (admin) + Email magic links (users)
 
 ---
 

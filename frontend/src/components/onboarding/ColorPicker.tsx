@@ -1,5 +1,6 @@
 import { Check } from 'lucide-react'
-import { AccentColor, ACCENT_COLORS } from '../../types/instance'
+import { useTranslation } from 'react-i18next'
+import { AccentColor, getAccentColors } from '../../types/instance'
 
 interface ColorPickerProps {
   value: AccentColor
@@ -7,7 +8,9 @@ interface ColorPickerProps {
 }
 
 export function ColorPicker({ value, onChange }: ColorPickerProps) {
-  const colors = Object.entries(ACCENT_COLORS) as [AccentColor, typeof ACCENT_COLORS[AccentColor]][]
+  const { t } = useTranslation()
+  const accentColors = getAccentColors(t)
+  const colors = Object.entries(accentColors) as [AccentColor, typeof accentColors[AccentColor]][]
 
   return (
     <div className="grid grid-cols-3 gap-3">

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Upload, FileText, X, CloudUpload, Loader2, Clock, ArrowLeft } from 'lucide-react'
+import { Upload, FileText, X, CloudUpload, Loader2, Clock, ArrowLeft, HelpCircle, ChevronLeft, ChevronRight } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { STORAGE_KEYS } from '../types/onboarding'
 import {
@@ -28,6 +28,11 @@ export function AdminDocumentUpload() {
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [recentJobs, setRecentJobs] = useState<JobStatus[]>([])
   const [isLoadingJobs, setIsLoadingJobs] = useState(true)
+
+  // Pipeline help modal state
+  const [showPipelineHelpModal, setShowPipelineHelpModal] = useState(false)
+  const [pipelineHelpPage, setPipelineHelpPage] = useState(0)
+  const pipelineHelpModalRef = useRef<HTMLDivElement>(null)
 
   // Check if admin is logged in
   useEffect(() => {
@@ -84,7 +89,7 @@ export function AdminDocumentUpload() {
 
     // TODO: Add file size validation (check backend MAX_UPLOAD_SIZE)
     if (!isAllowedFileType(file.name)) {
-      setUploadError(`Invalid file type. Allowed: ${getAllowedExtensionsDisplay()}`)
+      setUploadError(t('upload.invalidFileType', { extensions: getAllowedExtensionsDisplay() }))
       return
     }
 
@@ -186,6 +191,39 @@ export function AdminDocumentUpload() {
         return { label: status, color: 'text-text-muted', icon: '?' }
     }
   }
+
+  // Close pipeline help modal
+  const handleClosePipelineHelpModal = () => {
+    setShowPipelineHelpModal(false)
+    setPipelineHelpPage(0)
+  }
+
+  // Focus trap for pipeline help modal
+  useEffect(() => {
+    if (showPipelineHelpModal && pipelineHelpModalRef.current) {
+      pipelineHelpModalRef.current.focus()
+    }
+  }, [showPipelineHelpModal])
+
+  // Pipeline help pages data
+  const PIPELINE_HELP_PAGES = [
+    {
+      title: t('upload.pipelineHelp.formatsTitle', 'Supported Formats'),
+      content: 'formats',
+    },
+    {
+      title: t('upload.pipelineHelp.pipelineTitle', 'Processing Pipeline'),
+      content: 'pipeline',
+    },
+    {
+      title: t('upload.pipelineHelp.troubleshootingTitle', 'Troubleshooting'),
+      content: 'troubleshooting',
+    },
+    {
+      title: t('upload.pipelineHelp.tipsTitle', 'Best Practices'),
+      content: 'tips',
+    },
+  ]
 
   const footer = (
     <Link to="/" className="text-text-muted hover:text-text transition-colors">
@@ -307,6 +345,13 @@ export function AdminDocumentUpload() {
           <h3 className="text-sm font-semibold text-text mb-4 flex items-center gap-2">
             <Clock className="w-4 h-4 text-text-muted" />
             {t('upload.recentUploads')}
+            <button
+              onClick={() => setShowPipelineHelpModal(true)}
+              className="ml-1 text-text-muted hover:text-accent transition-colors"
+              aria-label={t('upload.pipelineHelp.ariaLabel', 'Document processing help')}
+            >
+              <HelpCircle className="w-5 h-5" />
+            </button>
           </h3>
 
           {isLoadingJobs ? (
@@ -372,6 +417,204 @@ export function AdminDocumentUpload() {
           </Link>
           {/* TODO: Support multiple file upload with queue management */}
         </div>
+
+        {/* Pipeline Help Modal */}
+        {showPipelineHelpModal && (
+          <div
+            ref={pipelineHelpModalRef}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pipeline-help-modal-title"
+            onKeyDown={(e) => e.key === 'Escape' && handleClosePipelineHelpModal()}
+            tabIndex={-1}
+          >
+            <div className="bg-surface border border-border rounded-xl p-6 w-full max-w-lg mx-4 shadow-xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 id="pipeline-help-modal-title" className="text-lg font-semibold text-text flex items-center gap-2">
+                  <HelpCircle className="w-5 h-5" />
+                  {PIPELINE_HELP_PAGES[pipelineHelpPage].title}
+                </h3>
+                <button
+                  onClick={handleClosePipelineHelpModal}
+                  className="text-text-muted hover:text-text transition-colors"
+                  aria-label={t('common.close', 'Close')}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="min-h-[280px]">
+                {PIPELINE_HELP_PAGES[pipelineHelpPage].content === 'formats' ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('upload.pipelineHelp.formatsDesc', 'Currently supported document formats for upload:')}
+                    </p>
+                    <div className="space-y-2">
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">.pdf</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {t('upload.pipelineHelp.pdfDesc', 'PDF documents. Text is extracted; images and scanned PDFs are not yet supported.')}
+                        </p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">.txt</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {t('upload.pipelineHelp.txtDesc', 'Plain text files. Best for simple, unformatted content.')}
+                        </p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">.md</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {t('upload.pipelineHelp.mdDesc', 'Markdown files. Formatting is preserved as plain text.')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="bg-warning/10 border border-warning/20 rounded-lg p-3 mt-4">
+                      <p className="text-xs text-warning">
+                        {t('upload.pipelineHelp.notSupported', 'Not yet supported: .docx, .xlsx, images, scanned PDFs. Convert these to text or PDF first.')}
+                      </p>
+                    </div>
+                  </div>
+                ) : PIPELINE_HELP_PAGES[pipelineHelpPage].content === 'pipeline' ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('upload.pipelineHelp.pipelineDesc', 'Documents go through these stages after upload:')}
+                    </p>
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-3 bg-surface-overlay border border-border rounded-lg p-3">
+                        <span className="text-text-muted">○</span>
+                        <div>
+                          <p className="text-sm font-medium text-text">{t('upload.pipelineHelp.pending', 'Pending')}</p>
+                          <p className="text-xs text-text-muted mt-1">
+                            {t('upload.pipelineHelp.pendingDesc', 'File uploaded, waiting in queue for processing.')}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 bg-surface-overlay border border-border rounded-lg p-3">
+                        <span className="text-warning">◐</span>
+                        <div>
+                          <p className="text-sm font-medium text-text">{t('upload.pipelineHelp.processing', 'Processing')}</p>
+                          <p className="text-xs text-text-muted mt-1">
+                            {t('upload.pipelineHelp.processingDesc', 'Text is being extracted from the document.')}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 bg-surface-overlay border border-border rounded-lg p-3">
+                        <span className="text-info">◑</span>
+                        <div>
+                          <p className="text-sm font-medium text-text">{t('upload.pipelineHelp.chunked', 'Chunked')}</p>
+                          <p className="text-xs text-text-muted mt-1">
+                            {t('upload.pipelineHelp.chunkedDesc', 'Document split into searchable chunks. Embeddings being generated.')}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 bg-surface-overlay border border-border rounded-lg p-3">
+                        <span className="text-success">●</span>
+                        <div>
+                          <p className="text-sm font-medium text-text">{t('upload.pipelineHelp.completed', 'Completed')}</p>
+                          <p className="text-xs text-text-muted mt-1">
+                            {t('upload.pipelineHelp.completedDesc', 'Document is now searchable and available to the AI.')}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : PIPELINE_HELP_PAGES[pipelineHelpPage].content === 'troubleshooting' ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('upload.pipelineHelp.troubleshootingDesc', 'Common issues and how to resolve them:')}
+                    </p>
+                    <div className="space-y-2">
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-error">{t('upload.pipelineHelp.stuckPending', 'Stuck on "Pending"')}</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {t('upload.pipelineHelp.stuckPendingFix', 'The processing queue may be full. Wait a few minutes or check if the backend service is running.')}
+                        </p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-error">{t('upload.pipelineHelp.failedProcessing', 'Failed during processing')}</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {t('upload.pipelineHelp.failedProcessingFix', 'The document may be corrupted or password-protected. Try re-saving it or converting to a different format.')}
+                        </p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-error">{t('upload.pipelineHelp.noChunks', 'Completed but no chunks')}</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {t('upload.pipelineHelp.noChunksFix', 'Document may be empty or contain only images. Ensure it has extractable text content.')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('upload.pipelineHelp.tipsDesc', 'For best results with your knowledge base:')}
+                    </p>
+                    <div className="space-y-2">
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">{t('upload.pipelineHelp.tipLength', 'Document Length')}</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {t('upload.pipelineHelp.tipLengthDesc', 'Moderate-length documents (5-50 pages) work best. Very long documents may need to be split.')}
+                        </p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">{t('upload.pipelineHelp.tipQuality', 'Content Quality')}</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {t('upload.pipelineHelp.tipQualityDesc', 'Well-structured documents with clear headings and paragraphs produce better search results.')}
+                        </p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">{t('upload.pipelineHelp.tipNaming', 'File Naming')}</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {t('upload.pipelineHelp.tipNamingDesc', 'Use descriptive file names. They help identify documents in the admin interface.')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
+                <button
+                  onClick={() => setPipelineHelpPage((prev) => Math.max(0, prev - 1))}
+                  disabled={pipelineHelpPage === 0}
+                  className="flex items-center gap-1 text-sm text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  {t('common.previous', 'Previous')}
+                </button>
+
+                {/* Page indicators */}
+                <div className="flex items-center gap-1.5">
+                  {PIPELINE_HELP_PAGES.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setPipelineHelpPage(index)}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        index === pipelineHelpPage
+                          ? 'bg-accent'
+                          : 'bg-border hover:bg-text-muted'
+                      }`}
+                      aria-label={`${t('common.goToPage', 'Go to page')} ${index + 1}`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setPipelineHelpPage((prev) => Math.min(PIPELINE_HELP_PAGES.length - 1, prev + 1))}
+                  disabled={pipelineHelpPage === PIPELINE_HELP_PAGES.length - 1}
+                  className="flex items-center gap-1 text-sm text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  {t('common.next', 'Next')}
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </OnboardingCard>
   )

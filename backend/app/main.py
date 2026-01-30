@@ -37,7 +37,11 @@ from models import (
     RowMutationRequest, RowMutationResponse,
     # Magic Link Auth models
     MagicLinkRequest, MagicLinkResponse,
-    VerifyTokenResponse, AuthUserResponse, SessionUserResponse
+    VerifyTokenResponse, AuthUserResponse, SessionUserResponse,
+    # Session defaults
+    SessionDefaultsResponse,
+    # Test email
+    TestEmailRequest, TestEmailResponse,
 )
 from nostr import verify_auth_event, get_pubkey_from_event
 import auth
@@ -56,6 +60,8 @@ logger = logging.getLogger("sanctum.main")
 # Import routers
 from ingest import router as ingest_router
 from query import router as query_router
+from ai_config import router as ai_config_router
+from deployment_config import router as deployment_config_router
 
 logger.info("Starting Sanctum API...")
 
@@ -77,6 +83,8 @@ app.add_middleware(
 # Include routers
 app.include_router(ingest_router)
 app.include_router(query_router)
+app.include_router(ai_config_router)
+app.include_router(deployment_config_router)
 
 
 @app.on_event("startup")
@@ -475,18 +483,22 @@ async def chat(request: ChatRequest, user: dict = Depends(auth.require_admin_or_
                 if tool_context:
                     tool_context_parts.append(tool_context)
 
-        if tool_context_parts:
-            combined_context = "\n\n".join(tool_context_parts)
-            prompt = f"""Use the following information to help answer the question.
+        # Import AI config functions for dynamic prompt building
+        from ai_config import build_chat_prompt, get_llm_parameters
 
-{combined_context}
+        # Get LLM parameters from config
+        llm_params = get_llm_parameters()
+        temperature = llm_params.get("temperature", 0.1)
 
-Question: {request.message}
-
-Answer:"""
+        # Build prompt using AI config
+        combined_context = "\n\n".join(tool_context_parts) if tool_context_parts else ""
+        prompt = build_chat_prompt(
+            message=request.message,
+            context=combined_context,
+        )
 
         provider = get_provider()
-        result = provider.complete(prompt)
+        result = provider.complete(prompt, temperature=temperature)
         return ChatResponse(
             message=result.content,
             model=result.model,
@@ -714,6 +726,145 @@ async def get_current_user(token: str = Query(None, description="Session token")
     )
 
 
+@app.post("/auth/test-email", response_model=TestEmailResponse)
+async def send_test_email(
+    body: TestEmailRequest,
+    admin: dict = Depends(auth.require_admin)
+):
+    """
+    Send a test email to verify SMTP configuration.
+    Requires admin authentication.
+    """
+    import smtplib
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+
+    email = body.email.strip().lower()
+    if not email:
+        raise HTTPException(status_code=400, detail="Email address is required")
+
+    # Get SMTP config
+    smtp = auth._get_smtp_config()
+
+    # Check if SMTP is configured
+    if not smtp["host"]:
+        return TestEmailResponse(
+            success=False,
+            message="SMTP not configured",
+            error="SMTP_HOST is not set. Configure SMTP settings first."
+        )
+
+    # Check if mock mode
+    if smtp["mock_mode"]:
+        logger.info("[TEST EMAIL - Mock Mode] Would send test email")
+        return TestEmailResponse(
+            success=True,
+            message=f"Mock mode enabled. Test email would be sent to {email}."
+        )
+
+    # Build test email
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = "Sanctum Test Email"
+    msg["From"] = smtp["from_address"]
+    msg["To"] = email
+
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; color: #333;">
+        <div style="max-width: 480px; margin: 0 auto;">
+            <h2 style="color: #333; margin-bottom: 24px;">Sanctum Test Email</h2>
+            <p style="margin-bottom: 24px;">
+                This is a test email from your Sanctum instance.
+                If you received this, your SMTP configuration is working correctly.
+            </p>
+            <p style="margin-top: 24px; font-size: 14px; color: #666;">
+                You can safely delete this email.
+            </p>
+        </div>
+    </body>
+    </html>
+    """
+    msg.attach(MIMEText(html, "html"))
+
+    try:
+        if smtp["port"] == 465:
+            with smtplib.SMTP_SSL(smtp["host"], smtp["port"], timeout=smtp["timeout"]) as server:
+                server.login(smtp["user"], smtp["password"])
+                server.sendmail(smtp["from_address"], [email], msg.as_string())
+        else:
+            with smtplib.SMTP(smtp["host"], smtp["port"], timeout=smtp["timeout"]) as server:
+                server.ehlo()
+                if server.has_extn('starttls'):
+                    server.starttls()
+                    server.ehlo()  # Re-identify after TLS upgrade
+                server.login(smtp["user"], smtp["password"])
+                server.sendmail(smtp["from_address"], [email], msg.as_string())
+
+        logger.info("Test email sent successfully")
+
+        # Store successful test status in database for health checks
+        # Wrapped in try/except - email was sent, so primary operation succeeded
+        # even if status tracking fails
+        try:
+            from datetime import datetime, timezone
+            database.upsert_deployment_config(
+                key="SMTP_LAST_TEST_AT",
+                value=datetime.now(timezone.utc).isoformat(),
+                is_secret=False,
+                requires_restart=False,
+                category="email",
+                description="Timestamp of last successful SMTP test",
+            )
+            database.upsert_deployment_config(
+                key="SMTP_LAST_TEST_SUCCESS",
+                value="true",
+                is_secret=False,
+                requires_restart=False,
+                category="email",
+                description="Whether last SMTP test was successful",
+            )
+        except Exception as db_err:
+            logger.warning(f"Failed to update SMTP test status in database: {db_err}")
+
+        return TestEmailResponse(
+            success=True,
+            message=f"Test email sent to {email}"
+        )
+
+    except smtplib.SMTPAuthenticationError as e:
+        logger.error(f"SMTP authentication failed: {e}")
+        return TestEmailResponse(
+            success=False,
+            message="SMTP authentication failed",
+            error=str(e)
+        )
+    except smtplib.SMTPConnectError as e:
+        logger.error(f"SMTP connection failed: {e}")
+        return TestEmailResponse(
+            success=False,
+            message="Could not connect to SMTP server",
+            error=str(e)
+        )
+    except TimeoutError:
+        logger.error(f"SMTP connection timed out after {smtp['timeout']}s")
+        return TestEmailResponse(
+            success=False,
+            message="SMTP connection timed out",
+            error=f"Connection timed out after {smtp['timeout']} seconds"
+        )
+    except Exception as e:
+        logger.error(f"Failed to send test email: {e}")
+        return TestEmailResponse(
+            success=False,
+            message="Failed to send test email",
+            error=str(e)
+        )
+
+
 # =============================================================================
 # Admin & User Management Endpoints (SQLite)
 # =============================================================================
@@ -827,6 +978,7 @@ SAFE_PUBLIC_SETTINGS = {
     "description",
     "logo_url",
     "favicon_url",
+    "icon",
 }
 
 
@@ -863,6 +1015,29 @@ async def get_public_settings():
     """Public endpoint: Get instance settings for branding (name, color, etc.)"""
     settings = filter_public_settings(database.get_all_settings())
     return InstanceSettingsResponse(settings=settings)
+
+
+@app.get("/session-defaults", response_model=SessionDefaultsResponse)
+async def get_session_defaults_public():
+    """
+    Public endpoint: Get session defaults for chat initialization.
+    No authentication required - returns safe defaults for new chat sessions.
+    """
+    try:
+        from ai_config import get_session_defaults
+        defaults = get_session_defaults()
+        default_docs = database.get_default_active_documents()
+
+        return SessionDefaultsResponse(
+            web_search_enabled=defaults.get("web_search_default", False),
+            default_document_ids=default_docs
+        )
+    except Exception as e:
+        logger.error(f"Failed to get session defaults: {e}")
+        return SessionDefaultsResponse(
+            web_search_enabled=False,
+            default_document_ids=[]
+        )
 
 
 @app.get("/admin/settings", response_model=InstanceSettingsResponse)
@@ -983,7 +1158,9 @@ async def create_field_definition(field: FieldDefinitionCreate, admin: dict = De
             field_type=field.field_type,
             required=field.required,
             display_order=field.display_order,
-            user_type_id=field.user_type_id
+            user_type_id=field.user_type_id,
+            placeholder=field.placeholder,
+            options=field.options
         )
         created = database.get_field_definition_by_id(field_id)
         return FieldDefinitionResponse(**created)
@@ -1011,7 +1188,9 @@ async def update_field_definition(field_id: int, field: FieldDefinitionUpdate, a
         field_type=field.field_type,
         required=field.required,
         display_order=field.display_order,
-        user_type_id=field.user_type_id if field.user_type_id != 0 else None
+        user_type_id=field.user_type_id if field.user_type_id != 0 else None,
+        placeholder=field.placeholder,
+        options=field.options
     )
     updated = database.get_field_definition_by_id(field_id)
     return FieldDefinitionResponse(**updated)

@@ -17,7 +17,7 @@ export async function adminFetch(
   const token = localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN)
 
   if (!token) {
-    throw new Error('Not authenticated as admin')
+    throw new Error('errors.notAuthenticatedAsAdmin')
   }
 
   const headers = new Headers(options.headers)
@@ -37,7 +37,7 @@ export async function adminFetch(
     localStorage.removeItem(STORAGE_KEYS.ADMIN_PUBKEY)
     localStorage.removeItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN)
     window.location.href = '/admin'
-    throw new Error('Admin session expired')
+    throw new Error('errors.adminSessionExpired')
   }
 
   return response

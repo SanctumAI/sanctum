@@ -1,9 +1,231 @@
 {
+  "common": {
+    "close": "Tutup",
+    "cancel": "Batal",
+    "save": "Simpan",
+    "saving": "Menyimpan...",
+    "saveChanges": "Simpan Perubahan",
+    "edit": "Edit",
+    "delete": "Hapus",
+    "remove": "Hapus",
+    "required": "Wajib",
+    "settings": "Pengaturan",
+    "toggleTheme": "Ganti tema",
+    "switchToLight": "Beralih ke mode terang",
+    "switchToDark": "Beralih ke mode gelap",
+    "moveUp": "Pindah ke atas",
+    "moveDown": "Pindah ke bawah",
+    "logout": "Keluar",
+    "adminQuestion": "Apakah Anda admin?",
+    "signInNostr": "Masuk dengan Nostr",
+    "tryAgain": "Coba lagi",
+    "continue": "Lanjutkan",
+    "unexpectedError": "Terjadi kesalahan yang tidak terduga",
+    "nullPlaceholder": "NULL",
+    "error": "Kesalahan",
+    "back": "Kembali",
+    "loading": "Memuat...",
+    "unknown": "Tidak diketahui",
+    "enabled": "Aktif",
+    "disabled": "Nonaktif"
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "signedInAs": "Masuk sebagai",
+    "signOut": "Keluar",
+    "adminTools": "Alat Admin",
+    "admin": {
+      "instanceConfig": "Konfigurasi Instance",
+      "instanceConfigDesc": "Branding, tipe pengguna, field",
+      "testDashboard": "Dashboard Pengujian",
+      "testDashboardDesc": "Pengujian API, alat debugging",
+      "documentUpload": "Unggah Dokumen",
+      "documentUploadDesc": "Tambah dokumen ke basis pengetahuan",
+      "databaseExplorer": "Penjelajah Database",
+      "databaseExplorerDesc": "Jelajahi database SQLite",
+      "instanceBranding": "Instance Branding",
+      "instanceBrandingDesc": "Colors, icons, user types",
+      "aiConfig": "AI Configuration",
+      "aiConfigDesc": "Prompts, parameters, defaults",
+      "deploymentConfig": "Deployment Config",
+      "deploymentConfigDesc": "Services, SMTP, storage"
+    }
+  },
+  "admin": {
+    "confirmDelete": "Apakah Anda yakin ingin menghapus catatan ini?",
+    "confirmDeleteField": "Hapus field \"{{name}}\"?",
+    "confirmDeleteTypeWithFields": "Hapus tipe pengguna \"{{name}}\"? Ini juga akan menghapus {{count}} field terkait.",
+    "confirmDeleteType": "Hapus tipe pengguna \"{{name}}\"?",
+    "global": "Global",
+    "setup": {
+      "backToChat": "Kembali ke Chat",
+      "title": "Konfigurasi Instance Anda",
+      "subtitle": "Sesuaikan branding dan pengalaman onboarding pengguna",
+      "branding": "Branding Instance",
+      "displayName": "Nama Tampilan",
+      "defaultName": "Sanctum",
+      "displayNameHint": "Nama ini muncul di header dan layar onboarding",
+      "icon": "Ikon",
+      "accentColor": "Warna Aksen",
+      "userTypes": "Tipe Pengguna",
+      "userTypesHint": "Tentukan tipe pengguna yang berbeda untuk menampilkan pertanyaan onboarding khusus tipe. Jika Anda memiliki lebih dari satu tipe, pengguna akan memilih tipe mereka saat onboarding.",
+      "typeName": "Nama Tipe",
+      "typeNamePlaceholder": "contoh: Peneliti, Mahasiswa",
+      "typeDescription": "Deskripsi (opsional)",
+      "typeDescPlaceholder": "contoh: Untuk peneliti akademis",
+      "addType": "Tambah Tipe",
+      "addUserType": "Tambah Tipe Pengguna",
+      "onboardingFields": "Field Onboarding Pengguna",
+      "optionsCount_one": "{{count}} opsi",
+      "optionsCount_other": "{{count}} opsi",
+      "noFields": "Tidak ada field kustom",
+      "addField": "Tambah Field",
+      "knowledgeBase": "Basis Pengetahuan",
+      "knowledgeBaseHint": "Unggah dokumen untuk membangun basis pengetahuan RAG Anda untuk respons berbasis AI.",
+      "uploadDocuments": "Unggah Dokumen",
+      "database": "Database",
+      "databaseHint": "Lihat dan kelola data instance Anda langsung di database SQLite.",
+      "openDatabase": "Buka Penjelajah Database",
+      "save": "Simpan Konfigurasi"
+    },
+    "database": {
+      "backToSetup": "Kembali ke Pengaturan Admin",
+      "title": "Penjelajah Database",
+      "subtitle": "Lihat dan kelola data SQLite",
+      "sqlQuery": "Query SQL",
+      "refreshTables": "Segarkan tabel",
+      "tables": "Tabel",
+      "noTables": "Tidak ada tabel ditemukan",
+      "notInitialized": "Database mungkin belum diinisialisasi",
+      "columns": "kolom",
+      "sqlQueryLabel": "Query SQL",
+      "sqlPlaceholder": "SELECT * FROM users WHERE role = 'admin';",
+      "runHint": "Tekan Cmd/Ctrl + Enter untuk menjalankan",
+      "running": "Menjalankan...",
+      "runQuery": "Jalankan Query",
+      "results": "Hasil",
+      "error": "Error",
+      "rowsAffected": "baris terpengaruh",
+      "lastInsertId": "ID insert terakhir:",
+      "noResults": "Tidak ada hasil",
+      "tableInfo": "{{columns}} kolom, {{rows}} baris",
+      "addRow": "Tambah Baris",
+      "newRecord": "Rekaman Baru",
+      "editRecord": "Edit Rekaman",
+      "noData": "Tidak ada data di tabel ini",
+      "addFirstRecord": "Tambahkan rekaman pertama Anda",
+      "clickToExpand": "Klik untuk memperluas",
+      "pagination": "Menampilkan {{from}} sampai {{to}} dari {{total}}",
+      "tableCount_one": "{{count}} tabel",
+      "tableCount_other": "{{count}} tabel",
+      "rowCount_one": "{{count}} baris",
+      "rowCount_other": "{{count}} baris",
+      "rowsInTable_one": "{{count}} baris di {{table}}",
+      "rowsInTable_other": "{{count}} baris di {{table}}",
+      "connected": "SQLite Terhubung",
+      "selectTable": "Pilih tabel dari sidebar",
+      "orUseSqlQuery": "atau gunakan mode Query SQL",
+      "encrypted": "[Terenkripsi]",
+      "encryptedMissingKey": "[Terenkripsi - Kunci Hilang]",
+      "decrypting": "[Mendekripsi...]",
+      "notSet": "(tidak diatur)"
+    },
+    "fields": {
+      "nameRequired": "Nama field wajib diisi",
+      "optionsRequired": "Minimal 2 opsi diperlukan",
+      "editField": "Edit Field",
+      "addField": "Tambah Field Baru",
+      "fieldName": "Nama Field",
+      "fieldNamePlaceholder": "contoh: Nama Perusahaan",
+      "applyTo": "Terapkan Ke",
+      "allUsers": "Semua Pengguna (Global)",
+      "globalHint": "Field global ditampilkan ke semua pengguna. Field khusus tipe hanya muncul untuk tipe pengguna tersebut.",
+      "fieldType": "Tipe Field",
+      "options": "Opsi",
+      "optionPlaceholder": "Opsi {{number}}",
+      "addOption": "+ Tambah opsi",
+      "placeholder": "Placeholder",
+      "placeholderOptional": "(opsional)",
+      "placeholderHint": "Teks petunjuk yang ditampilkan di input",
+      "requiredField": "Field wajib"
+    },
+    "fieldTypes": {
+      "text": "Teks",
+      "textDesc": "Input teks satu baris",
+      "email": "Email",
+      "emailDesc": "Email dengan validasi",
+      "number": "Angka",
+      "numberDesc": "Input numerik",
+      "textarea": "Area Teks",
+      "textareaDesc": "Teks multi-baris",
+      "select": "Dropdown",
+      "selectDesc": "Pilih dari opsi",
+      "checkbox": "Kotak Centang",
+      "checkboxDesc": "Toggle ya/tidak",
+      "date": "Tanggal",
+      "dateDesc": "Pemilih tanggal",
+      "url": "URL",
+      "urlDesc": "Tautan website"
+    },
+    "icons": {
+      "searchPlaceholder": "Cari ikon...",
+      "noMatch": "Tidak ada ikon yang cocok dengan \"{{search}}\"",
+      "selected": "Dipilih:"
+    },
+    "errors": {
+      "loadTypesFailed": "Gagal memuat tipe pengguna",
+      "loadFieldsFailed": "Gagal memuat field pengguna",
+      "loadFailed": "Gagal memuat data",
+      "saveFailed": "Gagal menyimpan pengaturan. Silakan coba lagi.",
+      "addTypeFailed": "Gagal menambahkan tipe pengguna",
+      "removeTypeFailed": "Gagal menghapus tipe pengguna",
+      "addFieldFailed": "Gagal menambahkan field",
+      "updateFieldFailed": "Gagal memperbarui field",
+      "removeFieldFailed": "Gagal menghapus field",
+      "reorderFailed": "Gagal mengurutkan ulang field"
+    }
+  },
+  "adminOnboarding": {
+    "notAdmin": "Bukan admin?",
+    "signInAsUser": "Masuk sebagai pengguna",
+    "title": "Pengaturan Admin",
+    "subtitle": "Hubungkan dengan identitas Nostr Anda untuk mengelola instance ini",
+    "connectNostr": "Hubungkan dengan Nostr",
+    "orForTesting": "atau untuk pengujian",
+    "continueMock": "Lanjutkan dengan identitas tiruan",
+    "connecting": "Menghubungkan ke ekstensi...",
+    "noExtension": "Ekstensi Nostr tidak ditemukan",
+    "installExtension": "Instal ekstensi yang kompatibel dengan NIP-07 untuk melanjutkan",
+    "useMock": "Gunakan tiruan",
+    "welcomeAdmin": "Selamat datang, Admin!",
+    "connectedAs": "Terhubung sebagai",
+    "redirecting": "Mengalihkan ke dashboard...",
+    "connectionFailed": "Koneksi gagal"
+  },
   "onboarding": {
+    "nostr": {
+      "whatIsNostr": "Apa itu Nostr?",
+      "whatIsNostrDesc": "Nostr adalah protokol terdesentralisasi untuk jejaring sosial dan identitas. Berbeda dengan login tradisional, identitas Anda tidak dikontrol oleh perusahaan manapun — Anda memiliki kunci Anda sendiri.",
+      "whatIsNip07": "Apa itu NIP-07?",
+      "whatIsNip07Desc": "NIP-07 adalah standar yang memungkinkan website meminta kunci publik Nostr Anda dari ekstensi browser. Ini berarti:",
+      "noPasswords": "Tidak perlu mengingat kata sandi",
+      "noEmailVerification": "Tidak perlu verifikasi email",
+      "cryptoSecure": "Identitas Anda diamankan secara kriptografis",
+      "controlKeys": "Anda mengontrol kunci Anda sendiri",
+      "howItWorks": "Cara kerjanya",
+      "step1": "Instal ekstensi penandatangan Nostr (kami merekomendasikan Alby)",
+      "step2": "Klik \"Hubungkan dengan Nostr\" di atas",
+      "step3": "Setujui koneksi di ekstensi Anda",
+      "step4": "Anda masuk!",
+      "dontHaveExtension": "Belum punya ekstensi Nostr? Dapatkan di sini:",
+      "alby": "Alby",
+      "nos2x": "nos2x"
+    },
     "userType": {
       "title": "Apa yang paling menggambarkan Anda?",
       "description": "Pilih opsi yang paling sesuai dengan kebutuhan Anda",
-      "loadError": "Gagal memuat tipe pengguna. Silakan coba lagi."
+      "loadError": "Gagal memuat tipe pengguna. Silakan coba lagi.",
+      "selectionLabel": "Pilihan tipe pengguna"
     },
     "language": {
       "selectLabel": "Pilih bahasa",
@@ -92,7 +314,9 @@
     "tools": {
       "label": "Alat",
       "webSearch": "Cari informasi terkini di web",
+      "webSearchName": "Web",
       "database": "Query database SQLite",
+      "databaseName": "Database",
       "knowledgeGraph": "Query graf pengetahuan"
     },
     "documentScope": {
@@ -103,7 +327,8 @@
       "docsLabel": "Dokumen"
     },
     "messages": {
-      "searching": "🔍 Mencari \"{{term}}\"...",
+      "searching": "Mencari \"{{term}}\"...",
+      "searchingPrefix": "Mencari",
       "searchResults": "Saya mencari \"{{term}}\" untuk Anda:",
       "newConversation": "Percakapan baru"
     },
@@ -119,177 +344,318 @@
       "markdown": "Markdown",
       "markdownExt": "file .md",
       "plainText": "Teks biasa",
-      "plainTextExt": "file .txt"
-    }
-  },
-  "common": {
-    "adminQuestion": "Apakah Anda admin?",
-    "signInNostr": "Masuk dengan Nostr",
-    "close": "Tutup",
-    "cancel": "Batal",
-    "save": "Simpan",
-    "saving": "Menyimpan...",
-    "saveChanges": "Simpan Perubahan",
-    "edit": "Edit",
-    "delete": "Hapus",
-    "remove": "Hapus",
-    "required": "Wajib",
-    "settings": "Pengaturan",
-    "toggleTheme": "Ganti tema",
-    "switchToLight": "Beralih ke mode terang",
-    "switchToDark": "Beralih ke mode gelap",
-    "moveUp": "Pindah ke atas",
-    "moveDown": "Pindah ke bawah",
-    "logout": "Keluar",
-    "tryAgain": "Coba lagi",
-    "continue": "Lanjutkan",
-    "unexpectedError": "Terjadi kesalahan yang tidak terduga",
-    "nullPlaceholder": "NULL",
-    "error": "Kesalahan"
-  },
-  "settings": {
-    "title": "Pengaturan",
-    "signedInAs": "Masuk sebagai",
-    "signOut": "Keluar",
-    "adminTools": "Alat Admin",
-    "admin": {
-      "instanceConfig": "Konfigurasi Instance",
-      "instanceConfigDesc": "Branding, tipe pengguna, field",
-      "testDashboard": "Dashboard Pengujian",
-      "testDashboardDesc": "Pengujian API, alat debugging",
-      "documentUpload": "Unggah Dokumen",
-      "documentUploadDesc": "Tambah dokumen ke basis pengetahuan",
-      "databaseExplorer": "Penjelajah Database",
-      "databaseExplorerDesc": "Jelajahi database SQLite"
-    }
-  },
-  "admin": {
-    "confirmDelete": "Apakah Anda yakin ingin menghapus catatan ini?",
-    "setup": {
-      "backToChat": "Kembali ke Chat",
-      "title": "Konfigurasi Instance Anda",
-      "subtitle": "Sesuaikan branding dan pengalaman onboarding pengguna",
-      "branding": "Branding Instance",
-      "displayName": "Nama Tampilan",
-      "defaultName": "Sanctum",
-      "displayNameHint": "Nama ini muncul di header dan layar onboarding",
-      "icon": "Ikon",
-      "accentColor": "Warna Aksen",
-      "userTypes": "Tipe Pengguna",
-      "userTypesHint": "Tentukan tipe pengguna yang berbeda untuk menampilkan pertanyaan onboarding khusus tipe. Jika Anda memiliki lebih dari satu tipe, pengguna akan memilih tipe mereka saat onboarding.",
-      "typeName": "Nama Tipe",
-      "typeNamePlaceholder": "contoh: Peneliti, Mahasiswa",
-      "typeDescription": "Deskripsi (opsional)",
-      "typeDescPlaceholder": "contoh: Untuk peneliti akademis",
-      "addType": "Tambah Tipe",
-      "addUserType": "Tambah Tipe Pengguna",
-      "onboardingFields": "Field Onboarding Pengguna",
-      "optionsCount": "{{count}} opsi",
-      "noFields": "Tidak ada field kustom",
-      "addField": "Tambah Field",
-      "knowledgeBase": "Basis Pengetahuan",
-      "knowledgeBaseHint": "Unggah dokumen untuk membangun basis pengetahuan RAG Anda untuk respons berbasis AI.",
-      "uploadDocuments": "Unggah Dokumen",
-      "database": "Database",
-      "databaseHint": "Lihat dan kelola data instance Anda langsung di database SQLite.",
-      "openDatabase": "Buka Penjelajah Database",
-      "save": "Simpan Konfigurasi"
+      "plainTextExt": "file .txt",
+      "defaultTitle": "Ekspor Obrolan",
+      "roleUser": "Anda",
+      "roleAssistant": "Asisten",
+      "footer": "Diekspor dari {{instanceName}}",
+      "exportedOn": "Diekspor pada {{timestamp}}"
     },
     "database": {
-      "backToSetup": "Kembali ke Pengaturan Admin",
-      "title": "Penjelajah Database",
-      "subtitle": "Lihat dan kelola data SQLite",
-      "sqlQuery": "Query SQL",
-      "refreshTables": "Segarkan tabel",
-      "tables": "Tabel",
-      "noTables": "Tidak ada tabel ditemukan",
-      "notInitialized": "Database mungkin belum diinisialisasi",
-      "columns": "kolom",
-      "sqlQueryLabel": "Query SQL",
-      "sqlPlaceholder": "SELECT * FROM users WHERE role = 'admin';",
-      "runHint": "Tekan Cmd/Ctrl + Enter untuk menjalankan",
-      "running": "Menjalankan...",
-      "runQuery": "Jalankan Query",
-      "results": "Hasil",
-      "error": "Error",
-      "rowsAffected": "baris terpengaruh",
-      "lastInsertId": "ID insert terakhir:",
-      "noResults": "Tidak ada hasil",
-      "tableInfo": "{{columns}} kolom, {{rows}} baris",
-      "addRow": "Tambah Baris",
-      "newRecord": "Rekaman Baru",
-      "editRecord": "Edit Rekaman",
-      "noData": "Tidak ada data di tabel ini",
-      "addFirstRecord": "Tambahkan rekaman pertama Anda",
-      "clickToExpand": "Klik untuk memperluas",
-      "pagination": "Menampilkan {{from}} sampai {{to}} dari {{total}}",
-      "tableCount_one": "{{count}} tabel",
-      "tableCount_other": "{{count}} tabel",
-      "rowCount_one": "{{count}} baris",
-      "rowCount_other": "{{count}} baris",
-      "rowsInTable": "{{count}} baris di {{table}}",
-      "connected": "SQLite Terhubung",
-      "selectTable": "Pilih tabel dari sidebar",
-      "orUseSqlQuery": "atau gunakan mode Query SQL"
-    },
-    "fields": {
-      "nameRequired": "Nama field wajib diisi",
-      "optionsRequired": "Minimal 2 opsi diperlukan",
-      "editField": "Edit Field",
-      "addField": "Tambah Field Baru",
-      "fieldName": "Nama Field",
-      "fieldNamePlaceholder": "contoh: Nama Perusahaan",
-      "applyTo": "Terapkan Ke",
-      "allUsers": "Semua Pengguna (Global)",
-      "globalHint": "Field global ditampilkan ke semua pengguna. Field khusus tipe hanya muncul untuk tipe pengguna tersebut.",
-      "fieldType": "Tipe Field",
-      "options": "Opsi",
-      "optionPlaceholder": "Opsi {{number}}",
-      "addOption": "+ Tambah opsi",
-      "placeholder": "Placeholder",
-      "placeholderOptional": "(opsional)",
-      "placeholderHint": "Teks petunjuk yang ditampilkan di input",
-      "requiredField": "Field wajib"
-    },
-    "fieldTypes": {
-      "text": "Teks",
-      "textDesc": "Input teks satu baris",
-      "email": "Email",
-      "emailDesc": "Email dengan validasi",
-      "number": "Angka",
-      "numberDesc": "Input numerik",
-      "textarea": "Area Teks",
-      "textareaDesc": "Teks multi-baris",
-      "select": "Dropdown",
-      "selectDesc": "Pilih dari opsi",
-      "checkbox": "Kotak Centang",
-      "checkboxDesc": "Toggle ya/tidak",
-      "date": "Tanggal",
-      "dateDesc": "Pemilih tanggal",
-      "url": "URL",
-      "urlDesc": "Tautan website"
-    },
-    "icons": {
-      "searchPlaceholder": "Cari ikon...",
-      "noMatch": "Tidak ada ikon yang cocok dengan \"{{search}}\"",
-      "selected": "Dipilih:"
+      "executedSql": "SQL yang dijalankan: {{sql}}",
+      "noResults": "Query tidak mengembalikan hasil.",
+      "resultsCount_one": "Hasil query database ({{count}} baris):",
+      "resultsCount_other": "Hasil query database ({{count}} baris):",
+      "resultsTruncated": "(Hasil dipotong menjadi 100 baris)"
     }
   },
-  "adminOnboarding": {
-    "notAdmin": "Bukan admin?",
-    "signInAsUser": "Masuk sebagai pengguna",
-    "title": "Pengaturan Admin",
-    "subtitle": "Hubungkan dengan identitas Nostr Anda untuk mengelola instance ini",
-    "connectNostr": "Hubungkan dengan Nostr",
-    "orForTesting": "atau untuk pengujian",
-    "continueMock": "Lanjutkan dengan identitas tiruan",
-    "connecting": "Menghubungkan ke ekstensi...",
-    "noExtension": "Ekstensi Nostr tidak ditemukan",
-    "installExtension": "Instal ekstensi yang kompatibel dengan NIP-07 untuk melanjutkan",
-    "useMock": "Gunakan tiruan",
-    "welcomeAdmin": "Selamat datang, Admin!",
-    "connectedAs": "Terhubung sebagai",
-    "redirecting": "Mengalihkan ke dashboard...",
-    "connectionFailed": "Koneksi gagal"
+  "errors": {
+    "requestFailed": "Permintaan gagal",
+    "invalidServerResponse": "Respons tidak valid dari server",
+    "unknownError": "Kesalahan tidak diketahui",
+    "failedToFetchDocuments": "Gagal mengambil dokumen",
+    "noResponseFromServer": "Tidak ada respons dari server",
+    "failedToSendMessage": "Gagal mengirim pesan",
+    "searchFailed": "Pencarian gagal: HTTP {{status}}",
+    "failedToSendMagicLink": "Gagal mengirim tautan ajaib",
+    "failedToFetchJobs": "Gagal mengambil pekerjaan",
+    "errorFetchingJobs": "Error mengambil pekerjaan",
+    "failedToFetchTables": "Gagal mengambil tabel",
+    "errorFetchingTables": "Error mengambil tabel",
+    "failedToFetchTableData": "Gagal mengambil data tabel",
+    "verificationFailed": "Verifikasi gagal",
+    "failedToFetchFields": "Gagal mengambil field",
+    "errorFetchingFields": "Error mengambil field",
+    "failedToFetchAIConfig": "Gagal mengambil konfigurasi AI",
+    "failedToPreviewPrompt": "Gagal melihat pratinjau prompt",
+    "failedToFetchDocumentDefaults": "Gagal mengambil default dokumen",
+    "failedToUpdateDocument": "Gagal memperbarui dokumen",
+    "failedToBatchUpdate": "Gagal memperbarui batch",
+    "failedToFetchDeploymentConfig": "Gagal mengambil konfigurasi deployment",
+    "failedToExport": "Gagal mengekspor",
+    "failedToValidate": "Gagal memvalidasi",
+    "failedToRevealSecret": "Gagal menampilkan rahasia",
+    "failedToFetchServiceHealth": "Gagal mengambil kesehatan layanan",
+    "failedToFetchAuditLog": "Gagal mengambil log audit",
+    "notAuthenticatedAsAdmin": "Tidak diautentikasi sebagai admin",
+    "adminSessionExpired": "Sesi admin kedaluwarsa",
+    "authenticationFailed": "Autentikasi gagal",
+    "noNostrExtension": "Ekstensi Nostr tidak ditemukan"
+  },
+  "adminDashboard": {
+    "title": "Dashboard Admin",
+    "subtitle": "Kelola konfigurasi instance Sanctum Anda",
+    "instance": "Konfigurasi Instance",
+    "instanceDesc": "Sesuaikan branding, tipe pengguna, dan field onboarding",
+    "ai": "Konfigurasi AI",
+    "aiDesc": "Konfigurasi prompt, parameter LLM, dan default dokumen",
+    "deployment": "Konfigurasi Deployment",
+    "deploymentDesc": "Kelola pengaturan lingkungan dan kesehatan layanan",
+    "upload": "Unggah Dokumen",
+    "uploadDesc": "Tambahkan dokumen ke basis pengetahuan Anda",
+    "database": "Penjelajah Database",
+    "databaseDesc": "Jelajahi dan query database SQLite"
+  },
+  "adminAI": {
+    "title": "Konfigurasi AI",
+    "subtitle": "Kontrol bagaimana AI berperilaku dan merespons pengguna Anda",
+    "promptTemplate": "Template Prompt",
+    "promptTemplateDesc": "Bentuk cara AI berkomunikasi dengan pengguna Anda",
+    "promptTemplateHint": "Pengaturan ini menentukan kepribadian dan batasan AI. Perubahan berlaku segera untuk percakapan baru.",
+    "preview": "Pratinjau",
+    "parameters": "Pengaturan Respons",
+    "parametersDesc": "Sesuaikan kualitas respons AI",
+    "parametersHint": "Pengaturan teknis ini memengaruhi kecepatan dan kualitas respons. Default berfungsi baik untuk sebagian besar kasus — hanya sesuaikan jika ada masalah.",
+    "sessionDefaults": "Default Fitur",
+    "sessionDefaultsDesc": "Atur fitur mana yang aktif secara default",
+    "sessionDefaultsHint": "Kontrol kemampuan AI mana yang diaktifkan saat pengguna memulai sesi chat baru.",
+    "documentDefaults": "Akses Dokumen",
+    "documentDefaultsDesc": "Kontrol dokumen mana yang dapat direferensikan AI",
+    "documentDefaultsHint": "Dokumen bertanda \"Tersedia\" dapat dipilih oleh pengguna. Dokumen bertanda \"Aktif Secara Default\" otomatis disertakan dalam percakapan baru.",
+    "available": "Tersedia",
+    "activeByDefault": "Aktif Secara Default",
+    "noDocuments": "Belum ada dokumen yang diunggah",
+    "promptPreview": "Pratinjau Prompt",
+    "invalidJson": "Format JSON tidak valid",
+    "chunks": "bagian"
+  },
+  "adminDeployment": {
+    "title": "Konfigurasi Deployment",
+    "subtitle": "Kelola koneksi server dan pengaturan infrastruktur Anda",
+    "serviceHealth": "Kesehatan Layanan",
+    "serviceHealthDesc": "Pantau layanan yang terhubung",
+    "serviceHealthHint": "Hijau berarti layanan merespons normal. Jika layanan menunjukkan merah, periksa konfigurasinya di bawah.",
+    "refresh": "Segarkan",
+    "restartRequired": "Diperlukan restart layanan",
+    "validate": "Validasi Konfigurasi",
+    "exportEnv": "Ekspor .env",
+    "auditLog": "Perubahan Terbaru",
+    "configValid": "Konfigurasi Valid",
+    "configInvalid": "Konfigurasi Tidak Valid",
+    "noRecentChanges": "Tidak ada perubahan terbaru",
+    "exportFailed": "Ekspor gagal",
+    "validationFailed": "Permintaan validasi gagal",
+    "requiresRestart": "Memerlukan Restart",
+    "secret": "Rahasia",
+    "leaveEmptyForSecret": "Kosongkan untuk mempertahankan nilai saat ini"
+  },
+  "upload": {
+    "invalidFileType": "Jenis file tidak valid. Diizinkan: {{extensions}}",
+    "title": "Unggah Dokumen",
+    "subtitle": "Tambahkan dokumen ke basis pengetahuan Anda untuk RAG",
+    "uploadFile": "Unggah File",
+    "dropFileHere": "Letakkan file di sini",
+    "dropOrBrowse": "Letakkan file di sini atau klik untuk menjelajah",
+    "supported": "Didukung: {{extensions}}",
+    "removeFile": "Hapus file",
+    "uploading": "Mengunggah...",
+    "uploadDocument": "Unggah Dokumen",
+    "recentUploads": "Unggahan Terbaru",
+    "noUploads": "Belum ada unggahan",
+    "backToDashboard": "Kembali ke Dashboard",
+    "backToSetup": "Kembali ke Pengaturan",
+    "status": {
+      "queued": "Antrian",
+      "processing": "Memproses",
+      "chunked": "Dipotong",
+      "complete": "Selesai",
+      "failed": "Gagal"
+    },
+    "chunks": "{{processed}}/{{total}} potongan"
+  },
+  "configCategories": {
+    "llm": {
+      "label": "Penyedia AI",
+      "description": "Hubungkan ke layanan AI Anda",
+      "hint": "Konfigurasi layanan AI mana yang menggerakkan asisten Anda. Anda memerlukan API key dari penyedia pilihan Anda (misalnya OpenAI, Anthropic). Perubahan memerlukan restart layanan untuk berlaku."
+    },
+    "embedding": {
+      "label": "Pemrosesan Teks",
+      "description": "Konfigurasi cara dokumen dianalisis",
+      "hint": "Pengaturan ini mengontrol bagaimana dokumen Anda dikonversi menjadi data yang dapat dicari. Default berfungsi baik untuk sebagian besar kasus — hanya ubah jika Anda menggunakan model kustom."
+    },
+    "email": {
+      "label": "Layanan Email",
+      "description": "Siapkan email untuk autentikasi pengguna",
+      "hint": "Konfigurasi email untuk mengirim tautan ajaib ke pengguna saat masuk. Anda memerlukan kredensial SMTP dari layanan email seperti SendGrid, Mailgun, atau server email Anda sendiri."
+    },
+    "storage": {
+      "label": "Penyimpanan Data",
+      "description": "Konfigurasi tempat data disimpan",
+      "hint": "Kontrol jalur file untuk database dan dokumen yang diunggah. Ini biasanya tidak perlu diubah kecuali Anda menyesuaikan deployment Anda."
+    },
+    "security": {
+      "label": "Keamanan & URL",
+      "description": "Konfigurasi pengaturan akses dan keamanan",
+      "hint": "Atur URL publik dan opsi keamanan Anda. URL frontend adalah tempat pengguna mengakses aplikasi. Pastikan ini sesuai dengan deployment aktual Anda."
+    },
+    "search": {
+      "label": "Pencarian Web",
+      "description": "Aktifkan kemampuan pencarian web AI",
+      "hint": "Konfigurasi mesin pencari yang menggerakkan fitur pencarian web AI. Saat diaktifkan, AI dapat mencari informasi terkini secara online."
+    },
+    "general": {
+      "label": "Umum",
+      "description": "Opsi konfigurasi lainnya",
+      "hint": "Pengaturan lain-lain yang tidak masuk ke kategori lain."
+    }
+  },
+  "promptSections": {
+    "prompt_tone": {
+      "label": "Nada & Kepribadian",
+      "description": "Bagaimana AI seharusnya terdengar saat merespons",
+      "hint": "Ini mengatur suara dan cara keseluruhan AI. Misalnya, Anda mungkin ingin \"hangat dan mendukung\" untuk aplikasi konseling, atau \"ringkas dan profesional\" untuk alat bisnis. AI akan menggunakan ini sebagai panduan untuk setiap respons.",
+      "placeholder": "Jadilah membantu, ringkas, dan profesional..."
+    },
+    "prompt_rules": {
+      "label": "Aturan Perilaku",
+      "description": "Instruksi spesifik yang harus diikuti AI",
+      "hint": "Tambahkan aturan sebagai daftar JSON seperti [\"Selalu kutip sumber\", \"Batasi respons di bawah 200 kata\"]. Ini adalah pedoman tegas yang akan diikuti AI di setiap percakapan.",
+      "placeholder": "[\"Aturan 1\", \"Aturan 2\", ...]"
+    },
+    "prompt_forbidden": {
+      "label": "Topik Terlarang",
+      "description": "Topik yang harus ditolak AI untuk dibahas",
+      "hint": "Daftar topik yang Anda ingin AI dengan sopan mengalihkan pembicaraan. Misalnya, [\"saran medis\", \"nasihat hukum\"]. AI akan mengakui permintaan ini tetapi menjelaskan bahwa ia tidak dapat membantu.",
+      "placeholder": "[\"Topik 1\", \"Topik 2\", ...]"
+    },
+    "prompt_greeting": {
+      "label": "Gaya Respons",
+      "description": "Bagaimana AI menyusun responsnya",
+      "hint": "Mengontrol preferensi format seperti apakah menggunakan poin-poin, header, atau paragraf percakapan. Ini memengaruhi bagaimana jawaban disajikan secara visual.",
+      "placeholder": "Gunakan poin-poin untuk daftar, header untuk bagian..."
+    }
+  },
+  "parameters": {
+    "temperature": {
+      "label": "Tingkat Kreativitas",
+      "description": "Seberapa dapat diprediksi vs. kreatif respons AI",
+      "hint": "Nilai lebih rendah (0.0-0.3) membuat respons lebih fokus dan konsisten — baik untuk Q&A faktual. Nilai lebih tinggi (0.7-1.0) membuat respons lebih bervariasi dan kreatif — lebih baik untuk brainstorming. Default: 0.7"
+    },
+    "top_k": {
+      "label": "Kedalaman Pengetahuan",
+      "description": "Berapa banyak bagian dokumen yang direferensikan",
+      "hint": "Saat menjawab pertanyaan, AI mencari dokumen yang Anda unggah dan mengambil bagian yang relevan. Angka lebih tinggi berarti lebih banyak konteks tetapi respons lebih lambat. Angka lebih rendah lebih cepat tetapi mungkin melewatkan info relevan. Default: 5"
+    }
+  },
+  "defaults": {
+    "web_search_default": {
+      "label": "Pencarian Web",
+      "description": "Izinkan AI mencari di internet",
+      "hint": "Saat diaktifkan, AI dapat mencari web untuk informasi terkini yang tidak ada di dokumen Anda. Nonaktifkan ini jika Anda ingin respons hanya berasal dari basis pengetahuan yang diunggah."
+    }
+  },
+  "colors": {
+    "blue": "Biru",
+    "purple": "Ungu",
+    "green": "Hijau",
+    "orange": "Oranye",
+    "pink": "Merah Muda",
+    "teal": "Teal"
+  },
+  "promptPreview": {
+    "sampleQuestion": "Apa yang harus saya ketahui tentang topik ini?"
+  },
+  "deploymentConfigItems": {
+    "LLM_PROVIDER": {
+      "label": "AI Service",
+      "description": "LLM provider (maple, ollama)",
+      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+    },
+    "LLM_MODEL": {
+      "label": "Model Name",
+      "description": "Model name/identifier",
+      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+    },
+    "LLM_API_URL": {
+      "label": "API Endpoint",
+      "description": "Base URL for API requests",
+      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+    },
+    "RAG_TOP_K": {
+      "label": "Context Chunks",
+      "description": "Number of chunks to retrieve",
+      "hint": "How many document chunks to retrieve for each query. Higher = more context but slower. Default: 8."
+    },
+    "PDF_EXTRACT_MODE": {
+      "label": "PDF Processing",
+      "description": "PDF extraction method",
+      "hint": "\"fast\" extracts text quickly. \"quality\" uses OCR for better accuracy with scanned documents but is slower."
+    },
+    "EMBEDDING_MODEL": {
+      "label": "Embedding Model",
+      "description": "HuggingFace model for embeddings",
+      "hint": "The HuggingFace model for converting text to vectors. Only change if you need a different language or domain."
+    },
+    "SMTP_HOST": {
+      "label": "Mail Server",
+      "description": "SMTP server address",
+      "hint": "Your SMTP server address (e.g., smtp.gmail.com, smtp.sendgrid.net)."
+    },
+    "SMTP_PORT": {
+      "label": "Mail Port",
+      "description": "SMTP server port",
+      "hint": "Usually 587 for TLS or 465 for SSL. Check your email provider's settings."
+    },
+    "SMTP_USER": {
+      "label": "SMTP Username",
+      "description": "Email service username",
+      "hint": "Your email service username or API key."
+    },
+    "SMTP_PASS": {
+      "label": "SMTP Password",
+      "description": "Email service password",
+      "hint": "Your email service password or API key secret."
+    },
+    "SMTP_FROM": {
+      "label": "Sender Address",
+      "description": "From address for emails",
+      "hint": "The \"from\" address for outgoing emails (e.g., noreply@yourdomain.com)."
+    },
+    "MOCK_SMTP": {
+      "label": "Test Mode",
+      "description": "Mock email sending",
+      "hint": "When \"true\", emails are logged instead of sent. Useful for development."
+    },
+    "SQLITE_PATH": {
+      "label": "Database File",
+      "description": "Path to SQLite database",
+      "hint": "Path to the SQLite database file. Default: /data/sanctum.db"
+    },
+    "UPLOADS_DIR": {
+      "label": "Uploads Folder",
+      "description": "Document uploads directory",
+      "hint": "Directory where uploaded documents are stored. Default: /uploads"
+    },
+    "QDRANT_HOST": {
+      "label": "Vector DB Host",
+      "description": "Qdrant server hostname",
+      "hint": "Hostname for the Qdrant vector database. Default: qdrant"
+    },
+    "QDRANT_PORT": {
+      "label": "Vector DB Port",
+      "description": "Qdrant REST API port",
+      "hint": "Port for Qdrant (REST API). Default: 6333"
+    },
+    "SEARXNG_URL": {
+      "label": "Search Engine URL",
+      "description": "SearXNG instance URL",
+      "hint": "URL of your SearXNG instance for web search functionality."
+    },
+    "FRONTEND_URL": {
+      "label": "App URL",
+      "description": "Public URL for the application",
+      "hint": "The public URL where users access the app. Used for generating magic links."
+    }
   }
 }

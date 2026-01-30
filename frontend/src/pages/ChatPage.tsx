@@ -135,10 +135,12 @@ export function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [selectedTools, setSelectedTools] = useState<string[]>(['web-search'])
+  const [selectedTools, setSelectedTools] = useState<string[]>([])
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([])
   const [ragSessionId, setRagSessionId] = useState<string | null>(null)
   const [documents, setDocuments] = useState<DocumentSource[]>([])
+  const [sessionDefaultsLoaded, setSessionDefaultsLoaded] = useState(false)
+  const [pendingDefaultDocs, setPendingDefaultDocs] = useState<string[]>([])
 
   // Build available tools list - db-query only visible to admins
   const availableTools = useMemo<Tool[]>(() => {
@@ -190,6 +192,42 @@ export function ChatPage() {
     }
   }, [navigate])
 
+  // Fetch session defaults from admin config
+  useEffect(() => {
+    if (sessionDefaultsLoaded) return
+
+    const fetchSessionDefaults = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/session-defaults`)
+        if (res.ok) {
+          const data = await res.json()
+          // Apply web search default
+          if (data.web_search_enabled) {
+            setSelectedTools(['web-search'])
+          } else {
+            setSelectedTools([])
+          }
+          // Store default document IDs to apply once documents are loaded
+          if (data.default_document_ids && data.default_document_ids.length > 0) {
+            setPendingDefaultDocs(data.default_document_ids)
+          }
+        } else {
+          // Non-2xx response - fall back to web search enabled by default
+          console.warn('Failed to fetch session defaults:', res.status)
+          setSelectedTools(['web-search'])
+        }
+      } catch (err) {
+        console.error('Failed to fetch session defaults:', err)
+        // Fall back to web search enabled by default on error
+        setSelectedTools(['web-search'])
+      } finally {
+        setSessionDefaultsLoaded(true)
+      }
+    }
+
+    fetchSessionDefaults()
+  }, [sessionDefaultsLoaded])
+
   // Fetch available documents from ingest jobs
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -217,6 +255,18 @@ export function ChatPage() {
     }
     fetchDocuments()
   }, [])
+
+  // Apply pending default documents once documents are loaded
+  useEffect(() => {
+    if (pendingDefaultDocs.length > 0 && documents.length > 0) {
+      // Filter to only include IDs that exist in the documents list
+      const validIds = pendingDefaultDocs.filter(id => documents.some(d => d.id === id))
+      if (validIds.length > 0) {
+        setSelectedDocuments(validIds)
+      }
+      setPendingDefaultDocs([])
+    }
+  }, [pendingDefaultDocs, documents])
 
   const handleToolToggle = useCallback((toolId: string) => {
     if (toolId === 'db-query' && !selectedTools.includes('db-query') && selectedDocuments.length > 0) {
@@ -423,8 +473,9 @@ IMPORTANT: Return a CONDENSED response:
       }
       
       // Remove the "Searching..." message and add results
+      const searchingPrefix = `🔍 ${t('chat.messages.searchingPrefix')}`
       setMessages((prev) => {
-        const withoutSearching = prev.filter(m => !m.content.startsWith('🔍 Searching'))
+        const withoutSearching = prev.filter(m => !m.content.startsWith(searchingPrefix))
         return [...withoutSearching, searchResultMessage]
       })
       
@@ -450,7 +501,8 @@ IMPORTANT: Return a CONDENSED response:
     } catch (e) {
       console.error('Auto-search failed:', e)
       // Remove searching message on error
-      setMessages((prev) => prev.filter(m => !m.content.startsWith('🔍 Searching')))
+      const searchingPrefix = `🔍 ${t('chat.messages.searchingPrefix')}`
+      setMessages((prev) => prev.filter(m => !m.content.startsWith(searchingPrefix)))
     }
   }
 

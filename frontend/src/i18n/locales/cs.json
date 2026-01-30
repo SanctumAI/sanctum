@@ -1,5 +1,23 @@
 {
   "onboarding": {
+    "nostr": {
+      "whatIsNostr": "Co je Nostr?",
+      "whatIsNostrDesc": "Nostr je decentralizovaný protokol pro sociální sítě a identitu. Na rozdíl od tradičních přihlášení vaši identitu nekontroluje žádná společnost — vlastníte své klíče.",
+      "whatIsNip07": "Co je NIP-07?",
+      "whatIsNip07Desc": "NIP-07 je standard, který umožňuje webům požádat o váš veřejný klíč Nostr z rozšíření prohlížeče. To znamená:",
+      "noPasswords": "Žádná hesla k zapamatování",
+      "noEmailVerification": "Není potřeba ověření e-mailu",
+      "cryptoSecure": "Vaše identita je kryptograficky zabezpečená",
+      "controlKeys": "Máte kontrolu nad svými klíči",
+      "howItWorks": "Jak to funguje",
+      "step1": "Nainstalujte rozšíření pro podepisování Nostr (doporučujeme Alby)",
+      "step2": "Klikněte na \"Připojit s Nostr\" výše",
+      "step3": "Schvalte připojení ve svém rozšíření",
+      "step4": "Jste přihlášeni!",
+      "dontHaveExtension": "Nemáte rozšíření Nostr? Získejte ho zde:",
+      "alby": "Alby",
+      "nos2x": "nos2x"
+    },
     "userType": {
       "title": "Co vás nejlépe vystihuje?",
       "description": "Vyberte možnost, která nejlépe odpovídá vašim potřebám",
@@ -104,6 +122,7 @@
     },
     "messages": {
       "searching": "🔍 Hledám \"{{term}}\"...",
+      "searchingPrefix": "Vyhledávání",
       "searchResults": "Vyhledal jsem \"{{term}}\" pro vás:",
       "newConversation": "Nová konverzace"
     },
@@ -119,7 +138,12 @@
       "markdown": "Markdown",
       "markdownExt": "soubor .md",
       "plainText": "Prostý text",
-      "plainTextExt": "soubor .txt"
+      "plainTextExt": "soubor .txt",
+      "defaultTitle": "Export chatu",
+      "roleUser": "Vy",
+      "roleAssistant": "Asistent",
+      "footer": "Exportováno z {{instanceName}}",
+      "exportedOn": "Exportováno {{timestamp}}"
     },
     "database": {
       "executedSql": "Provedený SQL: {{sql}}",
@@ -151,7 +175,12 @@
     "continue": "Pokračovat",
     "unexpectedError": "Došlo k neočekávané chybě",
     "nullPlaceholder": "NULL",
-    "error": "Chyba"
+    "error": "Chyba",
+    "back": "Zpět",
+    "loading": "Načítání...",
+    "unknown": "Neznámý",
+    "enabled": "Povoleno",
+    "disabled": "Zakázáno"
   },
   "settings": {
     "title": "Nastavení",
@@ -166,11 +195,21 @@
       "documentUpload": "Nahrání dokumentů",
       "documentUploadDesc": "Přidat dokumenty do znalostní báze",
       "databaseExplorer": "Prohlížeč databáze",
-      "databaseExplorerDesc": "Procházet SQLite databázi"
+      "databaseExplorerDesc": "Procházet SQLite databázi",
+      "instanceBranding": "Instance Branding",
+      "instanceBrandingDesc": "Colors, icons, user types",
+      "aiConfig": "AI Configuration",
+      "aiConfigDesc": "Prompts, parameters, defaults",
+      "deploymentConfig": "Deployment Config",
+      "deploymentConfigDesc": "Services, SMTP, storage"
     }
   },
   "admin": {
     "confirmDelete": "Opravdu chcete smazat tento záznam?",
+    "confirmDeleteField": "Smazat pole \"{{name}}\"?",
+    "confirmDeleteTypeWithFields": "Smazat typ uživatele \"{{name}}\"? Tím se také smaže {{count}} přidružených polí.",
+    "confirmDeleteType": "Smazat typ uživatele \"{{name}}\"?",
+    "global": "Globální",
     "setup": {
       "backToChat": "Zpět do chatu",
       "title": "Nakonfigurujte svou instanci",
@@ -236,7 +275,11 @@
       "rowsInTable": "{{count}} řádků v {{table}}",
       "connected": "SQLite připojen",
       "selectTable": "Vyberte tabulku z postranního panelu",
-      "orUseSqlQuery": "nebo použijte režim SQL dotazu"
+      "orUseSqlQuery": "nebo použijte režim SQL dotazu",
+      "encrypted": "[Šifrováno]",
+      "encryptedMissingKey": "[Šifrováno - chybí klíč]",
+      "decrypting": "[Dešifrování...]",
+      "notSet": "(nenastaveno)"
     },
     "fields": {
       "nameRequired": "Název pole je povinný",
@@ -279,6 +322,18 @@
       "searchPlaceholder": "Hledat ikony...",
       "noMatch": "Žádné ikony neodpovídají \"{{search}}\"",
       "selected": "Vybráno:"
+    },
+    "errors": {
+      "loadTypesFailed": "Nepodařilo se načíst typy uživatelů",
+      "loadFieldsFailed": "Nepodařilo se načíst uživatelská pole",
+      "loadFailed": "Nepodařilo se načíst data",
+      "saveFailed": "Nepodařilo se uložit nastavení. Zkuste to prosím znovu.",
+      "addTypeFailed": "Nepodařilo se přidat typ uživatele",
+      "removeTypeFailed": "Nepodařilo se odstranit typ uživatele",
+      "addFieldFailed": "Nepodařilo se přidat pole",
+      "updateFieldFailed": "Nepodařilo se aktualizovat pole",
+      "removeFieldFailed": "Nepodařilo se odstranit pole",
+      "reorderFailed": "Nepodařilo se změnit pořadí pole"
     }
   },
   "adminOnboarding": {
@@ -297,5 +352,304 @@
     "connectedAs": "Připojeno jako",
     "redirecting": "Přesměrování na panel...",
     "connectionFailed": "Připojení selhalo"
+  },
+  "errors": {
+    "requestFailed": "Požadavek selhal",
+    "invalidServerResponse": "Neplatná odpověď ze serveru",
+    "unknownError": "Neznámá chyba",
+    "failedToFetchDocuments": "Nepodařilo se načíst dokumenty",
+    "noResponseFromServer": "Žádná odpověď ze serveru",
+    "failedToSendMessage": "Nepodařilo se odeslat zprávu",
+    "searchFailed": "Vyhledávání selhalo: HTTP {{status}}",
+    "failedToSendMagicLink": "Nepodařilo se odeslat magický odkaz",
+    "failedToFetchJobs": "Nepodařilo se načíst úlohy",
+    "errorFetchingJobs": "Chyba při načítání úloh",
+    "failedToFetchTables": "Nepodařilo se načíst tabulky",
+    "errorFetchingTables": "Chyba při načítání tabulek",
+    "failedToFetchTableData": "Nepodařilo se načíst data tabulky",
+    "verificationFailed": "Ověření selhalo",
+    "failedToFetchFields": "Nepodařilo se načíst pole",
+    "errorFetchingFields": "Chyba při načítání polí",
+    "failedToFetchAIConfig": "Nepodařilo se načíst konfiguraci AI",
+    "failedToPreviewPrompt": "Nepodařilo se zobrazit náhled promptu",
+    "failedToFetchDocumentDefaults": "Nepodařilo se načíst výchozí nastavení dokumentů",
+    "failedToUpdateDocument": "Nepodařilo se aktualizovat dokument",
+    "failedToBatchUpdate": "Nepodařilo se provést hromadnou aktualizaci",
+    "failedToFetchDeploymentConfig": "Nepodařilo se načíst konfiguraci nasazení",
+    "failedToExport": "Nepodařilo se exportovat",
+    "failedToValidate": "Nepodařilo se ověřit",
+    "failedToRevealSecret": "Nepodařilo se odhalit tajemství",
+    "failedToFetchServiceHealth": "Nepodařilo se načíst stav služby",
+    "failedToFetchAuditLog": "Nepodařilo se načíst protokol auditu",
+    "notAuthenticatedAsAdmin": "Nejste přihlášen jako správce",
+    "adminSessionExpired": "Relace správce vypršela",
+    "authenticationFailed": "Ověření selhalo",
+    "noNostrExtension": "Nebyla nalezena žádná rozšíření Nostr"
+  },
+  "adminDashboard": {
+    "title": "Panel správce",
+    "subtitle": "Spravujte konfiguraci vaší instance Sanctum",
+    "instance": "Konfigurace instance",
+    "instanceDesc": "Přizpůsobte branding, typy uživatelů a pole pro registraci",
+    "ai": "Konfigurace AI",
+    "aiDesc": "Nastavte prompty, parametry LLM a výchozí dokumenty",
+    "deployment": "Konfigurace nasazení",
+    "deploymentDesc": "Spravujte nastavení prostředí a stav služeb",
+    "upload": "Nahrání dokumentů",
+    "uploadDesc": "Přidejte dokumenty do znalostní báze",
+    "database": "Prohlížeč databáze",
+    "databaseDesc": "Procházejte a dotazujte SQLite databázi"
+  },
+  "adminAI": {
+    "title": "Konfigurace AI",
+    "subtitle": "Ovládejte, jak se AI chová a odpovídá vašim uživatelům",
+    "promptTemplate": "Šablona promptu",
+    "promptTemplateDesc": "Určete, jak AI komunikuje s vašimi uživateli",
+    "promptTemplateHint": "Tato nastavení definují osobnost a hranice AI. Změny se projeví okamžitě pro nové konverzace.",
+    "preview": "Náhled",
+    "parameters": "Nastavení odpovědí",
+    "parametersDesc": "Dolaďte kvalitu odpovědí AI",
+    "parametersHint": "Tato technická nastavení ovlivňují rychlost a kvalitu odpovědí. Výchozí hodnoty fungují dobře pro většinu případů — upravujte pouze pokud zaznamenáte problémy.",
+    "sessionDefaults": "Výchozí funkce",
+    "sessionDefaultsDesc": "Nastavte, které funkce jsou ve výchozím stavu zapnuté",
+    "sessionDefaultsHint": "Ovládejte, které schopnosti AI jsou povoleny, když uživatelé zahájí novou chatovou relaci.",
+    "documentDefaults": "Přístup k dokumentům",
+    "documentDefaultsDesc": "Ovládejte, které dokumenty může AI používat",
+    "documentDefaultsHint": "Dokumenty označené jako \"Dostupné\" mohou uživatelé vybírat. Dokumenty označené jako \"Aktivní ve výchozím stavu\" jsou automaticky zahrnuty do nových konverzací.",
+    "available": "Dostupné",
+    "activeByDefault": "Aktivní ve výchozím stavu",
+    "noDocuments": "Zatím nebyly nahrány žádné dokumenty",
+    "promptPreview": "Náhled promptu",
+    "invalidJson": "Neplatný formát JSON",
+    "chunks": "bloky"
+  },
+  "adminDeployment": {
+    "title": "Konfigurace nasazení",
+    "subtitle": "Spravujte připojení k serverům a nastavení infrastruktury",
+    "serviceHealth": "Stav služeb",
+    "serviceHealthDesc": "Sledujte připojené služby",
+    "serviceHealthHint": "Zelená znamená, že služba odpovídá normálně. Pokud je služba červená, zkontrolujte její konfiguraci níže.",
+    "refresh": "Obnovit",
+    "restartRequired": "Vyžadován restart služby",
+    "validate": "Ověřit konfiguraci",
+    "exportEnv": "Exportovat .env",
+    "auditLog": "Nedávné změny",
+    "configValid": "Konfigurace je platná",
+    "configInvalid": "Konfigurace je neplatná",
+    "noRecentChanges": "Žádné nedávné změny",
+    "exportFailed": "Export selhal",
+    "validationFailed": "Požadavek na ověření selhal",
+    "requiresRestart": "Vyžaduje restart",
+    "secret": "Tajné",
+    "leaveEmptyForSecret": "Ponechte prázdné pro zachování aktuální hodnoty"
+  },
+  "upload": {
+    "invalidFileType": "Neplatný typ souboru. Povoleno: {{extensions}}",
+    "title": "Nahrát dokumenty",
+    "subtitle": "Přidejte dokumenty do znalostní báze pro RAG",
+    "uploadFile": "Nahrát soubor",
+    "dropFileHere": "Přetáhněte soubor sem",
+    "dropOrBrowse": "Přetáhněte soubor sem nebo klikněte pro procházení",
+    "supported": "Podporované: {{extensions}}",
+    "removeFile": "Odebrat soubor",
+    "uploading": "Nahrávání...",
+    "uploadDocument": "Nahrát dokument",
+    "recentUploads": "Nedávné nahrávky",
+    "noUploads": "Zatím žádné nahrávky",
+    "backToDashboard": "Zpět na panel",
+    "backToSetup": "Zpět na nastavení",
+    "status": {
+      "queued": "Ve frontě",
+      "processing": "Zpracovává se",
+      "chunked": "Rozděleno",
+      "complete": "Dokončeno",
+      "failed": "Selhalo"
+    },
+    "chunks": "{{processed}}/{{total}} částí"
+  },
+  "configCategories": {
+    "llm": {
+      "label": "Poskytovatel AI",
+      "description": "Připojte se k vaší AI službě",
+      "hint": "Nakonfigurujte, která AI služba pohání vašeho asistenta. Budete potřebovat API klíč od zvoleného poskytovatele (např. OpenAI, Anthropic). Změny vyžadují restart služby."
+    },
+    "embedding": {
+      "label": "Zpracování textu",
+      "description": "Nakonfigurujte, jak jsou dokumenty analyzovány",
+      "hint": "Tato nastavení řídí, jak jsou vaše dokumenty převáděny na prohledávatelná data. Výchozí hodnoty fungují dobře pro většinu případů — měňte pouze pokud používáte vlastní model."
+    },
+    "email": {
+      "label": "E-mailová služba",
+      "description": "Nastavte e-mail pro ověření uživatelů",
+      "hint": "Nakonfigurujte e-mail pro odesílání magických odkazů uživatelům při přihlášení. Budete potřebovat SMTP přihlašovací údaje od e-mailové služby jako SendGrid, Mailgun nebo vlastního poštovního serveru."
+    },
+    "storage": {
+      "label": "Úložiště dat",
+      "description": "Nakonfigurujte, kam se ukládají data",
+      "hint": "Ovládejte cesty k souborům pro databázi a nahrané dokumenty. Obvykle není potřeba měnit, pokud nepřizpůsobujete své nasazení."
+    },
+    "security": {
+      "label": "Zabezpečení a URL",
+      "description": "Nakonfigurujte nastavení přístupu a zabezpečení",
+      "hint": "Nastavte veřejné URL a možnosti zabezpečení. URL frontendu je místo, kde uživatelé přistupují k aplikaci. Ujistěte se, že odpovídají vašemu skutečnému nasazení."
+    },
+    "search": {
+      "label": "Webové vyhledávání",
+      "description": "Povolte schopnosti AI prohledávat web",
+      "hint": "Nakonfigurujte vyhledávač, který pohání funkci webového vyhledávání AI. Když je povoleno, AI může vyhledávat aktuální informace online."
+    },
+    "general": {
+      "label": "Obecné",
+      "description": "Další možnosti konfigurace",
+      "hint": "Různá nastavení, která se nehodí do jiných kategorií."
+    }
+  },
+  "promptSections": {
+    "prompt_tone": {
+      "label": "Tón a osobnost",
+      "description": "Jak by měla AI znít při odpovídání",
+      "hint": "Toto nastavuje celkový hlas a způsob AI. Například můžete chtít, aby byla \"vřelá a podporující\" pro poradenskou aplikaci, nebo \"stručná a profesionální\" pro obchodní nástroj. AI bude toto používat jako vodítko pro každou odpověď.",
+      "placeholder": "Buďte nápomocní, struční a profesionální..."
+    },
+    "prompt_rules": {
+      "label": "Pravidla chování",
+      "description": "Konkrétní instrukce, které AI musí dodržovat",
+      "hint": "Přidejte pravidla jako JSON seznam, např. [\"Vždy uvádějte zdroje\", \"Odpovědi udržujte pod 200 slov\"]. Toto jsou pevné pokyny, které se AI bude snažit dodržovat v každé konverzaci.",
+      "placeholder": "[\"Pravidlo 1\", \"Pravidlo 2\", ...]"
+    },
+    "prompt_forbidden": {
+      "label": "Zakázaná témata",
+      "description": "Témata, o kterých by AI měla odmítnout diskutovat",
+      "hint": "Vypište témata, od kterých chcete, aby AI zdvořile odklonila konverzaci. Například [\"lékařské rady\", \"právní poradenství\"]. AI tyto požadavky uzná, ale vysvětlí, že s nimi nemůže pomoci.",
+      "placeholder": "[\"Téma 1\", \"Téma 2\", ...]"
+    },
+    "prompt_greeting": {
+      "label": "Styl odpovědí",
+      "description": "Jak AI strukturuje své odpovědi",
+      "hint": "Ovládá preference formátování, jako zda používat odrážky, nadpisy nebo konverzační odstavce. Toto ovlivňuje, jak jsou odpovědi vizuálně prezentovány.",
+      "placeholder": "Používejte odrážky pro seznamy, nadpisy pro sekce..."
+    }
+  },
+  "parameters": {
+    "temperature": {
+      "label": "Úroveň kreativity",
+      "description": "Jak předvídatelné vs. kreativní jsou odpovědi AI",
+      "hint": "Nižší hodnoty (0.0-0.3) činí odpovědi soustředěnější a konzistentnější — dobré pro faktické otázky a odpovědi. Vyšší hodnoty (0.7-1.0) činí odpovědi rozmanitější a kreativnější — lepší pro brainstorming. Výchozí: 0.7"
+    },
+    "top_k": {
+      "label": "Hloubka znalostí",
+      "description": "Kolik částí dokumentů se má použít jako reference",
+      "hint": "Při odpovídání na otázky AI prohledává vaše nahrané dokumenty a získává relevantní části. Vyšší čísla znamenají více kontextu, ale pomalejší odpovědi. Nižší čísla jsou rychlejší, ale mohou minout relevantní informace. Výchozí: 5"
+    }
+  },
+  "defaults": {
+    "web_search_default": {
+      "label": "Webové vyhledávání",
+      "description": "Povolit AI prohledávat internet",
+      "hint": "Když je povoleno, AI může prohledávat web pro aktuální informace, které nejsou ve vašich dokumentech. Zakažte toto, pokud chcete, aby odpovědi pocházely pouze z vaší nahrané znalostní báze."
+    }
+  },
+  "colors": {
+    "blue": "Modrá",
+    "purple": "Fialová",
+    "green": "Zelená",
+    "orange": "Oranžová",
+    "pink": "Růžová",
+    "teal": "Tyrkysová"
+  },
+  "promptPreview": {
+    "sampleQuestion": "Co bych měl vědět o tomto tématu?"
+  },
+  "deploymentConfigItems": {
+    "LLM_PROVIDER": {
+      "label": "AI Service",
+      "description": "LLM provider (maple, ollama)",
+      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+    },
+    "LLM_MODEL": {
+      "label": "Model Name",
+      "description": "Model name/identifier",
+      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+    },
+    "LLM_API_URL": {
+      "label": "API Endpoint",
+      "description": "Base URL for API requests",
+      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+    },
+    "RAG_TOP_K": {
+      "label": "Context Chunks",
+      "description": "Number of chunks to retrieve",
+      "hint": "How many document chunks to retrieve for each query. Higher = more context but slower. Default: 8."
+    },
+    "PDF_EXTRACT_MODE": {
+      "label": "PDF Processing",
+      "description": "PDF extraction method",
+      "hint": "\"fast\" extracts text quickly. \"quality\" uses OCR for better accuracy with scanned documents but is slower."
+    },
+    "EMBEDDING_MODEL": {
+      "label": "Embedding Model",
+      "description": "HuggingFace model for embeddings",
+      "hint": "The HuggingFace model for converting text to vectors. Only change if you need a different language or domain."
+    },
+    "SMTP_HOST": {
+      "label": "Mail Server",
+      "description": "SMTP server address",
+      "hint": "Your SMTP server address (e.g., smtp.gmail.com, smtp.sendgrid.net)."
+    },
+    "SMTP_PORT": {
+      "label": "Mail Port",
+      "description": "SMTP server port",
+      "hint": "Usually 587 for TLS or 465 for SSL. Check your email provider's settings."
+    },
+    "SMTP_USER": {
+      "label": "SMTP Username",
+      "description": "Email service username",
+      "hint": "Your email service username or API key."
+    },
+    "SMTP_PASS": {
+      "label": "SMTP Password",
+      "description": "Email service password",
+      "hint": "Your email service password or API key secret."
+    },
+    "SMTP_FROM": {
+      "label": "Sender Address",
+      "description": "From address for emails",
+      "hint": "The \"from\" address for outgoing emails (e.g., noreply@yourdomain.com)."
+    },
+    "MOCK_SMTP": {
+      "label": "Test Mode",
+      "description": "Mock email sending",
+      "hint": "When \"true\", emails are logged instead of sent. Useful for development."
+    },
+    "SQLITE_PATH": {
+      "label": "Database File",
+      "description": "Path to SQLite database",
+      "hint": "Path to the SQLite database file. Default: /data/sanctum.db"
+    },
+    "UPLOADS_DIR": {
+      "label": "Uploads Folder",
+      "description": "Document uploads directory",
+      "hint": "Directory where uploaded documents are stored. Default: /uploads"
+    },
+    "QDRANT_HOST": {
+      "label": "Vector DB Host",
+      "description": "Qdrant server hostname",
+      "hint": "Hostname for the Qdrant vector database. Default: qdrant"
+    },
+    "QDRANT_PORT": {
+      "label": "Vector DB Port",
+      "description": "Qdrant REST API port",
+      "hint": "Port for Qdrant (REST API). Default: 6333"
+    },
+    "SEARXNG_URL": {
+      "label": "Search Engine URL",
+      "description": "SearXNG instance URL",
+      "hint": "URL of your SearXNG instance for web search functionality."
+    },
+    "FRONTEND_URL": {
+      "label": "App URL",
+      "description": "Public URL for the application",
+      "hint": "The public URL where users access the app. Used for generating magic links."
+    }
   }
 }

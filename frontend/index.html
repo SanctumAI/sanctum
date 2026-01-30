@@ -11,10 +11,22 @@
     <!-- Prevent flash of wrong theme -->
     <script>
       (function() {
+        // Apply dark mode
         const theme = localStorage.getItem('sanctum-theme');
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (theme === 'dark' || (!theme && prefersDark)) {
           document.documentElement.classList.add('dark');
+        }
+
+        // Apply accent color from cached config
+        try {
+          const config = JSON.parse(localStorage.getItem('sanctum_instance_config') || '{}');
+          const validColors = ['blue', 'purple', 'green', 'orange', 'pink', 'teal'];
+          if (config.accentColor && validColors.includes(config.accentColor)) {
+            document.documentElement.classList.add('accent-' + config.accentColor);
+          }
+        } catch (e) {
+          // Ignore parse errors, React will handle defaults
         }
       })();
     </script>

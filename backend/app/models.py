@@ -105,10 +105,12 @@ class UserTypeListResponse(BaseModel):
 class FieldDefinitionCreate(BaseModel):
     """Request model for creating a user field definition"""
     field_name: str
-    field_type: str  # 'text', 'number', 'boolean', 'email', 'url', etc.
+    field_type: str  # 'text', 'number', 'boolean', 'email', 'url', 'select', etc.
     required: bool = False
     display_order: int = 0
     user_type_id: Optional[int] = None  # None = global field (shown for all types)
+    placeholder: Optional[str] = None  # Placeholder text for input
+    options: Optional[list[str]] = None  # Options for select fields
 
 
 class FieldDefinitionUpdate(BaseModel):
@@ -118,6 +120,8 @@ class FieldDefinitionUpdate(BaseModel):
     required: Optional[bool] = None
     display_order: Optional[int] = None
     user_type_id: Optional[int] = None
+    placeholder: Optional[str] = None
+    options: Optional[list[str]] = None
 
 
 class FieldDefinitionResponse(BaseModel):
@@ -128,6 +132,8 @@ class FieldDefinitionResponse(BaseModel):
     required: bool
     display_order: int
     user_type_id: Optional[int] = None  # None = global field
+    placeholder: Optional[str] = None
+    options: Optional[list[str]] = None
     created_at: Optional[str] = None
 
 
@@ -301,4 +307,169 @@ class RowMutationResponse(BaseModel):
     """Response model for row mutations"""
     success: bool
     id: Optional[int] = None
+    error: Optional[str] = None
+
+
+# --- AI Configuration Models ---
+
+class AIConfigItem(BaseModel):
+    """Single AI config item"""
+    key: str
+    value: str
+    value_type: str  # 'string', 'number', 'boolean', 'json'
+    category: str  # 'prompt_section', 'parameter', 'default'
+    description: Optional[str] = None
+    updated_at: Optional[str] = None
+
+
+class AIConfigResponse(BaseModel):
+    """Response model for AI config grouped by category"""
+    prompt_sections: list[AIConfigItem] = []
+    parameters: list[AIConfigItem] = []
+    defaults: list[AIConfigItem] = []
+
+
+class AIConfigUpdate(BaseModel):
+    """Request model for updating an AI config value"""
+    value: str
+
+
+class PromptPreviewRequest(BaseModel):
+    """Request model for previewing assembled prompt"""
+    sample_question: str = "What should I know about this topic?"
+    sample_facts: dict = {}
+
+
+class PromptPreviewResponse(BaseModel):
+    """Response model for prompt preview"""
+    assembled_prompt: str
+    sections_used: list[str]
+
+
+class SessionDefaultsResponse(BaseModel):
+    """Response model for public session defaults"""
+    web_search_enabled: bool = False
+    default_document_ids: list[str] = []
+
+
+# --- Document Defaults Models ---
+
+class DocumentDefaultItem(BaseModel):
+    """Single document default item"""
+    job_id: str
+    filename: Optional[str] = None
+    status: Optional[str] = None
+    total_chunks: Optional[int] = None
+    is_available: bool = True
+    is_default_active: bool = True
+    display_order: int = 0
+    updated_at: Optional[str] = None
+
+
+class DocumentDefaultsResponse(BaseModel):
+    """Response model for list of document defaults"""
+    documents: list[DocumentDefaultItem]
+
+
+class DocumentDefaultUpdate(BaseModel):
+    """Request model for updating document defaults"""
+    is_available: Optional[bool] = None
+    is_default_active: Optional[bool] = None
+    display_order: Optional[int] = None
+
+
+class DocumentDefaultBatchItem(BaseModel):
+    """Single item in a batch update"""
+    job_id: str
+    is_available: Optional[bool] = None
+    is_default_active: Optional[bool] = None
+    display_order: Optional[int] = None
+
+
+class DocumentDefaultsBatchUpdate(BaseModel):
+    """Request model for batch updating document defaults"""
+    updates: list[DocumentDefaultBatchItem]
+
+
+# --- Deployment Configuration Models ---
+
+class DeploymentConfigItem(BaseModel):
+    """Single deployment config item"""
+    key: str
+    value: Optional[str] = None
+    is_secret: bool = False
+    requires_restart: bool = False
+    category: str
+    description: Optional[str] = None
+    updated_at: Optional[str] = None
+
+
+class DeploymentConfigResponse(BaseModel):
+    """Response model for deployment config grouped by category"""
+    llm: list[DeploymentConfigItem] = []
+    embedding: list[DeploymentConfigItem] = []
+    email: list[DeploymentConfigItem] = []
+    storage: list[DeploymentConfigItem] = []
+    security: list[DeploymentConfigItem] = []
+    search: list[DeploymentConfigItem] = []
+    general: list[DeploymentConfigItem] = []
+
+
+class DeploymentConfigUpdate(BaseModel):
+    """Request model for updating a deployment config value"""
+    value: str
+
+
+class ServiceHealthItem(BaseModel):
+    """Health status for a single service"""
+    name: str
+    status: str  # 'healthy', 'unhealthy', 'unknown'
+    response_time_ms: Optional[int] = None
+    last_checked: Optional[str] = None
+    error: Optional[str] = None
+
+
+class ServiceHealthResponse(BaseModel):
+    """Response model for service health"""
+    services: list[ServiceHealthItem]
+    restart_required: bool = False
+    changed_keys_requiring_restart: list[str] = []
+
+
+class DeploymentValidationResponse(BaseModel):
+    """Response model for config validation"""
+    valid: bool
+    errors: list[str] = []
+    warnings: list[str] = []
+
+
+# --- Config Audit Log Models ---
+
+class ConfigAuditLogEntry(BaseModel):
+    """Single audit log entry"""
+    id: int
+    table_name: str
+    config_key: str
+    old_value: Optional[str] = None
+    new_value: Optional[str] = None
+    changed_by: str
+    changed_at: str
+
+
+class ConfigAuditLogResponse(BaseModel):
+    """Response model for audit log"""
+    entries: list[ConfigAuditLogEntry]
+
+
+# --- Test Email Models ---
+
+class TestEmailRequest(BaseModel):
+    """Request model for sending a test email"""
+    email: str
+
+
+class TestEmailResponse(BaseModel):
+    """Response model for test email result"""
+    success: bool
+    message: str
     error: Optional[str] = None

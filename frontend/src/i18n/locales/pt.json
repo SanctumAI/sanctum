@@ -1,5 +1,23 @@
 {
   "onboarding": {
+    "nostr": {
+      "whatIsNostr": "O que é Nostr?",
+      "whatIsNostrDesc": "Nostr é um protocolo descentralizado para redes sociais e identidade. Diferente dos logins tradicionais, sua identidade não é controlada por nenhuma empresa — você possui suas chaves.",
+      "whatIsNip07": "O que é NIP-07?",
+      "whatIsNip07Desc": "NIP-07 é um padrão que permite aos sites solicitar sua chave pública Nostr de uma extensão do navegador. Isso significa:",
+      "noPasswords": "Sem senhas para lembrar",
+      "noEmailVerification": "Sem necessidade de verificação de e-mail",
+      "cryptoSecure": "Sua identidade é criptograficamente segura",
+      "controlKeys": "Você controla suas próprias chaves",
+      "howItWorks": "Como funciona",
+      "step1": "Instale uma extensão de assinatura Nostr (recomendamos Alby)",
+      "step2": "Clique em \"Conectar com Nostr\" acima",
+      "step3": "Aprove a conexão na sua extensão",
+      "step4": "Você está dentro!",
+      "dontHaveExtension": "Não tem uma extensão Nostr? Obtenha uma aqui:",
+      "alby": "Alby",
+      "nos2x": "nos2x"
+    },
     "userType": {
       "title": "O que melhor descreve você?",
       "description": "Selecione a opção que melhor se adapta às suas necessidades",
@@ -104,6 +122,7 @@
     },
     "messages": {
       "searching": "🔍 Pesquisando \"{{term}}\"...",
+      "searchingPrefix": "Pesquisando",
       "searchResults": "Pesquisei \"{{term}}\" para você:",
       "newConversation": "Nova conversa"
     },
@@ -119,7 +138,12 @@
       "markdown": "Markdown",
       "markdownExt": "arquivo .md",
       "plainText": "Texto simples",
-      "plainTextExt": "arquivo .txt"
+      "plainTextExt": "arquivo .txt",
+      "defaultTitle": "Exportar Conversa",
+      "roleUser": "Você",
+      "roleAssistant": "Assistente",
+      "footer": "Exportado de {{instanceName}}",
+      "exportedOn": "Exportado em {{timestamp}}"
     },
     "database": {
       "executedSql": "SQL executado: {{sql}}",
@@ -151,7 +175,12 @@
     "continue": "Continuar",
     "unexpectedError": "Ocorreu um erro inesperado",
     "nullPlaceholder": "NULL",
-    "error": "Erro"
+    "error": "Erro",
+    "back": "Voltar",
+    "loading": "Carregando...",
+    "unknown": "Desconhecido",
+    "enabled": "Ativado",
+    "disabled": "Desativado"
   },
   "settings": {
     "title": "Configurações",
@@ -166,11 +195,33 @@
       "documentUpload": "Upload de documentos",
       "documentUploadDesc": "Adicionar documentos à base de conhecimento",
       "databaseExplorer": "Explorador de banco de dados",
-      "databaseExplorerDesc": "Navegar no banco de dados SQLite"
+      "databaseExplorerDesc": "Navegar no banco de dados SQLite",
+      "instanceBranding": "Instance Branding",
+      "instanceBrandingDesc": "Colors, icons, user types",
+      "aiConfig": "AI Configuration",
+      "aiConfigDesc": "Prompts, parameters, defaults",
+      "deploymentConfig": "Deployment Config",
+      "deploymentConfigDesc": "Services, SMTP, storage"
     }
   },
   "admin": {
     "confirmDelete": "Tem certeza de que deseja excluir este registro?",
+    "confirmDeleteField": "Excluir o campo \"{{name}}\"?",
+    "confirmDeleteTypeWithFields": "Excluir o tipo de usuário \"{{name}}\"? Isso também excluirá {{count}} campo(s) associado(s).",
+    "confirmDeleteType": "Excluir o tipo de usuário \"{{name}}\"?",
+    "global": "Global",
+    "errors": {
+      "loadTypesFailed": "Falha ao carregar tipos de usuário",
+      "loadFieldsFailed": "Falha ao carregar campos de usuário",
+      "loadFailed": "Falha ao carregar dados",
+      "saveFailed": "Falha ao salvar configurações. Por favor, tente novamente.",
+      "addTypeFailed": "Falha ao adicionar tipo de usuário",
+      "removeTypeFailed": "Falha ao remover tipo de usuário",
+      "addFieldFailed": "Falha ao adicionar campo",
+      "updateFieldFailed": "Falha ao atualizar campo",
+      "removeFieldFailed": "Falha ao remover campo",
+      "reorderFailed": "Falha ao reordenar campo"
+    },
     "setup": {
       "backToChat": "Voltar ao chat",
       "title": "Configure sua instância",
@@ -237,7 +288,11 @@
       "rowsInTable": "{{count}} linhas em {{table}}",
       "connected": "SQLite conectado",
       "selectTable": "Selecione uma tabela na barra lateral",
-      "orUseSqlQuery": "ou use o modo de consulta SQL"
+      "orUseSqlQuery": "ou use o modo de consulta SQL",
+      "encrypted": "[Criptografado]",
+      "encryptedMissingKey": "[Criptografado - Chave ausente]",
+      "decrypting": "[Descriptografando...]",
+      "notSet": "(não definido)"
     },
     "fields": {
       "nameRequired": "Nome do campo é obrigatório",
@@ -298,5 +353,309 @@
     "connectedAs": "Conectado como",
     "redirecting": "Redirecionando para o painel...",
     "connectionFailed": "Falha na conexão"
+  },
+  "adminDashboard": {
+    "title": "Painel de Administração",
+    "subtitle": "Gerencie a configuração da sua instância Sanctum",
+    "instance": "Configuração da Instância",
+    "instanceDesc": "Personalize a marca, tipos de usuário e campos de integração",
+    "ai": "Configuração de IA",
+    "aiDesc": "Configure prompts, parâmetros do LLM e padrões de documentos",
+    "deployment": "Configuração de Implantação",
+    "deploymentDesc": "Gerencie configurações de ambiente e status dos serviços",
+    "upload": "Upload de Documentos",
+    "uploadDesc": "Adicione documentos à sua base de conhecimento",
+    "database": "Explorador de Banco de Dados",
+    "databaseDesc": "Navegue e consulte o banco de dados SQLite"
+  },
+  "adminAI": {
+    "title": "Configuração de IA",
+    "subtitle": "Controle como a IA se comporta e responde aos seus usuários",
+    "promptTemplate": "Modelo de Prompt",
+    "promptTemplateDesc": "Molde como a IA se comunica com seus usuários",
+    "promptTemplateHint": "Essas configurações definem a personalidade e limites da IA. As alterações entram em vigor imediatamente para novas conversas.",
+    "preview": "Visualizar",
+    "parameters": "Configurações de Resposta",
+    "parametersDesc": "Ajuste a qualidade das respostas da IA",
+    "parametersHint": "Essas configurações técnicas afetam a velocidade e qualidade das respostas. Os padrões funcionam bem para a maioria dos casos — ajuste apenas se notar problemas.",
+    "sessionDefaults": "Recursos Padrão",
+    "sessionDefaultsDesc": "Defina quais recursos estão ativos por padrão",
+    "sessionDefaultsHint": "Controle quais capacidades de IA estão habilitadas quando os usuários iniciam uma nova sessão de chat.",
+    "documentDefaults": "Acesso a Documentos",
+    "documentDefaultsDesc": "Controle quais documentos a IA pode referenciar",
+    "documentDefaultsHint": "Documentos marcados como \"Disponível\" podem ser selecionados pelos usuários. Documentos marcados como \"Ativo por padrão\" são automaticamente incluídos em novas conversas.",
+    "available": "Disponível",
+    "activeByDefault": "Ativo por padrão",
+    "noDocuments": "Nenhum documento enviado ainda",
+    "promptPreview": "Visualização do Prompt",
+    "invalidJson": "Formato JSON inválido",
+    "chunks": "partes"
+  },
+  "adminDeployment": {
+    "title": "Configuração de Implantação",
+    "subtitle": "Gerencie suas conexões de servidor e configurações de infraestrutura",
+    "serviceHealth": "Status dos Serviços",
+    "serviceHealthDesc": "Monitore seus serviços conectados",
+    "serviceHealthHint": "Verde significa que o serviço está respondendo normalmente. Se um serviço aparecer vermelho, verifique sua configuração abaixo.",
+    "refresh": "Atualizar",
+    "restartRequired": "Reinício do serviço necessário",
+    "validate": "Validar Configuração",
+    "exportEnv": "Exportar .env",
+    "auditLog": "Alterações Recentes",
+    "configValid": "Configuração Válida",
+    "configInvalid": "Configuração Inválida",
+    "noRecentChanges": "Sem alterações recentes",
+    "exportFailed": "Falha na exportação",
+    "validationFailed": "Falha na solicitação de validação",
+    "requiresRestart": "Requer Reinício",
+    "secret": "Secreto",
+    "leaveEmptyForSecret": "Deixe vazio para manter o valor atual",
+    "sendTestEmail": "Enviar Email de Teste",
+    "testEmailTitle": "Enviar Email de Teste",
+    "testEmailDesc": "Envie um email de teste para verificar se sua configuração SMTP está funcionando corretamente.",
+    "emailAddress": "Endereço de Email",
+    "send": "Enviar"
+  },
+  "errors": {
+    "requestFailed": "A solicitação falhou",
+    "invalidServerResponse": "Resposta inválida do servidor",
+    "unknownError": "Erro desconhecido",
+    "failedToFetchDocuments": "Falha ao buscar documentos",
+    "noResponseFromServer": "Nenhuma resposta do servidor",
+    "failedToSendMessage": "Falha ao enviar mensagem",
+    "searchFailed": "A pesquisa falhou: HTTP {{status}}",
+    "failedToSendMagicLink": "Falha ao enviar link mágico",
+    "failedToFetchJobs": "Falha ao buscar tarefas",
+    "errorFetchingJobs": "Erro ao buscar tarefas",
+    "failedToFetchTables": "Falha ao buscar tabelas",
+    "errorFetchingTables": "Erro ao buscar tabelas",
+    "failedToFetchTableData": "Falha ao buscar dados da tabela",
+    "verificationFailed": "A verificação falhou",
+    "failedToFetchFields": "Falha ao buscar campos",
+    "errorFetchingFields": "Erro ao buscar campos",
+    "failedToFetchAIConfig": "Falha ao buscar configuração de IA",
+    "failedToPreviewPrompt": "Falha ao pré-visualizar prompt",
+    "failedToFetchDocumentDefaults": "Falha ao buscar padrões de documentos",
+    "failedToUpdateDocument": "Falha ao atualizar documento",
+    "failedToBatchUpdate": "Falha na atualização em lote",
+    "failedToFetchDeploymentConfig": "Falha ao buscar configuração de implantação",
+    "failedToExport": "Falha ao exportar",
+    "failedToValidate": "Falha ao validar",
+    "failedToRevealSecret": "Falha ao revelar segredo",
+    "failedToFetchServiceHealth": "Falha ao buscar status do serviço",
+    "failedToFetchAuditLog": "Falha ao buscar log de auditoria",
+    "notAuthenticatedAsAdmin": "Não autenticado como administrador",
+    "adminSessionExpired": "Sessão de administrador expirada",
+    "authenticationFailed": "Falha na autenticação",
+    "noNostrExtension": "Extensão Nostr não encontrada"
+  },
+  "upload": {
+    "invalidFileType": "Tipo de arquivo inválido. Permitido: {{extensions}}",
+    "title": "Upload de Documentos",
+    "subtitle": "Adicione documentos à sua base de conhecimento para RAG",
+    "uploadFile": "Enviar Arquivo",
+    "dropFileHere": "Solte o arquivo aqui",
+    "dropOrBrowse": "Solte o arquivo aqui ou clique para navegar",
+    "supported": "Suportados: {{extensions}}",
+    "removeFile": "Remover arquivo",
+    "uploading": "Enviando...",
+    "uploadDocument": "Enviar Documento",
+    "recentUploads": "Envios Recentes",
+    "noUploads": "Nenhum envio ainda",
+    "backToDashboard": "Voltar ao Painel",
+    "backToSetup": "Voltar à Configuração",
+    "status": {
+      "queued": "Na fila",
+      "processing": "Processando",
+      "chunked": "Fragmentado",
+      "complete": "Completo",
+      "failed": "Falhou"
+    },
+    "chunks": "{{processed}}/{{total}} fragmentos"
+  },
+  "configCategories": {
+    "llm": {
+      "label": "Provedor de IA",
+      "description": "Conecte ao seu serviço de IA",
+      "hint": "Configure qual serviço de IA alimenta seu assistente. Você precisará de uma chave API do seu provedor escolhido (ex., OpenAI, Anthropic). Alterações requerem reinício do serviço."
+    },
+    "embedding": {
+      "label": "Processamento de Texto",
+      "description": "Configure como os documentos são analisados",
+      "hint": "Essas configurações controlam como seus documentos são convertidos em dados pesquisáveis. Os padrões funcionam bem para a maioria dos casos — mude apenas se estiver usando um modelo personalizado."
+    },
+    "email": {
+      "label": "Serviço de Email",
+      "description": "Configure email para autenticação de usuários",
+      "hint": "Configure email para enviar links mágicos aos usuários durante o login. Você precisará de credenciais SMTP de um serviço de email como SendGrid, Mailgun ou seu próprio servidor de correio."
+    },
+    "storage": {
+      "label": "Armazenamento de Dados",
+      "description": "Configure onde os dados são armazenados",
+      "hint": "Controle caminhos de arquivos para o banco de dados e documentos enviados. Geralmente não precisam ser alterados a menos que você esteja personalizando sua implantação."
+    },
+    "security": {
+      "label": "Segurança e URLs",
+      "description": "Configure opções de acesso e segurança",
+      "hint": "Defina suas URLs públicas e opções de segurança. A URL do frontend é onde os usuários acessam o aplicativo. Certifique-se de que correspondam à sua implantação real."
+    },
+    "search": {
+      "label": "Busca na Web",
+      "description": "Habilite capacidades de busca web da IA",
+      "hint": "Configure o mecanismo de busca que alimenta o recurso de busca web da IA. Quando habilitado, a IA pode buscar informações atuais online."
+    },
+    "general": {
+      "label": "Geral",
+      "description": "Outras opções de configuração",
+      "hint": "Configurações diversas que não se encaixam em outras categorias."
+    }
+  },
+  "promptSections": {
+    "prompt_tone": {
+      "label": "Tom e Personalidade",
+      "description": "Como a IA deve soar ao responder",
+      "hint": "Isso define a voz e maneira geral da IA. Por exemplo, você pode querer que seja \"calorosa e encorajadora\" para um app de aconselhamento, ou \"concisa e profissional\" para uma ferramenta empresarial. A IA usará isso como guia para cada resposta.",
+      "placeholder": "Seja útil, conciso e profissional..."
+    },
+    "prompt_rules": {
+      "label": "Regras de Comportamento",
+      "description": "Instruções específicas que a IA deve seguir",
+      "hint": "Adicione regras como uma lista JSON como [\"Sempre cite fontes\", \"Mantenha respostas abaixo de 200 palavras\"]. Estas são diretrizes firmes que a IA tentará seguir em cada conversa.",
+      "placeholder": "[\"Regra 1\", \"Regra 2\", ...]"
+    },
+    "prompt_forbidden": {
+      "label": "Tópicos Proibidos",
+      "description": "Tópicos que a IA deve recusar discutir",
+      "hint": "Liste tópicos que você quer que a IA redirecione educadamente. Por exemplo, [\"conselho médico\", \"conselho jurídico\"]. A IA reconhecerá essas solicitações mas explicará que não pode ajudar com elas.",
+      "placeholder": "[\"Tópico 1\", \"Tópico 2\", ...]"
+    },
+    "prompt_greeting": {
+      "label": "Estilo de Resposta",
+      "description": "Como a IA estrutura suas respostas",
+      "hint": "Controla preferências de formatação como usar marcadores, cabeçalhos ou parágrafos conversacionais. Isso afeta como as respostas são apresentadas visualmente.",
+      "placeholder": "Use marcadores para listas, cabeçalhos para seções..."
+    }
+  },
+  "parameters": {
+    "temperature": {
+      "label": "Nível de Criatividade",
+      "description": "Quão previsíveis vs. criativas são as respostas da IA",
+      "hint": "Valores baixos (0.0-0.3) tornam as respostas mais focadas e consistentes — bom para perguntas factuais. Valores altos (0.7-1.0) tornam as respostas mais variadas e criativas — melhor para brainstorming. Padrão: 0.7"
+    },
+    "top_k": {
+      "label": "Profundidade do Conhecimento",
+      "description": "Quantas seções de documentos referenciar",
+      "hint": "Ao responder perguntas, a IA pesquisa seus documentos enviados e traz seções relevantes. Números mais altos significam mais contexto mas respostas mais lentas. Números mais baixos são mais rápidos mas podem perder informações relevantes. Padrão: 5"
+    }
+  },
+  "defaults": {
+    "web_search_default": {
+      "label": "Busca na Web",
+      "description": "Permitir que a IA pesquise na internet",
+      "hint": "Quando habilitado, a IA pode buscar na web informações atuais que não estão em seus documentos. Desabilite isso se você quiser que as respostas venham apenas da sua base de conhecimento."
+    }
+  },
+  "colors": {
+    "blue": "Azul",
+    "purple": "Roxo",
+    "green": "Verde",
+    "orange": "Laranja",
+    "pink": "Rosa",
+    "teal": "Verde-azulado"
+  },
+  "promptPreview": {
+    "sampleQuestion": "O que devo saber sobre este tópico?"
+  },
+  "deploymentConfigItems": {
+    "LLM_PROVIDER": {
+      "label": "AI Service",
+      "description": "LLM provider (maple, ollama)",
+      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+    },
+    "LLM_MODEL": {
+      "label": "Model Name",
+      "description": "Model name/identifier",
+      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+    },
+    "LLM_API_URL": {
+      "label": "API Endpoint",
+      "description": "Base URL for API requests",
+      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+    },
+    "RAG_TOP_K": {
+      "label": "Context Chunks",
+      "description": "Number of chunks to retrieve",
+      "hint": "How many document chunks to retrieve for each query. Higher = more context but slower. Default: 8."
+    },
+    "PDF_EXTRACT_MODE": {
+      "label": "PDF Processing",
+      "description": "PDF extraction method",
+      "hint": "\"fast\" extracts text quickly. \"quality\" uses OCR for better accuracy with scanned documents but is slower."
+    },
+    "EMBEDDING_MODEL": {
+      "label": "Embedding Model",
+      "description": "HuggingFace model for embeddings",
+      "hint": "The HuggingFace model for converting text to vectors. Only change if you need a different language or domain."
+    },
+    "SMTP_HOST": {
+      "label": "Mail Server",
+      "description": "SMTP server address",
+      "hint": "Your SMTP server address (e.g., smtp.gmail.com, smtp.sendgrid.net)."
+    },
+    "SMTP_PORT": {
+      "label": "Mail Port",
+      "description": "SMTP server port",
+      "hint": "Usually 587 for TLS or 465 for SSL. Check your email provider's settings."
+    },
+    "SMTP_USER": {
+      "label": "SMTP Username",
+      "description": "Email service username",
+      "hint": "Your email service username or API key."
+    },
+    "SMTP_PASS": {
+      "label": "SMTP Password",
+      "description": "Email service password",
+      "hint": "Your email service password or API key secret."
+    },
+    "SMTP_FROM": {
+      "label": "Sender Address",
+      "description": "From address for emails",
+      "hint": "The \"from\" address for outgoing emails (e.g., noreply@yourdomain.com)."
+    },
+    "MOCK_SMTP": {
+      "label": "Test Mode",
+      "description": "Mock email sending",
+      "hint": "When \"true\", emails are logged instead of sent. Useful for development."
+    },
+    "SQLITE_PATH": {
+      "label": "Database File",
+      "description": "Path to SQLite database",
+      "hint": "Path to the SQLite database file. Default: /data/sanctum.db"
+    },
+    "UPLOADS_DIR": {
+      "label": "Uploads Folder",
+      "description": "Document uploads directory",
+      "hint": "Directory where uploaded documents are stored. Default: /uploads"
+    },
+    "QDRANT_HOST": {
+      "label": "Vector DB Host",
+      "description": "Qdrant server hostname",
+      "hint": "Hostname for the Qdrant vector database. Default: qdrant"
+    },
+    "QDRANT_PORT": {
+      "label": "Vector DB Port",
+      "description": "Qdrant REST API port",
+      "hint": "Port for Qdrant (REST API). Default: 6333"
+    },
+    "SEARXNG_URL": {
+      "label": "Search Engine URL",
+      "description": "SearXNG instance URL",
+      "hint": "URL of your SearXNG instance for web search functionality."
+    },
+    "FRONTEND_URL": {
+      "label": "App URL",
+      "description": "Public URL for the application",
+      "hint": "The public URL where users access the app. Used for generating magic links."
+    }
   }
 }

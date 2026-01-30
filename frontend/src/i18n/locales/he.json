@@ -1,9 +1,28 @@
 {
   "onboarding": {
+    "nostr": {
+      "whatIsNostr": "מה זה Nostr?",
+      "whatIsNostrDesc": "Nostr הוא פרוטוקול מבוזר לרשתות חברתיות וזהות. בניגוד להתחברויות מסורתיות, הזהות שלך לא נשלטת על ידי חברה כלשהי — אתה הבעלים של המפתחות שלך.",
+      "whatIsNip07": "מה זה NIP-07?",
+      "whatIsNip07Desc": "NIP-07 הוא תקן שמאפשר לאתרים לבקש את המפתח הציבורי שלך ב-Nostr מהרחבת דפדפן. המשמעות:",
+      "noPasswords": "אין סיסמאות לזכור",
+      "noEmailVerification": "אין צורך באימות אימייל",
+      "cryptoSecure": "הזהות שלך מאובטחת קריפטוגרפית",
+      "controlKeys": "אתה שולט במפתחות שלך",
+      "howItWorks": "איך זה עובד",
+      "step1": "התקן הרחבת חתימה של Nostr (אנו ממליצים על Alby)",
+      "step2": "לחץ על \"התחבר עם Nostr\" למעלה",
+      "step3": "אשר את החיבור בהרחבה שלך",
+      "step4": "אתה בפנים!",
+      "dontHaveExtension": "אין לך הרחבת Nostr? קבל אחת כאן:",
+      "alby": "Alby",
+      "nos2x": "nos2x"
+    },
     "userType": {
       "title": "מה מתאר אותך הכי טוב?",
       "description": "בחר את האפשרות המתאימה ביותר לצרכיך",
-      "loadError": "טעינת סוגי המשתמשים נכשלה. אנא נסה שוב."
+      "loadError": "טעינת סוגי המשתמשים נכשלה. אנא נסה שוב.",
+      "selectionLabel": "בחירת סוג משתמש"
     },
     "language": {
       "selectLabel": "בחר שפה",
@@ -92,7 +111,9 @@
     "tools": {
       "label": "כלים",
       "webSearch": "חפש מידע עדכני באינטרנט",
+      "webSearchName": "אינטרנט",
       "database": "שאילתה למסד נתונים SQLite",
+      "databaseName": "מסד נתונים",
       "knowledgeGraph": "שאילתה לגרף הידע"
     },
     "documentScope": {
@@ -103,7 +124,8 @@
       "docsLabel": "מסמכים"
     },
     "messages": {
-      "searching": "🔍 מחפש \"{{term}}\"...",
+      "searching": "מחפש \"{{term}}\"...",
+      "searchingPrefix": "מחפש",
       "searchResults": "חיפשתי \"{{term}}\" עבורך:",
       "newConversation": "שיחה חדשה"
     },
@@ -119,7 +141,19 @@
       "markdown": "Markdown",
       "markdownExt": "קובץ .md",
       "plainText": "טקסט רגיל",
-      "plainTextExt": "קובץ .txt"
+      "plainTextExt": "קובץ .txt",
+      "defaultTitle": "ייצוא שיחה",
+      "roleUser": "אתה",
+      "roleAssistant": "עוזר",
+      "footer": "יוצא מ-{{instanceName}}",
+      "exportedOn": "יוצא ב-{{timestamp}}"
+    },
+    "database": {
+      "executedSql": "SQL שהורץ: {{sql}}",
+      "noResults": "השאילתה לא החזירה תוצאות.",
+      "resultsCount_one": "תוצאת שאילתת מסד נתונים (שורה {{count}}):",
+      "resultsCount_other": "תוצאות שאילתת מסד נתונים ({{count}} שורות):",
+      "resultsTruncated": "(התוצאות קוצרו ל-100 שורות)"
     }
   },
   "common": {
@@ -145,7 +179,12 @@
     "continue": "המשך",
     "unexpectedError": "אירעה שגיאה בלתי צפויה",
     "nullPlaceholder": "NULL",
-    "error": "שגיאה"
+    "error": "שגיאה",
+    "back": "חזרה",
+    "loading": "טוען...",
+    "unknown": "לא ידוע",
+    "enabled": "מופעל",
+    "disabled": "מושבת"
   },
   "settings": {
     "title": "הגדרות",
@@ -160,11 +199,21 @@
       "documentUpload": "העלאת מסמכים",
       "documentUploadDesc": "הוסף מסמכים לבסיס הידע",
       "databaseExplorer": "סייר מסד נתונים",
-      "databaseExplorerDesc": "עיין במסד נתונים SQLite"
+      "databaseExplorerDesc": "עיין במסד נתונים SQLite",
+      "instanceBranding": "Instance Branding",
+      "instanceBrandingDesc": "Colors, icons, user types",
+      "aiConfig": "AI Configuration",
+      "aiConfigDesc": "Prompts, parameters, defaults",
+      "deploymentConfig": "Deployment Config",
+      "deploymentConfigDesc": "Services, SMTP, storage"
     }
   },
   "admin": {
     "confirmDelete": "האם אתה בטוח שברצונך למחוק רשומה זו?",
+    "confirmDeleteField": "למחוק את השדה \"{{name}}\"?",
+    "confirmDeleteTypeWithFields": "למחוק את סוג המשתמש \"{{name}}\"? פעולה זו תמחק גם {{count}} שדות משויכים.",
+    "confirmDeleteType": "למחוק את סוג המשתמש \"{{name}}\"?",
+    "global": "גלובלי",
     "setup": {
       "backToChat": "חזרה לצ'אט",
       "title": "הגדר את המופע שלך",
@@ -184,7 +233,8 @@
       "addType": "הוסף סוג",
       "addUserType": "הוסף סוג משתמש",
       "onboardingFields": "שדות הרשמת משתמשים",
-      "optionsCount": "{{count}} אפשרויות",
+      "optionsCount_one": "אפשרות {{count}}",
+      "optionsCount_other": "{{count}} אפשרויות",
       "noFields": "אין שדות מותאמים אישית",
       "addField": "הוסף שדה",
       "knowledgeBase": "בסיס ידע",
@@ -227,10 +277,15 @@
       "tableCount_other": "{{count}} טבלאות",
       "rowCount_one": "שורה {{count}}",
       "rowCount_other": "{{count}} שורות",
-      "rowsInTable": "{{count}} שורות ב-{{table}}",
+      "rowsInTable_one": "שורה {{count}} ב-{{table}}",
+      "rowsInTable_other": "{{count}} שורות ב-{{table}}",
       "connected": "SQLite מחובר",
       "selectTable": "בחר טבלה מסרגל הצד",
-      "orUseSqlQuery": "או השתמש במצב שאילתת SQL"
+      "orUseSqlQuery": "או השתמש במצב שאילתת SQL",
+      "encrypted": "[מוצפן]",
+      "encryptedMissingKey": "[מוצפן - מפתח חסר]",
+      "decrypting": "[מפענח...]",
+      "notSet": "(לא הוגדר)"
     },
     "fields": {
       "nameRequired": "שם השדה הוא חובה",
@@ -273,6 +328,18 @@
       "searchPlaceholder": "חפש אייקונים...",
       "noMatch": "אין אייקונים תואמים ל-\"{{search}}\"",
       "selected": "נבחר:"
+    },
+    "errors": {
+      "loadTypesFailed": "טעינת סוגי המשתמשים נכשלה",
+      "loadFieldsFailed": "טעינת שדות המשתמשים נכשלה",
+      "loadFailed": "טעינת הנתונים נכשלה",
+      "saveFailed": "שמירת ההגדרות נכשלה. אנא נסה שוב.",
+      "addTypeFailed": "הוספת סוג משתמש נכשלה",
+      "removeTypeFailed": "הסרת סוג משתמש נכשלה",
+      "addFieldFailed": "הוספת שדה נכשלה",
+      "updateFieldFailed": "עדכון שדה נכשל",
+      "removeFieldFailed": "הסרת שדה נכשלה",
+      "reorderFailed": "שינוי סדר השדה נכשל"
     }
   },
   "adminOnboarding": {
@@ -291,5 +358,304 @@
     "connectedAs": "מחובר כ",
     "redirecting": "מפנה ללוח הבקרה...",
     "connectionFailed": "החיבור נכשל"
+  },
+  "errors": {
+    "requestFailed": "הבקשה נכשלה",
+    "invalidServerResponse": "תגובה לא תקינה מהשרת",
+    "unknownError": "שגיאה לא ידועה",
+    "failedToFetchDocuments": "שליפת המסמכים נכשלה",
+    "noResponseFromServer": "אין תגובה מהשרת",
+    "failedToSendMessage": "שליחת ההודעה נכשלה",
+    "searchFailed": "החיפוש נכשל: HTTP {{status}}",
+    "failedToSendMagicLink": "שליחת קישור הקסם נכשלה",
+    "failedToFetchJobs": "שליפת המשימות נכשלה",
+    "errorFetchingJobs": "שגיאה בשליפת משימות",
+    "failedToFetchTables": "שליפת הטבלאות נכשלה",
+    "errorFetchingTables": "שגיאה בשליפת טבלאות",
+    "failedToFetchTableData": "שליפת נתוני הטבלה נכשלה",
+    "verificationFailed": "האימות נכשל",
+    "failedToFetchFields": "שליפת השדות נכשלה",
+    "errorFetchingFields": "שגיאה בשליפת שדות",
+    "failedToFetchAIConfig": "נכשל בטעינת הגדרות AI",
+    "failedToPreviewPrompt": "נכשל בתצוגה מקדימה של הפרומפט",
+    "failedToFetchDocumentDefaults": "נכשל בטעינת ברירות מחדל של מסמכים",
+    "failedToUpdateDocument": "נכשל בעדכון המסמך",
+    "failedToBatchUpdate": "נכשל בעדכון קבוצתי",
+    "failedToFetchDeploymentConfig": "נכשל בטעינת הגדרות פריסה",
+    "failedToExport": "נכשל בייצוא",
+    "failedToValidate": "נכשל באימות",
+    "failedToRevealSecret": "נכשל בחשיפת הסוד",
+    "failedToFetchServiceHealth": "נכשל בטעינת מצב השירות",
+    "failedToFetchAuditLog": "נכשל בטעינת יומן הביקורת",
+    "notAuthenticatedAsAdmin": "לא מאומת כמנהל",
+    "adminSessionExpired": "פג תוקף הפעילות של המנהל",
+    "authenticationFailed": "האימות נכשל",
+    "noNostrExtension": "לא נמצא תוסף Nostr"
+  },
+  "adminDashboard": {
+    "title": "לוח בקרה למנהלים",
+    "subtitle": "נהל את הגדרות מופע Sanctum שלך",
+    "instance": "הגדרות מופע",
+    "instanceDesc": "התאם אישית מיתוג, סוגי משתמשים ושדות הרשמה",
+    "ai": "הגדרות AI",
+    "aiDesc": "הגדר פרומפטים, פרמטרי LLM וברירות מחדל למסמכים",
+    "deployment": "הגדרות פריסה",
+    "deploymentDesc": "נהל הגדרות סביבה ובריאות שירותים",
+    "upload": "העלאת מסמכים",
+    "uploadDesc": "הוסף מסמכים לבסיס הידע שלך",
+    "database": "סייר מסד נתונים",
+    "databaseDesc": "עיין ושאל את מסד הנתונים SQLite"
+  },
+  "adminAI": {
+    "title": "הגדרות AI",
+    "subtitle": "שלוט באופן שבו ה-AI מתנהג ומגיב למשתמשים שלך",
+    "promptTemplate": "תבנית פרומפט",
+    "promptTemplateDesc": "עצב את אופן התקשורת של ה-AI עם המשתמשים שלך",
+    "promptTemplateHint": "הגדרות אלו מגדירות את האישיות והגבולות של ה-AI. שינויים נכנסים לתוקף מיד עבור שיחות חדשות.",
+    "preview": "תצוגה מקדימה",
+    "parameters": "הגדרות תגובה",
+    "parametersDesc": "כוונן את איכות התגובות של ה-AI",
+    "parametersHint": "הגדרות טכניות אלו משפיעות על מהירות ואיכות התגובות. ברירות המחדל עובדות היטב ברוב המקרים — שנה רק אם אתה מבחין בבעיות.",
+    "sessionDefaults": "ברירות מחדל לתכונות",
+    "sessionDefaultsDesc": "הגדר אילו תכונות מופעלות כברירת מחדל",
+    "sessionDefaultsHint": "שלוט באילו יכולות AI מופעלות כאשר משתמשים מתחילים שיחת צ'אט חדשה.",
+    "documentDefaults": "גישה למסמכים",
+    "documentDefaultsDesc": "שלוט לאילו מסמכים ה-AI יכול להתייחס",
+    "documentDefaultsHint": "מסמכים שסומנו כ\"זמינים\" ניתנים לבחירה על ידי משתמשים. מסמכים שסומנו כ\"פעילים כברירת מחדל\" נכללים אוטומטית בשיחות חדשות.",
+    "available": "זמין",
+    "activeByDefault": "פעיל כברירת מחדל",
+    "noDocuments": "עדיין לא הועלו מסמכים",
+    "promptPreview": "תצוגה מקדימה של פרומפט",
+    "invalidJson": "פורמט JSON לא תקין",
+    "chunks": "חלקים"
+  },
+  "adminDeployment": {
+    "title": "הגדרות פריסה",
+    "subtitle": "נהל את חיבורי השרת והגדרות התשתית שלך",
+    "serviceHealth": "בריאות שירותים",
+    "serviceHealthDesc": "עקוב אחר השירותים המחוברים שלך",
+    "serviceHealthHint": "ירוק אומר שהשירות מגיב כרגיל. אם שירות מציג אדום, בדוק את ההגדרות שלו למטה.",
+    "refresh": "רענן",
+    "restartRequired": "נדרש אתחול שירות",
+    "validate": "אמת הגדרות",
+    "exportEnv": "ייצא .env",
+    "auditLog": "שינויים אחרונים",
+    "configValid": "ההגדרות תקינות",
+    "configInvalid": "ההגדרות לא תקינות",
+    "noRecentChanges": "אין שינויים אחרונים",
+    "exportFailed": "הייצוא נכשל",
+    "validationFailed": "בקשת האימות נכשלה",
+    "requiresRestart": "דורש אתחול",
+    "secret": "סודי",
+    "leaveEmptyForSecret": "השאר ריק כדי לשמור על הערך הנוכחי"
+  },
+  "upload": {
+    "invalidFileType": "סוג קובץ לא חוקי. מותר: {{extensions}}",
+    "title": "העלה מסמכים",
+    "subtitle": "הוסף מסמכים לבסיס הידע שלך עבור RAG",
+    "uploadFile": "העלה קובץ",
+    "dropFileHere": "שחרר קובץ כאן",
+    "dropOrBrowse": "שחרר קובץ כאן או לחץ לעיון",
+    "supported": "נתמכים: {{extensions}}",
+    "removeFile": "הסר קובץ",
+    "uploading": "מעלה...",
+    "uploadDocument": "העלה מסמך",
+    "recentUploads": "העלאות אחרונות",
+    "noUploads": "עדיין אין העלאות",
+    "backToDashboard": "חזרה ללוח הבקרה",
+    "backToSetup": "חזרה להגדרות",
+    "status": {
+      "queued": "בתור",
+      "processing": "מעבד",
+      "chunked": "פוצל",
+      "complete": "הושלם",
+      "failed": "נכשל"
+    },
+    "chunks": "{{processed}}/{{total}} חלקים"
+  },
+  "configCategories": {
+    "llm": {
+      "label": "ספק AI",
+      "description": "התחבר לשירות ה-AI שלך",
+      "hint": "הגדר איזה שירות AI מפעיל את העוזר שלך. תצטרך מפתח API מהספק שבחרת (למשל, OpenAI, Anthropic). שינויים דורשים אתחול שירות כדי להיכנס לתוקף."
+    },
+    "embedding": {
+      "label": "עיבוד טקסט",
+      "description": "הגדר כיצד מסמכים מנותחים",
+      "hint": "הגדרות אלו שולטות באופן שבו המסמכים שלך מומרים לנתונים הניתנים לחיפוש. ברירות המחדל עובדות היטב ברוב המקרים — שנה רק אם אתה משתמש במודל מותאם אישית."
+    },
+    "email": {
+      "label": "שירות אימייל",
+      "description": "הגדר אימייל לאימות משתמשים",
+      "hint": "הגדר אימייל לשליחת קישורי קסם למשתמשים בעת ההתחברות. תצטרך פרטי SMTP משירות אימייל כמו SendGrid, Mailgun או שרת הדואר שלך."
+    },
+    "storage": {
+      "label": "אחסון נתונים",
+      "description": "הגדר היכן נתונים מאוחסנים",
+      "hint": "שלוט בנתיבי הקבצים למסד הנתונים ולמסמכים שהועלו. בדרך כלל אין צורך לשנות אותם אלא אם כן אתה מתאים אישית את הפריסה שלך."
+    },
+    "security": {
+      "label": "אבטחה וכתובות URL",
+      "description": "הגדר גישה והגדרות אבטחה",
+      "hint": "הגדר את כתובות ה-URL הציבוריות ואפשרויות האבטחה שלך. כתובת ה-URL של הממשק היא המקום שבו משתמשים ניגשים לאפליקציה. ודא שאלו תואמים לפריסה בפועל."
+    },
+    "search": {
+      "label": "חיפוש באינטרנט",
+      "description": "אפשר יכולות חיפוש באינטרנט ל-AI",
+      "hint": "הגדר את מנוע החיפוש שמפעיל את תכונת חיפוש האינטרנט של ה-AI. כאשר מופעל, ה-AI יכול לחפש מידע עדכני באינטרנט."
+    },
+    "general": {
+      "label": "כללי",
+      "description": "אפשרויות הגדרה אחרות",
+      "hint": "הגדרות שונות שלא מתאימות לקטגוריות אחרות."
+    }
+  },
+  "promptSections": {
+    "prompt_tone": {
+      "label": "טון ואישיות",
+      "description": "איך ה-AI אמור להישמע כשהוא מגיב",
+      "hint": "זה מגדיר את הקול והאופן הכללי של ה-AI. לדוגמה, אתה עשוי לרצות שהוא יהיה \"חם ותומך\" עבור אפליקציית ייעוץ, או \"תמציתי ומקצועי\" עבור כלי עסקי. ה-AI ישתמש בזה כהנחיה לכל תגובה.",
+      "placeholder": "היה מועיל, תמציתי ומקצועי..."
+    },
+    "prompt_rules": {
+      "label": "כללי התנהגות",
+      "description": "הוראות ספציפיות שה-AI חייב לעקוב אחריהן",
+      "hint": "הוסף כללים כרשימת JSON כמו [\"תמיד ציין מקורות\", \"שמור על תגובות מתחת ל-200 מילים\"]. אלו הנחיות ברורות שה-AI ינסה לעקוב אחריהן בכל שיחה.",
+      "placeholder": "[\"כלל 1\", \"כלל 2\", ...]"
+    },
+    "prompt_forbidden": {
+      "label": "נושאים אסורים",
+      "description": "נושאים שה-AI צריך לסרב לדון בהם",
+      "hint": "רשום נושאים שאתה רוצה שה-AI יפנה מהם בנימוס. לדוגמה, [\"ייעוץ רפואי\", \"ייעוץ משפטי\"]. ה-AI יכיר בבקשות אלו אך יסביר שהוא לא יכול לעזור בהן.",
+      "placeholder": "[\"נושא 1\", \"נושא 2\", ...]"
+    },
+    "prompt_greeting": {
+      "label": "סגנון תגובה",
+      "description": "איך ה-AI מבנה את תגובותיו",
+      "hint": "שולט בהעדפות עיצוב כמו האם להשתמש בנקודות תבליט, כותרות או פסקאות שיחה. זה משפיע על אופן הצגת התשובות חזותית.",
+      "placeholder": "השתמש בנקודות תבליט לרשימות, כותרות לסעיפים..."
+    }
+  },
+  "parameters": {
+    "temperature": {
+      "label": "רמת יצירתיות",
+      "description": "כמה צפויות לעומת יצירתיות תגובות ה-AI",
+      "hint": "ערכים נמוכים (0.0-0.3) הופכים תגובות למרוכזות ועקביות יותר — טוב לשאלות ותשובות עובדתיות. ערכים גבוהים (0.7-1.0) הופכים תגובות למגוונות ויצירתיות יותר — טוב יותר לסיעור מוחות. ברירת מחדל: 0.7"
+    },
+    "top_k": {
+      "label": "עומק ידע",
+      "description": "כמה קטעי מסמכים להתייחס אליהם",
+      "hint": "כאשר עונה על שאלות, ה-AI מחפש במסמכים שהעלית ומושך קטעים רלוונטיים. מספרים גבוהים יותר משמעם יותר הקשר אך תגובות איטיות יותר. מספרים נמוכים יותר מהירים יותר אך עשויים לפספס מידע רלוונטי. ברירת מחדל: 5"
+    }
+  },
+  "defaults": {
+    "web_search_default": {
+      "label": "חיפוש באינטרנט",
+      "description": "אפשר ל-AI לחפש באינטרנט",
+      "hint": "כאשר מופעל, ה-AI יכול לחפש באינטרנט מידע עדכני שאינו במסמכים שלך. השבת זאת אם אתה רוצה שתגובות יגיעו רק מבסיס הידע שהעלית."
+    }
+  },
+  "colors": {
+    "blue": "כחול",
+    "purple": "סגול",
+    "green": "ירוק",
+    "orange": "כתום",
+    "pink": "ורוד",
+    "teal": "טורקיז"
+  },
+  "promptPreview": {
+    "sampleQuestion": "מה כדאי לי לדעת על נושא זה?"
+  },
+  "deploymentConfigItems": {
+    "LLM_PROVIDER": {
+      "label": "AI Service",
+      "description": "LLM provider (maple, ollama)",
+      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+    },
+    "LLM_MODEL": {
+      "label": "Model Name",
+      "description": "Model name/identifier",
+      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+    },
+    "LLM_API_URL": {
+      "label": "API Endpoint",
+      "description": "Base URL for API requests",
+      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+    },
+    "RAG_TOP_K": {
+      "label": "Context Chunks",
+      "description": "Number of chunks to retrieve",
+      "hint": "How many document chunks to retrieve for each query. Higher = more context but slower. Default: 8."
+    },
+    "PDF_EXTRACT_MODE": {
+      "label": "PDF Processing",
+      "description": "PDF extraction method",
+      "hint": "\"fast\" extracts text quickly. \"quality\" uses OCR for better accuracy with scanned documents but is slower."
+    },
+    "EMBEDDING_MODEL": {
+      "label": "Embedding Model",
+      "description": "HuggingFace model for embeddings",
+      "hint": "The HuggingFace model for converting text to vectors. Only change if you need a different language or domain."
+    },
+    "SMTP_HOST": {
+      "label": "Mail Server",
+      "description": "SMTP server address",
+      "hint": "Your SMTP server address (e.g., smtp.gmail.com, smtp.sendgrid.net)."
+    },
+    "SMTP_PORT": {
+      "label": "Mail Port",
+      "description": "SMTP server port",
+      "hint": "Usually 587 for TLS or 465 for SSL. Check your email provider's settings."
+    },
+    "SMTP_USER": {
+      "label": "SMTP Username",
+      "description": "Email service username",
+      "hint": "Your email service username or API key."
+    },
+    "SMTP_PASS": {
+      "label": "SMTP Password",
+      "description": "Email service password",
+      "hint": "Your email service password or API key secret."
+    },
+    "SMTP_FROM": {
+      "label": "Sender Address",
+      "description": "From address for emails",
+      "hint": "The \"from\" address for outgoing emails (e.g., noreply@yourdomain.com)."
+    },
+    "MOCK_SMTP": {
+      "label": "Test Mode",
+      "description": "Mock email sending",
+      "hint": "When \"true\", emails are logged instead of sent. Useful for development."
+    },
+    "SQLITE_PATH": {
+      "label": "Database File",
+      "description": "Path to SQLite database",
+      "hint": "Path to the SQLite database file. Default: /data/sanctum.db"
+    },
+    "UPLOADS_DIR": {
+      "label": "Uploads Folder",
+      "description": "Document uploads directory",
+      "hint": "Directory where uploaded documents are stored. Default: /uploads"
+    },
+    "QDRANT_HOST": {
+      "label": "Vector DB Host",
+      "description": "Qdrant server hostname",
+      "hint": "Hostname for the Qdrant vector database. Default: qdrant"
+    },
+    "QDRANT_PORT": {
+      "label": "Vector DB Port",
+      "description": "Qdrant REST API port",
+      "hint": "Port for Qdrant (REST API). Default: 6333"
+    },
+    "SEARXNG_URL": {
+      "label": "Search Engine URL",
+      "description": "SearXNG instance URL",
+      "hint": "URL of your SearXNG instance for web search functionality."
+    },
+    "FRONTEND_URL": {
+      "label": "App URL",
+      "description": "Public URL for the application",
+      "hint": "The public URL where users access the app. Used for generating magic links."
+    }
   }
 }

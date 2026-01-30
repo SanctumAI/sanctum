@@ -34,7 +34,7 @@ class LLMProvider(ABC):
         pass
 
     @abstractmethod
-    def complete(self, prompt: str, model: Optional[str] = None) -> LLMResponse:
+    def complete(self, prompt: str, model: Optional[str] = None, temperature: float = 0.1) -> LLMResponse:
         """Generate a completion from the given prompt"""
         pass
 

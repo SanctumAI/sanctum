@@ -54,8 +54,8 @@ export async function submitAuthEvent(signedEvent: Event): Promise<AuthResult> {
   })
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: 'Authentication failed' }))
-    throw new Error(error.detail || 'Authentication failed')
+    const error = await response.json().catch(() => ({ detail: 'errors.authenticationFailed' }))
+    throw new Error(error.detail || 'errors.authenticationFailed')
   }
 
   return response.json()
@@ -70,7 +70,7 @@ export async function submitAuthEvent(signedEvent: Event): Promise<AuthResult> {
  */
 export async function authenticateWithNostr(): Promise<AuthResult> {
   if (!window.nostr) {
-    throw new Error('No Nostr extension found')
+    throw new Error('errors.noNostrExtension')
   }
 
   // Create unsigned event

@@ -1,110 +1,132 @@
 {
   "onboarding": {
+    "nostr": {
+      "whatIsNostr": "Co to jest Nostr?",
+      "whatIsNostrDesc": "Nostr to zdecentralizowany protokol do sieci spolecznosciowych i tozsamosci. W przeciwienstwie do tradycyjnych loginow, Twoja tozsamosc nie jest kontrolowana przez zadna firme — sam posiadasz swoje klucze.",
+      "whatIsNip07": "Co to jest NIP-07?",
+      "whatIsNip07Desc": "NIP-07 to standard, ktory umozliwia stronom internetowym zadanie klucza publicznego Nostr z rozszerzenia przegladarki. To oznacza:",
+      "noPasswords": "Zadnych hasel do zapamietania",
+      "noEmailVerification": "Nie trzeba weryfikacji e-mailem",
+      "cryptoSecure": "Twoja tozsamosc jest kryptograficznie bezpieczna",
+      "controlKeys": "Sam kontrolujesz swoje klucze",
+      "howItWorks": "Jak to dziala",
+      "step1": "Zainstaluj rozszerzenie do podpisywania Nostr (polecamy Alby)",
+      "step2": "Kliknij \"Polacz z Nostr\" powyzej",
+      "step3": "Zatwierdz polaczenie w rozszerzeniu",
+      "step4": "Gotowe!",
+      "dontHaveExtension": "Nie masz rozszerzenia Nostr? Pobierz je tutaj:",
+      "alby": "Alby",
+      "nos2x": "nos2x"
+    },
     "userType": {
       "title": "Co najlepiej Ciebie opisuje?",
-      "description": "Wybierz opcję, która najlepiej odpowiada Twoim potrzebom",
-      "loadError": "Nie udało się załadować typów użytkowników. Spróbuj ponownie."
+      "description": "Wybierz opcje, ktora najlepiej odpowiada Twoim potrzebom",
+      "loadError": "Nie udalo sie zaladowac typow uzytkownikow. Sprobuj ponownie.",
+      "selectionLabel": "Wybor typu uzytkownika"
     },
     "language": {
-      "selectLabel": "Wybierz język",
-      "title": "Wybierz swój język",
-      "subtitle": "Wybierz preferowany język, aby kontynuować",
-      "searchPlaceholder": "Wyszukaj języki...",
-      "searchLabel": "Wyszukaj języki",
-      "noResults": "Nie znaleziono języków dla \"{{query}}\"",
+      "selectLabel": "Wybierz jezyk",
+      "title": "Wybierz swoj jezyk",
+      "subtitle": "Wybierz preferowany jezyk, aby kontynuowac",
+      "searchPlaceholder": "Wyszukaj jezyki...",
+      "searchLabel": "Wyszukaj jezyki",
+      "noResults": "Nie znaleziono jezykow dla \"{{query}}\"",
       "continue": "Kontynuuj",
-      "changeInSettings": "Możesz to później zmienić w ustawieniach."
+      "changeInSettings": "Mozesz to pozniej zmienic w ustawieniach."
     },
     "auth": {
-      "signUp": "Zarejestruj się",
-      "logIn": "Zaloguj się",
-      "createAccountTitle": "Utwórz konto",
-      "createAccountSubtitle": "Zarejestruj się, aby zacząć korzystać z {{instanceName}}",
+      "signUp": "Zarejestruj sie",
+      "logIn": "Zaloguj sie",
+      "createAccountTitle": "Utworz konto",
+      "createAccountSubtitle": "Zarejestruj sie, aby zaczac korzystac z {{instanceName}}",
       "welcomeBackTitle": "Witamy ponownie",
-      "welcomeBackSubtitle": "Zaloguj się, aby kontynuować tam, gdzie skończyłeś",
-      "nameLabel": "Imię",
-      "namePlaceholder": "Twoje imię",
+      "welcomeBackSubtitle": "Zaloguj sie, aby kontynuowac tam, gdzie skonczyles",
+      "nameLabel": "Imie",
+      "namePlaceholder": "Twoje imie",
       "emailLabel": "E-mail",
       "emailPlaceholder": "ty@przyklad.pl",
-      "nameRequired": "Imię jest wymagane",
+      "nameRequired": "Imie jest wymagane",
       "emailRequired": "E-mail jest wymagany",
-      "emailInvalid": "Wpisz prawidłowy adres e-mail",
-      "sendingLink": "Wysyłanie linku...",
+      "emailInvalid": "Wpisz prawidlowy adres e-mail",
+      "sendingLink": "Wysylanie linku...",
       "continueWithEmail": "Kontynuuj z e-mailem",
-      "magicLinkHelp": "Wyślemy Ci magiczny link do logowania — bez hasła.",
-      "checkEmail": "Sprawdź swój e-mail!",
-      "sentMagicLink": "Wysłaliśmy magiczny link na",
-      "clickLink": "Kliknij link w e-mailu, aby się zalogować.",
-      "checkSpam": "Nie widzisz? Sprawdź folder spam.",
-      "simulateMagicLink": "Symuluj kliknięcie magicznego linku",
-      "forTesting": "Do celów testowych:"
+      "magicLinkHelp": "Wyslemy Ci magiczny link do logowania — bez hasla.",
+      "checkEmail": "Sprawdz swoj e-mail!",
+      "sentMagicLink": "Wyslalismy magiczny link na",
+      "clickLink": "Kliknij link w e-mailu, aby sie zalogowac.",
+      "checkSpam": "Nie widzisz? Sprawdz folder spam.",
+      "simulateMagicLink": "Symuluj klikniecie magicznego linku",
+      "forTesting": "Do celow testowych:"
     },
     "verify": {
-      "verifying": "Weryfikujemy Twój link...",
-      "pleaseWait": "Chwilka, logujemy Cię.",
+      "verifying": "Weryfikujemy Twoj link...",
+      "pleaseWait": "Chwilka, logujemy Cie.",
       "welcomeName": "Witaj, {{name}}!",
       "welcomeBack": "Witaj ponownie!",
-      "signedInAs": "Jesteś zalogowany jako",
-      "completingProfile": "Uzupełnianie profilu...",
+      "signedInAs": "Jestes zalogowany jako",
+      "completingProfile": "Uzupelnianie profilu...",
       "redirectingChat": "Przekierowanie do czatu...",
-      "linkExpired": "Link wygasł lub jest nieprawidłowy",
-      "linkExpiredMessage": "Ten magiczny link mógł wygasnąć lub został już użyty.",
-      "requestNewLink": "Poproś o nowy link"
+      "linkExpired": "Link wygasl lub jest nieprawidlowy",
+      "linkExpiredMessage": "Ten magiczny link mogl wygasnac lub zostal juz uzyty.",
+      "requestNewLink": "Popros o nowy link"
     },
     "profile": {
-      "title": "Uzupełnij profil",
-      "subtitle": "Jeszcze kilka szczegółów, aby zacząć",
+      "title": "Uzupelnij profil",
+      "subtitle": "Jeszcze kilka szczegulow, aby zaczac",
       "saving": "Zapisywanie...",
-      "continue": "Przejdź do czatu",
+      "continue": "Przejdz do czatu",
       "fieldRequired": "{{field}} jest wymagane",
-      "invalidEmail": "Wpisz prawidłowy adres e-mail",
-      "invalidUrl": "Wpisz prawidłowy URL",
-      "invalidNumber": "Wpisz prawidłową liczbę",
-      "enterField": "Wprowadź {{field}}",
-      "selectOption": "Wybierz opcję"
+      "invalidEmail": "Wpisz prawidlowy adres e-mail",
+      "invalidUrl": "Wpisz prawidlowy URL",
+      "invalidNumber": "Wpisz prawidlowa liczbe",
+      "enterField": "Wprowadz {{field}}",
+      "selectOption": "Wybierz opcje"
     },
     "pending": {
       "title": "Oczekuje na zatwierdzenie",
       "heading": "Twoje konto oczekuje na zatwierdzenie",
-      "message": "Administrator przejrzy Twoją rejestrację i zatwierdzi dostęp.",
-      "checkBack": "Sprawdź ponownie później."
+      "message": "Administrator przejrzy Twoja rejestracje i zatwierdzi dostep.",
+      "checkBack": "Sprawdz ponownie pozniej."
     }
   },
   "chat": {
     "emptyState": {
-      "title": "Co chcesz wiedzieć?",
-      "description": "Zadawaj pytania dotyczące swojej bazy wiedzy lub rozpocznij ogólną rozmowę",
-      "tryAsking": "Spróbuj zapytać"
+      "title": "Co chcesz wiedziec?",
+      "description": "Zadawaj pytania dotyczace swojej bazy wiedzy lub rozpocznij ogolna rozmowe",
+      "tryAsking": "Sprobuj zapytac"
     },
     "suggestedPrompts": {
-      "documents": "Jakie dokumenty są w bazie wiedzy?",
-      "summarize": "Podsumuj kluczowe pojęcia",
-      "ragPipeline": "Jak działa pipeline RAG?",
-      "entities": "Jakie są główne encje i relacje?"
+      "documents": "Jakie dokumenty sa w bazie wiedzy?",
+      "summarize": "Podsumuj kluczowe pojecia",
+      "ragPipeline": "Jak dziala pipeline RAG?",
+      "entities": "Jakie sa glowne encje i relacje?"
     },
-    "typing": "Myślę...",
+    "typing": "Mysle...",
     "input": {
       "placeholder": "Zapytaj o cokolwiek...",
       "placeholderWithDocs": "Zapytaj o wybrane dokumenty...",
-      "sendTitle": "Wyślij wiadomość (Enter)",
-      "sendLabel": "Wyślij wiadomość"
+      "sendTitle": "Wyslij wiadomosc (Enter)",
+      "sendLabel": "Wyslij wiadomosc"
     },
     "tools": {
-      "label": "Narzędzia",
+      "label": "Narzedzia",
       "webSearch": "Szukaj w internecie aktualnych informacji",
-      "database": "Zapytaj bazę danych SQLite",
+      "webSearchName": "Siec",
+      "database": "Zapytaj baze danych SQLite",
+      "databaseName": "Baza danych",
       "knowledgeGraph": "Zapytaj graf wiedzy"
     },
     "documentScope": {
       "title": "Bazy wiedzy",
-      "description": "Wybierz źródła do uwzględnienia w kontekście",
-      "noSources": "Brak dostępnych źródeł",
-      "clearAll": "Wyczyść wszystko",
+      "description": "Wybierz zrodla do uwzglednienia w kontekscie",
+      "noSources": "Brak dostepnych zrodel",
+      "clearAll": "Wyczysc wszystko",
       "docsLabel": "Dokumenty"
     },
     "messages": {
-      "searching": "🔍 Szukam \"{{term}}\"...",
-      "searchResults": "Wyszukałem \"{{term}}\" dla Ciebie:",
+      "searching": "Szukam \"{{term}}\"...",
+      "searchingPrefix": "Wyszukiwanie",
+      "searchResults": "Wyszukalem \"{{term}}\" dla Ciebie:",
       "newConversation": "Nowa rozmowa"
     },
     "code": {
@@ -114,129 +136,166 @@
     },
     "export": {
       "button": "Eksportuj",
-      "title": "Eksportuj rozmowę",
-      "disabled": "Brak wiadomości do eksportu",
+      "title": "Eksportuj rozmowe",
+      "disabled": "Brak wiadomosci do eksportu",
       "markdown": "Markdown",
       "markdownExt": "plik .md",
-      "plainText": "Zwykły tekst",
-      "plainTextExt": "plik .txt"
+      "plainText": "Zwykly tekst",
+      "plainTextExt": "plik .txt",
+      "defaultTitle": "Eksport czatu",
+      "roleUser": "Ty",
+      "roleAssistant": "Asystent",
+      "footer": "Wyeksportowano z {{instanceName}}",
+      "exportedOn": "Wyeksportowano {{timestamp}}"
     },
     "database": {
       "executedSql": "Wykonany SQL: {{sql}}",
-      "noResults": "Zapytanie nie zwróciło wyników.",
-      "resultsCount": "Wyniki zapytania do bazy danych ({{count}} wierszy):",
-      "resultsTruncated": "(Wyniki skrócone do 100 wierszy)"
+      "noResults": "Zapytanie nie zwrocilo wynikow.",
+      "resultsCount_one": "Wynik zapytania do bazy danych ({{count}} wiersz):",
+      "resultsCount_few": "Wyniki zapytania do bazy danych ({{count}} wiersze):",
+      "resultsCount_many": "Wyniki zapytania do bazy danych ({{count}} wierszy):",
+      "resultsCount_other": "Wyniki zapytania do bazy danych ({{count}} wierszy):",
+      "resultsTruncated": "(Wyniki skrocone do 100 wierszy)"
     }
   },
   "common": {
-    "adminQuestion": "Czy jesteś administratorem?",
-    "signInNostr": "Zaloguj się przez Nostr",
+    "adminQuestion": "Czy jestes administratorem?",
+    "signInNostr": "Zaloguj sie przez Nostr",
     "close": "Zamknij",
     "cancel": "Anuluj",
     "save": "Zapisz",
     "saving": "Zapisywanie...",
     "saveChanges": "Zapisz zmiany",
     "edit": "Edytuj",
-    "delete": "Usuń",
-    "remove": "Usuń",
+    "delete": "Usun",
+    "remove": "Usun",
     "required": "Wymagane",
     "settings": "Ustawienia",
-    "toggleTheme": "Przełącz motyw",
-    "switchToLight": "Przełącz na jasny motyw",
-    "switchToDark": "Przełącz na ciemny motyw",
-    "moveUp": "Przesuń w górę",
-    "moveDown": "Przesuń w dół",
-    "logout": "Wyloguj się",
-    "tryAgain": "Spróbuj ponownie",
+    "toggleTheme": "Przelacz motyw",
+    "switchToLight": "Przelacz na jasny motyw",
+    "switchToDark": "Przelacz na ciemny motyw",
+    "moveUp": "Przesun w gore",
+    "moveDown": "Przesun w dol",
+    "logout": "Wyloguj sie",
+    "tryAgain": "Sprobuj ponownie",
     "continue": "Kontynuuj",
-    "unexpectedError": "Wystąpił nieoczekiwany błąd",
+    "unexpectedError": "Wystapil nieoczekiwany blad",
     "nullPlaceholder": "NULL",
-    "error": "Błąd"
+    "error": "Blad",
+    "back": "Wstecz",
+    "loading": "Ladowanie...",
+    "unknown": "Nieznany",
+    "enabled": "Wlaczony",
+    "disabled": "Wylaczony"
   },
   "settings": {
     "title": "Ustawienia",
     "signedInAs": "Zalogowany jako",
-    "signOut": "Wyloguj się",
-    "adminTools": "Narzędzia administratora",
+    "signOut": "Wyloguj sie",
+    "adminTools": "Narzedzia administratora",
     "admin": {
       "instanceConfig": "Konfiguracja instancji",
-      "instanceConfigDesc": "Branding, typy użytkowników, pola",
+      "instanceConfigDesc": "Branding, typy uzytkownikow, pola",
       "testDashboard": "Panel testowy",
-      "testDashboardDesc": "Testowanie API, narzędzia debugowania",
-      "documentUpload": "Przesyłanie dokumentów",
+      "testDashboardDesc": "Testowanie API, narzedzia debugowania",
+      "documentUpload": "Przesylanie dokumentow",
       "documentUploadDesc": "Dodaj dokumenty do bazy wiedzy",
       "databaseExplorer": "Eksplorator bazy danych",
-      "databaseExplorerDesc": "Przeglądaj bazę danych SQLite"
+      "databaseExplorerDesc": "Przegladaj baze danych SQLite",
+      "instanceBranding": "Instance Branding",
+      "instanceBrandingDesc": "Colors, icons, user types",
+      "aiConfig": "AI Configuration",
+      "aiConfigDesc": "Prompts, parameters, defaults",
+      "deploymentConfig": "Deployment Config",
+      "deploymentConfigDesc": "Services, SMTP, storage"
     }
   },
   "admin": {
-    "confirmDelete": "Czy na pewno chcesz usunąć ten rekord?",
+    "confirmDelete": "Czy na pewno chcesz usunac ten rekord?",
+    "confirmDeleteField": "Usunac pole \"{{name}}\"?",
+    "confirmDeleteTypeWithFields": "Usunac typ uzytkownika \"{{name}}\"? Spowoduje to rowniez usuniecie {{count}} powiazanych pol.",
+    "confirmDeleteType": "Usunac typ uzytkownika \"{{name}}\"?",
+    "global": "Globalny",
     "setup": {
-      "backToChat": "Powrót do czatu",
-      "title": "Skonfiguruj swoją instancję",
-      "subtitle": "Dostosuj branding i doświadczenie rejestracji użytkowników",
+      "backToChat": "Powrot do czatu",
+      "title": "Skonfiguruj swoja instancje",
+      "subtitle": "Dostosuj branding i doswiadczenie rejestracji uzytkownikow",
       "branding": "Branding instancji",
-      "displayName": "Nazwa wyświetlana",
+      "displayName": "Nazwa wyswietlana",
       "defaultName": "Sanctum",
-      "displayNameHint": "Ta nazwa pojawia się w nagłówku i na ekranach rejestracji",
+      "displayNameHint": "Ta nazwa pojawia sie w naglowku i na ekranach rejestracji",
       "icon": "Ikona",
       "accentColor": "Kolor akcentu",
-      "userTypes": "Typy użytkowników",
-      "userTypesHint": "Zdefiniuj różne typy użytkowników, aby wyświetlać pytania rejestracyjne specyficzne dla typu. Jeśli masz więcej niż jeden typ, użytkownicy wybiorą swój typ podczas rejestracji.",
+      "userTypes": "Typy uzytkownikow",
+      "userTypesHint": "Zdefiniuj rozne typy uzytkownikow, aby wyswietlac pytania rejestracyjne specyficzne dla typu. Jesli masz wiecej niz jeden typ, uzytkownicy wybra swoj typ podczas rejestracji.",
       "typeName": "Nazwa typu",
       "typeNamePlaceholder": "np. Badacz, Student",
       "typeDescription": "Opis (opcjonalnie)",
       "typeDescPlaceholder": "np. Dla badaczy akademickich",
       "addType": "Dodaj typ",
-      "addUserType": "Dodaj typ użytkownika",
-      "onboardingFields": "Pola rejestracji użytkowników",
-      "optionsCount": "{{count}} opcji",
-      "noFields": "Brak niestandardowych pól",
+      "addUserType": "Dodaj typ uzytkownika",
+      "onboardingFields": "Pola rejestracji uzytkownikow",
+      "optionsCount_one": "{{count}} opcja",
+      "optionsCount_few": "{{count}} opcje",
+      "optionsCount_many": "{{count}} opcji",
+      "optionsCount_other": "{{count}} opcji",
+      "noFields": "Brak niestandardowych pol",
       "addField": "Dodaj pole",
       "knowledgeBase": "Baza wiedzy",
-      "knowledgeBaseHint": "Prześlij dokumenty, aby zbudować bazę wiedzy RAG dla odpowiedzi wspomaganych przez AI.",
-      "uploadDocuments": "Prześlij dokumenty",
+      "knowledgeBaseHint": "Przeslij dokumenty, aby zbudowac baze wiedzy RAG dla odpowiedzi wspomaganych przez AI.",
+      "uploadDocuments": "Przeslij dokumenty",
       "database": "Baza danych",
-      "databaseHint": "Wyświetlaj i zarządzaj danymi instancji bezpośrednio w bazie danych SQLite.",
-      "openDatabase": "Otwórz eksplorator bazy danych",
-      "save": "Zapisz konfigurację"
+      "databaseHint": "Wyswietlaj i zarzadzaj danymi instancji bezposrednio w bazie danych SQLite.",
+      "openDatabase": "Otworz eksplorator bazy danych",
+      "save": "Zapisz konfiguracje"
     },
     "database": {
-      "backToSetup": "Powrót do konfiguracji administratora",
+      "backToSetup": "Powrot do konfiguracji administratora",
       "title": "Eksplorator bazy danych",
-      "subtitle": "Wyświetl i zarządzaj danymi SQLite",
+      "subtitle": "Wyswietl i zarzadzaj danymi SQLite",
       "sqlQuery": "Zapytanie SQL",
-      "refreshTables": "Odśwież tabele",
+      "refreshTables": "Odswiez tabele",
       "tables": "Tabele",
       "noTables": "Nie znaleziono tabel",
-      "notInitialized": "Baza danych może nie być zainicjalizowana",
+      "notInitialized": "Baza danych moze nie byc zainicjalizowana",
       "columns": "kolumn",
       "sqlQueryLabel": "Zapytanie SQL",
       "sqlPlaceholder": "SELECT * FROM users WHERE role = 'admin';",
-      "runHint": "Naciśnij Cmd/Ctrl + Enter, aby uruchomić",
+      "runHint": "Nacisnij Cmd/Ctrl + Enter, aby uruchomic",
       "running": "Uruchamianie...",
       "runQuery": "Uruchom zapytanie",
       "results": "Wyniki",
-      "error": "Błąd",
+      "error": "Blad",
       "rowsAffected": "wiersz(y) zmodyfikowanych",
       "lastInsertId": "Ostatnie ID wstawienia:",
-      "noResults": "Brak wyników",
+      "noResults": "Brak wynikow",
       "tableInfo": "{{columns}} kolumn, {{rows}} wierszy",
       "addRow": "Dodaj wiersz",
       "newRecord": "Nowy rekord",
       "editRecord": "Edytuj rekord",
       "noData": "Brak danych w tej tabeli",
       "addFirstRecord": "Dodaj pierwszy rekord",
-      "clickToExpand": "Kliknij, aby rozwinąć",
-      "pagination": "Wyświetlanie {{from}} do {{to}} z {{total}}",
+      "clickToExpand": "Kliknij, aby rozwinac",
+      "pagination": "Wyswietlanie {{from}} do {{to}} z {{total}}",
       "tableCount_one": "{{count}} tabela",
+      "tableCount_few": "{{count}} tabele",
+      "tableCount_many": "{{count}} tabel",
       "tableCount_other": "{{count}} tabel",
       "rowCount_one": "{{count}} wiersz",
+      "rowCount_few": "{{count}} wiersze",
+      "rowCount_many": "{{count}} wierszy",
       "rowCount_other": "{{count}} wierszy",
-      "rowsInTable": "{{count}} wierszy w {{table}}",
-      "connected": "SQLite połączony",
-      "selectTable": "Wybierz tabelę z paska bocznego",
-      "orUseSqlQuery": "lub użyj trybu zapytania SQL"
+      "rowsInTable_one": "{{count}} wiersz w {{table}}",
+      "rowsInTable_few": "{{count}} wiersze w {{table}}",
+      "rowsInTable_many": "{{count}} wierszy w {{table}}",
+      "rowsInTable_other": "{{count}} wierszy w {{table}}",
+      "connected": "SQLite polaczony",
+      "selectTable": "Wybierz tabele z paska bocznego",
+      "orUseSqlQuery": "lub uzyj trybu zapytania SQL",
+      "encrypted": "[Zaszyfrowane]",
+      "encryptedMissingKey": "[Zaszyfrowane - brak klucza]",
+      "decrypting": "[Odszyfrowywanie...]",
+      "notSet": "(nie ustawiono)"
     },
     "fields": {
       "nameRequired": "Nazwa pola jest wymagana",
@@ -246,13 +305,13 @@
       "fieldName": "Nazwa pola",
       "fieldNamePlaceholder": "np. Nazwa firmy",
       "applyTo": "Zastosuj do",
-      "allUsers": "Wszyscy użytkownicy (globalnie)",
-      "globalHint": "Pola globalne są widoczne dla wszystkich użytkowników. Pola specyficzne dla typu pojawiają się tylko dla tego typu użytkowników.",
+      "allUsers": "Wszyscy uzytkownicy (globalnie)",
+      "globalHint": "Pola globalne sa widoczne dla wszystkich uzytkownikow. Pola specyficzne dla typu pojawiaja sie tylko dla tego typu uzytkownikow.",
       "fieldType": "Typ pola",
       "options": "Opcje",
       "optionPlaceholder": "Opcja {{number}}",
-      "addOption": "+ Dodaj opcję",
-      "placeholder": "Tekst zastępczy",
+      "addOption": "+ Dodaj opcje",
+      "placeholder": "Tekst zastepczy",
       "placeholderOptional": "(opcjonalnie)",
       "placeholderHint": "Tekst podpowiedzi widoczny w polu",
       "requiredField": "Pole wymagane"
@@ -261,41 +320,352 @@
       "text": "Tekst",
       "textDesc": "Jednoliniowe pole tekstowe",
       "email": "E-mail",
-      "emailDesc": "E-mail z walidacją",
+      "emailDesc": "E-mail z walidacja",
       "number": "Liczba",
       "numberDesc": "Pole numeryczne",
       "textarea": "Pole tekstowe",
       "textareaDesc": "Tekst wieloliniowy",
       "select": "Lista rozwijana",
-      "selectDesc": "Wybór z opcji",
+      "selectDesc": "Wybor z opcji",
       "checkbox": "Pole wyboru",
-      "checkboxDesc": "Przełącznik tak/nie",
+      "checkboxDesc": "Przelacznik tak/nie",
       "date": "Data",
-      "dateDesc": "Wybór daty",
+      "dateDesc": "Wybor daty",
       "url": "URL",
       "urlDesc": "Link do strony"
     },
     "icons": {
       "searchPlaceholder": "Szukaj ikon...",
-      "noMatch": "Brak ikon pasujących do \"{{search}}\"",
+      "noMatch": "Brak ikon pasujacych do \"{{search}}\"",
       "selected": "Wybrano:"
+    },
+    "errors": {
+      "loadTypesFailed": "Nie udalo sie zaladowac typow uzytkownikow",
+      "loadFieldsFailed": "Nie udalo sie zaladowac pol uzytkownikow",
+      "loadFailed": "Nie udalo sie zaladowac danych",
+      "saveFailed": "Nie udalo sie zapisac ustawien. Sprobuj ponownie.",
+      "addTypeFailed": "Nie udalo sie dodac typu uzytkownika",
+      "removeTypeFailed": "Nie udalo sie usunac typu uzytkownika",
+      "addFieldFailed": "Nie udalo sie dodac pola",
+      "updateFieldFailed": "Nie udalo sie zaktualizowac pola",
+      "removeFieldFailed": "Nie udalo sie usunac pola",
+      "reorderFailed": "Nie udalo sie zmienic kolejnosci pola"
     }
   },
   "adminOnboarding": {
-    "notAdmin": "Nie jesteś administratorem?",
-    "signInAsUser": "Zaloguj się jako użytkownik",
+    "notAdmin": "Nie jestes administratorem?",
+    "signInAsUser": "Zaloguj sie jako uzytkownik",
     "title": "Konfiguracja administratora",
-    "subtitle": "Połącz się ze swoją tożsamością Nostr, aby zarządzać tą instancją",
-    "connectNostr": "Połącz z Nostr",
-    "orForTesting": "lub do testów",
-    "continueMock": "Kontynuuj z fałszywą tożsamością",
-    "connecting": "Łączenie z rozszerzeniem...",
+    "subtitle": "Polacz sie ze swoja tozsamoscia Nostr, aby zarzadzac ta instancja",
+    "connectNostr": "Polacz z Nostr",
+    "orForTesting": "lub do testow",
+    "continueMock": "Kontynuuj z falszywą tozsamoscia",
+    "connecting": "Laczenie z rozszerzeniem...",
     "noExtension": "Nie znaleziono rozszerzenia Nostr",
-    "installExtension": "Zainstaluj rozszerzenie kompatybilne z NIP-07, aby kontynuować",
-    "useMock": "Użyj fałszywego",
+    "installExtension": "Zainstaluj rozszerzenie kompatybilne z NIP-07, aby kontynuowac",
+    "useMock": "Uzyj falszywego",
     "welcomeAdmin": "Witaj, Administratorze!",
-    "connectedAs": "Połączony jako",
+    "connectedAs": "Polaczony jako",
     "redirecting": "Przekierowanie do panelu...",
-    "connectionFailed": "Połączenie nie powiodło się"
+    "connectionFailed": "Polaczenie nie powiodlo sie"
+  },
+  "errors": {
+    "requestFailed": "Żądanie nie powiodło się",
+    "invalidServerResponse": "Nieprawidłowa odpowiedź z serwera",
+    "unknownError": "Nieznany błąd",
+    "failedToFetchDocuments": "Nie udalo sie pobrac dokumentow",
+    "noResponseFromServer": "Brak odpowiedzi z serwera",
+    "failedToSendMessage": "Nie udalo sie wyslac wiadomosci",
+    "searchFailed": "Wyszukiwanie nie powiodlo sie: HTTP {{status}}",
+    "failedToSendMagicLink": "Nie udalo sie wyslac magicznego linku",
+    "failedToFetchJobs": "Nie udalo sie pobrac zadan",
+    "errorFetchingJobs": "Blad podczas pobierania zadan",
+    "failedToFetchTables": "Nie udalo sie pobrac tabel",
+    "errorFetchingTables": "Blad podczas pobierania tabel",
+    "failedToFetchTableData": "Nie udalo sie pobrac danych tabeli",
+    "verificationFailed": "Weryfikacja nie powiodla sie",
+    "failedToFetchFields": "Nie udalo sie pobrac pol",
+    "errorFetchingFields": "Blad podczas pobierania pol",
+    "failedToFetchAIConfig": "Nie udało się pobrać konfiguracji AI",
+    "failedToPreviewPrompt": "Nie udało się wyświetlić podglądu promptu",
+    "failedToFetchDocumentDefaults": "Nie udało się pobrać domyślnych ustawień dokumentów",
+    "failedToUpdateDocument": "Nie udało się zaktualizować dokumentu",
+    "failedToBatchUpdate": "Nie udało się przeprowadzić aktualizacji zbiorczej",
+    "failedToFetchDeploymentConfig": "Nie udało się pobrać konfiguracji wdrożenia",
+    "failedToExport": "Nie udało się wyeksportować",
+    "failedToValidate": "Nie udało się zwalidować",
+    "failedToRevealSecret": "Nie udało się ujawnić sekretu",
+    "failedToFetchServiceHealth": "Nie udało się pobrać stanu usługi",
+    "failedToFetchAuditLog": "Nie udało się pobrać dziennika audytu",
+    "notAuthenticatedAsAdmin": "Nie uwierzytelniono jako administrator",
+    "adminSessionExpired": "Sesja administratora wygasła",
+    "authenticationFailed": "Uwierzytelnianie nie powiodło się",
+    "noNostrExtension": "Nie znaleziono rozszerzenia Nostr"
+  },
+  "adminDashboard": {
+    "title": "Panel administratora",
+    "subtitle": "Zarzadzaj konfiguracja instancji Sanctum",
+    "instance": "Konfiguracja instancji",
+    "instanceDesc": "Dostosuj branding, typy uzytkownikow i pola rejestracji",
+    "ai": "Konfiguracja AI",
+    "aiDesc": "Skonfiguruj prompty, parametry LLM i domyslne ustawienia dokumentow",
+    "deployment": "Konfiguracja wdrozenia",
+    "deploymentDesc": "Zarzadzaj ustawieniami srodowiska i stanem uslug",
+    "upload": "Przesylanie dokumentow",
+    "uploadDesc": "Dodaj dokumenty do bazy wiedzy",
+    "database": "Eksplorator bazy danych",
+    "databaseDesc": "Przegladaj i odpytuj baze danych SQLite"
+  },
+  "adminAI": {
+    "title": "Konfiguracja AI",
+    "subtitle": "Kontroluj zachowanie AI i sposob odpowiadania uzytkownikom",
+    "promptTemplate": "Szablon promptu",
+    "promptTemplateDesc": "Okresl sposob komunikacji AI z uzytkownikami",
+    "promptTemplateHint": "Te ustawienia definiuja osobowosc AI i jej granice. Zmiany zaczynaja obowiazywac natychmiast dla nowych rozmow.",
+    "preview": "Podglad",
+    "parameters": "Ustawienia odpowiedzi",
+    "parametersDesc": "Dostosuj jakosc odpowiedzi AI",
+    "parametersHint": "Te ustawienia techniczne wplywaja na szybkosc i jakosc odpowiedzi. Domyslne wartosci dzialaja dobrze w wiekszosci przypadkow — dostosuj tylko jesli zauwazyisz problemy.",
+    "sessionDefaults": "Domyslne funkcje",
+    "sessionDefaultsDesc": "Ustaw, ktore funkcje sa domyslnie wlaczone",
+    "sessionDefaultsHint": "Kontroluj, ktore funkcje AI sa wlaczone, gdy uzytkownicy rozpoczynaja nowa sesje czatu.",
+    "documentDefaults": "Dostep do dokumentow",
+    "documentDefaultsDesc": "Kontroluj, do ktorych dokumentow AI moze sie odwolywac",
+    "documentDefaultsHint": "Dokumenty oznaczone jako \"Dostepne\" moga byc wybierane przez uzytkownikow. Dokumenty oznaczone jako \"Aktywne domyslnie\" sa automatycznie dolaczane do nowych rozmow.",
+    "available": "Dostepne",
+    "activeByDefault": "Aktywne domyslnie",
+    "noDocuments": "Nie przeslano jeszcze zadnych dokumentow",
+    "promptPreview": "Podglad promptu",
+    "invalidJson": "Nieprawidlowy format JSON",
+    "chunks": "fragmenty"
+  },
+  "adminDeployment": {
+    "title": "Konfiguracja wdrozenia",
+    "subtitle": "Zarzadzaj polaczeniami z serwerem i ustawieniami infrastruktury",
+    "serviceHealth": "Stan uslug",
+    "serviceHealthDesc": "Monitoruj polaczone uslugi",
+    "serviceHealthHint": "Zielony oznacza, ze usluga odpowiada prawidlowo. Jesli usluga pokazuje sie na czerwono, sprawdz jej konfiguracje ponizej.",
+    "refresh": "Odswiez",
+    "restartRequired": "Wymagany restart uslugi",
+    "validate": "Sprawdz konfiguracje",
+    "exportEnv": "Eksportuj .env",
+    "auditLog": "Ostatnie zmiany",
+    "configValid": "Konfiguracja prawidlowa",
+    "configInvalid": "Konfiguracja nieprawidlowa",
+    "noRecentChanges": "Brak ostatnich zmian",
+    "exportFailed": "Eksport nie powiodl sie",
+    "validationFailed": "Zadanie walidacji nie powiodlo sie",
+    "requiresRestart": "Wymaga restartu",
+    "secret": "Tajne",
+    "leaveEmptyForSecret": "Pozostaw puste, aby zachowac obecna wartosc"
+  },
+  "upload": {
+    "invalidFileType": "Nieprawidłowy typ pliku. Dozwolone: {{extensions}}",
+    "title": "Przeslij dokumenty",
+    "subtitle": "Dodaj dokumenty do bazy wiedzy dla RAG",
+    "uploadFile": "Przeslij plik",
+    "dropFileHere": "Upusc plik tutaj",
+    "dropOrBrowse": "Upusc plik tutaj lub kliknij, aby przegladac",
+    "supported": "Obslugiwane: {{extensions}}",
+    "removeFile": "Usun plik",
+    "uploading": "Przesylanie...",
+    "uploadDocument": "Przeslij dokument",
+    "recentUploads": "Ostatnie przeslane pliki",
+    "noUploads": "Brak przeslanych plikow",
+    "backToDashboard": "Powrot do panelu",
+    "backToSetup": "Powrot do konfiguracji",
+    "status": {
+      "queued": "W kolejce",
+      "processing": "Przetwarzanie",
+      "chunked": "Podzielone",
+      "complete": "Zakonczone",
+      "failed": "Niepowodzenie"
+    },
+    "chunks": "{{processed}}/{{total}} fragmentow"
+  },
+  "configCategories": {
+    "llm": {
+      "label": "Dostawca AI",
+      "description": "Polacz sie z usluga AI",
+      "hint": "Skonfiguruj, ktora usluga AI zasilaja Twojego asystenta. Bedziesz potrzebowac klucza API od wybranego dostawcy (np. OpenAI, Anthropic). Zmiany wymagaja restartu uslugi."
+    },
+    "embedding": {
+      "label": "Przetwarzanie tekstu",
+      "description": "Skonfiguruj sposob analizy dokumentow",
+      "hint": "Te ustawienia kontroluja sposob konwersji dokumentow na przeszukiwalne dane. Domyslne ustawienia dzialaja dobrze w wiekszosci przypadkow — zmien tylko jesli uzywasz niestandardowego modelu."
+    },
+    "email": {
+      "label": "Usluga e-mail",
+      "description": "Skonfiguruj e-mail do uwierzytelniania uzytkownikow",
+      "hint": "Skonfiguruj e-mail do wysylania magicznych linkow do uzytkownikow podczas logowania. Bedziesz potrzebowac danych SMTP od uslugi e-mail, takiej jak SendGrid, Mailgun lub wlasnego serwera pocztowego."
+    },
+    "storage": {
+      "label": "Przechowywanie danych",
+      "description": "Skonfiguruj miejsce przechowywania danych",
+      "hint": "Kontroluj sciezki plikow dla bazy danych i przeslanych dokumentow. Zazwyczaj nie wymagaja zmiany, chyba ze dostosujesz swoje wdrozenie."
+    },
+    "security": {
+      "label": "Bezpieczenstwo i adresy URL",
+      "description": "Skonfiguruj ustawienia dostepu i bezpieczenstwa",
+      "hint": "Ustaw publiczne adresy URL i opcje bezpieczenstwa. Adres URL frontendu to miejsce, gdzie uzytkownicy uzyskuja dostep do aplikacji. Upewnij sie, ze odpowiadaja Twojemu rzeczywistemu wdrozeniu."
+    },
+    "search": {
+      "label": "Wyszukiwanie w sieci",
+      "description": "Wlacz mozliwosci wyszukiwania AI w sieci",
+      "hint": "Skonfiguruj wyszukiwarke, ktora zasila funkcje wyszukiwania AI w sieci. Po wlaczeniu AI moze wyszukiwac aktualne informacje online."
+    },
+    "general": {
+      "label": "Ogolne",
+      "description": "Inne opcje konfiguracji",
+      "hint": "Rozne ustawienia, ktore nie pasuja do innych kategorii."
+    }
+  },
+  "promptSections": {
+    "prompt_tone": {
+      "label": "Ton i osobowosc",
+      "description": "Jak AI powinno brzmiec podczas odpowiadania",
+      "hint": "Ustawia ogolny glos i sposob AI. Na przyklad, mozesz chciec, aby bylo \"cieple i wspierajace\" dla aplikacji doradczej lub \"zwiezle i profesjonalne\" dla narzedzia biznesowego. AI uzyje tego jako wskazowki dla kazdej odpowiedzi.",
+      "placeholder": "Badz pomocny, zwiezly i profesjonalny..."
+    },
+    "prompt_rules": {
+      "label": "Zasady zachowania",
+      "description": "Konkretne instrukcje, ktorych AI musi przestrzegac",
+      "hint": "Dodaj zasady jako liste JSON, np. [\"Zawsze cytuj zrodla\", \"Odpowiedzi do 200 slow\"]. To sa scisle wytyczne, ktorych AI bedzie przestrzegac w kazdej rozmowie.",
+      "placeholder": "[\"Zasada 1\", \"Zasada 2\", ...]"
+    },
+    "prompt_forbidden": {
+      "label": "Zakazane tematy",
+      "description": "Tematy, ktorych AI powinno odmowic omawiania",
+      "hint": "Wymien tematy, od ktorych chcesz, aby AI grzecznie sie odwracalo. Na przyklad [\"porady medyczne\", \"porady prawne\"]. AI potwierdzi te prosby, ale wyjasni, ze nie moze w tym pomoc.",
+      "placeholder": "[\"Temat 1\", \"Temat 2\", ...]"
+    },
+    "prompt_greeting": {
+      "label": "Styl odpowiedzi",
+      "description": "Jak AI strukturyzuje swoje odpowiedzi",
+      "hint": "Kontroluje preferencje formatowania, takie jak uzywanie punktorow, naglowkow lub konwersacyjnych akapitow. Wplywa na sposob prezentacji odpowiedzi wizualnie.",
+      "placeholder": "Uzywaj punktorow dla list, naglowkow dla sekcji..."
+    }
+  },
+  "parameters": {
+    "temperature": {
+      "label": "Poziom kreatywnosci",
+      "description": "Jak przewidywalne lub kreatywne sa odpowiedzi AI",
+      "hint": "Nizsze wartosci (0.0-0.3) sprawiaja, ze odpowiedzi sa bardziej skoncentrowane i spojne — dobre dla faktycznych pytan i odpowiedzi. Wyzsze wartosci (0.7-1.0) sprawiaja, ze odpowiedzi sa bardziej zroznicowane i kreatywne — lepsze do burzy mozgow. Domyslnie: 0.7"
+    },
+    "top_k": {
+      "label": "Glebokosc wiedzy",
+      "description": "Ile sekcji dokumentow ma byc referencyjnych",
+      "hint": "Podczas odpowiadania na pytania AI przeszukuje przeslane dokumenty i pobiera odpowiednie sekcje. Wyzsze liczby oznaczaja wiecej kontekstu, ale wolniejsze odpowiedzi. Nizsze liczby sa szybsze, ale moga pominac istotne informacje. Domyslnie: 5"
+    }
+  },
+  "defaults": {
+    "web_search_default": {
+      "label": "Wyszukiwanie w sieci",
+      "description": "Pozwol AI przeszukiwac internet",
+      "hint": "Po wlaczeniu AI moze wyszukiwac w sieci aktualne informacje, ktorych nie ma w Twoich dokumentach. Wylacz to, jesli chcesz, aby odpowiedzi pochodzily tylko z Twojej przeslanej bazy wiedzy."
+    }
+  },
+  "colors": {
+    "blue": "Niebieski",
+    "purple": "Fioletowy",
+    "green": "Zielony",
+    "orange": "Pomarańczowy",
+    "pink": "Różowy",
+    "teal": "Morski"
+  },
+  "promptPreview": {
+    "sampleQuestion": "Co powinienem wiedzieć o tym temacie?"
+  },
+  "deploymentConfigItems": {
+    "LLM_PROVIDER": {
+      "label": "AI Service",
+      "description": "LLM provider (maple, ollama)",
+      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+    },
+    "LLM_MODEL": {
+      "label": "Model Name",
+      "description": "Model name/identifier",
+      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+    },
+    "LLM_API_URL": {
+      "label": "API Endpoint",
+      "description": "Base URL for API requests",
+      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+    },
+    "RAG_TOP_K": {
+      "label": "Context Chunks",
+      "description": "Number of chunks to retrieve",
+      "hint": "How many document chunks to retrieve for each query. Higher = more context but slower. Default: 8."
+    },
+    "PDF_EXTRACT_MODE": {
+      "label": "PDF Processing",
+      "description": "PDF extraction method",
+      "hint": "\"fast\" extracts text quickly. \"quality\" uses OCR for better accuracy with scanned documents but is slower."
+    },
+    "EMBEDDING_MODEL": {
+      "label": "Embedding Model",
+      "description": "HuggingFace model for embeddings",
+      "hint": "The HuggingFace model for converting text to vectors. Only change if you need a different language or domain."
+    },
+    "SMTP_HOST": {
+      "label": "Mail Server",
+      "description": "SMTP server address",
+      "hint": "Your SMTP server address (e.g., smtp.gmail.com, smtp.sendgrid.net)."
+    },
+    "SMTP_PORT": {
+      "label": "Mail Port",
+      "description": "SMTP server port",
+      "hint": "Usually 587 for TLS or 465 for SSL. Check your email provider's settings."
+    },
+    "SMTP_USER": {
+      "label": "SMTP Username",
+      "description": "Email service username",
+      "hint": "Your email service username or API key."
+    },
+    "SMTP_PASS": {
+      "label": "SMTP Password",
+      "description": "Email service password",
+      "hint": "Your email service password or API key secret."
+    },
+    "SMTP_FROM": {
+      "label": "Sender Address",
+      "description": "From address for emails",
+      "hint": "The \"from\" address for outgoing emails (e.g., noreply@yourdomain.com)."
+    },
+    "MOCK_SMTP": {
+      "label": "Test Mode",
+      "description": "Mock email sending",
+      "hint": "When \"true\", emails are logged instead of sent. Useful for development."
+    },
+    "SQLITE_PATH": {
+      "label": "Database File",
+      "description": "Path to SQLite database",
+      "hint": "Path to the SQLite database file. Default: /data/sanctum.db"
+    },
+    "UPLOADS_DIR": {
+      "label": "Uploads Folder",
+      "description": "Document uploads directory",
+      "hint": "Directory where uploaded documents are stored. Default: /uploads"
+    },
+    "QDRANT_HOST": {
+      "label": "Vector DB Host",
+      "description": "Qdrant server hostname",
+      "hint": "Hostname for the Qdrant vector database. Default: qdrant"
+    },
+    "QDRANT_PORT": {
+      "label": "Vector DB Port",
+      "description": "Qdrant REST API port",
+      "hint": "Port for Qdrant (REST API). Default: 6333"
+    },
+    "SEARXNG_URL": {
+      "label": "Search Engine URL",
+      "description": "SearXNG instance URL",
+      "hint": "URL of your SearXNG instance for web search functionality."
+    },
+    "FRONTEND_URL": {
+      "label": "App URL",
+      "description": "Public URL for the application",
+      "hint": "The public URL where users access the app. Used for generating magic links."
+    }
   }
 }

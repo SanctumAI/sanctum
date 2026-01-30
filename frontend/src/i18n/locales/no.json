@@ -1,17 +1,36 @@
 {
   "onboarding": {
+    "nostr": {
+      "whatIsNostr": "Hva er Nostr?",
+      "whatIsNostrDesc": "Nostr er en desentralisert protokoll for sosiale nettverk og identitet. I motsetning til tradisjonelle innlogginger, er identiteten din ikke kontrollert av noe selskap - du eier dine egne noekler.",
+      "whatIsNip07": "Hva er NIP-07?",
+      "whatIsNip07Desc": "NIP-07 er en standard som lar nettsteder be om din offentlige Nostr-nokkel fra en nettleserutvidelse. Dette betyr:",
+      "noPasswords": "Ingen passord aa huske",
+      "noEmailVerification": "Ingen e-postverifisering nodvendig",
+      "cryptoSecure": "Identiteten din er kryptografisk sikker",
+      "controlKeys": "Du kontrollerer dine egne nokler",
+      "howItWorks": "Slik fungerer det",
+      "step1": "Installer en Nostr-signeringsutvidelse (vi anbefaler Alby)",
+      "step2": "Klikk \"Koble til med Nostr\" ovenfor",
+      "step3": "Godkjenn tilkoblingen i utvidelsen din",
+      "step4": "Du er inne!",
+      "dontHaveExtension": "Har du ikke en Nostr-utvidelse? Fa en her:",
+      "alby": "Alby",
+      "nos2x": "nos2x"
+    },
     "userType": {
       "title": "Hva beskriver deg best?",
       "description": "Velg alternativet som passer best til dine behov",
-      "loadError": "Kunne ikke laste brukertyper. Prøv igjen."
+      "loadError": "Kunne ikke laste brukertyper. Prov igjen.",
+      "selectionLabel": "Valg av brukertype"
     },
     "language": {
-      "selectLabel": "Velg et språk",
-      "title": "Velg språk",
-      "subtitle": "Velg ønsket språk for å fortsette",
-      "searchPlaceholder": "Søk etter språk...",
-      "searchLabel": "Søk etter språk",
-      "noResults": "Ingen språk funnet for \"{{query}}\"",
+      "selectLabel": "Velg et sprak",
+      "title": "Velg sprak",
+      "subtitle": "Velg onsket sprak for aa fortsette",
+      "searchPlaceholder": "Sok etter sprak...",
+      "searchLabel": "Sok etter sprak",
+      "noResults": "Ingen sprak funnet for \"{{query}}\"",
       "continue": "Fortsett",
       "changeInSettings": "Du kan endre dette senere i innstillingene."
     },
@@ -19,36 +38,36 @@
       "signUp": "Registrer deg",
       "logIn": "Logg inn",
       "createAccountTitle": "Opprett kontoen din",
-      "createAccountSubtitle": "Registrer deg for å begynne å bruke {{instanceName}}",
+      "createAccountSubtitle": "Registrer deg for aa begynne aa bruke {{instanceName}}",
       "welcomeBackTitle": "Velkommen tilbake",
-      "welcomeBackSubtitle": "Logg inn for å fortsette der du slapp",
+      "welcomeBackSubtitle": "Logg inn for aa fortsette der du slapp",
       "nameLabel": "Navn",
       "namePlaceholder": "Ditt navn",
       "emailLabel": "E-post",
       "emailPlaceholder": "deg@eksempel.no",
-      "nameRequired": "Navn er påkrevd",
-      "emailRequired": "E-post er påkrevd",
+      "nameRequired": "Navn er pakrevd",
+      "emailRequired": "E-post er pakrevd",
       "emailInvalid": "Vennligst skriv inn en gyldig e-postadresse",
       "sendingLink": "Sender lenke...",
       "continueWithEmail": "Fortsett med e-post",
-      "magicLinkHelp": "Vi sender deg en magisk lenke for å logge inn — ingen passord nødvendig.",
+      "magicLinkHelp": "Vi sender deg en magisk lenke for aa logge inn - ingen passord nodvendig.",
       "checkEmail": "Sjekk e-posten din!",
       "sentMagicLink": "Vi sendte en magisk lenke til",
-      "clickLink": "Klikk på lenken i e-posten for å logge inn.",
-      "checkSpam": "Ser du den ikke? Sjekk søppelposten.",
-      "simulateMagicLink": "Simuler klikk på magisk lenke",
-      "forTesting": "For testformål:"
+      "clickLink": "Klikk pa lenken i e-posten for aa logge inn.",
+      "checkSpam": "Ser du den ikke? Sjekk soppelposten.",
+      "simulateMagicLink": "Simuler klikk pa magisk lenke",
+      "forTesting": "For testformal:"
     },
     "verify": {
       "verifying": "Verifiserer lenken din...",
-      "pleaseWait": "Et øyeblikk mens vi logger deg inn.",
+      "pleaseWait": "Et oyeblikk mens vi logger deg inn.",
       "welcomeName": "Velkommen, {{name}}!",
       "welcomeBack": "Velkommen tilbake!",
       "signedInAs": "Du er logget inn som",
-      "completingProfile": "Fullfører profilen din...",
+      "completingProfile": "Fullforer profilen din...",
       "redirectingChat": "Omdirigerer til chat...",
-      "linkExpired": "Lenke utløpt eller ugyldig",
-      "linkExpiredMessage": "Denne magiske lenken kan ha utløpt eller allerede blitt brukt.",
+      "linkExpired": "Lenke utlopt eller ugyldig",
+      "linkExpiredMessage": "Denne magiske lenken kan ha utlopt eller allerede blitt brukt.",
       "requestNewLink": "Be om en ny lenke"
     },
     "profile": {
@@ -92,7 +111,9 @@
     "tools": {
       "label": "Verktøy",
       "webSearch": "Søk etter aktuell informasjon på nettet",
+      "webSearchName": "Nett",
       "database": "Søk i SQLite-databasen",
+      "databaseName": "Database",
       "knowledgeGraph": "Søk i kunnskapsgrafen"
     },
     "documentScope": {
@@ -103,7 +124,8 @@
       "docsLabel": "Dokumenter"
     },
     "messages": {
-      "searching": "🔍 Søker etter \"{{term}}\"...",
+      "searching": "Søker etter \"{{term}}\"...",
+      "searchingPrefix": "Søker",
       "searchResults": "Jeg søkte etter \"{{term}}\" for deg:",
       "newConversation": "Ny samtale"
     },
@@ -119,7 +141,19 @@
       "markdown": "Markdown",
       "markdownExt": ".md fil",
       "plainText": "Ren tekst",
-      "plainTextExt": ".txt fil"
+      "plainTextExt": ".txt fil",
+      "defaultTitle": "Chat-eksport",
+      "roleUser": "Deg",
+      "roleAssistant": "Assistent",
+      "footer": "Eksportert fra {{instanceName}}",
+      "exportedOn": "Eksportert {{timestamp}}"
+    },
+    "database": {
+      "executedSql": "Utført SQL: {{sql}}",
+      "noResults": "Spørringen returnerte ingen resultater.",
+      "resultsCount_one": "Databasespørringsresultat ({{count}} rad):",
+      "resultsCount_other": "Databasespørringsresultater ({{count}} rader):",
+      "resultsTruncated": "(Resultater avkortet til 100 rader)"
     }
   },
   "common": {
@@ -145,7 +179,12 @@
     "continue": "Fortsett",
     "unexpectedError": "En uventet feil oppstod",
     "nullPlaceholder": "NULL",
-    "error": "Feil"
+    "error": "Feil",
+    "back": "Tilbake",
+    "loading": "Laster...",
+    "unknown": "Ukjent",
+    "enabled": "Aktivert",
+    "disabled": "Deaktivert"
   },
   "settings": {
     "title": "Innstillinger",
@@ -160,11 +199,21 @@
       "documentUpload": "Dokumentopplasting",
       "documentUploadDesc": "Legg til dokumenter i kunnskapsbasen",
       "databaseExplorer": "Databaseutforsker",
-      "databaseExplorerDesc": "Utforsk SQLite-databasen"
+      "databaseExplorerDesc": "Utforsk SQLite-databasen",
+      "instanceBranding": "Instance Branding",
+      "instanceBrandingDesc": "Colors, icons, user types",
+      "aiConfig": "AI Configuration",
+      "aiConfigDesc": "Prompts, parameters, defaults",
+      "deploymentConfig": "Deployment Config",
+      "deploymentConfigDesc": "Services, SMTP, storage"
     }
   },
   "admin": {
     "confirmDelete": "Er du sikker på at du vil slette denne oppføringen?",
+    "confirmDeleteField": "Slette feltet \"{{name}}\"?",
+    "confirmDeleteTypeWithFields": "Slette brukertypen \"{{name}}\"? Dette vil også slette {{count}} tilknyttede felt.",
+    "confirmDeleteType": "Slette brukertypen \"{{name}}\"?",
+    "global": "Global",
     "setup": {
       "backToChat": "Tilbake til chat",
       "title": "Konfigurer instansen din",
@@ -227,10 +276,15 @@
       "tableCount_other": "{{count}} tabeller",
       "rowCount_one": "{{count}} rad",
       "rowCount_other": "{{count}} rader",
-      "rowsInTable": "{{count}} rader i {{table}}",
+      "rowsInTable_one": "{{count}} rad i {{table}}",
+      "rowsInTable_other": "{{count}} rader i {{table}}",
       "connected": "SQLite tilkoblet",
       "selectTable": "Velg en tabell fra sidefeltet",
-      "orUseSqlQuery": "eller bruk SQL-spørringsmodus"
+      "orUseSqlQuery": "eller bruk SQL-spørringsmodus",
+      "encrypted": "[Kryptert]",
+      "encryptedMissingKey": "[Kryptert - mangler nøkkel]",
+      "decrypting": "[Dekrypterer...]",
+      "notSet": "(ikke satt)"
     },
     "fields": {
       "nameRequired": "Feltnavn er påkrevd",
@@ -273,6 +327,18 @@
       "searchPlaceholder": "Søk etter ikoner...",
       "noMatch": "Ingen ikoner matcher \"{{search}}\"",
       "selected": "Valgt:"
+    },
+    "errors": {
+      "loadTypesFailed": "Kunne ikke laste brukertyper",
+      "loadFieldsFailed": "Kunne ikke laste brukerfelt",
+      "loadFailed": "Kunne ikke laste data",
+      "saveFailed": "Kunne ikke lagre innstillinger. Prøv igjen.",
+      "addTypeFailed": "Kunne ikke legge til brukertype",
+      "removeTypeFailed": "Kunne ikke fjerne brukertype",
+      "addFieldFailed": "Kunne ikke legge til felt",
+      "updateFieldFailed": "Kunne ikke oppdatere felt",
+      "removeFieldFailed": "Kunne ikke fjerne felt",
+      "reorderFailed": "Kunne ikke omorganisere felt"
     }
   },
   "adminOnboarding": {
@@ -291,5 +357,304 @@
     "connectedAs": "Tilkoblet som",
     "redirecting": "Omdirigerer til kontrollpanel...",
     "connectionFailed": "Tilkobling mislyktes"
+  },
+  "errors": {
+    "requestFailed": "Forespørsel mislyktes",
+    "invalidServerResponse": "Ugyldig svar fra server",
+    "unknownError": "Ukjent feil",
+    "failedToFetchDocuments": "Kunne ikke hente dokumenter",
+    "noResponseFromServer": "Ingen respons fra server",
+    "failedToSendMessage": "Kunne ikke sende melding",
+    "searchFailed": "Søk feilet: HTTP {{status}}",
+    "failedToSendMagicLink": "Kunne ikke sende magisk lenke",
+    "failedToFetchJobs": "Kunne ikke hente jobber",
+    "errorFetchingJobs": "Feil ved henting av jobber",
+    "failedToFetchTables": "Kunne ikke hente tabeller",
+    "errorFetchingTables": "Feil ved henting av tabeller",
+    "failedToFetchTableData": "Kunne ikke hente tabelldata",
+    "verificationFailed": "Verifisering feilet",
+    "failedToFetchFields": "Kunne ikke hente felt",
+    "errorFetchingFields": "Feil ved henting av felt",
+    "failedToFetchAIConfig": "Kunne ikke hente AI-konfigurasjon",
+    "failedToPreviewPrompt": "Kunne ikke forhåndsvise prompt",
+    "failedToFetchDocumentDefaults": "Kunne ikke hente dokumentstandarder",
+    "failedToUpdateDocument": "Kunne ikke oppdatere dokument",
+    "failedToBatchUpdate": "Kunne ikke utføre masseoppdatering",
+    "failedToFetchDeploymentConfig": "Kunne ikke hente distribusjonskonfigurasjon",
+    "failedToExport": "Kunne ikke eksportere",
+    "failedToValidate": "Kunne ikke validere",
+    "failedToRevealSecret": "Kunne ikke avsløre hemmelighet",
+    "failedToFetchServiceHealth": "Kunne ikke hente tjenestestatus",
+    "failedToFetchAuditLog": "Kunne ikke hente revisjonslogg",
+    "notAuthenticatedAsAdmin": "Ikke autentisert som administrator",
+    "adminSessionExpired": "Administratorøkt utløpt",
+    "authenticationFailed": "Autentisering mislyktes",
+    "noNostrExtension": "Ingen Nostr-utvidelse funnet"
+  },
+  "adminDashboard": {
+    "title": "Adminkontrollpanel",
+    "subtitle": "Administrer konfigurasjonen av din Sanctum-instans",
+    "instance": "Instansinnstillinger",
+    "instanceDesc": "Tilpass merkevarebygging, brukertyper og registreringsfelt",
+    "ai": "AI-konfigurasjon",
+    "aiDesc": "Konfigurer prompt, LLM-parametere og dokumentstandarder",
+    "deployment": "Distribusjonskonfigurasjon",
+    "deploymentDesc": "Administrer miljøinnstillinger og tjenestehelse",
+    "upload": "Dokumentopplasting",
+    "uploadDesc": "Legg til dokumenter i kunnskapsbasen din",
+    "database": "Databaseutforsker",
+    "databaseDesc": "Bla gjennom og søk i SQLite-databasen"
+  },
+  "adminAI": {
+    "title": "AI-konfigurasjon",
+    "subtitle": "Kontroller hvordan AI-en oppfører seg og svarer brukerne dine",
+    "promptTemplate": "Promptmal",
+    "promptTemplateDesc": "Form hvordan AI-en kommuniserer med brukerne dine",
+    "promptTemplateHint": "Disse innstillingene definerer AI-ens personlighet og grenser. Endringer trer i kraft umiddelbart for nye samtaler.",
+    "preview": "Forhåndsvisning",
+    "parameters": "Responsinnstillinger",
+    "parametersDesc": "Finjuster kvaliteten på AI-ens responser",
+    "parametersHint": "Disse tekniske innstillingene påvirker responshastighet og kvalitet. Standardverdiene fungerer godt for de fleste brukstilfeller - juster bare hvis du merker problemer.",
+    "sessionDefaults": "Funksjonsstandarder",
+    "sessionDefaultsDesc": "Angi hvilke funksjoner som er på som standard",
+    "sessionDefaultsHint": "Kontroller hvilke AI-funksjoner som er aktivert når brukere starter en ny chatøkt.",
+    "documentDefaults": "Dokumenttilgang",
+    "documentDefaultsDesc": "Kontroller hvilke dokumenter AI-en kan referere til",
+    "documentDefaultsHint": "Dokumenter merket \"Tilgjengelig\" kan velges av brukere. Dokumenter merket \"Aktiv som standard\" inkluderes automatisk i nye samtaler.",
+    "available": "Tilgjengelig",
+    "activeByDefault": "Aktiv som standard",
+    "noDocuments": "Ingen dokumenter lastet opp ennå",
+    "promptPreview": "Forhåndsvisning av prompt",
+    "invalidJson": "Ugyldig JSON-format",
+    "chunks": "deler"
+  },
+  "adminDeployment": {
+    "title": "Distribusjonskonfigurasjon",
+    "subtitle": "Administrer servertilkoblinger og infrastrukturinnstillinger",
+    "serviceHealth": "Tjenestehelse",
+    "serviceHealthDesc": "Overvåk tilkoblede tjenester",
+    "serviceHealthHint": "Grønn betyr at tjenesten svarer normalt. Hvis en tjeneste viser rødt, sjekk konfigurasjonen nedenfor.",
+    "refresh": "Oppdater",
+    "restartRequired": "Omstart av tjeneste påkrevd",
+    "validate": "Valider konfig",
+    "exportEnv": "Eksporter .env",
+    "auditLog": "Nylige endringer",
+    "configValid": "Konfigurasjon gyldig",
+    "configInvalid": "Konfigurasjon ugyldig",
+    "noRecentChanges": "Ingen nylige endringer",
+    "exportFailed": "Eksport feilet",
+    "validationFailed": "Valideringsforespørsel feilet",
+    "requiresRestart": "Krever omstart",
+    "secret": "Hemmelig",
+    "leaveEmptyForSecret": "La stå tom for å beholde gjeldende verdi"
+  },
+  "upload": {
+    "invalidFileType": "Ugyldig filtype. Tillatt: {{extensions}}",
+    "title": "Last opp dokumenter",
+    "subtitle": "Legg til dokumenter i kunnskapsbasen din for RAG",
+    "uploadFile": "Last opp fil",
+    "dropFileHere": "Slipp fil her",
+    "dropOrBrowse": "Slipp fil her eller klikk for å bla",
+    "supported": "Støttet: {{extensions}}",
+    "removeFile": "Fjern fil",
+    "uploading": "Laster opp...",
+    "uploadDocument": "Last opp dokument",
+    "recentUploads": "Nylige opplastinger",
+    "noUploads": "Ingen opplastinger ennå",
+    "backToDashboard": "Tilbake til kontrollpanel",
+    "backToSetup": "Tilbake til oppsett",
+    "status": {
+      "queued": "I kø",
+      "processing": "Behandler",
+      "chunked": "Oppdelt",
+      "complete": "Fullført",
+      "failed": "Feilet"
+    },
+    "chunks": "{{processed}}/{{total}} deler"
+  },
+  "configCategories": {
+    "llm": {
+      "label": "AI-leverandør",
+      "description": "Koble til din AI-tjeneste",
+      "hint": "Konfigurer hvilken AI-tjeneste som driver assistenten din. Du trenger en API-nøkkel fra din valgte leverandør (f.eks. OpenAI, Anthropic). Endringer krever omstart av tjenesten for å tre i kraft."
+    },
+    "embedding": {
+      "label": "Tekstbehandling",
+      "description": "Konfigurer hvordan dokumenter analyseres",
+      "hint": "Disse innstillingene kontrollerer hvordan dokumentene dine konverteres til søkbare data. Standardverdiene fungerer godt for de fleste tilfeller - endre bare hvis du bruker en tilpasset modell."
+    },
+    "email": {
+      "label": "E-posttjeneste",
+      "description": "Sett opp e-post for brukerautentisering",
+      "hint": "Konfigurer e-post for å sende magiske lenker til brukere under innlogging. Du trenger SMTP-legitimasjon fra en e-posttjeneste som SendGrid, Mailgun, eller din egen mailserver."
+    },
+    "storage": {
+      "label": "Datalagring",
+      "description": "Konfigurer hvor data lagres",
+      "hint": "Kontroller filstier for databasen og opplastede dokumenter. Disse trenger vanligvis ikke endres med mindre du tilpasser distribusjonen din."
+    },
+    "security": {
+      "label": "Sikkerhet og URL-er",
+      "description": "Konfigurer tilgangs- og sikkerhetsinnstillinger",
+      "hint": "Angi dine offentlige URL-er og sikkerhetsalternativer. Frontend-URL-en er der brukere får tilgang til appen. Sørg for at disse samsvarer med din faktiske distribusjon."
+    },
+    "search": {
+      "label": "Nettsøk",
+      "description": "Aktiver AI-nettsøkfunksjoner",
+      "hint": "Konfigurer søkemotoren som driver AI-ens nettsøkfunksjon. Når aktivert, kan AI-en slå opp aktuell informasjon på nettet."
+    },
+    "general": {
+      "label": "Generelt",
+      "description": "Andre konfigurasjonsalternativer",
+      "hint": "Diverse innstillinger som ikke passer inn i andre kategorier."
+    }
+  },
+  "promptSections": {
+    "prompt_tone": {
+      "label": "Tone og personlighet",
+      "description": "Hvordan AI-en skal høres ut når den svarer",
+      "hint": "Dette setter den generelle stemmen og tonen til AI-en. For eksempel kan du ønske at den skal være \"varm og støttende\" for en veiledningsapp, eller \"kortfattet og profesjonell\" for et forretningsverktøy. AI-en vil bruke dette som veiledning for hver respons.",
+      "placeholder": "Vær hjelpsom, kortfattet og profesjonell..."
+    },
+    "prompt_rules": {
+      "label": "Atferdsregler",
+      "description": "Spesifikke instruksjoner AI-en må følge",
+      "hint": "Legg til regler som en JSON-liste som [\"Siter alltid kilder\", \"Hold svar under 200 ord\"]. Dette er faste retningslinjer AI-en vil prøve å følge i hver samtale.",
+      "placeholder": "[\"Regel 1\", \"Regel 2\", ...]"
+    },
+    "prompt_forbidden": {
+      "label": "Forbudte emner",
+      "description": "Emner AI-en skal avslå å diskutere",
+      "hint": "List opp emner du ønsker at AI-en høflig skal omdirigere bort fra. For eksempel [\"medisinsk råd\", \"juridisk rådgivning\"]. AI-en vil anerkjenne disse forespørslene, men forklare at den ikke kan hjelpe med dem.",
+      "placeholder": "[\"Emne 1\", \"Emne 2\", ...]"
+    },
+    "prompt_greeting": {
+      "label": "Responsstil",
+      "description": "Hvordan AI-en strukturerer sine svar",
+      "hint": "Kontrollerer formateringspreferanser som om man skal bruke punktlister, overskrifter eller samtalepregede avsnitt. Dette påvirker hvordan svar presenteres visuelt.",
+      "placeholder": "Bruk punktlister for lister, overskrifter for seksjoner..."
+    }
+  },
+  "parameters": {
+    "temperature": {
+      "label": "Kreativitetsnivå",
+      "description": "Hvor forutsigbare vs. kreative AI-responsene er",
+      "hint": "Lavere verdier (0.0-0.3) gjør svar mer fokuserte og konsistente - bra for faktabaserte spørsmål og svar. Høyere verdier (0.7-1.0) gjør svar mer varierte og kreative - bedre for idémyldring. Standard: 0.7"
+    },
+    "top_k": {
+      "label": "Kunnskapsdybde",
+      "description": "Hvor mange dokumentseksjoner som skal refereres",
+      "hint": "Når AI-en svarer på spørsmål, søker den gjennom opplastede dokumenter og henter relevante seksjoner. Høyere tall betyr mer kontekst, men tregere svar. Lavere tall er raskere, men kan gå glipp av relevant informasjon. Standard: 5"
+    }
+  },
+  "defaults": {
+    "web_search_default": {
+      "label": "Nettsøk",
+      "description": "Tillat AI å søke på internett",
+      "hint": "Når aktivert kan AI-en søke på nettet etter aktuell informasjon som ikke finnes i dokumentene dine. Deaktiver dette hvis du vil at svar kun skal komme fra din opplastede kunnskapsbase."
+    }
+  },
+  "colors": {
+    "blue": "Blå",
+    "purple": "Lilla",
+    "green": "Grønn",
+    "orange": "Oransje",
+    "pink": "Rosa",
+    "teal": "Blågrønn"
+  },
+  "promptPreview": {
+    "sampleQuestion": "Hva bør jeg vite om dette emnet?"
+  },
+  "deploymentConfigItems": {
+    "LLM_PROVIDER": {
+      "label": "AI Service",
+      "description": "LLM provider (maple, ollama)",
+      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+    },
+    "LLM_MODEL": {
+      "label": "Model Name",
+      "description": "Model name/identifier",
+      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+    },
+    "LLM_API_URL": {
+      "label": "API Endpoint",
+      "description": "Base URL for API requests",
+      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+    },
+    "RAG_TOP_K": {
+      "label": "Context Chunks",
+      "description": "Number of chunks to retrieve",
+      "hint": "How many document chunks to retrieve for each query. Higher = more context but slower. Default: 8."
+    },
+    "PDF_EXTRACT_MODE": {
+      "label": "PDF Processing",
+      "description": "PDF extraction method",
+      "hint": "\"fast\" extracts text quickly. \"quality\" uses OCR for better accuracy with scanned documents but is slower."
+    },
+    "EMBEDDING_MODEL": {
+      "label": "Embedding Model",
+      "description": "HuggingFace model for embeddings",
+      "hint": "The HuggingFace model for converting text to vectors. Only change if you need a different language or domain."
+    },
+    "SMTP_HOST": {
+      "label": "Mail Server",
+      "description": "SMTP server address",
+      "hint": "Your SMTP server address (e.g., smtp.gmail.com, smtp.sendgrid.net)."
+    },
+    "SMTP_PORT": {
+      "label": "Mail Port",
+      "description": "SMTP server port",
+      "hint": "Usually 587 for TLS or 465 for SSL. Check your email provider's settings."
+    },
+    "SMTP_USER": {
+      "label": "SMTP Username",
+      "description": "Email service username",
+      "hint": "Your email service username or API key."
+    },
+    "SMTP_PASS": {
+      "label": "SMTP Password",
+      "description": "Email service password",
+      "hint": "Your email service password or API key secret."
+    },
+    "SMTP_FROM": {
+      "label": "Sender Address",
+      "description": "From address for emails",
+      "hint": "The \"from\" address for outgoing emails (e.g., noreply@yourdomain.com)."
+    },
+    "MOCK_SMTP": {
+      "label": "Test Mode",
+      "description": "Mock email sending",
+      "hint": "When \"true\", emails are logged instead of sent. Useful for development."
+    },
+    "SQLITE_PATH": {
+      "label": "Database File",
+      "description": "Path to SQLite database",
+      "hint": "Path to the SQLite database file. Default: /data/sanctum.db"
+    },
+    "UPLOADS_DIR": {
+      "label": "Uploads Folder",
+      "description": "Document uploads directory",
+      "hint": "Directory where uploaded documents are stored. Default: /uploads"
+    },
+    "QDRANT_HOST": {
+      "label": "Vector DB Host",
+      "description": "Qdrant server hostname",
+      "hint": "Hostname for the Qdrant vector database. Default: qdrant"
+    },
+    "QDRANT_PORT": {
+      "label": "Vector DB Port",
+      "description": "Qdrant REST API port",
+      "hint": "Port for Qdrant (REST API). Default: 6333"
+    },
+    "SEARXNG_URL": {
+      "label": "Search Engine URL",
+      "description": "SearXNG instance URL",
+      "hint": "URL of your SearXNG instance for web search functionality."
+    },
+    "FRONTEND_URL": {
+      "label": "App URL",
+      "description": "Public URL for the application",
+      "hint": "The public URL where users access the app. Used for generating magic links."
+    }
   }
 }

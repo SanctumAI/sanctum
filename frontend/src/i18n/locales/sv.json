@@ -1,9 +1,28 @@
 {
   "onboarding": {
+    "nostr": {
+      "whatIsNostr": "Vad är Nostr?",
+      "whatIsNostrDesc": "Nostr är ett decentraliserat protokoll för sociala nätverk och identitet. Till skillnad från traditionella inloggningar kontrolleras din identitet inte av något företag — du äger dina nycklar.",
+      "whatIsNip07": "Vad är NIP-07?",
+      "whatIsNip07Desc": "NIP-07 är en standard som låter webbplatser begära din Nostr offentliga nyckel från ett webbläsartillägg. Detta innebär:",
+      "noPasswords": "Inga lösenord att komma ihåg",
+      "noEmailVerification": "Ingen e-postverifiering behövs",
+      "cryptoSecure": "Din identitet är kryptografiskt säker",
+      "controlKeys": "Du kontrollerar dina egna nycklar",
+      "howItWorks": "Hur det fungerar",
+      "step1": "Installera ett Nostr-signeringstillägg (vi rekommenderar Alby)",
+      "step2": "Klicka på \"Anslut med Nostr\" ovan",
+      "step3": "Godkänn anslutningen i ditt tillägg",
+      "step4": "Du är inne!",
+      "dontHaveExtension": "Har du inget Nostr-tillägg? Skaffa ett här:",
+      "alby": "Alby",
+      "nos2x": "nos2x"
+    },
     "userType": {
       "title": "Vad beskriver dig bäst?",
       "description": "Välj det alternativ som bäst passar dina behov",
-      "loadError": "Kunde inte ladda användartyper. Försök igen."
+      "loadError": "Kunde inte ladda användartyper. Försök igen.",
+      "selectionLabel": "Val av användartyp"
     },
     "language": {
       "selectLabel": "Välj ett språk",
@@ -92,7 +111,9 @@
     "tools": {
       "label": "Verktyg",
       "webSearch": "Sök på webben efter aktuell information",
+      "webSearchName": "Webb",
       "database": "Sök i SQLite-databasen",
+      "databaseName": "Databas",
       "knowledgeGraph": "Sök i kunskapsgrafen"
     },
     "documentScope": {
@@ -103,7 +124,8 @@
       "docsLabel": "Dokument"
     },
     "messages": {
-      "searching": "🔍 Söker efter \"{{term}}\"...",
+      "searching": "Söker efter \"{{term}}\"...",
+      "searchingPrefix": "Söker",
       "searchResults": "Jag sökte efter \"{{term}}\" åt dig:",
       "newConversation": "Ny konversation"
     },
@@ -119,12 +141,18 @@
       "markdown": "Markdown",
       "markdownExt": ".md fil",
       "plainText": "Ren text",
-      "plainTextExt": ".txt fil"
+      "plainTextExt": ".txt fil",
+      "defaultTitle": "Chattexport",
+      "roleUser": "Du",
+      "roleAssistant": "Assistent",
+      "footer": "Exporterad från {{instanceName}}",
+      "exportedOn": "Exporterad {{timestamp}}"
     },
     "database": {
       "executedSql": "Utförd SQL: {{sql}}",
       "noResults": "Frågan returnerade inga resultat.",
-      "resultsCount": "Databasfrågans resultat ({{count}} rader):",
+      "resultsCount_one": "Databasfrågans resultat ({{count}} rad):",
+      "resultsCount_other": "Databasfrågans resultat ({{count}} rader):",
       "resultsTruncated": "(Resultaten trunkerade till 100 rader)"
     }
   },
@@ -151,7 +179,12 @@
     "continue": "Fortsätt",
     "unexpectedError": "Ett oväntat fel inträffade",
     "nullPlaceholder": "NULL",
-    "error": "Fel"
+    "error": "Fel",
+    "back": "Tillbaka",
+    "loading": "Laddar...",
+    "unknown": "Okänd",
+    "enabled": "Aktiverad",
+    "disabled": "Inaktiverad"
   },
   "settings": {
     "title": "Inställningar",
@@ -166,11 +199,21 @@
       "documentUpload": "Dokumentuppladdning",
       "documentUploadDesc": "Lägg till dokument i kunskapsbasen",
       "databaseExplorer": "Databasutforskare",
-      "databaseExplorerDesc": "Bläddra i SQLite-databasen"
+      "databaseExplorerDesc": "Bläddra i SQLite-databasen",
+      "instanceBranding": "Instance Branding",
+      "instanceBrandingDesc": "Colors, icons, user types",
+      "aiConfig": "AI Configuration",
+      "aiConfigDesc": "Prompts, parameters, defaults",
+      "deploymentConfig": "Deployment Config",
+      "deploymentConfigDesc": "Services, SMTP, storage"
     }
   },
   "admin": {
     "confirmDelete": "Är du säker på att du vill ta bort denna post?",
+    "confirmDeleteField": "Ta bort fältet \"{{name}}\"?",
+    "confirmDeleteTypeWithFields": "Ta bort användartypen \"{{name}}\"? Detta kommer också ta bort {{count}} tillhörande fält.",
+    "confirmDeleteType": "Ta bort användartypen \"{{name}}\"?",
+    "global": "Global",
     "setup": {
       "backToChat": "Tillbaka till chatten",
       "title": "Konfigurera din instans",
@@ -190,7 +233,8 @@
       "addType": "Lägg till typ",
       "addUserType": "Lägg till användartyp",
       "onboardingFields": "Användarregistreringsfält",
-      "optionsCount": "{{count}} alternativ",
+      "optionsCount_one": "{{count}} alternativ",
+      "optionsCount_other": "{{count}} alternativ",
       "noFields": "Inga anpassade fält",
       "addField": "Lägg till fält",
       "knowledgeBase": "Kunskapsbas",
@@ -233,10 +277,15 @@
       "tableCount_other": "{{count}} tabeller",
       "rowCount_one": "{{count}} rad",
       "rowCount_other": "{{count}} rader",
-      "rowsInTable": "{{count}} rader i {{table}}",
+      "rowsInTable_one": "{{count}} rad i {{table}}",
+      "rowsInTable_other": "{{count}} rader i {{table}}",
       "connected": "SQLite ansluten",
       "selectTable": "Välj en tabell från sidofältet",
-      "orUseSqlQuery": "eller använd SQL-frågeläget"
+      "orUseSqlQuery": "eller använd SQL-frågeläget",
+      "encrypted": "[Krypterad]",
+      "encryptedMissingKey": "[Krypterad - nyckel saknas]",
+      "decrypting": "[Dekrypterar...]",
+      "notSet": "(ej inställd)"
     },
     "fields": {
       "nameRequired": "Fältnamn krävs",
@@ -279,6 +328,18 @@
       "searchPlaceholder": "Sök ikoner...",
       "noMatch": "Inga ikoner matchar \"{{search}}\"",
       "selected": "Vald:"
+    },
+    "errors": {
+      "loadTypesFailed": "Kunde inte ladda användartyper",
+      "loadFieldsFailed": "Kunde inte ladda användarfält",
+      "loadFailed": "Kunde inte ladda data",
+      "saveFailed": "Kunde inte spara inställningar. Försök igen.",
+      "addTypeFailed": "Kunde inte lägga till användartyp",
+      "removeTypeFailed": "Kunde inte ta bort användartyp",
+      "addFieldFailed": "Kunde inte lägga till fält",
+      "updateFieldFailed": "Kunde inte uppdatera fält",
+      "removeFieldFailed": "Kunde inte ta bort fält",
+      "reorderFailed": "Kunde inte ändra ordningen på fältet"
     }
   },
   "adminOnboarding": {
@@ -297,5 +358,304 @@
     "connectedAs": "Ansluten som",
     "redirecting": "Omdirigerar till instrumentpanelen...",
     "connectionFailed": "Anslutningen misslyckades"
+  },
+  "errors": {
+    "requestFailed": "Förfrågan misslyckades",
+    "invalidServerResponse": "Ogiltigt svar från servern",
+    "unknownError": "Okänt fel",
+    "failedToFetchDocuments": "Kunde inte hämta dokument",
+    "noResponseFromServer": "Inget svar från servern",
+    "failedToSendMessage": "Kunde inte skicka meddelande",
+    "searchFailed": "Sökningen misslyckades: HTTP {{status}}",
+    "failedToSendMagicLink": "Kunde inte skicka magisk länk",
+    "failedToFetchJobs": "Kunde inte hämta jobb",
+    "errorFetchingJobs": "Fel vid hämtning av jobb",
+    "failedToFetchTables": "Kunde inte hämta tabeller",
+    "errorFetchingTables": "Fel vid hämtning av tabeller",
+    "failedToFetchTableData": "Kunde inte hämta tabelldata",
+    "verificationFailed": "Verifieringen misslyckades",
+    "failedToFetchFields": "Kunde inte hämta fält",
+    "errorFetchingFields": "Fel vid hämtning av fält",
+    "failedToFetchAIConfig": "Kunde inte hämta AI-konfiguration",
+    "failedToPreviewPrompt": "Kunde inte förhandsgranska prompt",
+    "failedToFetchDocumentDefaults": "Kunde inte hämta dokumentstandarder",
+    "failedToUpdateDocument": "Kunde inte uppdatera dokument",
+    "failedToBatchUpdate": "Kunde inte utföra batchuppdatering",
+    "failedToFetchDeploymentConfig": "Kunde inte hämta distributionskonfiguration",
+    "failedToExport": "Kunde inte exportera",
+    "failedToValidate": "Kunde inte validera",
+    "failedToRevealSecret": "Kunde inte avslöja hemligheten",
+    "failedToFetchServiceHealth": "Kunde inte hämta tjänststatus",
+    "failedToFetchAuditLog": "Kunde inte hämta granskningsloggen",
+    "notAuthenticatedAsAdmin": "Inte autentiserad som administratör",
+    "adminSessionExpired": "Administratörssessionen har gått ut",
+    "authenticationFailed": "Autentiseringen misslyckades",
+    "noNostrExtension": "Inget Nostr-tillägg hittades"
+  },
+  "adminDashboard": {
+    "title": "Adminpanel",
+    "subtitle": "Hantera din Sanctum-instanskonfiguration",
+    "instance": "Instanskonfiguration",
+    "instanceDesc": "Anpassa varumärke, användartyper och registreringsfält",
+    "ai": "AI-konfiguration",
+    "aiDesc": "Konfigurera promptar, LLM-parametrar och dokumentstandarder",
+    "deployment": "Driftkonfiguration",
+    "deploymentDesc": "Hantera miljöinställningar och tjänsternas hälsa",
+    "upload": "Dokumentuppladdning",
+    "uploadDesc": "Lägg till dokument i din kunskapsbas",
+    "database": "Databasutforskare",
+    "databaseDesc": "Bläddra och sök i SQLite-databasen"
+  },
+  "adminAI": {
+    "title": "AI-konfiguration",
+    "subtitle": "Kontrollera hur AI:n beter sig och svarar dina användare",
+    "promptTemplate": "Promptmall",
+    "promptTemplateDesc": "Forma hur AI:n kommunicerar med dina användare",
+    "promptTemplateHint": "Dessa inställningar definierar AI:ns personlighet och gränser. Ändringar träder i kraft omedelbart för nya konversationer.",
+    "preview": "Förhandsgranska",
+    "parameters": "Svarsinställningar",
+    "parametersDesc": "Finjustera AI:ns svarskvalitet",
+    "parametersHint": "Dessa tekniska inställningar påverkar svarshastighet och kvalitet. Standardvärdena fungerar bra för de flesta användningsfall — justera endast om du märker problem.",
+    "sessionDefaults": "Funktionsstandarder",
+    "sessionDefaultsDesc": "Ange vilka funktioner som är på som standard",
+    "sessionDefaultsHint": "Kontrollera vilka AI-funktioner som är aktiverade när användare startar en ny chattsession.",
+    "documentDefaults": "Dokumentåtkomst",
+    "documentDefaultsDesc": "Kontrollera vilka dokument AI:n kan referera till",
+    "documentDefaultsHint": "Dokument markerade som \"Tillgängliga\" kan väljas av användare. Dokument markerade som \"Aktiva som standard\" inkluderas automatiskt i nya konversationer.",
+    "available": "Tillgänglig",
+    "activeByDefault": "Aktiv som standard",
+    "noDocuments": "Inga dokument uppladdade ännu",
+    "promptPreview": "Förhandsgranskning av prompt",
+    "invalidJson": "Ogiltigt JSON-format",
+    "chunks": "delar"
+  },
+  "adminDeployment": {
+    "title": "Driftkonfiguration",
+    "subtitle": "Hantera dina serveranslutningar och infrastrukturinställningar",
+    "serviceHealth": "Tjänsternas hälsa",
+    "serviceHealthDesc": "Övervaka dina anslutna tjänster",
+    "serviceHealthHint": "Grönt betyder att tjänsten svarar normalt. Om en tjänst visar rött, kontrollera dess konfiguration nedan.",
+    "refresh": "Uppdatera",
+    "restartRequired": "Tjänsten måste startas om",
+    "validate": "Validera konfiguration",
+    "exportEnv": "Exportera .env",
+    "auditLog": "Senaste ändringar",
+    "configValid": "Konfigurationen är giltig",
+    "configInvalid": "Konfigurationen är ogiltig",
+    "noRecentChanges": "Inga senaste ändringar",
+    "exportFailed": "Exporten misslyckades",
+    "validationFailed": "Valideringsbegäran misslyckades",
+    "requiresRestart": "Kräver omstart",
+    "secret": "Hemlig",
+    "leaveEmptyForSecret": "Lämna tomt för att behålla nuvarande värde"
+  },
+  "upload": {
+    "invalidFileType": "Ogiltig filtyp. Tillåtet: {{extensions}}",
+    "title": "Ladda upp dokument",
+    "subtitle": "Lägg till dokument i din kunskapsbas för RAG",
+    "uploadFile": "Ladda upp fil",
+    "dropFileHere": "Släpp filen här",
+    "dropOrBrowse": "Släpp filen här eller klicka för att bläddra",
+    "supported": "Stöds: {{extensions}}",
+    "removeFile": "Ta bort fil",
+    "uploading": "Laddar upp...",
+    "uploadDocument": "Ladda upp dokument",
+    "recentUploads": "Senaste uppladdningar",
+    "noUploads": "Inga uppladdningar ännu",
+    "backToDashboard": "Tillbaka till instrumentpanelen",
+    "backToSetup": "Tillbaka till inställningar",
+    "status": {
+      "queued": "I kö",
+      "processing": "Bearbetar",
+      "chunked": "Uppdelad",
+      "complete": "Klar",
+      "failed": "Misslyckades"
+    },
+    "chunks": "{{processed}}/{{total}} delar"
+  },
+  "configCategories": {
+    "llm": {
+      "label": "AI-leverantör",
+      "description": "Anslut till din AI-tjänst",
+      "hint": "Konfigurera vilken AI-tjänst som driver din assistent. Du behöver en API-nyckel från din valda leverantör (t.ex. OpenAI, Anthropic). Ändringar kräver en omstart av tjänsten för att träda i kraft."
+    },
+    "embedding": {
+      "label": "Textbearbetning",
+      "description": "Konfigurera hur dokument analyseras",
+      "hint": "Dessa inställningar styr hur dina dokument omvandlas till sökbar data. Standardvärdena fungerar bra för de flesta fall — ändra endast om du använder en anpassad modell."
+    },
+    "email": {
+      "label": "E-posttjänst",
+      "description": "Konfigurera e-post för användarautentisering",
+      "hint": "Konfigurera e-post för att skicka magiska länkar till användare vid inloggning. Du behöver SMTP-uppgifter från en e-posttjänst som SendGrid, Mailgun eller din egen e-postserver."
+    },
+    "storage": {
+      "label": "Datalagring",
+      "description": "Konfigurera var data lagras",
+      "hint": "Kontrollera filsökvägar för databasen och uppladdade dokument. Dessa behöver vanligtvis inte ändras om du inte anpassar din driftsättning."
+    },
+    "security": {
+      "label": "Säkerhet & URL:er",
+      "description": "Konfigurera åtkomst- och säkerhetsinställningar",
+      "hint": "Ställ in dina publika URL:er och säkerhetsalternativ. Frontend-URL:en är där användare kommer åt appen. Se till att dessa matchar din faktiska driftsättning."
+    },
+    "search": {
+      "label": "Webbsökning",
+      "description": "Aktivera AI:ns webbsökningsfunktioner",
+      "hint": "Konfigurera sökmotorn som driver AI:ns webbsökningsfunktion. När den är aktiverad kan AI:n söka efter aktuell information online."
+    },
+    "general": {
+      "label": "Allmänt",
+      "description": "Övriga konfigurationsalternativ",
+      "hint": "Diverse inställningar som inte passar in i andra kategorier."
+    }
+  },
+  "promptSections": {
+    "prompt_tone": {
+      "label": "Ton & personlighet",
+      "description": "Hur AI:n ska låta när den svarar",
+      "hint": "Detta anger den övergripande rösten och stilen för AI:n. Till exempel kan du vilja att den ska vara \"varm och stödjande\" för en rådgivningsapp, eller \"kortfattad och professionell\" för ett affärsverktyg. AI:n använder detta som vägledning för varje svar.",
+      "placeholder": "Var hjälpsam, kortfattad och professionell..."
+    },
+    "prompt_rules": {
+      "label": "Beteenderegler",
+      "description": "Specifika instruktioner som AI:n måste följa",
+      "hint": "Lägg till regler som en JSON-lista som [\"Citera alltid källor\", \"Håll svaren under 200 ord\"]. Dessa är fasta riktlinjer som AI:n kommer försöka följa i varje konversation.",
+      "placeholder": "[\"Regel 1\", \"Regel 2\", ...]"
+    },
+    "prompt_forbidden": {
+      "label": "Förbjudna ämnen",
+      "description": "Ämnen som AI:n ska avböja att diskutera",
+      "hint": "Lista ämnen du vill att AI:n artigt ska omdirigera från. Till exempel [\"medicinsk rådgivning\", \"juridisk rådgivning\"]. AI:n kommer bekräfta dessa förfrågningar men förklara att den inte kan hjälpa till med dem.",
+      "placeholder": "[\"Ämne 1\", \"Ämne 2\", ...]"
+    },
+    "prompt_greeting": {
+      "label": "Svarsstil",
+      "description": "Hur AI:n strukturerar sina svar",
+      "hint": "Styr formateringspreferenser som om punktlistor, rubriker eller konversationsstycken ska användas. Detta påverkar hur svar presenteras visuellt.",
+      "placeholder": "Använd punktlistor för listor, rubriker för sektioner..."
+    }
+  },
+  "parameters": {
+    "temperature": {
+      "label": "Kreativitetsnivå",
+      "description": "Hur förutsägbara kontra kreativa AI-svaren är",
+      "hint": "Lägre värden (0,0-0,3) gör svaren mer fokuserade och konsekventa — bra för faktabaserade frågor och svar. Högre värden (0,7-1,0) gör svaren mer varierade och kreativa — bättre för brainstorming. Standard: 0,7"
+    },
+    "top_k": {
+      "label": "Kunskapsdjup",
+      "description": "Hur många dokumentavsnitt som ska refereras",
+      "hint": "När AI:n svarar på frågor söker den igenom dina uppladdade dokument och hämtar relevanta avsnitt. Högre värden betyder mer kontext men långsammare svar. Lägre värden är snabbare men kan missa relevant information. Standard: 5"
+    }
+  },
+  "defaults": {
+    "web_search_default": {
+      "label": "Webbsökning",
+      "description": "Tillåt AI:n att söka på internet",
+      "hint": "När det är aktiverat kan AI:n söka på webben efter aktuell information som inte finns i dina dokument. Inaktivera detta om du vill att svar endast ska komma från din uppladdade kunskapsbas."
+    }
+  },
+  "colors": {
+    "blue": "Blå",
+    "purple": "Lila",
+    "green": "Grön",
+    "orange": "Orange",
+    "pink": "Rosa",
+    "teal": "Blågrön"
+  },
+  "promptPreview": {
+    "sampleQuestion": "Vad bör jag veta om detta ämne?"
+  },
+  "deploymentConfigItems": {
+    "LLM_PROVIDER": {
+      "label": "AI Service",
+      "description": "LLM provider (maple, ollama)",
+      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+    },
+    "LLM_MODEL": {
+      "label": "Model Name",
+      "description": "Model name/identifier",
+      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+    },
+    "LLM_API_URL": {
+      "label": "API Endpoint",
+      "description": "Base URL for API requests",
+      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+    },
+    "RAG_TOP_K": {
+      "label": "Context Chunks",
+      "description": "Number of chunks to retrieve",
+      "hint": "How many document chunks to retrieve for each query. Higher = more context but slower. Default: 8."
+    },
+    "PDF_EXTRACT_MODE": {
+      "label": "PDF Processing",
+      "description": "PDF extraction method",
+      "hint": "\"fast\" extracts text quickly. \"quality\" uses OCR for better accuracy with scanned documents but is slower."
+    },
+    "EMBEDDING_MODEL": {
+      "label": "Embedding Model",
+      "description": "HuggingFace model for embeddings",
+      "hint": "The HuggingFace model for converting text to vectors. Only change if you need a different language or domain."
+    },
+    "SMTP_HOST": {
+      "label": "Mail Server",
+      "description": "SMTP server address",
+      "hint": "Your SMTP server address (e.g., smtp.gmail.com, smtp.sendgrid.net)."
+    },
+    "SMTP_PORT": {
+      "label": "Mail Port",
+      "description": "SMTP server port",
+      "hint": "Usually 587 for TLS or 465 for SSL. Check your email provider's settings."
+    },
+    "SMTP_USER": {
+      "label": "SMTP Username",
+      "description": "Email service username",
+      "hint": "Your email service username or API key."
+    },
+    "SMTP_PASS": {
+      "label": "SMTP Password",
+      "description": "Email service password",
+      "hint": "Your email service password or API key secret."
+    },
+    "SMTP_FROM": {
+      "label": "Sender Address",
+      "description": "From address for emails",
+      "hint": "The \"from\" address for outgoing emails (e.g., noreply@yourdomain.com)."
+    },
+    "MOCK_SMTP": {
+      "label": "Test Mode",
+      "description": "Mock email sending",
+      "hint": "When \"true\", emails are logged instead of sent. Useful for development."
+    },
+    "SQLITE_PATH": {
+      "label": "Database File",
+      "description": "Path to SQLite database",
+      "hint": "Path to the SQLite database file. Default: /data/sanctum.db"
+    },
+    "UPLOADS_DIR": {
+      "label": "Uploads Folder",
+      "description": "Document uploads directory",
+      "hint": "Directory where uploaded documents are stored. Default: /uploads"
+    },
+    "QDRANT_HOST": {
+      "label": "Vector DB Host",
+      "description": "Qdrant server hostname",
+      "hint": "Hostname for the Qdrant vector database. Default: qdrant"
+    },
+    "QDRANT_PORT": {
+      "label": "Vector DB Port",
+      "description": "Qdrant REST API port",
+      "hint": "Port for Qdrant (REST API). Default: 6333"
+    },
+    "SEARXNG_URL": {
+      "label": "Search Engine URL",
+      "description": "SearXNG instance URL",
+      "hint": "URL of your SearXNG instance for web search functionality."
+    },
+    "FRONTEND_URL": {
+      "label": "App URL",
+      "description": "Public URL for the application",
+      "hint": "The public URL where users access the app. Used for generating magic links."
+    }
   }
 }

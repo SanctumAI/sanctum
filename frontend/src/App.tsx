@@ -4,6 +4,9 @@ import { TestDashboard } from './pages/TestDashboard'
 import { ChatPage } from './pages/ChatPage'
 import { AdminOnboarding } from './pages/AdminOnboarding'
 import { AdminSetup } from './pages/AdminSetup'
+import { AdminInstanceConfig } from './pages/AdminInstanceConfig'
+import { AdminAIConfig } from './pages/AdminAIConfig'
+import { AdminDeploymentConfig } from './pages/AdminDeploymentConfig'
 import { AdminDocumentUpload } from './pages/AdminDocumentUpload'
 import { AdminDatabaseExplorer } from './pages/AdminDatabaseExplorer'
 import { UserOnboarding } from './pages/UserOnboarding'
@@ -22,6 +25,9 @@ function App() {
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/admin" element={<AdminOnboarding />} />
         <Route path="/admin/setup" element={<AdminSetup />} />
+        <Route path="/admin/instance" element={<AdminInstanceConfig />} />
+        <Route path="/admin/ai" element={<AdminAIConfig />} />
+        <Route path="/admin/deployment" element={<AdminDeploymentConfig />} />
         <Route path="/admin/upload" element={<AdminDocumentUpload />} />
         <Route path="/admin/database" element={<AdminDatabaseExplorer />} />
         <Route path="/login" element={<UserOnboarding />} />

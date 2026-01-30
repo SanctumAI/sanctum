@@ -149,16 +149,73 @@ def init_schema():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_values_field ON user_field_values(field_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_definitions_type ON user_field_definitions(user_type_id)")
 
+    # AI Configuration table - stores AI/LLM settings
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ai_config (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            key TEXT UNIQUE NOT NULL,
+            value TEXT NOT NULL,
+            value_type TEXT NOT NULL DEFAULT 'string',
+            category TEXT NOT NULL,
+            description TEXT,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    # Document defaults table - controls document availability and default state
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS document_defaults (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_id TEXT NOT NULL UNIQUE,
+            is_available INTEGER DEFAULT 1,
+            is_default_active INTEGER DEFAULT 1,
+            display_order INTEGER DEFAULT 0,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (job_id) REFERENCES ingest_jobs(job_id) ON DELETE CASCADE
+        )
+    """)
+
+    # Deployment configuration table - manages environment settings
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS deployment_config (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            key TEXT UNIQUE NOT NULL,
+            value TEXT,
+            is_secret INTEGER DEFAULT 0,
+            requires_restart INTEGER DEFAULT 0,
+            category TEXT NOT NULL,
+            description TEXT,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    # Config audit log table - tracks all configuration changes
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS config_audit_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            table_name TEXT NOT NULL,
+            config_key TEXT NOT NULL,
+            old_value TEXT,
+            new_value TEXT,
+            changed_by TEXT NOT NULL,
+            changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
     conn.commit()
     logger.info("SQLite schema initialized")
 
     # Run migrations for existing tables (must run BEFORE creating indexes on new columns)
     _migrate_add_approved_column()
     _migrate_add_encryption_columns()  # This adds email_blind_index column AND creates its index
+    _migrate_add_field_metadata_columns()  # Add placeholder and options columns
 
     # Initialize ingest job tables
     from ingest_db import init_ingest_schema
     init_ingest_schema()
+
+    # Seed default AI config values
+    _seed_default_ai_config()
 
 
 def _migrate_add_approved_column():
@@ -227,6 +284,27 @@ def _migrate_add_encryption_columns():
         logger.error(f"Migration: Duplicate email_blind_index values detected: {e}")
         raise
 
+    cursor.close()
+
+
+def _migrate_add_field_metadata_columns():
+    """Add placeholder and options columns to user_field_definitions if they don't exist"""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Check existing columns
+    cursor.execute("PRAGMA table_info(user_field_definitions)")
+    columns = [row[1] for row in cursor.fetchall()]
+
+    if 'placeholder' not in columns:
+        cursor.execute("ALTER TABLE user_field_definitions ADD COLUMN placeholder TEXT")
+        logger.info("Migration: Added 'placeholder' column to user_field_definitions table")
+
+    if 'options' not in columns:
+        cursor.execute("ALTER TABLE user_field_definitions ADD COLUMN options TEXT")  # JSON array
+        logger.info("Migration: Added 'options' column to user_field_definitions table")
+
+    conn.commit()
     cursor.close()
 
 
@@ -418,16 +496,21 @@ def create_field_definition(
     field_type: str,
     required: bool = False,
     display_order: int = 0,
-    user_type_id: int | None = None
+    user_type_id: int | None = None,
+    placeholder: str | None = None,
+    options: list[str] | None = None
 ) -> int:
     """Create a user field definition. Returns field id.
     user_type_id: None = global field (shown for all types)
+    placeholder: Placeholder text for the field input
+    options: List of options for select fields (stored as JSON)
     """
+    options_json = json.dumps(options) if options is not None else None
     with get_cursor() as cursor:
         cursor.execute("""
-            INSERT INTO user_field_definitions (field_name, field_type, required, display_order, user_type_id)
-            VALUES (?, ?, ?, ?, ?)
-        """, (field_name, field_type, int(required), display_order, user_type_id))
+            INSERT INTO user_field_definitions (field_name, field_type, required, display_order, user_type_id, placeholder, options)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (field_name, field_type, int(required), display_order, user_type_id, placeholder, options_json))
         return cursor.lastrowid
 
 
@@ -459,7 +542,18 @@ def get_field_definitions(user_type_id: int | None = None, include_global: bool 
                 WHERE user_type_id = ?
                 ORDER BY display_order, id
             """, (user_type_id,))
-        return [dict(row) for row in cursor.fetchall()]
+
+        results = []
+        for row in cursor.fetchall():
+            field = dict(row)
+            # Parse options JSON if present
+            if field.get("options"):
+                try:
+                    field["options"] = json.loads(field["options"])
+                except json.JSONDecodeError:
+                    field["options"] = None
+            results.append(field)
+        return results
 
 
 def get_field_definition_by_name(field_name: str, user_type_id: int | None = None) -> dict | None:
@@ -497,7 +591,9 @@ def update_field_definition(
     field_type: str | None = None,
     required: bool | None = None,
     display_order: int | None = None,
-    user_type_id: int | None = ...  # Use ... as sentinel for "not provided"
+    user_type_id: int | None = ...,  # Use ... as sentinel for "not provided"
+    placeholder: str | None = ...,
+    options: list[str] | None = ...
 ) -> bool:
     """Update a field definition. Returns True if updated."""
     updates = []
@@ -518,6 +614,12 @@ def update_field_definition(
     if user_type_id is not ...:
         updates.append("user_type_id = ?")
         values.append(user_type_id)
+    if placeholder is not ...:
+        updates.append("placeholder = ?")
+        values.append(placeholder)
+    if options is not ...:
+        updates.append("options = ?")
+        values.append(json.dumps(options) if options is not None else None)
 
     if not updates:
         return False
@@ -899,3 +1001,298 @@ def migrate_encrypt_existing_data():
     finally:
         cursor.close()
         conn.close()
+
+
+# --- AI Configuration Operations ---
+
+def _seed_default_ai_config():
+    """Seed default AI configuration values if not present"""
+    defaults = [
+        # Prompt sections
+        ("prompt_tone", "Be helpful, concise, and professional. Acknowledge the user's question before answering.", "string", "prompt_section", "Voice and personality instructions"),
+        ("prompt_rules", '["ONE action per response when providing step-by-step guidance", "NEVER invent sources, organization names, or contact information", "If asked about topics outside your knowledge base, acknowledge limitations"]', "json", "prompt_section", "Array of behavioral rules"),
+        ("prompt_forbidden", '[]', "json", "prompt_section", "Topics to avoid or redirect"),
+        ("prompt_greeting", "greeting_style", "string", "prompt_section", "Initial response style"),
+        # LLM Parameters
+        ("temperature", "0.1", "number", "parameter", "LLM temperature (0.0-1.0)"),
+        ("top_k", "8", "number", "parameter", "RAG retrieval count"),
+        # Session defaults
+        ("web_search_default", "false", "boolean", "default", "Web search active by default for new sessions"),
+    ]
+
+    with get_cursor() as cursor:
+        for key, value, value_type, category, description in defaults:
+            cursor.execute("""
+                INSERT OR IGNORE INTO ai_config (key, value, value_type, category, description)
+                VALUES (?, ?, ?, ?, ?)
+            """, (key, value, value_type, category, description))
+
+    logger.info("Default AI configuration seeded")
+
+
+def get_ai_config(key: str) -> dict | None:
+    """Get a single AI config value"""
+    with get_cursor() as cursor:
+        cursor.execute("SELECT * FROM ai_config WHERE key = ?", (key,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+
+def get_all_ai_config() -> list[dict]:
+    """Get all AI config values"""
+    with get_cursor() as cursor:
+        cursor.execute("SELECT * FROM ai_config ORDER BY category, key")
+        return [dict(row) for row in cursor.fetchall()]
+
+
+def get_ai_config_by_category(category: str) -> list[dict]:
+    """Get AI config values for a specific category"""
+    with get_cursor() as cursor:
+        cursor.execute("SELECT * FROM ai_config WHERE category = ? ORDER BY key", (category,))
+        return [dict(row) for row in cursor.fetchall()]
+
+
+def update_ai_config(key: str, value: str, changed_by: str) -> bool:
+    """Update an AI config value with audit logging"""
+    with get_cursor() as cursor:
+        # Get old value inside transaction to avoid TOCTOU race
+        cursor.execute("SELECT value FROM ai_config WHERE key = ?", (key,))
+        row = cursor.fetchone()
+        old_value = row["value"] if row else None
+
+        cursor.execute("""
+            UPDATE ai_config SET value = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE key = ?
+        """, (value, key))
+
+        if cursor.rowcount > 0:
+            # Log the change
+            cursor.execute("""
+                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
+                VALUES (?, ?, ?, ?, ?)
+            """, ("ai_config", key, old_value, value, changed_by))
+            return True
+        return False
+
+
+# --- Document Defaults Operations ---
+
+def get_document_defaults(job_id: str) -> dict | None:
+    """Get document defaults for a specific job"""
+    with get_cursor() as cursor:
+        cursor.execute("SELECT * FROM document_defaults WHERE job_id = ?", (job_id,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+
+def list_document_defaults() -> list[dict]:
+    """List all document defaults"""
+    with get_cursor() as cursor:
+        cursor.execute("""
+            SELECT dd.*, ij.filename, ij.status, ij.total_chunks
+            FROM document_defaults dd
+            JOIN ingest_jobs ij ON dd.job_id = ij.job_id
+            ORDER BY dd.display_order, ij.created_at DESC
+        """)
+        return [dict(row) for row in cursor.fetchall()]
+
+
+def upsert_document_defaults(
+    job_id: str,
+    is_available: bool = True,
+    is_default_active: bool = True,
+    display_order: int = 0,
+    changed_by: str = ""
+) -> bool:
+    """Create or update document defaults"""
+    with get_cursor() as cursor:
+        # Get old value inside transaction to avoid TOCTOU race
+        cursor.execute("SELECT is_available, is_default_active FROM document_defaults WHERE job_id = ?", (job_id,))
+        old_row = cursor.fetchone()
+        old_value = json.dumps({"is_available": bool(old_row["is_available"]), "is_default_active": bool(old_row["is_default_active"])}) if old_row else None
+
+        cursor.execute("""
+            INSERT INTO document_defaults (job_id, is_available, is_default_active, display_order)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(job_id) DO UPDATE SET
+                is_available = excluded.is_available,
+                is_default_active = excluded.is_default_active,
+                display_order = excluded.display_order,
+                updated_at = CURRENT_TIMESTAMP
+        """, (job_id, int(is_available), int(is_default_active), display_order))
+
+        # Log the change
+        new_value = json.dumps({"is_available": is_available, "is_default_active": is_default_active})
+        if changed_by:
+            cursor.execute("""
+                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
+                VALUES (?, ?, ?, ?, ?)
+            """, ("document_defaults", job_id, old_value, new_value, changed_by))
+
+        return True
+
+
+def get_default_active_documents() -> list[str]:
+    """Get list of job_ids that are default active"""
+    with get_cursor() as cursor:
+        cursor.execute("""
+            SELECT job_id FROM document_defaults
+            WHERE is_available = 1 AND is_default_active = 1
+            ORDER BY display_order
+        """)
+        return [row["job_id"] for row in cursor.fetchall()]
+
+
+def get_available_documents() -> list[str]:
+    """Get list of job_ids that are available for use"""
+    with get_cursor() as cursor:
+        cursor.execute("""
+            SELECT job_id FROM document_defaults
+            WHERE is_available = 1
+            ORDER BY display_order
+        """)
+        return [row["job_id"] for row in cursor.fetchall()]
+
+
+# --- Deployment Configuration Operations ---
+
+def get_deployment_config(key: str) -> dict | None:
+    """Get a single deployment config value"""
+    with get_cursor() as cursor:
+        cursor.execute("SELECT * FROM deployment_config WHERE key = ?", (key,))
+        row = cursor.fetchone()
+        if row:
+            result = dict(row)
+            # Mask secret values
+            if result.get("is_secret"):
+                result["value"] = "********"
+            return result
+        return None
+
+
+def get_all_deployment_config() -> list[dict]:
+    """Get all deployment config values (secrets masked)"""
+    with get_cursor() as cursor:
+        cursor.execute("SELECT * FROM deployment_config ORDER BY category, key")
+        results = []
+        for row in cursor.fetchall():
+            result = dict(row)
+            if result.get("is_secret"):
+                result["value"] = "********"
+            results.append(result)
+        return results
+
+
+def get_deployment_config_by_category(category: str) -> list[dict]:
+    """Get deployment config values for a specific category (secrets masked)"""
+    with get_cursor() as cursor:
+        cursor.execute("SELECT * FROM deployment_config WHERE category = ? ORDER BY key", (category,))
+        results = []
+        for row in cursor.fetchall():
+            result = dict(row)
+            if result.get("is_secret"):
+                result["value"] = "********"
+            results.append(result)
+        return results
+
+
+def update_deployment_config(key: str, value: str, changed_by: str) -> bool:
+    """Update a deployment config value with audit logging"""
+    # Get old value for audit log
+    with get_cursor() as cursor:
+        cursor.execute("SELECT value, is_secret FROM deployment_config WHERE key = ?", (key,))
+        row = cursor.fetchone()
+        if not row:
+            return False
+        old_value = "********" if row["is_secret"] else row["value"]
+
+        cursor.execute("""
+            UPDATE deployment_config SET value = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE key = ?
+        """, (value, key))
+
+        if cursor.rowcount > 0:
+            # Log the change (mask secrets in log too)
+            new_value_logged = "********" if row["is_secret"] else value
+            cursor.execute("""
+                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
+                VALUES (?, ?, ?, ?, ?)
+            """, ("deployment_config", key, old_value, new_value_logged, changed_by))
+            return True
+        return False
+
+
+def upsert_deployment_config(
+    key: str,
+    value: str,
+    is_secret: bool = False,
+    requires_restart: bool = False,
+    category: str = "general",
+    description: str = "",
+    changed_by: str = ""
+) -> bool:
+    """Create or update deployment config"""
+    with get_cursor() as cursor:
+        # Get old value inside transaction to avoid TOCTOU race
+        cursor.execute("SELECT value, is_secret FROM deployment_config WHERE key = ?", (key,))
+        old_row = cursor.fetchone()
+        old_value = "********" if (old_row and old_row["is_secret"]) else (old_row["value"] if old_row else None)
+
+        cursor.execute("""
+            INSERT INTO deployment_config (key, value, is_secret, requires_restart, category, description)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(key) DO UPDATE SET
+                value = excluded.value,
+                is_secret = excluded.is_secret,
+                requires_restart = excluded.requires_restart,
+                category = excluded.category,
+                description = excluded.description,
+                updated_at = CURRENT_TIMESTAMP
+        """, (key, value, int(is_secret), int(requires_restart), category, description))
+
+        # Log the change
+        if changed_by:
+            new_value_logged = "********" if is_secret else value
+            cursor.execute("""
+                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
+                VALUES (?, ?, ?, ?, ?)
+            """, ("deployment_config", key, old_value, new_value_logged, changed_by))
+
+        return True
+
+
+def get_restart_required_keys() -> list[str]:
+    """Get list of config keys that require restart when changed"""
+    with get_cursor() as cursor:
+        cursor.execute("SELECT key FROM deployment_config WHERE requires_restart = 1")
+        return [row["key"] for row in cursor.fetchall()]
+
+
+def get_deployment_config_value(key: str) -> str | None:
+    """Get the actual deployment config value (for internal system use only).
+
+    WARNING: This returns unmasked secret values. Do not expose via API.
+    """
+    with get_cursor() as cursor:
+        cursor.execute("SELECT value FROM deployment_config WHERE key = ?", (key,))
+        row = cursor.fetchone()
+        return row["value"] if row else None
+
+
+# --- Audit Log Operations ---
+
+def get_config_audit_log(limit: int = 100, table_name: str | None = None) -> list[dict]:
+    """Get recent config audit log entries"""
+    with get_cursor() as cursor:
+        if table_name:
+            cursor.execute("""
+                SELECT * FROM config_audit_log
+                WHERE table_name = ?
+                ORDER BY changed_at DESC LIMIT ?
+            """, (table_name, limit))
+        else:
+            cursor.execute("""
+                SELECT * FROM config_audit_log
+                ORDER BY changed_at DESC LIMIT ?
+            """, (limit,))
+        return [dict(row) for row in cursor.fetchall()]

@@ -18,10 +18,19 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks, Depends
 from pydantic import BaseModel
 
+import auth
+import database
 import ingest_db
+from models import (
+    DocumentDefaultItem,
+    DocumentDefaultsResponse,
+    DocumentDefaultUpdate,
+    DocumentDefaultsBatchUpdate,
+    SuccessResponse,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -698,3 +707,184 @@ async def get_ingest_pipeline_stats():
             "by_status": chunk_statuses,
         },
     }
+
+
+# =============================================================================
+# DOCUMENT DEFAULTS ENDPOINTS (Admin)
+# =============================================================================
+
+@router.get("/admin/documents/defaults", response_model=DocumentDefaultsResponse)
+async def get_document_defaults(admin: dict = Depends(auth.require_admin)):
+    """
+    List all documents with their availability/default status.
+    Also includes completed jobs that don't have defaults set yet.
+    Requires admin authentication.
+    """
+    # Get existing defaults
+    defaults = database.list_document_defaults()
+    defaults_by_job = {d["job_id"]: d for d in defaults}
+
+    # Get all completed jobs
+    completed_jobs = ingest_db.list_completed_jobs()
+
+    documents = []
+    for job in completed_jobs:
+        job_id = job["job_id"]
+        if job_id in defaults_by_job:
+            d = defaults_by_job[job_id]
+            documents.append(DocumentDefaultItem(
+                job_id=job_id,
+                filename=job["filename"],
+                status=job["status"],
+                total_chunks=job["total_chunks"],
+                is_available=bool(d["is_available"]),
+                is_default_active=bool(d["is_default_active"]),
+                display_order=d["display_order"],
+                updated_at=d.get("updated_at"),
+            ))
+        else:
+            # Job exists but no defaults set - treat as available and active
+            documents.append(DocumentDefaultItem(
+                job_id=job_id,
+                filename=job["filename"],
+                status=job["status"],
+                total_chunks=job["total_chunks"],
+                is_available=True,
+                is_default_active=True,
+                display_order=0,
+            ))
+
+    return DocumentDefaultsResponse(documents=documents)
+
+
+@router.put("/admin/documents/{job_id}/defaults", response_model=DocumentDefaultItem)
+async def update_document_defaults(
+    job_id: str,
+    update: DocumentDefaultUpdate,
+    admin: dict = Depends(auth.require_admin)
+):
+    """
+    Update document availability and default state.
+    Requires admin authentication.
+    """
+    # Verify job exists
+    job = ingest_db.get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
+
+    # Get current defaults
+    current = database.get_document_defaults(job_id)
+
+    # Merge updates with current values
+    is_available = update.is_available if update.is_available is not None else (
+        bool(current["is_available"]) if current else True
+    )
+    is_default_active = update.is_default_active if update.is_default_active is not None else (
+        bool(current["is_default_active"]) if current else True
+    )
+    display_order = update.display_order if update.display_order is not None else (
+        current["display_order"] if current else 0
+    )
+
+    # Get admin pubkey for audit log
+    admin_pubkey = admin.get("pubkey", "unknown")
+
+    # Update/create defaults
+    database.upsert_document_defaults(
+        job_id=job_id,
+        is_available=is_available,
+        is_default_active=is_default_active,
+        display_order=display_order,
+        changed_by=admin_pubkey,
+    )
+
+    return DocumentDefaultItem(
+        job_id=job_id,
+        filename=job["filename"],
+        status=job["status"],
+        total_chunks=job["total_chunks"],
+        is_available=is_available,
+        is_default_active=is_default_active,
+        display_order=display_order,
+        updated_at=datetime.utcnow().isoformat(),
+    )
+
+
+@router.put("/admin/documents/defaults/batch", response_model=SuccessResponse)
+async def batch_update_document_defaults(
+    batch: DocumentDefaultsBatchUpdate,
+    admin: dict = Depends(auth.require_admin)
+):
+    """
+    Batch update multiple documents' defaults.
+    Requires admin authentication.
+    """
+    admin_pubkey = admin.get("pubkey", "unknown")
+    updated = 0
+    skipped: list[str] = []
+
+    for item in batch.updates:
+        job_id = item.job_id
+        if not job_id:
+            skipped.append("(empty job_id)")
+            continue
+
+        # Verify job exists
+        job = ingest_db.get_job(job_id)
+        if not job:
+            skipped.append(job_id)
+            continue
+
+        # Get current defaults for merge (like single update endpoint)
+        current = database.get_document_defaults(job_id)
+
+        # Merge updates with current values (same pattern as single update endpoint)
+        is_available = item.is_available if item.is_available is not None else (
+            bool(current["is_available"]) if current else True
+        )
+        is_default_active = item.is_default_active if item.is_default_active is not None else (
+            bool(current["is_default_active"]) if current else True
+        )
+        display_order = item.display_order if item.display_order is not None else (
+            current["display_order"] if current else 0
+        )
+
+        database.upsert_document_defaults(
+            job_id=job_id,
+            is_available=is_available,
+            is_default_active=is_default_active,
+            display_order=display_order,
+            changed_by=admin_pubkey,
+        )
+        updated += 1
+
+    message = f"Updated {updated} document defaults"
+    if skipped:
+        message += f", skipped {len(skipped)}: {', '.join(skipped[:5])}"
+        if len(skipped) > 5:
+            message += f" and {len(skipped) - 5} more"
+
+    return SuccessResponse(
+        success=True,
+        message=message
+    )
+
+
+@router.get("/admin/documents/defaults/active")
+async def get_default_active_documents(admin: dict = Depends(auth.require_admin)):
+    """
+    Get list of job_ids that are default active for new sessions.
+    Requires admin authentication.
+    """
+    job_ids = database.get_default_active_documents()
+    return {"job_ids": job_ids}
+
+
+@router.get("/admin/documents/defaults/available")
+async def get_available_documents(admin: dict = Depends(auth.require_admin)):
+    """
+    Get list of job_ids that are available for use.
+    Requires admin authentication.
+    """
+    job_ids = database.get_available_documents()
+    return {"job_ids": job_ids}

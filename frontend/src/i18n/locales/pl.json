@@ -2,17 +2,17 @@
   "onboarding": {
     "nostr": {
       "whatIsNostr": "Co to jest Nostr?",
-      "whatIsNostrDesc": "Nostr to zdecentralizowany protokol do sieci spolecznosciowych i tozsamosci. W przeciwienstwie do tradycyjnych loginow, Twoja tozsamosc nie jest kontrolowana przez zadna firme — sam posiadasz swoje klucze.",
+      "whatIsNostrDesc": "Nostr to zdecentralizowany protokół do sieci społecznościowych i tożsamości. W przeciwieństwie do tradycyjnych loginów, Twoja tożsamość nie jest kontrolowana przez żadną firmę — sam posiadasz swoje klucze.",
       "whatIsNip07": "Co to jest NIP-07?",
-      "whatIsNip07Desc": "NIP-07 to standard, ktory umozliwia stronom internetowym zadanie klucza publicznego Nostr z rozszerzenia przegladarki. To oznacza:",
-      "noPasswords": "Zadnych hasel do zapamietania",
+      "whatIsNip07Desc": "NIP-07 to standard, który umożliwia stronom internetowym żądanie klucza publicznego Nostr z rozszerzenia przeglądarki. To oznacza:",
+      "noPasswords": "Żadnych haseł do zapamiętania",
       "noEmailVerification": "Nie trzeba weryfikacji e-mailem",
-      "cryptoSecure": "Twoja tozsamosc jest kryptograficznie bezpieczna",
+      "cryptoSecure": "Twoja tożsamość jest kryptograficznie bezpieczna",
       "controlKeys": "Sam kontrolujesz swoje klucze",
-      "howItWorks": "Jak to dziala",
+      "howItWorks": "Jak to działa",
       "step1": "Zainstaluj rozszerzenie do podpisywania Nostr (polecamy Alby)",
-      "step2": "Kliknij \"Polacz z Nostr\" powyzej",
-      "step3": "Zatwierdz polaczenie w rozszerzeniu",
+      "step2": "Kliknij \"Połącz z Nostr\" powyżej",
+      "step3": "Zatwierdź połączenie w rozszerzeniu",
       "step4": "Gotowe!",
       "dontHaveExtension": "Nie masz rozszerzenia Nostr? Pobierz je tutaj:",
       "alby": "Alby",
@@ -202,12 +202,12 @@
       "documentUploadDesc": "Dodaj dokumenty do bazy wiedzy",
       "databaseExplorer": "Eksplorator bazy danych",
       "databaseExplorerDesc": "Przegladaj baze danych SQLite",
-      "instanceBranding": "Instance Branding",
-      "instanceBrandingDesc": "Colors, icons, user types",
-      "aiConfig": "AI Configuration",
-      "aiConfigDesc": "Prompts, parameters, defaults",
-      "deploymentConfig": "Deployment Config",
-      "deploymentConfigDesc": "Services, SMTP, storage"
+      "instanceBranding": "Branding instancji",
+      "instanceBrandingDesc": "Kolory, ikony, typy użytkowników",
+      "aiConfig": "Konfiguracja AI",
+      "aiConfigDesc": "Prompty, parametry, domyślne",
+      "deploymentConfig": "Konfiguracja wdrożenia",
+      "deploymentConfigDesc": "Usługi, SMTP, storage"
     }
   },
   "admin": {
@@ -359,7 +359,7 @@
     "subtitle": "Polacz sie ze swoja tozsamoscia Nostr, aby zarzadzac ta instancja",
     "connectNostr": "Polacz z Nostr",
     "orForTesting": "lub do testow",
-    "continueMock": "Kontynuuj z falszywą tozsamoscia",
+    "continueMock": "Kontynuuj z fałszywą tożsamością",
     "connecting": "Laczenie z rozszerzeniem...",
     "noExtension": "Nie znaleziono rozszerzenia Nostr",
     "installExtension": "Zainstaluj rozszerzenie kompatybilne z NIP-07, aby kontynuowac",
@@ -373,19 +373,19 @@
     "requestFailed": "Żądanie nie powiodło się",
     "invalidServerResponse": "Nieprawidłowa odpowiedź z serwera",
     "unknownError": "Nieznany błąd",
-    "failedToFetchDocuments": "Nie udalo sie pobrac dokumentow",
+    "failedToFetchDocuments": "Nie udało się pobrać dokumentów",
     "noResponseFromServer": "Brak odpowiedzi z serwera",
-    "failedToSendMessage": "Nie udalo sie wyslac wiadomosci",
-    "searchFailed": "Wyszukiwanie nie powiodlo sie: HTTP {{status}}",
-    "failedToSendMagicLink": "Nie udalo sie wyslac magicznego linku",
-    "failedToFetchJobs": "Nie udalo sie pobrac zadan",
-    "errorFetchingJobs": "Blad podczas pobierania zadan",
-    "failedToFetchTables": "Nie udalo sie pobrac tabel",
-    "errorFetchingTables": "Blad podczas pobierania tabel",
-    "failedToFetchTableData": "Nie udalo sie pobrac danych tabeli",
-    "verificationFailed": "Weryfikacja nie powiodla sie",
-    "failedToFetchFields": "Nie udalo sie pobrac pol",
-    "errorFetchingFields": "Blad podczas pobierania pol",
+    "failedToSendMessage": "Nie udało się wysłać wiadomości",
+    "searchFailed": "Wyszukiwanie nie powiodło się: HTTP {{status}}",
+    "failedToSendMagicLink": "Nie udało się wysłać magicznego linku",
+    "failedToFetchJobs": "Nie udało się pobrać zadań",
+    "errorFetchingJobs": "Błąd podczas pobierania zadań",
+    "failedToFetchTables": "Nie udało się pobrać tabel",
+    "errorFetchingTables": "Błąd podczas pobierania tabel",
+    "failedToFetchTableData": "Nie udało się pobrać danych tabeli",
+    "verificationFailed": "Weryfikacja nie powiodła się",
+    "failedToFetchFields": "Nie udało się pobrać pól",
+    "errorFetchingFields": "Błąd podczas pobierania pól",
     "failedToFetchAIConfig": "Nie udało się pobrać konfiguracji AI",
     "failedToPreviewPrompt": "Nie udało się wyświetlić podglądu promptu",
     "failedToFetchDocumentDefaults": "Nie udało się pobrać domyślnych ustawień dokumentów",
@@ -418,151 +418,151 @@
   },
   "adminAI": {
     "title": "Konfiguracja AI",
-    "subtitle": "Kontroluj zachowanie AI i sposob odpowiadania uzytkownikom",
+    "subtitle": "Kontroluj zachowanie AI i sposób odpowiadania użytkownikom",
     "promptTemplate": "Szablon promptu",
-    "promptTemplateDesc": "Okresl sposob komunikacji AI z uzytkownikami",
-    "promptTemplateHint": "Te ustawienia definiuja osobowosc AI i jej granice. Zmiany zaczynaja obowiazywac natychmiast dla nowych rozmow.",
-    "preview": "Podglad",
+    "promptTemplateDesc": "Określ sposób komunikacji AI z użytkownikami",
+    "promptTemplateHint": "Te ustawienia definiują osobowość AI i jej granice. Zmiany zaczynają obowiązywać natychmiast dla nowych rozmów.",
+    "preview": "Podgląd",
     "parameters": "Ustawienia odpowiedzi",
-    "parametersDesc": "Dostosuj jakosc odpowiedzi AI",
-    "parametersHint": "Te ustawienia techniczne wplywaja na szybkosc i jakosc odpowiedzi. Domyslne wartosci dzialaja dobrze w wiekszosci przypadkow — dostosuj tylko jesli zauwazyisz problemy.",
-    "sessionDefaults": "Domyslne funkcje",
-    "sessionDefaultsDesc": "Ustaw, ktore funkcje sa domyslnie wlaczone",
-    "sessionDefaultsHint": "Kontroluj, ktore funkcje AI sa wlaczone, gdy uzytkownicy rozpoczynaja nowa sesje czatu.",
-    "documentDefaults": "Dostep do dokumentow",
-    "documentDefaultsDesc": "Kontroluj, do ktorych dokumentow AI moze sie odwolywac",
-    "documentDefaultsHint": "Dokumenty oznaczone jako \"Dostepne\" moga byc wybierane przez uzytkownikow. Dokumenty oznaczone jako \"Aktywne domyslnie\" sa automatycznie dolaczane do nowych rozmow.",
-    "available": "Dostepne",
-    "activeByDefault": "Aktywne domyslnie",
-    "noDocuments": "Nie przeslano jeszcze zadnych dokumentow",
-    "promptPreview": "Podglad promptu",
-    "invalidJson": "Nieprawidlowy format JSON",
+    "parametersDesc": "Dostosuj jakość odpowiedzi AI",
+    "parametersHint": "Te ustawienia techniczne wpływają na szybkość i jakość odpowiedzi. Domyślne wartości działają dobrze w większości przypadków — dostosuj tylko jeśli zauważysz problemy.",
+    "sessionDefaults": "Domyślne funkcje",
+    "sessionDefaultsDesc": "Ustaw, które funkcje są domyślnie włączone",
+    "sessionDefaultsHint": "Kontroluj, które funkcje AI są włączone, gdy użytkownicy rozpoczynają nową sesję czatu.",
+    "documentDefaults": "Dostęp do dokumentów",
+    "documentDefaultsDesc": "Kontroluj, do których dokumentów AI może się odwoływać",
+    "documentDefaultsHint": "Dokumenty oznaczone jako \"Dostępne\" mogą być wybierane przez użytkowników. Dokumenty oznaczone jako \"Aktywne domyślnie\" są automatycznie dołączane do nowych rozmów.",
+    "available": "Dostępne",
+    "activeByDefault": "Aktywne domyślnie",
+    "noDocuments": "Nie przesłano jeszcze żadnych dokumentów",
+    "promptPreview": "Podgląd promptu",
+    "invalidJson": "Nieprawidłowy format JSON",
     "chunks": "fragmenty"
   },
   "adminDeployment": {
-    "title": "Konfiguracja wdrozenia",
-    "subtitle": "Zarzadzaj polaczeniami z serwerem i ustawieniami infrastruktury",
-    "serviceHealth": "Stan uslug",
-    "serviceHealthDesc": "Monitoruj polaczone uslugi",
-    "serviceHealthHint": "Zielony oznacza, ze usluga odpowiada prawidlowo. Jesli usluga pokazuje sie na czerwono, sprawdz jej konfiguracje ponizej.",
-    "refresh": "Odswiez",
-    "restartRequired": "Wymagany restart uslugi",
-    "validate": "Sprawdz konfiguracje",
+    "title": "Konfiguracja wdrożenia",
+    "subtitle": "Zarządzaj połączeniami z serwerem i ustawieniami infrastruktury",
+    "serviceHealth": "Stan usług",
+    "serviceHealthDesc": "Monitoruj połączone usługi",
+    "serviceHealthHint": "Zielony oznacza, że usługa odpowiada prawidłowo. Jeśli usługa pokazuje się na czerwono, sprawdź jej konfigurację poniżej.",
+    "refresh": "Odśwież",
+    "restartRequired": "Wymagany restart usługi",
+    "validate": "Sprawdź konfigurację",
     "exportEnv": "Eksportuj .env",
     "auditLog": "Ostatnie zmiany",
-    "configValid": "Konfiguracja prawidlowa",
-    "configInvalid": "Konfiguracja nieprawidlowa",
+    "configValid": "Konfiguracja prawidłowa",
+    "configInvalid": "Konfiguracja nieprawidłowa",
     "noRecentChanges": "Brak ostatnich zmian",
-    "exportFailed": "Eksport nie powiodl sie",
-    "validationFailed": "Zadanie walidacji nie powiodlo sie",
+    "exportFailed": "Eksport nie powiódł się",
+    "validationFailed": "Zadanie walidacji nie powiodło się",
     "requiresRestart": "Wymaga restartu",
     "secret": "Tajne",
-    "leaveEmptyForSecret": "Pozostaw puste, aby zachowac obecna wartosc"
+    "leaveEmptyForSecret": "Pozostaw puste, aby zachować obecną wartość"
   },
   "upload": {
     "invalidFileType": "Nieprawidłowy typ pliku. Dozwolone: {{extensions}}",
-    "title": "Przeslij dokumenty",
+    "title": "Prześlij dokumenty",
     "subtitle": "Dodaj dokumenty do bazy wiedzy dla RAG",
-    "uploadFile": "Przeslij plik",
-    "dropFileHere": "Upusc plik tutaj",
-    "dropOrBrowse": "Upusc plik tutaj lub kliknij, aby przegladac",
-    "supported": "Obslugiwane: {{extensions}}",
-    "removeFile": "Usun plik",
-    "uploading": "Przesylanie...",
-    "uploadDocument": "Przeslij dokument",
-    "recentUploads": "Ostatnie przeslane pliki",
-    "noUploads": "Brak przeslanych plikow",
-    "backToDashboard": "Powrot do panelu",
-    "backToSetup": "Powrot do konfiguracji",
+    "uploadFile": "Prześlij plik",
+    "dropFileHere": "Upuść plik tutaj",
+    "dropOrBrowse": "Upuść plik tutaj lub kliknij, aby przeglądać",
+    "supported": "Obsługiwane: {{extensions}}",
+    "removeFile": "Usuń plik",
+    "uploading": "Przesyłanie...",
+    "uploadDocument": "Prześlij dokument",
+    "recentUploads": "Ostatnie przesłane pliki",
+    "noUploads": "Brak przesłanych plików",
+    "backToDashboard": "Powrót do panelu",
+    "backToSetup": "Powrót do konfiguracji",
     "status": {
       "queued": "W kolejce",
       "processing": "Przetwarzanie",
       "chunked": "Podzielone",
-      "complete": "Zakonczone",
+      "complete": "Zakończone",
       "failed": "Niepowodzenie"
     },
-    "chunks": "{{processed}}/{{total}} fragmentow"
+    "chunks": "{{processed}}/{{total}} fragmentów"
   },
   "configCategories": {
     "llm": {
       "label": "Dostawca AI",
-      "description": "Polacz sie z usluga AI",
-      "hint": "Skonfiguruj, ktora usluga AI zasilaja Twojego asystenta. Bedziesz potrzebowac klucza API od wybranego dostawcy (np. OpenAI, Anthropic). Zmiany wymagaja restartu uslugi."
+      "description": "Połącz się z usługą AI",
+      "hint": "Skonfiguruj, która usługa AI zasila Twojego asystenta. Będziesz potrzebować klucza API od wybranego dostawcy (np. OpenAI, Anthropic). Zmiany wymagają restartu usługi."
     },
     "embedding": {
       "label": "Przetwarzanie tekstu",
-      "description": "Skonfiguruj sposob analizy dokumentow",
-      "hint": "Te ustawienia kontroluja sposob konwersji dokumentow na przeszukiwalne dane. Domyslne ustawienia dzialaja dobrze w wiekszosci przypadkow — zmien tylko jesli uzywasz niestandardowego modelu."
+      "description": "Skonfiguruj sposób analizy dokumentów",
+      "hint": "Te ustawienia kontrolują sposób konwersji dokumentów na przeszukiwalne dane. Domyślne ustawienia działają dobrze w większości przypadków — zmień tylko jeśli używasz niestandardowego modelu."
     },
     "email": {
-      "label": "Usluga e-mail",
-      "description": "Skonfiguruj e-mail do uwierzytelniania uzytkownikow",
-      "hint": "Skonfiguruj e-mail do wysylania magicznych linkow do uzytkownikow podczas logowania. Bedziesz potrzebowac danych SMTP od uslugi e-mail, takiej jak SendGrid, Mailgun lub wlasnego serwera pocztowego."
+      "label": "Usługa e-mail",
+      "description": "Skonfiguruj e-mail do uwierzytelniania użytkowników",
+      "hint": "Skonfiguruj e-mail do wysyłania magicznych linków do użytkowników podczas logowania. Będziesz potrzebować danych SMTP od usługi e-mail, takiej jak SendGrid, Mailgun lub własnego serwera pocztowego."
     },
     "storage": {
       "label": "Przechowywanie danych",
       "description": "Skonfiguruj miejsce przechowywania danych",
-      "hint": "Kontroluj sciezki plikow dla bazy danych i przeslanych dokumentow. Zazwyczaj nie wymagaja zmiany, chyba ze dostosujesz swoje wdrozenie."
+      "hint": "Kontroluj ścieżki plików dla bazy danych i przesłanych dokumentów. Zazwyczaj nie wymagają zmiany, chyba że dostosujesz swoje wdrożenie."
     },
     "security": {
-      "label": "Bezpieczenstwo i adresy URL",
-      "description": "Skonfiguruj ustawienia dostepu i bezpieczenstwa",
-      "hint": "Ustaw publiczne adresy URL i opcje bezpieczenstwa. Adres URL frontendu to miejsce, gdzie uzytkownicy uzyskuja dostep do aplikacji. Upewnij sie, ze odpowiadaja Twojemu rzeczywistemu wdrozeniu."
+      "label": "Bezpieczeństwo i adresy URL",
+      "description": "Skonfiguruj ustawienia dostępu i bezpieczeństwa",
+      "hint": "Ustaw publiczne adresy URL i opcje bezpieczeństwa. Adres URL frontendu to miejsce, gdzie użytkownicy uzyskują dostęp do aplikacji. Upewnij się, że odpowiadają Twojemu rzeczywistemu wdrożeniu."
     },
     "search": {
       "label": "Wyszukiwanie w sieci",
-      "description": "Wlacz mozliwosci wyszukiwania AI w sieci",
-      "hint": "Skonfiguruj wyszukiwarke, ktora zasila funkcje wyszukiwania AI w sieci. Po wlaczeniu AI moze wyszukiwac aktualne informacje online."
+      "description": "Włącz możliwości wyszukiwania AI w sieci",
+      "hint": "Skonfiguruj wyszukiwarkę, która zasila funkcje wyszukiwania AI w sieci. Po włączeniu AI może wyszukiwać aktualne informacje online."
     },
     "general": {
-      "label": "Ogolne",
+      "label": "Ogólne",
       "description": "Inne opcje konfiguracji",
-      "hint": "Rozne ustawienia, ktore nie pasuja do innych kategorii."
+      "hint": "Różne ustawienia, które nie pasują do innych kategorii."
     }
   },
   "promptSections": {
     "prompt_tone": {
-      "label": "Ton i osobowosc",
-      "description": "Jak AI powinno brzmiec podczas odpowiadania",
-      "hint": "Ustawia ogolny glos i sposob AI. Na przyklad, mozesz chciec, aby bylo \"cieple i wspierajace\" dla aplikacji doradczej lub \"zwiezle i profesjonalne\" dla narzedzia biznesowego. AI uzyje tego jako wskazowki dla kazdej odpowiedzi.",
-      "placeholder": "Badz pomocny, zwiezly i profesjonalny..."
+      "label": "Ton i osobowość",
+      "description": "Jak AI powinno brzmieć podczas odpowiadania",
+      "hint": "Ustawia ogólny głos i sposób AI. Na przykład, możesz chcieć, aby było \"ciepłe i wspierające\" dla aplikacji doradczej lub \"zwięźle i profesjonalne\" dla narzędzia biznesowego. AI użyje tego jako wskazówki dla każdej odpowiedzi.",
+      "placeholder": "Bądź pomocny, zwięzły i profesjonalny..."
     },
     "prompt_rules": {
       "label": "Zasady zachowania",
-      "description": "Konkretne instrukcje, ktorych AI musi przestrzegac",
-      "hint": "Dodaj zasady jako liste JSON, np. [\"Zawsze cytuj zrodla\", \"Odpowiedzi do 200 slow\"]. To sa scisle wytyczne, ktorych AI bedzie przestrzegac w kazdej rozmowie.",
+      "description": "Konkretne instrukcje, których AI musi przestrzegać",
+      "hint": "Dodaj zasady jako listę JSON, np. [\"Zawsze cytuj źródła\", \"Odpowiedzi do 200 słów\"]. To są ścisłe wytyczne, których AI będzie przestrzegać w każdej rozmowie.",
       "placeholder": "[\"Zasada 1\", \"Zasada 2\", ...]"
     },
     "prompt_forbidden": {
       "label": "Zakazane tematy",
-      "description": "Tematy, ktorych AI powinno odmowic omawiania",
-      "hint": "Wymien tematy, od ktorych chcesz, aby AI grzecznie sie odwracalo. Na przyklad [\"porady medyczne\", \"porady prawne\"]. AI potwierdzi te prosby, ale wyjasni, ze nie moze w tym pomoc.",
+      "description": "Tematy, których AI powinno odmówić omawiania",
+      "hint": "Wymień tematy, od których chcesz, aby AI grzecznie się odwracało. Na przykład [\"porady medyczne\", \"porady prawne\"]. AI potwierdzi te prośby, ale wyjaśni, że nie może w tym pomóc.",
       "placeholder": "[\"Temat 1\", \"Temat 2\", ...]"
     },
     "prompt_greeting": {
       "label": "Styl odpowiedzi",
       "description": "Jak AI strukturyzuje swoje odpowiedzi",
-      "hint": "Kontroluje preferencje formatowania, takie jak uzywanie punktorow, naglowkow lub konwersacyjnych akapitow. Wplywa na sposob prezentacji odpowiedzi wizualnie.",
-      "placeholder": "Uzywaj punktorow dla list, naglowkow dla sekcji..."
+      "hint": "Kontroluje preferencje formatowania, takie jak używanie punktorów, nagłówków lub konwersacyjnych akapitów. Wpływa na sposób prezentacji odpowiedzi wizualnie.",
+      "placeholder": "Używaj punktorów dla list, nagłówków dla sekcji..."
     }
   },
   "parameters": {
     "temperature": {
-      "label": "Poziom kreatywnosci",
-      "description": "Jak przewidywalne lub kreatywne sa odpowiedzi AI",
-      "hint": "Nizsze wartosci (0.0-0.3) sprawiaja, ze odpowiedzi sa bardziej skoncentrowane i spojne — dobre dla faktycznych pytan i odpowiedzi. Wyzsze wartosci (0.7-1.0) sprawiaja, ze odpowiedzi sa bardziej zroznicowane i kreatywne — lepsze do burzy mozgow. Domyslnie: 0.7"
+      "label": "Poziom kreatywności",
+      "description": "Jak przewidywalne lub kreatywne są odpowiedzi AI",
+      "hint": "Niższe wartości (0.0-0.3) sprawiają, że odpowiedzi są bardziej skoncentrowane i spójne — dobre dla faktycznych pytań i odpowiedzi. Wyższe wartości (0.7-1.0) sprawiają, że odpowiedzi są bardziej zróżnicowane i kreatywne — lepsze do burzy mózgów. Domyślnie: 0.7"
     },
     "top_k": {
-      "label": "Glebokosc wiedzy",
-      "description": "Ile sekcji dokumentow ma byc referencyjnych",
-      "hint": "Podczas odpowiadania na pytania AI przeszukuje przeslane dokumenty i pobiera odpowiednie sekcje. Wyzsze liczby oznaczaja wiecej kontekstu, ale wolniejsze odpowiedzi. Nizsze liczby sa szybsze, ale moga pominac istotne informacje. Domyslnie: 5"
+      "label": "Głębokość wiedzy",
+      "description": "Ile sekcji dokumentów ma być referencyjnych",
+      "hint": "Podczas odpowiadania na pytania AI przeszukuje przesłane dokumenty i pobiera odpowiednie sekcje. Wyższe liczby oznaczają więcej kontekstu, ale wolniejsze odpowiedzi. Niższe liczby są szybsze, ale mogą pominąć istotne informacje. Domyślnie: 5"
     }
   },
   "defaults": {
     "web_search_default": {
       "label": "Wyszukiwanie w sieci",
-      "description": "Pozwol AI przeszukiwac internet",
-      "hint": "Po wlaczeniu AI moze wyszukiwac w sieci aktualne informacje, ktorych nie ma w Twoich dokumentach. Wylacz to, jesli chcesz, aby odpowiedzi pochodzily tylko z Twojej przeslanej bazy wiedzy."
+      "description": "Pozwól AI przeszukiwać internet",
+      "hint": "Po włączeniu AI może wyszukiwać w sieci aktualne informacje, których nie ma w Twoich dokumentach. Wyłącz to, jeśli chcesz, aby odpowiedzi pochodziły tylko z Twojej przesłanej bazy wiedzy."
     }
   },
   "colors": {
@@ -578,94 +578,94 @@
   },
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
-      "label": "AI Service",
-      "description": "LLM provider (maple, ollama)",
-      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+      "label": "Usługa AI",
+      "description": "Dostawca LLM (maple, ollama)",
+      "hint": "Wybierz \"maple\" dla proxy Maple (zalecane dla prywatności) lub \"ollama\" dla lokalnych modeli."
     },
     "LLM_MODEL": {
-      "label": "Model Name",
-      "description": "Model name/identifier",
-      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+      "label": "Nazwa modelu",
+      "description": "Nazwa/identyfikator modelu",
+      "hint": "Identyfikator modelu do użycia (np. \"kimi-k2-thinking\"). Sprawdź dokumentację dostawcy, aby poznać dostępne modele."
     },
     "LLM_API_URL": {
-      "label": "API Endpoint",
-      "description": "Base URL for API requests",
-      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+      "label": "Punkt końcowy API",
+      "description": "Bazowy URL dla żądań API",
+      "hint": "Bazowy URL dla żądań API. Dla Maple: http://maple-proxy:8080/v1. Dla Ollama: http://localhost:11434."
     },
     "RAG_TOP_K": {
-      "label": "Context Chunks",
-      "description": "Number of chunks to retrieve",
-      "hint": "How many document chunks to retrieve for each query. Higher = more context but slower. Default: 8."
+      "label": "Fragmenty kontekstu",
+      "description": "Liczba fragmentów do pobrania",
+      "hint": "Ile fragmentów dokumentów pobrać dla każdego zapytania. Więcej = więcej kontekstu, ale wolniej. Domyślnie: 8."
     },
     "PDF_EXTRACT_MODE": {
-      "label": "PDF Processing",
-      "description": "PDF extraction method",
-      "hint": "\"fast\" extracts text quickly. \"quality\" uses OCR for better accuracy with scanned documents but is slower."
+      "label": "Przetwarzanie PDF",
+      "description": "Metoda ekstrakcji PDF",
+      "hint": "\"fast\" szybko wyodrębnia tekst. \"quality\" używa OCR dla lepszej dokładności ze skanowanymi dokumentami, ale jest wolniejsze."
     },
     "EMBEDDING_MODEL": {
-      "label": "Embedding Model",
-      "description": "HuggingFace model for embeddings",
-      "hint": "The HuggingFace model for converting text to vectors. Only change if you need a different language or domain."
+      "label": "Model embeddingów",
+      "description": "Model HuggingFace dla embeddingów",
+      "hint": "Model HuggingFace do konwersji tekstu na wektory. Zmieniaj tylko jeśli potrzebujesz innego języka lub domeny."
     },
     "SMTP_HOST": {
-      "label": "Mail Server",
-      "description": "SMTP server address",
-      "hint": "Your SMTP server address (e.g., smtp.gmail.com, smtp.sendgrid.net)."
+      "label": "Serwer pocztowy",
+      "description": "Adres serwera SMTP",
+      "hint": "Adres Twojego serwera SMTP (np. smtp.gmail.com, smtp.sendgrid.net)."
     },
     "SMTP_PORT": {
-      "label": "Mail Port",
-      "description": "SMTP server port",
-      "hint": "Usually 587 for TLS or 465 for SSL. Check your email provider's settings."
+      "label": "Port poczty",
+      "description": "Port serwera SMTP",
+      "hint": "Zwykle 587 dla TLS lub 465 dla SSL. Sprawdź ustawienia dostawcy e-mail."
     },
     "SMTP_USER": {
-      "label": "SMTP Username",
-      "description": "Email service username",
-      "hint": "Your email service username or API key."
+      "label": "Nazwa użytkownika SMTP",
+      "description": "Nazwa użytkownika usługi e-mail",
+      "hint": "Nazwa użytkownika usługi e-mail lub klucz API."
     },
     "SMTP_PASS": {
-      "label": "SMTP Password",
-      "description": "Email service password",
-      "hint": "Your email service password or API key secret."
+      "label": "Hasło SMTP",
+      "description": "Hasło usługi e-mail",
+      "hint": "Hasło usługi e-mail lub sekret klucza API."
     },
     "SMTP_FROM": {
-      "label": "Sender Address",
-      "description": "From address for emails",
-      "hint": "The \"from\" address for outgoing emails (e.g., noreply@yourdomain.com)."
+      "label": "Adres nadawcy",
+      "description": "Adres nadawcy dla e-maili",
+      "hint": "Adres \"od\" dla wychodzących e-maili (np. noreply@twojadomena.pl)."
     },
     "MOCK_SMTP": {
-      "label": "Test Mode",
-      "description": "Mock email sending",
-      "hint": "When \"true\", emails are logged instead of sent. Useful for development."
+      "label": "Tryb testowy",
+      "description": "Symulowane wysyłanie e-maili",
+      "hint": "Gdy \"true\", e-maile są logowane zamiast wysyłane. Przydatne do rozwoju."
     },
     "SQLITE_PATH": {
-      "label": "Database File",
-      "description": "Path to SQLite database",
-      "hint": "Path to the SQLite database file. Default: /data/sanctum.db"
+      "label": "Plik bazy danych",
+      "description": "Ścieżka do bazy danych SQLite",
+      "hint": "Ścieżka do pliku bazy danych SQLite. Domyślnie: /data/sanctum.db"
     },
     "UPLOADS_DIR": {
-      "label": "Uploads Folder",
-      "description": "Document uploads directory",
-      "hint": "Directory where uploaded documents are stored. Default: /uploads"
+      "label": "Folder przesyłanych plików",
+      "description": "Katalog przesyłanych dokumentów",
+      "hint": "Katalog, w którym przechowywane są przesłane dokumenty. Domyślnie: /uploads"
     },
     "QDRANT_HOST": {
-      "label": "Vector DB Host",
-      "description": "Qdrant server hostname",
-      "hint": "Hostname for the Qdrant vector database. Default: qdrant"
+      "label": "Host bazy wektorowej",
+      "description": "Nazwa hosta serwera Qdrant",
+      "hint": "Nazwa hosta dla wektorowej bazy danych Qdrant. Domyślnie: qdrant"
     },
     "QDRANT_PORT": {
-      "label": "Vector DB Port",
-      "description": "Qdrant REST API port",
-      "hint": "Port for Qdrant (REST API). Default: 6333"
+      "label": "Port bazy wektorowej",
+      "description": "Port REST API Qdrant",
+      "hint": "Port dla Qdrant (REST API). Domyślnie: 6333"
     },
     "SEARXNG_URL": {
-      "label": "Search Engine URL",
-      "description": "SearXNG instance URL",
-      "hint": "URL of your SearXNG instance for web search functionality."
+      "label": "URL wyszukiwarki",
+      "description": "URL instancji SearXNG",
+      "hint": "URL Twojej instancji SearXNG dla funkcji wyszukiwania w sieci."
     },
     "FRONTEND_URL": {
-      "label": "App URL",
-      "description": "Public URL for the application",
-      "hint": "The public URL where users access the app. Used for generating magic links."
+      "label": "URL aplikacji",
+      "description": "Publiczny URL aplikacji",
+      "hint": "Publiczny URL, pod którym użytkownicy uzyskują dostęp do aplikacji. Używany do generowania magicznych linków."
     }
   }
 }

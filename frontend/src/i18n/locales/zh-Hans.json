@@ -43,12 +43,12 @@
       "documentUploadDesc": "将文档添加到知识库",
       "databaseExplorer": "数据库浏览器",
       "databaseExplorerDesc": "浏览 SQLite 数据库",
-      "instanceBranding": "Instance Branding",
-      "instanceBrandingDesc": "Colors, icons, user types",
-      "aiConfig": "AI Configuration",
-      "aiConfigDesc": "Prompts, parameters, defaults",
-      "deploymentConfig": "Deployment Config",
-      "deploymentConfigDesc": "Services, SMTP, storage"
+      "instanceBranding": "实例品牌",
+      "instanceBrandingDesc": "颜色、图标、用户类型",
+      "aiConfig": "AI 配置",
+      "aiConfigDesc": "提示词、参数、默认值",
+      "deploymentConfig": "部署配置",
+      "deploymentConfigDesc": "服务、SMTP、存储"
     }
   },
   "admin": {
@@ -571,94 +571,94 @@
   },
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
-      "label": "AI Service",
-      "description": "LLM provider (maple, ollama)",
-      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+      "label": "AI 服务",
+      "description": "LLM 提供商（maple、ollama）",
+      "hint": "选择 \"maple\" 使用 Maple 代理（推荐用于隐私保护）或 \"ollama\" 使用本地模型。"
     },
     "LLM_MODEL": {
-      "label": "Model Name",
-      "description": "Model name/identifier",
-      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+      "label": "模型名称",
+      "description": "模型名称/标识符",
+      "hint": "要使用的模型标识符（例如 \"kimi-k2-thinking\"）。请查看提供商的文档了解可用模型。"
     },
     "LLM_API_URL": {
-      "label": "API Endpoint",
-      "description": "Base URL for API requests",
-      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+      "label": "API 端点",
+      "description": "API 请求的基础 URL",
+      "hint": "API 请求的基础 URL。Maple: http://maple-proxy:8080/v1。Ollama: http://localhost:11434。"
     },
     "RAG_TOP_K": {
-      "label": "Context Chunks",
-      "description": "Number of chunks to retrieve",
-      "hint": "How many document chunks to retrieve for each query. Higher = more context but slower. Default: 8."
+      "label": "上下文块数",
+      "description": "检索的块数量",
+      "hint": "每次查询检索多少文档块。越高上下文越多但速度越慢。默认值：8"
     },
     "PDF_EXTRACT_MODE": {
-      "label": "PDF Processing",
-      "description": "PDF extraction method",
-      "hint": "\"fast\" extracts text quickly. \"quality\" uses OCR for better accuracy with scanned documents but is slower."
+      "label": "PDF 处理",
+      "description": "PDF 提取方式",
+      "hint": "\"fast\" 快速提取文本。\"quality\" 使用 OCR 提高扫描文档的准确性，但速度较慢。"
     },
     "EMBEDDING_MODEL": {
-      "label": "Embedding Model",
-      "description": "HuggingFace model for embeddings",
-      "hint": "The HuggingFace model for converting text to vectors. Only change if you need a different language or domain."
+      "label": "嵌入模型",
+      "description": "用于嵌入的 HuggingFace 模型",
+      "hint": "将文本转换为向量的 HuggingFace 模型。仅在需要不同语言或领域时更改。"
     },
     "SMTP_HOST": {
-      "label": "Mail Server",
-      "description": "SMTP server address",
-      "hint": "Your SMTP server address (e.g., smtp.gmail.com, smtp.sendgrid.net)."
+      "label": "邮件服务器",
+      "description": "SMTP 服务器地址",
+      "hint": "您的 SMTP 服务器地址（例如 smtp.gmail.com、smtp.sendgrid.net）。"
     },
     "SMTP_PORT": {
-      "label": "Mail Port",
-      "description": "SMTP server port",
-      "hint": "Usually 587 for TLS or 465 for SSL. Check your email provider's settings."
+      "label": "邮件端口",
+      "description": "SMTP 服务器端口",
+      "hint": "通常 TLS 使用 587，SSL 使用 465。请检查您的邮件提供商设置。"
     },
     "SMTP_USER": {
-      "label": "SMTP Username",
-      "description": "Email service username",
-      "hint": "Your email service username or API key."
+      "label": "SMTP 用户名",
+      "description": "邮件服务用户名",
+      "hint": "您的邮件服务用户名或 API 密钥。"
     },
     "SMTP_PASS": {
-      "label": "SMTP Password",
-      "description": "Email service password",
-      "hint": "Your email service password or API key secret."
+      "label": "SMTP 密码",
+      "description": "邮件服务密码",
+      "hint": "您的邮件服务密码或 API 密钥密文。"
     },
     "SMTP_FROM": {
-      "label": "Sender Address",
-      "description": "From address for emails",
-      "hint": "The \"from\" address for outgoing emails (e.g., noreply@yourdomain.com)."
+      "label": "发件人地址",
+      "description": "邮件发件人地址",
+      "hint": "发送邮件的「发件人」地址（例如 noreply@yourdomain.com）。"
     },
     "MOCK_SMTP": {
-      "label": "Test Mode",
-      "description": "Mock email sending",
-      "hint": "When \"true\", emails are logged instead of sent. Useful for development."
+      "label": "测试模式",
+      "description": "模拟邮件发送",
+      "hint": "设为 \"true\" 时，邮件将记录日志而非实际发送。适用于开发环境。"
     },
     "SQLITE_PATH": {
-      "label": "Database File",
-      "description": "Path to SQLite database",
-      "hint": "Path to the SQLite database file. Default: /data/sanctum.db"
+      "label": "数据库文件",
+      "description": "SQLite 数据库路径",
+      "hint": "SQLite 数据库文件的路径。默认值：/data/sanctum.db"
     },
     "UPLOADS_DIR": {
-      "label": "Uploads Folder",
-      "description": "Document uploads directory",
-      "hint": "Directory where uploaded documents are stored. Default: /uploads"
+      "label": "上传文件夹",
+      "description": "文档上传目录",
+      "hint": "上传文档的存储目录。默认值：/uploads"
     },
     "QDRANT_HOST": {
-      "label": "Vector DB Host",
-      "description": "Qdrant server hostname",
-      "hint": "Hostname for the Qdrant vector database. Default: qdrant"
+      "label": "向量数据库主机",
+      "description": "Qdrant 服务器主机名",
+      "hint": "Qdrant 向量数据库的主机名。默认值：qdrant"
     },
     "QDRANT_PORT": {
-      "label": "Vector DB Port",
-      "description": "Qdrant REST API port",
-      "hint": "Port for Qdrant (REST API). Default: 6333"
+      "label": "向量数据库端口",
+      "description": "Qdrant REST API 端口",
+      "hint": "Qdrant（REST API）的端口。默认值：6333"
     },
     "SEARXNG_URL": {
-      "label": "Search Engine URL",
-      "description": "SearXNG instance URL",
-      "hint": "URL of your SearXNG instance for web search functionality."
+      "label": "搜索引擎 URL",
+      "description": "SearXNG 实例 URL",
+      "hint": "用于网络搜索功能的 SearXNG 实例 URL。"
     },
     "FRONTEND_URL": {
-      "label": "App URL",
-      "description": "Public URL for the application",
-      "hint": "The public URL where users access the app. Used for generating magic links."
+      "label": "应用 URL",
+      "description": "应用程序的公开 URL",
+      "hint": "用户访问应用的公开 URL。用于生成魔法链接。"
     }
   }
 }

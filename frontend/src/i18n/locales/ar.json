@@ -200,12 +200,12 @@
       "documentUploadDesc": "إضافة مستندات إلى قاعدة المعرفة",
       "databaseExplorer": "مستكشف قاعدة البيانات",
       "databaseExplorerDesc": "تصفح قاعدة بيانات SQLite",
-      "instanceBranding": "Instance Branding",
-      "instanceBrandingDesc": "Colors, icons, user types",
-      "aiConfig": "AI Configuration",
-      "aiConfigDesc": "Prompts, parameters, defaults",
-      "deploymentConfig": "Deployment Config",
-      "deploymentConfigDesc": "Services, SMTP, storage"
+      "instanceBranding": "العلامة التجارية للمثيل",
+      "instanceBrandingDesc": "الألوان، الأيقونات، أنواع المستخدمين",
+      "aiConfig": "تكوين الذكاء الاصطناعي",
+      "aiConfigDesc": "المطالبات، المعلمات، الإعدادات الافتراضية",
+      "deploymentConfig": "تكوين النشر",
+      "deploymentConfigDesc": "الخدمات، SMTP، التخزين"
     }
   },
   "admin": {
@@ -568,94 +568,94 @@
   },
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
-      "label": "AI Service",
-      "description": "LLM provider (maple, ollama)",
-      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+      "label": "خدمة الذكاء الاصطناعي",
+      "description": "مزود LLM (maple, ollama)",
+      "hint": "اختر \"maple\" لوكيل Maple (موصى به للخصوصية) أو \"ollama\" للنماذج المحلية."
     },
     "LLM_MODEL": {
-      "label": "Model Name",
-      "description": "Model name/identifier",
-      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+      "label": "اسم النموذج",
+      "description": "اسم/معرف النموذج",
+      "hint": "معرف النموذج المراد استخدامه (مثال: \"kimi-k2-thinking\"). راجع وثائق المزود للنماذج المتاحة."
     },
     "LLM_API_URL": {
-      "label": "API Endpoint",
-      "description": "Base URL for API requests",
-      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+      "label": "نقطة نهاية API",
+      "description": "عنوان URL الأساسي لطلبات API",
+      "hint": "عنوان URL الأساسي لطلبات API. لـ Maple: http://maple-proxy:8080/v1. لـ Ollama: http://localhost:11434."
     },
     "RAG_TOP_K": {
-      "label": "Context Chunks",
-      "description": "Number of chunks to retrieve",
-      "hint": "How many document chunks to retrieve for each query. Higher = more context but slower. Default: 8."
+      "label": "أجزاء السياق",
+      "description": "عدد الأجزاء المراد استرجاعها",
+      "hint": "كم عدد أجزاء المستند المراد استرجاعها لكل استعلام. أعلى = سياق أكثر لكن أبطأ. الافتراضي: 8."
     },
     "PDF_EXTRACT_MODE": {
-      "label": "PDF Processing",
-      "description": "PDF extraction method",
-      "hint": "\"fast\" extracts text quickly. \"quality\" uses OCR for better accuracy with scanned documents but is slower."
+      "label": "معالجة PDF",
+      "description": "طريقة استخراج PDF",
+      "hint": "\"fast\" يستخرج النص بسرعة. \"quality\" يستخدم OCR لدقة أفضل مع المستندات الممسوحة لكنه أبطأ."
     },
     "EMBEDDING_MODEL": {
-      "label": "Embedding Model",
-      "description": "HuggingFace model for embeddings",
-      "hint": "The HuggingFace model for converting text to vectors. Only change if you need a different language or domain."
+      "label": "نموذج التضمين",
+      "description": "نموذج HuggingFace للتضمينات",
+      "hint": "نموذج HuggingFace لتحويل النص إلى متجهات. غيّر فقط إذا كنت بحاجة إلى لغة أو مجال مختلف."
     },
     "SMTP_HOST": {
-      "label": "Mail Server",
-      "description": "SMTP server address",
-      "hint": "Your SMTP server address (e.g., smtp.gmail.com, smtp.sendgrid.net)."
+      "label": "خادم البريد",
+      "description": "عنوان خادم SMTP",
+      "hint": "عنوان خادم SMTP الخاص بك (مثال: smtp.gmail.com, smtp.sendgrid.net)."
     },
     "SMTP_PORT": {
-      "label": "Mail Port",
-      "description": "SMTP server port",
-      "hint": "Usually 587 for TLS or 465 for SSL. Check your email provider's settings."
+      "label": "منفذ البريد",
+      "description": "منفذ خادم SMTP",
+      "hint": "عادة 587 لـ TLS أو 465 لـ SSL. تحقق من إعدادات مزود البريد الإلكتروني."
     },
     "SMTP_USER": {
-      "label": "SMTP Username",
-      "description": "Email service username",
-      "hint": "Your email service username or API key."
+      "label": "اسم مستخدم SMTP",
+      "description": "اسم مستخدم خدمة البريد الإلكتروني",
+      "hint": "اسم مستخدم خدمة البريد الإلكتروني أو مفتاح API الخاص بك."
     },
     "SMTP_PASS": {
-      "label": "SMTP Password",
-      "description": "Email service password",
-      "hint": "Your email service password or API key secret."
+      "label": "كلمة مرور SMTP",
+      "description": "كلمة مرور خدمة البريد الإلكتروني",
+      "hint": "كلمة مرور خدمة البريد الإلكتروني أو سر مفتاح API الخاص بك."
     },
     "SMTP_FROM": {
-      "label": "Sender Address",
-      "description": "From address for emails",
-      "hint": "The \"from\" address for outgoing emails (e.g., noreply@yourdomain.com)."
+      "label": "عنوان المرسل",
+      "description": "عنوان الإرسال للبريد الإلكتروني",
+      "hint": "عنوان \"من\" للرسائل الصادرة (مثال: noreply@yourdomain.com)."
     },
     "MOCK_SMTP": {
-      "label": "Test Mode",
-      "description": "Mock email sending",
-      "hint": "When \"true\", emails are logged instead of sent. Useful for development."
+      "label": "وضع الاختبار",
+      "description": "محاكاة إرسال البريد الإلكتروني",
+      "hint": "عند \"true\"، يتم تسجيل الرسائل بدلاً من إرسالها. مفيد للتطوير."
     },
     "SQLITE_PATH": {
-      "label": "Database File",
-      "description": "Path to SQLite database",
-      "hint": "Path to the SQLite database file. Default: /data/sanctum.db"
+      "label": "ملف قاعدة البيانات",
+      "description": "مسار قاعدة بيانات SQLite",
+      "hint": "مسار ملف قاعدة بيانات SQLite. الافتراضي: /data/sanctum.db"
     },
     "UPLOADS_DIR": {
-      "label": "Uploads Folder",
-      "description": "Document uploads directory",
-      "hint": "Directory where uploaded documents are stored. Default: /uploads"
+      "label": "مجلد التحميلات",
+      "description": "دليل تحميل المستندات",
+      "hint": "الدليل حيث يتم تخزين المستندات المحملة. الافتراضي: /uploads"
     },
     "QDRANT_HOST": {
-      "label": "Vector DB Host",
-      "description": "Qdrant server hostname",
-      "hint": "Hostname for the Qdrant vector database. Default: qdrant"
+      "label": "مضيف قاعدة البيانات المتجهة",
+      "description": "اسم مضيف خادم Qdrant",
+      "hint": "اسم المضيف لقاعدة البيانات المتجهة Qdrant. الافتراضي: qdrant"
     },
     "QDRANT_PORT": {
-      "label": "Vector DB Port",
-      "description": "Qdrant REST API port",
-      "hint": "Port for Qdrant (REST API). Default: 6333"
+      "label": "منفذ قاعدة البيانات المتجهة",
+      "description": "منفذ REST API لـ Qdrant",
+      "hint": "منفذ Qdrant (REST API). الافتراضي: 6333"
     },
     "SEARXNG_URL": {
-      "label": "Search Engine URL",
-      "description": "SearXNG instance URL",
-      "hint": "URL of your SearXNG instance for web search functionality."
+      "label": "عنوان محرك البحث",
+      "description": "عنوان URL لنسخة SearXNG",
+      "hint": "عنوان URL لنسخة SearXNG الخاصة بك لوظيفة البحث على الويب."
     },
     "FRONTEND_URL": {
-      "label": "App URL",
-      "description": "Public URL for the application",
-      "hint": "The public URL where users access the app. Used for generating magic links."
+      "label": "عنوان التطبيق",
+      "description": "عنوان URL العام للتطبيق",
+      "hint": "عنوان URL العام حيث يصل المستخدمون إلى التطبيق. يُستخدم لإنشاء روابط سحرية."
     }
   }
 }

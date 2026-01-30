@@ -153,7 +153,7 @@ export function AdminAIConfig() {
       setPreviewContent(result.assembled_prompt)
       setPreviewOpen(true)
     } catch (err) {
-      setPreviewError(err instanceof Error ? err.message : 'errors.failedToPreviewPrompt')
+      setPreviewError(err instanceof Error ? err.message : t('errors.failedToPreviewPrompt'))
     }
   }
 
@@ -385,7 +385,7 @@ export function AdminAIConfig() {
           <div className="bg-error/10 border border-error/20 rounded-xl p-4">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-error" />
-              <p className="text-sm text-error">{t(previewError)}</p>
+              <p className="text-sm text-error">{previewError}</p>
             </div>
           </div>
         )}

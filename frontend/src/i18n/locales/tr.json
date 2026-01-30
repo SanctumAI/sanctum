@@ -200,12 +200,12 @@
       "documentUploadDesc": "Bilgi tabanına belge ekle",
       "databaseExplorer": "Veritabanı Gezgini",
       "databaseExplorerDesc": "SQLite veritabanına göz at",
-      "instanceBranding": "Instance Branding",
-      "instanceBrandingDesc": "Colors, icons, user types",
-      "aiConfig": "AI Configuration",
-      "aiConfigDesc": "Prompts, parameters, defaults",
-      "deploymentConfig": "Deployment Config",
-      "deploymentConfigDesc": "Services, SMTP, storage"
+      "instanceBranding": "Örnek Markalaması",
+      "instanceBrandingDesc": "Renkler, simgeler, kullanıcı türleri",
+      "aiConfig": "AI Yapılandırması",
+      "aiConfigDesc": "Promptlar, parametreler, varsayılanlar",
+      "deploymentConfig": "Dağıtım Yapılandırması",
+      "deploymentConfigDesc": "Servisler, SMTP, depolama"
     }
   },
   "admin": {
@@ -568,94 +568,94 @@
   },
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
-      "label": "AI Service",
-      "description": "LLM provider (maple, ollama)",
-      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+      "label": "Yapay Zeka Servisi",
+      "description": "LLM sağlayıcısı (maple, ollama)",
+      "hint": "Maple proxy için \"maple\" (gizlilik için önerilir) veya yerel modeller için \"ollama\" seçin."
     },
     "LLM_MODEL": {
-      "label": "Model Name",
-      "description": "Model name/identifier",
-      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+      "label": "Model Adı",
+      "description": "Model adı/tanımlayıcısı",
+      "hint": "Kullanılacak model tanımlayıcısı (ör. \"kimi-k2-thinking\"). Mevcut modeller için sağlayıcınızın belgelerini kontrol edin."
     },
     "LLM_API_URL": {
-      "label": "API Endpoint",
-      "description": "Base URL for API requests",
-      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+      "label": "API Uç Noktası",
+      "description": "API istekleri için temel URL",
+      "hint": "API istekleri için temel URL. Maple için: http://maple-proxy:8080/v1. Ollama için: http://localhost:11434."
     },
     "RAG_TOP_K": {
-      "label": "Context Chunks",
-      "description": "Number of chunks to retrieve",
-      "hint": "How many document chunks to retrieve for each query. Higher = more context but slower. Default: 8."
+      "label": "Bağlam Parçaları",
+      "description": "Alınacak parça sayısı",
+      "hint": "Her sorgu için kaç belge parçası alınacağı. Daha yüksek = daha fazla bağlam ama daha yavaş. Varsayılan: 8."
     },
     "PDF_EXTRACT_MODE": {
-      "label": "PDF Processing",
-      "description": "PDF extraction method",
-      "hint": "\"fast\" extracts text quickly. \"quality\" uses OCR for better accuracy with scanned documents but is slower."
+      "label": "PDF İşleme",
+      "description": "PDF çıkarma yöntemi",
+      "hint": "\"fast\" metni hızlıca çıkarır. \"quality\" taranmış belgeler için daha iyi doğruluk sağlamak üzere OCR kullanır ama daha yavaştır."
     },
     "EMBEDDING_MODEL": {
-      "label": "Embedding Model",
-      "description": "HuggingFace model for embeddings",
-      "hint": "The HuggingFace model for converting text to vectors. Only change if you need a different language or domain."
+      "label": "Gömme Modeli",
+      "description": "Gömmeler için HuggingFace modeli",
+      "hint": "Metni vektörlere dönüştürmek için HuggingFace modeli. Yalnızca farklı bir dil veya alan gerekiyorsa değiştirin."
     },
     "SMTP_HOST": {
-      "label": "Mail Server",
-      "description": "SMTP server address",
-      "hint": "Your SMTP server address (e.g., smtp.gmail.com, smtp.sendgrid.net)."
+      "label": "Posta Sunucusu",
+      "description": "SMTP sunucu adresi",
+      "hint": "SMTP sunucu adresiniz (ör. smtp.gmail.com, smtp.sendgrid.net)."
     },
     "SMTP_PORT": {
-      "label": "Mail Port",
-      "description": "SMTP server port",
-      "hint": "Usually 587 for TLS or 465 for SSL. Check your email provider's settings."
+      "label": "Posta Portu",
+      "description": "SMTP sunucu portu",
+      "hint": "Genellikle TLS için 587 veya SSL için 465. E-posta sağlayıcınızın ayarlarını kontrol edin."
     },
     "SMTP_USER": {
-      "label": "SMTP Username",
-      "description": "Email service username",
-      "hint": "Your email service username or API key."
+      "label": "SMTP Kullanıcı Adı",
+      "description": "E-posta servisi kullanıcı adı",
+      "hint": "E-posta servisi kullanıcı adınız veya API anahtarınız."
     },
     "SMTP_PASS": {
-      "label": "SMTP Password",
-      "description": "Email service password",
-      "hint": "Your email service password or API key secret."
+      "label": "SMTP Şifresi",
+      "description": "E-posta servisi şifresi",
+      "hint": "E-posta servisi şifreniz veya API anahtarı gizli değeri."
     },
     "SMTP_FROM": {
-      "label": "Sender Address",
-      "description": "From address for emails",
-      "hint": "The \"from\" address for outgoing emails (e.g., noreply@yourdomain.com)."
+      "label": "Gönderen Adresi",
+      "description": "E-postalar için gönderen adresi",
+      "hint": "Giden e-postalar için \"kimden\" adresi (ör. noreply@yourdomain.com)."
     },
     "MOCK_SMTP": {
-      "label": "Test Mode",
-      "description": "Mock email sending",
-      "hint": "When \"true\", emails are logged instead of sent. Useful for development."
+      "label": "Test Modu",
+      "description": "E-posta gönderimini simüle et",
+      "hint": "\"true\" olduğunda, e-postalar gönderilmek yerine günlüğe kaydedilir. Geliştirme için kullanışlıdır."
     },
     "SQLITE_PATH": {
-      "label": "Database File",
-      "description": "Path to SQLite database",
-      "hint": "Path to the SQLite database file. Default: /data/sanctum.db"
+      "label": "Veritabanı Dosyası",
+      "description": "SQLite veritabanı yolu",
+      "hint": "SQLite veritabanı dosyasının yolu. Varsayılan: /data/sanctum.db"
     },
     "UPLOADS_DIR": {
-      "label": "Uploads Folder",
-      "description": "Document uploads directory",
-      "hint": "Directory where uploaded documents are stored. Default: /uploads"
+      "label": "Yüklemeler Klasörü",
+      "description": "Belge yüklemeleri dizini",
+      "hint": "Yüklenen belgelerin depolandığı dizin. Varsayılan: /uploads"
     },
     "QDRANT_HOST": {
-      "label": "Vector DB Host",
-      "description": "Qdrant server hostname",
-      "hint": "Hostname for the Qdrant vector database. Default: qdrant"
+      "label": "Vektör DB Sunucusu",
+      "description": "Qdrant sunucu ana bilgisayar adı",
+      "hint": "Qdrant vektör veritabanı için ana bilgisayar adı. Varsayılan: qdrant"
     },
     "QDRANT_PORT": {
-      "label": "Vector DB Port",
-      "description": "Qdrant REST API port",
-      "hint": "Port for Qdrant (REST API). Default: 6333"
+      "label": "Vektör DB Portu",
+      "description": "Qdrant REST API portu",
+      "hint": "Qdrant için port (REST API). Varsayılan: 6333"
     },
     "SEARXNG_URL": {
-      "label": "Search Engine URL",
-      "description": "SearXNG instance URL",
-      "hint": "URL of your SearXNG instance for web search functionality."
+      "label": "Arama Motoru URL",
+      "description": "SearXNG örnek URL'si",
+      "hint": "Web arama işlevselliği için SearXNG örneğinizin URL'si."
     },
     "FRONTEND_URL": {
-      "label": "App URL",
-      "description": "Public URL for the application",
-      "hint": "The public URL where users access the app. Used for generating magic links."
+      "label": "Uygulama URL",
+      "description": "Uygulama için genel URL",
+      "hint": "Kullanıcıların uygulamaya eriştiği genel URL. Sihirli bağlantılar oluşturmak için kullanılır."
     }
   }
 }

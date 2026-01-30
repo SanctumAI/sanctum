@@ -11,15 +11,27 @@
     <!-- Prevent flash of wrong theme -->
     <script>
       (function() {
+        // Apply dark mode
         const theme = localStorage.getItem('sanctum-theme');
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (theme === 'dark' || (!theme && prefersDark)) {
           document.documentElement.classList.add('dark');
         }
+
+        // Apply accent color from cached config
+        try {
+          const config = JSON.parse(localStorage.getItem('sanctum_instance_config') || '{}');
+          const validColors = ['blue', 'purple', 'green', 'orange', 'pink', 'teal'];
+          if (config.accentColor && validColors.includes(config.accentColor)) {
+            document.documentElement.classList.add('accent-' + config.accentColor);
+          }
+        } catch (e) {
+          // Ignore parse errors, React will handle defaults
+        }
       })();
     </script>
-    <script type="module" crossorigin src="/assets/index-DTEX8E50.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-Dd2Pvy0X.css">
+    <script type="module" crossorigin src="/assets/index-C-RZOLla.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CZ0X0Gzn.css">
   </head>
   <body>
     <div id="root"></div>

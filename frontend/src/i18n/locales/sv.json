@@ -200,12 +200,12 @@
       "documentUploadDesc": "Lägg till dokument i kunskapsbasen",
       "databaseExplorer": "Databasutforskare",
       "databaseExplorerDesc": "Bläddra i SQLite-databasen",
-      "instanceBranding": "Instance Branding",
-      "instanceBrandingDesc": "Colors, icons, user types",
-      "aiConfig": "AI Configuration",
-      "aiConfigDesc": "Prompts, parameters, defaults",
-      "deploymentConfig": "Deployment Config",
-      "deploymentConfigDesc": "Services, SMTP, storage"
+      "instanceBranding": "Instansvarumärke",
+      "instanceBrandingDesc": "Färger, ikoner, användartyper",
+      "aiConfig": "AI-konfiguration",
+      "aiConfigDesc": "Promptar, parametrar, standardvärden",
+      "deploymentConfig": "Distributionskonfiguration",
+      "deploymentConfigDesc": "Tjänster, SMTP, lagring"
     }
   },
   "admin": {
@@ -568,94 +568,94 @@
   },
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
-      "label": "AI Service",
-      "description": "LLM provider (maple, ollama)",
-      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+      "label": "AI-tjänst",
+      "description": "LLM-leverantör (maple, ollama)",
+      "hint": "Välj \"maple\" för Maple-proxy (rekommenderas för integritet) eller \"ollama\" för lokala modeller."
     },
     "LLM_MODEL": {
-      "label": "Model Name",
-      "description": "Model name/identifier",
-      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+      "label": "Modellnamn",
+      "description": "Modellnamn/identifierare",
+      "hint": "Modellidentifieraren att använda (t.ex. \"kimi-k2-thinking\"). Se din leverantörs dokumentation för tillgängliga modeller."
     },
     "LLM_API_URL": {
-      "label": "API Endpoint",
-      "description": "Base URL for API requests",
-      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+      "label": "API-slutpunkt",
+      "description": "Bas-URL för API-förfrågningar",
+      "hint": "Bas-URL för API-förfrågningar. För Maple: http://maple-proxy:8080/v1. För Ollama: http://localhost:11434."
     },
     "RAG_TOP_K": {
-      "label": "Context Chunks",
-      "description": "Number of chunks to retrieve",
-      "hint": "How many document chunks to retrieve for each query. Higher = more context but slower. Default: 8."
+      "label": "Kontextfragment",
+      "description": "Antal fragment att hämta",
+      "hint": "Hur många dokumentfragment att hämta för varje fråga. Högre = mer kontext men långsammare. Standard: 8."
     },
     "PDF_EXTRACT_MODE": {
-      "label": "PDF Processing",
-      "description": "PDF extraction method",
-      "hint": "\"fast\" extracts text quickly. \"quality\" uses OCR for better accuracy with scanned documents but is slower."
+      "label": "PDF-behandling",
+      "description": "PDF-extraheringsmetod",
+      "hint": "\"fast\" extraherar text snabbt. \"quality\" använder OCR för bättre noggrannhet med skannade dokument men är långsammare."
     },
     "EMBEDDING_MODEL": {
-      "label": "Embedding Model",
-      "description": "HuggingFace model for embeddings",
-      "hint": "The HuggingFace model for converting text to vectors. Only change if you need a different language or domain."
+      "label": "Embedding-modell",
+      "description": "HuggingFace-modell för embeddings",
+      "hint": "HuggingFace-modellen för att konvertera text till vektorer. Ändra endast om du behöver ett annat språk eller domän."
     },
     "SMTP_HOST": {
-      "label": "Mail Server",
-      "description": "SMTP server address",
-      "hint": "Your SMTP server address (e.g., smtp.gmail.com, smtp.sendgrid.net)."
+      "label": "E-postserver",
+      "description": "SMTP-serveradress",
+      "hint": "Din SMTP-serveradress (t.ex. smtp.gmail.com, smtp.sendgrid.net)."
     },
     "SMTP_PORT": {
-      "label": "Mail Port",
-      "description": "SMTP server port",
-      "hint": "Usually 587 for TLS or 465 for SSL. Check your email provider's settings."
+      "label": "E-postport",
+      "description": "SMTP-serverport",
+      "hint": "Vanligtvis 587 för TLS eller 465 för SSL. Kontrollera din e-postleverantörs inställningar."
     },
     "SMTP_USER": {
-      "label": "SMTP Username",
-      "description": "Email service username",
-      "hint": "Your email service username or API key."
+      "label": "SMTP-användarnamn",
+      "description": "E-posttjänst användarnamn",
+      "hint": "Ditt e-posttjänst användarnamn eller API-nyckel."
     },
     "SMTP_PASS": {
-      "label": "SMTP Password",
-      "description": "Email service password",
-      "hint": "Your email service password or API key secret."
+      "label": "SMTP-lösenord",
+      "description": "E-posttjänst lösenord",
+      "hint": "Ditt e-posttjänst lösenord eller API-nyckelhemlighet."
     },
     "SMTP_FROM": {
-      "label": "Sender Address",
-      "description": "From address for emails",
-      "hint": "The \"from\" address for outgoing emails (e.g., noreply@yourdomain.com)."
+      "label": "Avsändaradress",
+      "description": "Från-adress för e-post",
+      "hint": "\"Från\"-adressen för utgående e-post (t.ex. noreply@dindomän.com)."
     },
     "MOCK_SMTP": {
-      "label": "Test Mode",
-      "description": "Mock email sending",
-      "hint": "When \"true\", emails are logged instead of sent. Useful for development."
+      "label": "Testläge",
+      "description": "Simulerad e-postutskick",
+      "hint": "När \"true\", loggas e-post istället för att skickas. Användbart för utveckling."
     },
     "SQLITE_PATH": {
-      "label": "Database File",
-      "description": "Path to SQLite database",
-      "hint": "Path to the SQLite database file. Default: /data/sanctum.db"
+      "label": "Databasfil",
+      "description": "Sökväg till SQLite-databas",
+      "hint": "Sökväg till SQLite-databasfilen. Standard: /data/sanctum.db"
     },
     "UPLOADS_DIR": {
-      "label": "Uploads Folder",
-      "description": "Document uploads directory",
-      "hint": "Directory where uploaded documents are stored. Default: /uploads"
+      "label": "Uppladdningsmapp",
+      "description": "Katalog för dokumentuppladdningar",
+      "hint": "Katalog där uppladdade dokument lagras. Standard: /uploads"
     },
     "QDRANT_HOST": {
-      "label": "Vector DB Host",
-      "description": "Qdrant server hostname",
-      "hint": "Hostname for the Qdrant vector database. Default: qdrant"
+      "label": "Vektor-DB-värd",
+      "description": "Qdrant-server värdnamn",
+      "hint": "Värdnamn för Qdrant vektordatabasen. Standard: qdrant"
     },
     "QDRANT_PORT": {
-      "label": "Vector DB Port",
-      "description": "Qdrant REST API port",
-      "hint": "Port for Qdrant (REST API). Default: 6333"
+      "label": "Vektor-DB-port",
+      "description": "Qdrant REST API-port",
+      "hint": "Port för Qdrant (REST API). Standard: 6333"
     },
     "SEARXNG_URL": {
-      "label": "Search Engine URL",
-      "description": "SearXNG instance URL",
-      "hint": "URL of your SearXNG instance for web search functionality."
+      "label": "Sökmotor-URL",
+      "description": "SearXNG-instans-URL",
+      "hint": "URL till din SearXNG-instans för webbsökfunktionalitet."
     },
     "FRONTEND_URL": {
-      "label": "App URL",
-      "description": "Public URL for the application",
-      "hint": "The public URL where users access the app. Used for generating magic links."
+      "label": "App-URL",
+      "description": "Offentlig URL för applikationen",
+      "hint": "Den offentliga URL där användare kommer åt appen. Används för att generera magiska länkar."
     }
   }
 }

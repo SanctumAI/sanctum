@@ -96,12 +96,18 @@ async def update_ai_config_value(
             if update.value.lower() not in ("true", "false"):
                 raise ValueError("Boolean must be 'true' or 'false'")
         elif value_type == "json":
-            json.loads(update.value)  # Validate it's valid JSON
+            parsed = json.loads(update.value)  # Validate it's valid JSON
+            # Additional validation for list-type keys
+            if key in {"prompt_rules", "prompt_forbidden"}:
+                if not isinstance(parsed, list):
+                    raise ValueError(f"{key} must be a JSON array")
+                if not all(isinstance(item, str) for item in parsed):
+                    raise ValueError(f"{key} must be an array of strings")
     except (ValueError, json.JSONDecodeError, AttributeError) as e:
         logger.warning(f"Invalid value for type {value_type}: {e}")
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid value for type '{value_type}'"
+            detail=f"Invalid value for type '{value_type}': {str(e)}" if key in {"prompt_rules", "prompt_forbidden"} else f"Invalid value for type '{value_type}'"
         )
 
     # Additional validation for specific keys

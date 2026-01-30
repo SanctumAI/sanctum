@@ -228,6 +228,7 @@ def verify_smtp_config() -> dict:
     if not smtp["host"]:
         logger.warning("SMTP not configured: SMTP_HOST is empty")
         logger.info("Emails will be logged to console (mock mode implicit)")
+        result["mock_mode"] = True  # Effectively in mock mode when unconfigured
         return result
 
     result["configured"] = True

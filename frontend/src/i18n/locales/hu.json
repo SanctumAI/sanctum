@@ -135,13 +135,13 @@
       "copyCode": "Kod masolasa"
     },
     "export": {
-      "button": "Exportalas",
-      "title": "Beszelgetes exportalasa",
-      "disabled": "Nincs exportalhato uzenet",
+      "button": "Exportálás",
+      "title": "Beszélgetés exportálása",
+      "disabled": "Nincs exportálható üzenet",
       "markdown": "Markdown",
-      "markdownExt": ".md fajl",
-      "plainText": "Egyszeru szoveg",
-      "plainTextExt": ".txt fajl",
+      "markdownExt": ".md fájl",
+      "plainText": "Egyszerű szöveg",
+      "plainTextExt": ".txt fájl",
       "defaultTitle": "Beszélgetés exportálása",
       "roleUser": "Ön",
       "roleAssistant": "Asszisztens",
@@ -200,12 +200,12 @@
       "documentUploadDesc": "Dokumentumok hozzaadasa a tudasbazishoz",
       "databaseExplorer": "Adatbazis bongeszto",
       "databaseExplorerDesc": "SQLite adatbazis böngészése",
-      "instanceBranding": "Instance Branding",
-      "instanceBrandingDesc": "Colors, icons, user types",
-      "aiConfig": "AI Configuration",
-      "aiConfigDesc": "Prompts, parameters, defaults",
-      "deploymentConfig": "Deployment Config",
-      "deploymentConfigDesc": "Services, SMTP, storage"
+      "instanceBranding": "Példány arculat",
+      "instanceBrandingDesc": "Színek, ikonok, felhasználótípusok",
+      "aiConfig": "AI konfiguráció",
+      "aiConfigDesc": "Promptok, paraméterek, alapértelmezések",
+      "deploymentConfig": "Telepítési konfiguráció",
+      "deploymentConfigDesc": "Szolgáltatások, SMTP, tárhely"
     }
   },
   "admin": {
@@ -568,94 +568,94 @@
   },
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
-      "label": "AI Service",
-      "description": "LLM provider (maple, ollama)",
-      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+      "label": "AI szolgáltató",
+      "description": "LLM szolgáltató (maple, ollama)",
+      "hint": "Válaszd a \"maple\"-t a Maple proxyhoz (ajánlott az adatvédelemhez) vagy az \"ollama\"-t helyi modellekhez."
     },
     "LLM_MODEL": {
-      "label": "Model Name",
-      "description": "Model name/identifier",
-      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+      "label": "Modell neve",
+      "description": "Modell név/azonosító",
+      "hint": "A használandó modell azonosító (pl. \"kimi-k2-thinking\"). Ellenőrizd a szolgáltatód dokumentációját az elérhető modellekért."
     },
     "LLM_API_URL": {
-      "label": "API Endpoint",
-      "description": "Base URL for API requests",
-      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+      "label": "API végpont",
+      "description": "Alap URL az API kérésekhez",
+      "hint": "Az alap URL az API kérésekhez. Maple esetén: http://maple-proxy:8080/v1. Ollama esetén: http://localhost:11434."
     },
     "RAG_TOP_K": {
-      "label": "Context Chunks",
-      "description": "Number of chunks to retrieve",
-      "hint": "How many document chunks to retrieve for each query. Higher = more context but slower. Default: 8."
+      "label": "Kontextus darabok",
+      "description": "Lekérendő darabok száma",
+      "hint": "Hány dokumentumrészletet kérjen le minden lekérdezéshez. Magasabb = több kontextus, de lassabb. Alapértelmezett: 8."
     },
     "PDF_EXTRACT_MODE": {
-      "label": "PDF Processing",
-      "description": "PDF extraction method",
-      "hint": "\"fast\" extracts text quickly. \"quality\" uses OCR for better accuracy with scanned documents but is slower."
+      "label": "PDF feldolgozás",
+      "description": "PDF kinyerési módszer",
+      "hint": "A \"fast\" gyorsan nyeri ki a szöveget. A \"quality\" OCR-t használ a szkennelt dokumentumok jobb pontosságához, de lassabb."
     },
     "EMBEDDING_MODEL": {
-      "label": "Embedding Model",
-      "description": "HuggingFace model for embeddings",
-      "hint": "The HuggingFace model for converting text to vectors. Only change if you need a different language or domain."
+      "label": "Beágyazási modell",
+      "description": "HuggingFace modell a beágyazásokhoz",
+      "hint": "A HuggingFace modell a szöveg vektorokká alakításához. Csak akkor változtasd meg, ha más nyelvre vagy területre van szükséged."
     },
     "SMTP_HOST": {
-      "label": "Mail Server",
-      "description": "SMTP server address",
-      "hint": "Your SMTP server address (e.g., smtp.gmail.com, smtp.sendgrid.net)."
+      "label": "Levelezőszerver",
+      "description": "SMTP szerver címe",
+      "hint": "Az SMTP szerver címed (pl. smtp.gmail.com, smtp.sendgrid.net)."
     },
     "SMTP_PORT": {
-      "label": "Mail Port",
-      "description": "SMTP server port",
-      "hint": "Usually 587 for TLS or 465 for SSL. Check your email provider's settings."
+      "label": "Levelezési port",
+      "description": "SMTP szerver portja",
+      "hint": "Általában 587 TLS-hez vagy 465 SSL-hez. Ellenőrizd az e-mail szolgáltatód beállításait."
     },
     "SMTP_USER": {
-      "label": "SMTP Username",
-      "description": "Email service username",
-      "hint": "Your email service username or API key."
+      "label": "SMTP felhasználónév",
+      "description": "E-mail szolgáltatás felhasználóneve",
+      "hint": "Az e-mail szolgáltatásod felhasználóneve vagy API kulcsa."
     },
     "SMTP_PASS": {
-      "label": "SMTP Password",
-      "description": "Email service password",
-      "hint": "Your email service password or API key secret."
+      "label": "SMTP jelszó",
+      "description": "E-mail szolgáltatás jelszava",
+      "hint": "Az e-mail szolgáltatásod jelszava vagy API kulcs titka."
     },
     "SMTP_FROM": {
-      "label": "Sender Address",
-      "description": "From address for emails",
-      "hint": "The \"from\" address for outgoing emails (e.g., noreply@yourdomain.com)."
+      "label": "Feladó címe",
+      "description": "Feladó cím az e-mailekhez",
+      "hint": "A \"feladó\" cím a kimenő e-mailekhez (pl. noreply@yourdomain.com)."
     },
     "MOCK_SMTP": {
-      "label": "Test Mode",
-      "description": "Mock email sending",
-      "hint": "When \"true\", emails are logged instead of sent. Useful for development."
+      "label": "Teszt mód",
+      "description": "E-mail küldés szimulálása",
+      "hint": "Ha \"true\", az e-mailek naplózásra kerülnek küldés helyett. Hasznos fejlesztéshez."
     },
     "SQLITE_PATH": {
-      "label": "Database File",
-      "description": "Path to SQLite database",
-      "hint": "Path to the SQLite database file. Default: /data/sanctum.db"
+      "label": "Adatbázis fájl",
+      "description": "SQLite adatbázis elérési útja",
+      "hint": "Az SQLite adatbázis fájl elérési útja. Alapértelmezett: /data/sanctum.db"
     },
     "UPLOADS_DIR": {
-      "label": "Uploads Folder",
-      "description": "Document uploads directory",
-      "hint": "Directory where uploaded documents are stored. Default: /uploads"
+      "label": "Feltöltések mappa",
+      "description": "Dokumentum feltöltések könyvtára",
+      "hint": "A könyvtár, ahol a feltöltött dokumentumok tárolódnak. Alapértelmezett: /uploads"
     },
     "QDRANT_HOST": {
-      "label": "Vector DB Host",
-      "description": "Qdrant server hostname",
-      "hint": "Hostname for the Qdrant vector database. Default: qdrant"
+      "label": "Vektor DB hoszt",
+      "description": "Qdrant szerver hosztneve",
+      "hint": "A Qdrant vektor adatbázis hosztneve. Alapértelmezett: qdrant"
     },
     "QDRANT_PORT": {
-      "label": "Vector DB Port",
-      "description": "Qdrant REST API port",
-      "hint": "Port for Qdrant (REST API). Default: 6333"
+      "label": "Vektor DB port",
+      "description": "Qdrant REST API portja",
+      "hint": "A Qdrant portja (REST API). Alapértelmezett: 6333"
     },
     "SEARXNG_URL": {
-      "label": "Search Engine URL",
-      "description": "SearXNG instance URL",
-      "hint": "URL of your SearXNG instance for web search functionality."
+      "label": "Keresőmotor URL",
+      "description": "SearXNG példány URL-je",
+      "hint": "A SearXNG példányod URL-je a webes keresési funkcióhoz."
     },
     "FRONTEND_URL": {
-      "label": "App URL",
-      "description": "Public URL for the application",
-      "hint": "The public URL where users access the app. Used for generating magic links."
+      "label": "Alkalmazás URL",
+      "description": "Az alkalmazás nyilvános URL-je",
+      "hint": "A nyilvános URL, ahol a felhasználók elérik az alkalmazást. Magikus linkek generálásához használatos."
     }
   }
 }

@@ -218,7 +218,7 @@ def init_schema():
     _seed_default_ai_config()
 
 
-def _migrate_add_approved_column():
+def _migrate_add_approved_column() -> None:
     """Add approved column to users table if it doesn't exist (for existing deployments)"""
     conn = get_connection()
     cursor = conn.cursor()
@@ -235,7 +235,7 @@ def _migrate_add_approved_column():
     cursor.close()
 
 
-def _migrate_add_encryption_columns():
+def _migrate_add_encryption_columns() -> None:
     """Add encryption columns to users and user_field_values tables if they don't exist"""
     conn = get_connection()
     cursor = conn.cursor()
@@ -287,7 +287,7 @@ def _migrate_add_encryption_columns():
     cursor.close()
 
 
-def _migrate_add_field_metadata_columns():
+def _migrate_add_field_metadata_columns() -> None:
     """Add placeholder and options columns to user_field_definitions if they don't exist"""
     conn = get_connection()
     cursor = conn.cursor()
@@ -1005,7 +1005,7 @@ def migrate_encrypt_existing_data():
 
 # --- AI Configuration Operations ---
 
-def _seed_default_ai_config():
+def _seed_default_ai_config() -> None:
     """Seed default AI configuration values if not present"""
     defaults = [
         # Prompt sections

@@ -90,7 +90,7 @@ def _config_to_item(config: dict) -> DeploymentConfigItem:
     )
 
 
-def _sync_env_to_db():
+def _sync_env_to_db() -> None:
     """
     Sync current environment variables to the database.
     Only syncs keys that are in ENV_CONFIG_MAP and don't already exist in DB.
@@ -144,7 +144,7 @@ def _sync_env_to_db():
 
 
 @router.on_event("startup")
-async def startup_sync():
+async def startup_sync() -> None:
     """Sync environment variables to database on startup"""
     _sync_env_to_db()
 
@@ -281,19 +281,29 @@ async def update_deployment_config_value(
     if key not in ENV_CONFIG_MAP:
         raise HTTPException(status_code=400, detail=f"Unknown config key: {key}")
 
-    # Validate specific keys
     meta = ENV_CONFIG_MAP[key]
-    if key in ("SMTP_PORT", "QDRANT_PORT"):
+    value_to_save = update.value
+
+    # For secret keys, preserve existing value if new value is empty/whitespace
+    # This prevents accidentally clearing secrets when the masked value is submitted
+    if meta.get("is_secret") and (not value_to_save or not value_to_save.strip()):
+        existing_value = database.get_deployment_config_value(key)
+        if existing_value:
+            value_to_save = existing_value
+            logger.debug(f"Preserving existing secret value for {key} (empty value submitted)")
+
+    # Validate specific keys (only if we have a real value to validate)
+    if key in ("SMTP_PORT", "QDRANT_PORT") and value_to_save:
         try:
-            port = int(update.value)
+            port = int(value_to_save)
             if port < 1 or port > 65535:
                 raise ValueError()
         except ValueError:
             raise HTTPException(status_code=400, detail="Port must be between 1 and 65535")
 
-    if key == "RAG_TOP_K":
+    if key == "RAG_TOP_K" and value_to_save:
         try:
-            top_k = int(update.value)
+            top_k = int(value_to_save)
             if top_k < 1 or top_k > 100:
                 raise ValueError()
         except ValueError:
@@ -308,7 +318,7 @@ async def update_deployment_config_value(
     # Upsert the config (atomic create-or-update)
     database.upsert_deployment_config(
         key=key,
-        value=update.value,
+        value=value_to_save,
         is_secret=meta.get("is_secret", False),
         requires_restart=meta.get("requires_restart", False),
         category=meta["category"],

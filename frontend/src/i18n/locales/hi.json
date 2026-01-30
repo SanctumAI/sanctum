@@ -200,12 +200,12 @@
       "documentUploadDesc": "ज्ञान आधार में दस्तावेज़ जोड़ें",
       "databaseExplorer": "डेटाबेस एक्सप्लोरर",
       "databaseExplorerDesc": "SQLite डेटाबेस ब्राउज़ करें",
-      "instanceBranding": "Instance Branding",
-      "instanceBrandingDesc": "Colors, icons, user types",
-      "aiConfig": "AI Configuration",
-      "aiConfigDesc": "Prompts, parameters, defaults",
-      "deploymentConfig": "Deployment Config",
-      "deploymentConfigDesc": "Services, SMTP, storage"
+      "instanceBranding": "इंस्टेंस ब्रांडिंग",
+      "instanceBrandingDesc": "रंग, आइकन, उपयोगकर्ता प्रकार",
+      "aiConfig": "AI कॉन्फ़िगरेशन",
+      "aiConfigDesc": "प्रॉम्प्ट्स, पैरामीटर, डिफ़ॉल्ट",
+      "deploymentConfig": "डिप्लॉयमेंट कॉन्फ़िगरेशन",
+      "deploymentConfigDesc": "सेवाएं, SMTP, स्टोरेज"
     }
   },
   "admin": {
@@ -570,94 +570,94 @@
   },
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
-      "label": "AI Service",
-      "description": "LLM provider (maple, ollama)",
-      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+      "label": "AI सेवा",
+      "description": "LLM प्रदाता (maple, ollama)",
+      "hint": "Maple प्रॉक्सी के लिए \"maple\" चुनें (गोपनीयता के लिए अनुशंसित) या स्थानीय मॉडल के लिए \"ollama\"।"
     },
     "LLM_MODEL": {
-      "label": "Model Name",
-      "description": "Model name/identifier",
-      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+      "label": "मॉडल का नाम",
+      "description": "मॉडल का नाम/पहचानकर्ता",
+      "hint": "उपयोग करने के लिए मॉडल पहचानकर्ता (जैसे, \"kimi-k2-thinking\")। उपलब्ध मॉडलों के लिए अपने प्रदाता का दस्तावेज़ देखें।"
     },
     "LLM_API_URL": {
-      "label": "API Endpoint",
-      "description": "Base URL for API requests",
-      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+      "label": "API एंडपॉइंट",
+      "description": "API अनुरोधों के लिए आधार URL",
+      "hint": "API अनुरोधों के लिए आधार URL। Maple के लिए: http://maple-proxy:8080/v1. Ollama के लिए: http://localhost:11434."
     },
     "RAG_TOP_K": {
-      "label": "Context Chunks",
-      "description": "Number of chunks to retrieve",
-      "hint": "How many document chunks to retrieve for each query. Higher = more context but slower. Default: 8."
+      "label": "संदर्भ खंड",
+      "description": "पुनर्प्राप्त करने के लिए खंडों की संख्या",
+      "hint": "प्रत्येक क्वेरी के लिए कितने दस्तावेज़ खंड पुनर्प्राप्त करने हैं। अधिक = अधिक संदर्भ लेकिन धीमा। डिफ़ॉल्ट: 8."
     },
     "PDF_EXTRACT_MODE": {
-      "label": "PDF Processing",
-      "description": "PDF extraction method",
-      "hint": "\"fast\" extracts text quickly. \"quality\" uses OCR for better accuracy with scanned documents but is slower."
+      "label": "PDF प्रोसेसिंग",
+      "description": "PDF निष्कर्षण विधि",
+      "hint": "\"fast\" तेज़ी से टेक्स्ट निकालता है। \"quality\" स्कैन किए गए दस्तावेज़ों के साथ बेहतर सटीकता के लिए OCR का उपयोग करता है लेकिन धीमा है।"
     },
     "EMBEDDING_MODEL": {
-      "label": "Embedding Model",
-      "description": "HuggingFace model for embeddings",
-      "hint": "The HuggingFace model for converting text to vectors. Only change if you need a different language or domain."
+      "label": "एम्बेडिंग मॉडल",
+      "description": "एम्बेडिंग के लिए HuggingFace मॉडल",
+      "hint": "टेक्स्ट को वेक्टर में बदलने के लिए HuggingFace मॉडल। केवल तभी बदलें जब आपको अलग भाषा या डोमेन चाहिए।"
     },
     "SMTP_HOST": {
-      "label": "Mail Server",
-      "description": "SMTP server address",
-      "hint": "Your SMTP server address (e.g., smtp.gmail.com, smtp.sendgrid.net)."
+      "label": "मेल सर्वर",
+      "description": "SMTP सर्वर पता",
+      "hint": "आपका SMTP सर्वर पता (जैसे, smtp.gmail.com, smtp.sendgrid.net)।"
     },
     "SMTP_PORT": {
-      "label": "Mail Port",
-      "description": "SMTP server port",
-      "hint": "Usually 587 for TLS or 465 for SSL. Check your email provider's settings."
+      "label": "मेल पोर्ट",
+      "description": "SMTP सर्वर पोर्ट",
+      "hint": "आमतौर पर TLS के लिए 587 या SSL के लिए 465। अपने ईमेल प्रदाता की सेटिंग्स जांचें।"
     },
     "SMTP_USER": {
-      "label": "SMTP Username",
-      "description": "Email service username",
-      "hint": "Your email service username or API key."
+      "label": "SMTP उपयोगकर्ता नाम",
+      "description": "ईमेल सेवा उपयोगकर्ता नाम",
+      "hint": "आपका ईमेल सेवा उपयोगकर्ता नाम या API कुंजी।"
     },
     "SMTP_PASS": {
-      "label": "SMTP Password",
-      "description": "Email service password",
-      "hint": "Your email service password or API key secret."
+      "label": "SMTP पासवर्ड",
+      "description": "ईमेल सेवा पासवर्ड",
+      "hint": "आपका ईमेल सेवा पासवर्ड या API कुंजी सीक्रेट।"
     },
     "SMTP_FROM": {
-      "label": "Sender Address",
-      "description": "From address for emails",
-      "hint": "The \"from\" address for outgoing emails (e.g., noreply@yourdomain.com)."
+      "label": "प्रेषक पता",
+      "description": "ईमेल के लिए प्रेषक पता",
+      "hint": "आउटगोइंग ईमेल के लिए \"से\" पता (जैसे, noreply@yourdomain.com)।"
     },
     "MOCK_SMTP": {
-      "label": "Test Mode",
-      "description": "Mock email sending",
-      "hint": "When \"true\", emails are logged instead of sent. Useful for development."
+      "label": "परीक्षण मोड",
+      "description": "ईमेल भेजने का अनुकरण",
+      "hint": "जब \"true\" हो, ईमेल भेजे जाने के बजाय लॉग किए जाते हैं। विकास के लिए उपयोगी।"
     },
     "SQLITE_PATH": {
-      "label": "Database File",
-      "description": "Path to SQLite database",
-      "hint": "Path to the SQLite database file. Default: /data/sanctum.db"
+      "label": "डेटाबेस फ़ाइल",
+      "description": "SQLite डेटाबेस का पथ",
+      "hint": "SQLite डेटाबेस फ़ाइल का पथ। डिफ़ॉल्ट: /data/sanctum.db"
     },
     "UPLOADS_DIR": {
-      "label": "Uploads Folder",
-      "description": "Document uploads directory",
-      "hint": "Directory where uploaded documents are stored. Default: /uploads"
+      "label": "अपलोड फ़ोल्डर",
+      "description": "दस्तावेज़ अपलोड निर्देशिका",
+      "hint": "निर्देशिका जहाँ अपलोड किए गए दस्तावेज़ संग्रहीत हैं। डिफ़ॉल्ट: /uploads"
     },
     "QDRANT_HOST": {
-      "label": "Vector DB Host",
-      "description": "Qdrant server hostname",
-      "hint": "Hostname for the Qdrant vector database. Default: qdrant"
+      "label": "वेक्टर DB होस्ट",
+      "description": "Qdrant सर्वर होस्टनाम",
+      "hint": "Qdrant वेक्टर डेटाबेस के लिए होस्टनाम। डिफ़ॉल्ट: qdrant"
     },
     "QDRANT_PORT": {
-      "label": "Vector DB Port",
-      "description": "Qdrant REST API port",
-      "hint": "Port for Qdrant (REST API). Default: 6333"
+      "label": "वेक्टर DB पोर्ट",
+      "description": "Qdrant REST API पोर्ट",
+      "hint": "Qdrant (REST API) के लिए पोर्ट। डिफ़ॉल्ट: 6333"
     },
     "SEARXNG_URL": {
-      "label": "Search Engine URL",
-      "description": "SearXNG instance URL",
-      "hint": "URL of your SearXNG instance for web search functionality."
+      "label": "सर्च इंजन URL",
+      "description": "SearXNG इंस्टेंस URL",
+      "hint": "वेब सर्च कार्यक्षमता के लिए आपके SearXNG इंस्टेंस का URL।"
     },
     "FRONTEND_URL": {
-      "label": "App URL",
-      "description": "Public URL for the application",
-      "hint": "The public URL where users access the app. Used for generating magic links."
+      "label": "ऐप URL",
+      "description": "एप्लिकेशन के लिए सार्वजनिक URL",
+      "hint": "सार्वजनिक URL जहाँ उपयोगकर्ता ऐप एक्सेस करते हैं। मैजिक लिंक जनरेट करने के लिए उपयोग किया जाता है।"
     }
   }
 }

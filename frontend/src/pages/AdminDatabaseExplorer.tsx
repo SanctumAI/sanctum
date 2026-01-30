@@ -54,6 +54,7 @@ export function AdminDatabaseExplorer() {
   const [showDbHelpModal, setShowDbHelpModal] = useState(false)
   const [dbHelpPage, setDbHelpPage] = useState(0)
   const dbHelpModalRef = useRef<HTMLDivElement>(null)
+  const previousActiveElementRef = useRef<HTMLElement | null>(null)
 
   // Get current table info (moved up so useEffects can reference it)
   const currentTableInfo = tables.find((t) => t.name === selectedTable)
@@ -315,12 +316,95 @@ export function AdminDatabaseExplorer() {
   const handleCloseDbHelpModal = () => {
     setShowDbHelpModal(false)
     setDbHelpPage(0)
+    // Restore focus to previously focused element
+    if (previousActiveElementRef.current && document.contains(previousActiveElementRef.current)) {
+      previousActiveElementRef.current.focus()
+    }
+    previousActiveElementRef.current = null
   }
 
   // Focus trap for database help modal
   useEffect(() => {
-    if (showDbHelpModal && dbHelpModalRef.current) {
-      dbHelpModalRef.current.focus()
+    if (!showDbHelpModal || !dbHelpModalRef.current) {
+      return
+    }
+
+    const modal = dbHelpModalRef.current
+
+    /**
+     * Get all focusable elements within the modal
+     * Focusable elements include: button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])
+     */
+    function getFocusableElements(container: HTMLElement): HTMLElement[] {
+      const selector = [
+        'button:not([disabled])',
+        '[href]',
+        'input:not([disabled])',
+        'select:not([disabled])',
+        'textarea:not([disabled])',
+        '[tabindex]:not([tabindex="-1"])',
+      ].join(', ')
+
+      return Array.from(container.querySelectorAll<HTMLElement>(selector)).filter(
+        (el) => {
+          // Filter out elements that are not visible
+          const style = window.getComputedStyle(el)
+          return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0'
+        }
+      )
+    }
+
+    /**
+     * Handle Tab key navigation to trap focus within modal
+     */
+    function handleTabKey(e: KeyboardEvent) {
+      if (e.key !== 'Tab') {
+        return
+      }
+
+      const focusableElements = getFocusableElements(modal)
+      if (focusableElements.length === 0) {
+        e.preventDefault()
+        return
+      }
+
+      const firstElement = focusableElements[0]
+      const lastElement = focusableElements[focusableElements.length - 1]
+      const currentFocusIndex = focusableElements.indexOf(document.activeElement as HTMLElement)
+
+      // If Shift+Tab is pressed and focus is on first element, move to last
+      if (e.shiftKey) {
+        if (currentFocusIndex === 0 || currentFocusIndex === -1) {
+          e.preventDefault()
+          lastElement.focus()
+        }
+      } else {
+        // If Tab is pressed and focus is on last element, move to first
+        if (currentFocusIndex === focusableElements.length - 1 || currentFocusIndex === -1) {
+          e.preventDefault()
+          firstElement.focus()
+        }
+      }
+    }
+
+    // Set initial focus to first focusable element
+    const focusableElements = getFocusableElements(modal)
+    if (focusableElements.length > 0) {
+      // Small delay to ensure modal is fully rendered
+      setTimeout(() => {
+        focusableElements[0].focus()
+      }, 0)
+    } else {
+      // Fallback: focus the modal container itself
+      modal.focus()
+    }
+
+    // Add event listener for Tab key trapping
+    modal.addEventListener('keydown', handleTabKey)
+
+    // Cleanup function: remove event listener
+    return () => {
+      modal.removeEventListener('keydown', handleTabKey)
     }
   }, [showDbHelpModal])
 
@@ -372,7 +456,13 @@ export function AdminDatabaseExplorer() {
           <div className="flex items-center gap-2">
             {/* Help */}
             <button
-              onClick={() => setShowDbHelpModal(true)}
+              onClick={() => {
+                // Capture the currently active element before opening modal
+                if (document.activeElement instanceof HTMLElement) {
+                  previousActiveElementRef.current = document.activeElement
+                }
+                setShowDbHelpModal(true)
+              }}
               className="btn-ghost p-2 rounded-lg transition-all text-text-muted hover:text-accent"
               aria-label={t('admin.database.help.ariaLabel', 'Database explorer help')}
             >

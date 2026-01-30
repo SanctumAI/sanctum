@@ -85,12 +85,12 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
     from ai_config import get_llm_parameters
 
     question = request.question
+    llm_params = get_llm_parameters()
 
     # Get top_k from config if not specified in request
     if request.top_k is not None:
         top_k = request.top_k
     else:
-        llm_params = get_llm_parameters()
         try:
             top_k = int(llm_params.get("top_k", TOP_K_VECTORS))
         except (ValueError, TypeError):
@@ -168,8 +168,14 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         if clarifying_questions:
             session["pending_questions"] = clarifying_questions
         
+        # Get actual temperature for response (same logic as _call_llm_contextual)
+        try:
+            actual_temperature = float(llm_params.get("temperature", 0.1))
+        except (ValueError, TypeError):
+            actual_temperature = 0.1
+
         logger.info(f"RAG complete. Answer: {len(answer)} chars, {len(clarifying_questions)} clarifying Qs, search_term={search_term}, facts={session.get('facts_gathered', {})}")
-        
+
         return QueryResponse(
             answer=answer,
             session_id=session_id,
@@ -178,7 +184,7 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
             clarifying_questions=clarifying_questions,
             search_term=search_term,  # Auto-search trigger (if web-search tool enabled)
             context_used=full_prompt,  # For debugging - see exactly what LLM received
-            temperature=0.1,
+            temperature=actual_temperature,
         )
         
     except Exception as e:

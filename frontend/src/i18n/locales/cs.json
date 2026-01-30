@@ -196,12 +196,12 @@
       "documentUploadDesc": "Přidat dokumenty do znalostní báze",
       "databaseExplorer": "Prohlížeč databáze",
       "databaseExplorerDesc": "Procházet SQLite databázi",
-      "instanceBranding": "Instance Branding",
-      "instanceBrandingDesc": "Colors, icons, user types",
-      "aiConfig": "AI Configuration",
-      "aiConfigDesc": "Prompts, parameters, defaults",
-      "deploymentConfig": "Deployment Config",
-      "deploymentConfigDesc": "Services, SMTP, storage"
+      "instanceBranding": "Branding instance",
+      "instanceBrandingDesc": "Barvy, ikony, typy uživatelů",
+      "aiConfig": "Konfigurace AI",
+      "aiConfigDesc": "Prompty, parametry, výchozí hodnoty",
+      "deploymentConfig": "Konfigurace nasazení",
+      "deploymentConfigDesc": "Služby, SMTP, úložiště"
     }
   },
   "admin": {
@@ -562,94 +562,94 @@
   },
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
-      "label": "AI Service",
-      "description": "LLM provider (maple, ollama)",
-      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+      "label": "AI služba",
+      "description": "Poskytovatel LLM (maple, ollama)",
+      "hint": "Vyberte \"maple\" pro Maple proxy (doporučeno pro soukromí) nebo \"ollama\" pro lokální modely."
     },
     "LLM_MODEL": {
-      "label": "Model Name",
-      "description": "Model name/identifier",
-      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+      "label": "Název modelu",
+      "description": "Název/identifikátor modelu",
+      "hint": "Identifikátor modelu k použití (např. \"kimi-k2-thinking\"). Zkontrolujte dokumentaci vašeho poskytovatele pro dostupné modely."
     },
     "LLM_API_URL": {
-      "label": "API Endpoint",
-      "description": "Base URL for API requests",
-      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+      "label": "API koncový bod",
+      "description": "Základní URL pro API požadavky",
+      "hint": "Základní URL pro API požadavky. Pro Maple: http://maple-proxy:8080/v1. Pro Ollama: http://localhost:11434."
     },
     "RAG_TOP_K": {
-      "label": "Context Chunks",
-      "description": "Number of chunks to retrieve",
-      "hint": "How many document chunks to retrieve for each query. Higher = more context but slower. Default: 8."
+      "label": "Kontextové části",
+      "description": "Počet částí k načtení",
+      "hint": "Kolik částí dokumentu načíst pro každý dotaz. Více = více kontextu, ale pomaleji. Výchozí: 8."
     },
     "PDF_EXTRACT_MODE": {
-      "label": "PDF Processing",
-      "description": "PDF extraction method",
-      "hint": "\"fast\" extracts text quickly. \"quality\" uses OCR for better accuracy with scanned documents but is slower."
+      "label": "Zpracování PDF",
+      "description": "Metoda extrakce PDF",
+      "hint": "\"fast\" rychle extrahuje text. \"quality\" používá OCR pro lepší přesnost u naskenovaných dokumentů, ale je pomalejší."
     },
     "EMBEDDING_MODEL": {
-      "label": "Embedding Model",
-      "description": "HuggingFace model for embeddings",
-      "hint": "The HuggingFace model for converting text to vectors. Only change if you need a different language or domain."
+      "label": "Model pro embedding",
+      "description": "HuggingFace model pro embeddingy",
+      "hint": "HuggingFace model pro převod textu na vektory. Změňte pouze v případě potřeby jiného jazyka nebo domény."
     },
     "SMTP_HOST": {
-      "label": "Mail Server",
-      "description": "SMTP server address",
-      "hint": "Your SMTP server address (e.g., smtp.gmail.com, smtp.sendgrid.net)."
+      "label": "Poštovní server",
+      "description": "Adresa SMTP serveru",
+      "hint": "Adresa vašeho SMTP serveru (např. smtp.gmail.com, smtp.sendgrid.net)."
     },
     "SMTP_PORT": {
-      "label": "Mail Port",
-      "description": "SMTP server port",
-      "hint": "Usually 587 for TLS or 465 for SSL. Check your email provider's settings."
+      "label": "Poštovní port",
+      "description": "Port SMTP serveru",
+      "hint": "Obvykle 587 pro TLS nebo 465 pro SSL. Zkontrolujte nastavení vašeho poskytovatele e-mailu."
     },
     "SMTP_USER": {
-      "label": "SMTP Username",
-      "description": "Email service username",
-      "hint": "Your email service username or API key."
+      "label": "SMTP uživatelské jméno",
+      "description": "Uživatelské jméno e-mailové služby",
+      "hint": "Vaše uživatelské jméno e-mailové služby nebo API klíč."
     },
     "SMTP_PASS": {
-      "label": "SMTP Password",
-      "description": "Email service password",
-      "hint": "Your email service password or API key secret."
+      "label": "SMTP heslo",
+      "description": "Heslo e-mailové služby",
+      "hint": "Vaše heslo e-mailové služby nebo tajný klíč API."
     },
     "SMTP_FROM": {
-      "label": "Sender Address",
-      "description": "From address for emails",
-      "hint": "The \"from\" address for outgoing emails (e.g., noreply@yourdomain.com)."
+      "label": "Adresa odesílatele",
+      "description": "Adresa odesílatele pro e-maily",
+      "hint": "Adresa \"od\" pro odchozí e-maily (např. noreply@yourdomain.com)."
     },
     "MOCK_SMTP": {
-      "label": "Test Mode",
-      "description": "Mock email sending",
-      "hint": "When \"true\", emails are logged instead of sent. Useful for development."
+      "label": "Testovací režim",
+      "description": "Simulace odesílání e-mailů",
+      "hint": "Když je \"true\", e-maily se zaznamenávají místo odesílání. Užitečné pro vývoj."
     },
     "SQLITE_PATH": {
-      "label": "Database File",
-      "description": "Path to SQLite database",
-      "hint": "Path to the SQLite database file. Default: /data/sanctum.db"
+      "label": "Databázový soubor",
+      "description": "Cesta k SQLite databázi",
+      "hint": "Cesta k souboru SQLite databáze. Výchozí: /data/sanctum.db"
     },
     "UPLOADS_DIR": {
-      "label": "Uploads Folder",
-      "description": "Document uploads directory",
-      "hint": "Directory where uploaded documents are stored. Default: /uploads"
+      "label": "Složka pro nahrávání",
+      "description": "Adresář pro nahrávání dokumentů",
+      "hint": "Adresář, kde se ukládají nahrané dokumenty. Výchozí: /uploads"
     },
     "QDRANT_HOST": {
-      "label": "Vector DB Host",
-      "description": "Qdrant server hostname",
-      "hint": "Hostname for the Qdrant vector database. Default: qdrant"
+      "label": "Hostitel vektorové databáze",
+      "description": "Hostname Qdrant serveru",
+      "hint": "Hostname pro Qdrant vektorovou databázi. Výchozí: qdrant"
     },
     "QDRANT_PORT": {
-      "label": "Vector DB Port",
-      "description": "Qdrant REST API port",
-      "hint": "Port for Qdrant (REST API). Default: 6333"
+      "label": "Port vektorové databáze",
+      "description": "Port Qdrant REST API",
+      "hint": "Port pro Qdrant (REST API). Výchozí: 6333"
     },
     "SEARXNG_URL": {
-      "label": "Search Engine URL",
-      "description": "SearXNG instance URL",
-      "hint": "URL of your SearXNG instance for web search functionality."
+      "label": "URL vyhledávače",
+      "description": "URL instance SearXNG",
+      "hint": "URL vaší instance SearXNG pro funkci webového vyhledávání."
     },
     "FRONTEND_URL": {
-      "label": "App URL",
-      "description": "Public URL for the application",
-      "hint": "The public URL where users access the app. Used for generating magic links."
+      "label": "URL aplikace",
+      "description": "Veřejná URL aplikace",
+      "hint": "Veřejná URL, kde uživatelé přistupují k aplikaci. Používá se pro generování magických odkazů."
     }
   }
 }

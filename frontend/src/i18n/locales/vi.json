@@ -1,20 +1,20 @@
 {
   "onboarding": {
     "nostr": {
-      "whatIsNostr": "Nostr la gi?",
-      "whatIsNostrDesc": "Nostr la mot giao thuc phi tap trung cho mang xa hoi va danh tinh. Khac voi dang nhap truyen thong, danh tinh cua ban khong bi kiem soat boi bat ky cong ty nao - ban so huu khoa cua minh.",
-      "whatIsNip07": "NIP-07 la gi?",
-      "whatIsNip07Desc": "NIP-07 la mot tieu chuan cho phep cac trang web yeu cau khoa cong khai Nostr cua ban tu tien ich mo rong trinh duyet. Dieu nay co nghia la:",
-      "noPasswords": "Khong can nho mat khau",
-      "noEmailVerification": "Khong can xac minh email",
-      "cryptoSecure": "Danh tinh cua ban duoc bao mat bang mat ma",
-      "controlKeys": "Ban kiem soat khoa cua minh",
-      "howItWorks": "Cach hoat dong",
-      "step1": "Cai dat tien ich mo rong ky Nostr (chung toi khuyen nghi Alby)",
-      "step2": "Nhan \"Ket noi voi Nostr\" o tren",
-      "step3": "Chap nhan ket noi trong tien ich mo rong cua ban",
-      "step4": "Ban da vao!",
-      "dontHaveExtension": "Chua co tien ich mo rong Nostr? Lay tai day:",
+      "whatIsNostr": "Nostr là gì?",
+      "whatIsNostrDesc": "Nostr là một giao thức phi tập trung cho mạng xã hội và danh tính. Khác với đăng nhập truyền thống, danh tính của bạn không bị kiểm soát bởi bất kỳ công ty nào - bạn sở hữu khóa của mình.",
+      "whatIsNip07": "NIP-07 là gì?",
+      "whatIsNip07Desc": "NIP-07 là một tiêu chuẩn cho phép các trang web yêu cầu khóa công khai Nostr của bạn từ tiện ích mở rộng trình duyệt. Điều này có nghĩa là:",
+      "noPasswords": "Không cần nhớ mật khẩu",
+      "noEmailVerification": "Không cần xác minh email",
+      "cryptoSecure": "Danh tính của bạn được bảo mật bằng mật mã",
+      "controlKeys": "Bạn kiểm soát khóa của mình",
+      "howItWorks": "Cách hoạt động",
+      "step1": "Cài đặt tiện ích mở rộng ký Nostr (chúng tôi khuyên dùng Alby)",
+      "step2": "Nhấn \"Kết nối với Nostr\" ở trên",
+      "step3": "Chấp nhận kết nối trong tiện ích mở rộng của bạn",
+      "step4": "Bạn đã vào!",
+      "dontHaveExtension": "Chưa có tiện ích mở rộng Nostr? Lấy tại đây:",
       "alby": "Alby",
       "nos2x": "nos2x"
     },
@@ -200,12 +200,12 @@
       "documentUploadDesc": "Them tai lieu vao co so kien thuc",
       "databaseExplorer": "Trinh kham pha co so du lieu",
       "databaseExplorerDesc": "Duyet co so du lieu SQLite",
-      "instanceBranding": "Instance Branding",
-      "instanceBrandingDesc": "Colors, icons, user types",
-      "aiConfig": "AI Configuration",
-      "aiConfigDesc": "Prompts, parameters, defaults",
-      "deploymentConfig": "Deployment Config",
-      "deploymentConfigDesc": "Services, SMTP, storage"
+      "instanceBranding": "Thương hiệu phiên bản",
+      "instanceBrandingDesc": "Màu sắc, biểu tượng, loại người dùng",
+      "aiConfig": "Cấu hình AI",
+      "aiConfigDesc": "Prompt, tham số, mặc định",
+      "deploymentConfig": "Cấu hình triển khai",
+      "deploymentConfigDesc": "Dịch vụ, SMTP, lưu trữ"
     }
   },
   "admin": {
@@ -570,94 +570,94 @@
   },
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
-      "label": "AI Service",
-      "description": "LLM provider (maple, ollama)",
-      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+      "label": "Dịch vụ AI",
+      "description": "Nhà cung cấp LLM (maple, ollama)",
+      "hint": "Chọn \"maple\" cho proxy Maple (khuyên dùng cho quyền riêng tư) hoặc \"ollama\" cho mô hình cục bộ."
     },
     "LLM_MODEL": {
-      "label": "Model Name",
-      "description": "Model name/identifier",
-      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+      "label": "Tên mô hình",
+      "description": "Tên/mã định danh mô hình",
+      "hint": "Mã định danh mô hình cần sử dụng (ví dụ: \"kimi-k2-thinking\"). Xem tài liệu của nhà cung cấp để biết các mô hình có sẵn."
     },
     "LLM_API_URL": {
-      "label": "API Endpoint",
-      "description": "Base URL for API requests",
-      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+      "label": "Điểm cuối API",
+      "description": "URL cơ sở cho yêu cầu API",
+      "hint": "URL cơ sở cho yêu cầu API. Cho Maple: http://maple-proxy:8080/v1. Cho Ollama: http://localhost:11434."
     },
     "RAG_TOP_K": {
-      "label": "Context Chunks",
-      "description": "Number of chunks to retrieve",
-      "hint": "How many document chunks to retrieve for each query. Higher = more context but slower. Default: 8."
+      "label": "Khối ngữ cảnh",
+      "description": "Số lượng khối cần truy xuất",
+      "hint": "Số lượng khối tài liệu cần truy xuất cho mỗi truy vấn. Cao hơn = nhiều ngữ cảnh hơn nhưng chậm hơn. Mặc định: 8."
     },
     "PDF_EXTRACT_MODE": {
-      "label": "PDF Processing",
-      "description": "PDF extraction method",
-      "hint": "\"fast\" extracts text quickly. \"quality\" uses OCR for better accuracy with scanned documents but is slower."
+      "label": "Xử lý PDF",
+      "description": "Phương pháp trích xuất PDF",
+      "hint": "\"fast\" trích xuất văn bản nhanh chóng. \"quality\" sử dụng OCR để độ chính xác cao hơn với tài liệu quét nhưng chậm hơn."
     },
     "EMBEDDING_MODEL": {
-      "label": "Embedding Model",
-      "description": "HuggingFace model for embeddings",
-      "hint": "The HuggingFace model for converting text to vectors. Only change if you need a different language or domain."
+      "label": "Mô hình nhúng",
+      "description": "Mô hình HuggingFace cho nhúng vector",
+      "hint": "Mô hình HuggingFace để chuyển đổi văn bản thành vector. Chỉ thay đổi nếu bạn cần ngôn ngữ hoặc lĩnh vực khác."
     },
     "SMTP_HOST": {
-      "label": "Mail Server",
-      "description": "SMTP server address",
-      "hint": "Your SMTP server address (e.g., smtp.gmail.com, smtp.sendgrid.net)."
+      "label": "Máy chủ thư",
+      "description": "Địa chỉ máy chủ SMTP",
+      "hint": "Địa chỉ máy chủ SMTP của bạn (ví dụ: smtp.gmail.com, smtp.sendgrid.net)."
     },
     "SMTP_PORT": {
-      "label": "Mail Port",
-      "description": "SMTP server port",
-      "hint": "Usually 587 for TLS or 465 for SSL. Check your email provider's settings."
+      "label": "Cổng thư",
+      "description": "Cổng máy chủ SMTP",
+      "hint": "Thường là 587 cho TLS hoặc 465 cho SSL. Kiểm tra cài đặt của nhà cung cấp email."
     },
     "SMTP_USER": {
-      "label": "SMTP Username",
-      "description": "Email service username",
-      "hint": "Your email service username or API key."
+      "label": "Tên người dùng SMTP",
+      "description": "Tên người dùng dịch vụ email",
+      "hint": "Tên người dùng dịch vụ email hoặc khóa API của bạn."
     },
     "SMTP_PASS": {
-      "label": "SMTP Password",
-      "description": "Email service password",
-      "hint": "Your email service password or API key secret."
+      "label": "Mật khẩu SMTP",
+      "description": "Mật khẩu dịch vụ email",
+      "hint": "Mật khẩu dịch vụ email hoặc bí mật khóa API của bạn."
     },
     "SMTP_FROM": {
-      "label": "Sender Address",
-      "description": "From address for emails",
-      "hint": "The \"from\" address for outgoing emails (e.g., noreply@yourdomain.com)."
+      "label": "Địa chỉ người gửi",
+      "description": "Địa chỉ gửi cho email",
+      "hint": "Địa chỉ \"from\" cho email gửi đi (ví dụ: noreply@yourdomain.com)."
     },
     "MOCK_SMTP": {
-      "label": "Test Mode",
-      "description": "Mock email sending",
-      "hint": "When \"true\", emails are logged instead of sent. Useful for development."
+      "label": "Chế độ thử nghiệm",
+      "description": "Giả lập gửi email",
+      "hint": "Khi \"true\", email được ghi log thay vì gửi. Hữu ích cho phát triển."
     },
     "SQLITE_PATH": {
-      "label": "Database File",
-      "description": "Path to SQLite database",
-      "hint": "Path to the SQLite database file. Default: /data/sanctum.db"
+      "label": "Tệp cơ sở dữ liệu",
+      "description": "Đường dẫn đến cơ sở dữ liệu SQLite",
+      "hint": "Đường dẫn đến tệp cơ sở dữ liệu SQLite. Mặc định: /data/sanctum.db"
     },
     "UPLOADS_DIR": {
-      "label": "Uploads Folder",
-      "description": "Document uploads directory",
-      "hint": "Directory where uploaded documents are stored. Default: /uploads"
+      "label": "Thư mục tải lên",
+      "description": "Thư mục tải lên tài liệu",
+      "hint": "Thư mục lưu trữ tài liệu đã tải lên. Mặc định: /uploads"
     },
     "QDRANT_HOST": {
-      "label": "Vector DB Host",
-      "description": "Qdrant server hostname",
-      "hint": "Hostname for the Qdrant vector database. Default: qdrant"
+      "label": "Máy chủ Vector DB",
+      "description": "Tên máy chủ Qdrant",
+      "hint": "Tên máy chủ cho cơ sở dữ liệu vector Qdrant. Mặc định: qdrant"
     },
     "QDRANT_PORT": {
-      "label": "Vector DB Port",
-      "description": "Qdrant REST API port",
-      "hint": "Port for Qdrant (REST API). Default: 6333"
+      "label": "Cổng Vector DB",
+      "description": "Cổng REST API của Qdrant",
+      "hint": "Cổng cho Qdrant (REST API). Mặc định: 6333"
     },
     "SEARXNG_URL": {
-      "label": "Search Engine URL",
-      "description": "SearXNG instance URL",
-      "hint": "URL of your SearXNG instance for web search functionality."
+      "label": "URL công cụ tìm kiếm",
+      "description": "URL phiên bản SearXNG",
+      "hint": "URL của phiên bản SearXNG cho chức năng tìm kiếm web."
     },
     "FRONTEND_URL": {
-      "label": "App URL",
-      "description": "Public URL for the application",
-      "hint": "The public URL where users access the app. Used for generating magic links."
+      "label": "URL ứng dụng",
+      "description": "URL công khai cho ứng dụng",
+      "hint": "URL công khai nơi người dùng truy cập ứng dụng. Dùng để tạo liên kết ma thuật."
     }
   }
 }

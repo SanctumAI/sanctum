@@ -15,7 +15,7 @@ However, during this hackathon, we face a hard constraint: **time**.
 | Embeddings | SentenceTransformer | Local CPU | ~2-13 sec/chunk |
 | LLM Extraction | Local LLM / Maple | Self-hosted | ~10-30 sec/chunk |
 | Vector Store | Qdrant | Local container | Fast |
-| Graph Store | Neo4j | Local container | Fast |
+| Database | SQLite | Local container | Fast |
 
 **Total for 150-chunk document: 30-60+ minutes**
 
@@ -26,7 +26,7 @@ However, during this hackathon, we face a hard constraint: **time**.
 | Embeddings | **OpenAI API** | ⚠️ External | ~0.2 sec/batch |
 | LLM Extraction | Maple Proxy | HRF-hosted | ~10-20 sec/chunk |
 | Vector Store | Qdrant | Local container | Fast |
-| Graph Store | Neo4j | Local container | Fast |
+| Database | SQLite | Local container | Fast |
 
 **Total for 15-chunk sample: ~2.5 minutes**
 

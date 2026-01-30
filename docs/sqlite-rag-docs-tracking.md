@@ -6,7 +6,7 @@ This document describes the SQLite-based persistence layer for tracking ingested
 
 ## Overview
 
-Previously, ingest job state was stored in JSON files (`logs/jobs_state.json`), which were not mounted into the Docker container. This caused job metadata to be lost on container rebuilds, even though the actual vector/graph data persisted in Qdrant and Neo4j.
+Previously, ingest job state was stored in JSON files (`logs/jobs_state.json`), which were not mounted into the Docker container. This caused job metadata to be lost on container rebuilds, even though the actual vector data persisted in Qdrant.
 
 The solution: store job metadata in SQLite, which is already volume-mounted via `sqlite_data:/data`.
 
@@ -133,11 +133,6 @@ CREATE TABLE IF NOT EXISTS ingest_jobs (
 │   Upload PDF    │────▶│  SQLite: Job    │────▶│  Qdrant: Vectors│
 │                 │     │  (metadata)     │     │  (embeddings)   │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
-                                                         │
-                        ┌─────────────────┐              │
-                        │  Neo4j: Graph   │◀─────────────┘
-                        │  (entities)     │
-                        └─────────────────┘
 ```
 
 **What's stored where:**
@@ -146,7 +141,6 @@ CREATE TABLE IF NOT EXISTS ingest_jobs (
 |-------|------|-------------------|
 | SQLite (`/data/sanctum.db`) | Job metadata (filename, status, chunk counts) | ✅ Yes (Docker volume) |
 | Qdrant (`qdrant_data` volume) | Vector embeddings for RAG search | ✅ Yes (Docker volume) |
-| Neo4j (`neo4j_data` volume) | Knowledge graph entities/relationships | ✅ Yes (Docker volume) |
 | Memory | Active chunk processing state | ❌ No (ephemeral) |
 
 ---

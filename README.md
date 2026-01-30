@@ -36,25 +36,17 @@ curl http://localhost:8000/test
 Expected response:
 ```json
 {
-  "neo4j": {
-    "status": "ok",
-    "claim": {
-      "id": "claim_udhr_1948",
-      "text": "La Declaración Universal de Derechos Humanos fue adoptada en 1948.",
-      "language": "es"
-    },
-    "source": {
-      "id": "source_un_udhr",
-      "title": "United Nations - Universal Declaration of Human Rights"
-    }
-  },
   "qdrant": {
     "status": "ok",
     "vector_id": "6437e612-5e33-5e2e-99ee-b40fa6a6b018",
-    "payload": {"claim_id": "claim_udhr_1948", ...},
+    "payload": {
+      "claim_id": "claim_udhr_1948",
+      "text": "La Declaración Universal de Derechos Humanos fue adoptada en 1948.",
+      "language": "es"
+    },
     "vector_dimension": 768
   },
-  "message": "Smoke test passed! ✓",
+  "message": "Smoke test passed!",
   "success": true
 }
 ```

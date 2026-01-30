@@ -1,0 +1,274 @@
+# Sanctum — Current Architecture (v0.1 MVP)
+
+This document describes the **current** implementation of Sanctum. For the planned graph-first architecture using Neo4j + Graphiti, see [ARCHITECTURE_PLANNED.md](./ARCHITECTURE_PLANNED.md).
+
+---
+
+## Stack Overview
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| **Backend** | FastAPI (Python 3.11) | API orchestration, ingest pipeline, RAG queries |
+| **Frontend** | Vite + React + TypeScript | Admin dashboard, user chat interface |
+| **Database** | SQLite | Users, documents, settings, jobs, sessions |
+| **Vector Store** | Qdrant | Semantic search embeddings (768-dim) |
+| **Web Search** | SearXNG | Privacy-preserving metasearch for web tool |
+| **LLM Proxy** | maple-proxy | OpenAI-compatible LLM gateway |
+| **Deployment** | Docker Compose | Container orchestration |
+
+---
+
+## Service Architecture
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Frontend  │────▶│   Backend   │────▶│   SQLite    │
+│   (Vite)    │     │  (FastAPI)  │     │   (Data)    │
+└─────────────┘     └──────┬──────┘     └─────────────┘
+                           │
+                ┌──────────┼──────────┐
+                ▼          ▼          ▼
+         ┌──────────┐ ┌────────┐ ┌────────┐
+         │  Qdrant  │ │ maple  │ │SearXNG │
+         │(Vectors) │ │ proxy  │ │(Search)│
+         └──────────┘ └────────┘ └────────┘
+```
+
+### Service Ports
+
+| Service | Port | URL |
+|---------|------|-----|
+| Frontend (Vite) | 5173 | http://localhost:5173 |
+| Backend (FastAPI) | 8000 | http://localhost:8000 |
+| Qdrant Dashboard | 6333 | http://localhost:6333/dashboard |
+| Qdrant gRPC | 6334 | - |
+| maple-proxy | 8080 | http://localhost:8080 |
+| SearXNG | 8080 (internal) | - |
+
+---
+
+## Data Storage
+
+### SQLite (`/data/sanctum.db`)
+
+All structured data is stored in SQLite:
+
+- **Users**: Nostr pubkeys (admin), email users, sessions
+- **Documents**: Uploaded files metadata, ingest jobs
+- **Settings**: Instance configuration (branding, SMTP, LLM settings)
+- **Custom Fields**: Admin-defined user profile fields
+- **Ontologies**: Extraction schemas for document processing
+
+Volume: `sqlite_data:/data`
+
+### Qdrant
+
+Vector embeddings for semantic search:
+
+- **Collection**: `sanctum_knowledge`
+- **Dimensions**: 768 (multilingual-e5-base)
+- **Payload**: Document metadata, chunk references
+
+Volume: `qdrant_data:/qdrant/storage`
+
+### File Storage
+
+- **Uploads**: `./uploads` (bind mount)
+- **Model Cache**: `embedding_cache:/root/.cache/huggingface`
+
+---
+
+## Authentication
+
+### Admin Authentication (Nostr NIP-07)
+
+1. Admin clicks "Login with Nostr"
+2. Browser extension signs challenge
+3. Backend verifies signature against allowed pubkeys
+4. JWT session token issued
+
+### User Authentication (Email Magic Link)
+
+1. User enters email address
+2. Backend sends magic link via SMTP
+3. User clicks link, verifies token
+4. JWT session token issued
+
+See [docs/authentication.md](./docs/authentication.md) for details.
+
+---
+
+## RAG Pipeline
+
+### Ingest Flow
+
+```
+Document Upload → Text Extraction → Chunking → Embedding → Qdrant Storage
+                                       │
+                                       └──→ SQLite (job metadata)
+```
+
+1. Document uploaded via `/ingest/upload`
+2. Text extracted (PyMuPDF for PDFs)
+3. Text split into chunks (~500 tokens)
+4. Chunks embedded using `intfloat/multilingual-e5-base`
+5. Vectors stored in Qdrant with metadata
+6. Job status tracked in SQLite
+
+### Query Flow
+
+```
+User Query → Embed → Qdrant Search → Top-K Results → LLM Context → Response
+```
+
+1. User submits question via chat
+2. Query embedded using same model
+3. Qdrant returns semantically similar chunks
+4. Chunks assembled into context
+5. LLM generates response with citations
+6. Response returned to user
+
+---
+
+## Embedding Model
+
+- **Model**: `intfloat/multilingual-e5-base`
+- **Dimensions**: 768
+- **Prefix Convention**: "passage: " for documents, "query: " for search
+- **Languages**: 100+ (including Spanish, optimized for multilingual use)
+- **Size**: ~500MB (cached in Docker volume)
+
+---
+
+## LLM Integration
+
+### maple-proxy (Default)
+
+- OpenAI-compatible API at `/v1/chat/completions`
+- Supports structured outputs
+- Privacy-preserving proxy layer
+
+### Ollama (Optional)
+
+- Local inference alternative
+- Configure via `LLM_PROVIDER=ollama` environment variable
+
+---
+
+## Tools
+
+The RAG system supports tool use for enhanced responses:
+
+| Tool | Description | Access |
+|------|-------------|--------|
+| `web_search` | SearXNG metasearch | All users |
+| `sqlite_query` | Direct database queries | Admin only |
+
+See [docs/tools.md](./docs/tools.md) for details.
+
+---
+
+## Key API Endpoints
+
+### Health & Testing
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Service health check (Qdrant status) |
+| `/test` | GET | Smoke test (verifies Qdrant seeded data) |
+| `/llm/test` | GET | LLM provider connectivity test |
+
+### Ingest
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/ingest/upload` | POST | Upload document for processing |
+| `/ingest/jobs` | GET | List all ingest jobs |
+| `/ingest/status/{job_id}` | GET | Get job status |
+| `/ingest/stats` | GET | Qdrant collection statistics |
+
+### Query
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/query` | POST | RAG query with document context |
+| `/vector-search` | POST | Direct vector similarity search |
+
+---
+
+## What's Different from Planned Architecture
+
+The current MVP uses a simpler stack than the planned graph-first architecture:
+
+| Aspect | Current (MVP) | Planned |
+|--------|--------------|---------|
+| **Structured Data** | SQLite | Neo4j |
+| **Knowledge Graph** | None | Graphiti |
+| **Entity Extraction** | Manual via ontologies | Automatic via Graphiti |
+| **Relationship Modeling** | Flat document references | Graph traversal |
+| **Query Expansion** | Vector similarity only | Graph + vector hybrid |
+
+### Why SQLite for MVP?
+
+1. **Simpler deployment**: No additional services to manage
+2. **Sufficient for MVP**: Document-level RAG doesn't require graph
+3. **Faster iteration**: Schema changes are trivial
+4. **Migration path exists**: SQLite data can export to Neo4j
+
+### When to Migrate to Graph
+
+Consider migrating to the planned Neo4j + Graphiti architecture when:
+
+- Complex entity relationships become important
+- Query expansion via graph traversal is needed
+- Automatic entity extraction is required
+- Knowledge base exceeds SQLite performance limits
+
+---
+
+## Docker Compose Services
+
+```yaml
+services:
+  backend:     # FastAPI + SQLite
+  frontend:    # Vite dev server
+  qdrant:      # Vector database
+  maple-proxy: # LLM gateway
+  searxng:     # Web search
+```
+
+### Commands
+
+```bash
+# Start all services
+docker compose up --build
+
+# View logs
+docker compose logs -f backend
+
+# Reset all data
+docker compose down -v
+```
+
+---
+
+## Environment Variables
+
+Key configuration options (see `.env.example`):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `LLM_PROVIDER` | `maple` | LLM backend (`maple` or `ollama`) |
+| `MAPLE_URL` | `http://maple-proxy:8080/v1` | maple-proxy endpoint |
+| `QDRANT_URL` | `http://qdrant:6333` | Qdrant endpoint |
+| `SEARXNG_URL` | `http://searxng:8080` | SearXNG endpoint |
+
+---
+
+## Related Documentation
+
+- [ARCHITECTURE_PLANNED.md](./ARCHITECTURE_PLANNED.md) — Future graph-first architecture
+- [docs/authentication.md](./docs/authentication.md) — Auth flows
+- [docs/tools.md](./docs/tools.md) — Tool system documentation
+- [docs/upload-documents.md](./docs/upload-documents.md) — Ingest guide
+- [docs/sqlite-rag-docs-tracking.md](./docs/sqlite-rag-docs-tracking.md) — SQLite schema

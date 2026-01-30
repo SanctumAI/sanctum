@@ -1,4 +1,10 @@
-# Sanctum — Private RAG System for Curated Knowledge
+# Sanctum — Planned Architecture (Graph-First RAG)
+
+> **Note:** This document describes the **planned** architecture for Sanctum's future graph-first RAG system using Neo4j + Graphiti. For the **current** implementation (SQLite + Qdrant), see [ARCHITECTURE_CURRENT.md](./ARCHITECTURE_CURRENT.md).
+>
+> **Status:** Not implemented. The current MVP uses a simpler SQLite + Qdrant stack. This architecture represents a future evolution when graph-based knowledge representation becomes necessary.
+
+---
 
 Sanctum is a privacy-first Retrieval-Augmented Generation (RAG) system for building, maintaining, and querying curated knowledge bases. Sanctum is designed to be domain-agnostic and fully configurable for any use case requiring privacy, accuracy, and explainability.
 
@@ -15,9 +21,9 @@ Sanctum runs locally as a Docker Compose application. It combines a structured k
 
 ---
 
-## High-Level Architecture
+## High-Level Architecture (Planned)
 
-Sanctum is composed of the following runtime components:
+The planned architecture includes the following runtime components:
 
 - **Frontend**: Vite-based web UI
 - **Backend**: FastAPI application
@@ -41,7 +47,7 @@ The frontend is built with **Vite** and React, providing a complete user interfa
 - **Instance configuration**: Customize branding (name, icon, accent color)
 - **User onboarding**: Define custom fields for user registration
 - **Document upload**: Submit documents to the RAG knowledge base
-- **Database explorer**: View and manage instance data (SQLite)
+- **Database explorer**: View and manage instance data
 - **System monitoring**: Test RAG pipeline components
 
 ### User Flow
@@ -85,11 +91,11 @@ Job execution (ingest, reindex, export) is assumed to be managed asynchronously 
 
 ---
 
-## RAG Architecture (Recommended Flow)
+## RAG Architecture (Planned Graph-First Flow)
 
-Sanctum implements a **graph-first RAG pipeline**.
+The planned architecture implements a **graph-first RAG pipeline**.
 
-### Ingest Flow
+### Ingest Flow (Planned)
 
 1. Curated documents are submitted to the backend
 2. Graphiti extracts entities and relationships into Neo4j
@@ -100,11 +106,11 @@ Sanctum implements a **graph-first RAG pipeline**.
    - node summaries
 5. Embeddings are stored in Qdrant with metadata linking back to graph IDs
 
-Neo4j is the source of truth. Qdrant is a recall accelerator.
+In this model, Neo4j is the source of truth. Qdrant is a recall accelerator.
 
 ---
 
-### Query Flow
+### Query Flow (Planned)
 
 1. A user submits a query
 2. The backend embeds the query
@@ -120,9 +126,9 @@ The LLM does not select tools or retrieve data. It only synthesizes responses fr
 
 ---
 
-## Knowledge Representation
+## Knowledge Representation (Planned)
 
-Sanctum stores knowledge explicitly using a graph model.
+The graph model stores knowledge explicitly using typed entities and relationships.
 
 Typical entity types include:
 
@@ -173,11 +179,9 @@ This is optional and configurable via Docker Compose profiles.
 
 ---
 
-## Deployment Model
+## Deployment Model (Planned)
 
-Sanctum is deployed via **Docker Compose**.
-
-A typical deployment includes containers for:
+The planned deployment includes containers for:
 
 - FastAPI backend
 - Vite frontend
@@ -190,9 +194,9 @@ All stateful services use persistent volumes.
 
 ---
 
-## Export and Portability
+## Export and Portability (Planned)
 
-Sanctum supports exporting knowledge at multiple layers:
+The planned system supports exporting knowledge at multiple layers:
 
 - Neo4j database dumps and logical exports
 - Qdrant snapshots (optional; vectors are regenerable)
@@ -216,18 +220,19 @@ It is a **curated, explainable RAG system** optimized for correctness, privacy, 
 
 ---
 
-## Status
+## Migration Path
 
-Architecture finalized. Implementation in progress.
+When the current SQLite-based implementation requires more advanced knowledge representation:
 
-Primary next steps:
-- Finalize ontology v1
-- Implement ingest + query pipelines
-- Wire Maple structured output enforcement
-- Build job tracking endpoints
-- Harden export and reindex paths
+1. **Entity Extraction**: Add Graphiti for automatic entity/relationship extraction
+2. **Graph Storage**: Deploy Neo4j to store the knowledge graph
+3. **Hybrid Retrieval**: Use Qdrant for recall, Neo4j for graph traversal
+4. **Schema Migration**: Export SQLite data to Neo4j format
 
+The current implementation is designed to allow this evolution when scale and complexity require it.
 
+---
 
+## Embedding Model
 
-“Sanctum uses local, open-source sentence embeddings (e.g., BGE/E5-class models) selected for universality, robustness, and CPU-friendly operation.”
+Sanctum uses local, open-source sentence embeddings (e.g., BGE/E5-class models) selected for universality, robustness, and CPU-friendly operation.

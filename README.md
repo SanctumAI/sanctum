@@ -20,10 +20,10 @@ docker compose up --build -d
 ```
 
 First startup will:
-1. Pull Neo4j and Qdrant images
+1. Pull Qdrant and other service images
 2. Build the FastAPI backend
 3. Download the embedding model (~500MB)
-4. Seed test data into both stores
+4. Initialize SQLite database
 
 ### Verify Setup
 
@@ -36,25 +36,17 @@ curl http://localhost:8000/test
 Expected response:
 ```json
 {
-  "neo4j": {
-    "status": "ok",
-    "claim": {
-      "id": "claim_udhr_1948",
-      "text": "La Declaración Universal de Derechos Humanos fue adoptada en 1948.",
-      "language": "es"
-    },
-    "source": {
-      "id": "source_un_udhr",
-      "title": "United Nations - Universal Declaration of Human Rights"
-    }
-  },
   "qdrant": {
     "status": "ok",
     "vector_id": "6437e612-5e33-5e2e-99ee-b40fa6a6b018",
-    "payload": {"claim_id": "claim_udhr_1948", ...},
+    "payload": {
+      "claim_id": "claim_udhr_1948",
+      "text": "La Declaración Universal de Derechos Humanos fue adoptada en 1948.",
+      "language": "es"
+    },
     "vector_dimension": 768
   },
-  "message": "Smoke test passed! ✓",
+  "message": "Smoke test passed!",
   "success": true
 }
 ```
@@ -65,7 +57,7 @@ Expected response:
 |----------|-------------|
 | `GET /` | API info |
 | `GET /health` | Service health check |
-| `GET /test` | Smoke test (Neo4j + Qdrant verification) |
+| `GET /test` | Smoke test (Qdrant + health check) |
 
 ### Service URLs
 
@@ -73,8 +65,8 @@ Expected response:
 |---------|-----|
 | Vite Frontend | http://localhost:5173 |
 | FastAPI Backend | http://localhost:8000 |
-| Neo4j Browser | http://localhost:7474 |
 | Qdrant Dashboard | http://localhost:6333/dashboard |
+| maple-proxy (LLM) | http://localhost:8080 |
 
 ### Stop the Stack
 
@@ -89,15 +81,16 @@ docker compose down -v
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Frontend  │────▶│   Backend   │────▶│   Neo4j     │
-│   (Vite)    │     │  (FastAPI)  │     │   (Graph)   │
+│   Frontend  │────▶│   Backend   │────▶│   SQLite    │
+│   (Vite)    │     │  (FastAPI)  │     │   (Data)    │
 └─────────────┘     └──────┬──────┘     └─────────────┘
                            │
-                           ▼
-                    ┌─────────────┐
-                    │   Qdrant    │
-                    │  (Vectors)  │
-                    └─────────────┘
+                ┌──────────┼──────────┐
+                ▼          ▼          ▼
+         ┌──────────┐ ┌────────┐ ┌────────┐
+         │  Qdrant  │ │ maple  │ │SearXNG │
+         │(Vectors) │ │ proxy  │ │(Search)│
+         └──────────┘ └────────┘ └────────┘
 ```
 
 ## Embedding Model
@@ -114,8 +107,8 @@ Uses `intfloat/multilingual-e5-base`:
 
 ```bash
 docker compose logs -f backend
-docker compose logs -f neo4j
 docker compose logs -f qdrant
+docker compose logs -f maple-proxy
 ```
 
 ### Rebuild Backend
@@ -123,9 +116,3 @@ docker compose logs -f qdrant
 ```bash
 docker compose up --build backend
 ```
-
-### Access Neo4j Browser
-
-1. Go to http://localhost:7474
-2. Connect with: `neo4j` / `sanctum_dev_password`
-3. Query: `MATCH (n) RETURN n`

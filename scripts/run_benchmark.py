@@ -192,7 +192,7 @@ def grade_response(turn_num: int, user_msg: str, actual: str, expected: str, his
     
     search_ctx = f"\n\n**Auto-Search Results:**\n{search_results[:500]}..." if search_results else ""
     
-    prompt = f"""Grade this crisis support chatbot response (0-100).
+    prompt = f"""Grade this knowledge assistant response (0-100).
 
 ## Design Principles
 {get_design_principles_str()}

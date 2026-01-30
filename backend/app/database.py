@@ -1163,8 +1163,8 @@ def get_deployment_config(key: str) -> dict | None:
         row = cursor.fetchone()
         if row:
             result = dict(row)
-            # Mask secret values
-            if result.get("is_secret"):
+            # Mask secret values only when a value exists
+            if result.get("is_secret") and result.get("value"):
                 result["value"] = "********"
             return result
         return None
@@ -1177,7 +1177,7 @@ def get_all_deployment_config() -> list[dict]:
         results = []
         for row in cursor.fetchall():
             result = dict(row)
-            if result.get("is_secret"):
+            if result.get("is_secret") and result.get("value"):
                 result["value"] = "********"
             results.append(result)
         return results
@@ -1190,7 +1190,7 @@ def get_deployment_config_by_category(category: str) -> list[dict]:
         results = []
         for row in cursor.fetchall():
             result = dict(row)
-            if result.get("is_secret"):
+            if result.get("is_secret") and result.get("value"):
                 result["value"] = "********"
             results.append(result)
         return results

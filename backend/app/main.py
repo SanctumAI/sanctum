@@ -27,7 +27,7 @@ import database
 from models import (
     AdminAuth, AdminResponse, AdminListResponse,
     AdminAuthRequest, AdminAuthResponse,
-    InstanceSettings, InstanceSettingsResponse,
+    InstanceSettings, InstanceSettingsResponse, InstanceStatusResponse,
     # User Type models
     UserTypeCreate, UserTypeUpdate, UserTypeResponse, UserTypeListResponse,
     # Field Definition models
@@ -619,12 +619,15 @@ async def vector_search(request: VectorSearchRequest):
 async def send_magic_link(
     request: Request,
     body: MagicLinkRequest,
-    _: None = Depends(magic_link_limiter)
+    _: None = Depends(magic_link_limiter),
+    __: None = Depends(auth.require_instance_setup_complete)
 ):
     """
     Send a magic link to the user's email for authentication.
     Creates a signed, time-limited token and sends it via email.
     Rate limited to 5 requests per minute per IP.
+    
+    Requires instance setup to be complete (admin must authenticate first).
     """
     email = body.email.strip().lower()
     name = body.name.strip()
@@ -655,18 +658,18 @@ async def send_magic_link(
 
 
 @app.get("/auth/verify", response_model=VerifyTokenResponse)
-async def verify_magic_link(token: str = Query(..., description="Magic link token")):
+async def verify_magic_link(
+    token: str = Query(..., description="Magic link token"),
+    _: None = Depends(auth.require_instance_setup_complete)
+):
     """
     Verify a magic link token and create/return the user.
     Returns a session token for subsequent authenticated requests.
+    
+    Requires instance setup to be complete (admin must authenticate first).
     """
-    # Require admin to be configured before onboarding
-    if not database.list_admins():
-        raise HTTPException(
-            status_code=503,
-            detail="Instance not configured. An admin must be registered before users can sign up."
-        )
-
+    # Instance setup completion is checked by the dependency above
+    
     # Verify token
     data = auth.verify_magic_link_token(token)
     if not data:
@@ -700,10 +703,15 @@ async def verify_magic_link(token: str = Query(..., description="Magic link toke
 
 
 @app.get("/auth/me", response_model=SessionUserResponse)
-async def get_current_user(token: str = Query(None, description="Session token")):
+async def get_current_user(
+    token: str = Query(None, description="Session token"),
+    _: None = Depends(auth.require_instance_setup_complete)
+):
     """
     Get the current authenticated user from session token.
     Returns authenticated: false if no valid session.
+    
+    Requires instance setup to be complete (admin must authenticate first).
     """
     if not token:
         return SessionUserResponse(authenticated=False)
@@ -910,37 +918,41 @@ async def admin_auth(
     existing = database.get_admin_by_pubkey(pubkey)
 
     # ==========================================================================
-    # SECURITY: Single-admin restriction (v1)
+    # SECURITY: Single-admin restriction (ENFORCED)
     #
-    # Only the FIRST person to authenticate via NIP-07 can become the admin.
-    # After an admin exists, new registrations are rejected. Existing admins
-    # can still re-authenticate to get new session tokens.
-    #
-    # TODO: Future enhancement - allow existing admins to invite new admins
+    # Only ONE admin can exist per instance. The first person to authenticate
+    # via NIP-07 becomes the admin. Subsequent attempts are rejected.
     # ==========================================================================
-    all_admins = database.list_admins()
-    instance_initialized = len(all_admins) > 0
+    
+    is_new = existing is None
+    instance_has_admin = database.has_admin()
 
-    if existing is None and instance_initialized:
+    if is_new and instance_has_admin:
         # Someone is trying to register as admin but an admin already exists
         raise HTTPException(
             status_code=403,
             detail="Admin registration is closed. This instance already has an admin."
         )
 
-    is_new = existing is None
-
     if is_new:
-        # First admin creation - only happens when no admins exist yet
-        database.add_admin(pubkey)
-        admin = database.get_admin_by_pubkey(pubkey)
-
-        # Migrate any existing plaintext data to encrypted format
-        # This happens when users signed up before an admin was configured
-        # Run in a thread to avoid blocking the event loop
-        await asyncio.to_thread(database.migrate_encrypt_existing_data)
+        # First admin creation - use our single admin constraint
+        try:
+            database.add_admin(pubkey)
+            admin = database.get_admin_by_pubkey(pubkey)
+            
+            # Migrate any existing plaintext data to encrypted format
+            # This happens when users signed up before an admin was configured
+            # Run in a thread to avoid blocking the event loop
+            await asyncio.to_thread(database.migrate_encrypt_existing_data)
+            
+        except ValueError as e:
+            # This should not happen due to our check above, but safety first
+            raise HTTPException(status_code=403, detail=str(e))
     else:
         admin = existing
+
+    # Mark instance setup as complete after successful admin authentication
+    database.mark_instance_setup_complete()
 
     # Create session token for subsequent authenticated requests
     session_token = auth.create_admin_session_token(admin["id"], pubkey)
@@ -948,7 +960,7 @@ async def admin_auth(
     return AdminAuthResponse(
         admin=AdminResponse(**admin),
         is_new=is_new,
-        instance_initialized=instance_initialized,
+        instance_initialized=instance_has_admin or is_new,  # True if had admin or just created one
         session_token=session_token
     )
 
@@ -1001,16 +1013,18 @@ class InstanceStatusResponse(BaseModel):
 @app.get("/instance/status", response_model=InstanceStatusResponse)
 async def get_instance_status():
     """
-    Public endpoint: Check if instance is initialized (has an admin).
+    Public endpoint: Check if instance is initialized and ready for users.
 
     Used by frontend to determine whether to show:
     - Admin setup flow (if not initialized)
-    - User registration (if initialized)
+    - User waiting page (if admin exists but setup incomplete)
+    - User registration (if setup complete)
     """
-    admins = database.list_admins()
     settings = filter_public_settings(database.get_all_settings())
     return InstanceStatusResponse(
-        initialized=len(admins) > 0,
+        initialized=database.has_admin(),
+        setup_complete=database.is_instance_setup_complete(),
+        ready_for_users=database.is_instance_setup_complete(),
         settings=settings
     )
 

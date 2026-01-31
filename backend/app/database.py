@@ -56,13 +56,32 @@ def init_schema():
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Admins table - stores Nostr pubkeys
+    # Admins table - stores single Nostr pubkey (max 1 admin per instance)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS admins (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             pubkey TEXT UNIQUE NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
+    """)
+
+    # Instance state - tracks setup completion and governance
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS instance_state (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    
+    # Initialize instance state if not exists
+    cursor.execute("""
+        INSERT OR IGNORE INTO instance_state (key, value) 
+        VALUES ('setup_complete', 'false')
+    """)
+    cursor.execute("""
+        INSERT OR IGNORE INTO instance_state (key, value) 
+        VALUES ('admin_initialized', 'false')
     """)
 
     # Instance settings - key-value store for admin configuration
@@ -330,13 +349,34 @@ def seed_default_settings():
 # --- Admin Operations ---
 
 def add_admin(pubkey: str) -> int:
-    """Add an admin by pubkey. Returns admin id."""
+    """
+    Add the single admin by pubkey. Enforces single admin constraint.
+    Returns admin id if successful.
+    
+    Raises:
+        ValueError: If an admin already exists
+    """
     with get_cursor() as cursor:
+        # Check if any admin already exists
+        cursor.execute("SELECT COUNT(*) FROM admins")
+        admin_count = cursor.fetchone()[0]
+        
+        if admin_count > 0:
+            raise ValueError("Instance already has an admin. Only one admin per instance is allowed.")
+        
         cursor.execute(
             "INSERT INTO admins (pubkey) VALUES (?)",
             (pubkey,)
         )
-        return cursor.lastrowid
+        admin_id = cursor.lastrowid
+        
+        # Mark admin as initialized
+        cursor.execute("""
+            INSERT OR REPLACE INTO instance_state (key, value, updated_at)
+            VALUES ('admin_initialized', 'true', CURRENT_TIMESTAMP)
+        """)
+        
+        return admin_id
 
 
 def get_admin_by_pubkey(pubkey: str) -> dict | None:
@@ -405,6 +445,50 @@ def get_auto_approve_users() -> bool:
     """Get whether new users should be auto-approved"""
     setting = get_setting("auto_approve_users")
     return setting != "false"  # Default to true if not set or not "false"
+
+
+# --- Instance State Operations ---
+
+def get_instance_state(key: str) -> str | None:
+    """Get instance state value by key"""
+    with get_cursor() as cursor:
+        cursor.execute("SELECT value FROM instance_state WHERE key = ?", (key,))
+        row = cursor.fetchone()
+        return row["value"] if row else None
+
+
+def set_instance_state(key: str, value: str):
+    """Set instance state value"""
+    with get_cursor() as cursor:
+        cursor.execute("""
+            INSERT OR REPLACE INTO instance_state (key, value, updated_at)
+            VALUES (?, ?, CURRENT_TIMESTAMP)
+        """, (key, value))
+
+
+def is_instance_setup_complete() -> bool:
+    """Check if instance setup is complete"""
+    admin_initialized = get_instance_state('admin_initialized') == 'true'
+    setup_complete = get_instance_state('setup_complete') == 'true'
+    return admin_initialized and setup_complete
+
+
+def mark_instance_setup_complete():
+    """Mark instance setup as complete (called after admin authentication)"""
+    set_instance_state('setup_complete', 'true')
+
+
+def has_admin() -> bool:
+    """Check if instance has an admin configured"""
+    return get_instance_state('admin_initialized') == 'true'
+
+
+def get_single_admin() -> dict | None:
+    """Get the single admin for this instance"""
+    with get_cursor() as cursor:
+        cursor.execute("SELECT * FROM admins LIMIT 1")
+        row = cursor.fetchone()
+        return dict(row) if row else None
 
 
 # --- User Type Operations ---

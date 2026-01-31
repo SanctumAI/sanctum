@@ -70,6 +70,14 @@ class InstanceSettingsResponse(BaseModel):
     settings: dict
 
 
+class InstanceStatusResponse(BaseModel):
+    """Response model for instance status and setup state"""
+    initialized: bool  # Whether an admin has been configured
+    setup_complete: bool = False  # Whether admin has completed setup/auth
+    ready_for_users: bool = False  # Whether users can register/login
+    settings: dict = {}  # Public instance settings
+
+
 # --- User Type Models ---
 
 class UserTypeCreate(BaseModel):

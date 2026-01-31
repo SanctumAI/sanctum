@@ -99,7 +99,7 @@ def get_admin_token(api_base: str, privkey_hex: str, pubkey_hex: str) -> str | N
     try:
         response = requests.post(f"{api_base}/admin/auth", json={"event": event}, timeout=10)
         if response.status_code == 200:
-            return response.json().get("token")
+            return response.json().get("session_token")
         print(f"[ERROR] Admin auth failed: {response.status_code} - {response.text}")
         return None
     except requests.exceptions.RequestException as e:
@@ -430,7 +430,7 @@ def test_full_migration_flow(api_base: str, admin_token: str, old_admin_privkey:
             for user in new_prepare_data.get("users", []):
                 try:
                     if user.get("encrypted_email") and user.get("ephemeral_pubkey_email"):
-                        email = nip04_decrypt(
+                        _ = nip04_decrypt(
                             user["encrypted_email"],
                             user["ephemeral_pubkey_email"],
                             new_admin_privkey_bytes

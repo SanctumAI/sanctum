@@ -113,6 +113,7 @@ export function AdminDeploymentConfig() {
   const [migrationProgress, setMigrationProgress] = useState('')
   const [migrationResult, setMigrationResult] = useState<{ success: boolean; message: string; usersMigrated?: number; fieldValuesMigrated?: number } | null>(null)
   const migrationModalRef = useRef<HTMLDivElement>(null)
+  const isExecutingMigration = useRef(false)
 
   // Check if admin is logged in
   useEffect(() => {
@@ -426,7 +427,9 @@ export function AdminDeploymentConfig() {
 
   const handleMigrationExecute = async () => {
     if (!migrationPrepareData || !newAdminPubkey) return
+    if (isExecutingMigration.current) return
 
+    isExecutingMigration.current = true
     setMigrationStep('progress')
 
     try {
@@ -520,6 +523,8 @@ export function AdminDeploymentConfig() {
         message: err instanceof Error ? err.message : t('adminDeployment.keyMigration.failed', 'Migration failed'),
       })
       setMigrationStep('error')
+    } finally {
+      isExecutingMigration.current = false
     }
   }
 

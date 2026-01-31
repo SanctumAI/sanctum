@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, SquareTerminal, RefreshCw, Loader2, Play, Database, Key, X, Pencil, Trash2, ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react'
+import { ArrowLeft, SquareTerminal, RefreshCw, Loader2, Play, Database, Key, X, Pencil, Trash2, ChevronLeft, ChevronRight, HelpCircle, Download } from 'lucide-react'
 import {
   TableInfo,
   QueryResponse,
@@ -88,6 +88,38 @@ export function AdminDatabaseExplorer() {
       setIsLoadingTables(false)
     }
   }, [selectedTable])
+
+  // Export database
+  const exportDatabase = async () => {
+    try {
+      const response = await adminFetch('/admin/database/export')
+      if (!response.ok) throw new Error(t('errors.exportFailed'))
+      
+      // Get the filename from the Content-Disposition header
+      const disposition = response.headers.get('Content-Disposition')
+      let filename = 'sanctum_backup.db'
+      if (disposition) {
+        const filenameMatch = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
+        if (filenameMatch) {
+          filename = filenameMatch[1].replace(/['"]/g, '')
+        }
+      }
+      
+      // Create blob and download
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Database export failed:', error)
+      // You might want to add a toast notification here
+    }
+  }
 
   useEffect(() => {
     if (isAuthorized) {
@@ -467,6 +499,16 @@ export function AdminDatabaseExplorer() {
               aria-label={t('admin.database.help.ariaLabel', 'Database explorer help')}
             >
               <HelpCircle className="w-4 h-4" />
+            </button>
+
+            {/* Export Database */}
+            <button
+              onClick={exportDatabase}
+              className="btn-ghost p-2 rounded-lg transition-all"
+              title={t('admin.database.exportDatabase', 'Export Database')}
+              aria-label={t('admin.database.exportDatabase', 'Export Database')}
+            >
+              <Download className="w-4 h-4" />
             </button>
 
             {/* Query Mode Toggle */}

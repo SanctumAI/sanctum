@@ -15,6 +15,11 @@ import type {
   ServiceHealthResponse,
   DeploymentValidationResponse,
   ConfigAuditLogResponse,
+  MigrationPrepareResponse,
+  MigrationExecuteResponse,
+  DecryptedUserData,
+  DecryptedFieldValue,
+  NostrEvent,
 } from '../types/config'
 
 // --- AI Configuration Hooks ---
@@ -333,5 +338,82 @@ export function useConfigAuditLog(tableName?: string, limit: number = 50) {
     loading,
     error,
     refresh: fetchLog,
+  }
+}
+
+// --- Key Migration Hook ---
+
+export function useKeyMigration() {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const prepare = useCallback(async (): Promise<MigrationPrepareResponse> => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await adminFetch('/admin/key-migration/prepare')
+      if (!response.ok) {
+        let detail = `Failed to prepare migration: ${response.status}`
+        try {
+          const err = await response.json()
+          if (err.detail) detail = err.detail
+        } catch {
+          // Non-JSON response
+        }
+        throw new Error(detail)
+      }
+      return await response.json()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'errors.failedToPrepareMigration'
+      setError(message)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const execute = useCallback(async (
+    newAdminPubkey: string,
+    users: DecryptedUserData[],
+    fieldValues: DecryptedFieldValue[],
+    signatureEvent: NostrEvent
+  ): Promise<MigrationExecuteResponse> => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await adminFetch('/admin/key-migration/execute', {
+        method: 'POST',
+        body: JSON.stringify({
+          new_admin_pubkey: newAdminPubkey,
+          users,
+          field_values: fieldValues,
+          signature_event: signatureEvent,
+        }),
+      })
+      if (!response.ok) {
+        let detail = `Failed to execute migration: ${response.status}`
+        try {
+          const err = await response.json()
+          if (err.detail) detail = err.detail
+        } catch {
+          // Non-JSON response
+        }
+        throw new Error(detail)
+      }
+      return await response.json()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'errors.failedToExecuteMigration'
+      setError(message)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  return {
+    loading,
+    error,
+    prepare,
+    execute,
   }
 }

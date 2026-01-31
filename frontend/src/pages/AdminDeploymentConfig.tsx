@@ -24,13 +24,18 @@ import {
   HelpCircle,
   ChevronLeft,
   ChevronRight,
+  Key,
 } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { isAdminAuthenticated } from '../utils/adminApi'
-import { useDeploymentConfig, useServiceHealth, useConfigAuditLog } from '../hooks/useAdminConfig'
-import type { DeploymentConfigItem, ServiceHealthItem, ConfigCategory, DeploymentConfigItemKey } from '../types/config'
+import { useDeploymentConfig, useServiceHealth, useConfigAuditLog, useKeyMigration } from '../hooks/useAdminConfig'
+import type { DeploymentConfigItem, ServiceHealthItem, ConfigCategory, DeploymentConfigItemKey, MigrationPrepareResponse, DecryptedUserData, DecryptedFieldValue } from '../types/config'
 import { getConfigCategories, getDeploymentConfigItemMeta } from '../types/config'
 import { STORAGE_KEYS } from '../types/onboarding'
+import { hasNip04Support, decryptField } from '../utils/encryption'
+import { hasNostrExtension } from '../utils/nostrAuth'
+import { normalizePubkey } from '../utils/nostrKeys'
+import { clearAdminAuth } from '../utils/adminApi'
 
 export function AdminDeploymentConfig() {
   const { t } = useTranslation()
@@ -93,6 +98,22 @@ export function AdminDeploymentConfig() {
   const [showEmbeddingHelpModal, setShowEmbeddingHelpModal] = useState(false)
   const [embeddingHelpPage, setEmbeddingHelpPage] = useState(0)
   const embeddingHelpModalRef = useRef<HTMLDivElement>(null)
+
+  // Key migration hook and state
+  const {
+    loading: migrationLoading,
+    prepare: prepareMigration,
+    execute: executeMigration,
+  } = useKeyMigration()
+
+  const [showMigrationModal, setShowMigrationModal] = useState(false)
+  const [migrationStep, setMigrationStep] = useState<'input' | 'confirm' | 'progress' | 'complete' | 'error'>('input')
+  const [newAdminPubkey, setNewAdminPubkey] = useState('')
+  const [migrationPrepareData, setMigrationPrepareData] = useState<MigrationPrepareResponse | null>(null)
+  const [migrationProgress, setMigrationProgress] = useState('')
+  const [migrationResult, setMigrationResult] = useState<{ success: boolean; message: string; usersMigrated?: number; fieldValuesMigrated?: number } | null>(null)
+  const migrationModalRef = useRef<HTMLDivElement>(null)
+  const isExecutingMigration = useRef(false)
 
   // Check if admin is logged in
   useEffect(() => {
@@ -319,6 +340,206 @@ export function AdminDeploymentConfig() {
     setShowEmbeddingHelpModal(false)
     setEmbeddingHelpPage(0)
   }
+
+  // Key migration handlers
+  const handleOpenMigrationModal = () => {
+    // Check prerequisites
+    if (!hasNostrExtension()) {
+      setMigrationResult({
+        success: false,
+        message: t('adminDeployment.keyMigration.noExtension', 'No Nostr extension found. Please install a NIP-07 compatible extension like Alby or nos2x.'),
+      })
+      setMigrationStep('error')
+      setShowMigrationModal(true)
+      return
+    }
+    if (!hasNip04Support()) {
+      setMigrationResult({
+        success: false,
+        message: t('adminDeployment.keyMigration.noNip04', 'Your Nostr extension does not support NIP-04 decryption.'),
+      })
+      setMigrationStep('error')
+      setShowMigrationModal(true)
+      return
+    }
+
+    setMigrationStep('input')
+    setNewAdminPubkey('')
+    setMigrationPrepareData(null)
+    setMigrationResult(null)
+    setShowMigrationModal(true)
+  }
+
+  const handleCloseMigrationModal = () => {
+    if (migrationStep === 'progress') {
+      // Don't allow closing during migration
+      return
+    }
+    setShowMigrationModal(false)
+    setMigrationStep('input')
+    setNewAdminPubkey('')
+    setMigrationPrepareData(null)
+    setMigrationResult(null)
+  }
+
+  const handleMigrationPrepare = async () => {
+    // Validate new pubkey
+    let normalizedPubkey: string
+    try {
+      normalizedPubkey = normalizePubkey(newAdminPubkey)
+    } catch {
+      setMigrationResult({
+        success: false,
+        message: t('adminDeployment.keyMigration.invalidPubkey', 'Invalid pubkey format. Enter a valid npub or 64-character hex pubkey.'),
+      })
+      setMigrationStep('error')
+      return
+    }
+
+    // Fetch encrypted data
+    setMigrationProgress(t('adminDeployment.keyMigration.fetchingData', 'Fetching encrypted data...'))
+    setMigrationStep('progress')
+
+    try {
+      const prepareData = await prepareMigration()
+      setMigrationPrepareData(prepareData)
+
+      // Check if trying to migrate to same key
+      if (normalizedPubkey === prepareData.admin_pubkey) {
+        setMigrationResult({
+          success: false,
+          message: t('adminDeployment.keyMigration.samePubkey', 'The new pubkey must be different from the current admin pubkey.'),
+        })
+        setMigrationStep('error')
+        return
+      }
+
+      setNewAdminPubkey(normalizedPubkey)
+      setMigrationStep('confirm')
+    } catch (err) {
+      setMigrationResult({
+        success: false,
+        message: err instanceof Error ? err.message : t('adminDeployment.keyMigration.prepareFailed', 'Failed to prepare migration'),
+      })
+      setMigrationStep('error')
+    }
+  }
+
+  const handleMigrationExecute = async () => {
+    if (!migrationPrepareData || !newAdminPubkey) return
+    if (isExecutingMigration.current) return
+
+    isExecutingMigration.current = true
+    setMigrationStep('progress')
+
+    try {
+      // Step 1: Decrypt all user data
+      setMigrationProgress(t('adminDeployment.keyMigration.decryptingUsers', 'Decrypting user data...'))
+      const decryptedUsers: DecryptedUserData[] = []
+
+      for (const user of migrationPrepareData.users) {
+        const decryptedUser: DecryptedUserData = { id: user.id }
+
+        if (user.encrypted_email && user.ephemeral_pubkey_email) {
+          const email = await decryptField({
+            ciphertext: user.encrypted_email,
+            ephemeral_pubkey: user.ephemeral_pubkey_email,
+          })
+          if (email === null) {
+            throw new Error(t('adminDeployment.keyMigration.decryptFailed', 'Failed to decrypt email for user {{id}}. Migration aborted to prevent data loss.', { id: user.id }))
+          }
+          decryptedUser.email = email
+        }
+
+        if (user.encrypted_name && user.ephemeral_pubkey_name) {
+          const name = await decryptField({
+            ciphertext: user.encrypted_name,
+            ephemeral_pubkey: user.ephemeral_pubkey_name,
+          })
+          if (name === null) {
+            throw new Error(t('adminDeployment.keyMigration.decryptFailed', 'Failed to decrypt name for user {{id}}. Migration aborted to prevent data loss.', { id: user.id }))
+          }
+          decryptedUser.name = name
+        }
+
+        decryptedUsers.push(decryptedUser)
+      }
+
+      // Step 2: Decrypt all field values
+      setMigrationProgress(t('adminDeployment.keyMigration.decryptingFields', 'Decrypting field values...'))
+      const decryptedFieldValues: DecryptedFieldValue[] = []
+
+      for (const field of migrationPrepareData.field_values) {
+        if (field.encrypted_value && field.ephemeral_pubkey) {
+          const value = await decryptField({
+            ciphertext: field.encrypted_value,
+            ephemeral_pubkey: field.ephemeral_pubkey,
+          })
+          if (value === null) {
+            throw new Error(t('adminDeployment.keyMigration.decryptFieldFailed', 'Failed to decrypt field value {{id}}. Migration aborted to prevent data loss.', { id: field.id }))
+          }
+          decryptedFieldValues.push({ id: field.id, value })
+        }
+      }
+
+      // Step 3: Sign authorization event
+      setMigrationProgress(t('adminDeployment.keyMigration.signing', 'Requesting signature...'))
+
+      if (!window.nostr) {
+        throw new Error(t('adminDeployment.keyMigration.noExtension', 'No Nostr extension found'))
+      }
+
+      const unsignedEvent = {
+        kind: 22242,
+        created_at: Math.floor(Date.now() / 1000),
+        tags: [['action', 'admin_key_migration']],
+        content: '',
+      }
+
+      const signedEvent = await window.nostr.signEvent(unsignedEvent)
+
+      // Step 4: Submit migration
+      setMigrationProgress(t('adminDeployment.keyMigration.submitting', 'Submitting migration...'))
+
+      const result = await executeMigration(
+        newAdminPubkey,
+        decryptedUsers,
+        decryptedFieldValues,
+        signedEvent
+      )
+
+      setMigrationResult({
+        success: true,
+        message: result.message,
+        usersMigrated: result.users_migrated,
+        fieldValuesMigrated: result.field_values_migrated,
+      })
+      setMigrationStep('complete')
+
+    } catch (err) {
+      console.error('Migration failed:', err)
+      setMigrationResult({
+        success: false,
+        message: err instanceof Error ? err.message : t('adminDeployment.keyMigration.failed', 'Migration failed'),
+      })
+      setMigrationStep('error')
+    } finally {
+      isExecutingMigration.current = false
+    }
+  }
+
+  const handleMigrationComplete = () => {
+    // Clear session and redirect to login
+    clearAdminAuth()
+    navigate('/admin')
+  }
+
+  // Focus trap for migration modal
+  useEffect(() => {
+    if (showMigrationModal && migrationModalRef.current) {
+      migrationModalRef.current.focus()
+    }
+  }, [showMigrationModal])
 
   // Focus trap for email help modal
   useEffect(() => {
@@ -928,6 +1149,42 @@ export function AdminDeploymentConfig() {
           </>
         )}
 
+        {/* Admin Key Migration Section */}
+        <div className="card card-sm p-5! bg-surface-overlay!">
+          <h3 className="heading-sm mb-2 flex items-center gap-2">
+            <Key className="w-4 h-4 text-text-muted" />
+            {t('adminDeployment.keyMigration.title', 'Admin Key Migration')}
+          </h3>
+          <p className="text-sm text-text-secondary mb-1">
+            {t('adminDeployment.keyMigration.description', 'Migrate to a new Nostr private key')}
+          </p>
+          <p className="text-xs text-text-muted mb-4">
+            {t('adminDeployment.keyMigration.hint', 'Re-encrypts all user PII to a new admin pubkey. Use this if you need to change your admin key.')}
+          </p>
+
+          <div className="bg-surface border border-border rounded-lg p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-text-muted mb-1">
+                  {t('adminDeployment.keyMigration.currentAdmin', 'Current Admin')}
+                </p>
+                <p className="text-sm font-mono text-text">
+                  {localStorage.getItem(STORAGE_KEYS.ADMIN_PUBKEY)
+                    ? `npub...${localStorage.getItem(STORAGE_KEYS.ADMIN_PUBKEY)?.slice(-8)}`
+                    : t('adminDeployment.keyMigration.unknown', 'Unknown')}
+                </p>
+              </div>
+              <button
+                onClick={handleOpenMigrationModal}
+                className="flex items-center gap-2 bg-warning/10 border border-warning/30 text-warning rounded-lg px-4 py-2 text-sm font-medium hover:bg-warning/20 transition-all"
+              >
+                <Key className="w-4 h-4" />
+                {t('adminDeployment.keyMigration.migrateButton', 'Migrate to New Key')}
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Navigation */}
         <div className="flex gap-3">
           <Link
@@ -1424,6 +1681,196 @@ export function AdminDeploymentConfig() {
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Key Migration Modal */}
+        {showMigrationModal && (
+          <div
+            ref={migrationModalRef}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="migration-modal-title"
+            onKeyDown={(e) => e.key === 'Escape' && migrationStep !== 'progress' && handleCloseMigrationModal()}
+            tabIndex={-1}
+          >
+            <div className="bg-surface border border-border rounded-xl p-6 w-full max-w-md mx-4 shadow-xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 id="migration-modal-title" className="text-lg font-semibold text-text flex items-center gap-2">
+                  <Key className="w-5 h-5" />
+                  {t('adminDeployment.keyMigration.modalTitle', 'Admin Key Migration')}
+                </h3>
+                {migrationStep !== 'progress' && (
+                  <button
+                    onClick={handleCloseMigrationModal}
+                    className="text-text-muted hover:text-text transition-colors"
+                    aria-label={t('common.close', 'Close')}
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Input Step */}
+              {migrationStep === 'input' && (
+                <div className="space-y-4">
+                  <div className="bg-warning/10 border border-warning/20 rounded-lg p-3">
+                    <p className="text-xs text-warning">
+                      {t('adminDeployment.keyMigration.warning', 'This operation is irreversible. Make sure you have access to the new private key before proceeding.')}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-text mb-1">
+                      {t('adminDeployment.keyMigration.newPubkeyLabel', 'New Admin Pubkey')}
+                    </label>
+                    <input
+                      type="text"
+                      value={newAdminPubkey}
+                      onChange={(e) => setNewAdminPubkey(e.target.value)}
+                      placeholder="npub1... or 64-char hex"
+                      className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm font-mono focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                    />
+                    <p className="text-xs text-text-muted mt-1">
+                      {t('adminDeployment.keyMigration.pubkeyHint', 'Enter the public key (npub or hex) of the new admin')}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleCloseMigrationModal}
+                      className="flex-1 bg-surface-overlay border border-border text-text rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-surface transition-all"
+                    >
+                      {t('common.cancel', 'Cancel')}
+                    </button>
+                    <button
+                      onClick={handleMigrationPrepare}
+                      disabled={!newAdminPubkey.trim() || migrationLoading}
+                      className="flex-1 bg-warning text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-warning/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {migrationLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Key className="w-4 h-4" />
+                      )}
+                      {t('common.continue', 'Continue')}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Confirm Step */}
+              {migrationStep === 'confirm' && migrationPrepareData && (
+                <div className="space-y-4">
+                  <div className="bg-surface-overlay border border-border rounded-lg p-4 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-text-muted">{t('adminDeployment.keyMigration.usersToMigrate', 'Users to migrate:')}</span>
+                      <span className="text-text font-medium">{migrationPrepareData.user_count}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-text-muted">{t('adminDeployment.keyMigration.fieldsToMigrate', 'Field values to migrate:')}</span>
+                      <span className="text-text font-medium">{migrationPrepareData.field_value_count}</span>
+                    </div>
+                    <div className="pt-2 border-t border-border">
+                      <div className="text-xs text-text-muted mb-1">{t('adminDeployment.keyMigration.fromKey', 'From:')}</div>
+                      <div className="text-xs font-mono text-text truncate">{migrationPrepareData.admin_pubkey}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-text-muted mb-1">{t('adminDeployment.keyMigration.toKey', 'To:')}</div>
+                      <div className="text-xs font-mono text-text truncate">{newAdminPubkey}</div>
+                    </div>
+                  </div>
+
+                  <div className="bg-error/10 border border-error/20 rounded-lg p-3">
+                    <p className="text-xs text-error font-medium mb-1">
+                      {t('adminDeployment.keyMigration.confirmWarningTitle', 'This action cannot be undone')}
+                    </p>
+                    <p className="text-xs text-error">
+                      {t('adminDeployment.keyMigration.confirmWarning', 'You will be signed out after migration and must log in with the new key.')}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setMigrationStep('input')}
+                      className="flex-1 bg-surface-overlay border border-border text-text rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-surface transition-all"
+                    >
+                      {t('common.back', 'Back')}
+                    </button>
+                    <button
+                      onClick={handleMigrationExecute}
+                      className="flex-1 bg-error text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-error/90 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Key className="w-4 h-4" />
+                      {t('adminDeployment.keyMigration.confirmButton', 'Migrate Now')}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Progress Step */}
+              {migrationStep === 'progress' && (
+                <div className="space-y-4 py-4">
+                  <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="w-12 h-12 text-accent animate-spin" />
+                    <p className="text-sm text-text-muted text-center">{migrationProgress}</p>
+                  </div>
+                  <p className="text-xs text-text-muted text-center">
+                    {t('adminDeployment.keyMigration.doNotClose', 'Please do not close this window.')}
+                  </p>
+                </div>
+              )}
+
+              {/* Complete Step */}
+              {migrationStep === 'complete' && migrationResult && (
+                <div className="space-y-4">
+                  <div className="flex flex-col items-center gap-4 py-4">
+                    <CheckCircle className="w-12 h-12 text-success" />
+                    <p className="text-sm text-text text-center font-medium">{migrationResult.message}</p>
+                  </div>
+
+                  <div className="bg-surface-overlay border border-border rounded-lg p-3 space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-text-muted">{t('adminDeployment.keyMigration.usersMigrated', 'Users migrated:')}</span>
+                      <span className="text-success font-medium">{migrationResult.usersMigrated}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-text-muted">{t('adminDeployment.keyMigration.fieldsMigrated', 'Fields migrated:')}</span>
+                      <span className="text-success font-medium">{migrationResult.fieldValuesMigrated}</span>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-text-muted text-center">
+                    {t('adminDeployment.keyMigration.signInPrompt', 'Click below to sign in with your new key.')}
+                  </p>
+
+                  <button
+                    onClick={handleMigrationComplete}
+                    className="w-full bg-accent text-accent-text rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-accent-hover transition-all"
+                  >
+                    {t('adminDeployment.keyMigration.goToLogin', 'Go to Login')}
+                  </button>
+                </div>
+              )}
+
+              {/* Error Step */}
+              {migrationStep === 'error' && migrationResult && (
+                <div className="space-y-4">
+                  <div className="flex flex-col items-center gap-4 py-4">
+                    <XCircle className="w-12 h-12 text-error" />
+                    <p className="text-sm text-error text-center">{migrationResult.message}</p>
+                  </div>
+
+                  <button
+                    onClick={handleCloseMigrationModal}
+                    className="w-full bg-surface-overlay border border-border text-text rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-surface transition-all"
+                  >
+                    {t('common.close', 'Close')}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -12,6 +12,7 @@ import time
 import re
 import math
 from fastapi import FastAPI, HTTPException, Query, Depends, Request
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from qdrant_client import QdrantClient
 from pydantic import BaseModel
@@ -1678,3 +1679,32 @@ async def delete_db_row(table_name: str, row_id: int, admin: dict = Depends(auth
         return RowMutationResponse(success=True, id=row_id)
     except Exception as e:
         return RowMutationResponse(success=False, error=str(e))
+
+
+@app.get("/admin/database/export")
+async def export_database(admin: dict = Depends(auth.require_admin)):
+    """Export the SQLite database as a downloadable file (requires admin auth)"""
+    try:
+        # Get the database file path
+        db_path = database.SQLITE_PATH
+        
+        # Check if database file exists
+        if not os.path.exists(db_path):
+            raise HTTPException(status_code=404, detail="Database file not found")
+        
+        # Generate filename with timestamp
+        import datetime
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"sanctum_backup_{timestamp}.db"
+        
+        # Return the database file as a download
+        return FileResponse(
+            path=db_path,
+            filename=filename,
+            media_type="application/octet-stream",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+        
+    except Exception as e:
+        logger.error(f"Database export failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")

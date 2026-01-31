@@ -129,6 +129,68 @@ export interface ConfigAuditLogResponse {
   entries: ConfigAuditLogEntry[]
 }
 
+// --- Key Migration Types ---
+
+export interface EncryptedUserData {
+  id: number
+  encrypted_email?: string
+  ephemeral_pubkey_email?: string
+  encrypted_name?: string
+  ephemeral_pubkey_name?: string
+}
+
+export interface EncryptedFieldValue {
+  id: number
+  user_id: number
+  field_id: number
+  encrypted_value?: string
+  ephemeral_pubkey?: string
+}
+
+export interface MigrationPrepareResponse {
+  admin_pubkey: string
+  users: EncryptedUserData[]
+  field_values: EncryptedFieldValue[]
+  user_count: number
+  field_value_count: number
+}
+
+export interface DecryptedUserData {
+  id: number
+  email?: string
+  name?: string
+}
+
+export interface DecryptedFieldValue {
+  id: number
+  value?: string
+}
+
+export interface MigrationExecuteRequest {
+  new_admin_pubkey: string
+  users: DecryptedUserData[]
+  field_values: DecryptedFieldValue[]
+  signature_event: NostrEvent
+}
+
+export interface MigrationExecuteResponse {
+  success: boolean
+  message: string
+  users_migrated: number
+  field_values_migrated: number
+}
+
+// Nostr event for signing
+export interface NostrEvent {
+  id: string
+  pubkey: string
+  created_at: number
+  kind: number
+  tags: string[][]
+  content: string
+  sig: string
+}
+
 // --- Config Categories for UI ---
 
 export interface ConfigCategoryMeta {

@@ -158,6 +158,13 @@ Any NIP-07 compatible browser extension:
 - [Flamingo](https://www.flamingo.zip/)
 - [Nostr Connect](https://nostrconnect.com/)
 
+### Admin Key Migration
+
+Admins can migrate to a new Nostr keypair without losing access to encrypted user data.
+This re-encrypts all PII to the new pubkey.
+
+See [sqlite-encryption.md](./sqlite-encryption.md#admin-key-migration) for details.
+
 ---
 
 ## User Authentication (Magic Link)

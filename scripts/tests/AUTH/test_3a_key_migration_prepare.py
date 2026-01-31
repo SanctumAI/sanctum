@@ -113,7 +113,7 @@ def get_admin_token(api_base: str, privkey_hex: str, pubkey_hex: str) -> str | N
         )
         if response.status_code == 200:
             data = response.json()
-            return data.get("token")
+            return data.get("session_token")
         else:
             print(f"[ERROR] Admin auth failed: {response.status_code}")
             print(f"  Response: {response.text}")
@@ -166,7 +166,7 @@ def test_prepare_endpoint(api_base: str, admin_token: str, admin_pubkey: str) ->
             passed = False
             return passed, prepare_response
 
-        print(f"  Result: 200 OK")
+        print("  Result: 200 OK")
         prepare_response = response.json()
 
     except requests.exceptions.RequestException as e:

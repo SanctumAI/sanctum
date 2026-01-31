@@ -506,6 +506,7 @@ export function AdminDatabaseExplorer() {
               onClick={exportDatabase}
               className="btn-ghost p-2 rounded-lg transition-all"
               title={t('admin.database.exportDatabase', 'Export Database')}
+              aria-label={t('admin.database.exportDatabase', 'Export Database')}
             >
               <Download className="w-4 h-4" />
             </button>

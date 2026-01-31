@@ -11,12 +11,14 @@ import logging
 import time
 import re
 import math
+import tempfile
+import sqlite3
 from fastapi import FastAPI, HTTPException, Query, Depends, Request
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from qdrant_client import QdrantClient
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict
 from sentence_transformers import SentenceTransformer
 
 from llm import get_provider
@@ -1682,8 +1684,25 @@ async def delete_db_row(table_name: str, row_id: int, admin: dict = Depends(auth
 
 
 @app.get("/admin/database/export")
-async def export_database(admin: dict = Depends(auth.require_admin)):
-    """Export the SQLite database as a downloadable file (requires admin auth)"""
+async def export_database(_admin: Dict = Depends(auth.require_admin)) -> FileResponse:
+    """
+    Export the SQLite database as a downloadable backup file.
+    
+    Creates a consistent snapshot of the database using SQLite's backup mechanism
+    to avoid locking the live database during export. The backup file is served
+    with a timestamped filename for easy organization.
+    
+    Args:
+        _admin (Dict): Admin authentication dependency (unused but required)
+        
+    Returns:
+        FileResponse: Database backup file with timestamped filename
+        
+    Raises:
+        HTTPException: 
+            - 404 if database file not found
+            - 500 if backup creation or export fails
+    """
     try:
         # Get the database file path
         db_path = database.SQLITE_PATH
@@ -1697,14 +1716,52 @@ async def export_database(admin: dict = Depends(auth.require_admin)):
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"sanctum_backup_{timestamp}.db"
         
-        # Return the database file as a download
-        return FileResponse(
-            path=db_path,
-            filename=filename,
-            media_type="application/octet-stream",
-            headers={"Content-Disposition": f"attachment; filename={filename}"}
-        )
+        # Create a temporary file for the backup
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".db")
+        temp_path = temp_file.name
+        temp_file.close()
         
+        try:
+            # Create a backup using SQLite's backup mechanism for consistency
+            source_conn = sqlite3.connect(db_path)
+            backup_conn = sqlite3.connect(temp_path)
+            
+            # Perform the backup (this creates a consistent snapshot)
+            source_conn.backup(backup_conn)
+            
+            # Close connections
+            backup_conn.close()
+            source_conn.close()
+            
+            # Return the backup file as a download with cleanup
+            def cleanup_temp_file():
+                try:
+                    os.unlink(temp_path)
+                except OSError:
+                    pass
+            
+            # Schedule cleanup after response is sent
+            import asyncio
+            asyncio.create_task(asyncio.sleep(1)).add_done_callback(lambda _: cleanup_temp_file())
+            
+            return FileResponse(
+                path=temp_path,
+                filename=filename,
+                media_type="application/octet-stream",
+                headers={"Content-Disposition": f"attachment; filename={filename}"}
+            )
+            
+        except Exception as backup_error:
+            # Clean up temp file on backup failure
+            try:
+                os.unlink(temp_path)
+            except OSError:
+                pass
+            raise backup_error
+        
+    except HTTPException:
+        # Re-raise HTTPExceptions to preserve status codes
+        raise
     except Exception as e:
         logger.error(f"Database export failed: {e}")
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")

@@ -169,7 +169,7 @@ def init_schema():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_values_user ON user_field_values(user_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_values_field ON user_field_values(field_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_definitions_type ON user_field_definitions(user_type_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_definitions_encryption ON user_field_definitions(encryption_enabled)")
+    # Note: idx_user_field_definitions_encryption created in _migrate_add_encryption_enabled_column()
 
     # AI Configuration table - stores AI/LLM settings
     cursor.execute("""
@@ -345,9 +345,9 @@ def _migrate_add_encryption_enabled_column() -> None:
         cursor.execute("ALTER TABLE user_field_definitions ADD COLUMN encryption_enabled INTEGER DEFAULT 1")
         logger.info("Migration: Added 'encryption_enabled' column to user_field_definitions table (default: encrypted)")
 
-        # Create index for performance
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_definitions_encryption ON user_field_definitions(encryption_enabled)")
-        logger.info("Migration: Added index for encryption_enabled column")
+    # Always ensure index exists (idempotent via IF NOT EXISTS)
+    # This runs after column is guaranteed to exist (either from CREATE TABLE or ALTER TABLE above)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_definitions_encryption ON user_field_definitions(encryption_enabled)")
 
     conn.commit()
     cursor.close()

@@ -91,6 +91,7 @@ export function AdminInstanceConfig() {
             placeholder: f.placeholder,
             options: f.options,
             user_type_id: f.user_type_id,
+            encryption_enabled: f.encryption_enabled ?? true,  // Default to true for security
           }))
           setFields(fetchedFields)
         } else {
@@ -226,6 +227,7 @@ export function AdminInstanceConfig() {
           user_type_id: field.user_type_id,
           placeholder: field.placeholder || null,
           options: field.options || null,
+          encryption_enabled: field.encryption_enabled ?? true,  // Secure default
         }),
       })
 
@@ -239,6 +241,7 @@ export function AdminInstanceConfig() {
           placeholder: newField.placeholder,
           options: newField.options,
           user_type_id: newField.user_type_id,
+          encryption_enabled: newField.encryption_enabled ?? true,
         }
         setFields([...fields, addedField])
         setIsEditing(false)
@@ -271,6 +274,7 @@ export function AdminInstanceConfig() {
           user_type_id: field.user_type_id,
           placeholder: field.placeholder || null,
           options: field.options || null,
+          encryption_enabled: field.encryption_enabled ?? true,  // Secure default
         }),
       })
 
@@ -377,6 +381,7 @@ export function AdminInstanceConfig() {
               placeholder: f.placeholder,
               options: f.options,
               user_type_id: f.user_type_id,
+              encryption_enabled: f.encryption_enabled ?? true,  // Default to true for security
             }))
             setFields(fetchedFields)
             setReorderError(t('admin.errors.reorderFailed', 'Failed to reorder field'))
@@ -405,6 +410,7 @@ export function AdminInstanceConfig() {
             placeholder: f.placeholder,
             options: f.options,
             user_type_id: f.user_type_id,
+            encryption_enabled: f.encryption_enabled ?? true,  // Default to true for security
           }))
           setFields(fetchedFields)
         }
@@ -754,6 +760,13 @@ export function AdminInstanceConfig() {
                               • {t('admin.setup.optionsCount', { count: field.options.length })}
                             </span>
                           )}
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                            field.encryption_enabled !== false
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {field.encryption_enabled !== false ? '🔒 Encrypted' : '🔓 Plaintext'}
+                          </span>
                           <span className={`text-[10px] px-1.5 py-0.5 rounded ${
                             field.user_type_id === null || field.user_type_id === undefined
                               ? 'bg-accent/10 text-accent'

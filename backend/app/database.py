@@ -106,6 +106,7 @@ def init_schema():
 
     # User field definitions - admin-defined custom fields for users
     # user_type_id: NULL = global field (shown for all types), non-NULL = type-specific
+    # encryption_enabled: 1 = encrypt field values (default), 0 = store plaintext
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS user_field_definitions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -114,6 +115,7 @@ def init_schema():
             required INTEGER DEFAULT 0,
             display_order INTEGER DEFAULT 0,
             user_type_id INTEGER,
+            encryption_enabled INTEGER DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_type_id) REFERENCES user_types(id) ON DELETE CASCADE,
             UNIQUE(field_name, user_type_id)
@@ -167,6 +169,7 @@ def init_schema():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_values_user ON user_field_values(user_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_values_field ON user_field_values(field_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_definitions_type ON user_field_definitions(user_type_id)")
+    # Note: idx_user_field_definitions_encryption created in _migrate_add_encryption_enabled_column()
 
     # AI Configuration table - stores AI/LLM settings
     cursor.execute("""
@@ -262,6 +265,7 @@ def init_schema():
     _migrate_add_approved_column()
     _migrate_add_encryption_columns()  # This adds email_blind_index column AND creates its index
     _migrate_add_field_metadata_columns()  # Add placeholder and options columns
+    _migrate_add_encryption_enabled_column()  # Add encryption_enabled column for optional field encryption
 
     # Initialize ingest job tables
     from ingest_db import init_ingest_schema
@@ -356,6 +360,28 @@ def _migrate_add_field_metadata_columns() -> None:
     if 'options' not in columns:
         cursor.execute("ALTER TABLE user_field_definitions ADD COLUMN options TEXT")  # JSON array
         logger.info("Migration: Added 'options' column to user_field_definitions table")
+
+    conn.commit()
+    cursor.close()
+
+
+def _migrate_add_encryption_enabled_column() -> None:
+    """Add encryption_enabled column to user_field_definitions if it doesn't exist"""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Check existing columns
+    cursor.execute("PRAGMA table_info(user_field_definitions)")
+    columns = [row[1] for row in cursor.fetchall()]
+
+    if 'encryption_enabled' not in columns:
+        # Add column with secure default (1 = encrypted)
+        cursor.execute("ALTER TABLE user_field_definitions ADD COLUMN encryption_enabled INTEGER DEFAULT 1")
+        logger.info("Migration: Added 'encryption_enabled' column to user_field_definitions table (default: encrypted)")
+
+    # Always ensure index exists (idempotent via IF NOT EXISTS)
+    # This runs after column is guaranteed to exist (either from CREATE TABLE or ALTER TABLE above)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_definitions_encryption ON user_field_definitions(encryption_enabled)")
 
     conn.commit()
     cursor.close()
@@ -635,19 +661,21 @@ def create_field_definition(
     display_order: int = 0,
     user_type_id: int | None = None,
     placeholder: str | None = None,
-    options: list[str] | None = None
+    options: list[str] | None = None,
+    encryption_enabled: bool = True
 ) -> int:
     """Create a user field definition. Returns field id.
     user_type_id: None = global field (shown for all types)
     placeholder: Placeholder text for the field input
     options: List of options for select fields (stored as JSON)
+    encryption_enabled: True = encrypt field values (secure default), False = store plaintext
     """
     options_json = json.dumps(options) if options is not None else None
     with get_cursor() as cursor:
         cursor.execute("""
-            INSERT INTO user_field_definitions (field_name, field_type, required, display_order, user_type_id, placeholder, options)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (field_name, field_type, int(required), display_order, user_type_id, placeholder, options_json))
+            INSERT INTO user_field_definitions (field_name, field_type, required, display_order, user_type_id, placeholder, options, encryption_enabled)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (field_name, field_type, int(required), display_order, user_type_id, placeholder, options_json, int(encryption_enabled)))
         return cursor.lastrowid
 
 
@@ -730,9 +758,13 @@ def update_field_definition(
     display_order: int | None = None,
     user_type_id: int | None = ...,  # Use ... as sentinel for "not provided"
     placeholder: str | None = ...,
-    options: list[str] | None = ...
+    options: list[str] | None = ...,
+    encryption_enabled: bool | None = None
 ) -> bool:
-    """Update a field definition. Returns True if updated."""
+    """Update a field definition. Returns True if updated.
+    
+    WARNING: Changing encryption_enabled may require data migration for existing field values.
+    """
     updates = []
     values = []
 
@@ -757,6 +789,9 @@ def update_field_definition(
     if options is not ...:
         updates.append("options = ?")
         values.append(json.dumps(options) if options is not None else None)
+    if encryption_enabled is not None:
+        updates.append("encryption_enabled = ?")
+        values.append(int(encryption_enabled))
 
     if not updates:
         return False
@@ -962,7 +997,8 @@ def list_users() -> list[dict]:
 def set_user_field(user_id: int, field_name: str, value: object, user_type_id: int | None = None):
     """Set a field value for a user.
 
-    Values are encrypted using NIP-04 if an admin exists.
+    Values are encrypted using NIP-04 if the field definition has encryption_enabled=True
+    and an admin exists. Otherwise, stored as plaintext.
     """
     from encryption import encrypt_for_admin_required, serialize_field_value
 
@@ -970,20 +1006,35 @@ def set_user_field(user_id: int, field_name: str, value: object, user_type_id: i
     if not field_def:
         raise ValueError(f"Unknown field: {field_name}")
 
-    # Encrypt the value
+    # Serialize value to string
     serialized = serialize_field_value(value)
-    encrypted_value, ephemeral_pubkey = encrypt_for_admin_required(serialized)
 
-    # Store encrypted - clear plaintext
-    with get_cursor() as cursor:
-        cursor.execute("""
-            INSERT INTO user_field_values (user_id, field_id, value, encrypted_value, ephemeral_pubkey)
-            VALUES (?, ?, NULL, ?, ?)
-            ON CONFLICT(user_id, field_id) DO UPDATE SET
-                value = NULL,
-                encrypted_value = excluded.encrypted_value,
-                ephemeral_pubkey = excluded.ephemeral_pubkey
-        """, (user_id, field_def["id"], encrypted_value, ephemeral_pubkey))
+    # Check if encryption is enabled for this field
+    if field_def.get("encryption_enabled", 1):  # Default to encrypted for backward compatibility
+        # ENCRYPTED PATH - encrypt the value
+        encrypted_value, ephemeral_pubkey = encrypt_for_admin_required(serialized)
+        
+        # Store encrypted - clear plaintext
+        with get_cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO user_field_values (user_id, field_id, value, encrypted_value, ephemeral_pubkey)
+                VALUES (?, ?, NULL, ?, ?)
+                ON CONFLICT(user_id, field_id) DO UPDATE SET
+                    value = NULL,
+                    encrypted_value = excluded.encrypted_value,
+                    ephemeral_pubkey = excluded.ephemeral_pubkey
+            """, (user_id, field_def["id"], encrypted_value, ephemeral_pubkey))
+    else:
+        # PLAINTEXT PATH - store value directly
+        with get_cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO user_field_values (user_id, field_id, value, encrypted_value, ephemeral_pubkey)
+                VALUES (?, ?, ?, NULL, NULL)
+                ON CONFLICT(user_id, field_id) DO UPDATE SET
+                    value = excluded.value,
+                    encrypted_value = NULL,
+                    ephemeral_pubkey = NULL
+            """, (user_id, field_def["id"], serialized))
 
 
 def set_user_fields(user_id: int, fields: dict, user_type_id: int | None = None):

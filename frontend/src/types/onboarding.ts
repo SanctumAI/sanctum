@@ -16,6 +16,7 @@ export interface CustomField {
   placeholder?: string
   options?: string[]  // for select type
   user_type_id?: number | null  // null = global field (shown for all types)
+  encryption_enabled?: boolean  // true = encrypt field values (secure default)
 }
 
 export interface UserProfile {

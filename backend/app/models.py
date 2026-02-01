@@ -119,6 +119,7 @@ class FieldDefinitionCreate(BaseModel):
     user_type_id: Optional[int] = None  # None = global field (shown for all types)
     placeholder: Optional[str] = None  # Placeholder text for input
     options: Optional[list[str]] = None  # Options for select fields
+    encryption_enabled: bool = True  # Secure default: encrypt field values
 
 
 class FieldDefinitionUpdate(BaseModel):
@@ -130,6 +131,7 @@ class FieldDefinitionUpdate(BaseModel):
     user_type_id: Optional[int] = None
     placeholder: Optional[str] = None
     options: Optional[list[str]] = None
+    encryption_enabled: Optional[bool] = None  # Toggle encryption for field
 
 
 class FieldDefinitionResponse(BaseModel):
@@ -142,12 +144,27 @@ class FieldDefinitionResponse(BaseModel):
     user_type_id: Optional[int] = None  # None = global field
     placeholder: Optional[str] = None
     options: Optional[list[str]] = None
+    encryption_enabled: bool = True  # Whether field values are encrypted
     created_at: Optional[str] = None
 
 
 class FieldDefinitionListResponse(BaseModel):
     """Response model for list of field definitions"""
     fields: list[FieldDefinitionResponse]
+
+
+class FieldEncryptionRequest(BaseModel):
+    """Request model for updating field encryption setting"""
+    encryption_enabled: bool
+    force: bool = False  # Override warnings about existing data
+
+
+class FieldEncryptionResponse(BaseModel):
+    """Response model for field encryption update"""
+    field_id: int
+    encryption_enabled: bool
+    warning: Optional[str] = None
+    migrated_values: Optional[int] = None  # Number of values migrated
 
 
 # --- Encrypted Data Models ---

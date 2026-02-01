@@ -85,7 +85,11 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
     from ai_config import get_llm_parameters
 
     question = request.question
-    llm_params = get_llm_parameters()
+
+    # Get user_type_id from authenticated user for per-type config
+    user_type_id = user.get("user_type_id")
+
+    llm_params = get_llm_parameters(user_type_id=user_type_id) or {}
 
     # Get top_k from config if not specified in request
     if request.top_k is not None:
@@ -145,7 +149,7 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         context = _build_context(chunk_texts, sources)
         session["_last_sources"] = sources  # For dynamic citation
         answer, clarifying_questions, full_prompt, search_term = _call_llm_contextual(
-            question, context, session, tools=request.tools
+            question, context, session, tools=request.tools, user_type_id=user_type_id
         )
         
         # Add assistant response to history
@@ -331,19 +335,26 @@ def _build_context(chunk_texts: list[str], sources: list[dict]) -> str:
     return "\n".join(parts)
 
 
-def _call_llm_contextual(question: str, context: str, session: dict, tools: Optional[list[str]] = None) -> tuple[str, list[str], str, Optional[str]]:
+def _call_llm_contextual(question: str, context: str, session: dict, tools: Optional[list[str]] = None, user_type_id: int | None = None) -> tuple[str, list[str], str, Optional[str]]:
     """
     Call LLM with context-aware prompt.
     Returns (answer, list of clarifying questions, full_prompt for debugging, search_term or None).
+
+    Args:
+        question: The user's question
+        context: Retrieved context from vector search
+        session: Session state dict
+        tools: List of enabled tool IDs
+        user_type_id: If provided, uses user-type-specific prompt sections and parameters
     """
     import re
     from ai_config import get_prompt_sections, get_llm_parameters
     llm = get_provider()
     tools = tools or []
 
-    # Get prompt sections from database (with defensive fallbacks)
-    prompt_sections = get_prompt_sections() or {}
-    llm_params = get_llm_parameters() or {}
+    # Get prompt sections from database with user-type overrides if applicable
+    prompt_sections = get_prompt_sections(user_type_id=user_type_id) or {}
+    llm_params = get_llm_parameters(user_type_id=user_type_id) or {}
 
     # Get temperature from config (with fallback and type coercion)
     try:

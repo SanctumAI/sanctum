@@ -491,15 +491,19 @@ async def chat(request: ChatRequest, user: dict = Depends(auth.require_admin_or_
         # Import AI config functions for dynamic prompt building
         from ai_config import build_chat_prompt, get_llm_parameters
 
-        # Get LLM parameters from config
-        llm_params = get_llm_parameters()
+        # Get user_type_id from authenticated user for per-type config
+        user_type_id = user.get("user_type_id")
+
+        # Get LLM parameters from config (with user-type overrides if applicable)
+        llm_params = get_llm_parameters(user_type_id=user_type_id)
         temperature = llm_params.get("temperature", 0.1)
 
-        # Build prompt using AI config
+        # Build prompt using AI config (with user-type overrides if applicable)
         combined_context = "\n\n".join(tool_context_parts) if tool_context_parts else ""
         prompt = build_chat_prompt(
             message=request.message,
             context=combined_context,
+            user_type_id=user_type_id,
         )
 
         provider = get_provider()

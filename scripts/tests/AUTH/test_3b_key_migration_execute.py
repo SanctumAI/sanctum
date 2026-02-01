@@ -32,7 +32,6 @@ import os
 import sys
 import json
 import time
-import shlex
 import hashlib
 import argparse
 import subprocess
@@ -131,10 +130,25 @@ def create_test_user(api_base: str, user_data: dict, admin_token: str) -> dict |
 
 
 def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db") -> str:
-    """Run SQL inside Docker container and return output."""
-    escaped_sql = sql.replace("'", "'\\''")
-    cmd = f"docker compose exec -T backend sqlite3 -json {shlex.quote(db_path)} '{escaped_sql}'"
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=REPO_ROOT)
+    """
+    Run read-only SQL inside Docker container and return output.
+
+    Security: Uses stdin to pass SQL (avoids shell injection), and
+    validates that only SELECT statements are allowed.
+    """
+    # Validate: only allow SELECT statements (defense-in-depth for test helper)
+    sql_normalized = sql.strip().upper()
+    if not sql_normalized.startswith("SELECT"):
+        raise ValueError(f"run_docker_sql only allows SELECT statements, got: {sql[:50]}")
+
+    # Use list argv with stdin for SQL (no shell=True, no escaping needed)
+    result = subprocess.run(
+        ["docker", "compose", "exec", "-T", "backend", "sqlite3", "-json", db_path],
+        input=sql,
+        capture_output=True,
+        text=True,
+        cwd=REPO_ROOT,
+    )
     return result.stdout.strip()
 
 

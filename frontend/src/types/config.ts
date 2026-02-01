@@ -25,6 +25,38 @@ export interface AIConfigUpdate {
   value: string
 }
 
+// --- AI Config User-Type Override Types ---
+
+export interface AIConfigWithInheritance {
+  key: string
+  value: string
+  value_type: 'string' | 'number' | 'boolean' | 'json'
+  category: 'prompt_section' | 'parameter' | 'default'
+  description?: string
+  updated_at?: string
+  is_override: boolean
+  override_user_type_id?: number
+}
+
+export interface AIConfigOverrideItem {
+  key: string
+  value: string
+  user_type_id: number
+  updated_at?: string
+}
+
+export interface AIConfigUserTypeResponse {
+  user_type_id: number
+  user_type_name?: string
+  prompt_sections: AIConfigWithInheritance[]
+  parameters: AIConfigWithInheritance[]
+  defaults: AIConfigWithInheritance[]
+}
+
+export interface AIConfigOverrideUpdate {
+  value: string
+}
+
 export interface PromptPreviewRequest {
   sample_question?: string
   sample_facts?: Record<string, string>
@@ -65,6 +97,33 @@ export interface DocumentDefaultsBatchUpdate {
     is_default_active?: boolean
     display_order?: number
   }>
+}
+
+// --- Document Defaults User-Type Override Types ---
+
+export interface DocumentDefaultWithInheritance {
+  job_id: string
+  filename?: string
+  status?: string
+  total_chunks?: number
+  is_available: boolean
+  is_default_active: boolean
+  display_order: number
+  updated_at?: string
+  is_override: boolean
+  override_user_type_id?: number
+  override_updated_at?: string
+}
+
+export interface DocumentDefaultsUserTypeResponse {
+  user_type_id: number
+  user_type_name?: string
+  documents: DocumentDefaultWithInheritance[]
+}
+
+export interface DocumentDefaultOverrideUpdate {
+  is_available?: boolean
+  is_default_active?: boolean
 }
 
 // --- Deployment Configuration Types ---

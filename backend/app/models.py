@@ -360,6 +360,42 @@ class SessionDefaultsResponse(BaseModel):
     default_document_ids: list[str] = []
 
 
+# --- AI Config User-Type Override Models ---
+
+class AIConfigWithInheritance(BaseModel):
+    """AI config item with inheritance information"""
+    key: str
+    value: str
+    value_type: str  # 'string', 'number', 'boolean', 'json'
+    category: str  # 'prompt_section', 'parameter', 'default'
+    description: Optional[str] = None
+    updated_at: Optional[str] = None
+    is_override: bool = False
+    override_user_type_id: Optional[int] = None
+
+
+class AIConfigOverrideItem(BaseModel):
+    """Single AI config override for a user type"""
+    key: str
+    value: str
+    user_type_id: int
+    updated_at: Optional[str] = None
+
+
+class AIConfigUserTypeResponse(BaseModel):
+    """Response model for AI config with user-type inheritance"""
+    user_type_id: int
+    user_type_name: Optional[str] = None
+    prompt_sections: list[AIConfigWithInheritance] = []
+    parameters: list[AIConfigWithInheritance] = []
+    defaults: list[AIConfigWithInheritance] = []
+
+
+class AIConfigOverrideUpdate(BaseModel):
+    """Request model for updating an AI config override"""
+    value: str
+
+
 # --- Document Defaults Models ---
 
 class DocumentDefaultItem(BaseModel):
@@ -397,6 +433,36 @@ class DocumentDefaultBatchItem(BaseModel):
 class DocumentDefaultsBatchUpdate(BaseModel):
     """Request model for batch updating document defaults"""
     updates: list[DocumentDefaultBatchItem]
+
+
+# --- Document Defaults User-Type Override Models ---
+
+class DocumentDefaultWithInheritance(BaseModel):
+    """Document default item with inheritance information"""
+    job_id: str
+    filename: Optional[str] = None
+    status: Optional[str] = None
+    total_chunks: Optional[int] = None
+    is_available: bool = True
+    is_default_active: bool = True
+    display_order: int = 0
+    updated_at: Optional[str] = None
+    is_override: bool = False
+    override_user_type_id: Optional[int] = None
+    override_updated_at: Optional[str] = None
+
+
+class DocumentDefaultsUserTypeResponse(BaseModel):
+    """Response model for document defaults with user-type inheritance"""
+    user_type_id: int
+    user_type_name: Optional[str] = None
+    documents: list[DocumentDefaultWithInheritance]
+
+
+class DocumentDefaultOverrideUpdate(BaseModel):
+    """Request model for updating document defaults override"""
+    is_available: Optional[bool] = None
+    is_default_active: Optional[bool] = None
 
 
 # --- Deployment Configuration Models ---

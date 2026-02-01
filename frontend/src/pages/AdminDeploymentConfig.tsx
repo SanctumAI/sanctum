@@ -440,6 +440,14 @@ export function AdminDeploymentConfig() {
       for (const user of migrationPrepareData.users) {
         const decryptedUser: DecryptedUserData = { id: user.id }
 
+        // Guard: encrypted data must have its ephemeral pubkey
+        if (user.encrypted_email && !user.ephemeral_pubkey_email) {
+          throw new Error(t('adminDeployment.keyMigration.decryptFailed', 'Data integrity error: encrypted email for user {{id}} is missing ephemeral pubkey. Migration aborted.', { id: user.id }))
+        }
+        if (user.encrypted_name && !user.ephemeral_pubkey_name) {
+          throw new Error(t('adminDeployment.keyMigration.decryptFailed', 'Data integrity error: encrypted name for user {{id}} is missing ephemeral pubkey. Migration aborted.', { id: user.id }))
+        }
+
         if (user.encrypted_email && user.ephemeral_pubkey_email) {
           const email = await decryptField({
             ciphertext: user.encrypted_email,
@@ -470,6 +478,11 @@ export function AdminDeploymentConfig() {
       const decryptedFieldValues: DecryptedFieldValue[] = []
 
       for (const field of migrationPrepareData.field_values) {
+        // Guard: encrypted data must have its ephemeral pubkey
+        if (field.encrypted_value && !field.ephemeral_pubkey) {
+          throw new Error(t('adminDeployment.keyMigration.decryptFieldFailed', 'Data integrity error: encrypted field {{id}} is missing ephemeral pubkey. Migration aborted.', { id: field.id }))
+        }
+
         if (field.encrypted_value && field.ephemeral_pubkey) {
           const value = await decryptField({
             ciphertext: field.encrypted_value,

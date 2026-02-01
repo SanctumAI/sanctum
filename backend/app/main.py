@@ -32,6 +32,7 @@ from models import (
     UserTypeCreate, UserTypeUpdate, UserTypeResponse, UserTypeListResponse,
     # Field Definition models
     FieldDefinitionCreate, FieldDefinitionUpdate, FieldDefinitionResponse, FieldDefinitionListResponse,
+    FieldEncryptionRequest, FieldEncryptionResponse,
     UserCreate, UserUpdate, UserResponse, UserListResponse,
     SuccessResponse,
     # Database Explorer models
@@ -1171,7 +1172,8 @@ async def create_field_definition(field: FieldDefinitionCreate, admin: dict = De
             display_order=field.display_order,
             user_type_id=field.user_type_id,
             placeholder=field.placeholder,
-            options=field.options
+            options=field.options,
+            encryption_enabled=field.encryption_enabled
         )
         created = database.get_field_definition_by_id(field_id)
         return FieldDefinitionResponse(**created)
@@ -1201,7 +1203,8 @@ async def update_field_definition(field_id: int, field: FieldDefinitionUpdate, a
         display_order=field.display_order,
         user_type_id=field.user_type_id if field.user_type_id != 0 else None,
         placeholder=field.placeholder,
-        options=field.options
+        options=field.options,
+        encryption_enabled=field.encryption_enabled
     )
     updated = database.get_field_definition_by_id(field_id)
     return FieldDefinitionResponse(**updated)
@@ -1213,6 +1216,62 @@ async def delete_field_definition(field_id: int, admin: dict = Depends(auth.requ
     if database.delete_field_definition(field_id):
         return SuccessResponse(success=True, message="Field definition deleted")
     raise HTTPException(status_code=404, detail="Field definition not found")
+
+
+@app.put("/admin/user-fields/{field_id}/encryption", response_model=FieldEncryptionResponse)
+async def update_field_encryption(
+    field_id: int, 
+    encryption_request: FieldEncryptionRequest, 
+    admin: dict = Depends(auth.require_admin)
+):
+    """Update encryption setting for a field definition (requires admin auth).
+    
+    WARNING: Changing encryption settings may affect existing data.
+    - Enabling encryption: Future values will be encrypted, existing plaintext remains  
+    - Disabling encryption: Future values stored as plaintext, existing encrypted data remains
+    
+    Use force=true to bypass warnings about data migration complexity.
+    """
+    # Check if field exists
+    field_def = database.get_field_definition_by_id(field_id)
+    if not field_def:
+        raise HTTPException(status_code=404, detail="Field definition not found")
+    
+    current_encryption = field_def.get("encryption_enabled", 1)
+    new_encryption = encryption_request.encryption_enabled
+    
+    warning = None
+    
+    # Check for potential data impact
+    if current_encryption != int(new_encryption):
+        # TODO: Check if field has existing values that would be affected
+        # For now, provide general warning
+        if not new_encryption:
+            warning = "⚠️ Disabling encryption will store future values as plaintext. Existing encrypted data remains encrypted."
+        else:
+            warning = "Enabling encryption will encrypt future values. Existing plaintext data remains unencrypted."
+        
+        if not encryption_request.force and warning:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"{warning} Use force=true to confirm this change."
+            )
+    
+    # Update encryption setting
+    success = database.update_field_definition(
+        field_id,
+        encryption_enabled=new_encryption
+    )
+    
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to update field encryption")
+    
+    return FieldEncryptionResponse(
+        field_id=field_id,
+        encryption_enabled=new_encryption,
+        warning=warning,
+        migrated_values=0  # TODO: Implement data migration counting
+    )
 
 
 # --- Users ---

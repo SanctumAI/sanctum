@@ -147,7 +147,18 @@
       "placeholder": "Placeholder",
       "placeholderOptional": "(optional)",
       "placeholderHint": "Hint text shown in the input",
-      "requiredField": "Required field"
+      "requiredField": "Required field",
+      "encryptEnabled": "🔒 Encrypt field values",
+      "encryptDisabled": "🔓 Store as plaintext",
+      "encryptedHint": "Field values will be encrypted with NIP-04 (recommended)",
+      "plaintextHint": "⚠️ Field values will be stored in plaintext (not recommended for sensitive data)",
+      "securityWarning": "Security Warning",
+      "securityWarningBody": "Disabling encryption will store user data in plaintext. Only disable for non-sensitive fields like preferences or public information.",
+      "includeInChat": "💬 Include in AI Chat Context",
+      "includeInChatHint": "Share this field's value with the AI assistant to personalize responses",
+      "aiPersonalization": "AI Personalization",
+      "aiPersonalizationBody": "The AI assistant will see this field's value to provide more relevant, personalized responses to users.",
+      "encryptedChatNote": "💬 AI Chat Context: Encrypted fields cannot be included in AI chat context. To share this field with the AI assistant, disable encryption above."
     },
     "fieldTypes": {
       "text": "Text",

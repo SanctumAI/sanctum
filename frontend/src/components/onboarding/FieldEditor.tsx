@@ -273,12 +273,12 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
             </div>
             <div className="flex-1">
               <span className="text-sm text-text font-medium">
-                {encryptionEnabled ? '🔒 Encrypt field values' : '🔓 Store as plaintext'}
+                {encryptionEnabled ? t('admin.fields.encryptEnabled') : t('admin.fields.encryptDisabled')}
               </span>
               <p className="text-xs text-text-muted">
                 {encryptionEnabled
-                  ? 'Field values will be encrypted with NIP-04 (recommended)'
-                  : '⚠️ Field values will be stored in plaintext (not recommended for sensitive data)'}
+                  ? t('admin.fields.encryptedHint')
+                  : t('admin.fields.plaintextHint')}
               </p>
             </div>
           </label>
@@ -290,9 +290,9 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.582 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
                 <div>
-                  <p className="text-sm font-medium text-yellow-800">Security Warning</p>
+                  <p className="text-sm font-medium text-yellow-800">{t('admin.fields.securityWarning')}</p>
                   <p className="text-xs text-yellow-700 mt-1">
-                    Disabling encryption will store user data in plaintext. Only disable for non-sensitive fields like preferences or public information.
+                    {t('admin.fields.securityWarningBody')}
                   </p>
                 </div>
               </div>
@@ -318,10 +318,10 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
               </div>
               <div className="flex-1">
                 <span className="text-sm text-text font-medium">
-                  💬 Include in AI Chat Context
+                  {t('admin.fields.includeInChat')}
                 </span>
                 <p className="text-xs text-text-muted">
-                  Share this field's value with the AI assistant to personalize responses
+                  {t('admin.fields.includeInChatHint')}
                 </p>
               </div>
             </label>
@@ -333,9 +333,9 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div>
-                    <p className="text-sm font-medium text-blue-800">AI Personalization</p>
+                    <p className="text-sm font-medium text-blue-800">{t('admin.fields.aiPersonalization')}</p>
                     <p className="text-xs text-blue-700 mt-1">
-                      The AI assistant will see this field's value to provide more relevant, personalized responses to users.
+                      {t('admin.fields.aiPersonalizationBody')}
                     </p>
                   </div>
                 </div>
@@ -348,8 +348,7 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
         {encryptionEnabled && (
           <div className="bg-surface-overlay border border-border rounded-lg p-3">
             <p className="text-xs text-text-muted">
-              💬 <strong>AI Chat Context:</strong> Encrypted fields cannot be included in AI chat context.
-              To share this field with the AI assistant, disable encryption above.
+              {t('admin.fields.encryptedChatNote')}
             </p>
           </div>
         )}

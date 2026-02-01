@@ -464,6 +464,53 @@ async def require_admin(authorization: Optional[str] = Header(None)) -> dict:
     return admin
 
 
+async def require_instance_setup_complete() -> None:
+    """
+    FastAPI dependency that checks if instance setup is complete.
+    Raises 503 if setup is not complete.
+    """
+    # Import here to avoid circular imports
+    import database
+    
+    if not database.is_instance_setup_complete():
+        raise HTTPException(
+            status_code=503, 
+            detail={
+                "error": "instance_not_ready",
+                "message": "Instance setup not complete. Admin authentication required.",
+                "setup_required": True
+            }
+        )
+
+
+async def require_admin_or_setup_complete(authorization: Optional[str] = Header(None)) -> dict:
+    """
+    FastAPI dependency that allows admin access OR blocks if setup not complete.
+    Used for admin-only endpoints during setup phase.
+    """
+    # Import here to avoid circular imports
+    import database
+    
+    # If setup is complete, require normal admin auth
+    if database.is_instance_setup_complete():
+        return await require_admin(authorization)
+    
+    # If setup not complete, allow admin auth but don't require setup completion
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+
+    token = authorization[7:]
+    data = verify_admin_session_token(token)
+    if not data:
+        raise HTTPException(status_code=401, detail="Invalid or expired admin token")
+
+    admin = database.get_admin_by_pubkey(data["pubkey"])
+    if not admin:
+        raise HTTPException(status_code=401, detail="Admin not found")
+
+    return admin
+
+
 async def get_current_user(authorization: Optional[str] = Header(None)) -> dict:
     """
     FastAPI dependency requiring valid user authentication.

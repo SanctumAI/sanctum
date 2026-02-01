@@ -357,17 +357,16 @@ def add_admin(pubkey: str) -> int:
         ValueError: If an admin already exists
     """
     with get_cursor() as cursor:
-        # Check if any admin already exists
-        cursor.execute("SELECT COUNT(*) FROM admins")
-        admin_count = cursor.fetchone()[0]
+        # Atomic INSERT that only succeeds if no admin exists
+        cursor.execute("""
+            INSERT INTO admins (pubkey) 
+            SELECT ? WHERE NOT EXISTS (SELECT 1 FROM admins)
+        """, (pubkey,))
         
-        if admin_count > 0:
+        # Check if the insert succeeded
+        if cursor.rowcount == 0:
             raise ValueError("Instance already has an admin. Only one admin per instance is allowed.")
         
-        cursor.execute(
-            "INSERT INTO admins (pubkey) VALUES (?)",
-            (pubkey,)
-        )
         admin_id = cursor.lastrowid
         
         # Mark admin as initialized
@@ -457,7 +456,7 @@ def get_instance_state(key: str) -> str | None:
         return row["value"] if row else None
 
 
-def set_instance_state(key: str, value: str):
+def set_instance_state(key: str, value: str) -> None:
     """Set instance state value"""
     with get_cursor() as cursor:
         cursor.execute("""
@@ -473,14 +472,16 @@ def is_instance_setup_complete() -> bool:
     return admin_initialized and setup_complete
 
 
-def mark_instance_setup_complete():
+def mark_instance_setup_complete() -> None:
     """Mark instance setup as complete (called after admin authentication)"""
     set_instance_state('setup_complete', 'true')
 
 
 def has_admin() -> bool:
     """Check if instance has an admin configured"""
-    return get_instance_state('admin_initialized') == 'true'
+    with get_cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM admins")
+        return cursor.fetchone()[0] > 0
 
 
 def get_single_admin() -> dict | None:

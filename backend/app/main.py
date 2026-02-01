@@ -13,7 +13,7 @@ import re
 import math
 import tempfile
 import sqlite3
-from fastapi import FastAPI, HTTPException, Query, Depends, Request
+from fastapi import FastAPI, HTTPException, Query, Depends, Request, BackgroundTasks
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from qdrant_client import QdrantClient
@@ -1004,12 +1004,6 @@ def filter_public_settings(settings: dict) -> dict:
     return {k: v for k, v in settings.items() if k in SAFE_PUBLIC_SETTINGS}
 
 
-class InstanceStatusResponse(BaseModel):
-    """Response model for instance status"""
-    initialized: bool  # True if an admin has been registered
-    settings: dict
-
-
 @app.get("/instance/status", response_model=InstanceStatusResponse)
 async def get_instance_status():
     """
@@ -1700,7 +1694,7 @@ async def delete_db_row(table_name: str, row_id: int, admin: dict = Depends(auth
 
 
 @app.get("/admin/database/export")
-async def export_database(_admin: Dict = Depends(auth.require_admin)) -> FileResponse:
+async def export_database(background_tasks: BackgroundTasks, _admin: Dict = Depends(auth.require_admin)) -> FileResponse:
     """
     Export the SQLite database as a downloadable backup file.
     
@@ -1756,9 +1750,8 @@ async def export_database(_admin: Dict = Depends(auth.require_admin)) -> FileRes
                 except OSError:
                     pass
             
-            # Schedule cleanup after response is sent
-            import asyncio
-            asyncio.create_task(asyncio.sleep(1)).add_done_callback(lambda _: cleanup_temp_file())
+            # Schedule cleanup after response is sent using BackgroundTasks
+            background_tasks.add_task(cleanup_temp_file)
             
             return FileResponse(
                 path=temp_path,

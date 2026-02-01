@@ -3,7 +3,7 @@ Sanctum Pydantic Models
 Request and response models for user/admin management.
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
@@ -75,7 +75,7 @@ class InstanceStatusResponse(BaseModel):
     initialized: bool  # Whether an admin has been configured
     setup_complete: bool = False  # Whether admin has completed setup/auth
     ready_for_users: bool = False  # Whether users can register/login
-    settings: dict = {}  # Public instance settings
+    settings: dict = Field(default_factory=dict)  # Public instance settings
 
 
 # --- User Type Models ---

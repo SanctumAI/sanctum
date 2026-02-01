@@ -912,31 +912,66 @@ async def get_document_defaults_for_user_type(
     if not user_type:
         raise HTTPException(status_code=404, detail=f"User type not found: {user_type_id}")
 
-    # Get effective defaults with inheritance
+    # Get effective defaults with inheritance (only includes jobs WITH defaults)
     effective_defaults = database.get_effective_document_defaults(user_type_id)
+    effective_by_job = {d["job_id"]: d for d in effective_defaults}
 
-    # Get all completed jobs to include ones without defaults
+    # Get all completed jobs to include ones without defaults (same pattern as global endpoint)
     completed_jobs = ingest_db.list_completed_jobs()
-    jobs_by_id = {j["job_id"]: j for j in completed_jobs}
 
     documents = []
-    for doc in effective_defaults:
-        job_id = doc["job_id"]
-        job = jobs_by_id.get(job_id, {})
-        # Use explicit None checks to handle falsy values like 0 correctly
-        documents.append(DocumentDefaultWithInheritance(
-            job_id=job_id,
-            filename=job.get("filename") if job.get("filename") is not None else doc.get("filename"),
-            status=job.get("status") if job.get("status") is not None else doc.get("status"),
-            total_chunks=job.get("total_chunks") if job.get("total_chunks") is not None else doc.get("total_chunks"),
-            is_available=bool(doc.get("is_available", True)),
-            is_default_active=bool(doc.get("is_default_active", True)),
-            display_order=doc.get("display_order", 0),
-            updated_at=doc.get("updated_at"),
-            is_override=doc.get("is_override", False),
-            override_user_type_id=doc.get("override_user_type_id"),
-            override_updated_at=doc.get("override_updated_at"),
-        ))
+    for job in completed_jobs:
+        job_id = job["job_id"]
+
+        if job_id in effective_by_job:
+            # Job has defaults (possibly with override)
+            doc = effective_by_job[job_id]
+            documents.append(DocumentDefaultWithInheritance(
+                job_id=job_id,
+                filename=job["filename"],
+                status=job["status"],
+                total_chunks=job["total_chunks"],
+                is_available=bool(doc.get("is_available", True)),
+                is_default_active=bool(doc.get("is_default_active", True)),
+                display_order=doc.get("display_order", 0),
+                updated_at=doc.get("updated_at"),
+                is_override=doc.get("is_override", False),
+                override_user_type_id=doc.get("override_user_type_id"),
+                override_updated_at=doc.get("override_updated_at"),
+            ))
+        else:
+            # Job exists but no defaults set - check for user-type override only
+            override = database.get_document_defaults_override(job_id, user_type_id)
+            if override:
+                # Has override but no global default
+                documents.append(DocumentDefaultWithInheritance(
+                    job_id=job_id,
+                    filename=job["filename"],
+                    status=job["status"],
+                    total_chunks=job["total_chunks"],
+                    is_available=bool(override["is_available"]) if override["is_available"] is not None else True,
+                    is_default_active=bool(override["is_default_active"]) if override["is_default_active"] is not None else True,
+                    display_order=0,
+                    updated_at=None,
+                    is_override=True,
+                    override_user_type_id=user_type_id,
+                    override_updated_at=override.get("updated_at"),
+                ))
+            else:
+                # No defaults and no override - use sensible defaults
+                documents.append(DocumentDefaultWithInheritance(
+                    job_id=job_id,
+                    filename=job["filename"],
+                    status=job["status"],
+                    total_chunks=job["total_chunks"],
+                    is_available=True,
+                    is_default_active=True,
+                    display_order=0,
+                    updated_at=None,
+                    is_override=False,
+                    override_user_type_id=None,
+                    override_updated_at=None,
+                ))
 
     return DocumentDefaultsUserTypeResponse(
         user_type_id=user_type_id,

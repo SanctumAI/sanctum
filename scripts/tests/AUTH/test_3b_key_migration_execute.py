@@ -134,21 +134,38 @@ def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db") -> str:
     Run read-only SQL inside Docker container and return output.
 
     Security: Uses stdin to pass SQL (avoids shell injection), and
-    validates that only SELECT statements are allowed.
+    validates that only a single SELECT statement is allowed.
+
+    Raises:
+        ValueError: If SQL is not a single SELECT statement
+        RuntimeError: If sqlite3 command fails
     """
+    # Normalize: strip whitespace and trailing semicolons
+    sql_normalized = sql.strip().rstrip(";").strip()
+
+    # Reject multi-statement input (internal semicolons)
+    if ";" in sql_normalized:
+        raise ValueError(f"run_docker_sql only allows single statements, got: {sql[:50]}")
+
     # Validate: only allow SELECT statements (defense-in-depth for test helper)
-    sql_normalized = sql.strip().upper()
-    if not sql_normalized.startswith("SELECT"):
+    if not sql_normalized.upper().startswith("SELECT"):
         raise ValueError(f"run_docker_sql only allows SELECT statements, got: {sql[:50]}")
 
     # Use list argv with stdin for SQL (no shell=True, no escaping needed)
     result = subprocess.run(
         ["docker", "compose", "exec", "-T", "backend", "sqlite3", "-json", db_path],
-        input=sql,
+        input=sql_normalized,
         capture_output=True,
         text=True,
         cwd=REPO_ROOT,
     )
+
+    # Surface sqlite3 failures
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"sqlite3 failed (exit {result.returncode}): {result.stderr.strip() or result.stdout.strip()}"
+        )
+
     return result.stdout.strip()
 
 

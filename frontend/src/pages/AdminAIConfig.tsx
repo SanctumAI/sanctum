@@ -114,6 +114,14 @@ export function AdminAIConfig() {
     }
   }, [navigate])
 
+  // Clear edit state when user type changes to prevent stale edits being applied to wrong target
+  useEffect(() => {
+    setEditingKey(null)
+    setEditValue('')
+    setSaveError(null)
+    setToggleError(null)
+  }, [selectedUserTypeId])
+
   // Focus trap for modal
   useEffect(() => {
     if (previewOpen && modalRef.current) {

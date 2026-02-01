@@ -92,6 +92,7 @@ export function AdminInstanceConfig() {
             options: f.options,
             user_type_id: f.user_type_id,
             encryption_enabled: f.encryption_enabled ?? true,  // Default to true for security
+            include_in_chat: f.include_in_chat ?? false,  // Default to false
           }))
           setFields(fetchedFields)
         } else {
@@ -228,6 +229,7 @@ export function AdminInstanceConfig() {
           placeholder: field.placeholder || null,
           options: field.options || null,
           encryption_enabled: field.encryption_enabled ?? true,  // Secure default
+          include_in_chat: field.include_in_chat ?? false,
         }),
       })
 
@@ -242,6 +244,7 @@ export function AdminInstanceConfig() {
           options: newField.options,
           user_type_id: newField.user_type_id,
           encryption_enabled: newField.encryption_enabled ?? true,
+          include_in_chat: newField.include_in_chat ?? false,
         }
         setFields([...fields, addedField])
         setIsEditing(false)
@@ -275,6 +278,7 @@ export function AdminInstanceConfig() {
           placeholder: field.placeholder || null,
           options: field.options || null,
           encryption_enabled: field.encryption_enabled ?? true,  // Secure default
+          include_in_chat: field.include_in_chat ?? false,
         }),
       })
 
@@ -382,6 +386,7 @@ export function AdminInstanceConfig() {
               options: f.options,
               user_type_id: f.user_type_id,
               encryption_enabled: f.encryption_enabled ?? true,  // Default to true for security
+              include_in_chat: f.include_in_chat ?? false,
             }))
             setFields(fetchedFields)
             setReorderError(t('admin.errors.reorderFailed', 'Failed to reorder field'))
@@ -411,6 +416,7 @@ export function AdminInstanceConfig() {
             options: f.options,
             user_type_id: f.user_type_id,
             encryption_enabled: f.encryption_enabled ?? true,  // Default to true for security
+            include_in_chat: f.include_in_chat ?? false,
           }))
           setFields(fetchedFields)
         }
@@ -767,6 +773,11 @@ export function AdminInstanceConfig() {
                           }`}>
                             {field.encryption_enabled !== false ? '🔒 Encrypted' : '🔓 Plaintext'}
                           </span>
+                          {field.include_in_chat && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
+                              💬 In Chat
+                            </span>
+                          )}
                           <span className={`text-[10px] px-1.5 py-0.5 rounded ${
                             field.user_type_id === null || field.user_type_id === undefined
                               ? 'bg-accent/10 text-accent'

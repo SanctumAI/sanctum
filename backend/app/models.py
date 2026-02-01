@@ -120,6 +120,7 @@ class FieldDefinitionCreate(BaseModel):
     placeholder: Optional[str] = None  # Placeholder text for input
     options: Optional[list[str]] = None  # Options for select fields
     encryption_enabled: bool = True  # Secure default: encrypt field values
+    include_in_chat: bool = False  # Include field value in AI chat context (only for unencrypted fields)
 
 
 class FieldDefinitionUpdate(BaseModel):
@@ -132,6 +133,7 @@ class FieldDefinitionUpdate(BaseModel):
     placeholder: Optional[str] = None
     options: Optional[list[str]] = None
     encryption_enabled: Optional[bool] = None  # Toggle encryption for field
+    include_in_chat: Optional[bool] = None  # Toggle AI chat context inclusion
 
 
 class FieldDefinitionResponse(BaseModel):
@@ -145,6 +147,7 @@ class FieldDefinitionResponse(BaseModel):
     placeholder: Optional[str] = None
     options: Optional[list[str]] = None
     encryption_enabled: bool = True  # Whether field values are encrypted
+    include_in_chat: bool = False  # Whether field value is included in AI chat context
     created_at: Optional[str] = None
 
 

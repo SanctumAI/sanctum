@@ -599,7 +599,12 @@ def get_session_defaults(user_type_id: int | None = None) -> dict:
     return result
 
 
-def build_chat_prompt(message: str, context: str = "", user_type_id: int | None = None) -> str:
+def build_chat_prompt(
+    message: str,
+    context: str = "",
+    user_type_id: int | None = None,
+    user_profile_context: dict[str, str] | None = None
+) -> str:
     """
     Build a chat prompt using AI config settings.
     Assembles the prompt from configured sections.
@@ -608,6 +613,8 @@ def build_chat_prompt(message: str, context: str = "", user_type_id: int | None 
         message: The user's message/question
         context: Optional tool context (search results, database results, etc.)
         user_type_id: If provided, uses user-type-specific prompt sections.
+        user_profile_context: Optional dict of {field_name: value} for user profile
+            data to include in the prompt for personalization.
 
     Returns:
         Assembled prompt string for the LLM
@@ -619,6 +626,14 @@ def build_chat_prompt(message: str, context: str = "", user_type_id: int | None 
     if sections.get("prompt_tone"):
         parts.append("=== STYLE ===")
         parts.append(sections["prompt_tone"])
+
+    # User profile section (if any profile data is available)
+    if user_profile_context:
+        parts.append("")
+        parts.append("=== USER PROFILE ===")
+        parts.append("The following information is known about the user:")
+        for field_name, value in user_profile_context.items():
+            parts.append(f"- {field_name}: {value}")
 
     # Rules section
     rules = sections.get("prompt_rules", [])

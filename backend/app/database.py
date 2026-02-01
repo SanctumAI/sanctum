@@ -266,6 +266,7 @@ def init_schema():
     _migrate_add_encryption_columns()  # This adds email_blind_index column AND creates its index
     _migrate_add_field_metadata_columns()  # Add placeholder and options columns
     _migrate_add_encryption_enabled_column()  # Add encryption_enabled column for optional field encryption
+    _migrate_add_include_in_chat_column()  # Add include_in_chat column for AI chat context
 
     # Initialize ingest job tables
     from ingest_db import init_ingest_schema
@@ -382,6 +383,32 @@ def _migrate_add_encryption_enabled_column() -> None:
     # Always ensure index exists (idempotent via IF NOT EXISTS)
     # This runs after column is guaranteed to exist (either from CREATE TABLE or ALTER TABLE above)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_definitions_encryption ON user_field_definitions(encryption_enabled)")
+
+    conn.commit()
+    cursor.close()
+
+
+def _migrate_add_include_in_chat_column() -> None:
+    """Add include_in_chat column to user_field_definitions if it doesn't exist.
+
+    This column controls whether a field's value should be included in AI chat context
+    to personalize responses. Only unencrypted fields can be included (encrypted fields
+    require admin's private key to decrypt, but chat runs in user context).
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Check existing columns
+    cursor.execute("PRAGMA table_info(user_field_definitions)")
+    columns = [row[1] for row in cursor.fetchall()]
+
+    if 'include_in_chat' not in columns:
+        # Add column with default 0 (not included in chat)
+        cursor.execute("ALTER TABLE user_field_definitions ADD COLUMN include_in_chat INTEGER DEFAULT 0")
+        logger.info("Migration: Added 'include_in_chat' column to user_field_definitions table (default: not included)")
+
+    # Create index for efficient lookups of fields to include in chat
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_definitions_include_in_chat ON user_field_definitions(include_in_chat)")
 
     conn.commit()
     cursor.close()
@@ -662,20 +689,22 @@ def create_field_definition(
     user_type_id: int | None = None,
     placeholder: str | None = None,
     options: list[str] | None = None,
-    encryption_enabled: bool = True
+    encryption_enabled: bool = True,
+    include_in_chat: bool = False
 ) -> int:
     """Create a user field definition. Returns field id.
     user_type_id: None = global field (shown for all types)
     placeholder: Placeholder text for the field input
     options: List of options for select fields (stored as JSON)
     encryption_enabled: True = encrypt field values (secure default), False = store plaintext
+    include_in_chat: True = include field value in AI chat context (only for unencrypted fields)
     """
     options_json = json.dumps(options) if options is not None else None
     with get_cursor() as cursor:
         cursor.execute("""
-            INSERT INTO user_field_definitions (field_name, field_type, required, display_order, user_type_id, placeholder, options, encryption_enabled)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (field_name, field_type, int(required), display_order, user_type_id, placeholder, options_json, int(encryption_enabled)))
+            INSERT INTO user_field_definitions (field_name, field_type, required, display_order, user_type_id, placeholder, options, encryption_enabled, include_in_chat)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (field_name, field_type, int(required), display_order, user_type_id, placeholder, options_json, int(encryption_enabled), int(include_in_chat)))
         return cursor.lastrowid
 
 
@@ -759,10 +788,11 @@ def update_field_definition(
     user_type_id: int | None = ...,  # Use ... as sentinel for "not provided"
     placeholder: str | None = ...,
     options: list[str] | None = ...,
-    encryption_enabled: bool | None = None
+    encryption_enabled: bool | None = None,
+    include_in_chat: bool | None = None
 ) -> bool:
     """Update a field definition. Returns True if updated.
-    
+
     WARNING: Changing encryption_enabled may require data migration for existing field values.
     """
     updates = []
@@ -792,6 +822,9 @@ def update_field_definition(
     if encryption_enabled is not None:
         updates.append("encryption_enabled = ?")
         values.append(int(encryption_enabled))
+    if include_in_chat is not None:
+        updates.append("include_in_chat = ?")
+        values.append(int(include_in_chat))
 
     if not updates:
         return False
@@ -1041,6 +1074,54 @@ def set_user_fields(user_id: int, fields: dict, user_type_id: int | None = None)
     """Set multiple field values for a user"""
     for field_name, value in fields.items():
         set_user_field(user_id, field_name, value, user_type_id)
+
+
+def get_user_chat_context_values(user_id: int, user_type_id: int | None = None) -> dict[str, str]:
+    """Get unencrypted field values for fields marked include_in_chat=1.
+
+    Returns a dict of {field_name: value} for use in AI chat context.
+    Only returns plaintext values (not encrypted_value) from fields that have:
+    - encryption_enabled=0 (unencrypted)
+    - include_in_chat=1 (marked for chat inclusion)
+
+    Args:
+        user_id: The user's ID
+        user_type_id: If provided, also includes type-specific fields
+
+    Returns:
+        Dict mapping field names to their plaintext values
+    """
+    with get_cursor() as cursor:
+        # Query joins field definitions with field values
+        # Only gets unencrypted fields marked for chat inclusion
+        if user_type_id is not None:
+            # Include global fields (user_type_id IS NULL) and type-specific fields
+            cursor.execute("""
+                SELECT fd.field_name, ufv.value
+                FROM user_field_values ufv
+                JOIN user_field_definitions fd ON fd.id = ufv.field_id
+                WHERE ufv.user_id = ?
+                  AND fd.encryption_enabled = 0
+                  AND fd.include_in_chat = 1
+                  AND (fd.user_type_id IS NULL OR fd.user_type_id = ?)
+                  AND ufv.value IS NOT NULL
+                  AND ufv.value != ''
+            """, (user_id, user_type_id))
+        else:
+            # Only global fields
+            cursor.execute("""
+                SELECT fd.field_name, ufv.value
+                FROM user_field_values ufv
+                JOIN user_field_definitions fd ON fd.id = ufv.field_id
+                WHERE ufv.user_id = ?
+                  AND fd.encryption_enabled = 0
+                  AND fd.include_in_chat = 1
+                  AND fd.user_type_id IS NULL
+                  AND ufv.value IS NOT NULL
+                  AND ufv.value != ''
+            """, (user_id,))
+
+        return {row["field_name"]: row["value"] for row in cursor.fetchall()}
 
 
 def delete_user(user_id: int) -> bool:

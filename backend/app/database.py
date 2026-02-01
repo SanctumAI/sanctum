@@ -402,7 +402,25 @@ def remove_admin(pubkey: str) -> bool:
     """Remove admin by pubkey. Returns True if removed."""
     with get_cursor() as cursor:
         cursor.execute("DELETE FROM admins WHERE pubkey = ?", (pubkey,))
-        return cursor.rowcount > 0
+        removed = cursor.rowcount > 0
+        
+        # Check if any admins remain after deletion
+        if removed:
+            cursor.execute("SELECT COUNT(*) FROM admins")
+            remaining_admins = cursor.fetchone()[0]
+            
+            # If no admins remain, reset instance state
+            if remaining_admins == 0:
+                cursor.execute("""
+                    INSERT OR REPLACE INTO instance_state (key, value, updated_at)
+                    VALUES ('admin_initialized', 'false', CURRENT_TIMESTAMP)
+                """)
+                cursor.execute("""
+                    INSERT OR REPLACE INTO instance_state (key, value, updated_at)
+                    VALUES ('setup_complete', 'false', CURRENT_TIMESTAMP)
+                """)
+        
+        return removed
 
 
 # --- Instance Settings Operations ---

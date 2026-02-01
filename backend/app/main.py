@@ -668,8 +668,6 @@ async def verify_magic_link(
     
     Requires instance setup to be complete (admin must authenticate first).
     """
-    # Instance setup completion is checked by the dependency above
-    
     # Verify token
     data = auth.verify_magic_link_token(token)
     if not data:
@@ -947,7 +945,7 @@ async def admin_auth(
             
         except ValueError as e:
             # This should not happen due to our check above, but safety first
-            raise HTTPException(status_code=403, detail=str(e))
+            raise HTTPException(status_code=403, detail=str(e)) from e
     else:
         admin = existing
 

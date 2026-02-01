@@ -17,31 +17,71 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Users,
+  Undo2,
+  Globe,
 } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
-import { isAdminAuthenticated } from '../utils/adminApi'
+import { isAdminAuthenticated, adminFetch } from '../utils/adminApi'
 import { useAIConfig, useDocumentDefaults } from '../hooks/useAdminConfig'
-import type { AIConfigItem, DocumentDefaultItem, PromptSectionKey, ParameterKey, DefaultKey } from '../types/config'
+import type { AIConfigItem, AIConfigWithInheritance, DocumentDefaultItem, DocumentDefaultWithInheritance, PromptSectionKey, ParameterKey, DefaultKey } from '../types/config'
 import { getPromptSectionMeta, getParameterMeta, getDefaultMeta } from '../types/config'
+
+interface UserType {
+  id: number
+  name: string
+  description?: string
+}
 
 export function AdminAIConfig() {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
-  // Hooks for config data
+  // User type selector state
+  const [userTypes, setUserTypes] = useState<UserType[]>([])
+  const [selectedUserTypeId, setSelectedUserTypeId] = useState<number | null>(null)
+  const [userTypesLoading, setUserTypesLoading] = useState(true)
+
+  // Fetch user types on mount
+  useEffect(() => {
+    const fetchUserTypes = async () => {
+      try {
+        setUserTypesLoading(true)
+        const response = await adminFetch('/admin/user-types')
+        if (response.ok) {
+          const data = await response.json()
+          setUserTypes(data.types || [])
+        }
+      } catch {
+        // Silently fail - user types are optional
+      } finally {
+        setUserTypesLoading(false)
+      }
+    }
+    fetchUserTypes()
+  }, [])
+
+  // Hooks for config data - pass selectedUserTypeId
   const {
     config: aiConfig,
+    userTypeConfig: _userTypeConfig, // Used for inheritance info embedded in config items
     loading: aiLoading,
     error: aiError,
     updateConfig,
+    setOverride: setAIConfigOverride,
+    revertOverride: revertAIConfigOverride,
     previewPrompt,
-  } = useAIConfig()
+  } = useAIConfig(selectedUserTypeId)
+  void _userTypeConfig // Suppress unused warning - type info is embedded in config items
 
   const {
     documents,
+    userTypeDocuments,
     loading: docsLoading,
     updateDocument,
-  } = useDocumentDefaults()
+    setOverride: setDocOverride,
+    revertOverride: revertDocOverride,
+  } = useDocumentDefaults(selectedUserTypeId)
 
   // Local state for editing
   const [editingKey, setEditingKey] = useState<string | null>(null)
@@ -74,6 +114,14 @@ export function AdminAIConfig() {
     }
   }, [navigate])
 
+  // Clear edit state when user type changes to prevent stale edits being applied to wrong target
+  useEffect(() => {
+    setEditingKey(null)
+    setEditValue('')
+    setSaveError(null)
+    setToggleError(null)
+  }, [selectedUserTypeId])
+
   // Focus trap for modal
   useEffect(() => {
     if (previewOpen && modalRef.current) {
@@ -104,7 +152,7 @@ export function AdminAIConfig() {
     setSaveError(null)
   }
 
-  // Handle saving a config value
+  // Handle saving a config value (global or override based on selectedUserTypeId)
   const handleSave = async () => {
     if (!editingKey) return
 
@@ -127,11 +175,30 @@ export function AdminAIConfig() {
     setSaveError(null)
 
     try {
-      await updateConfig(editingKey, editValue)
+      if (selectedUserTypeId) {
+        // Set override for user type
+        await setAIConfigOverride(editingKey, editValue)
+      } else {
+        // Update global config
+        await updateConfig(editingKey, editValue)
+      }
       setEditingKey(null)
       setEditValue('')
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Failed to save')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Handle reverting an AI config override
+  const handleRevertOverride = async (key: string) => {
+    setSaveError(null)
+    setSaving(true)
+    try {
+      await revertAIConfigOverride(key)
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to revert')
     } finally {
       setSaving(false)
     }
@@ -157,15 +224,29 @@ export function AdminAIConfig() {
     }
   }
 
-  // Handle document toggle
-  const handleDocumentToggle = async (doc: DocumentDefaultItem, field: 'is_available' | 'is_default_active') => {
+  // Handle document toggle (global or override based on selectedUserTypeId)
+  const handleDocumentToggle = async (doc: DocumentDefaultItem | DocumentDefaultWithInheritance, field: 'is_available' | 'is_default_active') => {
     setToggleError(null)
     try {
-      await updateDocument(doc.job_id, {
-        [field]: !doc[field],
-      })
+      if (selectedUserTypeId) {
+        // Set override for user type
+        await setDocOverride(doc.job_id, { [field]: !doc[field] })
+      } else {
+        // Update global
+        await updateDocument(doc.job_id, { [field]: !doc[field] })
+      }
     } catch (err) {
       setToggleError(err instanceof Error ? err.message : 'Toggle failed')
+    }
+  }
+
+  // Handle reverting a document override
+  const handleRevertDocOverride = async (jobId: string) => {
+    setToggleError(null)
+    try {
+      await revertDocOverride(jobId)
+    } catch (err) {
+      setToggleError(err instanceof Error ? err.message : 'Revert failed')
     }
   }
 
@@ -218,24 +299,51 @@ export function AdminAIConfig() {
   const parameterMeta = getParameterMeta(t)
   const defaultMeta = getDefaultMeta(t)
 
-  // Render a config item editor
-  const renderConfigItem = (item: AIConfigItem) => {
+  // Render a config item editor (supports inheritance display)
+  const renderConfigItem = (item: AIConfigItem | AIConfigWithInheritance) => {
     const isEditing = editingKey === item.key
     const sectionMeta = promptSectionMeta[item.key as PromptSectionKey]
     const paramMeta = parameterMeta[item.key as ParameterKey]
     const defMeta = defaultMeta[item.key as DefaultKey]
     const meta = sectionMeta || paramMeta || defMeta
 
+    // Check if this is an override (has inheritance info)
+    const isOverride = 'is_override' in item && item.is_override
+
     return (
       <div
         key={item.key}
-        className="bg-surface border border-border rounded-xl p-4 hover:border-border-strong transition-all"
+        className={`bg-surface border rounded-xl p-4 hover:border-border-strong transition-all ${
+          isOverride ? 'border-accent/50' : 'border-border'
+        }`}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-text">
-              {meta?.label || item.key}
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-text">
+                {meta?.label || item.key}
+              </p>
+              {/* Inheritance indicator */}
+              {selectedUserTypeId && (
+                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                  isOverride
+                    ? 'bg-accent/10 text-accent'
+                    : 'bg-surface-overlay text-text-muted'
+                }`}>
+                  {isOverride ? (
+                    <>
+                      <Users className="w-2.5 h-2.5" />
+                      {t('adminAI.override', 'Override')}
+                    </>
+                  ) : (
+                    <>
+                      <Globe className="w-2.5 h-2.5" />
+                      {t('adminAI.inherited', 'Inherited')}
+                    </>
+                  )}
+                </span>
+              )}
+            </div>
             <p className="text-xs text-text-muted mt-0.5">
               {meta?.description || item.description || ''}
             </p>
@@ -245,14 +353,27 @@ export function AdminAIConfig() {
               </p>
             )}
           </div>
-          {!isEditing && (
-            <button
-              onClick={() => handleEdit(item)}
-              className="text-xs text-accent hover:text-accent-hover transition-colors"
-            >
-              {t('common.edit')}
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {/* Revert button for overrides */}
+            {!isEditing && isOverride && selectedUserTypeId && (
+              <button
+                onClick={() => handleRevertOverride(item.key)}
+                className="text-xs text-text-muted hover:text-accent transition-colors flex items-center gap-1"
+                title={t('adminAI.revertToGlobal', 'Revert to global')}
+              >
+                <Undo2 className="w-3 h-3" />
+                {t('adminAI.revert', 'Revert')}
+              </button>
+            )}
+            {!isEditing && (
+              <button
+                onClick={() => handleEdit(item)}
+                className="text-xs text-accent hover:text-accent-hover transition-colors"
+              >
+                {t('common.edit')}
+              </button>
+            )}
+          </div>
         </div>
 
         {isEditing ? (
@@ -358,7 +479,7 @@ export function AdminAIConfig() {
     </Link>
   )
 
-  if (!authChecked || aiLoading || docsLoading) {
+  if (!authChecked || aiLoading || docsLoading || userTypesLoading) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-accent animate-spin" />
@@ -373,6 +494,51 @@ export function AdminAIConfig() {
       footer={footer}
     >
       <div className="space-y-6">
+        {/* User Type Selector */}
+        {userTypes.length > 0 && (
+          <div className="bg-surface-overlay border border-border rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Users className="w-4 h-4 text-text-muted" />
+              <span className="text-sm font-medium text-text">
+                {t('adminAI.configureFor', 'Configure For')}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedUserTypeId(null)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  selectedUserTypeId === null
+                    ? 'bg-accent text-accent-text'
+                    : 'bg-surface border border-border text-text-muted hover:border-accent/50 hover:text-text'
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5" />
+                  {t('adminAI.globalAllUsers', 'Global (All Users)')}
+                </span>
+              </button>
+              {userTypes.map((type) => (
+                <button
+                  key={type.id}
+                  onClick={() => setSelectedUserTypeId(type.id)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                    selectedUserTypeId === type.id
+                      ? 'bg-accent text-accent-text'
+                      : 'bg-surface border border-border text-text-muted hover:border-accent/50 hover:text-text'
+                  }`}
+                >
+                  {type.name}
+                </button>
+              ))}
+            </div>
+            {selectedUserTypeId && (
+              <p className="text-xs text-text-muted mt-3">
+                {t('adminAI.overrideHint', 'Changes made here will override global settings for this user type. Items marked "Override" have custom values; items marked "Inherited" use global defaults.')}
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Error display */}
         {aiError && (
           <div className="bg-error/10 border border-error/20 rounded-xl p-4">
@@ -492,60 +658,97 @@ export function AdminAIConfig() {
 
           {documents.length > 0 ? (
             <div className="space-y-2">
-              {documents.map((doc) => (
-                <div
-                  key={doc.job_id}
-                  className="bg-surface border border-border rounded-xl p-3.5 hover:border-border-strong transition-all"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-text truncate">
-                        {doc.filename || doc.job_id}
-                      </p>
-                      <p className="text-xs text-text-muted">
-                        {doc.total_chunks} {t('adminAI.chunks')}
-                        {doc.status && ` • ${doc.status}`}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2 text-xs">
-                        <button
-                          onClick={() => handleDocumentToggle(doc, 'is_available')}
-                          className="focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded"
-                          role="switch"
-                          aria-checked={doc.is_available}
-                          aria-label={`${doc.filename || doc.job_id} ${t('adminAI.available', 'Available')}`}
-                        >
-                          {doc.is_available ? (
-                            <ToggleRight className="w-6 h-4 text-accent" />
-                          ) : (
-                            <ToggleLeft className="w-6 h-4 text-text-muted" />
+              {(selectedUserTypeId ? userTypeDocuments : documents).map((doc: DocumentDefaultItem | DocumentDefaultWithInheritance) => {
+                const isOverride = 'is_override' in doc && doc.is_override
+                return (
+                  <div
+                    key={doc.job_id}
+                    className={`bg-surface border rounded-xl p-3.5 hover:border-border-strong transition-all ${
+                      isOverride ? 'border-accent/50' : 'border-border'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium text-text truncate">
+                            {doc.filename || doc.job_id}
+                          </p>
+                          {/* Inheritance indicator for documents */}
+                          {selectedUserTypeId && (
+                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium shrink-0 ${
+                              isOverride
+                                ? 'bg-accent/10 text-accent'
+                                : 'bg-surface-overlay text-text-muted'
+                            }`}>
+                              {isOverride ? (
+                                <>
+                                  <Users className="w-2.5 h-2.5" />
+                                  {t('adminAI.override', 'Override')}
+                                </>
+                              ) : (
+                                <>
+                                  <Globe className="w-2.5 h-2.5" />
+                                  {t('adminAI.inherited', 'Inherited')}
+                                </>
+                              )}
+                            </span>
                           )}
-                        </button>
-                        <span className="text-text-muted">{t('adminAI.available', 'Available')}</span>
+                        </div>
+                        <p className="text-xs text-text-muted">
+                          {doc.total_chunks} {t('adminAI.chunks')}
+                          {doc.status && ` • ${doc.status}`}
+                        </p>
                       </div>
-                      <div className="flex items-center gap-2 text-xs">
-                        <button
-                          onClick={() => handleDocumentToggle(doc, 'is_default_active')}
-                          className="focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                          disabled={!doc.is_available}
-                          role="switch"
-                          aria-checked={doc.is_default_active && doc.is_available}
-                          aria-disabled={!doc.is_available}
-                          aria-label={`${doc.filename || doc.job_id} ${t('adminAI.activeByDefault', 'Active by Default')}`}
-                        >
-                          {doc.is_default_active && doc.is_available ? (
-                            <ToggleRight className="w-6 h-4 text-accent" />
-                          ) : (
-                            <ToggleLeft className="w-6 h-4 text-text-muted" />
-                          )}
-                        </button>
-                        <span className="text-text-muted">{t('adminAI.activeByDefault', 'Active by Default')}</span>
+                      <div className="flex items-center gap-4">
+                        {/* Revert button for document overrides */}
+                        {isOverride && selectedUserTypeId && (
+                          <button
+                            onClick={() => handleRevertDocOverride(doc.job_id)}
+                            className="text-xs text-text-muted hover:text-accent transition-colors flex items-center gap-1"
+                            title={t('adminAI.revertToGlobal', 'Revert to global')}
+                          >
+                            <Undo2 className="w-3 h-3" />
+                          </button>
+                        )}
+                        <div className="flex items-center gap-2 text-xs">
+                          <button
+                            onClick={() => handleDocumentToggle(doc, 'is_available')}
+                            className="focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded"
+                            role="switch"
+                            aria-checked={doc.is_available}
+                            aria-label={`${doc.filename || doc.job_id} ${t('adminAI.available', 'Available')}`}
+                          >
+                            {doc.is_available ? (
+                              <ToggleRight className="w-6 h-4 text-accent" />
+                            ) : (
+                              <ToggleLeft className="w-6 h-4 text-text-muted" />
+                            )}
+                          </button>
+                          <span className="text-text-muted">{t('adminAI.available', 'Available')}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs">
+                          <button
+                            onClick={() => handleDocumentToggle(doc, 'is_default_active')}
+                            className="focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={!doc.is_available}
+                            role="switch"
+                            aria-checked={doc.is_default_active && doc.is_available}
+                            aria-disabled={!doc.is_available}
+                            aria-label={`${doc.filename || doc.job_id} ${t('adminAI.activeByDefault', 'Active by Default')}`}
+                          >
+                            {doc.is_default_active && doc.is_available ? (
+                              <ToggleRight className="w-6 h-4 text-accent" />
+                            ) : (
+                              <ToggleLeft className="w-6 h-4 text-text-muted" />
+                            )}
+                          </button>
+                          <span className="text-text-muted">{t('adminAI.activeByDefault', 'Active by Default')}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           ) : (
             <div className="text-center py-6 bg-surface border border-border border-dashed rounded-lg">

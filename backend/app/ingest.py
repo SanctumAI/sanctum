@@ -29,6 +29,9 @@ from models import (
     DocumentDefaultsResponse,
     DocumentDefaultUpdate,
     DocumentDefaultsBatchUpdate,
+    DocumentDefaultWithInheritance,
+    DocumentDefaultsUserTypeResponse,
+    DocumentDefaultOverrideUpdate,
     SuccessResponse,
 )
 
@@ -887,4 +890,213 @@ async def get_available_documents(admin: dict = Depends(auth.require_admin)):
     Requires admin authentication.
     """
     job_ids = database.get_available_documents()
+    return {"job_ids": job_ids}
+
+
+# =============================================================================
+# DOCUMENT DEFAULTS USER-TYPE OVERRIDE ENDPOINTS (Admin)
+# =============================================================================
+
+@router.get("/admin/documents/defaults/user-type/{user_type_id}", response_model=DocumentDefaultsUserTypeResponse)
+async def get_document_defaults_for_user_type(
+    user_type_id: int,
+    admin: dict = Depends(auth.require_admin)
+):
+    """
+    Get document defaults with inheritance applied for a user type.
+    Shows which values are overridden vs inherited from global defaults.
+    Requires admin authentication.
+    """
+    # Verify user type exists
+    user_type = database.get_user_type(user_type_id)
+    if not user_type:
+        raise HTTPException(status_code=404, detail=f"User type not found: {user_type_id}")
+
+    # Get effective defaults with inheritance (only includes jobs WITH defaults)
+    effective_defaults = database.get_effective_document_defaults(user_type_id)
+    effective_by_job = {d["job_id"]: d for d in effective_defaults}
+
+    # Get all completed jobs to include ones without defaults (same pattern as global endpoint)
+    completed_jobs = ingest_db.list_completed_jobs()
+
+    documents = []
+    for job in completed_jobs:
+        job_id = job["job_id"]
+
+        if job_id in effective_by_job:
+            # Job has defaults (possibly with override)
+            doc = effective_by_job[job_id]
+            documents.append(DocumentDefaultWithInheritance(
+                job_id=job_id,
+                filename=job["filename"],
+                status=job["status"],
+                total_chunks=job["total_chunks"],
+                is_available=bool(doc.get("is_available", True)),
+                is_default_active=bool(doc.get("is_default_active", True)),
+                display_order=doc.get("display_order", 0),
+                updated_at=doc.get("updated_at"),
+                is_override=doc.get("is_override", False),
+                override_user_type_id=doc.get("override_user_type_id"),
+                override_updated_at=doc.get("override_updated_at"),
+            ))
+        else:
+            # Job exists but no defaults set - check for user-type override only
+            override = database.get_document_defaults_override(job_id, user_type_id)
+            if override:
+                # Has override but no global default
+                documents.append(DocumentDefaultWithInheritance(
+                    job_id=job_id,
+                    filename=job["filename"],
+                    status=job["status"],
+                    total_chunks=job["total_chunks"],
+                    is_available=bool(override["is_available"]) if override["is_available"] is not None else True,
+                    is_default_active=bool(override["is_default_active"]) if override["is_default_active"] is not None else True,
+                    display_order=0,
+                    updated_at=None,
+                    is_override=True,
+                    override_user_type_id=user_type_id,
+                    override_updated_at=override.get("updated_at"),
+                ))
+            else:
+                # No defaults and no override - use sensible defaults
+                documents.append(DocumentDefaultWithInheritance(
+                    job_id=job_id,
+                    filename=job["filename"],
+                    status=job["status"],
+                    total_chunks=job["total_chunks"],
+                    is_available=True,
+                    is_default_active=True,
+                    display_order=0,
+                    updated_at=None,
+                    is_override=False,
+                    override_user_type_id=None,
+                    override_updated_at=None,
+                ))
+
+    return DocumentDefaultsUserTypeResponse(
+        user_type_id=user_type_id,
+        user_type_name=user_type.get("name"),
+        documents=documents
+    )
+
+
+@router.put("/admin/documents/{job_id}/defaults/user-type/{user_type_id}", response_model=DocumentDefaultWithInheritance)
+async def set_document_defaults_override(
+    job_id: str,
+    user_type_id: int,
+    update: DocumentDefaultOverrideUpdate,
+    admin: dict = Depends(auth.require_admin)
+):
+    """
+    Set a document defaults override for a user type.
+    This value will override the global default for users of this type.
+    Requires admin authentication.
+    """
+    # Verify user type exists
+    user_type = database.get_user_type(user_type_id)
+    if not user_type:
+        raise HTTPException(status_code=404, detail=f"User type not found: {user_type_id}")
+
+    # Verify job exists
+    job = ingest_db.get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
+
+    # Get admin pubkey for audit log - fail if missing (auth integrity check)
+    admin_pubkey = admin.get("pubkey")
+    if not admin_pubkey:
+        logger.error("Admin pubkey missing from authenticated context")
+        raise HTTPException(status_code=500, detail="Authentication context incomplete")
+
+    # Create/update the override
+    database.upsert_document_defaults_override(
+        job_id=job_id,
+        user_type_id=user_type_id,
+        is_available=update.is_available,
+        is_default_active=update.is_default_active,
+        changed_by=admin_pubkey,
+    )
+
+    # Get the effective state after update
+    override = database.get_document_defaults_override(job_id, user_type_id)
+    global_defaults = database.get_document_defaults(job_id)
+
+    # Calculate effective values
+    is_available = (
+        bool(override["is_available"]) if override and override["is_available"] is not None
+        else (bool(global_defaults["is_available"]) if global_defaults else True)
+    )
+    is_default_active = (
+        bool(override["is_default_active"]) if override and override["is_default_active"] is not None
+        else (bool(global_defaults["is_default_active"]) if global_defaults else True)
+    )
+
+    return DocumentDefaultWithInheritance(
+        job_id=job_id,
+        filename=job["filename"],
+        status=job["status"],
+        total_chunks=job["total_chunks"],
+        is_available=is_available,
+        is_default_active=is_default_active,
+        display_order=global_defaults["display_order"] if global_defaults else 0,
+        is_override=True,
+        override_user_type_id=user_type_id,
+        override_updated_at=override["updated_at"] if override else None,
+    )
+
+
+@router.delete("/admin/documents/{job_id}/defaults/user-type/{user_type_id}")
+async def delete_document_defaults_override(
+    job_id: str,
+    user_type_id: int,
+    admin: dict = Depends(auth.require_admin)
+):
+    """
+    Remove a document defaults override for a user type (revert to global default).
+    Requires admin authentication.
+    """
+    # Verify user type exists
+    user_type = database.get_user_type(user_type_id)
+    if not user_type:
+        raise HTTPException(status_code=404, detail=f"User type not found: {user_type_id}")
+
+    # Verify job exists
+    job = ingest_db.get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
+
+    # Get admin pubkey for audit log - fail if missing (auth integrity check)
+    admin_pubkey = admin.get("pubkey")
+    if not admin_pubkey:
+        logger.error("Admin pubkey missing from authenticated context")
+        raise HTTPException(status_code=500, detail="Authentication context incomplete")
+
+    # Delete the override
+    deleted = database.delete_document_defaults_override(job_id, user_type_id, changed_by=admin_pubkey)
+
+    if not deleted:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No override found for job '{job_id}' and user type {user_type_id}"
+        )
+
+    return {"success": True, "message": f"Override for document '{job_id}' reverted to global default"}
+
+
+@router.get("/admin/documents/defaults/user-type/{user_type_id}/active")
+async def get_active_documents_for_user_type(
+    user_type_id: int,
+    admin: dict = Depends(auth.require_admin)
+):
+    """
+    Get list of job_ids that are default active for a user type.
+    Uses inheritance: user-type overrides take precedence over global defaults.
+    Requires admin authentication.
+    """
+    # Verify user type exists
+    user_type = database.get_user_type(user_type_id)
+    if not user_type:
+        raise HTTPException(status_code=404, detail=f"User type not found: {user_type_id}")
+
+    job_ids = database.get_active_documents_for_user_type(user_type_id)
     return {"job_ids": job_ids}

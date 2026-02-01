@@ -7,9 +7,13 @@ import { adminFetch } from '../utils/adminApi'
 import type {
   AIConfigResponse,
   AIConfigItem,
+  AIConfigUserTypeResponse,
+  AIConfigWithInheritance,
   PromptPreviewResponse,
   DocumentDefaultsResponse,
   DocumentDefaultItem,
+  DocumentDefaultsUserTypeResponse,
+  DocumentDefaultWithInheritance,
   DeploymentConfigResponse,
   DeploymentConfigItem,
   ServiceHealthResponse,
@@ -24,32 +28,75 @@ import type {
 
 // --- AI Configuration Hooks ---
 
-export function useAIConfig() {
+export function useAIConfig(userTypeId?: number | null) {
   const [config, setConfig] = useState<AIConfigResponse | null>(null)
+  const [userTypeConfig, setUserTypeConfig] = useState<AIConfigUserTypeResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Fetch global config or user-type-specific config
   const fetchConfig = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await adminFetch('/admin/ai-config')
-      if (!response.ok) {
-        throw new Error(`errors.failedToFetchAIConfig`)
+
+      if (userTypeId) {
+        // Fetch user-type-specific config with inheritance
+        const response = await adminFetch(`/admin/ai-config/user-type/${userTypeId}`)
+        if (!response.ok) {
+          throw new Error(`errors.failedToFetchAIConfig`)
+        }
+        const data: AIConfigUserTypeResponse = await response.json()
+        setUserTypeConfig(data)
+        // Also convert to AIConfigResponse format for compatibility
+        setConfig({
+          prompt_sections: data.prompt_sections.map(item => ({
+            key: item.key,
+            value: item.value,
+            value_type: item.value_type,
+            category: item.category,
+            description: item.description,
+            updated_at: item.updated_at,
+          })),
+          parameters: data.parameters.map(item => ({
+            key: item.key,
+            value: item.value,
+            value_type: item.value_type,
+            category: item.category,
+            description: item.description,
+            updated_at: item.updated_at,
+          })),
+          defaults: data.defaults.map(item => ({
+            key: item.key,
+            value: item.value,
+            value_type: item.value_type,
+            category: item.category,
+            description: item.description,
+            updated_at: item.updated_at,
+          })),
+        })
+      } else {
+        // Fetch global config
+        const response = await adminFetch('/admin/ai-config')
+        if (!response.ok) {
+          throw new Error(`errors.failedToFetchAIConfig`)
+        }
+        const data = await response.json()
+        setConfig(data)
+        setUserTypeConfig(null)
       }
-      const data = await response.json()
-      setConfig(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'errors.failedToFetchAIConfig')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [userTypeId])
 
   useEffect(() => {
     fetchConfig()
   }, [fetchConfig])
 
+  // Update global config
   const updateConfig = useCallback(async (key: string, value: string): Promise<AIConfigItem | null> => {
     try {
       const response = await adminFetch(`/admin/ai-config/${key}`, {
@@ -75,8 +122,71 @@ export function useAIConfig() {
     }
   }, [fetchConfig])
 
-  const previewPrompt = useCallback(async (sampleQuestion?: string, sampleFacts?: Record<string, string>): Promise<PromptPreviewResponse> => {
-    const response = await adminFetch('/admin/ai-config/prompts/preview', {
+  // Set override for a user type
+  const setOverride = useCallback(async (key: string, value: string, targetUserTypeId?: number): Promise<AIConfigWithInheritance | null> => {
+    const typeId = targetUserTypeId ?? userTypeId
+    if (!typeId) {
+      throw new Error('User type ID is required for setting overrides')
+    }
+    try {
+      const response = await adminFetch(`/admin/ai-config/user-type/${typeId}/${key}`, {
+        method: 'PUT',
+        body: JSON.stringify({ value }),
+      })
+      if (!response.ok) {
+        let detail = `errors.failedToSetOverride`
+        try {
+          const err = await response.json()
+          if (err.detail) detail = err.detail
+        } catch {
+          // Non-JSON response
+        }
+        throw new Error(detail)
+      }
+      const updated = await response.json()
+      // Refresh full config
+      await fetchConfig()
+      return updated
+    } catch (err) {
+      throw err
+    }
+  }, [fetchConfig, userTypeId])
+
+  // Revert override to global (delete override)
+  const revertOverride = useCallback(async (key: string, targetUserTypeId?: number): Promise<void> => {
+    const typeId = targetUserTypeId ?? userTypeId
+    if (!typeId) {
+      throw new Error('User type ID is required for reverting overrides')
+    }
+    try {
+      const response = await adminFetch(`/admin/ai-config/user-type/${typeId}/${key}`, {
+        method: 'DELETE',
+      })
+      if (!response.ok) {
+        let detail = `errors.failedToRevertOverride`
+        try {
+          const err = await response.json()
+          if (err.detail) detail = err.detail
+        } catch {
+          // Non-JSON response
+        }
+        throw new Error(detail)
+      }
+      // Refresh full config
+      await fetchConfig()
+    } catch (err) {
+      throw err
+    }
+  }, [fetchConfig, userTypeId])
+
+  // Preview prompt (global or for user type)
+  const previewPrompt = useCallback(async (sampleQuestion?: string, sampleFacts?: Record<string, string>, targetUserTypeId?: number): Promise<PromptPreviewResponse> => {
+    const typeId = targetUserTypeId ?? userTypeId
+    const url = typeId
+      ? `/admin/ai-config/user-type/${typeId}/prompts/preview`
+      : '/admin/ai-config/prompts/preview'
+
+    const response = await adminFetch(url, {
       method: 'POST',
       body: JSON.stringify({
         sample_question: sampleQuestion,
@@ -87,22 +197,26 @@ export function useAIConfig() {
       throw new Error(`errors.failedToPreviewPrompt`)
     }
     return response.json()
-  }, [])
+  }, [userTypeId])
 
   return {
     config,
+    userTypeConfig,
     loading,
     error,
     refresh: fetchConfig,
     updateConfig,
+    setOverride,
+    revertOverride,
     previewPrompt,
   }
 }
 
 // --- Document Defaults Hooks ---
 
-export function useDocumentDefaults() {
+export function useDocumentDefaults(userTypeId?: number | null) {
   const [documents, setDocuments] = useState<DocumentDefaultItem[]>([])
+  const [userTypeDocuments, setUserTypeDocuments] = useState<DocumentDefaultWithInheritance[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -110,23 +224,48 @@ export function useDocumentDefaults() {
     try {
       setLoading(true)
       setError(null)
-      const response = await adminFetch('/ingest/admin/documents/defaults')
-      if (!response.ok) {
-        throw new Error(`errors.failedToFetchDocumentDefaults`)
+
+      if (userTypeId) {
+        // Fetch user-type-specific document defaults with inheritance
+        const response = await adminFetch(`/ingest/admin/documents/defaults/user-type/${userTypeId}`)
+        if (!response.ok) {
+          throw new Error(`errors.failedToFetchDocumentDefaults`)
+        }
+        const data: DocumentDefaultsUserTypeResponse = await response.json()
+        setUserTypeDocuments(data.documents)
+        // Also convert to DocumentDefaultItem format for compatibility
+        setDocuments(data.documents.map(doc => ({
+          job_id: doc.job_id,
+          filename: doc.filename,
+          status: doc.status,
+          total_chunks: doc.total_chunks,
+          is_available: doc.is_available,
+          is_default_active: doc.is_default_active,
+          display_order: doc.display_order,
+          updated_at: doc.updated_at,
+        })))
+      } else {
+        // Fetch global document defaults
+        const response = await adminFetch('/ingest/admin/documents/defaults')
+        if (!response.ok) {
+          throw new Error(`errors.failedToFetchDocumentDefaults`)
+        }
+        const data: DocumentDefaultsResponse = await response.json()
+        setDocuments(data.documents)
+        setUserTypeDocuments([])
       }
-      const data: DocumentDefaultsResponse = await response.json()
-      setDocuments(data.documents)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'errors.failedToFetchDocumentDefaults')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [userTypeId])
 
   useEffect(() => {
     fetchDefaults()
   }, [fetchDefaults])
 
+  // Update global document defaults
   const updateDocument = useCallback(async (
     jobId: string,
     update: { is_available?: boolean; is_default_active?: boolean; display_order?: number }
@@ -140,13 +279,74 @@ export function useDocumentDefaults() {
         throw new Error(`errors.failedToUpdateDocument`)
       }
       const updated = await response.json()
-      // Update local state
-      setDocuments(prev => prev.map(d => d.job_id === jobId ? updated : d))
+      // Refresh full list
+      await fetchDefaults()
       return updated
     } catch (err) {
       throw err
     }
-  }, [])
+  }, [fetchDefaults])
+
+  // Set override for a user type
+  const setOverride = useCallback(async (
+    jobId: string,
+    update: { is_available?: boolean; is_default_active?: boolean },
+    targetUserTypeId?: number
+  ): Promise<DocumentDefaultWithInheritance | null> => {
+    const typeId = targetUserTypeId ?? userTypeId
+    if (!typeId) {
+      throw new Error('User type ID is required for setting document overrides')
+    }
+    try {
+      const response = await adminFetch(`/ingest/admin/documents/${jobId}/defaults/user-type/${typeId}`, {
+        method: 'PUT',
+        body: JSON.stringify(update),
+      })
+      if (!response.ok) {
+        let detail = `errors.failedToSetDocOverride`
+        try {
+          const err = await response.json()
+          if (err.detail) detail = err.detail
+        } catch {
+          // Non-JSON response
+        }
+        throw new Error(detail)
+      }
+      const updated = await response.json()
+      // Refresh full list
+      await fetchDefaults()
+      return updated
+    } catch (err) {
+      throw err
+    }
+  }, [fetchDefaults, userTypeId])
+
+  // Revert override to global (delete override)
+  const revertOverride = useCallback(async (jobId: string, targetUserTypeId?: number): Promise<void> => {
+    const typeId = targetUserTypeId ?? userTypeId
+    if (!typeId) {
+      throw new Error('User type ID is required for reverting document overrides')
+    }
+    try {
+      const response = await adminFetch(`/ingest/admin/documents/${jobId}/defaults/user-type/${typeId}`, {
+        method: 'DELETE',
+      })
+      if (!response.ok) {
+        let detail = `errors.failedToRevertDocOverride`
+        try {
+          const err = await response.json()
+          if (err.detail) detail = err.detail
+        } catch {
+          // Non-JSON response
+        }
+        throw new Error(detail)
+      }
+      // Refresh full list
+      await fetchDefaults()
+    } catch (err) {
+      throw err
+    }
+  }, [fetchDefaults, userTypeId])
 
   const batchUpdate = useCallback(async (
     updates: Array<{ job_id: string; is_available?: boolean; is_default_active?: boolean; display_order?: number }>
@@ -164,10 +364,13 @@ export function useDocumentDefaults() {
 
   return {
     documents,
+    userTypeDocuments,
     loading,
     error,
     refresh: fetchDefaults,
     updateDocument,
+    setOverride,
+    revertOverride,
     batchUpdate,
   }
 }

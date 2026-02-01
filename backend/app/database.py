@@ -221,6 +221,40 @@ def init_schema():
         )
     """)
 
+    # AI config user-type overrides - stores per-user-type AI config overrides
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ai_config_user_type_overrides (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ai_config_key TEXT NOT NULL,
+            user_type_id INTEGER NOT NULL,
+            value TEXT NOT NULL,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_type_id) REFERENCES user_types(id) ON DELETE CASCADE,
+            UNIQUE(ai_config_key, user_type_id)
+        )
+    """)
+
+    # Document defaults user-type overrides - stores per-user-type document defaults
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS document_defaults_user_type_overrides (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_id TEXT NOT NULL,
+            user_type_id INTEGER NOT NULL,
+            is_available INTEGER,
+            is_default_active INTEGER,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (job_id) REFERENCES ingest_jobs(job_id) ON DELETE CASCADE,
+            FOREIGN KEY (user_type_id) REFERENCES user_types(id) ON DELETE CASCADE,
+            UNIQUE(job_id, user_type_id)
+        )
+    """)
+
+    # Indexes for user-type override tables
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_ai_config_overrides_type ON ai_config_user_type_overrides(user_type_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_ai_config_overrides_key ON ai_config_user_type_overrides(ai_config_key)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_doc_defaults_overrides_type ON document_defaults_user_type_overrides(user_type_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_doc_defaults_overrides_job ON document_defaults_user_type_overrides(job_id)")
+
     conn.commit()
     logger.info("SQLite schema initialized")
 
@@ -1178,6 +1212,125 @@ def update_ai_config(key: str, value: str, changed_by: str) -> bool:
         return False
 
 
+# --- AI Config User-Type Override Operations ---
+
+def get_ai_config_override(key: str, user_type_id: int) -> dict | None:
+    """Get a single AI config override for a user type"""
+    with get_cursor() as cursor:
+        cursor.execute("""
+            SELECT * FROM ai_config_user_type_overrides
+            WHERE ai_config_key = ? AND user_type_id = ?
+        """, (key, user_type_id))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+
+def get_ai_config_overrides_by_type(user_type_id: int) -> list[dict]:
+    """Get all AI config overrides for a user type"""
+    with get_cursor() as cursor:
+        cursor.execute("""
+            SELECT * FROM ai_config_user_type_overrides
+            WHERE user_type_id = ?
+            ORDER BY ai_config_key
+        """, (user_type_id,))
+        return [dict(row) for row in cursor.fetchall()]
+
+
+def upsert_ai_config_override(key: str, user_type_id: int, value: str, changed_by: str) -> bool:
+    """Create or update an AI config override for a user type"""
+    with get_cursor() as cursor:
+        # Get old value for audit log
+        cursor.execute("""
+            SELECT value FROM ai_config_user_type_overrides
+            WHERE ai_config_key = ? AND user_type_id = ?
+        """, (key, user_type_id))
+        old_row = cursor.fetchone()
+        old_value = old_row["value"] if old_row else None
+
+        cursor.execute("""
+            INSERT INTO ai_config_user_type_overrides (ai_config_key, user_type_id, value)
+            VALUES (?, ?, ?)
+            ON CONFLICT(ai_config_key, user_type_id) DO UPDATE SET
+                value = excluded.value,
+                updated_at = CURRENT_TIMESTAMP
+        """, (key, user_type_id, value))
+
+        # Log the change (only if changed_by is provided)
+        if changed_by:
+            cursor.execute("""
+                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
+                VALUES (?, ?, ?, ?, ?)
+            """, ("ai_config_user_type_overrides", f"{key}:type_{user_type_id}", old_value, value, changed_by))
+
+        return True
+
+
+def delete_ai_config_override(key: str, user_type_id: int, changed_by: str = "") -> bool:
+    """Delete an AI config override (revert to global). Returns True if deleted."""
+    with get_cursor() as cursor:
+        # Get old value for audit log
+        cursor.execute("""
+            SELECT value FROM ai_config_user_type_overrides
+            WHERE ai_config_key = ? AND user_type_id = ?
+        """, (key, user_type_id))
+        old_row = cursor.fetchone()
+        old_value = old_row["value"] if old_row else None
+
+        cursor.execute("""
+            DELETE FROM ai_config_user_type_overrides
+            WHERE ai_config_key = ? AND user_type_id = ?
+        """, (key, user_type_id))
+
+        deleted = cursor.rowcount > 0
+
+        # Log the change if something was deleted
+        if deleted and changed_by:
+            cursor.execute("""
+                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
+                VALUES (?, ?, ?, ?, ?)
+            """, ("ai_config_user_type_overrides", f"{key}:type_{user_type_id}", old_value, "(reverted to global)", changed_by))
+
+        return deleted
+
+
+def get_effective_ai_config(user_type_id: int | None = None) -> list[dict]:
+    """
+    Get all AI config values with inheritance applied.
+
+    If user_type_id is provided, returns global config merged with user-type overrides.
+    Override values replace global values for matching keys.
+    Each item includes is_override flag and override_user_type_id if applicable.
+    """
+    # Start with global config
+    all_config = get_all_ai_config()
+
+    if user_type_id is None:
+        # No user type, return global config with is_override=False
+        for config in all_config:
+            config["is_override"] = False
+            config["override_user_type_id"] = None
+        return all_config
+
+    # Get overrides for this user type
+    overrides = get_ai_config_overrides_by_type(user_type_id)
+    overrides_by_key = {o["ai_config_key"]: o for o in overrides}
+
+    # Merge: overrides win
+    for config in all_config:
+        key = config["key"]
+        if key in overrides_by_key:
+            override = overrides_by_key[key]
+            config["value"] = override["value"]
+            config["is_override"] = True
+            config["override_user_type_id"] = user_type_id
+            config["updated_at"] = override["updated_at"]
+        else:
+            config["is_override"] = False
+            config["override_user_type_id"] = None
+
+    return all_config
+
+
 # --- Document Defaults Operations ---
 
 def get_document_defaults(job_id: str) -> dict | None:
@@ -1255,6 +1408,188 @@ def get_available_documents() -> list[str]:
             ORDER BY display_order
         """)
         return [row["job_id"] for row in cursor.fetchall()]
+
+
+# --- Document Defaults User-Type Override Operations ---
+
+def get_document_defaults_override(job_id: str, user_type_id: int) -> dict | None:
+    """Get document defaults override for a specific job and user type"""
+    with get_cursor() as cursor:
+        cursor.execute("""
+            SELECT * FROM document_defaults_user_type_overrides
+            WHERE job_id = ? AND user_type_id = ?
+        """, (job_id, user_type_id))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+
+def get_document_defaults_overrides_by_type(user_type_id: int) -> list[dict]:
+    """Get all document defaults overrides for a user type"""
+    with get_cursor() as cursor:
+        cursor.execute("""
+            SELECT * FROM document_defaults_user_type_overrides
+            WHERE user_type_id = ?
+            ORDER BY job_id
+        """, (user_type_id,))
+        return [dict(row) for row in cursor.fetchall()]
+
+
+def upsert_document_defaults_override(
+    job_id: str,
+    user_type_id: int,
+    is_available: bool | None = None,
+    is_default_active: bool | None = None,
+    changed_by: str = ""
+) -> bool:
+    """Create or update document defaults override for a user type"""
+    with get_cursor() as cursor:
+        # Get old value for audit log
+        cursor.execute("""
+            SELECT is_available, is_default_active FROM document_defaults_user_type_overrides
+            WHERE job_id = ? AND user_type_id = ?
+        """, (job_id, user_type_id))
+        old_row = cursor.fetchone()
+        old_value = json.dumps({
+            "is_available": bool(old_row["is_available"]) if old_row and old_row["is_available"] is not None else None,
+            "is_default_active": bool(old_row["is_default_active"]) if old_row and old_row["is_default_active"] is not None else None
+        }) if old_row else None
+
+        # Handle None values - only update fields that are provided
+        if old_row:
+            # Merge with existing values
+            final_available = is_available if is_available is not None else (
+                bool(old_row["is_available"]) if old_row["is_available"] is not None else None
+            )
+            final_active = is_default_active if is_default_active is not None else (
+                bool(old_row["is_default_active"]) if old_row["is_default_active"] is not None else None
+            )
+        else:
+            final_available = is_available
+            final_active = is_default_active
+
+        cursor.execute("""
+            INSERT INTO document_defaults_user_type_overrides (job_id, user_type_id, is_available, is_default_active)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(job_id, user_type_id) DO UPDATE SET
+                is_available = excluded.is_available,
+                is_default_active = excluded.is_default_active,
+                updated_at = CURRENT_TIMESTAMP
+        """, (
+            job_id,
+            user_type_id,
+            int(final_available) if final_available is not None else None,
+            int(final_active) if final_active is not None else None
+        ))
+
+        # Log the change
+        new_value = json.dumps({"is_available": final_available, "is_default_active": final_active})
+        if changed_by:
+            cursor.execute("""
+                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
+                VALUES (?, ?, ?, ?, ?)
+            """, ("document_defaults_user_type_overrides", f"{job_id}:type_{user_type_id}", old_value, new_value, changed_by))
+
+        return True
+
+
+def delete_document_defaults_override(job_id: str, user_type_id: int, changed_by: str = "") -> bool:
+    """Delete document defaults override (revert to global). Returns True if deleted."""
+    with get_cursor() as cursor:
+        # Get old value for audit log
+        cursor.execute("""
+            SELECT is_available, is_default_active FROM document_defaults_user_type_overrides
+            WHERE job_id = ? AND user_type_id = ?
+        """, (job_id, user_type_id))
+        old_row = cursor.fetchone()
+        old_value = json.dumps({
+            "is_available": bool(old_row["is_available"]) if old_row and old_row["is_available"] is not None else None,
+            "is_default_active": bool(old_row["is_default_active"]) if old_row and old_row["is_default_active"] is not None else None
+        }) if old_row else None
+
+        cursor.execute("""
+            DELETE FROM document_defaults_user_type_overrides
+            WHERE job_id = ? AND user_type_id = ?
+        """, (job_id, user_type_id))
+
+        deleted = cursor.rowcount > 0
+
+        if deleted and changed_by:
+            cursor.execute("""
+                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
+                VALUES (?, ?, ?, ?, ?)
+            """, ("document_defaults_user_type_overrides", f"{job_id}:type_{user_type_id}", old_value, "(reverted to global)", changed_by))
+
+        return deleted
+
+
+def get_effective_document_defaults(user_type_id: int | None = None) -> list[dict]:
+    """
+    Get all document defaults with inheritance applied.
+
+    If user_type_id is provided, returns global defaults merged with user-type overrides.
+    Override values replace global values for matching job_ids.
+    Each item includes is_override flag if applicable.
+
+    Note: This only processes documents that have global defaults set.
+    """
+    # Get global defaults
+    defaults = list_document_defaults()
+
+    if user_type_id is None:
+        # No user type, return global with is_override=False
+        for doc in defaults:
+            doc["is_override"] = False
+            doc["override_user_type_id"] = None
+        return defaults
+
+    # Get overrides for this user type
+    overrides = get_document_defaults_overrides_by_type(user_type_id)
+    overrides_by_job = {o["job_id"]: o for o in overrides}
+
+    # Merge: overrides win for is_available and is_default_active
+    for doc in defaults:
+        job_id = doc["job_id"]
+        if job_id in overrides_by_job:
+            override = overrides_by_job[job_id]
+            # Only override if the override has a non-None value
+            if override["is_available"] is not None:
+                doc["is_available"] = bool(override["is_available"])
+            if override["is_default_active"] is not None:
+                doc["is_default_active"] = bool(override["is_default_active"])
+            doc["is_override"] = True
+            doc["override_user_type_id"] = user_type_id
+            doc["override_updated_at"] = override["updated_at"]
+        else:
+            doc["is_override"] = False
+            doc["override_user_type_id"] = None
+
+    return defaults
+
+
+def get_active_documents_for_user_type(user_type_id: int | None = None) -> list[str]:
+    """
+    Get list of job_ids that should be default active for a user type.
+
+    Uses inheritance: user-type overrides take precedence over global defaults.
+    """
+    if user_type_id is None:
+        return get_default_active_documents()
+
+    effective = get_effective_document_defaults(user_type_id)
+    return [doc["job_id"] for doc in effective if doc.get("is_available") and doc.get("is_default_active")]
+
+
+def get_available_documents_for_user_type(user_type_id: int | None = None) -> list[str]:
+    """
+    Get list of job_ids that are available for a user type.
+
+    Uses inheritance: user-type overrides take precedence over global defaults.
+    """
+    if user_type_id is None:
+        return get_available_documents()
+
+    effective = get_effective_document_defaults(user_type_id)
+    return [doc["job_id"] for doc in effective if doc.get("is_available")]
 
 
 # --- Deployment Configuration Operations ---

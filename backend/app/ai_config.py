@@ -25,6 +25,16 @@ logger = logging.getLogger("sanctum.ai_config")
 router = APIRouter(prefix="/admin/ai-config", tags=["ai-config"])
 
 
+def _sanitize_profile_value(value: str) -> str:
+    """
+    Sanitize user profile values before prompt interpolation.
+    Collapses newlines and normalizes whitespace to prevent prompt structure breakage.
+    """
+    if not isinstance(value, str):
+        value = str(value)
+    return " ".join(value.split())
+
+
 def _config_to_item(config: dict) -> AIConfigItem:
     """Convert database row to AIConfigItem"""
     return AIConfigItem(
@@ -633,7 +643,8 @@ def build_chat_prompt(
         parts.append("=== USER PROFILE ===")
         parts.append("The following information is known about the user:")
         for field_name, value in user_profile_context.items():
-            parts.append(f"- {field_name}: {value}")
+            safe_value = _sanitize_profile_value(value)
+            parts.append(f"- {field_name}: {safe_value}")
 
     # Rules section
     rules = sections.get("prompt_rules", [])

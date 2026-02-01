@@ -11,6 +11,7 @@ Key principles:
 """
 
 import os
+import re
 import logging
 import uuid
 from typing import Optional
@@ -32,6 +33,17 @@ from llm import get_provider
 logger = logging.getLogger("sanctum.query")
 
 router = APIRouter(prefix="/query", tags=["query"])
+
+
+def _sanitize_profile_value(value: str) -> str:
+    """
+    Sanitize user profile values before prompt interpolation.
+    Collapses newlines and normalizes whitespace to prevent prompt structure breakage.
+    """
+    if not isinstance(value, str):
+        value = str(value)
+    return " ".join(value.split())
+
 
 # Configuration
 TOP_K_VECTORS = int(os.getenv("RAG_TOP_K", "8"))  # More context for nuance
@@ -148,8 +160,23 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         # 4. Build context and call LLM with context-aware prompt
         context = _build_context(chunk_texts, sources)
         session["_last_sources"] = sources  # For dynamic citation
+
+        # Get user profile context for chat personalization (unencrypted fields only)
+        import database
+        user_profile_context = None
+        user_id = user.get("id")
+        if user_id and user_id != -1:  # Skip dev mode mock user (id=-1)
+            user_profile_context = database.get_user_chat_context_values(
+                user_id=user_id,
+                user_type_id=user_type_id
+            )
+            # Only pass if there's actual data
+            if not user_profile_context:
+                user_profile_context = None
+
         answer, clarifying_questions, full_prompt, search_term = _call_llm_contextual(
-            question, context, session, tools=request.tools, user_type_id=user_type_id
+            question, context, session, tools=request.tools, user_type_id=user_type_id,
+            user_profile_context=user_profile_context
         )
         
         # Add assistant response to history
@@ -180,6 +207,14 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
 
         logger.info(f"RAG complete. Answer: {len(answer)} chars, {len(clarifying_questions)} clarifying Qs, search_term={search_term}, facts={session.get('facts_gathered', {})}")
 
+        # Redact user profile section from debug output to avoid exposing sensitive data
+        debug_prompt = re.sub(
+            r'=== USER PROFILE ===.*?(?====|$)',
+            '=== USER PROFILE ===\n[REDACTED]\n\n',
+            full_prompt,
+            flags=re.DOTALL
+        )
+
         return QueryResponse(
             answer=answer,
             session_id=session_id,
@@ -187,7 +222,7 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
             graph_context=graph_context,
             clarifying_questions=clarifying_questions,
             search_term=search_term,  # Auto-search trigger (if web-search tool enabled)
-            context_used=full_prompt,  # For debugging - see exactly what LLM received
+            context_used=debug_prompt,  # For debugging - redacted to protect user data
             temperature=actual_temperature,
         )
         
@@ -335,7 +370,14 @@ def _build_context(chunk_texts: list[str], sources: list[dict]) -> str:
     return "\n".join(parts)
 
 
-def _call_llm_contextual(question: str, context: str, session: dict, tools: Optional[list[str]] = None, user_type_id: int | None = None) -> tuple[str, list[str], str, Optional[str]]:
+def _call_llm_contextual(
+    question: str,
+    context: str,
+    session: dict,
+    tools: Optional[list[str]] = None,
+    user_type_id: int | None = None,
+    user_profile_context: dict[str, str] | None = None
+) -> tuple[str, list[str], str, Optional[str]]:
     """
     Call LLM with context-aware prompt.
     Returns (answer, list of clarifying questions, full_prompt for debugging, search_term or None).
@@ -346,6 +388,7 @@ def _call_llm_contextual(question: str, context: str, session: dict, tools: Opti
         session: Session state dict
         tools: List of enabled tool IDs
         user_type_id: If provided, uses user-type-specific prompt sections and parameters
+        user_profile_context: Optional dict of {field_name: value} for user profile data
     """
     import re
     from ai_config import get_prompt_sections, get_llm_parameters
@@ -392,6 +435,12 @@ def _call_llm_contextual(question: str, context: str, session: dict, tools: Opti
         known_facts_section = "=== NO FACTS CONFIRMED YET ===\nAsk about location and context early, but only once per conversation."
         jurisdiction_note = "We don't know location yet. Ask about it, but don't repeatedly ask if user doesn't answer."
 
+    # Build user profile section (if any profile data is available)
+    user_profile_section = ""
+    if user_profile_context:
+        profile_lines = [f"  - {field_name}: {_sanitize_profile_value(value)}" for field_name, value in user_profile_context.items()]
+        user_profile_section = "\n\n=== USER PROFILE ===\nThe following information is known about the user:\n" + "\n".join(profile_lines)
+
     # Auto-search instruction if web-search tool is enabled
     search_instruction = ""
     if "web-search" in tools:
@@ -436,7 +485,7 @@ Make search terms specific: "[SEARCH: local library hours downtown]"
 
     prompt = f"""You are a helpful, knowledgeable assistant.
 
-{known_facts_section}
+{known_facts_section}{user_profile_section}
 
 {style_section}
 

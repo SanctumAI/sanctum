@@ -499,12 +499,25 @@ async def chat(request: ChatRequest, user: dict = Depends(auth.require_admin_or_
         llm_params = get_llm_parameters(user_type_id=user_type_id)
         temperature = llm_params.get("temperature", 0.1)
 
+        # Get user profile context for chat personalization (unencrypted fields only)
+        user_profile_context = None
+        user_id = user.get("id")
+        if user_id and user_id != -1:  # Skip dev mode mock user (id=-1)
+            user_profile_context = database.get_user_chat_context_values(
+                user_id=user_id,
+                user_type_id=user_type_id
+            )
+            # Only pass if there's actual data
+            if not user_profile_context:
+                user_profile_context = None
+
         # Build prompt using AI config (with user-type overrides if applicable)
         combined_context = "\n\n".join(tool_context_parts) if tool_context_parts else ""
         prompt = build_chat_prompt(
             message=request.message,
             context=combined_context,
             user_type_id=user_type_id,
+            user_profile_context=user_profile_context,
         )
 
         provider = get_provider()
@@ -1168,6 +1181,13 @@ async def create_field_definition(field: FieldDefinitionCreate, admin: dict = De
         if not database.get_user_type(field.user_type_id):
             raise HTTPException(status_code=400, detail="User type not found")
 
+    # Validation: Cannot include encrypted fields in chat context
+    if field.include_in_chat and field.encryption_enabled:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot include encrypted fields in chat context. Encrypted fields require admin's private key to decrypt."
+        )
+
     try:
         field_id = database.create_field_definition(
             field_name=field.field_name,
@@ -1177,7 +1197,8 @@ async def create_field_definition(field: FieldDefinitionCreate, admin: dict = De
             user_type_id=field.user_type_id,
             placeholder=field.placeholder,
             options=field.options,
-            encryption_enabled=field.encryption_enabled
+            encryption_enabled=field.encryption_enabled,
+            include_in_chat=field.include_in_chat
         )
         created = database.get_field_definition_by_id(field_id)
         return FieldDefinitionResponse(**created)
@@ -1199,6 +1220,17 @@ async def update_field_definition(field_id: int, field: FieldDefinitionUpdate, a
         if not database.get_user_type(field.user_type_id):
             raise HTTPException(status_code=400, detail="User type not found")
 
+    # Determine effective encryption state (use existing if not specified)
+    effective_encryption = field.encryption_enabled if field.encryption_enabled is not None else existing.get("encryption_enabled", 1)
+    effective_include_in_chat = field.include_in_chat if field.include_in_chat is not None else existing.get("include_in_chat", 0)
+
+    # Validation: Cannot include encrypted fields in chat context
+    if effective_include_in_chat and effective_encryption:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot include encrypted fields in chat context. Encrypted fields require admin's private key to decrypt."
+        )
+
     database.update_field_definition(
         field_id,
         field_name=field.field_name,
@@ -1208,7 +1240,8 @@ async def update_field_definition(field_id: int, field: FieldDefinitionUpdate, a
         user_type_id=field.user_type_id if field.user_type_id != 0 else None,
         placeholder=field.placeholder,
         options=field.options,
-        encryption_enabled=field.encryption_enabled
+        encryption_enabled=field.encryption_enabled,
+        include_in_chat=field.include_in_chat
     )
     updated = database.get_field_definition_by_id(field_id)
     return FieldDefinitionResponse(**updated)
@@ -1224,28 +1257,31 @@ async def delete_field_definition(field_id: int, admin: dict = Depends(auth.requ
 
 @app.put("/admin/user-fields/{field_id}/encryption", response_model=FieldEncryptionResponse)
 async def update_field_encryption(
-    field_id: int, 
-    encryption_request: FieldEncryptionRequest, 
+    field_id: int,
+    encryption_request: FieldEncryptionRequest,
     admin: dict = Depends(auth.require_admin)
 ):
     """Update encryption setting for a field definition (requires admin auth).
-    
+
     WARNING: Changing encryption settings may affect existing data.
-    - Enabling encryption: Future values will be encrypted, existing plaintext remains  
+    - Enabling encryption: Future values will be encrypted, existing plaintext remains
     - Disabling encryption: Future values stored as plaintext, existing encrypted data remains
-    
+
     Use force=true to bypass warnings about data migration complexity.
+
+    Note: Enabling encryption will auto-disable include_in_chat since encrypted
+    fields cannot be included in AI chat context.
     """
     # Check if field exists
     field_def = database.get_field_definition_by_id(field_id)
     if not field_def:
         raise HTTPException(status_code=404, detail="Field definition not found")
-    
+
     current_encryption = field_def.get("encryption_enabled", 1)
     new_encryption = encryption_request.encryption_enabled
-    
+
     warning = None
-    
+
     # Check for potential data impact
     if current_encryption != int(new_encryption):
         # TODO: Check if field has existing values that would be affected
@@ -1254,22 +1290,32 @@ async def update_field_encryption(
             warning = "⚠️ Disabling encryption will store future values as plaintext. Existing encrypted data remains encrypted."
         else:
             warning = "Enabling encryption will encrypt future values. Existing plaintext data remains unencrypted."
-        
+
         if not encryption_request.force and warning:
             raise HTTPException(
-                status_code=400, 
+                status_code=400,
                 detail=f"{warning} Use force=true to confirm this change."
             )
-    
-    # Update encryption setting
+
+    # When enabling encryption, auto-disable include_in_chat
+    include_in_chat_update = None
+    if new_encryption and field_def.get("include_in_chat", 0):
+        include_in_chat_update = False
+        if warning:
+            warning += " Also disabled 'include in chat' since encrypted fields cannot be included in AI chat context."
+        else:
+            warning = "Disabled 'include in chat' since encrypted fields cannot be included in AI chat context."
+
+    # Update encryption setting (and include_in_chat if needed)
     success = database.update_field_definition(
         field_id,
-        encryption_enabled=new_encryption
+        encryption_enabled=new_encryption,
+        include_in_chat=include_in_chat_update
     )
-    
+
     if not success:
         raise HTTPException(status_code=500, detail="Failed to update field encryption")
-    
+
     return FieldEncryptionResponse(
         field_id=field_id,
         encryption_enabled=new_encryption,

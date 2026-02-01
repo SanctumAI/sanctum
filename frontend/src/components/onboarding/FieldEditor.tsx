@@ -26,6 +26,7 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
   const [options, setOptions] = useState<string[]>(initialField?.options || [''])
   const [userTypeId, setUserTypeId] = useState<number | null>(initialField?.user_type_id ?? null)
   const [encryptionEnabled, setEncryptionEnabled] = useState(initialField?.encryption_enabled ?? true)
+  const [includeInChat, setIncludeInChat] = useState(initialField?.include_in_chat ?? false)
   const [errors, setErrors] = useState<{ name?: string; options?: string }>({})
 
   const handleAddOption = () => {
@@ -72,9 +73,21 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
       options: type === 'select' ? options.filter((o) => o.trim()) : undefined,
       user_type_id: userTypeId,
       encryption_enabled: encryptionEnabled,
+      // Only include in chat if not encrypted
+      include_in_chat: encryptionEnabled ? false : includeInChat,
     }
 
     onSave(field)
+  }
+
+  // Auto-disable include_in_chat when encryption is enabled
+  const handleEncryptionToggle = () => {
+    const newEncryption = !encryptionEnabled
+    setEncryptionEnabled(newEncryption)
+    // If enabling encryption, auto-disable include_in_chat
+    if (newEncryption) {
+      setIncludeInChat(false)
+    }
   }
 
   return (
@@ -247,7 +260,7 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
         <div className="space-y-2">
           <label className="flex items-center gap-3 cursor-pointer py-2">
             <div
-              onClick={() => setEncryptionEnabled(!encryptionEnabled)}
+              onClick={handleEncryptionToggle}
               className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
                 encryptionEnabled ? 'bg-green-600 border-green-600' : 'border-border hover:border-accent/50'
               }`}
@@ -260,16 +273,16 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
             </div>
             <div className="flex-1">
               <span className="text-sm text-text font-medium">
-                {encryptionEnabled ? '🔒 Encrypt field values' : '🔓 Store as plaintext'}
+                {encryptionEnabled ? t('admin.fields.encryptEnabled') : t('admin.fields.encryptDisabled')}
               </span>
               <p className="text-xs text-text-muted">
-                {encryptionEnabled 
-                  ? 'Field values will be encrypted with NIP-04 (recommended)' 
-                  : '⚠️ Field values will be stored in plaintext (not recommended for sensitive data)'}
+                {encryptionEnabled
+                  ? t('admin.fields.encryptedHint')
+                  : t('admin.fields.plaintextHint')}
               </p>
             </div>
           </label>
-          
+
           {!encryptionEnabled && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
               <div className="flex items-start gap-2">
@@ -277,15 +290,68 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.582 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
                 <div>
-                  <p className="text-sm font-medium text-yellow-800">Security Warning</p>
+                  <p className="text-sm font-medium text-yellow-800">{t('admin.fields.securityWarning')}</p>
                   <p className="text-xs text-yellow-700 mt-1">
-                    Disabling encryption will store user data in plaintext. Only disable for non-sensitive fields like preferences or public information.
+                    {t('admin.fields.securityWarningBody')}
                   </p>
                 </div>
               </div>
             </div>
           )}
         </div>
+
+        {/* Include in AI Chat Toggle - only show for unencrypted fields */}
+        {!encryptionEnabled && (
+          <div className="space-y-2">
+            <label className="flex items-center gap-3 cursor-pointer py-2">
+              <div
+                onClick={() => setIncludeInChat(!includeInChat)}
+                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
+                  includeInChat ? 'bg-accent border-accent' : 'border-border hover:border-accent/50'
+                }`}
+              >
+                {includeInChat && (
+                  <svg className="w-3 h-3 text-accent-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </div>
+              <div className="flex-1">
+                <span className="text-sm text-text font-medium">
+                  {t('admin.fields.includeInChat')}
+                </span>
+                <p className="text-xs text-text-muted">
+                  {t('admin.fields.includeInChatHint')}
+                </p>
+              </div>
+            </label>
+
+            {includeInChat && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <svg className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <p className="text-sm font-medium text-blue-800">{t('admin.fields.aiPersonalization')}</p>
+                    <p className="text-xs text-blue-700 mt-1">
+                      {t('admin.fields.aiPersonalizationBody')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Note when encrypted - explain why include in chat is not available */}
+        {encryptionEnabled && (
+          <div className="bg-surface-overlay border border-border rounded-lg p-3">
+            <p className="text-xs text-text-muted">
+              {t('admin.fields.encryptedChatNote')}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Actions */}

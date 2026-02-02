@@ -352,7 +352,7 @@ The admin key migration feature allows transferring encryption authority to a ne
 #### What Migrates vs What Doesn't
 
 | Data | Migrates? | Notes |
-|------|-----------|-------|
+| ---- | --------- | ----- |
 | `encrypted_email` | Yes | Re-encrypted to new pubkey |
 | `encrypted_name` | Yes | Re-encrypted to new pubkey |
 | `encrypted_value` (fields) | Yes | Re-encrypted to new pubkey |

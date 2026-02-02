@@ -251,27 +251,62 @@ async def execute_migration(
         cursor.execute("BEGIN EXCLUSIVE TRANSACTION")
 
         # Validate all records are included to prevent partial migration
+        # Fetch actual IDs from database for exact comparison
         cursor.execute("""
-            SELECT COUNT(*) FROM users
+            SELECT id FROM users
             WHERE encrypted_email IS NOT NULL OR encrypted_name IS NOT NULL
         """)
-        expected_user_count = cursor.fetchone()[0]
+        expected_user_ids = {row[0] for row in cursor.fetchall()}
 
         cursor.execute("""
-            SELECT COUNT(*) FROM user_field_values
+            SELECT id FROM user_field_values
             WHERE encrypted_value IS NOT NULL
         """)
-        expected_field_count = cursor.fetchone()[0]
+        expected_field_ids = {row[0] for row in cursor.fetchall()}
 
-        if len(request.users) != expected_user_count:
+        # Check for duplicates in request
+        request_user_ids = [u.id for u in request.users]
+        request_field_ids = [f.id for f in request.field_values]
+
+        if len(request_user_ids) != len(set(request_user_ids)):
             raise HTTPException(
                 status_code=400,
-                detail=f"User count mismatch: expected {expected_user_count}, received {len(request.users)}. All users with encrypted data must be included."
+                detail="Duplicate user IDs in request. Each user must appear exactly once."
             )
-        if len(request.field_values) != expected_field_count:
+        if len(request_field_ids) != len(set(request_field_ids)):
             raise HTTPException(
                 status_code=400,
-                detail=f"Field value count mismatch: expected {expected_field_count}, received {len(request.field_values)}. All encrypted field values must be included."
+                detail="Duplicate field value IDs in request. Each field value must appear exactly once."
+            )
+
+        request_user_ids_set = set(request_user_ids)
+        request_field_ids_set = set(request_field_ids)
+
+        # Check for missing or extra IDs
+        missing_users = expected_user_ids - request_user_ids_set
+        extra_users = request_user_ids_set - expected_user_ids
+        if missing_users or extra_users:
+            detail_parts = []
+            if missing_users:
+                detail_parts.append(f"missing user IDs: {sorted(missing_users)}")
+            if extra_users:
+                detail_parts.append(f"extra user IDs: {sorted(extra_users)}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"User ID mismatch: {'; '.join(detail_parts)}. All users with encrypted data must be included."
+            )
+
+        missing_fields = expected_field_ids - request_field_ids_set
+        extra_fields = request_field_ids_set - expected_field_ids
+        if missing_fields or extra_fields:
+            detail_parts = []
+            if missing_fields:
+                detail_parts.append(f"missing field IDs: {sorted(missing_fields)}")
+            if extra_fields:
+                detail_parts.append(f"extra field IDs: {sorted(extra_fields)}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Field value ID mismatch: {'; '.join(detail_parts)}. All encrypted field values must be included."
             )
 
         # Re-encrypt users

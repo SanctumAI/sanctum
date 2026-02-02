@@ -1839,17 +1839,21 @@ async def export_database(background_tasks: BackgroundTasks, _admin: Dict = Depe
         temp_file.close()
         
         try:
-            # Create a backup using SQLite's backup mechanism for consistency
-            source_conn = sqlite3.connect(db_path)
-            backup_conn = sqlite3.connect(temp_path)
-            
-            # Perform the backup (this creates a consistent snapshot)
-            source_conn.backup(backup_conn)
-            
-            # Close connections
-            backup_conn.close()
-            source_conn.close()
-            
+            # Helper to run blocking backup in thread pool
+            def perform_backup():
+                source_conn = sqlite3.connect(db_path)
+                try:
+                    backup_conn = sqlite3.connect(temp_path)
+                    try:
+                        source_conn.backup(backup_conn)
+                    finally:
+                        backup_conn.close()
+                finally:
+                    source_conn.close()
+
+            # Run blocking backup operation in a thread to avoid stalling event loop
+            await asyncio.to_thread(perform_backup)
+
             # Return the backup file as a download with cleanup
             def cleanup_temp_file():
                 try:

@@ -1183,7 +1183,7 @@ export function AdminDeploymentConfig() {
                 </p>
                 <p className="text-sm font-mono text-text">
                   {localStorage.getItem(STORAGE_KEYS.ADMIN_PUBKEY)
-                    ? `npub...${localStorage.getItem(STORAGE_KEYS.ADMIN_PUBKEY)?.slice(-8)}`
+                    ? `${localStorage.getItem(STORAGE_KEYS.ADMIN_PUBKEY)?.slice(0, 8)}...${localStorage.getItem(STORAGE_KEYS.ADMIN_PUBKEY)?.slice(-8)}`
                     : t('adminDeployment.keyMigration.unknown', 'Unknown')}
                 </p>
               </div>

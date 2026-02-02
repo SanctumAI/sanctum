@@ -1106,6 +1106,7 @@ def get_user_chat_context_values(user_id: int, user_type_id: int | None = None) 
                   AND (fd.user_type_id IS NULL OR fd.user_type_id = ?)
                   AND ufv.value IS NOT NULL
                   AND ufv.value != ''
+                ORDER BY fd.user_type_id IS NULL DESC
             """, (user_id, user_type_id))
         else:
             # Only global fields

@@ -241,8 +241,10 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
 
         {/* Required Toggle */}
         <label className="flex items-center gap-3 cursor-pointer py-2">
-          <div
+          <button
+            type="button"
             onClick={() => setRequired(!required)}
+            aria-pressed={required}
             className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
               required ? 'bg-accent border-accent' : 'border-border hover:border-accent/50'
             }`}
@@ -252,15 +254,17 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             )}
-          </div>
+          </button>
           <span className="text-sm text-text">{t('admin.fields.requiredField')}</span>
         </label>
 
         {/* Encryption Toggle */}
         <div className="space-y-2">
           <label className="flex items-center gap-3 cursor-pointer py-2">
-            <div
+            <button
+              type="button"
               onClick={handleEncryptionToggle}
+              aria-pressed={encryptionEnabled}
               className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
                 encryptionEnabled ? 'bg-green-600 border-green-600' : 'border-border hover:border-accent/50'
               }`}
@@ -270,7 +274,7 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               )}
-            </div>
+            </button>
             <div className="flex-1">
               <span className="text-sm text-text font-medium">
                 {encryptionEnabled ? t('admin.fields.encryptEnabled') : t('admin.fields.encryptDisabled')}
@@ -304,8 +308,10 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
         {!encryptionEnabled && (
           <div className="space-y-2">
             <label className="flex items-center gap-3 cursor-pointer py-2">
-              <div
+              <button
+                type="button"
                 onClick={() => setIncludeInChat(!includeInChat)}
+                aria-pressed={includeInChat}
                 className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
                   includeInChat ? 'bg-accent border-accent' : 'border-border hover:border-accent/50'
                 }`}
@@ -315,7 +321,7 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 )}
-              </div>
+              </button>
               <div className="flex-1">
                 <span className="text-sm text-text font-medium">
                   {t('admin.fields.includeInChat')}

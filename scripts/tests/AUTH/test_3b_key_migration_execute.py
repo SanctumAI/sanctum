@@ -140,7 +140,7 @@ def create_test_user(api_base: str, user_data: dict, admin_token: str) -> dict |
         return None
 
 
-def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db") -> str:
+def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db", timeout: int = 30) -> str:
     """
     Run read-only SQL inside Docker container and return output.
 
@@ -149,7 +149,7 @@ def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db") -> str:
 
     Raises:
         ValueError: If SQL is not a single SELECT statement
-        RuntimeError: If sqlite3 command fails
+        RuntimeError: If sqlite3 command fails or times out
     """
     # Normalize: strip whitespace and trailing semicolons
     sql_normalized = sql.strip().rstrip(";").strip()
@@ -162,14 +162,18 @@ def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db") -> str:
     if not sql_normalized.upper().startswith("SELECT"):
         raise ValueError(f"run_docker_sql only allows SELECT statements, got: {sql[:50]}")
 
-    # Use list argv with stdin for SQL (no shell=True, no escaping needed)
-    result = subprocess.run(
-        ["docker", "compose", "exec", "-T", "backend", "sqlite3", "-json", db_path],
-        input=sql_normalized,
-        capture_output=True,
-        text=True,
-        cwd=REPO_ROOT,
-    )
+    # Safe subprocess invocation: argv list (no shell=True), SQL passed via stdin
+    try:
+        result = subprocess.run(
+            ["docker", "compose", "exec", "-T", "backend", "sqlite3", "-json", db_path],
+            input=sql_normalized,
+            capture_output=True,
+            text=True,
+            cwd=REPO_ROOT,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(f"sqlite3 command timed out after {timeout}s")
 
     # Surface sqlite3 failures
     if result.returncode != 0:

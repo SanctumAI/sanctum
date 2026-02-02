@@ -243,6 +243,7 @@ def test_prepare_endpoint(api_base: str, admin_token: str, admin_pubkey: str) ->
 
     if encrypted_fields_checked == 0:
         print("  WARNING: No encrypted fields found (test may need user data)")
+        passed = False
     elif encrypted_fields_valid == encrypted_fields_checked:
         print(f"  {encrypted_fields_valid}/{encrypted_fields_checked} encrypted fields have valid NIP-04 format")
     else:

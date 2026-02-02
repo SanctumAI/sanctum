@@ -72,6 +72,8 @@ Admin auth uses a custom Nostr event kind `22242`:
 - Timestamp must be within 5 minutes of server time
 - Signature must be valid BIP-340 Schnorr
 
+**Single-admin constraint:** The first admin to authenticate becomes the only admin for the instance. Subsequent admin auth attempts return `403` ("Admin registration is closed"). The admin can migrate to a new Nostr keypair using key migration, but this does not transfer ownership to a different person.
+
 ### API Endpoint
 
 #### `POST /admin/auth`
@@ -113,6 +115,7 @@ The `session_token` must be included in subsequent admin API requests as `Author
 
 **Errors:**
 - `401` - Invalid signature, wrong event kind, expired timestamp, or missing action tag
+- `403` - Admin registration is closed (an admin already exists)
 - `429` - Rate limit exceeded (10 requests per minute per IP)
 
 **Rate Limiting:** 10 requests per minute per IP address. Returns 429 after limit is exceeded.
@@ -170,6 +173,8 @@ See [sqlite-encryption.md](./sqlite-encryption.md#admin-key-migration) for detai
 ## User Authentication (Magic Link)
 
 Users authenticate via email magic links - no password required.
+
+**Setup requirement:** User auth endpoints are disabled until an admin has authenticated at least once (instance setup complete). If no admin exists, `/auth/magic-link` returns `503` with "Instance not configured."
 
 ### How It Works
 
@@ -244,6 +249,7 @@ curl -X POST http://localhost:8000/auth/magic-link \
 - `400` - Email is required
 - `429` - Rate limit exceeded (5 requests per minute per IP)
 - `500` - Failed to send email
+- `503` - Instance not configured (no admin has authenticated yet)
 
 **Rate Limiting:** 5 requests per minute per IP address. Prevents email flooding attacks.
 
@@ -311,6 +317,43 @@ curl "http://localhost:8000/auth/me?token=eyJ1c2VyX2lkIjox..."
 
 ---
 
+#### `POST /auth/test-email`
+
+Send a test email to verify SMTP configuration (admin only).
+
+**Request:**
+```bash
+curl -X POST http://localhost:8000/auth/test-email \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <admin-token>" \
+  -d '{"email": "you@example.com"}'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Test email sent successfully"
+}
+```
+
+**Response (mock mode):**
+```json
+{
+  "success": true,
+  "message": "Test email sent successfully (mock mode enabled - check backend logs)"
+}
+```
+
+If `MOCK_EMAIL=true` (or `MOCK_SMTP=true` via deployment config), the response notes that mock mode is enabled.
+
+**Errors:**
+- `401/403` - Unauthorized or not an admin
+- `400` - Email address required
+- `500` - Failed to send test email
+
+---
+
 ## Configuration
 
 ### Environment Variables
@@ -320,6 +363,7 @@ curl "http://localhost:8000/auth/me?token=eyJ1c2VyX2lkIjox..."
 | `SECRET_KEY` | (auto-generated) | Key for signing tokens. If not set, auto-generates and persists to `/data/.secret_key` |
 | `FRONTEND_URL` | `http://localhost:5173` | Base URL for magic link emails |
 | `MOCK_EMAIL` | `true` | Log magic links instead of sending emails |
+| `MOCK_SMTP` | (alias) | Deployment-config alias for `MOCK_EMAIL` |
 | `SMTP_HOST` | (empty) | SMTP server hostname |
 | `SMTP_PORT` | `587` | SMTP server port |
 | `SMTP_USER` | (empty) | SMTP username |
@@ -328,7 +372,7 @@ curl "http://localhost:8000/auth/me?token=eyJ1c2VyX2lkIjox..."
 
 ### Development Mode (Mock Email)
 
-With `MOCK_EMAIL=true` (default), magic links are logged to the console instead of being sent via email:
+With `MOCK_EMAIL=true` (default), or `MOCK_SMTP=true` via deployment config, magic links are logged to the console instead of being sent via email:
 
 ```
 ============================================================
@@ -416,7 +460,7 @@ The codebase includes several development conveniences that are disabled by defa
 
 ### Mock Email Mode
 
-With `MOCK_EMAIL=true`, magic links are logged to console instead of sent via SMTP. This is controlled by the backend environment variable.
+With `MOCK_EMAIL=true` (or `MOCK_SMTP=true` via deployment config), magic links are logged to console instead of sent via SMTP. This is controlled by the backend environment variable.
 
 ### VITE_DEV_MODE (Frontend)
 

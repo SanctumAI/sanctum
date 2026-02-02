@@ -10,6 +10,10 @@ This document describes the SQLite-based admin and user management system in San
 SQLite provides persistent storage for:
 - **Admin authentication** - Nostr pubkey-based admin access
 - **Instance settings** - Configurable instance branding/settings
+- **Instance state** - Setup completion and admin initialization flags
+- **Deployment configuration** - Environment-level settings (LLM, email, storage) + audit log
+- **AI configuration** - Prompt sections, parameters, and session defaults (with per-user-type overrides)
+- **Document defaults** - Per-document availability/defaults (with per-user-type overrides)
 - **User types** - Groups of users with different onboarding question sets
 - **User management** - Onboarded users with dynamic custom fields
 
@@ -83,6 +87,21 @@ Key-value store for instance configuration.
 - `description`: "A privacy-first RAG knowledge base"
 - `auto_approve_users`: "true" - When "true", new users are automatically approved; when "false", users wait at `/pending` for admin approval
 
+#### `instance_state`
+Tracks setup status flags used to gate user onboarding.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `key` | TEXT | Setting key (primary key) |
+| `value` | TEXT | Setting value (`"true"` / `"false"`) |
+| `updated_at` | TIMESTAMP | Last update timestamp |
+
+**Keys:**
+- `admin_initialized`: Set to `"true"` after the first admin is created
+- `setup_complete`: Set to `"true"` after the admin successfully authenticates
+
+User auth endpoints require both flags to be `"true"` (see `docs/authentication.md`).
+
 #### `user_types`
 Groups of users with different onboarding question sets.
 
@@ -105,9 +124,15 @@ Admin-defined custom fields for user onboarding.
 | `required` | INTEGER | 1 if required, 0 if optional |
 | `display_order` | INTEGER | Order for UI display |
 | `user_type_id` | INTEGER | NULL = global field, non-NULL = type-specific |
+| `placeholder` | TEXT | Optional placeholder text for UI inputs |
+| `options` | TEXT | JSON array of options (used by `select` fields) |
+| `encryption_enabled` | INTEGER | 1 = encrypt values (default), 0 = store plaintext |
+| `include_in_chat` | INTEGER | 1 = include plaintext value in chat context, 0 = exclude |
 | `created_at` | TIMESTAMP | Creation timestamp |
 
 **Note:** `field_name` + `user_type_id` must be unique. This allows the same field name to be used differently across user types.
+
+**Encryption note:** Fields are encrypted by default. `include_in_chat` can only be enabled for fields with `encryption_enabled = 0` (plaintext), since encrypted values require the admin private key to decrypt.
 
 #### `users`
 Onboarded users.
@@ -139,6 +164,81 @@ Dynamic field values for users (EAV pattern).
 | `ephemeral_pubkey` | TEXT | Ephemeral key for decryption |
 | `value` | TEXT | **Legacy** (deprecated, always NULL) |
 
+#### `ai_config`
+Global AI configuration values (prompt sections, parameters, defaults).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER | Primary key (auto-increment) |
+| `key` | TEXT | Unique config key (e.g., `prompt_tone`, `temperature`) |
+| `value` | TEXT | Stored value (stringified for JSON/number/boolean) |
+| `value_type` | TEXT | `string`, `number`, `boolean`, or `json` |
+| `category` | TEXT | `prompt_section`, `parameter`, or `default` |
+| `description` | TEXT | Human-readable description |
+| `updated_at` | TIMESTAMP | Last update timestamp |
+
+#### `ai_config_user_type_overrides`
+Per-user-type overrides for AI config values.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER | Primary key (auto-increment) |
+| `ai_config_key` | TEXT | Config key being overridden |
+| `user_type_id` | INTEGER | Foreign key to user_types |
+| `value` | TEXT | Override value |
+| `updated_at` | TIMESTAMP | Last update timestamp |
+
+#### `document_defaults`
+Global document availability and default state for ingest jobs.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER | Primary key (auto-increment) |
+| `job_id` | TEXT | Unique ingest job id |
+| `is_available` | INTEGER | 1 = available for use, 0 = hidden |
+| `is_default_active` | INTEGER | 1 = enabled by default for new sessions |
+| `display_order` | INTEGER | Order for UI display |
+| `updated_at` | TIMESTAMP | Last update timestamp |
+
+#### `document_defaults_user_type_overrides`
+Per-user-type overrides for document defaults.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER | Primary key (auto-increment) |
+| `job_id` | TEXT | Ingest job id |
+| `user_type_id` | INTEGER | Foreign key to user_types |
+| `is_available` | INTEGER | Override availability (nullable) |
+| `is_default_active` | INTEGER | Override default-active state (nullable) |
+| `updated_at` | TIMESTAMP | Last update timestamp |
+
+#### `deployment_config`
+Deployment-level configuration values (LLM, email, storage, etc).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER | Primary key (auto-increment) |
+| `key` | TEXT | Unique config key |
+| `value` | TEXT | Value (masked in API responses if secret) |
+| `is_secret` | INTEGER | 1 = secret, 0 = visible |
+| `requires_restart` | INTEGER | 1 = restart required to apply |
+| `category` | TEXT | Grouping (llm, email, storage, etc) |
+| `description` | TEXT | Human-readable description |
+| `updated_at` | TIMESTAMP | Last update timestamp |
+
+#### `config_audit_log`
+Audit trail for deployment and AI config changes.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER | Primary key (auto-increment) |
+| `table_name` | TEXT | Source table (`deployment_config`, `ai_config`, `document_defaults`) |
+| `config_key` | TEXT | Key or job_id that changed |
+| `old_value` | TEXT | Previous value |
+| `new_value` | TEXT | New value |
+| `changed_by` | TEXT | Admin pubkey that made the change |
+| `changed_at` | TIMESTAMP | Change timestamp |
+
 ## Field Scoping
 
 Fields can be **global** or **type-specific**:
@@ -155,13 +255,26 @@ When fetching fields for a user type, the system returns:
 ### Admin Authentication
 
 #### `POST /admin/auth`
-Register or authenticate an admin by Nostr pubkey.
+Register or authenticate the admin using a signed Nostr event (kind `22242`).
+Only the **first** admin to authenticate can register; subsequent attempts are rejected.
 
 ```bash
 curl -X POST http://localhost:8000/admin/auth \
   -H "Content-Type: application/json" \
-  -d '{"pubkey": "npub1..."}'
+  -d '{
+    "event": {
+      "id": "...",
+      "pubkey": "...",
+      "created_at": 1705000000,
+      "kind": 22242,
+      "tags": [["action", "admin_auth"]],
+      "content": "",
+      "sig": "..."
+    }
+  }'
 ```
+
+See [Authentication](./authentication.md) for the full event format and validation rules.
 
 #### `GET /admin/list`
 List all registered admins.
@@ -184,6 +297,71 @@ curl -X PUT http://localhost:8000/admin/settings \
   -H "Content-Type: application/json" \
   -d '{"instance_name": "My Sanctum", "primary_color": "#FF5733"}'
 ```
+
+---
+
+### Deployment Configuration (Admin)
+
+Manage environment-level settings through the admin API. Values are stored in `deployment_config` and audited.
+
+#### `GET /admin/deployment/config`
+Get all deployment config values grouped by category (secret values masked).
+
+#### `GET /admin/deployment/config/{key}`
+Get a single config value (masked if secret).
+
+#### `GET /admin/deployment/config/{key}/reveal`
+Reveal a secret value (admin only).
+
+#### `PUT /admin/deployment/config/{key}`
+Update a config value. Returns `requires_restart` if a restart is needed.
+
+#### `GET /admin/deployment/config/export`
+Export current config as `.env`-style text (includes secrets).
+
+#### `POST /admin/deployment/config/validate`
+Validate config and return errors/warnings (e.g., missing SMTP, invalid ports).
+
+#### `GET /admin/deployment/health`
+Health check for Qdrant/LLM/SearXNG/SMTP plus restart requirement.
+
+#### `GET /admin/deployment/restart-required`
+List keys changed since service start that require restart.
+
+#### `GET /admin/deployment/audit-log`
+Recent config changes (default 50, up to 1000).
+
+**Common keys:** `LLM_PROVIDER`, `LLM_API_URL`, `LLM_MODEL`, `EMBEDDING_MODEL`, `SMTP_*`, `MOCK_SMTP` (deployment UI alias for `MOCK_EMAIL`; `MOCK_EMAIL` takes precedence if both are set), `SQLITE_PATH`, `UPLOADS_DIR`, `QDRANT_HOST`, `QDRANT_PORT`, `SEARXNG_URL`, `FRONTEND_URL`, `RAG_TOP_K`, `PDF_EXTRACT_MODE`.
+
+---
+
+### AI Configuration (Admin)
+
+Manage prompt sections, LLM parameters, and session defaults stored in `ai_config`, with optional per-user-type overrides.
+
+#### `GET /admin/ai-config`
+Get all AI config values grouped by category.
+
+#### `GET /admin/ai-config/{key}`
+Get a single AI config item.
+
+#### `PUT /admin/ai-config/{key}`
+Update a config value (type-checked).
+
+#### `GET /admin/ai-config/user-type/{user_type_id}`
+Get effective AI config for a user type (shows overrides vs inherited values).
+
+#### `PUT /admin/ai-config/user-type/{user_type_id}/{key}`
+Set an override value for a user type.
+
+#### `DELETE /admin/ai-config/user-type/{user_type_id}/{key}`
+Remove an override (revert to global default).
+
+#### `POST /admin/ai-config/prompts/preview`
+Preview the assembled prompt using global config.
+
+#### `POST /admin/ai-config/user-type/{user_type_id}/prompts/preview`
+Preview the assembled prompt with user-type overrides applied.
 
 ---
 
@@ -232,8 +410,7 @@ Delete a user type (cascades to type-specific field definitions).
 Get all user field definitions.
 
 **Query params:**
-- `user_type_id`: Filter to specific type (includes global fields by default)
-- `include_global`: Set to `false` to exclude global fields when filtering by type
+- `user_type_id`: Optional. When provided, returns global fields plus fields for that type.
 
 #### `POST /admin/user-fields`
 Create a new user field definition.
@@ -262,11 +439,26 @@ curl -X POST http://localhost:8000/admin/user-fields \
 | `date` | Date value | Date picker |
 | `url` | URL with validation | URL input |
 
+**Field metadata:**
+- `placeholder`: Optional placeholder text for inputs
+- `options`: Required for `select` fields (array of strings)
+- `encryption_enabled`: Defaults to `true` (encrypt values at rest)
+- `include_in_chat`: Defaults to `false`; only allowed when `encryption_enabled = false`
+
 #### `PUT /admin/user-fields/{field_id}`
 Update a field definition.
 
 #### `DELETE /admin/user-fields/{field_id}`
 Delete a field definition (and all associated user values).
+
+#### `PUT /admin/user-fields/{field_id}/encryption`
+Update encryption settings for a field definition.
+
+**Notes:**
+- Disabling encryption stores future values as plaintext (existing encrypted values remain encrypted)
+- Enabling encryption encrypts future values (existing plaintext remains plaintext)
+- Enabling encryption auto-disables `include_in_chat`
+- Pass `force=true` to acknowledge warnings
 
 ---
 
@@ -323,6 +515,35 @@ curl -X PUT http://localhost:8000/users/1 \
 
 #### `DELETE /users/{user_id}`
 Delete a user and all their field values.
+
+---
+
+### Document Defaults (Admin)
+
+Control which completed ingest jobs are available and enabled by default for new sessions.
+
+#### `GET /admin/documents/defaults`
+List all completed documents with default availability/active flags.
+
+#### `PUT /admin/documents/{job_id}/defaults`
+Update defaults for a single document (`is_available`, `is_default_active`, `display_order`).
+
+#### `PUT /admin/documents/defaults/batch`
+Batch update defaults for multiple documents.
+
+#### `GET /admin/documents/defaults/available`
+Get all job_ids currently available.
+
+#### `GET /admin/documents/defaults/active`
+Get all job_ids active by default for new sessions.
+
+#### User-type overrides
+- `GET /admin/documents/defaults/user-type/{user_type_id}`
+- `PUT /admin/documents/{job_id}/defaults/user-type/{user_type_id}`
+- `DELETE /admin/documents/{job_id}/defaults/user-type/{user_type_id}`
+- `GET /admin/documents/defaults/user-type/{user_type_id}/active`
+
+User-type overrides take precedence over global defaults.
 
 ---
 
@@ -466,6 +687,10 @@ curl -X POST http://localhost:8000/users \
 | `frontend/src/pages/UserProfile.tsx` | Dynamic profile form based on fields |
 | `frontend/src/pages/PendingApproval.tsx` | Waiting page for unapproved users |
 | `frontend/src/pages/AdminSetup.tsx` | Admin configuration UI (types + fields) |
+| `frontend/src/pages/AdminInstanceConfig.tsx` | Instance settings (name, branding, approvals) |
+| `frontend/src/pages/AdminAIConfig.tsx` | AI prompt/parameter configuration |
+| `frontend/src/pages/AdminDeploymentConfig.tsx` | Deployment config + service health |
+| `frontend/src/pages/AdminDocumentUpload.tsx` | Document upload + defaults management |
 | `frontend/src/pages/AdminDatabaseExplorer.tsx` | SQLite database browser UI (with encryption support) |
 | `frontend/src/components/onboarding/FieldEditor.tsx` | Field creation/editing form |
 | `frontend/src/components/onboarding/DynamicField.tsx` | Dynamic field renderer |
@@ -479,6 +704,7 @@ The frontend uses localStorage for temporary state during onboarding:
 | Key | Description |
 |-----|-------------|
 | `sanctum_admin_pubkey` | Admin Nostr pubkey (after login) |
+| `sanctum_admin_session_token` | Admin session token (after NIP-07 auth) |
 | `sanctum_session_token` | User session token (after magic link verification) |
 | `sanctum_user_email` | Verified user email |
 | `sanctum_user_name` | User display name |
@@ -488,6 +714,20 @@ The frontend uses localStorage for temporary state during onboarding:
 | `sanctum_pending_name` | Name awaiting verification |
 
 ## Admin UI Features
+
+### Instance Settings
+- Edit instance name, branding color, and description
+- Toggle auto-approve for new users
+
+### Deployment Configuration
+- Update LLM, email, storage, and search settings
+- Validate config and check service health
+- Export `.env` and review recent config changes
+
+### AI Configuration
+- Edit prompt sections, LLM parameters, and session defaults
+- Preview assembled prompts
+- Override AI config per user type
 
 ### User Types Section
 - Create new user types with name and description
@@ -500,6 +740,11 @@ The frontend uses localStorage for temporary state during onboarding:
 - Edit existing fields
 - Reorder fields (display order)
 - Delete fields
+
+### Document Defaults
+- Upload documents and monitor ingest jobs
+- Set availability and default-active status
+- Configure per-user-type document overrides
 
 ### Database Explorer
 - Browse all SQLite tables

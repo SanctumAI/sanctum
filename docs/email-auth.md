@@ -11,6 +11,8 @@ Sanctum uses magic link email authentication. Users enter their email address, r
 5. **Token verified**: Backend validates signature and expiration (15 minutes)
 6. **Session created**: A 7-day session token is returned to the frontend
 
+**Setup requirement:** Magic link endpoints are disabled until an admin has authenticated at least once. If no admin exists, `/auth/magic-link` returns `503` ("Instance not configured").
+
 ## Configuration
 
 All configuration is done via environment variables.
@@ -19,7 +21,7 @@ All configuration is done via environment variables.
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `MOCK_EMAIL` | Set to `false` for production | `false` |
+| `MOCK_EMAIL` | Set to `false` for production (canonical key) | `false` |
 | `SMTP_HOST` | SMTP server hostname | `smtp.mailgun.org` |
 | `SMTP_PORT` | SMTP port (usually 587 for TLS) | `587` |
 | `SMTP_USER` | SMTP username/login | `postmaster@mg.example.com` |
@@ -33,9 +35,11 @@ All configuration is done via environment variables.
 |----------|-------------|---------|
 | `SECRET_KEY` | Token signing key (auto-generated if not set) | Auto-generated |
 
+> **Note:** `MOCK_SMTP` is a deployment config UI alias for `MOCK_EMAIL`. If both are set, `MOCK_EMAIL` takes precedence. Use `MOCK_EMAIL` when setting environment variables directly.
+
 ## Development Mode
 
-For local development, leave `MOCK_EMAIL=true` (the default when `SMTP_HOST` is empty). Magic links will be logged to the console instead of sent via email:
+For local development, leave `MOCK_EMAIL=true` (or set `MOCK_SMTP=true` in deployment config). Magic links will be logged to the console instead of sent via email:
 
 ```
 ============================================================
@@ -44,6 +48,19 @@ To: user@example.com
 URL: http://localhost:5173/verify?token=eyJhbGc...
 ============================================================
 ```
+
+## Test Email Endpoint
+
+Admins can send a test email to verify SMTP settings:
+
+```bash
+curl -X POST http://localhost:8000/auth/test-email \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <admin-token>" \
+  -d '{"email": "you@example.com"}'
+```
+
+If mock mode is enabled (`MOCK_EMAIL=true` or `MOCK_SMTP=true`), the response indicates no email was actually sent.
 
 ## Provider Configuration Examples
 
@@ -172,7 +189,7 @@ The `/auth/magic-link` endpoint is rate-limited to 5 requests per minute per IP 
 
 ### Emails not sending
 
-1. Check that `MOCK_EMAIL=false` is set
+1. Check that `MOCK_EMAIL=false` (or `MOCK_SMTP=false` in deployment config) is set
 2. Verify `SMTP_HOST` is not empty
 3. Check backend logs for SMTP errors: `docker compose logs backend`
 4. Test SMTP credentials with a tool like `swaks` or your provider's test feature

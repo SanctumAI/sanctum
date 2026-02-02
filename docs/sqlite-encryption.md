@@ -265,7 +265,7 @@ Important:
 #### SECRET_KEY Management
 
 `SECRET_KEY` (in `.env` or environment) is used for:
-- JWT signing (auth tokens)
+- Session token signing (magic links + admin/user sessions)
 - Blind index key derivation
 
 **Backup procedures:**
@@ -274,29 +274,24 @@ Important:
 - Never commit to version control
 
 **Rotation process:**
-1. **Warning**: Rotating `SECRET_KEY` invalidates all blind indexes and active JWTs
+1. **Warning**: Rotating `SECRET_KEY` invalidates all blind indexes and active session tokens
 2. Export all user data (requires admin decryption of emails)
 3. Update `SECRET_KEY` in environment
 4. Restart backend
 5. Run `migrate_encrypt_existing_data()` to recompute blind indexes
-6. Users will need to re-authenticate (JWTs invalidated)
+6. Users will need to re-authenticate (sessions invalidated)
 
-### Multi-Admin Support
+### Single-Admin Constraint
 
-Current implementation uses the **first admin's pubkey** for all encryption. To support multiple admins:
+Sanctum enforces a **single admin per instance**. The first successful NIP-07 admin auth creates the admin record; subsequent admin auth attempts are rejected. This keeps encryption tied to one pubkey.
 
-**Adding admins:**
-- Additional admins can be added via `/admin/admins` endpoint
-- However, only the first admin can decrypt existing PII
-- New admins can authenticate but cannot decrypt data encrypted to the original admin
+**Admin transfer options:**
+- **Recommended:** Use **admin key migration** to rotate to a new keypair while preserving access to all encrypted data
+- **Destructive:** Remove the current admin to reset setup, then re-register a new admin (requires existing admin access). **WARNING: This permanently destroys access to all existing encrypted PII.** Data is encrypted to the old admin's pubkey and cannot be recovered by a new admin. Only use this for fresh instances or when encrypted data is no longer needed.
 
 **Future enhancement:**
 - Re-encrypt PII to multiple admin pubkeys (one ciphertext per admin)
 - Or use a shared admin key with secure key distribution
-
-**Revoking admin access:**
-- Remove admin from `admins` table
-- If revoking the primary (first) admin: must first re-encrypt all PII to a new admin pubkey
 
 ### Emergency Access and Recovery
 

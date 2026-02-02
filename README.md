@@ -51,6 +51,10 @@ Expected response:
 }
 ```
 
+### Admin Setup (First Run)
+
+Sanctum requires a NIP-07 admin login before user signups are enabled. Open the frontend at http://localhost:5173 and complete the admin login flow. Until the first admin authenticates, `/auth/magic-link` returns `503` ("Instance not configured").
+
 ### Available Endpoints
 
 | Endpoint | Description |

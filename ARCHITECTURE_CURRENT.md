@@ -84,15 +84,17 @@ Volume: `qdrant_data:/qdrant/storage`
 
 1. Admin clicks "Login with Nostr"
 2. Browser extension signs challenge
-3. Backend verifies signature against allowed pubkeys
-4. JWT session token issued
+3. Backend verifies the signed event (kind `22242`) and registers the **first** admin
+4. Signed session token issued (single-admin instance)
 
 ### User Authentication (Email Magic Link)
 
 1. User enters email address
 2. Backend sends magic link via SMTP
 3. User clicks link, verifies token
-4. JWT session token issued
+4. Signed session token issued
+
+> User onboarding is blocked until an admin has authenticated at least once (instance setup complete).
 
 See [docs/authentication.md](./docs/authentication.md) for details.
 
@@ -259,9 +261,13 @@ Key configuration options (see `.env.example`):
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `LLM_PROVIDER` | `maple` | LLM backend (`maple` or `ollama`) |
-| `MAPLE_URL` | `http://maple-proxy:8080/v1` | maple-proxy endpoint |
-| `QDRANT_URL` | `http://qdrant:6333` | Qdrant endpoint |
+| `LLM_API_URL` | (provider-specific) | Base URL for LLM provider. Set this generic variable OR the provider-specific `MAPLE_BASE_URL`/`OLLAMA_BASE_URL` |
+| `LLM_MODEL` | (provider-specific) | Model name. Set this generic variable OR the provider-specific `MAPLE_MODEL`/`OLLAMA_MODEL` |
+| `QDRANT_HOST` | `qdrant` | Qdrant hostname |
+| `QDRANT_PORT` | `6333` | Qdrant port |
 | `SEARXNG_URL` | `http://searxng:8080` | SearXNG endpoint |
+| `FRONTEND_URL` | `http://localhost:5173` | Base URL for magic links |
+| `MOCK_EMAIL` | `true` | Log magic links instead of sending (alias: `MOCK_SMTP`) |
 
 ---
 

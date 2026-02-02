@@ -76,13 +76,25 @@ def init_schema():
     
     # Initialize instance state if not exists
     cursor.execute("""
-        INSERT OR IGNORE INTO instance_state (key, value) 
+        INSERT OR IGNORE INTO instance_state (key, value)
         VALUES ('setup_complete', 'false')
     """)
     cursor.execute("""
-        INSERT OR IGNORE INTO instance_state (key, value) 
+        INSERT OR IGNORE INTO instance_state (key, value)
         VALUES ('admin_initialized', 'false')
     """)
+
+    # Fix for upgraded installs: if admins already exist, ensure admin_initialized is true
+    # This handles cases where the DB was created before instance_state tracking was added
+    cursor.execute("SELECT COUNT(*) FROM admins")
+    admin_count = cursor.fetchone()[0]
+    if admin_count > 0:
+        cursor.execute("""
+            UPDATE instance_state SET value = 'true', updated_at = CURRENT_TIMESTAMP
+            WHERE key = 'admin_initialized' AND value = 'false'
+        """)
+        if cursor.rowcount > 0:
+            logger.info("Migration: Fixed admin_initialized state for existing admin")
 
     # Instance settings - key-value store for admin configuration
     cursor.execute("""

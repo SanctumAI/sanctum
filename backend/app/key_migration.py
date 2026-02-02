@@ -251,18 +251,31 @@ async def execute_migration(
         cursor.execute("BEGIN EXCLUSIVE TRANSACTION")
 
         # Validate all records are included to prevent partial migration
-        # Fetch actual IDs from database for exact comparison
+        # Fetch actual IDs and per-field encryption flags from database
         cursor.execute("""
-            SELECT id FROM users
+            SELECT id,
+                   encrypted_email IS NOT NULL AS has_email,
+                   encrypted_name IS NOT NULL AS has_name
+            FROM users
             WHERE encrypted_email IS NOT NULL OR encrypted_name IS NOT NULL
         """)
-        expected_user_ids = {row[0] for row in cursor.fetchall()}
+        user_rows = cursor.fetchall()
+        expected_user_ids = {row[0] for row in user_rows}
+        # Track which fields each user has encrypted
+        user_encrypted_fields = {
+            row[0]: {"has_email": bool(row[1]), "has_name": bool(row[2])}
+            for row in user_rows
+        }
 
         cursor.execute("""
-            SELECT id FROM user_field_values
+            SELECT id, encrypted_value IS NOT NULL AS has_value
+            FROM user_field_values
             WHERE encrypted_value IS NOT NULL
         """)
-        expected_field_ids = {row[0] for row in cursor.fetchall()}
+        field_rows = cursor.fetchall()
+        expected_field_ids = {row[0] for row in field_rows}
+        # Track which field values have encryption
+        field_has_value = {row[0]: bool(row[1]) for row in field_rows}
 
         # Check for duplicates in request
         request_user_ids = [u.id for u in request.users]
@@ -307,6 +320,35 @@ async def execute_migration(
             raise HTTPException(
                 status_code=400,
                 detail=f"Field value ID mismatch: {'; '.join(detail_parts)}. All encrypted field values must be included."
+            )
+
+        # Validate plaintexts are provided for all encrypted data
+        # This prevents leaving old ciphertext encrypted under the old key
+        missing_plaintexts = []
+
+        # Build lookup for request data
+        request_users_by_id = {u.id: u for u in request.users}
+        request_fields_by_id = {f.id: f for f in request.field_values}
+
+        # Check users have required plaintexts
+        for user_id, flags in user_encrypted_fields.items():
+            user_data = request_users_by_id.get(user_id)
+            if user_data:
+                if flags["has_email"] and user_data.email is None:
+                    missing_plaintexts.append(f"user {user_id}: missing email plaintext")
+                if flags["has_name"] and user_data.name is None:
+                    missing_plaintexts.append(f"user {user_id}: missing name plaintext")
+
+        # Check field values have required plaintexts
+        for field_id, has_value in field_has_value.items():
+            field_data = request_fields_by_id.get(field_id)
+            if field_data and has_value and field_data.value is None:
+                missing_plaintexts.append(f"field value {field_id}: missing value plaintext")
+
+        if missing_plaintexts:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Plaintext data missing for encrypted records (would leave old ciphertext undecryptable): {missing_plaintexts}"
             )
 
         # Re-encrypt users

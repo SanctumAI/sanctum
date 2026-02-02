@@ -199,7 +199,7 @@ export function ChatPage() {
     const fetchSessionDefaults = async () => {
       try {
         const userTypeId = getSelectedUserTypeId()
-        const url = userTypeId
+        const url = userTypeId !== null
           ? `${API_BASE}/session-defaults?user_type_id=${userTypeId}`
           : `${API_BASE}/session-defaults`
         const res = await fetch(url)

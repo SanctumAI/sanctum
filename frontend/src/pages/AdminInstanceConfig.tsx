@@ -780,7 +780,7 @@ export function AdminInstanceConfig() {
                           }`}>
                             {field.encryption_enabled !== false ? `🔒 ${t('admin.fields.encryptedBadge')}` : `🔓 ${t('admin.fields.plaintextBadge')}`}
                           </span>
-                          {field.include_in_chat && (
+                          {field.include_in_chat && field.encryption_enabled === false && (
                             <span className="inline-flex items-center text-[10px] font-medium bg-accent/10 text-accent px-2 py-0.5 rounded-md border border-accent/20">
                               💬 {t('admin.fields.inChatBadge')}
                             </span>

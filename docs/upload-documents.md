@@ -76,7 +76,7 @@ curl http://localhost:8000/ingest/status/ab442f508fae94f8
 {
   "job_id": "ab442f508fae94f8",
   "filename": "example-document.pdf",
-  "status": "extracting",
+  "status": "processing",
   "ontology_id": "general",
   "created_at": "2026-01-17T22:30:00.000000",
   "updated_at": "2026-01-17T22:35:00.000000",
@@ -91,8 +91,7 @@ curl http://localhost:8000/ingest/status/ab442f508fae94f8
 | Status | Description |
 |--------|-------------|
 | `pending` | Job created, waiting to start |
-| `processing` | Extracting text from document and creating chunks |
-| `extracting` | Running LLM extraction on chunks |
+| `processing` | Extracting text, chunking, embedding, and running ontology extraction |
 | `completed` | All chunks processed successfully |
 | `completed_with_errors` | Processing finished but some chunks failed |
 | `failed` | Job failed entirely (check `error` field) |

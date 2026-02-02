@@ -213,7 +213,7 @@ Per-user-type overrides for document defaults.
 | `updated_at` | TIMESTAMP | Last update timestamp |
 
 #### `deployment_config`
-Deployment-level configuration values (LLM, email, storage, etc).
+Deployment-level configuration values (LLM, email, storage, etc.).
 
 | Column | Type | Description |
 |--------|------|-------------|
@@ -222,7 +222,7 @@ Deployment-level configuration values (LLM, email, storage, etc).
 | `value` | TEXT | Value (masked in API responses if secret) |
 | `is_secret` | INTEGER | 1 = secret, 0 = visible |
 | `requires_restart` | INTEGER | 1 = restart required to apply |
-| `category` | TEXT | Grouping (llm, email, storage, etc) |
+| `category` | TEXT | Grouping (llm, email, storage, etc.) |
 | `description` | TEXT | Human-readable description |
 | `updated_at` | TIMESTAMP | Last update timestamp |
 

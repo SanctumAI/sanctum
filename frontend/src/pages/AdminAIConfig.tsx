@@ -175,7 +175,7 @@ export function AdminAIConfig() {
     setSaveError(null)
 
     try {
-      if (selectedUserTypeId) {
+      if (selectedUserTypeId !== null) {
         // Set override for user type
         await setAIConfigOverride(editingKey, editValue)
       } else {
@@ -228,7 +228,7 @@ export function AdminAIConfig() {
   const handleDocumentToggle = async (doc: DocumentDefaultItem | DocumentDefaultWithInheritance, field: 'is_available' | 'is_default_active') => {
     setToggleError(null)
     try {
-      if (selectedUserTypeId) {
+      if (selectedUserTypeId !== null) {
         // Set override for user type
         await setDocOverride(doc.job_id, { [field]: !doc[field] })
       } else {
@@ -324,7 +324,7 @@ export function AdminAIConfig() {
                 {meta?.label || item.key}
               </p>
               {/* Inheritance indicator */}
-              {selectedUserTypeId && (
+              {selectedUserTypeId !== null && (
                 <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${
                   isOverride
                     ? 'bg-accent/10 text-accent'
@@ -355,7 +355,7 @@ export function AdminAIConfig() {
           </div>
           <div className="flex items-center gap-2">
             {/* Revert button for overrides */}
-            {!isEditing && isOverride && selectedUserTypeId && (
+            {!isEditing && isOverride && selectedUserTypeId !== null && (
               <button
                 onClick={() => handleRevertOverride(item.key)}
                 className="text-xs text-text-muted hover:text-accent transition-colors flex items-center gap-1"
@@ -531,7 +531,7 @@ export function AdminAIConfig() {
                 </button>
               ))}
             </div>
-            {selectedUserTypeId && (
+            {selectedUserTypeId !== null && (
               <p className="text-xs text-text-muted mt-3">
                 {t('adminAI.overrideHint', 'Changes made here will override global settings for this user type. Items marked "Override" have custom values; items marked "Inherited" use global defaults.')}
               </p>
@@ -674,7 +674,7 @@ export function AdminAIConfig() {
                             {doc.filename || doc.job_id}
                           </p>
                           {/* Inheritance indicator for documents */}
-                          {selectedUserTypeId && (
+                          {selectedUserTypeId !== null && (
                             <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium shrink-0 ${
                               isOverride
                                 ? 'bg-accent/10 text-accent'
@@ -701,12 +701,13 @@ export function AdminAIConfig() {
                       </div>
                       <div className="flex items-center gap-4">
                         {/* Revert button for document overrides */}
-                        {isOverride && selectedUserTypeId && (
+                        {isOverride && selectedUserTypeId !== null && (
                           <button
                             type="button"
                             onClick={() => handleRevertDocOverride(doc.job_id)}
                             className="text-xs text-text-muted hover:text-accent transition-colors flex items-center gap-1"
                             title={t('adminAI.revertToGlobal', 'Revert to global')}
+                            aria-label={t('adminAI.revertToGlobal', 'Revert to global')}
                           >
                             <Undo2 className="w-3 h-3" />
                           </button>

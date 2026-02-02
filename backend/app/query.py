@@ -191,10 +191,11 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         session["_last_sources"] = sources  # For dynamic citation
 
         # Get user profile context for chat personalization (unencrypted fields only)
+        # Skip for dev mode (id=-1) and admin accounts (no user profile in users table)
         import database
         user_profile_context = None
         user_id = user.get("id")
-        if user_id and user_id != -1:  # Skip dev mode mock user (id=-1)
+        if user_id and user_id != -1 and user.get("type") != "admin":
             user_profile_context = database.get_user_chat_context_values(
                 user_id=user_id,
                 user_type_id=user_type_id

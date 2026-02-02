@@ -341,7 +341,7 @@
       "encryptionHelpDisabledPoint1": "Daten werden als lesbarer Klartext gespeichert",
       "encryptionHelpDisabledPoint2": "Jeder mit Datenbankzugriff kann sie lesen",
       "encryptionHelpDisabledPoint3": "Kann mit KI zur Personalisierung geteilt werden",
-      "encryptionHelpRecommendation": "Empfehlung: Behalten Sie die Verschlüsselung für alle persönlich identifizierbaren Informationen aktiviert (Namen, E-Mails, Telefonnummern, Adressen).",
+      "encryptionHelpRecommendation": "Empfehlung: Behalte die Verschlüsselung für alle persönlich identifizierbaren Informationen aktiviert (Namen, E-Mails, Telefonnummern, Adressen).",
       "encryptedBadge": "Verschlüsselt",
       "plaintextBadge": "Klartext",
       "inChatBadge": "Im Chat"

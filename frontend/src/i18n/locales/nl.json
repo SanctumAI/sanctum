@@ -502,7 +502,7 @@
       "complete": "Voltooid",
       "failed": "Mislukt"
     },
-    "chunks": "{{processed}}/{{total}} chunks",
+    "chunks": "{{processed}}/{{total}} delen",
     "deleteDocument": "Document verwijderen",
     "confirmDelete": "Dit document verwijderen?",
     "confirmDeleteDesc": "Dit verwijdert het document en al zijn chunks permanent uit de kennisbank. Deze actie kan niet ongedaan worden gemaakt.",

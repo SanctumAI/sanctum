@@ -41,7 +41,7 @@ export function useAIConfig(userTypeId?: number | null) {
       setLoading(true)
       setError(null)
 
-      if (userTypeId) {
+      if (userTypeId !== null) {
         // Fetch user-type-specific config with inheritance
         const response = await adminFetch(`/admin/ai-config/user-type/${userTypeId}`)
         if (!response.ok) {
@@ -206,7 +206,7 @@ export function useDocumentDefaults(userTypeId?: number | null) {
       setLoading(true)
       setError(null)
 
-      if (userTypeId) {
+      if (userTypeId !== null) {
         // Fetch user-type-specific document defaults with inheritance
         const response = await adminFetch(`/ingest/admin/documents/defaults/user-type/${userTypeId}`)
         if (!response.ok) {

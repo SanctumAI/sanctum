@@ -199,7 +199,7 @@ def test_error_cases(api_base: str, admin_token: str, admin_pubkey: str, new_adm
     try:
         response = requests.post(f"{api_base}/admin/key-migration/execute", json=invalid_request, headers=headers, timeout=10)
         if response.status_code == 400:
-            print(f"  Result: 400 Bad Request (expected)")
+            print("  Result: 400 Bad Request (expected)")
         else:
             print(f"  Result: {response.status_code} (expected 400)")
             passed = False
@@ -218,7 +218,7 @@ def test_error_cases(api_base: str, admin_token: str, admin_pubkey: str, new_adm
     try:
         response = requests.post(f"{api_base}/admin/key-migration/execute", json=same_pubkey_request, headers=headers, timeout=10)
         if response.status_code == 400:
-            print(f"  Result: 400 Bad Request (expected)")
+            print("  Result: 400 Bad Request (expected)")
         else:
             print(f"  Result: {response.status_code} (expected 400)")
             passed = False
@@ -240,7 +240,7 @@ def test_error_cases(api_base: str, admin_token: str, admin_pubkey: str, new_adm
     try:
         response = requests.post(f"{api_base}/admin/key-migration/execute", json=invalid_sig_request, headers=headers, timeout=10)
         if response.status_code == 401:
-            print(f"  Result: 401 Unauthorized (expected)")
+            print("  Result: 401 Unauthorized (expected)")
         else:
             print(f"  Result: {response.status_code} (expected 401)")
             print(f"  Response: {response.text}")
@@ -261,7 +261,7 @@ def test_error_cases(api_base: str, admin_token: str, admin_pubkey: str, new_adm
     try:
         response = requests.post(f"{api_base}/admin/key-migration/execute", json=wrong_action_request, headers=headers, timeout=10)
         if response.status_code == 401:
-            print(f"  Result: 401 Unauthorized (expected)")
+            print("  Result: 401 Unauthorized (expected)")
         else:
             print(f"  Result: {response.status_code} (expected 401)")
             passed = False
@@ -280,7 +280,7 @@ def test_error_cases(api_base: str, admin_token: str, admin_pubkey: str, new_adm
     try:
         response = requests.post(f"{api_base}/admin/key-migration/execute", json=valid_request, timeout=10)
         if response.status_code == 401:
-            print(f"  Result: 401 Unauthorized (expected)")
+            print("  Result: 401 Unauthorized (expected)")
         else:
             print(f"  Result: {response.status_code} (expected 401)")
             passed = False

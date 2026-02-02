@@ -163,8 +163,8 @@ The RAG system supports tool use for enhanced responses:
 
 | Tool | Description | Access |
 |------|-------------|--------|
-| `web_search` | SearXNG metasearch | All users |
-| `sqlite_query` | Direct database queries | Admin only |
+| `web-search` | SearXNG metasearch | All users |
+| `db-query` | Direct database queries | Admin only |
 
 See [docs/tools.md](./docs/tools.md) for details.
 

@@ -277,6 +277,7 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
             <button
               type="button"
               onClick={() => setShowEncryptionHelpModal(true)}
+              aria-label={t('admin.fields.encryptionHelpAria')}
               className="text-text-muted hover:text-accent transition-colors"
             >
               <HelpCircle className="w-4 h-4" />
@@ -421,6 +422,7 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
               <button
                 type="button"
                 onClick={() => setShowEncryptionHelpModal(false)}
+                aria-label={t('common.close')}
                 className="p-1 text-text-muted hover:text-text transition-colors"
               >
                 <X className="w-5 h-5" />

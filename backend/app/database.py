@@ -1663,7 +1663,7 @@ def get_effective_document_defaults(user_type_id: int | None = None) -> list[dic
     Override values replace global values for matching job_ids.
     Each item includes is_override flag if applicable.
 
-    Note: This only processes documents that have global defaults set.
+    Also includes "orphan overrides" - documents with user-type overrides but no global entry.
     """
     # Get global defaults
     defaults = list_document_defaults()
@@ -1674,6 +1674,9 @@ def get_effective_document_defaults(user_type_id: int | None = None) -> list[dic
             doc["is_override"] = False
             doc["override_user_type_id"] = None
         return defaults
+
+    # Track which job_ids have global defaults
+    global_job_ids = {doc["job_id"] for doc in defaults}
 
     # Get overrides for this user type
     overrides = get_document_defaults_overrides_by_type(user_type_id)
@@ -1695,6 +1698,32 @@ def get_effective_document_defaults(user_type_id: int | None = None) -> list[dic
         else:
             doc["is_override"] = False
             doc["override_user_type_id"] = None
+
+    # Add orphan overrides (overrides without global defaults)
+    for job_id, override in overrides_by_job.items():
+        if job_id not in global_job_ids:
+            # Get job info from ingest_jobs
+            with get_cursor() as cursor:
+                cursor.execute("""
+                    SELECT job_id, filename, status, total_chunks
+                    FROM ingest_jobs WHERE job_id = ?
+                """, (job_id,))
+                job_row = cursor.fetchone()
+                if job_row:
+                    defaults.append({
+                        "id": None,  # No global default entry exists
+                        "job_id": job_id,
+                        "filename": job_row["filename"],
+                        "status": job_row["status"],
+                        "total_chunks": job_row["total_chunks"],
+                        "is_available": bool(override["is_available"]) if override["is_available"] is not None else True,
+                        "is_default_active": bool(override["is_default_active"]) if override["is_default_active"] is not None else True,
+                        "display_order": 0,
+                        "updated_at": override["updated_at"],
+                        "is_override": True,
+                        "override_user_type_id": user_type_id,
+                        "override_updated_at": override["updated_at"],
+                    })
 
     return defaults
 

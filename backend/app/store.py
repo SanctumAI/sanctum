@@ -163,12 +163,15 @@ async def store_chunks_to_qdrant(
 
     # Create chunk point
     chunk_point_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"chunk:{chunk_id}"))
+    # Extract job_id from chunk_id (format: {job_id}_chunk_XXXX)
+    job_id = chunk_id.split('_chunk_')[0] if '_chunk_' in chunk_id else chunk_id
     point = PointStruct(
         id=chunk_point_id,
         vector=embedding,
         payload={
             "type": "chunk",
             "chunk_id": chunk_id,
+            "job_id": job_id,  # Separate field for filtering by document
             "text": source_text[:2000],  # Store more text for context
             "source_file": source_file,
         }
@@ -185,3 +188,68 @@ async def store_chunks_to_qdrant(
     return {
         "qdrant": qdrant_result,
     }
+
+
+async def delete_chunks_from_qdrant(job_id: str) -> int:
+    """
+    Delete all chunks for a job from Qdrant.
+
+    Args:
+        job_id: The job ID whose chunks should be deleted
+
+    Returns:
+        Number of points deleted
+    """
+    from qdrant_client.models import Filter, FieldCondition, MatchValue, PointIdsList
+
+    client = get_qdrant_client()
+
+    # Check if collection exists
+    collections = client.get_collections().collections
+    if not any(c.name == COLLECTION_NAME for c in collections):
+        logger.info(f"Collection {COLLECTION_NAME} does not exist, nothing to delete")
+        return 0
+
+    # First, scroll to find all matching points
+    deleted_count = 0
+    offset = None
+    batch_size = 100
+
+    while True:
+        # Scroll through points with matching job_id
+        results = client.scroll(
+            collection_name=COLLECTION_NAME,
+            scroll_filter=Filter(
+                must=[
+                    FieldCondition(
+                        key="job_id",
+                        match=MatchValue(value=job_id),
+                    )
+                ]
+            ),
+            limit=batch_size,
+            offset=offset,
+            with_payload=False,
+            with_vectors=False,
+        )
+
+        points, next_offset = results
+
+        if not points:
+            break
+
+        # Delete the found points
+        point_ids = [p.id for p in points]
+        client.delete(
+            collection_name=COLLECTION_NAME,
+            points_selector=PointIdsList(points=point_ids),
+        )
+        deleted_count += len(point_ids)
+        logger.debug(f"Deleted {len(point_ids)} points for job {job_id}")
+
+        if next_offset is None:
+            break
+        offset = next_offset
+
+    logger.info(f"Deleted {deleted_count} total points from Qdrant for job {job_id}")
+    return deleted_count

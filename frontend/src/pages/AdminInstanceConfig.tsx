@@ -498,7 +498,7 @@ export function AdminInstanceConfig() {
         // Only update context after successful save
         updateConfig({ name, accentColor: previewAccentColor, icon: previewIcon })
         setIsDirty(false)
-        navigate('/admin')
+        navigate('/admin/setup')
       } else {
         console.error('Failed to save settings:', response.status)
         setSaveError(t('admin.errors.saveFailed', 'Failed to save settings. Please try again.'))
@@ -749,15 +749,18 @@ export function AdminInstanceConfig() {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
+                        {/* Field name and required tag */}
+                        <div className="flex items-center gap-2 flex-wrap">
                           <p className="text-sm font-medium text-text">{field.name}</p>
                           {field.required && (
-                            <span className="text-[10px] bg-error/10 text-error px-1.5 py-0.5 rounded">
+                            <span className="inline-flex items-center text-[10px] font-medium bg-accent/15 text-accent px-2 py-0.5 rounded-md border border-accent/30">
                               {t('common.required')}
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                        
+                        {/* Type information */}
+                        <div className="flex items-center gap-2 mt-1.5">
                           <span className="text-xs text-text-muted">
                             {FIELD_TYPE_LABELS[field.type] || field.type}
                           </span>
@@ -766,23 +769,23 @@ export function AdminInstanceConfig() {
                               • {t('admin.setup.optionsCount', { count: field.options.length })}
                             </span>
                           )}
-                          <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                        </div>
+                        
+                        {/* Tags container */}
+                        <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                          <span className={`inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-md border ${
                             field.encryption_enabled !== false
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-yellow-100 text-yellow-800'
+                              ? 'bg-accent/10 text-accent border-accent/20'
+                              : 'bg-warning/10 text-warning border-warning/20'
                           }`}>
-                            {field.encryption_enabled !== false ? '🔒 Encrypted' : '🔓 Plaintext'}
+                            {field.encryption_enabled !== false ? `🔒 ${t('admin.fields.encryptedBadge')}` : `🔓 ${t('admin.fields.plaintextBadge')}`}
                           </span>
                           {field.include_in_chat && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
-                              💬 In Chat
+                            <span className="inline-flex items-center text-[10px] font-medium bg-accent/10 text-accent px-2 py-0.5 rounded-md border border-accent/20">
+                              💬 {t('admin.fields.inChatBadge')}
                             </span>
                           )}
-                          <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                            field.user_type_id === null || field.user_type_id === undefined
-                              ? 'bg-accent/10 text-accent'
-                              : 'bg-surface-overlay text-text-muted'
-                          }`}>
+                          <span className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-md border bg-surface-overlay/50 text-text border-border">
                             {getUserTypeName(field.user_type_id)}
                           </span>
                         </div>

@@ -68,6 +68,7 @@ class QueryRequest(BaseModel):
     jurisdiction: Optional[str] = None  # e.g., "California", "Germany"
     situation_details: Optional[str] = None  # Any facts they share
     tools: list[str] = []  # Tool IDs enabled for this request
+    job_ids: Optional[list[str]] = None  # Filter to specific documents by job ID
 
 
 class QueryResponse(BaseModel):
@@ -136,16 +137,44 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         # 1. Embed the query (include conversation context for better retrieval)
         search_query = _build_search_query(question, session)
         query_embedding = embed_texts([f"query: {search_query}"])[0]
-        
-        # 2. Vector search in Qdrant
+
+        # 2. Build filter for specific documents if requested
+        search_filter = None
+        if request.job_ids and len(request.job_ids) > 0:
+            import database
+            # Validate user has access to these documents
+            available_job_ids = set(database.get_available_documents_for_user_type(user_type_id))
+
+            # Filter to only allowed documents
+            allowed_job_ids = [jid for jid in request.job_ids if jid in available_job_ids]
+
+            if not allowed_job_ids:
+                # User requested documents they can't access - return zero results
+                logger.warning(f"User requested inaccessible job_ids: {request.job_ids}")
+                search_filter = {"must": [{"key": "job_id", "match": {"value": "__impossible__"}}]}
+            else:
+                # Build OR filter: match any of the job_ids
+                search_filter = {
+                    "should": [
+                        {"key": "job_id", "match": {"value": job_id}}
+                        for job_id in allowed_job_ids
+                    ]
+                }
+                logger.debug(f"Filtering search to {len(allowed_job_ids)} documents")
+
+        # 3. Vector search in Qdrant
         qdrant_url = f"http://{QDRANT_HOST}:{QDRANT_PORT}/collections/{COLLECTION_NAME}/points/search"
+        search_payload = {
+            "vector": query_embedding,
+            "limit": top_k,
+            "with_payload": True,
+        }
+        if search_filter:
+            search_payload["filter"] = search_filter
+
         search_response = httpx.post(
             qdrant_url,
-            json={
-                "vector": query_embedding,
-                "limit": top_k,
-                "with_payload": True,
-            },
+            json=search_payload,
             timeout=30.0,
         )
         search_response.raise_for_status()

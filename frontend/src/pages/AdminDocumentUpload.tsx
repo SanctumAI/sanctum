@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Upload, FileText, X, CloudUpload, Loader2, Clock, ArrowLeft, HelpCircle, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Upload, FileText, X, CloudUpload, Loader2, Clock, ArrowLeft, HelpCircle, ChevronLeft, ChevronRight, CheckCircle2, Trash2, AlertTriangle } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { STORAGE_KEYS } from '../types/onboarding'
 import {
@@ -26,13 +26,34 @@ export function AdminDocumentUpload() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [uploadSuccess, setUploadSuccess] = useState<{ filename: string; jobId: string } | null>(null)
   const [recentJobs, setRecentJobs] = useState<JobStatus[]>([])
   const [isLoadingJobs, setIsLoadingJobs] = useState(true)
+  const [jobsError, setJobsError] = useState<string | null>(null)
 
   // Pipeline help modal state
   const [showPipelineHelpModal, setShowPipelineHelpModal] = useState(false)
   const [pipelineHelpPage, setPipelineHelpPage] = useState(0)
   const pipelineHelpModalRef = useRef<HTMLDivElement>(null)
+
+  // Delete confirmation modal state
+  const [deleteJobId, setDeleteJobId] = useState<string | null>(null)
+  const [deleteJobFilename, setDeleteJobFilename] = useState<string>('')
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const deleteModalRef = useRef<HTMLDivElement>(null)
+
+  // Timeout ref for cleanup
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Cleanup success timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current)
+      }
+    }
+  }, [])
 
   // Check if admin is logged in
   useEffect(() => {
@@ -42,25 +63,49 @@ export function AdminDocumentUpload() {
     }
   }, [navigate])
 
-  // Fetch recent jobs
+  // Fetch recent jobs with timeout
   const fetchJobs = useCallback(async () => {
+    setJobsError(null)
+
+    // Create abort controller for timeout
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10s timeout
+
     try {
-      const response = await fetch(`${INGEST_API_BASE}/ingest/jobs`)
+      const response = await fetch(`${INGEST_API_BASE}/ingest/jobs`, {
+        signal: controller.signal
+      })
+      clearTimeout(timeoutId)
+
       if (!response.ok) throw new Error(t('errors.failedToFetchJobs'))
       const data: JobsListResponse = await response.json()
 
-      // Fetch full status for each job
+      // Fetch full status for each job (with individual timeouts)
       const jobStatuses = await Promise.all(
         data.jobs.slice(0, 10).map(async (job) => {
-          const statusResponse = await fetch(`${INGEST_API_BASE}/ingest/status/${job.job_id}`)
-          if (!statusResponse.ok) return null
-          return statusResponse.json() as Promise<JobStatus>
+          try {
+            const statusController = new AbortController()
+            const statusTimeout = setTimeout(() => statusController.abort(), 5000)
+            const statusResponse = await fetch(`${INGEST_API_BASE}/ingest/status/${job.job_id}`, {
+              signal: statusController.signal
+            })
+            clearTimeout(statusTimeout)
+            if (!statusResponse.ok) return null
+            return statusResponse.json() as Promise<JobStatus>
+          } catch {
+            return null
+          }
         })
       )
 
       setRecentJobs(jobStatuses.filter((j): j is JobStatus => j !== null))
     } catch (error) {
       console.error(t('errors.errorFetchingJobs'), error)
+      if (error instanceof Error && error.name === 'AbortError') {
+        setJobsError(t('upload.jobsTimeout', 'Server is busy processing documents. Try refreshing in a moment.'))
+      } else {
+        setJobsError(t('errors.failedToFetchJobs'))
+      }
     } finally {
       setIsLoadingJobs(false)
     }
@@ -69,6 +114,56 @@ export function AdminDocumentUpload() {
   useEffect(() => {
     fetchJobs()
   }, [fetchJobs])
+
+  // Handle document deletion
+  const handleDeleteJob = async (jobId: string) => {
+    setIsDeleting(true)
+    setDeleteError(null)
+
+    try {
+      const response = await fetch(`${INGEST_API_BASE}/ingest/jobs/${jobId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.detail || t('upload.deleteFailed'))
+      }
+
+      // Close modal and refresh jobs
+      setDeleteJobId(null)
+      setDeleteJobFilename('')
+      await fetchJobs()
+    } catch (error) {
+      console.error('Delete error:', error)
+      setDeleteError(error instanceof Error ? error.message : t('upload.deleteFailed'))
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  // Open delete confirmation modal
+  const openDeleteModal = (jobId: string, filename: string) => {
+    setDeleteJobId(jobId)
+    setDeleteJobFilename(filename)
+    setDeleteError(null)
+  }
+
+  // Close delete confirmation modal
+  const closeDeleteModal = () => {
+    if (!isDeleting) {
+      setDeleteJobId(null)
+      setDeleteJobFilename('')
+      setDeleteError(null)
+    }
+  }
+
+  // Focus trap for delete modal
+  useEffect(() => {
+    if (deleteJobId && deleteModalRef.current) {
+      deleteModalRef.current.focus()
+    }
+  }, [deleteJobId])
 
   // Poll for job status updates
   // TODO: Consider WebSocket or SSE for real-time job status updates
@@ -131,6 +226,9 @@ export function AdminDocumentUpload() {
 
     setIsUploading(true)
     setUploadError(null)
+    setUploadSuccess(null)
+
+    const filename = selectedFile.name
 
     try {
       const formData = new FormData()
@@ -149,7 +247,10 @@ export function AdminDocumentUpload() {
       const data: UploadResponse = await response.json()
       console.log('Upload successful:', data)
 
-      // Clear selected file and refresh jobs
+      // Show success state
+      setUploadSuccess({ filename, jobId: data.job_id })
+
+      // Clear selected file
       setSelectedFile(null)
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
@@ -157,6 +258,12 @@ export function AdminDocumentUpload() {
 
       // Refresh job list
       await fetchJobs()
+
+      // Clear success message after 4 seconds
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current)
+      }
+      successTimeoutRef.current = setTimeout(() => setUploadSuccess(null), 4000)
     } catch (error) {
       console.error('Upload error:', error)
       setUploadError(error instanceof Error ? error.message : 'Upload failed')
@@ -254,31 +361,70 @@ export function AdminDocumentUpload() {
             className="hidden"
           />
 
-          {/* Drop zone or selected file */}
+          {/* Drop zone, selected file, or success state */}
           {selectedFile ? (
-            <div className="border border-accent/50 bg-accent-subtle rounded-xl p-4 animate-fade-in">
+            <div className="border border-border bg-surface rounded-xl p-4 animate-fade-in">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-                    <FileText className="w-5 h-5 text-accent" />
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                    isUploading ? 'bg-accent/10' : 'bg-surface-overlay'
+                  }`}>
+                    {isUploading ? (
+                      <Loader2 className="w-5 h-5 text-accent animate-spin" />
+                    ) : (
+                      <FileText className="w-5 h-5 text-text-muted" />
+                    )}
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-text truncate">
                       {selectedFile.name}
                     </p>
                     <p className="text-xs text-text-muted">
-                      {(selectedFile.size / 1024).toFixed(1)} KB
+                      {isUploading
+                        ? t('upload.uploadingStatus', 'Uploading to server...')
+                        : `${(selectedFile.size / 1024).toFixed(1)} KB`
+                      }
                     </p>
                   </div>
                 </div>
 
-                <button
-                  onClick={handleCancelFile}
-                  className="p-1.5 text-text-muted hover:text-error transition-colors shrink-0"
-                  title={t('upload.removeFile')}
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                {!isUploading && (
+                  <button
+                    onClick={handleCancelFile}
+                    className="p-1.5 text-text-muted hover:text-error transition-colors shrink-0"
+                    title={t('upload.removeFile')}
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Upload progress indicator */}
+              {isUploading && (
+                <div className="mt-3 pt-3 border-t border-border">
+                  <div className="flex items-center gap-2 text-xs text-text-muted">
+                    <div className="flex-1 h-1.5 bg-surface-overlay rounded-full overflow-hidden">
+                      <div className="h-full bg-accent rounded-full animate-pulse" style={{ width: '60%' }} />
+                    </div>
+                    <span>{t('upload.uploading')}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : uploadSuccess ? (
+            <div className="border border-success/30 bg-success/5 rounded-xl p-4 animate-fade-in">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-5 h-5 text-success" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-text truncate">
+                    {uploadSuccess.filename}
+                  </p>
+                  <p className="text-xs text-success">
+                    {t('upload.uploadedSuccess', 'Uploaded successfully — processing started')}
+                  </p>
+                </div>
               </div>
             </div>
           ) : (
@@ -342,27 +488,54 @@ export function AdminDocumentUpload() {
 
         {/* Recent Uploads */}
         <div className="bg-surface-overlay border border-border rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-text mb-4 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-text-muted" />
-            {t('upload.recentUploads')}
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-text flex items-center gap-2">
+              <Clock className="w-4 h-4 text-text-muted" />
+              {t('upload.recentUploads')}
+              <button
+                onClick={() => setShowPipelineHelpModal(true)}
+                className="ml-1 text-text-muted hover:text-accent transition-colors"
+                aria-label={t('upload.pipelineHelp.ariaLabel', 'Document processing help')}
+              >
+                <HelpCircle className="w-5 h-5" />
+              </button>
+            </h3>
             <button
-              onClick={() => setShowPipelineHelpModal(true)}
-              className="ml-1 text-text-muted hover:text-accent transition-colors"
-              aria-label={t('upload.pipelineHelp.ariaLabel', 'Document processing help')}
+              onClick={() => { setIsLoadingJobs(true); fetchJobs() }}
+              disabled={isLoadingJobs}
+              className="text-xs text-text-muted hover:text-accent transition-colors disabled:opacity-50 flex items-center gap-1"
             >
-              <HelpCircle className="w-5 h-5" />
+              {isLoadingJobs ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <span>↻</span>
+              )}
+              {t('upload.refresh', 'Refresh')}
             </button>
-          </h3>
+          </div>
 
           {isLoadingJobs ? (
             <div className="text-center py-6">
               <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-2" />
               <p className="text-xs text-text-muted">{t('common.loading')}</p>
             </div>
+          ) : jobsError ? (
+            <div className="text-center py-6 bg-surface border border-border rounded-lg">
+              <Clock className="w-8 h-8 text-text-muted mx-auto mb-2" strokeWidth={1.5} />
+              <p className="text-sm text-text-secondary mb-1">{t('upload.serverBusy', 'Server is busy')}</p>
+              <p className="text-xs text-text-muted mb-3">{jobsError}</p>
+              <button
+                onClick={() => { setIsLoadingJobs(true); fetchJobs() }}
+                className="text-xs text-accent hover:text-accent-hover transition-colors"
+              >
+                {t('upload.tryRefresh', 'Try again')}
+              </button>
+            </div>
           ) : recentJobs.length > 0 ? (
             <div className="space-y-2">
               {recentJobs.map((job) => {
                 const statusInfo = getStatusDisplay(job.status)
+                const canDelete = job.status !== 'pending' && job.status !== 'processing'
                 return (
                   <div
                     key={job.job_id}
@@ -389,6 +562,19 @@ export function AdminDocumentUpload() {
                           </p>
                         )}
                       </div>
+                      {/* Delete button */}
+                      <button
+                        onClick={() => openDeleteModal(job.job_id, job.filename)}
+                        disabled={!canDelete}
+                        className={`p-1.5 rounded-lg transition-colors shrink-0 ${
+                          canDelete
+                            ? 'text-text-muted hover:text-error hover:bg-error/10'
+                            : 'text-text-muted/30 cursor-not-allowed'
+                        }`}
+                        title={canDelete ? t('upload.deleteDocument') : t('upload.status.processing')}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 )
@@ -610,6 +796,77 @@ export function AdminDocumentUpload() {
                 >
                   {t('common.next', 'Next')}
                   <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {deleteJobId && (
+          <div
+            ref={deleteModalRef}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-modal-title"
+            onKeyDown={(e) => e.key === 'Escape' && closeDeleteModal()}
+            tabIndex={-1}
+          >
+            <div className="bg-surface border border-border rounded-xl p-6 w-full max-w-md mx-4 shadow-xl">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-5 h-5 text-error" />
+                </div>
+                <div>
+                  <h3 id="delete-modal-title" className="text-lg font-semibold text-text">
+                    {t('upload.confirmDelete')}
+                  </h3>
+                </div>
+              </div>
+
+              <p className="text-sm text-text-muted mb-2">
+                {t('upload.confirmDeleteDesc')}
+              </p>
+
+              <div className="bg-surface-overlay border border-border rounded-lg p-3 mb-4">
+                <p className="text-sm font-medium text-text truncate">
+                  {deleteJobFilename}
+                </p>
+              </div>
+
+              {/* Error message */}
+              {deleteError && (
+                <div className="mb-4 p-3 bg-error/10 border border-error/20 rounded-lg">
+                  <p className="text-sm text-error">{deleteError}</p>
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={closeDeleteModal}
+                  disabled={isDeleting}
+                  className="flex-1 border border-border hover:border-accent/50 text-text rounded-xl px-4 py-2.5 text-sm font-medium transition-all hover:bg-surface-overlay disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  onClick={() => handleDeleteJob(deleteJobId)}
+                  disabled={isDeleting}
+                  className="flex-1 bg-error text-white rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-error/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      {t('upload.deleting')}
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      {t('common.delete')}
+                    </>
+                  )}
                 </button>
               </div>
             </div>

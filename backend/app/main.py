@@ -1047,15 +1047,24 @@ async def get_public_settings():
 
 
 @app.get("/session-defaults", response_model=SessionDefaultsResponse)
-async def get_session_defaults_public():
+async def get_session_defaults_public(
+    user_type_id: Optional[int] = Query(None, description="User type ID for type-specific defaults")
+):
     """
     Public endpoint: Get session defaults for chat initialization.
     No authentication required - returns safe defaults for new chat sessions.
+
+    If user_type_id is provided, returns defaults with user-type-specific overrides applied.
     """
     try:
         from ai_config import get_session_defaults
         defaults = get_session_defaults()
-        default_docs = database.get_default_active_documents()
+
+        # Get document defaults with user-type inheritance if applicable
+        if user_type_id is not None:
+            default_docs = database.get_active_documents_for_user_type(user_type_id)
+        else:
+            default_docs = database.get_default_active_documents()
 
         return SessionDefaultsResponse(
             web_search_enabled=defaults.get("web_search_default", False),

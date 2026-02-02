@@ -27,7 +27,8 @@
     "loading": "Loading...",
     "unknown": "Unknown",
     "enabled": "Enabled",
-    "disabled": "Disabled"
+    "disabled": "Disabled",
+    "gotIt": "Got it"
   },
   "settings": {
     "title": "Settings",
@@ -148,17 +149,37 @@
       "placeholderOptional": "(optional)",
       "placeholderHint": "Hint text shown in the input",
       "requiredField": "Required field",
-      "encryptEnabled": "🔒 Encrypt field values",
-      "encryptDisabled": "🔓 Store as plaintext",
+      "dataSecurityTitle": "Data Security",
+      "dataSecurityIntro": "Choose how this field's data is stored. This affects both security and AI personalization capabilities.",
+      "encryptEnabled": "Encrypt field values",
+      "encryptDisabled": "Store as plaintext",
       "encryptedHint": "Field values will be encrypted with NIP-04 (recommended)",
-      "plaintextHint": "⚠️ Field values will be stored in plaintext (not recommended for sensitive data)",
+      "plaintextHint": "Field values will be stored in plaintext (not recommended for sensitive data)",
+      "encryptedSummary": "This field is encrypted. Only you can view the data when logged in.",
+      "encryptedNoAI": "AI personalization is not available for encrypted fields.",
       "securityWarning": "Security Warning",
       "securityWarningBody": "Disabling encryption will store user data in plaintext. Only disable for non-sensitive fields like preferences or public information.",
-      "includeInChat": "💬 Include in AI Chat Context",
+      "plaintextAIOption": "Since this field is unencrypted, you can optionally share it with the AI assistant:",
+      "includeInChat": "Include in AI Chat Context",
       "includeInChatHint": "Share this field's value with the AI assistant to personalize responses",
       "aiPersonalization": "AI Personalization",
       "aiPersonalizationBody": "The AI assistant will see this field's value to provide more relevant, personalized responses to users.",
-      "encryptedChatNote": "💬 AI Chat Context: Encrypted fields cannot be included in AI chat context. To share this field with the AI assistant, disable encryption above."
+      "encryptionHelpAria": "Learn about field encryption",
+      "encryptionHelpTitle": "About Field Encryption",
+      "encryptionHelpDesc": "Encryption protects sensitive user data by scrambling it before storage.",
+      "encryptionHelpWhenEnabled": "When encryption is enabled:",
+      "encryptionHelpPoint1": "Data is encrypted using the admin's Nostr key (NIP-04)",
+      "encryptionHelpPoint2": "Only the admin can decrypt and view the data",
+      "encryptionHelpPoint3": "Protects against database breaches",
+      "encryptionHelpPoint4": "Cannot be shared with the AI assistant",
+      "encryptionHelpWhenDisabled": "When encryption is disabled:",
+      "encryptionHelpDisabledPoint1": "Data is stored as readable plaintext",
+      "encryptionHelpDisabledPoint2": "Anyone with database access can read it",
+      "encryptionHelpDisabledPoint3": "Can be shared with AI for personalization",
+      "encryptionHelpRecommendation": "Recommendation: Keep encryption enabled for any personally identifiable information (names, emails, phone numbers, addresses).",
+      "encryptedBadge": "Encrypted",
+      "plaintextBadge": "Plaintext",
+      "inChatBadge": "In Chat"
     },
     "fieldTypes": {
       "text": "Text",
@@ -470,9 +491,15 @@
     "supported": "Supported: {{extensions}}",
     "removeFile": "Remove file",
     "uploading": "Uploading...",
+    "uploadingStatus": "Uploading to server...",
+    "uploadedSuccess": "Uploaded successfully — processing started",
     "uploadDocument": "Upload Document",
     "recentUploads": "Recent Uploads",
     "noUploads": "No uploads yet",
+    "refresh": "Refresh",
+    "serverBusy": "Server is busy",
+    "jobsTimeout": "Server is busy processing documents. Try refreshing in a moment.",
+    "tryRefresh": "Try again",
     "backToDashboard": "Back to Dashboard",
     "backToSetup": "Back to Setup",
     "status": {
@@ -482,7 +509,13 @@
       "complete": "Complete",
       "failed": "Failed"
     },
-    "chunks": "{{processed}}/{{total}} chunks"
+    "chunks": "{{processed}}/{{total}} chunks",
+    "deleteDocument": "Delete document",
+    "confirmDelete": "Delete this document?",
+    "confirmDeleteDesc": "This will permanently remove the document and all its chunks from the knowledge base. This action cannot be undone.",
+    "deleting": "Deleting...",
+    "deleteSuccess": "Document deleted successfully",
+    "deleteFailed": "Failed to delete document"
   },
   "configCategories": {
     "llm": {

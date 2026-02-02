@@ -610,12 +610,26 @@ async def get_job_status(job_id: str):
 
 
 @router.get("/jobs")
-async def list_jobs():
-    """List all ingest jobs (from SQLite for persistence across restarts)"""
+async def list_jobs(user: dict = Depends(auth.require_admin_or_approved_user)):
+    """List ingest jobs available to the current user"""
     # Read directly from SQLite to ensure we get persisted data
     jobs_from_db = ingest_db.list_jobs(limit=500)
+
+    # Admins see all jobs
+    if user.get("type") == "admin":
+        filtered_jobs = jobs_from_db
+    else:
+        # Regular users only see available documents for their type
+        user_type_id = user.get("user_type_id")
+        if user_type_id is None:
+            # User without assigned type sees no documents
+            filtered_jobs = []
+        else:
+            available_job_ids = set(database.get_available_documents_for_user_type(user_type_id))
+            filtered_jobs = [j for j in jobs_from_db if j["job_id"] in available_job_ids]
+
     return {
-        "total": len(jobs_from_db),
+        "total": len(filtered_jobs),
         "jobs": [
             {
                 "job_id": j["job_id"],
@@ -624,8 +638,102 @@ async def list_jobs():
                 "total_chunks": j["total_chunks"],
                 "created_at": j["created_at"],
             }
-            for j in jobs_from_db
+            for j in filtered_jobs
         ]
+    }
+
+
+@router.delete("/jobs/{job_id}")
+async def delete_document(job_id: str, admin: dict = Depends(auth.require_admin)):
+    """
+    Delete a document and all its associated data.
+    Requires admin authentication.
+
+    This removes:
+    1. Chunks from Qdrant vector database
+    2. Uploaded file from filesystem
+    3. Job record from SQLite (CASCADE handles document_defaults tables)
+    4. In-memory job/chunk entries
+
+    Cannot delete documents that are currently processing.
+    """
+    from store import delete_chunks_from_qdrant
+
+    # 1. Check if job exists
+    job = ingest_db.get_job(job_id)
+    if not job:
+        # Also check in-memory (for jobs not yet synced)
+        if job_id not in JOBS:
+            raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
+        job = JOBS[job_id]
+
+    # 2. Block deletion if job is currently processing
+    status = job.get("status", "")
+    if status in ("pending", "processing"):
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot delete document while it is {status}. Wait for processing to complete."
+        )
+
+    logger.info(f"[{job_id}] Starting document deletion...")
+    result = {
+        "job_id": job_id,
+        "filename": job.get("filename", "unknown"),
+        "qdrant_deleted": 0,
+        "file_deleted": False,
+        "db_deleted": False,
+    }
+
+    # 3. Delete chunks from Qdrant (fail-fast to avoid orphaned data)
+    try:
+        deleted_count = await delete_chunks_from_qdrant(job_id)
+        result["qdrant_deleted"] = deleted_count
+        logger.info(f"[{job_id}] Deleted {deleted_count} chunks from Qdrant")
+    except Exception as e:
+        logger.error(f"[{job_id}] Failed to delete from Qdrant: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to delete document chunks from vector database: {e}"
+        )
+
+    # 4. Delete uploaded file from filesystem
+    file_path = Path(job.get("file_path", ""))
+    if file_path.exists():
+        try:
+            file_path.unlink()
+            result["file_deleted"] = True
+            logger.info(f"[{job_id}] Deleted file: {file_path}")
+        except Exception as e:
+            logger.error(f"[{job_id}] Failed to delete file {file_path}: {e}")
+    else:
+        logger.debug(f"[{job_id}] File not found (already deleted?): {file_path}")
+        result["file_deleted"] = True  # Consider it deleted if not present
+
+    # 5. Delete from SQLite (CASCADE handles document_defaults tables)
+    try:
+        db_deleted = ingest_db.delete_job(job_id)
+        result["db_deleted"] = db_deleted
+        logger.info(f"[{job_id}] Deleted from SQLite: {db_deleted}")
+    except Exception as e:
+        logger.error(f"[{job_id}] Failed to delete from SQLite: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to delete job from database: {e}"
+        )
+
+    # 6. Clear in-memory entries
+    JOBS.pop(job_id, None)
+    # Clear chunks for this job
+    chunks_to_delete = [cid for cid, c in CHUNKS.items() if c.get("job_id") == job_id]
+    for cid in chunks_to_delete:
+        CHUNKS.pop(cid, None)
+    logger.info(f"[{job_id}] Cleared {len(chunks_to_delete)} in-memory chunks")
+
+    logger.info(f"[{job_id}] Document deletion complete")
+    return {
+        "success": True,
+        "message": f"Document '{result['filename']}' deleted successfully",
+        "details": result,
     }
 
 

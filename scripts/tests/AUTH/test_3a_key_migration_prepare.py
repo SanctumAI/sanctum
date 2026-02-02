@@ -281,7 +281,7 @@ def main():
         if not admin_token:
             print("[ERROR] Failed to get admin token")
             sys.exit(1)
-        print(f"[SETUP] Got admin token: {admin_token[:20]}...")
+        print("[SETUP] Obtained admin token")
 
     # Run test
     passed, _ = test_prepare_endpoint(args.api_base, admin_token, admin_pubkey)

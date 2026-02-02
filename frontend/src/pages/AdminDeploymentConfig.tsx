@@ -384,9 +384,10 @@ export function AdminDeploymentConfig() {
 
   const handleMigrationPrepare = async () => {
     // Validate new pubkey
+    const trimmed = newAdminPubkey.trim()
     let normalizedPubkey: string
     try {
-      normalizedPubkey = normalizePubkey(newAdminPubkey)
+      normalizedPubkey = normalizePubkey(trimmed)
     } catch {
       setMigrationResult({
         success: false,

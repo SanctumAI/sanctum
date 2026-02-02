@@ -703,6 +703,7 @@ export function AdminAIConfig() {
                         {/* Revert button for document overrides */}
                         {isOverride && selectedUserTypeId && (
                           <button
+                            type="button"
                             onClick={() => handleRevertDocOverride(doc.job_id)}
                             className="text-xs text-text-muted hover:text-accent transition-colors flex items-center gap-1"
                             title={t('adminAI.revertToGlobal', 'Revert to global')}
@@ -712,6 +713,7 @@ export function AdminAIConfig() {
                         )}
                         <div className="flex items-center gap-2 text-xs">
                           <button
+                            type="button"
                             onClick={() => handleDocumentToggle(doc, 'is_available')}
                             className="focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded"
                             role="switch"
@@ -728,6 +730,7 @@ export function AdminAIConfig() {
                         </div>
                         <div className="flex items-center gap-2 text-xs">
                           <button
+                            type="button"
                             onClick={() => handleDocumentToggle(doc, 'is_default_active')}
                             className="focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                             disabled={!doc.is_available}

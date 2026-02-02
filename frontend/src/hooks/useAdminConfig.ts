@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { adminFetch } from '../utils/adminApi'
 import type {
   AIConfigResponse,
+  AIConfigResponseWithInheritance,
   AIConfigItem,
   AIConfigUserTypeResponse,
   AIConfigWithInheritance,
@@ -29,7 +30,7 @@ import type {
 // --- AI Configuration Hooks ---
 
 export function useAIConfig(userTypeId?: number | null) {
-  const [config, setConfig] = useState<AIConfigResponse | null>(null)
+  const [config, setConfig] = useState<AIConfigResponse | AIConfigResponseWithInheritance | null>(null)
   const [userTypeConfig, setUserTypeConfig] = useState<AIConfigUserTypeResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -48,32 +49,12 @@ export function useAIConfig(userTypeId?: number | null) {
         }
         const data: AIConfigUserTypeResponse = await response.json()
         setUserTypeConfig(data)
-        // Also convert to AIConfigResponse format for compatibility
+        // Pass the full user-type items directly to preserve is_override and override_user_type_id
+        // This allows the UI to show override badges and revert actions
         setConfig({
-          prompt_sections: data.prompt_sections.map(item => ({
-            key: item.key,
-            value: item.value,
-            value_type: item.value_type,
-            category: item.category,
-            description: item.description,
-            updated_at: item.updated_at,
-          })),
-          parameters: data.parameters.map(item => ({
-            key: item.key,
-            value: item.value,
-            value_type: item.value_type,
-            category: item.category,
-            description: item.description,
-            updated_at: item.updated_at,
-          })),
-          defaults: data.defaults.map(item => ({
-            key: item.key,
-            value: item.value,
-            value_type: item.value_type,
-            category: item.category,
-            description: item.description,
-            updated_at: item.updated_at,
-          })),
+          prompt_sections: data.prompt_sections,
+          parameters: data.parameters,
+          defaults: data.defaults,
         })
       } else {
         // Fetch global config
@@ -234,16 +215,8 @@ export function useDocumentDefaults(userTypeId?: number | null) {
         const data: DocumentDefaultsUserTypeResponse = await response.json()
         setUserTypeDocuments(data.documents)
         // Also convert to DocumentDefaultItem format for compatibility
-        setDocuments(data.documents.map(doc => ({
-          job_id: doc.job_id,
-          filename: doc.filename,
-          status: doc.status,
-          total_chunks: doc.total_chunks,
-          is_available: doc.is_available,
-          is_default_active: doc.is_default_active,
-          display_order: doc.display_order,
-          updated_at: doc.updated_at,
-        })))
+        // Note: We spread full items to preserve is_override metadata for UI badges/revert actions
+        setDocuments(data.documents.map(doc => ({ ...doc })))
       } else {
         // Fetch global document defaults
         const response = await adminFetch('/ingest/admin/documents/defaults')

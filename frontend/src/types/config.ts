@@ -21,6 +21,16 @@ export interface AIConfigResponse {
   defaults: AIConfigItem[]
 }
 
+// Type that allows config items with optional inheritance metadata
+// Used when config may come from user-type endpoints that include is_override
+export type AIConfigItemWithOptionalInheritance = AIConfigItem | AIConfigWithInheritance
+
+export interface AIConfigResponseWithInheritance {
+  prompt_sections: AIConfigItemWithOptionalInheritance[]
+  parameters: AIConfigItemWithOptionalInheritance[]
+  defaults: AIConfigItemWithOptionalInheritance[]
+}
+
 export interface AIConfigUpdate {
   value: string
 }

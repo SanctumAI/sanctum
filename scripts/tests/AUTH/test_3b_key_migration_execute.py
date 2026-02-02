@@ -16,8 +16,9 @@ Tests the complete admin key migration flow:
 Also tests error cases:
 - Invalid pubkey format (not 64-char hex) -> 400
 - Same pubkey as current -> 400
-- Invalid signature -> 401
-- Missing authorization event -> 401/422
+- Invalid signature (wrong private key) -> 401
+- Wrong action tag -> 401
+- No auth header -> 401
 
 Usage:
     python test_3b_key_migration_execute.py [--api-base http://localhost:8000]
@@ -92,18 +93,28 @@ def create_signed_auth_event(privkey_hex: str, pubkey_hex: str, action: str = "a
     return event
 
 
-def get_admin_token(api_base: str, privkey_hex: str, pubkey_hex: str) -> str | None:
-    """Authenticate as admin and return session token."""
+def get_admin_token(api_base: str, privkey_hex: str, pubkey_hex: str) -> tuple[str | None, int | None]:
+    """Authenticate as admin and return (session_token, status_code).
+
+    Returns:
+        (token, 200) on success
+        (None, status_code) on auth rejection (e.g., 401, 403)
+        (None, None) on network/request exception
+    """
     event = create_signed_auth_event(privkey_hex, pubkey_hex, "admin_auth")
     try:
         response = requests.post(f"{api_base}/admin/auth", json={"event": event}, timeout=10)
         if response.status_code == 200:
-            return response.json().get("session_token")
+            token = response.json().get("session_token")
+            if token:
+                return token, 200
+            print("[ERROR] Admin auth returned 200 but no session_token in response")
+            return None, None
         print(f"[ERROR] Admin auth failed: {response.status_code} - {response.text}")
-        return None
+        return None, response.status_code
     except requests.exceptions.RequestException as e:
         print(f"[ERROR] Admin auth request failed: {e}")
-        return None
+        return None, None
 
 
 def create_test_user(api_base: str, user_data: dict, admin_token: str) -> dict | None:
@@ -437,11 +448,14 @@ def test_full_migration_flow(api_base: str, admin_token: str, old_admin_privkey:
 
     # Step 6: Authenticate as new admin and verify can access data
     print("\n[STEP 6] Authenticate as new admin...")
-    new_admin_token = get_admin_token(api_base, new_admin_privkey, new_admin_pubkey)
+    new_admin_token, status_code = get_admin_token(api_base, new_admin_privkey, new_admin_pubkey)
     if new_admin_token:
         print(f"  New admin token: {new_admin_token[:20]}...")
     else:
-        print("  Failed to authenticate as new admin!")
+        if status_code is None:
+            print("  Network error during new admin auth!")
+        else:
+            print(f"  Failed to authenticate as new admin! (status: {status_code})")
         passed = False
         return passed
 
@@ -483,14 +497,20 @@ def test_full_migration_flow(api_base: str, admin_token: str, old_admin_privkey:
 
     # Step 8: Verify old admin cannot authenticate
     print("\n[STEP 8] Verify old admin cannot authenticate...")
-    old_admin_token_check = get_admin_token(api_base, old_admin_privkey, old_admin_pubkey)
+    old_admin_token_check, status_code = get_admin_token(api_base, old_admin_privkey, old_admin_pubkey)
     if old_admin_token_check:
         print("  WARNING: Old admin can still authenticate (pubkey may not have been removed)")
         # This is actually expected since we UPDATE the admin pubkey rather than delete/create
         # The old pubkey no longer exists in the DB, so auth should fail
         passed = False
+    elif status_code is None:
+        print("  Network error - cannot verify old admin rejection!")
+        passed = False
+    elif status_code in (401, 403):
+        print(f"  Old admin cannot authenticate (status: {status_code}, expected)")
     else:
-        print("  Old admin cannot authenticate (expected)")
+        print(f"  Unexpected status code: {status_code} (expected 401 or 403)")
+        passed = False
 
     print("\n" + "-"*60)
     print(f"FULL MIGRATION FLOW RESULT: {'PASSED' if passed else 'FAILED'}")
@@ -523,9 +543,12 @@ def main():
     admin_token = args.token
     if not admin_token:
         print("\n[SETUP] Authenticating as test admin...")
-        admin_token = get_admin_token(args.api_base, old_admin_privkey, old_admin_pubkey)
+        admin_token, status_code = get_admin_token(args.api_base, old_admin_privkey, old_admin_pubkey)
         if not admin_token:
-            print("[ERROR] Failed to get admin token")
+            if status_code is None:
+                print("[ERROR] Network error getting admin token")
+            else:
+                print(f"[ERROR] Failed to get admin token (status: {status_code})")
             sys.exit(1)
         print(f"[SETUP] Got admin token: {admin_token[:20]}...")
 

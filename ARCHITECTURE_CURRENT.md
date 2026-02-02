@@ -54,10 +54,9 @@ This document describes the **current** implementation of Sanctum. For the plann
 All structured data is stored in SQLite:
 
 - **Users**: Nostr pubkeys (admin), email users, sessions
-- **Documents**: Uploaded files metadata, ingest jobs
+- **Documents**: Uploaded files metadata, ingest jobs (including `ontology_id` — taxonomy for categorizing documents; valid values: `general`, `bitcoin`; see `/ingest/ontologies`)
 - **Settings**: Instance configuration (branding, SMTP, LLM settings)
 - **Custom Fields**: Admin-defined user profile fields
-- **Ontologies**: Extraction schemas for document processing
 
 Volume: `sqlite_data:/data`
 
@@ -111,8 +110,8 @@ Document Upload → Text Extraction → Chunking → Embedding → Qdrant Storag
 ```
 
 1. Document uploaded via `/ingest/upload`
-2. Text extracted (PyMuPDF for PDFs)
-3. Text split into chunks (~500 tokens)
+2. Text extracted (PyMuPDF by default; Docling optional via `PDF_EXTRACT_MODE=quality`)
+3. Text split into chunks (~1500 chars with overlap)
 4. Chunks embedded using `intfloat/multilingual-e5-base`
 5. Vectors stored in Qdrant with metadata
 6. Job status tracked in SQLite
@@ -185,9 +184,12 @@ See [docs/tools.md](./docs/tools.md) for details.
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/ingest/upload` | POST | Upload document for processing |
-| `/ingest/jobs` | GET | List all ingest jobs |
+| `/ingest/ontologies` | GET | List valid ontology IDs |
+| `/ingest/jobs` | GET | List ingest jobs (admin or approved user — see [authentication.md](./docs/authentication.md#user-approval-workflow)) |
 | `/ingest/status/{job_id}` | GET | Get job status |
+| `/ingest/jobs/{job_id}` | DELETE | Delete document + vectors (admin only) |
 | `/ingest/stats` | GET | Qdrant collection statistics |
+| `/ingest/wipe` | POST | Delete Qdrant collections (dev only) |
 
 ### Query
 
@@ -263,11 +265,16 @@ Key configuration options (see `.env.example`):
 | `LLM_PROVIDER` | `maple` | LLM backend (`maple` or `ollama`) |
 | `LLM_API_URL` | (provider-specific) | Base URL for LLM provider. Set this generic variable OR the provider-specific `MAPLE_BASE_URL`/`OLLAMA_BASE_URL` |
 | `LLM_MODEL` | (provider-specific) | Model name. Set this generic variable OR the provider-specific `MAPLE_MODEL`/`OLLAMA_MODEL` |
+| `MAPLE_API_KEY` | (required) | API key for maple-proxy when `LLM_PROVIDER=maple` |
 | `QDRANT_HOST` | `qdrant` | Qdrant hostname |
 | `QDRANT_PORT` | `6333` | Qdrant port |
+| `EMBEDDING_PROVIDER` | `local` | Embedding backend (`local` or `openai`) |
+| `EMBEDDING_MODEL` | `intfloat/multilingual-e5-base` | Embedding model name |
+| `OPENAI_API_KEY` | (required for OpenAI embeddings) | OpenAI key when `EMBEDDING_PROVIDER=openai` |
 | `SEARXNG_URL` | `http://searxng:8080` | SearXNG endpoint |
 | `FRONTEND_URL` | `http://localhost:5173` | Base URL for magic links |
 | `MOCK_EMAIL` | `true` | Log magic links instead of sending (alias: `MOCK_SMTP`) |
+| `PDF_EXTRACT_MODE` | `default` | PDF extraction mode (`default` for PyMuPDF, `quality` for Docling) |
 
 ---
 

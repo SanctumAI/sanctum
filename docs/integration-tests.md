@@ -10,6 +10,10 @@ This document describes the integration test suite located in `scripts/tests/`.
 scripts/tests/
 ├── run_all_be_tests.py     # Master test runner (with integrated harness)
 ├── backups/                # Database backups (auto-created)
+├── AUTH/                   # Admin key migration tests (2x)
+│   ├── test-config.json    # Test fixtures and constants
+│   ├── test_3a_key_migration_prepare.py
+│   └── test_3b_key_migration_execute.py
 ├── CRM/                    # User data encryption tests (1x)
 │   ├── test-config.json    # Test fixtures and constants
 │   ├── test_1a_verify_encryption.py
@@ -42,7 +46,7 @@ test_{number}{letter}_{description}.py
 |--------|--------|-------------|
 | 1 | CRM | User data, encryption, PII handling |
 | 2 | RAG | Document ingestion, retrieval, persistence |
-| 3 | AUTH | Authentication flows (reserved) |
+| 3 | AUTH | Admin key migration and auth flows |
 | 4 | TOOLS | Tool orchestration (reserved) |
 
 ### Current Tests
@@ -53,6 +57,8 @@ test_{number}{letter}_{description}.py
 | 1B | `test_1b_decrypt_fidelity.py` | CRM | Decrypt and verify data fidelity |
 | 2A | `test_2a_document_persistence.py` | RAG | Document ingestion and persistence |
 | 2B | (planned) | RAG | RAG query retrieval accuracy |
+| 3A | `test_3a_key_migration_prepare.py` | AUTH | Prepare admin key migration payload |
+| 3B | `test_3b_key_migration_execute.py` | AUTH | Execute migration and verify re-encryption |
 
 ---
 
@@ -93,6 +99,26 @@ The `keypair_seed` is used to derive an admin keypair deterministically using SH
 ```
 
 The `content` field is converted to a PDF at test runtime for upload testing.
+
+### AUTH/test-config.json
+
+```json
+{
+  "test_admin": {
+    "keypair_seed": "..."
+  },
+  "new_admin": {
+    "keypair_seed": "..."
+  },
+  "test_user": {
+    "email": "...",
+    "name": "...",
+    "fields": { }
+  }
+}
+```
+
+The AUTH tests use deterministic admin keypairs for migration. The `test_user` values should match CRM fixtures for cross-domain consistency.
 
 ---
 
@@ -156,6 +182,9 @@ python run_all_be_tests.py --verbose
 # Run all CRM tests (1x)
 python run_all_be_tests.py --pattern "test_1*"
 
+# Run all AUTH tests (3x)
+python run_all_be_tests.py --pattern "test_3*"
+
 # Run specific test (2A)
 python run_all_be_tests.py --pattern "test_2a_*"
 ```
@@ -170,6 +199,14 @@ python test_1a_verify_encryption.py --api-base http://localhost:8000
 # RAG persistence test (2A)
 cd scripts/tests/RAG
 python test_2a_document_persistence.py --api-base http://localhost:8000
+
+# AUTH key migration prepare (3A)
+cd scripts/tests/AUTH
+python test_3a_key_migration_prepare.py --api-base http://localhost:8000
+
+# AUTH key migration execute (3B)
+cd scripts/tests/AUTH
+python test_3b_key_migration_execute.py --api-base http://localhost:8000
 ```
 
 ---
@@ -191,6 +228,13 @@ python test_2a_document_persistence.py --api-base http://localhost:8000
 - Upload succeeds via `/ingest/upload`
 - Job appears in `/ingest/jobs` (SQLite persistence)
 - Job persists after `docker compose down && up`
+
+### Test 3A/3B: Admin Key Migration
+
+✅ **PASS** when:
+- `/admin/key-migration/prepare` returns encrypted payload for the current admin
+- `/admin/key-migration/execute` re-encrypts PII to the new admin pubkey
+- Post-migration decrypt verifies data fidelity for the new admin key
 
 ---
 

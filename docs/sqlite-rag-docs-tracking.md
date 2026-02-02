@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS ingest_jobs (
 | **Read** | `list_completed_jobs()` | ✅ Implemented | Jobs ready for RAG queries |
 | **Read** | `job_exists(job_id)` | ✅ Implemented | Check if job exists |
 | **Update** | `update_job_status()` | ✅ Implemented | Update status and counters |
-| **Delete** | `delete_job()` | 📋 TODO | Not needed for MVP |
+| **Delete** | `delete_job()` | ✅ Implemented | Removes job row (API handles Qdrant + file cleanup) |
 | **Delete** | `purge_old_jobs(days)` | 📋 TODO | Cleanup utility |
 
 ### Migration Helper
@@ -114,6 +114,17 @@ CREATE TABLE IF NOT EXISTS ingest_jobs (
 2. Ensures persisted data is returned even after restart
 ```
 
+### On Document Delete (`DELETE /ingest/jobs/{job_id}`)
+
+```
+1. Verify job exists (SQLite or in-memory fallback)
+2. Reject deletion if status is pending/processing
+3. Delete job chunks from Qdrant (fail-fast)
+4. Delete uploaded file from /uploads
+5. Delete job row from SQLite
+6. Clear in-memory job/chunk entries
+```
+
 ---
 
 ## API Endpoints
@@ -121,8 +132,9 @@ CREATE TABLE IF NOT EXISTS ingest_jobs (
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/ingest/upload` | POST | Upload document, returns job_id |
-| `/ingest/jobs` | GET | List all jobs (from SQLite) |
+| `/ingest/jobs` | GET | List jobs (admin or approved user) |
 | `/ingest/status/{job_id}` | GET | Get single job status |
+| `/ingest/jobs/{job_id}` | DELETE | Delete document + vectors (admin only) |
 
 ---
 
@@ -147,14 +159,9 @@ CREATE TABLE IF NOT EXISTS ingest_jobs (
 
 ## Future Enhancements (TODO)
 
-### Delete Operations
+### Cleanup Utilities
 
 ```python
-def delete_job(job_id: str) -> bool:
-    """Delete a job and optionally its vectors from Qdrant."""
-    # TODO: Also delete associated vectors from Qdrant collection
-    pass
-
 def purge_old_jobs(days: int = 30) -> int:
     """Delete jobs older than specified days. Returns count deleted."""
     pass

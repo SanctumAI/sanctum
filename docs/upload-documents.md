@@ -180,6 +180,14 @@ List available ontologies:
 curl http://localhost:8000/ingest/ontologies
 ```
 
+Response:
+```json
+{
+  "ontologies": ["bitcoin", "general"],
+  "default": "general"
+}
+```
+
 Common ontologies:
 - `general` - General-purpose knowledge extraction (default)
 - `bitcoin` - Bitcoin/cryptocurrency concepts
@@ -213,8 +221,22 @@ curl -X POST http://localhost:8000/ingest/wipe
 ### List All Jobs
 
 ```bash
-curl http://localhost:8000/ingest/jobs
+curl http://localhost:8000/ingest/jobs \
+  -H "Authorization: Bearer <session-token>"
 ```
+
+This endpoint requires an admin or approved user session token. See `docs/authentication.md` for how to obtain a token.
+
+### Delete a Document (Admin Only)
+
+```bash
+curl -X DELETE http://localhost:8000/ingest/jobs/{job_id} \
+  -H "Authorization: Bearer <admin-token>"
+```
+
+**Notes:**
+- Returns `409` if the job is still `pending` or `processing`
+- Deletes Qdrant vectors, the uploaded file, and the SQLite job record
 
 ## Complete Example
 

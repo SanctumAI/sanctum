@@ -9,6 +9,13 @@ Privacy-first Retrieval-Augmented Generation system for curated knowledge bases.
 - Docker & Docker Compose
 - ~4GB disk space (for embedding model cache)
 
+### Configure Environment (Recommended)
+
+```bash
+cp .env.example .env
+# Set MAPLE_API_KEY in .env (required for LLM features)
+```
+
 ### Start the Stack
 
 ```bash
@@ -62,6 +69,7 @@ Sanctum requires a NIP-07 admin login before user signups are enabled. Open the 
 | `GET /` | API info |
 | `GET /health` | Service health check |
 | `GET /test` | Smoke test (Qdrant + health check) |
+| `GET /llm/test` | LLM provider connectivity test |
 
 ### Service URLs
 

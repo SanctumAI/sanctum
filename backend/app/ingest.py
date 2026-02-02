@@ -189,6 +189,11 @@ class JobStatus(BaseModel):
     error: Optional[str] = None
 
 
+class OntologiesResponse(BaseModel):
+    ontologies: list[str]
+    default: str
+
+
 class ChunkInfo(BaseModel):
     chunk_id: str
     job_id: str
@@ -507,6 +512,15 @@ async def get_datastore_stats():
         stats["qdrant"] = {"status": "error", "message": str(e)}
 
     return stats
+
+
+@router.get("/ontologies", response_model=OntologiesResponse)
+async def list_ontologies():
+    """List valid ontology IDs for document extraction."""
+    return OntologiesResponse(
+        ontologies=sorted(VALID_ONTOLOGIES),
+        default="general",
+    )
 
 
 @router.post("/upload", response_model=UploadResponse)

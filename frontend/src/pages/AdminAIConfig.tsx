@@ -360,6 +360,7 @@ export function AdminAIConfig() {
                 onClick={() => handleRevertOverride(item.key)}
                 className="text-xs text-text-muted hover:text-accent transition-colors flex items-center gap-1"
                 title={t('adminAI.revertToGlobal', 'Revert to global')}
+                aria-label={t('adminAI.revertToGlobal', 'Revert to global')}
               >
                 <Undo2 className="w-3 h-3" />
                 {t('adminAI.revert', 'Revert')}

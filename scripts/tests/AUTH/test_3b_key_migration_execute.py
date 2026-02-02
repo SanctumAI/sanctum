@@ -329,6 +329,9 @@ def test_full_migration_flow(api_base: str, admin_token: str, old_admin_privkey:
             print(f"  Created user ID: {user.get('id')}")
             # Re-fetch prepare data
             response = requests.get(f"{api_base}/admin/key-migration/prepare", headers=headers, timeout=10)
+            if response.status_code != 200:
+                print(f"  Failed to re-fetch prepare data: {response.status_code} - {response.text}")
+                return False
             prepare_data = response.json()
         else:
             print(f"  Found {prepare_data['user_count']} user(s) with encrypted data")

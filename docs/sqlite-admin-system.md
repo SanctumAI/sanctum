@@ -67,7 +67,7 @@ SQLite provides persistent storage for:
 Stores admin Nostr pubkeys for authentication.
 
 | Column | Type | Description |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | `id` | INTEGER | Primary key (auto-increment) |
 | `pubkey` | TEXT | Unique Nostr pubkey |
 | `created_at` | TIMESTAMP | Creation timestamp |
@@ -76,7 +76,7 @@ Stores admin Nostr pubkeys for authentication.
 Key-value store for instance configuration.
 
 | Column | Type | Description |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | `key` | TEXT | Setting key (primary key) |
 | `value` | TEXT | Setting value |
 | `updated_at` | TIMESTAMP | Last update timestamp |
@@ -91,7 +91,7 @@ Key-value store for instance configuration.
 Tracks setup status flags used to gate user onboarding.
 
 | Column | Type | Description |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | `key` | TEXT | Setting key (primary key) |
 | `value` | TEXT | Setting value (`"true"` / `"false"`) |
 | `updated_at` | TIMESTAMP | Last update timestamp |
@@ -106,7 +106,7 @@ User auth endpoints require both flags to be `"true"` (see `docs/authentication.
 Groups of users with different onboarding question sets.
 
 | Column | Type | Description |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | `id` | INTEGER | Primary key (auto-increment) |
 | `name` | TEXT | Unique type name (e.g., "researcher", "developer") |
 | `description` | TEXT | Optional description |
@@ -117,7 +117,7 @@ Groups of users with different onboarding question sets.
 Admin-defined custom fields for user onboarding.
 
 | Column | Type | Description |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | `id` | INTEGER | Primary key (auto-increment) |
 | `field_name` | TEXT | Field identifier |
 | `field_type` | TEXT | Field type (text, email, number, boolean, url) |
@@ -138,7 +138,7 @@ Admin-defined custom fields for user onboarding.
 Onboarded users.
 
 | Column | Type | Description |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | `id` | INTEGER | Primary key (auto-increment) |
 | `pubkey` | TEXT | Optional Nostr pubkey (unique) |
 | `encrypted_email` | TEXT | NIP-04 encrypted email |
@@ -156,7 +156,7 @@ Onboarded users.
 Dynamic field values for users (EAV pattern).
 
 | Column | Type | Description |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | `id` | INTEGER | Primary key (auto-increment) |
 | `user_id` | INTEGER | Foreign key to users |
 | `field_id` | INTEGER | Foreign key to user_field_definitions |
@@ -168,7 +168,7 @@ Dynamic field values for users (EAV pattern).
 Global AI configuration values (prompt sections, parameters, defaults).
 
 | Column | Type | Description |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | `id` | INTEGER | Primary key (auto-increment) |
 | `key` | TEXT | Unique config key (e.g., `prompt_tone`, `temperature`) |
 | `value` | TEXT | Stored value (stringified for JSON/number/boolean) |
@@ -181,7 +181,7 @@ Global AI configuration values (prompt sections, parameters, defaults).
 Per-user-type overrides for AI config values.
 
 | Column | Type | Description |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | `id` | INTEGER | Primary key (auto-increment) |
 | `ai_config_key` | TEXT | Config key being overridden |
 | `user_type_id` | INTEGER | Foreign key to user_types |
@@ -192,7 +192,7 @@ Per-user-type overrides for AI config values.
 Global document availability and default state for ingest jobs.
 
 | Column | Type | Description |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | `id` | INTEGER | Primary key (auto-increment) |
 | `job_id` | TEXT | Unique ingest job id |
 | `is_available` | INTEGER | 1 = available for use, 0 = hidden |
@@ -204,7 +204,7 @@ Global document availability and default state for ingest jobs.
 Per-user-type overrides for document defaults.
 
 | Column | Type | Description |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | `id` | INTEGER | Primary key (auto-increment) |
 | `job_id` | TEXT | Ingest job id |
 | `user_type_id` | INTEGER | Foreign key to user_types |
@@ -216,7 +216,7 @@ Per-user-type overrides for document defaults.
 Deployment-level configuration values (LLM, email, storage, etc.).
 
 | Column | Type | Description |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | `id` | INTEGER | Primary key (auto-increment) |
 | `key` | TEXT | Unique config key |
 | `value` | TEXT | Value (masked in API responses if secret) |
@@ -230,7 +230,7 @@ Deployment-level configuration values (LLM, email, storage, etc.).
 Audit trail for deployment and AI config changes.
 
 | Column | Type | Description |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | `id` | INTEGER | Primary key (auto-increment) |
 | `table_name` | TEXT | Source table (`deployment_config`, `ai_config`, `document_defaults`) |
 | `config_key` | TEXT | Key or job_id that changed |
@@ -429,7 +429,7 @@ curl -X POST http://localhost:8000/admin/user-fields \
 
 **Field types:**
 | Type | Description | Frontend Input |
-|------|-------------|----------------|
+| ------ | ------------- | ---------------- |
 | `text` | Single-line text | Text input |
 | `email` | Email with validation | Email input |
 | `number` | Numeric value | Number input |
@@ -670,7 +670,7 @@ curl -X POST http://localhost:8000/users \
 ### Backend
 
 | File | Description |
-|------|-------------|
+| ------ | ------------- |
 | `backend/app/database.py` | SQLite connection, schema, and CRUD operations |
 | `backend/app/models.py` | Pydantic request/response models |
 | `backend/app/seed.py` | Database initialization on startup |
@@ -681,7 +681,7 @@ curl -X POST http://localhost:8000/users \
 ### Frontend
 
 | File | Description |
-|------|-------------|
+| ------ | ------------- |
 | `frontend/src/types/onboarding.ts` | TypeScript types, storage keys, helper functions |
 | `frontend/src/pages/UserTypeSelection.tsx` | User type selection page |
 | `frontend/src/pages/UserProfile.tsx` | Dynamic profile form based on fields |
@@ -702,7 +702,7 @@ curl -X POST http://localhost:8000/users \
 The frontend uses localStorage for temporary state during onboarding:
 
 | Key | Description |
-|-----|-------------|
+| ----- | ------------- |
 | `sanctum_admin_pubkey` | Admin Nostr pubkey (after login) |
 | `sanctum_admin_session_token` | Admin session token (after NIP-07 auth) |
 | `sanctum_session_token` | User session token (after magic link verification) |

@@ -274,7 +274,7 @@ Key configuration options (see `.env.example`):
 | `SEARXNG_URL` | `http://searxng:8080` | SearXNG endpoint |
 | `FRONTEND_URL` | `http://localhost:5173` | Base URL for magic links |
 | `MOCK_EMAIL` | `true` | Log magic links instead of sending (alias: `MOCK_SMTP`) |
-| `PDF_EXTRACT_MODE` | `default` | PDF extraction mode (`default` for PyMuPDF, `quality` for Docling) |
+| `PDF_EXTRACT_MODE` | `fast` | PDF extraction mode (`fast` for PyMuPDF, `quality` for Docling) |
 
 ---
 

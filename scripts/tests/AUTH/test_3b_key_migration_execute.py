@@ -109,7 +109,7 @@ def get_admin_token(api_base: str, privkey_hex: str, pubkey_hex: str) -> tuple[s
             if token:
                 return token, 200
             print("[ERROR] Admin auth returned 200 but no session_token in response")
-            return None, None
+            return None, 200
         print(f"[ERROR] Admin auth failed: {response.status_code} - {response.text}")
         return None, response.status_code
     except requests.exceptions.RequestException as e:

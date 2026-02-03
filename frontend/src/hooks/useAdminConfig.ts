@@ -45,7 +45,7 @@ export function useAIConfig(userTypeId?: number | null) {
         // Fetch user-type-specific config with inheritance
         const response = await adminFetch(`/admin/ai-config/user-type/${userTypeId}`)
         if (!response.ok) {
-          throw new Error(`errors.failedToFetchAIConfig`)
+          throw new Error('errors.failedToFetchAIConfig')
         }
         const data: AIConfigUserTypeResponse = await response.json()
         setUserTypeConfig(data)
@@ -60,7 +60,7 @@ export function useAIConfig(userTypeId?: number | null) {
         // Fetch global config
         const response = await adminFetch('/admin/ai-config')
         if (!response.ok) {
-          throw new Error(`errors.failedToFetchAIConfig`)
+          throw new Error('errors.failedToFetchAIConfig')
         }
         const data = await response.json()
         setConfig(data)

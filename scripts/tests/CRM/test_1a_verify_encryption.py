@@ -102,10 +102,14 @@ def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db") -> str:
     validates that only a single SELECT statement is allowed.
 
     Raises:
-        ValueError: If SQL is not a single SELECT statement
+        ValueError: If SQL is not a single SELECT statement or db_path is invalid
         RuntimeError: If sqlite3 command fails
     """
     repo_root = SCRIPT_DIR.parent.parent.parent
+
+    # Validate db_path to prevent option injection (paths starting with "-")
+    if not db_path or db_path.startswith("-"):
+        raise ValueError(f"Invalid db_path: {db_path!r}")
 
     # Normalize: strip whitespace and trailing semicolons
     sql_normalized = sql.strip().rstrip(";").strip()

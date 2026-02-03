@@ -191,7 +191,7 @@ async def update_ai_config_value(
 async def get_ai_config_for_user_type(
     user_type_id: int,
     admin: dict = Depends(auth.require_admin)
-):
+) -> AIConfigUserTypeResponse:
     """
     Get AI configuration with inheritance applied for a user type.
     Shows which values are overridden vs inherited from global defaults.
@@ -228,7 +228,7 @@ async def set_ai_config_override(
     key: str,
     update: AIConfigOverrideUpdate,
     admin: dict = Depends(auth.require_admin)
-):
+) -> AIConfigWithInheritance:
     """
     Set an AI config override for a user type.
     This value will override the global default for users of this type.
@@ -318,7 +318,7 @@ async def delete_ai_config_override(
     user_type_id: int,
     key: str,
     admin: dict = Depends(auth.require_admin)
-):
+) -> dict:
     """
     Remove an AI config override for a user type (revert to global default).
     Requires admin authentication.
@@ -348,7 +348,7 @@ async def preview_prompt_for_user_type(
     user_type_id: int,
     request: PromptPreviewRequest,
     admin: dict = Depends(auth.require_admin)
-):
+) -> PromptPreviewResponse:
     """
     Preview assembled prompt with sample data for a specific user type.
     Shows how the prompt appears with user-type overrides applied.

@@ -140,7 +140,7 @@ def verify_migration_authorization(event: NostrEvent, current_admin_pubkey: str)
 # --- Endpoints ---
 
 @router.get("/prepare", response_model=MigrationPrepareResponse)
-async def prepare_migration(admin: dict = Depends(auth.require_admin)):
+async def prepare_migration(admin: dict = Depends(auth.require_admin)) -> MigrationPrepareResponse:
     """
     Prepare for key migration by returning all encrypted data.
 
@@ -207,7 +207,7 @@ async def prepare_migration(admin: dict = Depends(auth.require_admin)):
 async def execute_migration(
     request: MigrationExecuteRequest,
     admin: dict = Depends(auth.require_admin)
-):
+) -> MigrationExecuteResponse:
     """
     Execute key migration by re-encrypting all data to the new admin pubkey.
 

@@ -508,6 +508,8 @@ class DeploymentConfigResponse(BaseModel):
     storage: list[DeploymentConfigItem] = []
     security: list[DeploymentConfigItem] = []
     search: list[DeploymentConfigItem] = []
+    domains: list[DeploymentConfigItem] = []
+    ssl: list[DeploymentConfigItem] = []
     general: list[DeploymentConfigItem] = []
 
 

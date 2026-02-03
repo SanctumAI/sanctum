@@ -25,6 +25,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Key,
+  Globe,
+  Lock,
 } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { isAdminAuthenticated } from '../utils/adminApi'
@@ -719,6 +721,10 @@ export function AdminDeploymentConfig() {
         return <Shield className="w-4 h-4 text-text-muted" />
       case 'search':
         return <Search className="w-4 h-4 text-text-muted" />
+      case 'domains':
+        return <Globe className="w-4 h-4 text-text-muted" />
+      case 'ssl':
+        return <Lock className="w-4 h-4 text-text-muted" />
       default:
         return <Server className="w-4 h-4 text-text-muted" />
     }
@@ -746,6 +752,8 @@ export function AdminDeploymentConfig() {
       ...(deploymentConfig.storage || []),
       ...(deploymentConfig.security || []),
       ...(deploymentConfig.search || []),
+      ...(deploymentConfig.domains || []),
+      ...(deploymentConfig.ssl || []),
       ...(deploymentConfig.general || []),
     ]
     const configItem = allConfigs.find((c) => c.key === configKey)
@@ -1159,6 +1167,8 @@ export function AdminDeploymentConfig() {
             {renderCategory('storage', deploymentConfig.storage)}
             {renderCategory('search', deploymentConfig.search)}
             {renderCategory('security', deploymentConfig.security)}
+            {renderCategory('domains', deploymentConfig.domains)}
+            {renderCategory('ssl', deploymentConfig.ssl)}
             {renderCategory('general', deploymentConfig.general)}
           </>
         )}

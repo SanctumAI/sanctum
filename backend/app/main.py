@@ -2020,17 +2020,17 @@ async def export_database(background_tasks: BackgroundTasks, _admin: Dict = Depe
                 headers={"Content-Disposition": f"attachment; filename={filename}"}
             )
             
-        except Exception as backup_error:
+        except Exception:
             # Clean up temp file on backup failure
             try:
                 os.unlink(temp_path)
             except OSError:
                 pass
-            raise backup_error
-        
+            raise
+
     except HTTPException:
         # Re-raise HTTPExceptions to preserve status codes
         raise
     except Exception as e:
-        logger.error(f"Database export failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
+        logger.exception("Database export failed")
+        raise HTTPException(status_code=500, detail=f"Export failed: {e!r}") from e

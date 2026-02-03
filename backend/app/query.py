@@ -29,20 +29,11 @@ from store import (
     QDRANT_PORT,
 )
 from llm import get_provider
+from utils import sanitize_profile_value
 
 logger = logging.getLogger("sanctum.query")
 
 router = APIRouter(prefix="/query", tags=["query"])
-
-
-def _sanitize_profile_value(value: str) -> str:
-    """
-    Sanitize user profile values before prompt interpolation.
-    Collapses newlines and normalizes whitespace to prevent prompt structure breakage.
-    """
-    if not isinstance(value, str):
-        value = str(value)
-    return " ".join(value.split())
 
 
 # Configuration
@@ -469,7 +460,7 @@ def _call_llm_contextual(
     # Build user profile section (if any profile data is available)
     user_profile_section = ""
     if user_profile_context:
-        profile_lines = [f"  - {field_name}: {_sanitize_profile_value(value)}" for field_name, value in user_profile_context.items()]
+        profile_lines = [f"  - {field_name}: {sanitize_profile_value(value)}" for field_name, value in user_profile_context.items()]
         user_profile_section = "\n\n=== USER PROFILE ===\nThe following information is known about the user:\n" + "\n".join(profile_lines)
 
     # Auto-search instruction if web-search tool is enabled

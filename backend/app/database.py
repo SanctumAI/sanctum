@@ -711,6 +711,10 @@ def create_field_definition(
     encryption_enabled: True = encrypt field values (secure default), False = store plaintext
     include_in_chat: True = include field value in AI chat context (only for unencrypted fields)
     """
+    # Enforce data consistency: encrypted fields cannot be included in chat context
+    if encryption_enabled:
+        include_in_chat = False
+
     options_json = json.dumps(options) if options is not None else None
     with get_cursor() as cursor:
         cursor.execute("""
@@ -834,7 +838,13 @@ def update_field_definition(
     if encryption_enabled is not None:
         updates.append("encryption_enabled = ?")
         values.append(int(encryption_enabled))
-    if include_in_chat is not None:
+        # Enforce data consistency: when enabling encryption, disable include_in_chat
+        if encryption_enabled:
+            updates.append("include_in_chat = ?")
+            values.append(0)
+    # Only process include_in_chat if encryption is not being enabled
+    # (when encryption_enabled=True, we already forced include_in_chat=0 above)
+    if include_in_chat is not None and not encryption_enabled:
         updates.append("include_in_chat = ?")
         values.append(int(include_in_chat))
 

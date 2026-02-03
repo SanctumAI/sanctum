@@ -1041,6 +1041,10 @@ async def get_document_defaults_for_user_type(
     # Get all completed jobs to include ones without defaults (same pattern as global endpoint)
     completed_jobs = ingest_db.list_completed_jobs()
 
+    # Prefetch all overrides for this user type to avoid N+1 queries
+    all_overrides = database.get_document_defaults_overrides_by_type(user_type_id)
+    overrides_by_job = {o["job_id"]: o for o in all_overrides}
+
     documents = []
     for job in completed_jobs:
         job_id = job["job_id"]
@@ -1063,7 +1067,7 @@ async def get_document_defaults_for_user_type(
             ))
         else:
             # Job exists but no defaults set - check for user-type override only
-            override = database.get_document_defaults_override(job_id, user_type_id)
+            override = overrides_by_job.get(job_id)
             if override:
                 # Has override but no global default
                 documents.append(DocumentDefaultWithInheritance(

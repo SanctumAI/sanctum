@@ -31,11 +31,15 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
   const [errors, setErrors] = useState<{ name?: string; options?: string }>({})
   const [showEncryptionHelpModal, setShowEncryptionHelpModal] = useState(false)
   const encryptionHelpModalRef = useRef<HTMLDivElement>(null)
+  const triggerElementRef = useRef<HTMLElement | null>(null)
 
-  // Focus modal when opened
+  // Focus modal when opened, restore focus when closed
   useEffect(() => {
     if (showEncryptionHelpModal && encryptionHelpModalRef.current) {
       encryptionHelpModalRef.current.focus()
+    } else if (!showEncryptionHelpModal && triggerElementRef.current) {
+      triggerElementRef.current.focus()
+      triggerElementRef.current = null
     }
   }, [showEncryptionHelpModal])
 
@@ -276,7 +280,10 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
             <span className="text-sm font-medium text-text">{t('admin.fields.dataSecurityTitle')}</span>
             <button
               type="button"
-              onClick={() => setShowEncryptionHelpModal(true)}
+              onClick={(e) => {
+                triggerElementRef.current = e.currentTarget
+                setShowEncryptionHelpModal(true)
+              }}
               aria-label={t('admin.fields.encryptionHelpAria')}
               className="text-text-muted hover:text-accent transition-colors"
             >

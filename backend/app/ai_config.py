@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException, Depends
 
 import auth
 import database
+from utils import sanitize_profile_value
 from models import (
     AIConfigItem,
     AIConfigResponse,
@@ -23,16 +24,6 @@ from models import (
 logger = logging.getLogger("sanctum.ai_config")
 
 router = APIRouter(prefix="/admin/ai-config", tags=["ai-config"])
-
-
-def _sanitize_profile_value(value: str) -> str:
-    """
-    Sanitize user profile values before prompt interpolation.
-    Collapses newlines and normalizes whitespace to prevent prompt structure breakage.
-    """
-    if not isinstance(value, str):
-        value = str(value)
-    return " ".join(value.split())
 
 
 def _config_to_item(config: dict) -> AIConfigItem:
@@ -402,7 +393,10 @@ async def preview_prompt_for_user_type(
     # Question
     parts.append("")
     parts.append("=== QUESTION ===")
-    parts.append(request.sample_question)
+    if request.sample_question:
+        parts.append(request.sample_question)
+    else:
+        parts.append("(No sample question provided)")
 
     parts.append("")
     parts.append("=== RESPOND ===")
@@ -485,7 +479,10 @@ async def preview_prompt(
     # Question
     parts.append("")
     parts.append("=== QUESTION ===")
-    parts.append(request.sample_question)
+    if request.sample_question:
+        parts.append(request.sample_question)
+    else:
+        parts.append("(No sample question provided)")
 
     parts.append("")
     parts.append("=== RESPOND ===")
@@ -643,7 +640,7 @@ def build_chat_prompt(
         parts.append("=== USER PROFILE ===")
         parts.append("The following information is known about the user:")
         for field_name, value in user_profile_context.items():
-            safe_value = _sanitize_profile_value(value)
+            safe_value = sanitize_profile_value(value)
             parts.append(f"- {field_name}: {safe_value}")
 
     # Rules section

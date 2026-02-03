@@ -8,6 +8,8 @@ from typing import Iterable
 def connect(db_path: str) -> sqlite3.Connection:
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
+    # Enable foreign key enforcement to prevent orphaned records
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 
@@ -46,12 +48,12 @@ def fetch_duplicate_blind_indexes(cur: sqlite3.Cursor) -> list[str]:
 def fetch_duplicate_plain_emails(cur: sqlite3.Cursor) -> list[str]:
     cur.execute(
         """
-        SELECT LOWER(email) AS email_norm, COUNT(*) AS count
+        SELECT LOWER(TRIM(email)) AS email_norm, COUNT(*) AS count
         FROM users
         WHERE email_blind_index IS NULL
           AND email IS NOT NULL
           AND TRIM(email) != ''
-        GROUP BY LOWER(email)
+        GROUP BY LOWER(TRIM(email))
         HAVING COUNT(*) > 1
         ORDER BY COUNT(*) DESC
         """
@@ -69,7 +71,7 @@ def fetch_users_by_blind_index(cur: sqlite3.Cursor, blind_index: str) -> list[sq
 
 def fetch_users_by_plain_email(cur: sqlite3.Cursor, email_norm: str) -> list[sqlite3.Row]:
     cur.execute(
-        "SELECT * FROM users WHERE LOWER(email) = ? AND email_blind_index IS NULL ORDER BY id",
+        "SELECT * FROM users WHERE LOWER(TRIM(email)) = ? AND email_blind_index IS NULL ORDER BY id",
         (email_norm,)
     )
     return cur.fetchall()

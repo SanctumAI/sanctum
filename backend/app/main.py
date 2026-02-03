@@ -1148,7 +1148,7 @@ def _get_simulation_setting(key: str, default: str = "true") -> bool:
 
 
 @app.get("/config/public", response_model=PublicConfigResponse)
-async def get_public_config():
+async def get_public_config() -> PublicConfigResponse:
     """
     Public endpoint: Get simulation/development settings.
 
@@ -1164,7 +1164,7 @@ async def get_public_config():
 @app.get("/session-defaults", response_model=SessionDefaultsResponse)
 async def get_session_defaults_public(
     user_type_id: Optional[int] = Query(None, description="User type ID for type-specific defaults")
-):
+) -> SessionDefaultsResponse:
     """
     Public endpoint: Get session defaults for chat initialization.
     No authentication required - returns safe defaults for new chat sessions.
@@ -1386,7 +1386,7 @@ async def update_field_encryption(
     field_id: int,
     encryption_request: FieldEncryptionRequest,
     admin: dict = Depends(auth.require_admin)
-):
+) -> FieldEncryptionResponse:
     """Update encryption setting for a field definition (requires admin auth).
 
     WARNING: Changing encryption settings may affect existing data.
@@ -1519,9 +1519,18 @@ async def create_user(user: UserCreate):
         )
 
     # Validate required fields
+    # For partial updates (existing user), consider both existing and provided fields
     required_fields = {f["field_name"] for f in field_defs if f["required"]}
     provided_fields = set(user.fields.keys())
-    missing = required_fields - provided_fields
+
+    if existing_user:
+        # Union the existing user's fields with provided fields for validation
+        existing_fields = set(existing_user.get("fields", {}).keys()) | set(existing_user.get("fields_encrypted", {}).keys())
+        all_fields = existing_fields | provided_fields
+        missing = required_fields - all_fields
+    else:
+        # New user: only check provided fields
+        missing = required_fields - provided_fields
 
     if missing:
         raise HTTPException(
@@ -2024,17 +2033,17 @@ async def export_database(background_tasks: BackgroundTasks, _admin: Dict = Depe
                 headers={"Content-Disposition": f"attachment; filename={filename}"}
             )
             
-        except Exception as backup_error:
+        except Exception:
             # Clean up temp file on backup failure
             try:
                 os.unlink(temp_path)
             except OSError:
                 pass
-            raise backup_error
-        
+            raise
+
     except HTTPException:
         # Re-raise HTTPExceptions to preserve status codes
         raise
     except Exception as e:
-        logger.error(f"Database export failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
+        logger.exception("Database export failed")
+        raise HTTPException(status_code=500, detail=f"Export failed: {e!r}") from e

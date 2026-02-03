@@ -80,7 +80,6 @@ export function AdminDocumentUpload() {
       const response = await adminFetch('/ingest/jobs', {
         signal: controller.signal
       })
-      clearTimeout(timeoutId)
 
       if (!response.ok) throw new Error(t('errors.failedToFetchJobs'))
       const data: JobsListResponse = await response.json()
@@ -88,17 +87,18 @@ export function AdminDocumentUpload() {
       // Fetch full status for each job (with individual timeouts)
       const jobStatuses = await Promise.all(
         data.jobs.slice(0, 10).map(async (job) => {
+          const statusController = new AbortController()
+          const statusTimeout = setTimeout(() => statusController.abort(), 5000)
           try {
-            const statusController = new AbortController()
-            const statusTimeout = setTimeout(() => statusController.abort(), 5000)
             const statusResponse = await adminFetch(`/ingest/status/${job.job_id}`, {
               signal: statusController.signal
             })
-            clearTimeout(statusTimeout)
             if (!statusResponse.ok) return null
             return statusResponse.json() as Promise<JobStatus>
           } catch {
             return null
+          } finally {
+            clearTimeout(statusTimeout)
           }
         })
       )
@@ -118,6 +118,7 @@ export function AdminDocumentUpload() {
         setJobsError(t('errors.failedToFetchJobs'))
       }
     } finally {
+      clearTimeout(timeoutId)
       setIsLoadingJobs(false)
     }
   }, [t])

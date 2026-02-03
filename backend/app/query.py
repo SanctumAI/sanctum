@@ -29,20 +29,11 @@ from store import (
     QDRANT_PORT,
 )
 from llm import get_provider
+from utils import sanitize_profile_value
 
 logger = logging.getLogger("sanctum.query")
 
 router = APIRouter(prefix="/query", tags=["query"])
-
-
-def _sanitize_profile_value(value: str) -> str:
-    """
-    Sanitize user profile values before prompt interpolation.
-    Collapses newlines and normalizes whitespace to prevent prompt structure breakage.
-    """
-    if not isinstance(value, str):
-        value = str(value)
-    return " ".join(value.split())
 
 
 # Configuration
@@ -134,6 +125,9 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
     logger.info(f"RAG query (session={session_id[:8]}): '{question[:50]}...'")
     
     try:
+        # Import database module once at the start of the function
+        import database
+
         # 1. Embed the query (include conversation context for better retrieval)
         search_query = _build_search_query(question, session)
         query_embedding = embed_texts([f"query: {search_query}"])[0]
@@ -141,7 +135,6 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         # 2. Build filter for specific documents if requested
         search_filter = None
         if request.job_ids and len(request.job_ids) > 0:
-            import database
             # Validate user has access to these documents
             available_job_ids = set(database.get_available_documents_for_user_type(user_type_id))
 
@@ -192,7 +185,6 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
 
         # Get user profile context for chat personalization (unencrypted fields only)
         # Skip for dev mode (id=-1) and admin accounts (no user profile in users table)
-        import database
         user_profile_context = None
         user_id = user.get("id")
         if user_id and user_id != -1 and user.get("type") != "admin":
@@ -468,7 +460,7 @@ def _call_llm_contextual(
     # Build user profile section (if any profile data is available)
     user_profile_section = ""
     if user_profile_context:
-        profile_lines = [f"  - {field_name}: {_sanitize_profile_value(value)}" for field_name, value in user_profile_context.items()]
+        profile_lines = [f"  - {field_name}: {sanitize_profile_value(value)}" for field_name, value in user_profile_context.items()]
         user_profile_section = "\n\n=== USER PROFILE ===\nThe following information is known about the user:\n" + "\n".join(profile_lines)
 
     # Auto-search instruction if web-search tool is enabled

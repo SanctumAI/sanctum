@@ -515,7 +515,7 @@ async def get_datastore_stats():
 
 
 @router.get("/ontologies", response_model=OntologiesResponse)
-async def list_ontologies():
+async def list_ontologies() -> OntologiesResponse:
     """List valid ontology IDs for document extraction."""
     return OntologiesResponse(
         ontologies=sorted(VALID_ONTOLOGIES),
@@ -624,7 +624,7 @@ async def get_job_status(job_id: str):
 
 
 @router.get("/jobs")
-async def list_jobs(user: dict = Depends(auth.require_admin_or_approved_user)):
+async def list_jobs(user: dict = Depends(auth.require_admin_or_approved_user)) -> dict:
     """List ingest jobs available to the current user"""
     # Read directly from SQLite to ensure we get persisted data
     jobs_from_db = ingest_db.list_jobs(limit=500)
@@ -658,7 +658,7 @@ async def list_jobs(user: dict = Depends(auth.require_admin_or_approved_user)):
 
 
 @router.delete("/jobs/{job_id}")
-async def delete_document(job_id: str, admin: dict = Depends(auth.require_admin)):
+async def delete_document(job_id: str, admin: dict = Depends(auth.require_admin)) -> dict:
     """
     Delete a document and all its associated data.
     Requires admin authentication.
@@ -718,6 +718,7 @@ async def delete_document(job_id: str, admin: dict = Depends(auth.require_admin)
             result["file_deleted"] = True
             logger.info(f"[{job_id}] Deleted file: {file_path}")
         except Exception as e:
+            result["file_deleted"] = False
             logger.error(f"[{job_id}] Failed to delete file {file_path}: {e}")
     else:
         logger.debug(f"[{job_id}] File not found (already deleted?): {file_path}")
@@ -744,9 +745,23 @@ async def delete_document(job_id: str, admin: dict = Depends(auth.require_admin)
     logger.info(f"[{job_id}] Cleared {len(chunks_to_delete)} in-memory chunks")
 
     logger.info(f"[{job_id}] Document deletion complete")
+    file_deleted = result.get("file_deleted", True)
+    db_deleted = result.get("db_deleted", False)
+    overall_success = file_deleted and db_deleted
+
+    # Build specific message based on what failed
+    if overall_success:
+        status_msg = "deleted successfully"
+    elif not file_deleted and db_deleted:
+        status_msg = "partially deleted (file deletion failed)"
+    elif file_deleted and not db_deleted:
+        status_msg = "partially deleted (database deletion failed)"
+    else:
+        status_msg = "deletion failed (both file and database deletion failed)"
+
     return {
-        "success": True,
-        "message": f"Document '{result['filename']}' deleted successfully",
+        "success": overall_success,
+        "message": f"Document '{result['filename']}' {status_msg}",
         "details": result,
     }
 
@@ -1041,6 +1056,10 @@ async def get_document_defaults_for_user_type(
     # Get all completed jobs to include ones without defaults (same pattern as global endpoint)
     completed_jobs = ingest_db.list_completed_jobs()
 
+    # Prefetch all overrides for this user type to avoid N+1 queries
+    all_overrides = database.get_document_defaults_overrides_by_type(user_type_id)
+    overrides_by_job = {o["job_id"]: o for o in all_overrides}
+
     documents = []
     for job in completed_jobs:
         job_id = job["job_id"]
@@ -1063,7 +1082,7 @@ async def get_document_defaults_for_user_type(
             ))
         else:
             # Job exists but no defaults set - check for user-type override only
-            override = database.get_document_defaults_override(job_id, user_type_id)
+            override = overrides_by_job.get(job_id)
             if override:
                 # Has override but no global default
                 documents.append(DocumentDefaultWithInheritance(

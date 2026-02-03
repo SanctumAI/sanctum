@@ -155,6 +155,8 @@ export interface DeploymentConfigResponse {
   storage: DeploymentConfigItem[]
   security: DeploymentConfigItem[]
   search: DeploymentConfigItem[]
+  domains: DeploymentConfigItem[]
+  ssl: DeploymentConfigItem[]
   general: DeploymentConfigItem[]
 }
 
@@ -268,7 +270,7 @@ export interface ConfigCategoryMeta {
   hint: string
 }
 
-export const CONFIG_CATEGORY_KEYS = ['llm', 'embedding', 'email', 'storage', 'security', 'search', 'general'] as const
+export const CONFIG_CATEGORY_KEYS = ['llm', 'embedding', 'email', 'storage', 'security', 'search', 'domains', 'ssl', 'general'] as const
 
 export type ConfigCategory = typeof CONFIG_CATEGORY_KEYS[number]
 
@@ -298,14 +300,24 @@ export function getConfigCategories(t: TFunction): Record<ConfigCategory, Config
       hint: t('configCategories.storage.hint', "Control file paths for the database and uploaded documents. These typically don't need to change unless you're customizing your deployment."),
     },
     security: {
-      label: t('configCategories.security.label', 'Security & URLs'),
+      label: t('configCategories.security.label', 'Security'),
       description: t('configCategories.security.description', 'Configure access and security settings'),
-      hint: t('configCategories.security.hint', 'Set your public URLs and security options. The frontend URL is where users access the app. Make sure these match your actual deployment.'),
+      hint: t('configCategories.security.hint', 'Configure security options like authentication simulation modes for development and testing.'),
     },
     search: {
       label: t('configCategories.search.label', 'Web Search'),
       description: t('configCategories.search.description', 'Enable AI web search capabilities'),
       hint: t('configCategories.search.hint', "Configure the search engine that powers the AI's web search feature. When enabled, the AI can look up current information online."),
+    },
+    domains: {
+      label: t('configCategories.domains.label', 'Domain & URLs'),
+      description: t('configCategories.domains.description', 'Configure domain names, URLs, and DNS settings'),
+      hint: t('configCategories.domains.hint', 'Set up your domain configuration for production deployment. Configure your root domain, subdomains, CORS origins, and email DNS records (DKIM, SPF, DMARC).'),
+    },
+    ssl: {
+      label: t('configCategories.ssl.label', 'SSL & Security'),
+      description: t('configCategories.ssl.description', 'Configure SSL certificates and HTTPS settings'),
+      hint: t('configCategories.ssl.hint', 'Manage SSL/TLS configuration, HTTPS enforcement, and security headers like HSTS.'),
     },
     general: {
       label: t('configCategories.general.label', 'General'),
@@ -445,6 +457,13 @@ export const DEPLOYMENT_CONFIG_KEY_LIST = [
   'SEARXNG_URL',
   // Security
   'FRONTEND_URL', 'SIMULATE_USER_AUTH', 'SIMULATE_ADMIN_AUTH',
+  // Domain & URLs
+  'BASE_DOMAIN', 'INSTANCE_URL', 'API_BASE_URL', 'ADMIN_BASE_URL',
+  'EMAIL_DOMAIN', 'DKIM_SELECTOR', 'SPF_INCLUDE', 'DMARC_POLICY',
+  'CORS_ORIGINS', 'CDN_DOMAINS', 'CUSTOM_SEARXNG_URL', 'WEBHOOK_BASE_URL',
+  // SSL & Security
+  'TRUSTED_PROXIES', 'SSL_CERT_PATH', 'SSL_KEY_PATH',
+  'FORCE_HTTPS', 'HSTS_MAX_AGE', 'MONITORING_URL',
 ] as const
 
 export type DeploymentConfigItemKey = typeof DEPLOYMENT_CONFIG_KEY_LIST[number]
@@ -553,6 +572,98 @@ export function getDeploymentConfigItemMeta(t: TFunction): Record<DeploymentConf
       label: t('deploymentConfigItems.SIMULATE_ADMIN_AUTH.label', 'Simulate Admin Auth'),
       description: t('deploymentConfigItems.SIMULATE_ADMIN_AUTH.description', 'Show mock Nostr connection button for admin auth (testing only)'),
       hint: t('deploymentConfigItems.SIMULATE_ADMIN_AUTH.hint', 'Enable for development/testing. Shows a "Mock Connection" button on admin login that bypasses Nostr extension requirement. Should be disabled in production.'),
+    },
+    // Domain & URLs
+    BASE_DOMAIN: {
+      label: t('deploymentConfigItems.BASE_DOMAIN.label', 'Root Domain'),
+      description: t('deploymentConfigItems.BASE_DOMAIN.description', 'Primary domain name'),
+      hint: t('deploymentConfigItems.BASE_DOMAIN.hint', 'Your root domain without protocol (e.g., example.com)'),
+    },
+    INSTANCE_URL: {
+      label: t('deploymentConfigItems.INSTANCE_URL.label', 'Application URL'),
+      description: t('deploymentConfigItems.INSTANCE_URL.description', 'Full URL with protocol'),
+      hint: t('deploymentConfigItems.INSTANCE_URL.hint', 'The complete URL users access (e.g., https://app.example.com)'),
+    },
+    API_BASE_URL: {
+      label: t('deploymentConfigItems.API_BASE_URL.label', 'API URL'),
+      description: t('deploymentConfigItems.API_BASE_URL.description', 'API subdomain URL (optional)'),
+      hint: t('deploymentConfigItems.API_BASE_URL.hint', 'If your API is on a separate subdomain (e.g., https://api.example.com)'),
+    },
+    ADMIN_BASE_URL: {
+      label: t('deploymentConfigItems.ADMIN_BASE_URL.label', 'Admin URL'),
+      description: t('deploymentConfigItems.ADMIN_BASE_URL.description', 'Admin panel subdomain URL (optional)'),
+      hint: t('deploymentConfigItems.ADMIN_BASE_URL.hint', 'If your admin panel is on a separate subdomain (e.g., https://admin.example.com)'),
+    },
+    EMAIL_DOMAIN: {
+      label: t('deploymentConfigItems.EMAIL_DOMAIN.label', 'Email Domain'),
+      description: t('deploymentConfigItems.EMAIL_DOMAIN.description', 'Domain for email addresses'),
+      hint: t('deploymentConfigItems.EMAIL_DOMAIN.hint', 'The domain used for sending emails (e.g., mail.example.com)'),
+    },
+    DKIM_SELECTOR: {
+      label: t('deploymentConfigItems.DKIM_SELECTOR.label', 'DKIM Selector'),
+      description: t('deploymentConfigItems.DKIM_SELECTOR.description', 'DKIM DNS record selector'),
+      hint: t('deploymentConfigItems.DKIM_SELECTOR.hint', 'The selector prefix for your DKIM DNS record (default: sanctum)'),
+    },
+    SPF_INCLUDE: {
+      label: t('deploymentConfigItems.SPF_INCLUDE.label', 'SPF Include'),
+      description: t('deploymentConfigItems.SPF_INCLUDE.description', 'SPF DNS include directive'),
+      hint: t('deploymentConfigItems.SPF_INCLUDE.hint', 'SPF include value for your DNS TXT record (e.g., include:_spf.google.com)'),
+    },
+    DMARC_POLICY: {
+      label: t('deploymentConfigItems.DMARC_POLICY.label', 'DMARC Policy'),
+      description: t('deploymentConfigItems.DMARC_POLICY.description', 'DMARC DNS policy record'),
+      hint: t('deploymentConfigItems.DMARC_POLICY.hint', 'DMARC policy value (e.g., v=DMARC1; p=quarantine; rua=mailto:dmarc@example.com)'),
+    },
+    CORS_ORIGINS: {
+      label: t('deploymentConfigItems.CORS_ORIGINS.label', 'CORS Origins'),
+      description: t('deploymentConfigItems.CORS_ORIGINS.description', 'Comma-separated allowed CORS origins'),
+      hint: t('deploymentConfigItems.CORS_ORIGINS.hint', 'Allowed origins for cross-origin requests (e.g., https://app.example.com,https://admin.example.com)'),
+    },
+    CDN_DOMAINS: {
+      label: t('deploymentConfigItems.CDN_DOMAINS.label', 'CDN Domains'),
+      description: t('deploymentConfigItems.CDN_DOMAINS.description', 'Content delivery domains'),
+      hint: t('deploymentConfigItems.CDN_DOMAINS.hint', 'CDN domains for static asset delivery (e.g., cdn.example.com)'),
+    },
+    CUSTOM_SEARXNG_URL: {
+      label: t('deploymentConfigItems.CUSTOM_SEARXNG_URL.label', 'Custom SearXNG URL'),
+      description: t('deploymentConfigItems.CUSTOM_SEARXNG_URL.description', 'Private SearXNG instance URL'),
+      hint: t('deploymentConfigItems.CUSTOM_SEARXNG_URL.hint', 'URL of your private SearXNG instance if different from default'),
+    },
+    WEBHOOK_BASE_URL: {
+      label: t('deploymentConfigItems.WEBHOOK_BASE_URL.label', 'Webhook URL'),
+      description: t('deploymentConfigItems.WEBHOOK_BASE_URL.description', 'Webhook callback base URL'),
+      hint: t('deploymentConfigItems.WEBHOOK_BASE_URL.hint', 'Base URL for webhook callbacks from external services'),
+    },
+    // SSL & Security
+    TRUSTED_PROXIES: {
+      label: t('deploymentConfigItems.TRUSTED_PROXIES.label', 'Trusted Proxies'),
+      description: t('deploymentConfigItems.TRUSTED_PROXIES.description', 'Trusted reverse proxies (cloudflare, aws, custom)'),
+      hint: t('deploymentConfigItems.TRUSTED_PROXIES.hint', 'Specify trusted proxy configuration: cloudflare, aws, or custom IP ranges'),
+    },
+    SSL_CERT_PATH: {
+      label: t('deploymentConfigItems.SSL_CERT_PATH.label', 'SSL Certificate Path'),
+      description: t('deploymentConfigItems.SSL_CERT_PATH.description', 'SSL certificate file path'),
+      hint: t('deploymentConfigItems.SSL_CERT_PATH.hint', 'Path to your SSL/TLS certificate file (e.g., /etc/ssl/certs/server.crt)'),
+    },
+    SSL_KEY_PATH: {
+      label: t('deploymentConfigItems.SSL_KEY_PATH.label', 'SSL Key Path'),
+      description: t('deploymentConfigItems.SSL_KEY_PATH.description', 'SSL private key file path'),
+      hint: t('deploymentConfigItems.SSL_KEY_PATH.hint', 'Path to your SSL/TLS private key file (e.g., /etc/ssl/private/server.key)'),
+    },
+    FORCE_HTTPS: {
+      label: t('deploymentConfigItems.FORCE_HTTPS.label', 'Force HTTPS'),
+      description: t('deploymentConfigItems.FORCE_HTTPS.description', 'Redirect HTTP to HTTPS'),
+      hint: t('deploymentConfigItems.FORCE_HTTPS.hint', 'Set to true to automatically redirect all HTTP requests to HTTPS'),
+    },
+    HSTS_MAX_AGE: {
+      label: t('deploymentConfigItems.HSTS_MAX_AGE.label', 'HSTS Max Age'),
+      description: t('deploymentConfigItems.HSTS_MAX_AGE.description', 'HSTS max-age in seconds'),
+      hint: t('deploymentConfigItems.HSTS_MAX_AGE.hint', 'HTTP Strict Transport Security max-age header value (default: 31536000 = 1 year)'),
+    },
+    MONITORING_URL: {
+      label: t('deploymentConfigItems.MONITORING_URL.label', 'Monitoring URL'),
+      description: t('deploymentConfigItems.MONITORING_URL.description', 'Health monitoring endpoint URL'),
+      hint: t('deploymentConfigItems.MONITORING_URL.hint', 'URL for external health monitoring service to check'),
     },
   }
 }

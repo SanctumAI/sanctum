@@ -91,7 +91,7 @@ def validate_pubkey_format(pubkey: str) -> bool:
         return False
 
 
-def verify_migration_authorization(event: NostrEvent, current_admin_pubkey: str) -> tuple[bool, str]:
+def verify_migration_authorization(event: NostrEvent, current_admin_pubkey: str, new_admin_pubkey: str) -> tuple[bool, str]:
     """
     Verify that the migration is authorized by the current admin.
 
@@ -100,7 +100,8 @@ def verify_migration_authorization(event: NostrEvent, current_admin_pubkey: str)
     2. Event kind is AUTH_EVENT_KIND (22242)
     3. Timestamp is within MAX_EVENT_AGE_SECONDS
     4. Has action tag = "admin_key_migration"
-    5. Signature is valid
+    5. Has new_pubkey tag matching the request's new_admin_pubkey (prevents replay attacks)
+    6. Signature is valid
     """
     event_dict = event.model_dump()
 
@@ -122,13 +123,22 @@ def verify_migration_authorization(event: NostrEvent, current_admin_pubkey: str)
     # Check action tag
     tags = event_dict.get("tags", [])
     action_tag = None
+    new_pubkey_tag = None
     for tag in tags:
         if len(tag) >= 2 and tag[0] == "action":
             action_tag = tag[1]
-            break
+        if len(tag) >= 2 and tag[0] == "new_pubkey":
+            new_pubkey_tag = tag[1]
 
     if action_tag != "admin_key_migration":
         return False, f"Invalid action tag: expected 'admin_key_migration', got '{action_tag}'"
+
+    # Check new_pubkey tag matches request (prevents replay attacks with captured events)
+    if new_pubkey_tag is None:
+        return False, "Missing new_pubkey tag in authorization event"
+
+    if new_pubkey_tag != new_admin_pubkey:
+        return False, f"new_pubkey tag mismatch: event targets '{new_pubkey_tag[:16]}...' but request is for '{new_admin_pubkey[:16]}...'"
 
     # Verify signature
     if not verify_event_signature(event_dict):
@@ -232,10 +242,11 @@ async def execute_migration(
             detail="New pubkey must be different from current admin pubkey"
         )
 
-    # Verify authorization
+    # Verify authorization (includes new_pubkey tag check to prevent replay attacks)
     valid, error = verify_migration_authorization(
         request.signature_event,
-        current_admin_pubkey
+        current_admin_pubkey,
+        new_pubkey
     )
     if not valid:
         raise HTTPException(status_code=401, detail=f"Authorization failed: {error}")

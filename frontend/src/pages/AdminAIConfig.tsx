@@ -26,12 +26,7 @@ import { isAdminAuthenticated, adminFetch } from '../utils/adminApi'
 import { useAIConfig, useDocumentDefaults } from '../hooks/useAdminConfig'
 import type { AIConfigItem, AIConfigWithInheritance, DocumentDefaultItem, DocumentDefaultWithInheritance, PromptSectionKey, ParameterKey, DefaultKey } from '../types/config'
 import { getPromptSectionMeta, getParameterMeta, getDefaultMeta } from '../types/config'
-
-interface UserType {
-  id: number
-  name: string
-  description?: string
-}
+import type { UserType } from '../types/onboarding'
 
 export function AdminAIConfig() {
   const { t } = useTranslation()
@@ -659,7 +654,7 @@ export function AdminAIConfig() {
 
           {documents.length > 0 ? (
             <div className="space-y-2">
-              {(selectedUserTypeId ? userTypeDocuments : documents).map((doc: DocumentDefaultItem | DocumentDefaultWithInheritance) => {
+              {(selectedUserTypeId !== null ? userTypeDocuments : documents).map((doc: DocumentDefaultItem | DocumentDefaultWithInheritance) => {
                 const isOverride = 'is_override' in doc && doc.is_override
                 return (
                   <div

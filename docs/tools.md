@@ -86,7 +86,7 @@ If `web-search` is included in the `tools` array for `/query`, the LLM may ident
 ```
 
 **Client workflow:**
-```
+```text
 ┌────────────────┐
 │ POST /query    │
 │ tools: ["web-  │

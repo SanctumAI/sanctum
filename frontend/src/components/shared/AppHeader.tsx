@@ -51,6 +51,9 @@ export function AppHeader({
   const { config } = useInstanceConfig()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const isAdmin = isAdminAuthenticated()
+  const showIcon = config.headerLayout !== 'name_only'
+  const showName = config.headerLayout !== 'icon_only'
+  const showTagline = showName && Boolean(config.headerTagline?.trim())
 
   return (
     <>
@@ -70,10 +73,19 @@ export function AppHeader({
             </Link>
           )}
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center shadow-md ring-1 ring-white/10">
-              <DynamicIcon name={config.icon} size={18} className="text-white" />
-            </div>
-            <span className="font-semibold text-text hidden sm:block tracking-tight">{config.name}</span>
+            {showIcon && (
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center shadow-md ring-1 ring-white/10">
+                <DynamicIcon name={config.icon} size={18} className="text-white" />
+              </div>
+            )}
+            {showName && (
+              <div className={`${showIcon ? 'hidden sm:flex' : 'flex'} flex-col leading-tight`}>
+                <span className="font-semibold text-text tracking-tight">{config.name}</span>
+                {showTagline && (
+                  <span className="text-[11px] text-text-muted">{config.headerTagline}</span>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

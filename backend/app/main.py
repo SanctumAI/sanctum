@@ -1074,6 +1074,17 @@ SAFE_PUBLIC_SETTINGS = {
     "logo_url",
     "favicon_url",
     "icon",
+    "assistant_icon",
+    "user_icon",
+    "assistant_name",
+    "user_label",
+    "header_layout",
+    "header_tagline",
+    "chat_bubble_style",
+    "chat_bubble_shadow",
+    "surface_style",
+    "status_icon_set",
+    "typography_preset",
 }
 
 
@@ -1236,6 +1247,7 @@ async def create_user_type(user_type: UserTypeCreate, admin: dict = Depends(auth
         type_id = database.create_user_type(
             name=user_type.name,
             description=user_type.description,
+            icon=user_type.icon,
             display_order=user_type.display_order
         )
         created = database.get_user_type(type_id)
@@ -1257,6 +1269,7 @@ async def update_user_type(type_id: int, user_type: UserTypeUpdate, admin: dict 
         type_id,
         name=user_type.name,
         description=user_type.description,
+        icon=user_type.icon,
         display_order=user_type.display_order
     )
     updated = database.get_user_type(type_id)

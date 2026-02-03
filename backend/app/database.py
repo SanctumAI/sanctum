@@ -111,6 +111,7 @@ def init_schema():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT UNIQUE NOT NULL,
             description TEXT,
+            icon TEXT,
             display_order INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -279,6 +280,7 @@ def init_schema():
     _migrate_add_field_metadata_columns()  # Add placeholder and options columns
     _migrate_add_encryption_enabled_column()  # Add encryption_enabled column for optional field encryption
     _migrate_add_include_in_chat_column()  # Add include_in_chat column for AI chat context
+    _migrate_add_user_type_icon_column()  # Add icon column to user_types table
 
     # Initialize ingest job tables
     from ingest_db import init_ingest_schema
@@ -426,12 +428,40 @@ def _migrate_add_include_in_chat_column() -> None:
     cursor.close()
 
 
+def _migrate_add_user_type_icon_column() -> None:
+    """Add icon column to user_types if it doesn't exist."""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("PRAGMA table_info(user_types)")
+    columns = [row[1] for row in cursor.fetchall()]
+
+    if 'icon' not in columns:
+        cursor.execute("ALTER TABLE user_types ADD COLUMN icon TEXT")
+        logger.info("Migration: Added 'icon' column to user_types table")
+
+    conn.commit()
+    cursor.close()
+
+
 def seed_default_settings():
     """Seed default instance settings if not present"""
     defaults = {
         "instance_name": "Sanctum",
         "primary_color": "#3B82F6",
         "description": "A privacy-first RAG knowledge base",
+        "icon": "Sparkles",
+        "assistant_icon": "Sparkles",
+        "user_icon": "User",
+        "assistant_name": "Sanctum AI",
+        "user_label": "You",
+        "header_layout": "icon_name",
+        "header_tagline": "",
+        "chat_bubble_style": "soft",
+        "chat_bubble_shadow": "true",
+        "surface_style": "plain",
+        "status_icon_set": "classic",
+        "typography_preset": "modern",
         "auto_approve_users": "true",  # true = auto-approve, false = require manual approval
     }
 
@@ -614,14 +644,15 @@ def get_single_admin() -> dict | None:
 def create_user_type(
     name: str,
     description: str | None = None,
+    icon: str | None = None,
     display_order: int = 0
 ) -> int:
     """Create a user type. Returns type id."""
     with get_cursor() as cursor:
         cursor.execute("""
-            INSERT INTO user_types (name, description, display_order)
-            VALUES (?, ?, ?)
-        """, (name, description, display_order))
+            INSERT INTO user_types (name, description, icon, display_order)
+            VALUES (?, ?, ?, ?)
+        """, (name, description, icon, display_order))
         return cursor.lastrowid
 
 
@@ -655,6 +686,7 @@ def update_user_type(
     type_id: int,
     name: str | None = None,
     description: str | None = None,
+    icon: str | None = None,
     display_order: int | None = None
 ) -> bool:
     """Update a user type. Returns True if updated."""
@@ -667,6 +699,9 @@ def update_user_type(
     if description is not None:
         updates.append("description = ?")
         values.append(description)
+    if icon is not None:
+        updates.append("icon = ?")
+        values.append(icon)
     if display_order is not None:
         updates.append("display_order = ?")
         values.append(display_order)

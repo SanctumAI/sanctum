@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Paintbrush, Brain, Server, Upload, Database, ArrowRight } from 'lucide-react'
+import { Paintbrush, Brain, Server, Upload, Database, ArrowRight, Users } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { isAdminAuthenticated } from '../utils/adminApi'
 
@@ -68,7 +68,15 @@ export function AdminSetup() {
           to="/admin/instance"
           icon={<Paintbrush className="w-5 h-5" />}
           title={t('adminDashboard.instance', 'Instance Configuration')}
-          description={t('adminDashboard.instanceDesc', 'Customize branding, user types, and onboarding fields')}
+          description={t('adminDashboard.instanceDesc', 'Branding, chat style, and theme settings')}
+        />
+
+        {/* User Configuration */}
+        <DashboardCard
+          to="/admin/users"
+          icon={<Users className="w-5 h-5" />}
+          title={t('adminDashboard.user', 'User Configuration')}
+          description={t('adminDashboard.userDesc', 'Define user types and onboarding questions')}
         />
 
         {/* AI Configuration */}

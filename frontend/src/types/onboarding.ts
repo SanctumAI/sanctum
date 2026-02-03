@@ -5,6 +5,7 @@ export interface UserType {
   id: number
   name: string
   description?: string
+  icon?: string
   display_order: number
 }
 

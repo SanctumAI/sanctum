@@ -60,6 +60,18 @@ class InstanceSettings(BaseModel):
     instance_name: Optional[str] = None
     primary_color: Optional[str] = None
     description: Optional[str] = None
+    icon: Optional[str] = None
+    assistant_icon: Optional[str] = None
+    user_icon: Optional[str] = None
+    assistant_name: Optional[str] = None
+    user_label: Optional[str] = None
+    header_layout: Optional[str] = None
+    header_tagline: Optional[str] = None
+    chat_bubble_style: Optional[str] = None
+    chat_bubble_shadow: Optional[str] = None
+    surface_style: Optional[str] = None
+    status_icon_set: Optional[str] = None
+    typography_preset: Optional[str] = None
 
     class Config:
         extra = "allow"  # Allow arbitrary additional settings
@@ -84,6 +96,7 @@ class UserTypeCreate(BaseModel):
     """Request model for creating a user type"""
     name: str
     description: Optional[str] = None
+    icon: Optional[str] = None
     display_order: int = 0
 
 
@@ -91,6 +104,7 @@ class UserTypeUpdate(BaseModel):
     """Request model for updating a user type"""
     name: Optional[str] = None
     description: Optional[str] = None
+    icon: Optional[str] = None
     display_order: Optional[int] = None
 
 
@@ -99,6 +113,7 @@ class UserTypeResponse(BaseModel):
     id: int
     name: str
     description: Optional[str] = None
+    icon: Optional[str] = None
     display_order: int
     created_at: Optional[str] = None
 

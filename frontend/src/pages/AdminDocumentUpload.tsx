@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Upload, FileText, X, CloudUpload, Loader2, Clock, ArrowLeft, HelpCircle, ChevronLeft, ChevronRight, CheckCircle2, Trash2, AlertTriangle } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { STORAGE_KEYS } from '../types/onboarding'
+import { useInstanceConfig } from '../context/InstanceConfigContext'
 import {
   UploadResponse,
   JobStatus,
@@ -12,6 +13,7 @@ import {
   getAllowedExtensionsDisplay,
 } from '../types/ingest'
 import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
+import { getStatusIcon } from '../utils/statusIcons'
 
 // TODO: Replace localStorage check with proper auth token validation
 // Current implementation only checks for admin pubkey in localStorage
@@ -19,6 +21,7 @@ import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
 export function AdminDocumentUpload() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { config } = useInstanceConfig()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // State
@@ -301,15 +304,15 @@ export function AdminDocumentUpload() {
   const getStatusDisplay = (status: JobStatus['status']) => {
     switch (status) {
       case 'pending':
-        return { label: t('upload.status.queued'), color: 'text-text-muted', icon: '○' }
+        return { label: t('upload.status.queued'), color: 'text-text-muted', icon: getStatusIcon(config.statusIconSet, 'queued') }
       case 'processing':
-        return { label: t('upload.status.processing'), color: 'text-warning', icon: '◐' }
+        return { label: t('upload.status.processing'), color: 'text-warning', icon: getStatusIcon(config.statusIconSet, 'processing') }
       case 'chunked':
-        return { label: t('upload.status.chunked'), color: 'text-info', icon: '◑' }
+        return { label: t('upload.status.chunked'), color: 'text-info', icon: getStatusIcon(config.statusIconSet, 'chunked') }
       case 'completed':
-        return { label: t('upload.status.complete'), color: 'text-success', icon: '●' }
+        return { label: t('upload.status.complete'), color: 'text-success', icon: getStatusIcon(config.statusIconSet, 'complete') }
       case 'failed':
-        return { label: t('upload.status.failed'), color: 'text-error', icon: '✕' }
+        return { label: t('upload.status.failed'), color: 'text-error', icon: getStatusIcon(config.statusIconSet, 'failed') }
       default:
         return { label: status, color: 'text-text-muted', icon: '?' }
     }

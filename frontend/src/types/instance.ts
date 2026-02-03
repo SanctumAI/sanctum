@@ -8,18 +8,51 @@
 import type { TFunction } from 'i18next'
 
 export type AccentColor = 'blue' | 'purple' | 'green' | 'orange' | 'pink' | 'teal'
+export type HeaderLayout = 'icon_name' | 'icon_only' | 'name_only'
+export type ChatBubbleStyle = 'soft' | 'round' | 'square' | 'pill'
+export type SurfaceStyle = 'plain' | 'gradient' | 'noise' | 'grid'
+export type StatusIconSet = 'classic' | 'minimal' | 'playful'
+export type TypographyPreset = 'modern' | 'grotesk' | 'humanist'
 
 export interface InstanceConfig {
   name: string
   accentColor: AccentColor
   icon: string
+  assistantIcon: string
+  userIcon: string
+  assistantName: string
+  userLabel: string
+  headerLayout: HeaderLayout
+  headerTagline: string
+  chatBubbleStyle: ChatBubbleStyle
+  chatBubbleShadow: boolean
+  surfaceStyle: SurfaceStyle
+  statusIconSet: StatusIconSet
+  typographyPreset: TypographyPreset
 }
 
 export const DEFAULT_INSTANCE_CONFIG: InstanceConfig = {
   name: 'Sanctum',
   accentColor: 'blue',
   icon: 'Sparkles',
+  assistantIcon: 'Sparkles',
+  userIcon: 'User',
+  assistantName: 'Sanctum AI',
+  userLabel: 'You',
+  headerLayout: 'icon_name',
+  headerTagline: '',
+  chatBubbleStyle: 'soft',
+  chatBubbleShadow: true,
+  surfaceStyle: 'plain',
+  statusIconSet: 'classic',
+  typographyPreset: 'modern',
 }
+
+export const HEADER_LAYOUTS: HeaderLayout[] = ['icon_name', 'icon_only', 'name_only']
+export const CHAT_BUBBLE_STYLES: ChatBubbleStyle[] = ['soft', 'round', 'square', 'pill']
+export const SURFACE_STYLES: SurfaceStyle[] = ['plain', 'gradient', 'noise', 'grid']
+export const STATUS_ICON_SETS: StatusIconSet[] = ['classic', 'minimal', 'playful']
+export const TYPOGRAPHY_PRESETS: TypographyPreset[] = ['modern', 'grotesk', 'humanist']
 
 // Curated icons suitable for branding/logo use
 export const CURATED_ICONS = [
@@ -32,6 +65,8 @@ export const CURATED_ICONS = [
   'Book', 'BookOpen', 'GraduationCap', 'Library', 'Scroll', 'FileText',
   // Communication
   'MessageCircle', 'MessageSquare', 'Mail', 'Send', 'Radio',
+  // People
+  'User', 'UserCircle', 'UserSquare', 'UserRound',
   // Security/Trust
   'Shield', 'ShieldCheck', 'Lock', 'Key', 'Fingerprint', 'Eye',
   // Navigation/Discovery
@@ -111,6 +146,19 @@ export function getInstanceConfig(): InstanceConfig {
       name: parsed.name || DEFAULT_INSTANCE_CONFIG.name,
       accentColor: parsed.accentColor || DEFAULT_INSTANCE_CONFIG.accentColor,
       icon: parsed.icon || DEFAULT_INSTANCE_CONFIG.icon,
+      assistantIcon: parsed.assistantIcon || DEFAULT_INSTANCE_CONFIG.assistantIcon,
+      userIcon: parsed.userIcon || DEFAULT_INSTANCE_CONFIG.userIcon,
+      assistantName: typeof parsed.assistantName === 'string' ? parsed.assistantName : DEFAULT_INSTANCE_CONFIG.assistantName,
+      userLabel: typeof parsed.userLabel === 'string' ? parsed.userLabel : DEFAULT_INSTANCE_CONFIG.userLabel,
+      headerLayout: parsed.headerLayout || DEFAULT_INSTANCE_CONFIG.headerLayout,
+      headerTagline: typeof parsed.headerTagline === 'string' ? parsed.headerTagline : DEFAULT_INSTANCE_CONFIG.headerTagline,
+      chatBubbleStyle: parsed.chatBubbleStyle || DEFAULT_INSTANCE_CONFIG.chatBubbleStyle,
+      chatBubbleShadow: typeof parsed.chatBubbleShadow === 'boolean'
+        ? parsed.chatBubbleShadow
+        : DEFAULT_INSTANCE_CONFIG.chatBubbleShadow,
+      surfaceStyle: parsed.surfaceStyle || DEFAULT_INSTANCE_CONFIG.surfaceStyle,
+      statusIconSet: parsed.statusIconSet || DEFAULT_INSTANCE_CONFIG.statusIconSet,
+      typographyPreset: parsed.typographyPreset || DEFAULT_INSTANCE_CONFIG.typographyPreset,
     }
   } catch {
     return DEFAULT_INSTANCE_CONFIG
@@ -130,4 +178,20 @@ export function applyAccentColor(color: AccentColor): void {
   })
   // Add the new one
   root.classList.add(`accent-${color}`)
+}
+
+export function applySurfaceStyle(style: SurfaceStyle): void {
+  const root = document.documentElement
+  SURFACE_STYLES.forEach((value) => {
+    root.classList.remove(`surface-${value}`)
+  })
+  root.classList.add(`surface-${style}`)
+}
+
+export function applyTypographyPreset(preset: TypographyPreset): void {
+  const root = document.documentElement
+  TYPOGRAPHY_PRESETS.forEach((value) => {
+    root.classList.remove(`type-${value}`)
+  })
+  root.classList.add(`type-${preset}`)
 }

@@ -515,7 +515,7 @@ async def get_datastore_stats():
 
 
 @router.get("/ontologies", response_model=OntologiesResponse)
-async def list_ontologies():
+async def list_ontologies() -> OntologiesResponse:
     """List valid ontology IDs for document extraction."""
     return OntologiesResponse(
         ontologies=sorted(VALID_ONTOLOGIES),
@@ -624,7 +624,7 @@ async def get_job_status(job_id: str):
 
 
 @router.get("/jobs")
-async def list_jobs(user: dict = Depends(auth.require_admin_or_approved_user)):
+async def list_jobs(user: dict = Depends(auth.require_admin_or_approved_user)) -> dict:
     """List ingest jobs available to the current user"""
     # Read directly from SQLite to ensure we get persisted data
     jobs_from_db = ingest_db.list_jobs(limit=500)
@@ -658,7 +658,7 @@ async def list_jobs(user: dict = Depends(auth.require_admin_or_approved_user)):
 
 
 @router.delete("/jobs/{job_id}")
-async def delete_document(job_id: str, admin: dict = Depends(auth.require_admin)):
+async def delete_document(job_id: str, admin: dict = Depends(auth.require_admin)) -> dict:
     """
     Delete a document and all its associated data.
     Requires admin authentication.

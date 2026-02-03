@@ -41,7 +41,7 @@ export function useAIConfig(userTypeId?: number | null) {
       setLoading(true)
       setError(null)
 
-      if (userTypeId !== null) {
+      if (userTypeId != null) {
         // Fetch user-type-specific config with inheritance
         const response = await adminFetch(`/admin/ai-config/user-type/${userTypeId}`)
         if (!response.ok) {
@@ -163,7 +163,7 @@ export function useAIConfig(userTypeId?: number | null) {
   // Preview prompt (global or for user type)
   const previewPrompt = useCallback(async (sampleQuestion?: string, sampleFacts?: Record<string, string>, targetUserTypeId?: number): Promise<PromptPreviewResponse> => {
     const typeId = targetUserTypeId ?? userTypeId
-    const url = typeId
+    const url = typeId != null
       ? `/admin/ai-config/user-type/${typeId}/prompts/preview`
       : '/admin/ai-config/prompts/preview'
 
@@ -206,7 +206,7 @@ export function useDocumentDefaults(userTypeId?: number | null) {
       setLoading(true)
       setError(null)
 
-      if (userTypeId !== null) {
+      if (userTypeId != null) {
         // Fetch user-type-specific document defaults with inheritance
         const response = await adminFetch(`/ingest/admin/documents/defaults/user-type/${userTypeId}`)
         if (!response.ok) {

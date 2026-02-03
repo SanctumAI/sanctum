@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS ingest_jobs (
 
 ### On Document Delete (`DELETE /ingest/jobs/{job_id}`)
 
-```
+```text
 1. Verify job exists (SQLite or in-memory fallback)
 2. Reject deletion if status is pending/processing
 3. Delete job chunks from Qdrant (fail-fast)

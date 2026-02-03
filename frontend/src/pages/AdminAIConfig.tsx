@@ -26,12 +26,7 @@ import { isAdminAuthenticated, adminFetch } from '../utils/adminApi'
 import { useAIConfig, useDocumentDefaults } from '../hooks/useAdminConfig'
 import type { AIConfigItem, AIConfigWithInheritance, DocumentDefaultItem, DocumentDefaultWithInheritance, PromptSectionKey, ParameterKey, DefaultKey } from '../types/config'
 import { getPromptSectionMeta, getParameterMeta, getDefaultMeta } from '../types/config'
-
-interface UserType {
-  id: number
-  name: string
-  description?: string
-}
+import type { UserType } from '../types/onboarding'
 
 export function AdminAIConfig() {
   const { t } = useTranslation()

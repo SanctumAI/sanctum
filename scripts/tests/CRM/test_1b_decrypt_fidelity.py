@@ -63,31 +63,70 @@ def inspect_raw_database(db_path: str, user_id: int) -> dict:
     Directly inspect the SQLite database via docker exec.
 
     Returns raw column values for the user.
+
+    Uses run_docker_sql() helper to avoid shell injection vulnerabilities.
     """
     # Validate user_id is an integer to prevent SQL injection
     user_id = int(user_id)
 
-    repo_root = SCRIPT_DIR.parent.parent.parent
-
-    # Get user record with -json flag for structured output
-    # Use shlex.quote for db_path to handle paths with spaces/special chars
-    cmd = f"docker compose exec -T backend sqlite3 -json {shlex.quote(db_path)} 'SELECT * FROM users WHERE id = {user_id}'"
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=repo_root)
-
-    if not result.stdout.strip() or result.stdout.strip() == "[]":
+    # Get user record using the hardened run_docker_sql() helper
+    try:
+        user_output = run_docker_sql(
+            f"SELECT id, pubkey, email, encrypted_email, ephemeral_pubkey_email, "
+            f"name, encrypted_name, ephemeral_pubkey_name, email_blind_index, "
+            f"user_type_id, approved, created_at FROM users WHERE id = {user_id}",
+            db_path
+        )
+    except RuntimeError:
         return None
 
-    users = json.loads(result.stdout.strip())
-    if not users:
+    if not user_output.strip():
         return None
 
-    user_data = users[0]
+    # Parse pipe-separated output from sqlite3
+    lines = user_output.strip().split("\n")
+    if not lines or not lines[0]:
+        return None
 
-    # Get field values
-    cmd = f"docker compose exec -T backend sqlite3 -json {shlex.quote(db_path)} 'SELECT fd.field_name, ufv.value, ufv.encrypted_value, ufv.ephemeral_pubkey FROM user_field_values ufv JOIN user_field_definitions fd ON fd.id = ufv.field_id WHERE ufv.user_id = {user_id}'"
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=repo_root)
+    # Column names in order from the SELECT
+    columns = [
+        "id", "pubkey", "email", "encrypted_email", "ephemeral_pubkey_email",
+        "name", "encrypted_name", "ephemeral_pubkey_name", "email_blind_index",
+        "user_type_id", "approved", "created_at"
+    ]
+    values = lines[0].split("|")
+    if len(values) != len(columns):
+        return None
 
-    user_data["field_values"] = json.loads(result.stdout.strip()) if result.stdout.strip() else []
+    user_data = {}
+    for col, val in zip(columns, values):
+        user_data[col] = val if val else None
+
+    # Get field values using the hardened helper
+    try:
+        fields_output = run_docker_sql(
+            f"SELECT fd.field_name, ufv.value, ufv.encrypted_value, ufv.ephemeral_pubkey "
+            f"FROM user_field_values ufv "
+            f"JOIN user_field_definitions fd ON fd.id = ufv.field_id "
+            f"WHERE ufv.user_id = {user_id}",
+            db_path
+        )
+    except RuntimeError:
+        fields_output = ""
+
+    field_values = []
+    if fields_output.strip():
+        for line in fields_output.strip().split("\n"):
+            parts = line.split("|")
+            if len(parts) >= 4:
+                field_values.append({
+                    "field_name": parts[0] or None,
+                    "value": parts[1] or None,
+                    "encrypted_value": parts[2] or None,
+                    "ephemeral_pubkey": parts[3] or None,
+                })
+
+    user_data["field_values"] = field_values
 
     return user_data
 

@@ -363,8 +363,8 @@ async def update_deployment_config_value(
 
     # Boolean validation for FORCE_HTTPS
     if key == "FORCE_HTTPS" and value_to_save:
-        if value_to_save.lower() not in ("true", "false", "1", "0"):
-            raise HTTPException(status_code=400, detail="FORCE_HTTPS must be true or false")
+        if value_to_save.lower() not in ("true", "false", "1", "0", "yes", "no", "on", "off"):
+            raise HTTPException(status_code=400, detail="FORCE_HTTPS must be a boolean value (true/false, 1/0, yes/no, on/off)")
 
     # Get admin pubkey for audit log
     admin_pubkey = admin.get("pubkey")
@@ -457,7 +457,7 @@ async def validate_config(admin: dict = Depends(auth.require_admin)):
     # Check for SSL configuration consistency
     ssl_cert = config_dict.get("SSL_CERT_PATH", "")
     ssl_key = config_dict.get("SSL_KEY_PATH", "")
-    force_https = config_dict.get("FORCE_HTTPS", "").lower() == "true"
+    force_https = config_dict.get("FORCE_HTTPS", "").lower() in ("true", "1", "yes", "on")
 
     if force_https and (not ssl_cert or not ssl_key):
         warnings.append("FORCE_HTTPS is enabled but SSL certificate paths are not configured")

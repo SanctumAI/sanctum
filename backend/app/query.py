@@ -134,6 +134,9 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
     logger.info(f"RAG query (session={session_id[:8]}): '{question[:50]}...'")
     
     try:
+        # Import database module once at the start of the function
+        import database
+
         # 1. Embed the query (include conversation context for better retrieval)
         search_query = _build_search_query(question, session)
         query_embedding = embed_texts([f"query: {search_query}"])[0]
@@ -141,7 +144,6 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         # 2. Build filter for specific documents if requested
         search_filter = None
         if request.job_ids and len(request.job_ids) > 0:
-            import database
             # Validate user has access to these documents
             available_job_ids = set(database.get_available_documents_for_user_type(user_type_id))
 
@@ -192,7 +194,6 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
 
         # Get user profile context for chat personalization (unencrypted fields only)
         # Skip for dev mode (id=-1) and admin accounts (no user profile in users table)
-        import database
         user_profile_context = None
         user_id = user.get("id")
         if user_id and user_id != -1 and user.get("type") != "admin":

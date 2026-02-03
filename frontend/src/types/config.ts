@@ -300,9 +300,9 @@ export function getConfigCategories(t: TFunction): Record<ConfigCategory, Config
       hint: t('configCategories.storage.hint', "Control file paths for the database and uploaded documents. These typically don't need to change unless you're customizing your deployment."),
     },
     security: {
-      label: t('configCategories.security.label', 'Security & URLs'),
+      label: t('configCategories.security.label', 'Security'),
       description: t('configCategories.security.description', 'Configure access and security settings'),
-      hint: t('configCategories.security.hint', 'Set your public URLs and security options. The frontend URL is where users access the app. Make sure these match your actual deployment.'),
+      hint: t('configCategories.security.hint', 'Configure security options like authentication simulation modes for development and testing.'),
     },
     search: {
       label: t('configCategories.search.label', 'Web Search'),

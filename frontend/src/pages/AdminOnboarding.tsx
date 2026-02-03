@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import { Link2, AlertCircle, Check } from 'lucide-react'
@@ -6,9 +6,7 @@ import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { NostrInfo, NostrExtensionLinks } from '../components/onboarding/NostrInfo'
 import { STORAGE_KEYS } from '../types/onboarding'
 import { authenticateWithNostr, hasNostrExtension, type AuthResult } from '../utils/nostrAuth'
-
-// DEV_MODE enables mock authentication for testing without a real Nostr extension
-const DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true'
+import { fetchPublicConfig } from '../utils/publicConfig'
 
 type ConnectionState = 'idle' | 'connecting' | 'success' | 'no-extension' | 'error'
 
@@ -33,6 +31,14 @@ export function AdminOnboarding() {
   const [state, setState] = useState<ConnectionState>('idle')
   const [pubkey, setPubkey] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [simulateAdminAuth, setSimulateAdminAuth] = useState(false)
+
+  // Fetch simulation setting on mount
+  useEffect(() => {
+    fetchPublicConfig().then((config) => {
+      setSimulateAdminAuth(config.simulateAdminAuth)
+    })
+  }, [])
 
   const handleConnect = async () => {
     setState('connecting')
@@ -132,8 +138,8 @@ export function AdminOnboarding() {
             {t('adminOnboarding.connectNostr')}
           </button>
 
-          {/* Mock auth only available in DEV_MODE */}
-          {DEV_MODE && (
+          {/* Mock auth only available in simulateAdminAuth */}
+          {simulateAdminAuth && (
             <>
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
@@ -179,12 +185,12 @@ export function AdminOnboarding() {
           <div className="flex gap-3">
             <button
               onClick={handleRetry}
-              className={`${DEV_MODE ? 'flex-1' : 'w-full'} bg-surface-overlay border border-border text-text rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-surface-raised transition-all`}
+              className={`${simulateAdminAuth ? 'flex-1' : 'w-full'} bg-surface-overlay border border-border text-text rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-surface-raised transition-all`}
             >
               {t('common.tryAgain')}
             </button>
-            {/* Mock auth only available in DEV_MODE */}
-            {DEV_MODE && (
+            {/* Mock auth only available in simulateAdminAuth */}
+            {simulateAdminAuth && (
               <button
                 onClick={handleMockConnect}
                 className="flex-1 bg-accent text-accent-text rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-accent-hover transition-all active-press"

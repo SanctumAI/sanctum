@@ -444,7 +444,7 @@ export const DEPLOYMENT_CONFIG_KEY_LIST = [
   // Search
   'SEARXNG_URL',
   // Security
-  'FRONTEND_URL',
+  'FRONTEND_URL', 'SIMULATE_USER_AUTH', 'SIMULATE_ADMIN_AUTH',
 ] as const
 
 export type DeploymentConfigItemKey = typeof DEPLOYMENT_CONFIG_KEY_LIST[number]
@@ -543,6 +543,16 @@ export function getDeploymentConfigItemMeta(t: TFunction): Record<DeploymentConf
       label: t('deploymentConfigItems.FRONTEND_URL.label', 'App URL'),
       description: t('deploymentConfigItems.FRONTEND_URL.description', 'Public URL for the application'),
       hint: t('deploymentConfigItems.FRONTEND_URL.hint', 'The public URL where users access the app. Used for generating magic links.'),
+    },
+    SIMULATE_USER_AUTH: {
+      label: t('deploymentConfigItems.SIMULATE_USER_AUTH.label', 'Simulate User Auth'),
+      description: t('deploymentConfigItems.SIMULATE_USER_AUTH.description', 'Allow user verification without magic link token (testing only)'),
+      hint: t('deploymentConfigItems.SIMULATE_USER_AUTH.hint', 'Enable for development/testing. Allows users to complete email verification without clicking the magic link. Should be disabled in production.'),
+    },
+    SIMULATE_ADMIN_AUTH: {
+      label: t('deploymentConfigItems.SIMULATE_ADMIN_AUTH.label', 'Simulate Admin Auth'),
+      description: t('deploymentConfigItems.SIMULATE_ADMIN_AUTH.description', 'Show mock Nostr connection button for admin auth (testing only)'),
+      hint: t('deploymentConfigItems.SIMULATE_ADMIN_AUTH.hint', 'Enable for development/testing. Shows a "Mock Connection" button on admin login that bypasses Nostr extension requirement. Should be disabled in production.'),
     },
   }
 }

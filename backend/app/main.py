@@ -675,6 +675,60 @@ async def send_magic_link(
     )
 
 
+def _compute_onboarding_flags(user: dict) -> tuple[bool, bool]:
+    """Return (needs_onboarding, needs_user_type) for the given user."""
+    if not user:
+        return False, False
+
+    user_type_id = user.get("user_type_id")
+    user_types = database.list_user_types()
+
+    needs_user_type = len(user_types) > 1 and not user_type_id
+    if needs_user_type:
+        return True, True
+
+    # If only one type exists, treat it as the effective type even if not yet stored
+    effective_type_id = user_type_id
+    if effective_type_id is None and len(user_types) == 1:
+        effective_type_id = user_types[0]["id"]
+
+    if effective_type_id is None:
+        # Only global fields apply when no type is selected
+        field_defs = [
+            f for f in database.get_field_definitions()
+            if f.get("user_type_id") is None
+        ]
+    else:
+        field_defs = database.get_field_definitions(
+            user_type_id=effective_type_id,
+            include_global=True
+        )
+
+    if not field_defs:
+        return False, False
+
+    user_fields = set(user.get("fields", {}).keys()) | set(user.get("fields_encrypted", {}).keys())
+
+    # If there are fields configured but none stored, onboarding hasn't been completed yet
+    if not user_fields:
+        return True, False
+
+    required_fields = [f["field_name"] for f in field_defs if f.get("required")]
+    if not required_fields:
+        return False, False
+
+    for field_name in required_fields:
+        if field_name in user.get("fields_encrypted", {}):
+            continue
+        value = user.get("fields", {}).get(field_name)
+        if value is None:
+            return True, False
+        if isinstance(value, str) and not value.strip():
+            return True, False
+
+    return False, False
+
+
 @app.get("/auth/verify", response_model=VerifyTokenResponse)
 async def verify_magic_link(
     token: str = Query(..., description="Magic link token"),
@@ -704,6 +758,8 @@ async def verify_magic_link(
     # Create session token
     session_token = auth.create_session_token(user["id"], email)
 
+    needs_onboarding, needs_user_type = _compute_onboarding_flags(user)
+
     return VerifyTokenResponse(
         success=True,
         user=AuthUserResponse(
@@ -712,7 +768,9 @@ async def verify_magic_link(
             name=name or user.get("name"),
             user_type_id=user.get("user_type_id"),
             approved=bool(user.get("approved", 1)),
-            created_at=user.get("created_at")
+            created_at=user.get("created_at"),
+            needs_onboarding=needs_onboarding,
+            needs_user_type=needs_user_type
         ),
         session_token=session_token
     )
@@ -742,6 +800,8 @@ async def get_current_user(
     if not user:
         return SessionUserResponse(authenticated=False)
 
+    needs_onboarding, needs_user_type = _compute_onboarding_flags(user)
+
     return SessionUserResponse(
         authenticated=True,
         user=AuthUserResponse(
@@ -750,7 +810,9 @@ async def get_current_user(
             name=user.get("name"),
             user_type_id=user.get("user_type_id"),
             approved=bool(user.get("approved", 1)),
-            created_at=user.get("created_at")
+            created_at=user.get("created_at"),
+            needs_onboarding=needs_onboarding,
+            needs_user_type=needs_user_type
         )
     )
 
@@ -1044,6 +1106,48 @@ async def get_public_settings():
     """Public endpoint: Get instance settings for branding (name, color, etc.)"""
     settings = filter_public_settings(database.get_all_settings())
     return InstanceSettingsResponse(settings=settings)
+
+
+# Import for public config
+from models import PublicConfigResponse
+
+
+def _get_simulation_setting(key: str, default: str = "true") -> bool:
+    """Get a simulation setting from database with env var fallback.
+
+    Args:
+        key: The config key (e.g., "SIMULATE_USER_AUTH")
+        default: Default value if not found anywhere ("true" or "false")
+
+    Returns:
+        Boolean value of the setting
+    """
+    # First try database
+    db_value = database.get_deployment_config_value(key)
+    if db_value is not None:
+        return db_value.lower() in ("true", "1", "yes")
+
+    # Then try environment variable
+    env_value = os.getenv(key)
+    if env_value is not None:
+        return env_value.lower() in ("true", "1", "yes")
+
+    # Fall back to default
+    return default.lower() in ("true", "1", "yes")
+
+
+@app.get("/config/public", response_model=PublicConfigResponse)
+async def get_public_config():
+    """
+    Public endpoint: Get simulation/development settings.
+
+    Returns configuration flags that control testing features.
+    No authentication required - these settings affect client-side behavior.
+    """
+    return PublicConfigResponse(
+        simulate_user_auth=_get_simulation_setting("SIMULATE_USER_AUTH", "false"),
+        simulate_admin_auth=_get_simulation_setting("SIMULATE_ADMIN_AUTH", "false"),
+    )
 
 
 @app.get("/session-defaults", response_model=SessionDefaultsResponse)
@@ -1368,11 +1472,38 @@ async def create_user(user: UserCreate):
         if not database.get_user_type(user.user_type_id):
             raise HTTPException(status_code=400, detail="User type not found")
 
+    # Normalize pubkey if provided
+    pubkey = None
+    if user.pubkey:
+        from nostr_keys import normalize_pubkey
+        try:
+            pubkey = normalize_pubkey(user.pubkey)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+
+    # Check for existing user (by pubkey or email) to avoid duplicates
+    existing_user = None
+    if pubkey:
+        existing_user = database.get_user_by_pubkey(pubkey)
+    if not existing_user and user.email:
+        existing_user = database.get_user_by_email(user.email)
+
+    # Resolve effective user_type_id (use existing if not provided)
+    effective_user_type_id = user.user_type_id
+    if effective_user_type_id is None and existing_user:
+        effective_user_type_id = existing_user.get("user_type_id")
+
     # Get field definitions for this user type (global + type-specific)
-    field_defs = database.get_field_definitions(
-        user_type_id=user.user_type_id,
-        include_global=True
-    )
+    if effective_user_type_id is None:
+        field_defs = [
+            f for f in database.get_field_definitions()
+            if f.get("user_type_id") is None
+        ]
+    else:
+        field_defs = database.get_field_definitions(
+            user_type_id=effective_user_type_id,
+            include_global=True
+        )
 
     # Validate required fields
     required_fields = {f["field_name"] for f in field_defs if f["required"]}
@@ -1394,14 +1525,14 @@ async def create_user(user: UserCreate):
             detail=f"Unknown fields: {', '.join(unknown)}"
         )
 
-    # Normalize pubkey if provided
-    pubkey = None
-    if user.pubkey:
-        from nostr_keys import normalize_pubkey
-        try:
-            pubkey = normalize_pubkey(user.pubkey)
-        except ValueError as e:
-            raise HTTPException(status_code=400, detail=str(e)) from e
+    if existing_user:
+        # Update existing user (avoid duplicate accounts)
+        if user.user_type_id is not None and user.user_type_id != existing_user.get("user_type_id"):
+            database.update_user_type_id(existing_user["id"], user.user_type_id)
+            effective_user_type_id = user.user_type_id
+        if user.fields:
+            database.set_user_fields(existing_user["id"], user.fields, user_type_id=effective_user_type_id)
+        return UserResponse(**database.get_user(existing_user["id"]))
 
     # Create user
     try:
@@ -1412,7 +1543,7 @@ async def create_user(user: UserCreate):
             user_type_id=user.user_type_id
         )
         if user.fields:
-            database.set_user_fields(user_id, user.fields, user_type_id=user.user_type_id)
+            database.set_user_fields(user_id, user.fields, user_type_id=effective_user_type_id)
         return UserResponse(**database.get_user(user_id))
     except Exception as e:
         if "UNIQUE constraint" in str(e):

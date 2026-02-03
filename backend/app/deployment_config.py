@@ -65,6 +65,8 @@ ENV_CONFIG_MAP = {
     "SEARXNG_URL": {"category": "search", "description": "SearXNG instance URL", "requires_restart": False, "default": "http://searxng:8080"},
     # Security Settings
     "FRONTEND_URL": {"category": "security", "description": "Frontend application URL", "requires_restart": False, "default": "http://localhost:5173"},
+    "SIMULATE_USER_AUTH": {"category": "security", "description": "Allow user verification without magic link token (testing only)", "requires_restart": False, "default": "false"},
+    "SIMULATE_ADMIN_AUTH": {"category": "security", "description": "Show mock Nostr connection button for admin auth (testing only)", "requires_restart": False, "default": "false"},
     # RAG Settings
     "RAG_TOP_K": {"category": "llm", "description": "Default RAG retrieval count", "requires_restart": False, "default": "8"},
     "PDF_EXTRACT_MODE": {"category": "llm", "description": "PDF extraction mode (fast/quality)", "requires_restart": False, "default": "fast"},

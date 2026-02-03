@@ -247,6 +247,8 @@ class AuthUserResponse(BaseModel):
     user_type_id: Optional[int] = None
     approved: bool = True
     created_at: Optional[str] = None
+    needs_onboarding: bool = False
+    needs_user_type: bool = False
 
 
 class VerifyTokenResponse(BaseModel):
@@ -567,3 +569,15 @@ class TestEmailResponse(BaseModel):
     success: bool
     message: str
     error: Optional[str] = None
+
+
+# --- Public Configuration Models ---
+
+class PublicConfigResponse(BaseModel):
+    """Response model for public (unauthenticated) configuration settings.
+
+    These settings control simulation/development features and are safe
+    to expose without authentication.
+    """
+    simulate_user_auth: bool = False
+    simulate_admin_auth: bool = False

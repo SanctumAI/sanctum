@@ -8,10 +8,10 @@ import {
   UploadResponse,
   JobStatus,
   JobsListResponse,
-  INGEST_API_BASE,
   isAllowedFileType,
   getAllowedExtensionsDisplay,
 } from '../types/ingest'
+import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
 
 // TODO: Replace localStorage check with proper auth token validation
 // Current implementation only checks for admin pubkey in localStorage
@@ -30,6 +30,7 @@ export function AdminDocumentUpload() {
   const [recentJobs, setRecentJobs] = useState<JobStatus[]>([])
   const [isLoadingJobs, setIsLoadingJobs] = useState(true)
   const [jobsError, setJobsError] = useState<string | null>(null)
+  const [jobsErrorTitle, setJobsErrorTitle] = useState<string | null>(null)
 
   // Pipeline help modal state
   const [showPipelineHelpModal, setShowPipelineHelpModal] = useState(false)
@@ -57,8 +58,8 @@ export function AdminDocumentUpload() {
 
   // Check if admin is logged in
   useEffect(() => {
-    const pubkey = localStorage.getItem(STORAGE_KEYS.ADMIN_PUBKEY)
-    if (!pubkey) {
+    if (!isAdminAuthenticated()) {
+      localStorage.removeItem(STORAGE_KEYS.ADMIN_PUBKEY)
       navigate('/admin')
     }
   }, [navigate])
@@ -66,13 +67,14 @@ export function AdminDocumentUpload() {
   // Fetch recent jobs with timeout
   const fetchJobs = useCallback(async () => {
     setJobsError(null)
+    setJobsErrorTitle(null)
 
     // Create abort controller for timeout
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 10000) // 10s timeout
 
     try {
-      const response = await fetch(`${INGEST_API_BASE}/ingest/jobs`, {
+      const response = await adminFetch('/ingest/jobs', {
         signal: controller.signal
       })
       clearTimeout(timeoutId)
@@ -86,7 +88,7 @@ export function AdminDocumentUpload() {
           try {
             const statusController = new AbortController()
             const statusTimeout = setTimeout(() => statusController.abort(), 5000)
-            const statusResponse = await fetch(`${INGEST_API_BASE}/ingest/status/${job.job_id}`, {
+            const statusResponse = await adminFetch(`/ingest/status/${job.job_id}`, {
               signal: statusController.signal
             })
             clearTimeout(statusTimeout)
@@ -102,8 +104,14 @@ export function AdminDocumentUpload() {
     } catch (error) {
       console.error(t('errors.errorFetchingJobs'), error)
       if (error instanceof Error && error.name === 'AbortError') {
+        setJobsErrorTitle(t('upload.serverBusy', 'Server is busy'))
         setJobsError(t('upload.jobsTimeout', 'Server is busy processing documents. Try refreshing in a moment.'))
+      } else if (error instanceof Error && error.message.startsWith('errors.')) {
+        const errorMessage = t(error.message)
+        setJobsErrorTitle(errorMessage)
+        setJobsError(errorMessage)
       } else {
+        setJobsErrorTitle(t('errors.failedToFetchJobs'))
         setJobsError(t('errors.failedToFetchJobs'))
       }
     } finally {
@@ -121,7 +129,7 @@ export function AdminDocumentUpload() {
     setDeleteError(null)
 
     try {
-      const response = await fetch(`${INGEST_API_BASE}/ingest/jobs/${jobId}`, {
+      const response = await adminFetch(`/ingest/jobs/${jobId}`, {
         method: 'DELETE',
       })
 
@@ -136,7 +144,11 @@ export function AdminDocumentUpload() {
       await fetchJobs()
     } catch (error) {
       console.error('Delete error:', error)
-      setDeleteError(error instanceof Error ? error.message : t('upload.deleteFailed'))
+      if (error instanceof Error && error.message.startsWith('errors.')) {
+        setDeleteError(t(error.message))
+      } else {
+        setDeleteError(error instanceof Error ? error.message : t('upload.deleteFailed'))
+      }
     } finally {
       setIsDeleting(false)
     }
@@ -234,7 +246,7 @@ export function AdminDocumentUpload() {
       const formData = new FormData()
       formData.append('file', selectedFile)
 
-      const response = await fetch(`${INGEST_API_BASE}/ingest/upload`, {
+      const response = await adminFetch('/ingest/upload', {
         method: 'POST',
         body: formData,
       })
@@ -266,7 +278,11 @@ export function AdminDocumentUpload() {
       successTimeoutRef.current = setTimeout(() => setUploadSuccess(null), 4000)
     } catch (error) {
       console.error('Upload error:', error)
-      setUploadError(error instanceof Error ? error.message : 'Upload failed')
+      if (error instanceof Error && error.message.startsWith('errors.')) {
+        setUploadError(t(error.message))
+      } else {
+        setUploadError(error instanceof Error ? error.message : 'Upload failed')
+      }
     } finally {
       setIsUploading(false)
     }
@@ -522,7 +538,9 @@ export function AdminDocumentUpload() {
           ) : jobsError ? (
             <div className="text-center py-6 bg-surface border border-border rounded-lg">
               <Clock className="w-8 h-8 text-text-muted mx-auto mb-2" strokeWidth={1.5} />
-              <p className="text-sm text-text-secondary mb-1">{t('upload.serverBusy', 'Server is busy')}</p>
+              <p className="text-sm text-text-secondary mb-1">
+                {jobsErrorTitle || t('upload.serverBusy', 'Server is busy')}
+              </p>
               <p className="text-xs text-text-muted mb-3">{jobsError}</p>
               <button
                 onClick={() => { setIsLoadingJobs(true); fetchJobs() }}

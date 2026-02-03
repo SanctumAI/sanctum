@@ -72,13 +72,16 @@ services:
       # Magic Link Auth configuration
       - SECRET_KEY=${SECRET_KEY:-dev-secret-change-in-production}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
-      - MOCK_EMAIL=${MOCK_EMAIL:-true}
+      - MOCK_EMAIL=${MOCK_EMAIL:-false}
       # SMTP configuration (optional, not needed if MOCK_EMAIL=true)
       - SMTP_HOST=${SMTP_HOST:-}
       - SMTP_PORT=${SMTP_PORT:-587}
       - SMTP_USER=${SMTP_USER:-}
       - SMTP_PASS=${SMTP_PASS:-}
       - SMTP_FROM=${SMTP_FROM:-Sanctum <noreply@localhost>}
+      # Simulation settings for development/testing
+      - SIMULATE_USER_AUTH=${SIMULATE_USER_AUTH:-false}
+      - SIMULATE_ADMIN_AUTH=${SIMULATE_ADMIN_AUTH:-false}
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
       interval: 10s
@@ -107,8 +110,6 @@ services:
     container_name: sanctum-frontend
     ports:
       - "5173:5173"
-    environment:
-      - VITE_DEV_MODE=${VITE_DEV_MODE:-true}
     dns:
       - 127.0.0.11  # Docker's embedded DNS server
     dns_opt:

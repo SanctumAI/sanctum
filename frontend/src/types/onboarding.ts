@@ -127,6 +127,8 @@ export interface AuthUserResponse {
   user_type_id: number | null
   approved: boolean
   created_at: string | null
+  needs_onboarding?: boolean
+  needs_user_type?: boolean
 }
 
 export interface VerifyTokenResponse {

@@ -2,12 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
-import { STORAGE_KEYS, API_BASE } from '../types/onboarding'
-
-// DEV_MODE enables token-less verification for testing without real emails
-const DEV_MODE = ['true', '1', 'yes'].includes(
-  String(import.meta.env.VITE_DEV_MODE || '').toLowerCase()
-)
+import { STORAGE_KEYS, API_BASE, saveSelectedUserTypeId } from '../types/onboarding'
+import { fetchPublicConfig } from '../utils/publicConfig'
 
 type VerifyState = 'verifying' | 'success' | 'error'
 
@@ -18,15 +14,16 @@ export function VerifyMagicLink() {
   const [state, setState] = useState<VerifyState>('verifying')
   const [email, setEmail] = useState<string | null>(null)
   const [name, setName] = useState<string | null>(null)
-  const [hasOnboarding, setHasOnboarding] = useState(false)
+  const [needsOnboarding, setNeedsOnboarding] = useState(false)
+  const [needsUserType, setNeedsUserType] = useState(false)
   const [isApproved, setIsApproved] = useState(true)
   const hasVerified = useRef(false) // Prevent double-execution in StrictMode
 
   useEffect(() => {
     const token = searchParams.get('token')
 
-    // Check if there are user types or custom fields to complete
-    async function checkOnboarding() {
+    // Fallback onboarding inference (used in simulate mode or if backend doesn't send flags)
+    async function inferOnboardingNeeds() {
       try {
         const [typesRes, fieldsRes] = await Promise.all([
           fetch(`${API_BASE}/user-types`),
@@ -36,12 +33,31 @@ export function VerifyMagicLink() {
         const typesData = typesRes.ok ? await typesRes.json() : { types: [] }
         const fieldsData = fieldsRes.ok ? await fieldsRes.json() : { fields: [] }
 
-        // Has onboarding if there are types (>1) or fields to complete
+        const typeCount = typesData.types?.length || 0
+        if (typeCount === 1 && typesData.types?.[0]?.id !== undefined) {
+          saveSelectedUserTypeId(typesData.types[0].id)
+        }
+
         const hasTypes = (typesData.types?.length || 0) > 1
         const hasFields = (fieldsData.fields?.length || 0) > 0
-        setHasOnboarding(hasTypes || hasFields)
+        setNeedsUserType(hasTypes)
+        setNeedsOnboarding(hasTypes || hasFields)
       } catch {
-        setHasOnboarding(false)
+        setNeedsUserType(false)
+        setNeedsOnboarding(false)
+      }
+    }
+
+    async function hydrateSingleUserType() {
+      try {
+        const typesRes = await fetch(`${API_BASE}/user-types`)
+        const typesData = typesRes.ok ? await typesRes.json() : { types: [] }
+        const typeCount = typesData.types?.length || 0
+        if (typeCount === 1 && typesData.types?.[0]?.id !== undefined) {
+          saveSelectedUserTypeId(typesData.types[0].id)
+        }
+      } catch {
+        // Ignore if we can't hydrate user type
       }
     }
 
@@ -51,9 +67,18 @@ export function VerifyMagicLink() {
         return
       }
 
+      // Fetch simulation setting from backend
+      let simulateUserAuth = false
+      try {
+        const config = await fetchPublicConfig()
+        simulateUserAuth = config?.simulateUserAuth ?? false
+      } catch {
+        // Default to false if config fetch fails
+      }
+
       if (!token) {
-        // No token - only allow in DEV_MODE for testing
-        if (DEV_MODE) {
+        // No token - only allow in simulate mode for testing
+        if (simulateUserAuth) {
           const storedEmail = localStorage.getItem(STORAGE_KEYS.PENDING_EMAIL)
           if (storedEmail) {
             setEmail(storedEmail)
@@ -64,11 +89,12 @@ export function VerifyMagicLink() {
             if (storedName) {
               localStorage.setItem(STORAGE_KEYS.USER_NAME, storedName)
             }
-            // Set mock session token for DEV_MODE
-            localStorage.setItem(STORAGE_KEYS.SESSION_TOKEN, 'dev-mode-mock-token')
-            // Set approval to true for dev testing
+            // Set mock session token for simulated auth
+            localStorage.setItem(STORAGE_KEYS.SESSION_TOKEN, 'simulated-auth-mock-token')
+            // Set approval to true for testing
             localStorage.setItem(STORAGE_KEYS.USER_APPROVED, 'true')
             setIsApproved(true)
+            await inferOnboardingNeeds()
             localStorage.removeItem(STORAGE_KEYS.PENDING_EMAIL)
             localStorage.removeItem(STORAGE_KEYS.PENDING_NAME)
             hasVerified.current = true
@@ -76,7 +102,7 @@ export function VerifyMagicLink() {
             return
           }
         }
-        // No token and not in DEV_MODE (or no pending email) = error
+        // No token and not in simulate mode (or no pending email) = error
         setState('error')
         return
       }
@@ -106,6 +132,31 @@ export function VerifyMagicLink() {
 
         const data = await response.json()
 
+        if (data.user?.user_type_id !== null && data.user?.user_type_id !== undefined) {
+          saveSelectedUserTypeId(data.user.user_type_id)
+        }
+
+        const onboardingFlag = typeof data.user?.needs_onboarding === 'boolean'
+          ? data.user.needs_onboarding
+          : null
+        const userTypeFlag = typeof data.user?.needs_user_type === 'boolean'
+          ? data.user.needs_user_type
+          : null
+
+        if (onboardingFlag === null || userTypeFlag === null) {
+          await inferOnboardingNeeds()
+        } else {
+          setNeedsOnboarding(onboardingFlag)
+          setNeedsUserType(userTypeFlag)
+          if (
+            onboardingFlag &&
+            !userTypeFlag &&
+            (data.user?.user_type_id === null || data.user?.user_type_id === undefined)
+          ) {
+            await hydrateSingleUserType()
+          }
+        }
+
         // Store session token and user info
         localStorage.setItem(STORAGE_KEYS.SESSION_TOKEN, data.session_token)
         localStorage.setItem(STORAGE_KEYS.USER_EMAIL, data.user.email)
@@ -132,7 +183,6 @@ export function VerifyMagicLink() {
       }
     }
 
-    checkOnboarding()
     verifyToken()
   }, [searchParams])
 
@@ -143,9 +193,13 @@ export function VerifyMagicLink() {
         // If not approved, go to pending page
         if (!isApproved) {
           navigate('/pending')
-        } else if (hasOnboarding) {
+        } else if (needsOnboarding) {
           // If onboarding needed, go to user-type selection (which auto-skips if needed)
-          navigate('/user-type')
+          if (needsUserType) {
+            navigate('/user-type')
+          } else {
+            navigate('/profile')
+          }
         } else {
           navigate('/chat')
         }
@@ -153,7 +207,7 @@ export function VerifyMagicLink() {
 
       return () => clearTimeout(redirectTimer)
     }
-  }, [state, navigate, hasOnboarding, isApproved])
+  }, [state, navigate, needsOnboarding, needsUserType, isApproved])
 
   return (
     <OnboardingCard>
@@ -184,7 +238,7 @@ export function VerifyMagicLink() {
             {email}
           </p>
           <p className="text-xs text-text-muted mt-6">
-            {hasOnboarding ? t('onboarding.verify.completingProfile') : t('onboarding.verify.redirectingChat')}
+            {needsOnboarding ? t('onboarding.verify.completingProfile') : t('onboarding.verify.redirectingChat')}
           </p>
         </div>
       )}

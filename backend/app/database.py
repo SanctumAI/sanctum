@@ -920,6 +920,16 @@ def create_user(
         return cursor.lastrowid
 
 
+def update_user_type_id(user_id: int, user_type_id: int | None) -> bool:
+    """Update a user's type selection. Returns True if updated."""
+    with get_cursor() as cursor:
+        cursor.execute(
+            "UPDATE users SET user_type_id = ? WHERE id = ?",
+            (user_type_id, user_id)
+        )
+        return cursor.rowcount > 0
+
+
 def get_user(user_id: int) -> dict | None:
     """Get user by id with all field values.
 
@@ -1015,7 +1025,7 @@ def get_user_by_email(email: str) -> dict | None:
     with get_cursor() as cursor:
         # Try blind index first (encrypted emails)
         cursor.execute(
-            "SELECT id FROM users WHERE email_blind_index = ?",
+            "SELECT id FROM users WHERE email_blind_index = ? ORDER BY id DESC LIMIT 1",
             (blind_index,)
         )
         row = cursor.fetchone()
@@ -1024,7 +1034,10 @@ def get_user_by_email(email: str) -> dict | None:
 
         # Fall back to plaintext email (legacy/unencrypted data)
         # Use normalized email for consistent matching
-        cursor.execute("SELECT id FROM users WHERE LOWER(email) = ?", (normalized_email,))
+        cursor.execute(
+            "SELECT id FROM users WHERE LOWER(email) = ? ORDER BY id DESC LIMIT 1",
+            (normalized_email,)
+        )
         row = cursor.fetchone()
         if row:
             return get_user(row["id"])

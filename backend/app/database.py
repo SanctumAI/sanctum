@@ -842,9 +842,16 @@ def update_field_definition(
         if encryption_enabled:
             updates.append("include_in_chat = ?")
             values.append(0)
+    # Get effective encryption status (consider stored value if not being updated)
+    effective_encryption = encryption_enabled
+    if encryption_enabled is None and include_in_chat:
+        existing_field = get_field_definition_by_id(field_id)
+        if existing_field and existing_field.get("encryption_enabled"):
+            effective_encryption = True
+
     # Only process include_in_chat if encryption is not being enabled
     # (when encryption_enabled=True, we already forced include_in_chat=0 above)
-    if include_in_chat is not None and not encryption_enabled:
+    if include_in_chat is not None and not effective_encryption:
         updates.append("include_in_chat = ?")
         values.append(int(include_in_chat))
 

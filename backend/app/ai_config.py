@@ -393,7 +393,10 @@ async def preview_prompt_for_user_type(
     # Question
     parts.append("")
     parts.append("=== QUESTION ===")
-    parts.append(request.sample_question)
+    if request.sample_question:
+        parts.append(request.sample_question)
+    else:
+        parts.append("(No sample question provided)")
 
     parts.append("")
     parts.append("=== RESPOND ===")
@@ -476,7 +479,10 @@ async def preview_prompt(
     # Question
     parts.append("")
     parts.append("=== QUESTION ===")
-    parts.append(request.sample_question)
+    if request.sample_question:
+        parts.append(request.sample_question)
+    else:
+        parts.append("(No sample question provided)")
 
     parts.append("")
     parts.append("=== RESPOND ===")

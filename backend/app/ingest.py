@@ -718,6 +718,7 @@ async def delete_document(job_id: str, admin: dict = Depends(auth.require_admin)
             result["file_deleted"] = True
             logger.info(f"[{job_id}] Deleted file: {file_path}")
         except Exception as e:
+            result["file_deleted"] = False
             logger.error(f"[{job_id}] Failed to delete file {file_path}: {e}")
     else:
         logger.debug(f"[{job_id}] File not found (already deleted?): {file_path}")
@@ -744,9 +745,23 @@ async def delete_document(job_id: str, admin: dict = Depends(auth.require_admin)
     logger.info(f"[{job_id}] Cleared {len(chunks_to_delete)} in-memory chunks")
 
     logger.info(f"[{job_id}] Document deletion complete")
+    file_deleted = result.get("file_deleted", True)
+    db_deleted = result.get("db_deleted", False)
+    overall_success = file_deleted and db_deleted
+
+    # Build specific message based on what failed
+    if overall_success:
+        status_msg = "deleted successfully"
+    elif not file_deleted and db_deleted:
+        status_msg = "partially deleted (file deletion failed)"
+    elif file_deleted and not db_deleted:
+        status_msg = "partially deleted (database deletion failed)"
+    else:
+        status_msg = "deletion failed (both file and database deletion failed)"
+
     return {
-        "success": True,
-        "message": f"Document '{result['filename']}' deleted successfully",
+        "success": overall_success,
+        "message": f"Document '{result['filename']}' {status_msg}",
         "details": result,
     }
 

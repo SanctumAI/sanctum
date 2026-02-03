@@ -72,7 +72,7 @@ def inspect_raw_database(db_path: str, user_id: int) -> dict:
     # Get user record using the hardened run_docker_sql() helper
     try:
         user_output = run_docker_sql(
-            f"SELECT id, pubkey, email, encrypted_email, ephemeral_pubkey_email, "
+            f"SELECT id, pubkey, email, encrypted_email, ephemeral_pubkey_email, "  # noqa: S608
             f"name, encrypted_name, ephemeral_pubkey_name, email_blind_index, "
             f"user_type_id, approved, created_at FROM users WHERE id = {user_id}",
             db_path
@@ -99,13 +99,13 @@ def inspect_raw_database(db_path: str, user_id: int) -> dict:
         return None
 
     user_data = {}
-    for col, val in zip(columns, values):
+    for col, val in zip(columns, values, strict=True):
         user_data[col] = val if val else None
 
     # Get field values using the hardened helper
     try:
         fields_output = run_docker_sql(
-            f"SELECT fd.field_name, ufv.value, ufv.encrypted_value, ufv.ephemeral_pubkey "
+            f"SELECT fd.field_name, ufv.value, ufv.encrypted_value, ufv.ephemeral_pubkey "  # noqa: S608
             f"FROM user_field_values ufv "
             f"JOIN user_field_definitions fd ON fd.id = ufv.field_id "
             f"WHERE ufv.user_id = {user_id}",

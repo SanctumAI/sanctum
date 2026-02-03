@@ -508,7 +508,10 @@ export function AdminDeploymentConfig() {
       const unsignedEvent = {
         kind: 22242,
         created_at: Math.floor(Date.now() / 1000),
-        tags: [['action', 'admin_key_migration']],
+        tags: [
+          ['action', 'admin_key_migration'],
+          ['new_pubkey', newAdminPubkey],
+        ],
         content: '',
       }
 

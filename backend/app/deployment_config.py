@@ -469,10 +469,13 @@ async def validate_config(admin: dict = Depends(auth.require_admin)):
         warnings.append("SSL_KEY_PATH is set but SSL_CERT_PATH is missing")
 
     # Check CORS origins match configured domains
-    cors_origins = config_dict.get("CORS_ORIGINS", "")
-    instance_url = config_dict.get("INSTANCE_URL", "")
-    if instance_url and cors_origins and instance_url not in cors_origins:
-        warnings.append("INSTANCE_URL is not included in CORS_ORIGINS - this may cause CORS errors")
+    cors_origins_raw = config_dict.get("CORS_ORIGINS", "")
+    instance_url = config_dict.get("INSTANCE_URL", "").rstrip("/")
+    if instance_url and cors_origins_raw:
+        # Parse comma-separated origins and normalize (strip whitespace and trailing slashes)
+        cors_origins_list = [origin.strip().rstrip("/") for origin in cors_origins_raw.split(",") if origin.strip()]
+        if instance_url not in cors_origins_list:
+            warnings.append("INSTANCE_URL is not included in CORS_ORIGINS - this may cause CORS errors")
 
     return DeploymentValidationResponse(
         valid=len(errors) == 0,

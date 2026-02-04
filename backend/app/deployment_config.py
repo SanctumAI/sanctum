@@ -71,25 +71,25 @@ ENV_CONFIG_MAP = {
     "RAG_TOP_K": {"category": "llm", "description": "Default RAG retrieval count", "requires_restart": False, "default": "8"},
     "PDF_EXTRACT_MODE": {"category": "llm", "description": "PDF extraction mode (fast/quality)", "requires_restart": False, "default": "fast"},
     # Domain & URLs Settings
-    "BASE_DOMAIN": {"category": "domains", "description": "Root domain name", "requires_restart": False},
-    "INSTANCE_URL": {"category": "domains", "description": "Full application URL with protocol", "requires_restart": True},
-    "API_BASE_URL": {"category": "domains", "description": "API subdomain URL (optional)", "requires_restart": True},
-    "ADMIN_BASE_URL": {"category": "domains", "description": "Admin panel subdomain URL (optional)", "requires_restart": True},
-    "EMAIL_DOMAIN": {"category": "domains", "description": "Domain for email addresses", "requires_restart": False},
+    "BASE_DOMAIN": {"category": "domains", "description": "Root domain name", "requires_restart": False, "default": "localhost"},
+    "INSTANCE_URL": {"category": "domains", "description": "Full application URL with protocol", "requires_restart": True, "default": "http://localhost:5173"},
+    "API_BASE_URL": {"category": "domains", "description": "API subdomain URL (optional)", "requires_restart": True, "default": "http://localhost:8000"},
+    "ADMIN_BASE_URL": {"category": "domains", "description": "Admin panel subdomain URL (optional)", "requires_restart": True, "default": "http://localhost:5173/admin"},
+    "EMAIL_DOMAIN": {"category": "domains", "description": "Domain for email addresses", "requires_restart": False, "default": "localhost"},
     "DKIM_SELECTOR": {"category": "domains", "description": "DKIM DNS record selector", "requires_restart": False, "default": "sanctum"},
-    "SPF_INCLUDE": {"category": "domains", "description": "SPF DNS include directive", "requires_restart": False},
-    "DMARC_POLICY": {"category": "domains", "description": "DMARC DNS policy record", "requires_restart": False},
-    "CORS_ORIGINS": {"category": "domains", "description": "Comma-separated allowed CORS origins", "requires_restart": True},
+    "SPF_INCLUDE": {"category": "domains", "description": "SPF DNS include directive (e.g., include:_spf.google.com)", "requires_restart": False, "default": ""},
+    "DMARC_POLICY": {"category": "domains", "description": "DMARC DNS policy record", "requires_restart": False, "default": "v=DMARC1; p=none"},
+    "CORS_ORIGINS": {"category": "domains", "description": "Comma-separated allowed CORS origins", "requires_restart": True, "default": "http://localhost:5173"},
     "CDN_DOMAINS": {"category": "domains", "description": "Content delivery domains", "requires_restart": False},
     "CUSTOM_SEARXNG_URL": {"category": "domains", "description": "Private SearXNG instance URL", "requires_restart": True},
-    "WEBHOOK_BASE_URL": {"category": "domains", "description": "Webhook callback base URL", "requires_restart": False},
+    "WEBHOOK_BASE_URL": {"category": "domains", "description": "Webhook callback base URL", "requires_restart": False, "default": "http://localhost:8000"},
     # SSL & Security Settings
     "TRUSTED_PROXIES": {"category": "ssl", "description": "Trusted reverse proxies (cloudflare, aws, custom)", "requires_restart": True},
     "SSL_CERT_PATH": {"category": "ssl", "description": "SSL certificate file path", "requires_restart": True},
     "SSL_KEY_PATH": {"category": "ssl", "description": "SSL private key file path", "requires_restart": True, "is_secret": True},
     "FORCE_HTTPS": {"category": "ssl", "description": "Redirect HTTP to HTTPS", "requires_restart": True, "default": "false"},
     "HSTS_MAX_AGE": {"category": "ssl", "description": "HSTS max-age in seconds", "requires_restart": False, "default": "31536000"},
-    "MONITORING_URL": {"category": "ssl", "description": "Health monitoring endpoint URL", "requires_restart": False},
+    "MONITORING_URL": {"category": "ssl", "description": "Health monitoring endpoint URL", "requires_restart": False, "default": "http://localhost:8000/health"},
 }
 
 # Keys that should never be exposed or editable
@@ -129,10 +129,7 @@ def _sync_env_to_db() -> None:
         if key in FORBIDDEN_KEYS:
             continue
 
-        # Check if already in DB
         existing = database.get_deployment_config(key)
-        if existing:
-            continue
 
         # Try to get value from env, with key translation
         value = None
@@ -153,6 +150,21 @@ def _sync_env_to_db() -> None:
         # 4. Fall back to default from config map
         if value is None:
             value = meta.get("default", "")
+
+        if existing:
+            # Backfill empty values with defaults/env values
+            existing_value = existing.get("value")
+            if (existing_value is None or existing_value == "") and value not in (None, ""):
+                database.upsert_deployment_config(
+                    key=key,
+                    value=value,
+                    is_secret=meta.get("is_secret", False),
+                    requires_restart=meta.get("requires_restart", False),
+                    category=meta["category"],
+                    description=meta.get("description", ""),
+                )
+                logger.debug(f"Backfilled empty config: {key} (value: {'***' if meta.get('is_secret') else value})")
+            continue
 
         database.upsert_deployment_config(
             key=key,

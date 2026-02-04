@@ -155,6 +155,7 @@ def merge_user_rows(cur: sqlite3.Cursor, keep: sqlite3.Row, dup: sqlite3.Row, ap
         "dup_id": dup_id,
         "updated_columns": list(updates.keys()),
         "moved_fields": moved_fields,
+        "_updates": updates,  # Internal: used to update keep state between iterations
     }
 
 
@@ -211,14 +212,19 @@ def main() -> int:
             if not keep or not dups:
                 return
             groups_processed += 1
+            # Convert keep to mutable dict for tracking state across iterations
+            keep = dict(keep)
             for dup in dups:
                 info = merge_user_rows(cur, keep, dup, args.apply)
+                updates = info.pop("_updates", {})  # Remove internal field from summary
                 info["group"] = label
                 summary.append(info)
-                # Re-fetch keep row to reflect updates for next iteration
+                # Update keep state for next iteration (both apply and dry-run)
                 if args.apply:
                     cur.execute("SELECT * FROM users WHERE id = ?", (keep["id"],))
-                    keep = cur.fetchone()
+                    keep = dict(cur.fetchone())
+                elif updates:
+                    keep.update(updates)
 
         for blind_index in blind_groups:
             users = fetch_users_by_blind_index(cur, blind_index)

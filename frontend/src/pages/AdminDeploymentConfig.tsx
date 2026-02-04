@@ -101,6 +101,11 @@ export function AdminDeploymentConfig() {
   const [embeddingHelpPage, setEmbeddingHelpPage] = useState(0)
   const embeddingHelpModalRef = useRef<HTMLDivElement>(null)
 
+  // Domains help modal state
+  const [showDomainsHelpModal, setShowDomainsHelpModal] = useState(false)
+  const [domainsHelpPage, setDomainsHelpPage] = useState(0)
+  const domainsHelpModalRef = useRef<HTMLDivElement>(null)
+
   // Key migration hook and state
   const {
     loading: migrationLoading,
@@ -343,6 +348,11 @@ export function AdminDeploymentConfig() {
     setEmbeddingHelpPage(0)
   }
 
+  const handleCloseDomainsHelpModal = () => {
+    setShowDomainsHelpModal(false)
+    setDomainsHelpPage(0)
+  }
+
   // Key migration handlers
   const handleOpenMigrationModal = () => {
     // Check prerequisites
@@ -581,6 +591,13 @@ export function AdminDeploymentConfig() {
     }
   }, [showEmbeddingHelpModal])
 
+  // Focus trap for domains help modal
+  useEffect(() => {
+    if (showDomainsHelpModal && domainsHelpModalRef.current) {
+      domainsHelpModalRef.current.focus()
+    }
+  }, [showDomainsHelpModal, domainsHelpModalRef])
+
   // Email help pages data
   const EMAIL_HELP_PAGES = [
     {
@@ -706,6 +723,25 @@ export function AdminDeploymentConfig() {
     {
       title: t('adminDeployment.embeddingHelp.performanceTitle', 'Performance Settings'),
       content: 'performance',
+    },
+  ]
+
+  const DOMAINS_HELP_PAGES = [
+    {
+      title: t('adminDeployment.domainsHelp.overviewTitle', 'Domains & URLs Overview'),
+      content: 'overview',
+    },
+    {
+      title: t('adminDeployment.domainsHelp.urlsTitle', 'Public URLs & CORS'),
+      content: 'urls',
+    },
+    {
+      title: t('adminDeployment.domainsHelp.dnsTitle', 'DNS Records (Email)'),
+      content: 'dns',
+    },
+    {
+      title: t('adminDeployment.domainsHelp.edgeTitle', 'CDN & Webhooks'),
+      content: 'edge',
     },
   ]
 
@@ -900,7 +936,7 @@ export function AdminDeploymentConfig() {
 
     const meta = configCategories[category]
     const helpText = meta.hint || meta.description
-    const hasModalHelp = category === 'email' || category === 'llm' || category === 'embedding'
+    const hasModalHelp = category === 'email' || category === 'llm' || category === 'embedding' || category === 'domains'
 
     return (
       <div key={category} className="card card-sm p-5! bg-surface-overlay!">
@@ -932,6 +968,16 @@ export function AdminDeploymentConfig() {
               onClick={() => setShowEmbeddingHelpModal(true)}
               className="ml-1 text-text-muted hover:text-accent transition-colors"
               aria-label={t('adminDeployment.embeddingHelp.ariaLabel', 'Embedding configuration help')}
+              title={helpText}
+            >
+              <HelpCircle className="w-5 h-5" />
+            </button>
+          )}
+          {category === 'domains' && (
+            <button
+              onClick={() => setShowDomainsHelpModal(true)}
+              className="ml-1 text-text-muted hover:text-accent transition-colors"
+              aria-label={t('adminDeployment.domainsHelp.ariaLabel', 'Domains and DNS configuration help')}
               title={helpText}
             >
               <HelpCircle className="w-5 h-5" />
@@ -1728,6 +1774,161 @@ export function AdminDeploymentConfig() {
                 <button
                   onClick={() => setEmbeddingHelpPage((prev) => Math.min(EMBEDDING_HELP_PAGES.length - 1, prev + 1))}
                   disabled={embeddingHelpPage === EMBEDDING_HELP_PAGES.length - 1}
+                  className="flex items-center gap-1 text-sm text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  {t('common.next', 'Next')}
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Domains Help Modal */}
+        {showDomainsHelpModal && (
+          <div
+            ref={domainsHelpModalRef}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="domains-help-modal-title"
+            onKeyDown={(e) => e.key === 'Escape' && handleCloseDomainsHelpModal()}
+            tabIndex={-1}
+          >
+            <div className="bg-surface border border-border rounded-xl p-6 w-full max-w-lg mx-4 shadow-xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 id="domains-help-modal-title" className="text-lg font-semibold text-text flex items-center gap-2">
+                  <HelpCircle className="w-5 h-5" />
+                  {DOMAINS_HELP_PAGES[domainsHelpPage].title}
+                </h3>
+                <button
+                  onClick={handleCloseDomainsHelpModal}
+                  className="text-text-muted hover:text-text transition-colors"
+                  aria-label={t('common.close', 'Close')}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="min-h-[280px]">
+                {DOMAINS_HELP_PAGES[domainsHelpPage].content === 'overview' ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('adminDeployment.domainsHelp.overviewDesc', 'These settings control where your app lives on the internet and how services find each other. Defaults are set for local development.')}
+                    </p>
+                    <div className="bg-surface-overlay border border-border rounded-lg p-4">
+                      <p className="text-sm font-medium text-text mb-2">{t('adminDeployment.domainsHelp.whatToSet', 'Set these when you go live:')}</p>
+                      <ul className="text-xs text-text-muted space-y-2 list-disc list-inside">
+                        <li>{t('adminDeployment.domainsHelp.overviewUrl', 'INSTANCE_URL / API_BASE_URL / ADMIN_BASE_URL for public entry points')}</li>
+                        <li>{t('adminDeployment.domainsHelp.overviewCORS', 'CORS_ORIGINS to allow your frontend domain')}</li>
+                        <li>{t('adminDeployment.domainsHelp.overviewDns', 'Email DNS (DKIM/SPF/DMARC) for deliverability')}</li>
+                      </ul>
+                    </div>
+                    <p className="text-xs text-text-muted">
+                      {t('adminDeployment.domainsHelp.overviewNote', 'If you are staying on localhost, you can keep the defaults.')}
+                    </p>
+                  </div>
+                ) : DOMAINS_HELP_PAGES[domainsHelpPage].content === 'urls' ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('adminDeployment.domainsHelp.urlsDesc', 'Public URLs and CORS origins must match exactly (scheme + domain + port).')}
+                    </p>
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3 font-mono text-xs space-y-1">
+                      <div>INSTANCE_URL=https://app.example.com</div>
+                      <div>API_BASE_URL=https://api.example.com</div>
+                      <div>ADMIN_BASE_URL=https://admin.example.com</div>
+                      <div>CORS_ORIGINS=https://app.example.com,https://admin.example.com</div>
+                    </div>
+                    <p className="text-xs text-text-muted">
+                      {t('adminDeployment.domainsHelp.urlsNote', 'If your API is served from the same domain as the app, you can leave API_BASE_URL empty.')}
+                    </p>
+                  </div>
+                ) : DOMAINS_HELP_PAGES[domainsHelpPage].content === 'dns' ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('adminDeployment.domainsHelp.dnsDesc', 'These values help you create DNS records for email deliverability.')}
+                    </p>
+                    <div className="space-y-2">
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-xs text-text-muted mb-1">SPF</p>
+                        <p className="text-xs text-text">
+                          {t('adminDeployment.domainsHelp.spfExample', 'Example TXT record: v=spf1 include:sendgrid.net ~all')}
+                        </p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-xs text-text-muted mb-1">DKIM</p>
+                        <p className="text-xs text-text">
+                          {t('adminDeployment.domainsHelp.dkimExample', 'Use the selector from DKIM_SELECTOR and the public key from your provider.')}
+                        </p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-xs text-text-muted mb-1">DMARC</p>
+                        <p className="text-xs text-text">
+                          {t('adminDeployment.domainsHelp.dmarcExample', 'Example TXT record: v=DMARC1; p=none; rua=mailto:dmarc@example.com')}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-text-muted">
+                      {t('adminDeployment.domainsHelp.dnsNote', 'Use your email provider\'s recommended records for best deliverability.')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('adminDeployment.domainsHelp.edgeDesc', 'Optional settings for advanced setups.')}
+                    </p>
+                    <div className="space-y-2">
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-xs font-medium text-text">CDN_DOMAINS</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {t('adminDeployment.domainsHelp.cdnDesc', 'Comma-separated CDN hostnames for static assets. Leave blank if not using a CDN.')}
+                        </p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-xs font-medium text-text">WEBHOOK_BASE_URL</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {t('adminDeployment.domainsHelp.webhookDesc', 'Base URL used to construct webhook callbacks. Use your public API domain.')}
+                        </p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-xs font-medium text-text">CUSTOM_SEARXNG_URL</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {t('adminDeployment.domainsHelp.searxDesc', 'Only needed if your SearXNG instance lives on a different host.')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
+                <button
+                  onClick={() => setDomainsHelpPage((prev) => Math.max(0, prev - 1))}
+                  disabled={domainsHelpPage === 0}
+                  className="flex items-center gap-1 text-sm text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  {t('common.previous', 'Previous')}
+                </button>
+
+                <div className="flex items-center gap-1.5">
+                  {DOMAINS_HELP_PAGES.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setDomainsHelpPage(index)}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        index === domainsHelpPage
+                          ? 'bg-accent'
+                          : 'bg-border hover:bg-text-muted'
+                      }`}
+                      aria-label={`${t('adminDeployment.domainsHelp.goToPage', 'Go to page')} ${index + 1}`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setDomainsHelpPage((prev) => Math.min(DOMAINS_HELP_PAGES.length - 1, prev + 1))}
+                  disabled={domainsHelpPage === DOMAINS_HELP_PAGES.length - 1}
                   className="flex items-center gap-1 text-sm text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
                   {t('common.next', 'Next')}

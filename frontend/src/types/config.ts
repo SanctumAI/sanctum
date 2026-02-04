@@ -312,12 +312,12 @@ export function getConfigCategories(t: TFunction): Record<ConfigCategory, Config
     domains: {
       label: t('configCategories.domains.label', 'Domain & URLs'),
       description: t('configCategories.domains.description', 'Configure domain names, URLs, and DNS settings'),
-      hint: t('configCategories.domains.hint', 'Set up your domain configuration for production deployment. Configure your root domain, subdomains, CORS origins, and email DNS records (DKIM, SPF, DMARC).'),
+      hint: t('configCategories.domains.hint', 'Use these when moving to a custom domain. Defaults assume local development (localhost). Configure your root domain, public URLs, CORS origins, and email DNS records (DKIM/SPF/DMARC).'),
     },
     ssl: {
       label: t('configCategories.ssl.label', 'SSL & Security'),
       description: t('configCategories.ssl.description', 'Configure SSL certificates and HTTPS settings'),
-      hint: t('configCategories.ssl.hint', 'Manage SSL/TLS configuration, HTTPS enforcement, and security headers like HSTS.'),
+      hint: t('configCategories.ssl.hint', 'Configure TLS and proxy settings when serving over HTTPS. Defaults are safe for local dev; enable HTTPS only after certificates are mounted.'),
     },
     general: {
       label: t('configCategories.general.label', 'General'),
@@ -577,93 +577,93 @@ export function getDeploymentConfigItemMeta(t: TFunction): Record<DeploymentConf
     BASE_DOMAIN: {
       label: t('deploymentConfigItems.BASE_DOMAIN.label', 'Root Domain'),
       description: t('deploymentConfigItems.BASE_DOMAIN.description', 'Primary domain name'),
-      hint: t('deploymentConfigItems.BASE_DOMAIN.hint', 'Your root domain without protocol (e.g., example.com)'),
+      hint: t('deploymentConfigItems.BASE_DOMAIN.hint', 'Root domain without protocol. Example: example.com. Leave blank for local dev.'),
     },
     INSTANCE_URL: {
       label: t('deploymentConfigItems.INSTANCE_URL.label', 'Application URL'),
       description: t('deploymentConfigItems.INSTANCE_URL.description', 'Full URL with protocol'),
-      hint: t('deploymentConfigItems.INSTANCE_URL.hint', 'The complete URL users access (e.g., https://app.example.com)'),
+      hint: t('deploymentConfigItems.INSTANCE_URL.hint', 'Public app URL with protocol. Example: https://app.example.com. Default: http://localhost:5173.'),
     },
     API_BASE_URL: {
       label: t('deploymentConfigItems.API_BASE_URL.label', 'API URL'),
       description: t('deploymentConfigItems.API_BASE_URL.description', 'API subdomain URL (optional)'),
-      hint: t('deploymentConfigItems.API_BASE_URL.hint', 'If your API is on a separate subdomain (e.g., https://api.example.com)'),
+      hint: t('deploymentConfigItems.API_BASE_URL.hint', 'Only set if API is on a separate domain. Example: https://api.example.com. Default: http://localhost:8000.'),
     },
     ADMIN_BASE_URL: {
       label: t('deploymentConfigItems.ADMIN_BASE_URL.label', 'Admin URL'),
       description: t('deploymentConfigItems.ADMIN_BASE_URL.description', 'Admin panel subdomain URL (optional)'),
-      hint: t('deploymentConfigItems.ADMIN_BASE_URL.hint', 'If your admin panel is on a separate subdomain (e.g., https://admin.example.com)'),
+      hint: t('deploymentConfigItems.ADMIN_BASE_URL.hint', 'Only if admin UI is on a separate domain. Example: https://admin.example.com. Default: http://localhost:5173/admin.'),
     },
     EMAIL_DOMAIN: {
       label: t('deploymentConfigItems.EMAIL_DOMAIN.label', 'Email Domain'),
       description: t('deploymentConfigItems.EMAIL_DOMAIN.description', 'Domain for email addresses'),
-      hint: t('deploymentConfigItems.EMAIL_DOMAIN.hint', 'The domain used for sending emails (e.g., mail.example.com)'),
+      hint: t('deploymentConfigItems.EMAIL_DOMAIN.hint', 'Domain used for From addresses and DNS records. Example: example.com or mail.example.com.'),
     },
     DKIM_SELECTOR: {
       label: t('deploymentConfigItems.DKIM_SELECTOR.label', 'DKIM Selector'),
       description: t('deploymentConfigItems.DKIM_SELECTOR.description', 'DKIM DNS record selector'),
-      hint: t('deploymentConfigItems.DKIM_SELECTOR.hint', 'The selector prefix for your DKIM DNS record (default: sanctum)'),
+      hint: t('deploymentConfigItems.DKIM_SELECTOR.hint', 'Selector prefix for your DKIM TXT record. Default: sanctum. Your provider may require a specific selector.'),
     },
     SPF_INCLUDE: {
       label: t('deploymentConfigItems.SPF_INCLUDE.label', 'SPF Include'),
       description: t('deploymentConfigItems.SPF_INCLUDE.description', 'SPF DNS include directive'),
-      hint: t('deploymentConfigItems.SPF_INCLUDE.hint', 'SPF include value for your DNS TXT record (e.g., include:_spf.google.com)'),
+      hint: t('deploymentConfigItems.SPF_INCLUDE.hint', 'Replace with your provider include value (e.g., include:sendgrid.net). Default: include:_spf.google.com.'),
     },
     DMARC_POLICY: {
       label: t('deploymentConfigItems.DMARC_POLICY.label', 'DMARC Policy'),
       description: t('deploymentConfigItems.DMARC_POLICY.description', 'DMARC DNS policy record'),
-      hint: t('deploymentConfigItems.DMARC_POLICY.hint', 'DMARC policy value (e.g., v=DMARC1; p=quarantine; rua=mailto:dmarc@example.com)'),
+      hint: t('deploymentConfigItems.DMARC_POLICY.hint', 'Start with v=DMARC1; p=none; rua=mailto:dmarc@example.com and tighten later.'),
     },
     CORS_ORIGINS: {
       label: t('deploymentConfigItems.CORS_ORIGINS.label', 'CORS Origins'),
       description: t('deploymentConfigItems.CORS_ORIGINS.description', 'Comma-separated allowed CORS origins'),
-      hint: t('deploymentConfigItems.CORS_ORIGINS.hint', 'Allowed origins for cross-origin requests (e.g., https://app.example.com,https://admin.example.com)'),
+      hint: t('deploymentConfigItems.CORS_ORIGINS.hint', 'Comma-separated full origins (scheme + host). Example: https://app.example.com,https://admin.example.com. Default: http://localhost:5173.'),
     },
     CDN_DOMAINS: {
       label: t('deploymentConfigItems.CDN_DOMAINS.label', 'CDN Domains'),
       description: t('deploymentConfigItems.CDN_DOMAINS.description', 'Content delivery domains'),
-      hint: t('deploymentConfigItems.CDN_DOMAINS.hint', 'CDN domains for static asset delivery (e.g., cdn.example.com)'),
+      hint: t('deploymentConfigItems.CDN_DOMAINS.hint', 'Comma-separated CDN hostnames for static assets (e.g., cdn.example.com). Leave blank if not using a CDN.'),
     },
     CUSTOM_SEARXNG_URL: {
       label: t('deploymentConfigItems.CUSTOM_SEARXNG_URL.label', 'Custom SearXNG URL'),
       description: t('deploymentConfigItems.CUSTOM_SEARXNG_URL.description', 'Private SearXNG instance URL'),
-      hint: t('deploymentConfigItems.CUSTOM_SEARXNG_URL.hint', 'URL of your private SearXNG instance if different from default'),
+      hint: t('deploymentConfigItems.CUSTOM_SEARXNG_URL.hint', 'Set only if using a separate SearXNG host. Example: https://search.example.com.'),
     },
     WEBHOOK_BASE_URL: {
       label: t('deploymentConfigItems.WEBHOOK_BASE_URL.label', 'Webhook URL'),
       description: t('deploymentConfigItems.WEBHOOK_BASE_URL.description', 'Webhook callback base URL'),
-      hint: t('deploymentConfigItems.WEBHOOK_BASE_URL.hint', 'Base URL for webhook callbacks from external services'),
+      hint: t('deploymentConfigItems.WEBHOOK_BASE_URL.hint', 'Base URL used to construct webhook callbacks. Example: https://api.example.com/webhooks. Default: http://localhost:8000.'),
     },
     // SSL & Security
     TRUSTED_PROXIES: {
       label: t('deploymentConfigItems.TRUSTED_PROXIES.label', 'Trusted Proxies'),
       description: t('deploymentConfigItems.TRUSTED_PROXIES.description', 'Trusted reverse proxies (cloudflare, aws, custom)'),
-      hint: t('deploymentConfigItems.TRUSTED_PROXIES.hint', 'Specify trusted proxy configuration: cloudflare, aws, or custom IP ranges'),
+      hint: t('deploymentConfigItems.TRUSTED_PROXIES.hint', 'Set to cloudflare, aws, or a comma-separated list of IP ranges. Leave blank if not behind a proxy.'),
     },
     SSL_CERT_PATH: {
       label: t('deploymentConfigItems.SSL_CERT_PATH.label', 'SSL Certificate Path'),
       description: t('deploymentConfigItems.SSL_CERT_PATH.description', 'SSL certificate file path'),
-      hint: t('deploymentConfigItems.SSL_CERT_PATH.hint', 'Path to your SSL/TLS certificate file (e.g., /etc/ssl/certs/server.crt)'),
+      hint: t('deploymentConfigItems.SSL_CERT_PATH.hint', 'Absolute path to the certificate file. Example: /etc/ssl/certs/fullchain.pem.'),
     },
     SSL_KEY_PATH: {
       label: t('deploymentConfigItems.SSL_KEY_PATH.label', 'SSL Key Path'),
       description: t('deploymentConfigItems.SSL_KEY_PATH.description', 'SSL private key file path'),
-      hint: t('deploymentConfigItems.SSL_KEY_PATH.hint', 'Path to your SSL/TLS private key file (e.g., /etc/ssl/private/server.key)'),
+      hint: t('deploymentConfigItems.SSL_KEY_PATH.hint', 'Absolute path to the private key file. Example: /etc/ssl/private/privkey.pem.'),
     },
     FORCE_HTTPS: {
       label: t('deploymentConfigItems.FORCE_HTTPS.label', 'Force HTTPS'),
       description: t('deploymentConfigItems.FORCE_HTTPS.description', 'Redirect HTTP to HTTPS'),
-      hint: t('deploymentConfigItems.FORCE_HTTPS.hint', 'Set to true to automatically redirect all HTTP requests to HTTPS'),
+      hint: t('deploymentConfigItems.FORCE_HTTPS.hint', 'Set to true only after SSL_CERT_PATH and SSL_KEY_PATH are configured.'),
     },
     HSTS_MAX_AGE: {
       label: t('deploymentConfigItems.HSTS_MAX_AGE.label', 'HSTS Max Age'),
       description: t('deploymentConfigItems.HSTS_MAX_AGE.description', 'HSTS max-age in seconds'),
-      hint: t('deploymentConfigItems.HSTS_MAX_AGE.hint', 'HTTP Strict Transport Security max-age header value (default: 31536000 = 1 year)'),
+      hint: t('deploymentConfigItems.HSTS_MAX_AGE.hint', 'Seconds browsers should enforce HTTPS. Default: 31536000 (1 year). Use 0 to disable.'),
     },
     MONITORING_URL: {
       label: t('deploymentConfigItems.MONITORING_URL.label', 'Monitoring URL'),
       description: t('deploymentConfigItems.MONITORING_URL.description', 'Health monitoring endpoint URL'),
-      hint: t('deploymentConfigItems.MONITORING_URL.hint', 'URL for external health monitoring service to check'),
+      hint: t('deploymentConfigItems.MONITORING_URL.hint', 'Health check URL for external monitors. Default: http://localhost:8000/health.'),
     },
   }
 }

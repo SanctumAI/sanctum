@@ -129,7 +129,7 @@ export function AdminUserConfig() {
 
     try {
       const nextDisplayOrder = userTypes.length > 0
-        ? Math.max(...userTypes.map(t => t.display_order ?? 0)) + 1
+        ? Math.max(...userTypes.map(ut => ut.display_order ?? 0)) + 1
         : 0
       const response = await adminFetch('/admin/user-types', {
         method: 'POST',

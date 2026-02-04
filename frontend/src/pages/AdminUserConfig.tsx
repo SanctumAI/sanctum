@@ -95,6 +95,7 @@ export function AdminUserConfig() {
             user_type_id: f.user_type_id,
             encryption_enabled: f.encryption_enabled ?? true,  // Default to true for security
             include_in_chat: f.include_in_chat ?? false,  // Default to false
+            display_order: f.display_order ?? 0,
           }))
           setFields(fetchedFields)
         } else {
@@ -127,13 +128,16 @@ export function AdminUserConfig() {
     setAddTypeError(null)
 
     try {
+      const nextDisplayOrder = userTypes.length > 0
+        ? Math.max(...userTypes.map(t => t.display_order ?? 0)) + 1
+        : 0
       const response = await adminFetch('/admin/user-types', {
         method: 'POST',
         body: JSON.stringify({
           name: newTypeName.trim(),
           description: newTypeDescription.trim() || null,
           icon: newTypeIcon,
-          display_order: userTypes.length,
+          display_order: nextDisplayOrder,
         }),
       })
 
@@ -252,13 +256,16 @@ export function AdminUserConfig() {
     setFieldError(null)
 
     try {
+      const nextFieldDisplayOrder = fields.length > 0
+        ? Math.max(...fields.map(f => f.display_order ?? 0)) + 1
+        : 0
       const response = await adminFetch('/admin/user-fields', {
         method: 'POST',
         body: JSON.stringify({
           field_name: field.name,
           field_type: field.type,
           required: field.required,
-          display_order: fields.length,
+          display_order: nextFieldDisplayOrder,
           user_type_id: field.user_type_id,
           placeholder: field.placeholder || null,
           options: field.options || null,
@@ -279,6 +286,7 @@ export function AdminUserConfig() {
           user_type_id: newField.user_type_id,
           encryption_enabled: newField.encryption_enabled ?? true,
           include_in_chat: newField.include_in_chat ?? false,
+          display_order: newField.display_order ?? 0,
         }
         setFields([...fields, addedField])
         setIsEditing(false)
@@ -421,6 +429,7 @@ export function AdminUserConfig() {
               user_type_id: f.user_type_id,
               encryption_enabled: f.encryption_enabled ?? true,  // Default to true for security
               include_in_chat: f.include_in_chat ?? false,
+              display_order: f.display_order ?? 0,
             }))
             setFields(fetchedFields)
             setReorderError(t('admin.errors.reorderFailed', 'Failed to reorder field'))
@@ -451,6 +460,7 @@ export function AdminUserConfig() {
             user_type_id: f.user_type_id,
             encryption_enabled: f.encryption_enabled ?? true,  // Default to true for security
             include_in_chat: f.include_in_chat ?? false,
+            display_order: f.display_order ?? 0,
           }))
           setFields(fetchedFields)
         }

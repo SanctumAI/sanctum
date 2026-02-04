@@ -486,7 +486,7 @@ When `VITE_DEV_MODE` is unset or `false` (default):
 
 ### Configuration
 
-Add to `frontend/.env` or `docker-compose.yml`:
+Add to `frontend/.env` or `docker-compose.app.yml`:
 ```bash
 # Development
 VITE_DEV_MODE=true
@@ -580,6 +580,6 @@ Magic links expire after 15 minutes. Request a new one from the login page.
 2. Verify SMTP configuration is correct
 3. Check backend logs for send errors:
    ```bash
-   docker compose logs backend | grep -i "magic link"
+   docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs backend | grep -i "magic link"
    ```
 4. In development, ensure you're checking the backend logs for mock mode output

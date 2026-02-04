@@ -1,54 +1,4 @@
 services:
-  maple-proxy:
-    image: ghcr.io/opensecretcloud/maple-proxy:latest
-    container_name: sanctum-maple-proxy
-    ports:
-      - "8080:8080"
-    environment:
-      - MAPLE_BACKEND_URL=https://enclave.trymaple.ai
-      - MAPLE_API_KEY=${MAPLE_API_KEY}
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
-    networks:
-      - sanctum-net
-
-  qdrant:
-    image: qdrant/qdrant:v1.12.6
-    container_name: sanctum-qdrant
-    ports:
-      - "6333:6333"  # HTTP
-      - "6334:6334"  # gRPC
-    volumes:
-      - qdrant_data:/qdrant/storage
-    healthcheck:
-      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/6333' || exit 1"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
-    networks:
-      - sanctum-net
-
-  searxng:
-    image: searxng/searxng:latest
-    container_name: sanctum-searxng
-    volumes:
-      - ./searxng:/etc/searxng:ro
-    environment:
-      - SEARXNG_BASE_URL=http://searxng:8080/
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/healthz || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
-    networks:
-      - sanctum-net
-
   backend:
     build:
       context: ./backend
@@ -125,7 +75,6 @@ services:
       - sanctum-net
 
 volumes:
-  qdrant_data:
   embedding_cache:
   sqlite_data:
 

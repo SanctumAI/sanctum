@@ -7,7 +7,7 @@ This guide explains how to upload documents to your locally running Sanctum serv
 Make sure the Docker stack is running:
 
 ```bash
-docker compose up --build -d
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build -d
 ```
 
 Verify all services are healthy:
@@ -198,7 +198,7 @@ Common ontologies:
 
 Check backend logs:
 ```bash
-docker compose logs -f backend
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs -f backend
 ```
 
 ### PDF Extraction Issues

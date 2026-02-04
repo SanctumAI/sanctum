@@ -18,12 +18,14 @@ cp .env.example .env
 
 ### Start the Stack
 
+Docker Compose is split into infra and app files; include both for the full stack.
+
 ```bash
 # Start all services
-docker compose up --build
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build
 
 # Or run in detached mode
-docker compose up --build -d
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build -d
 ```
 
 First startup will:
@@ -83,10 +85,10 @@ Sanctum requires a NIP-07 admin login before user signups are enabled. Open the 
 ### Stop the Stack
 
 ```bash
-docker compose down
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml down
 
 # To also remove volumes (clears all data)
-docker compose down -v
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml down -v
 ```
 
 ## Architecture
@@ -118,13 +120,13 @@ Uses `intfloat/multilingual-e5-base`:
 ### View Logs
 
 ```bash
-docker compose logs -f backend
-docker compose logs -f qdrant
-docker compose logs -f maple-proxy
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs -f backend
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs -f qdrant
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs -f maple-proxy
 ```
 
 ### Rebuild Backend
 
 ```bash
-docker compose up --build backend
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build backend
 ```

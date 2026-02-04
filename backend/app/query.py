@@ -230,11 +230,12 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         logger.info(f"RAG complete. Answer: {len(answer)} chars, {len(clarifying_questions)} clarifying Qs, search_term={search_term}, facts={session.get('facts_gathered', {})}")
 
         # Redact user profile section from debug output to avoid exposing sensitive data
+        # Use line-anchored pattern to avoid stopping at === inside values
         debug_prompt = re.sub(
-            r'=== USER PROFILE ===.*?(?====|$)',
+            r'^=== USER PROFILE ===.*?(?=^===|\Z)',
             '=== USER PROFILE ===\n[REDACTED]\n\n',
             full_prompt,
-            flags=re.DOTALL
+            flags=re.MULTILINE | re.DOTALL
         )
 
         return QueryResponse(

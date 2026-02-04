@@ -132,7 +132,7 @@ pip install requests reportlab coincurve pycryptodome
 
 Ensure backend is running:
 ```bash
-docker compose up --build
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build
 ```
 
 ### Run All Tests (Default - With Harness)
@@ -227,7 +227,7 @@ python test_3b_key_migration_execute.py --api-base http://localhost:8000
 - PDF generated from config content
 - Upload succeeds via `/ingest/upload`
 - Job appears in `/ingest/jobs` (SQLite persistence)
-- Job persists after `docker compose down && up`
+- Job persists after `docker compose -f docker-compose.infra.yml -f docker-compose.app.yml down && up`
 
 ### Test 3A/3B: Admin Key Migration
 
@@ -301,7 +301,7 @@ Register as admin via frontend before running CRM tests.
 ### "Job not found after restart"
 SQLite persistence issue - check if `ingest_jobs` table has data:
 ```bash
-docker compose exec backend sqlite3 /data/sanctum.db "SELECT * FROM ingest_jobs"
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml exec backend sqlite3 /data/sanctum.db "SELECT * FROM ingest_jobs"
 ```
 
 ### Authentication errors

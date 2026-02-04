@@ -475,7 +475,7 @@ def main():
         print("\n[NEXT STEPS]")
         print("To verify persistence across restarts:")
         print("  1. Note the job_id from above")
-        print("  2. Restart the server: docker compose down && docker compose up --build")
+        print("  2. Restart the server: docker compose -f docker-compose.infra.yml -f docker-compose.app.yml down && docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build")
         print("  3. Run: python test_2a_document_persistence.py --verify-job <job_id>")
     
     sys.exit(0 if passed else 1)

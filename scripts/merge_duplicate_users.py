@@ -215,6 +215,10 @@ def main() -> int:
                 info = merge_user_rows(cur, keep, dup, args.apply)
                 info["group"] = label
                 summary.append(info)
+                # Re-fetch keep row to reflect updates for next iteration
+                if args.apply:
+                    cur.execute("SELECT * FROM users WHERE id = ?", (keep["id"],))
+                    keep = cur.fetchone()
 
         for blind_index in blind_groups:
             users = fetch_users_by_blind_index(cur, blind_index)

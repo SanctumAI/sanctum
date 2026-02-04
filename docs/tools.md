@@ -149,7 +149,7 @@ SearXNG is a privacy-respecting metasearch engine that aggregates results from m
 SearXNG runs as a Docker container on the internal network (not exposed to host):
 
 ```yaml
-# docker-compose.yml
+# docker-compose.infra.yml
 searxng:
   image: searxng/searxng:latest
   container_name: sanctum-searxng
@@ -395,7 +395,7 @@ searxng/
 
 Check if the container is healthy:
 ```bash
-docker compose logs searxng
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs searxng
 docker exec sanctum-backend curl -s "http://searxng:8080/search?q=test&format=json"
 ```
 
@@ -407,7 +407,7 @@ Ensure the tool ID in `ToolSelector.tsx` matches the tool's `definition.name`.
 
 Check backend logs for the actual error:
 ```bash
-docker compose logs backend --tail 50
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs backend --tail 50
 ```
 
 Common issues:

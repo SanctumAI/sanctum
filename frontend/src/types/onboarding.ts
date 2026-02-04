@@ -19,6 +19,7 @@ export interface CustomField {
   user_type_id?: number | null  // null = global field (shown for all types)
   encryption_enabled?: boolean  // true = encrypt field values (secure default)
   include_in_chat?: boolean  // true = include field value in AI chat context (only for unencrypted fields)
+  display_order?: number  // ordering for display purposes
 }
 
 export interface UserProfile {

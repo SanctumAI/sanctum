@@ -191,7 +191,7 @@ The `/auth/magic-link` endpoint is rate-limited to 5 requests per minute per IP 
 
 1. Check that `MOCK_EMAIL=false` (or `MOCK_SMTP=false` in deployment config) is set
 2. Verify `SMTP_HOST` is not empty
-3. Check backend logs for SMTP errors: `docker compose logs backend`
+3. Check backend logs for SMTP errors: `docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs backend`
 4. Test SMTP credentials with a tool like `swaks` or your provider's test feature
 
 ### "Invalid or expired token" errors

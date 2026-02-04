@@ -771,6 +771,10 @@ export function AdminDeploymentConfig() {
     const isEditing = editingKey === item.key
     const isShowingSecret = showSecret === item.key
     const meta = deploymentConfigItemMeta[item.key as DeploymentConfigItemKey]
+    const label = meta?.label || item.key
+    const description = meta?.description || item.description
+    const hint = meta?.hint
+    const helpText = hint || description || item.description
 
     return (
       <div
@@ -779,8 +783,17 @@ export function AdminDeploymentConfig() {
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-mono text-text">{item.key}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-sm font-medium text-text">{label}</p>
+              {helpText && (
+                <span
+                  className="text-text-muted"
+                  title={helpText}
+                  aria-label={helpText}
+                >
+                  <HelpCircle className="w-4 h-4" />
+                </span>
+              )}
               {item.requires_restart && (
                 <span className="text-[10px] bg-warning/10 text-warning px-1.5 py-0.5 rounded">
                   {t('adminDeployment.requiresRestart', 'Requires Restart')}
@@ -792,9 +805,12 @@ export function AdminDeploymentConfig() {
                 </span>
               )}
             </div>
-            <p className="text-xs text-text-muted mt-0.5">{meta?.description || item.description}</p>
-            {meta?.hint && (
-              <p className="text-xs text-text-muted/70 mt-1 leading-relaxed">{meta.hint}</p>
+            <p className="text-[11px] font-mono text-text-muted mt-1">{item.key}</p>
+            {description && (
+              <p className="text-xs text-text-muted mt-1">{description}</p>
+            )}
+            {hint && (
+              <p className="text-xs text-text-muted/70 mt-1 leading-relaxed">{hint}</p>
             )}
           </div>
           {!isEditing && (
@@ -883,6 +899,8 @@ export function AdminDeploymentConfig() {
     if (items.length === 0) return null
 
     const meta = configCategories[category]
+    const helpText = meta.hint || meta.description
+    const hasModalHelp = category === 'email' || category === 'llm' || category === 'embedding'
 
     return (
       <div key={category} className="card card-sm p-5! bg-surface-overlay!">
@@ -894,6 +912,7 @@ export function AdminDeploymentConfig() {
               onClick={() => setShowEmailHelpModal(true)}
               className="ml-1 text-text-muted hover:text-accent transition-colors"
               aria-label={t('adminDeployment.emailHelp.ariaLabel', 'Email configuration help')}
+              title={helpText}
             >
               <HelpCircle className="w-5 h-5" />
             </button>
@@ -903,6 +922,7 @@ export function AdminDeploymentConfig() {
               onClick={() => setShowLlmHelpModal(true)}
               className="ml-1 text-text-muted hover:text-accent transition-colors"
               aria-label={t('adminDeployment.llmHelp.ariaLabel', 'LLM provider configuration help')}
+              title={helpText}
             >
               <HelpCircle className="w-5 h-5" />
             </button>
@@ -912,9 +932,15 @@ export function AdminDeploymentConfig() {
               onClick={() => setShowEmbeddingHelpModal(true)}
               className="ml-1 text-text-muted hover:text-accent transition-colors"
               aria-label={t('adminDeployment.embeddingHelp.ariaLabel', 'Embedding configuration help')}
+              title={helpText}
             >
               <HelpCircle className="w-5 h-5" />
             </button>
+          )}
+          {!hasModalHelp && helpText && (
+            <span className="ml-1 text-text-muted" title={helpText} aria-label={helpText}>
+              <HelpCircle className="w-5 h-5" />
+            </span>
           )}
         </h3>
         <p className="text-sm text-text-secondary mb-1">{meta.description}</p>

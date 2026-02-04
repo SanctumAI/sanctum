@@ -587,7 +587,7 @@ curl -X POST http://localhost:8000/admin/db/query \
 SQLite data persists via Docker volume:
 
 ```yaml
-# docker-compose.yml
+# docker-compose.app.yml
 services:
   backend:
     environment:
@@ -769,9 +769,9 @@ The frontend uses localStorage for temporary state during onboarding:
 **Solution:** Reset the SQLite volume to recreate the database with the new schema:
 
 ```bash
-docker compose down
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml down
 docker volume rm sanctum-rag-runtime_sqlite_data
-docker compose up --build
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build
 ```
 
 > **Warning:** This deletes all data in the SQLite database (admins, users, settings, etc.)
@@ -782,7 +782,7 @@ If the backend container exits immediately or keeps restarting:
 
 1. **Check logs:**
    ```bash
-   docker compose logs backend --tail 50
+   docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs backend --tail 50
    ```
 
 2. **Common causes:**
@@ -792,7 +792,7 @@ If the backend container exits immediately or keeps restarting:
 
 3. **Verify dependencies are healthy:**
    ```bash
-   docker compose ps
+   docker compose -f docker-compose.infra.yml -f docker-compose.app.yml ps
    # All dependencies should show "healthy" status
    ```
 
@@ -803,8 +803,8 @@ If you see CORS errors like "CORS request did not succeed" with `Status code: (n
 **This is NOT a CORS configuration issue.** The `(null)` status code means the request never reached the backend.
 
 **Check:**
-1. Is the backend running? `docker compose ps`
+1. Is the backend running? `docker compose -f docker-compose.infra.yml -f docker-compose.app.yml ps`
 2. Can you reach the backend directly? `curl http://localhost:8000/health`
-3. Check backend logs for errors: `docker compose logs backend`
+3. Check backend logs for errors: `docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs backend`
 
 The backend CORS middleware is configured to allow all origins (`allow_origins=["*"]`). If the backend is running, CORS should work.

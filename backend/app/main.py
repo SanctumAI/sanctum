@@ -1385,7 +1385,7 @@ async def delete_field_definition(field_id: int, admin: dict = Depends(auth.requ
 async def update_field_encryption(
     field_id: int,
     encryption_request: FieldEncryptionRequest,
-    admin: dict = Depends(auth.require_admin)
+    _admin: dict = Depends(auth.require_admin)
 ) -> FieldEncryptionResponse:
     """Update encryption setting for a field definition (requires admin auth).
 

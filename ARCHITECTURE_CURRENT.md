@@ -245,13 +245,13 @@ services:
 
 ```bash
 # Start all services
-docker compose up --build
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build
 
 # View logs
-docker compose logs -f backend
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs -f backend
 
 # Reset all data
-docker compose down -v
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml down -v
 ```
 
 ---

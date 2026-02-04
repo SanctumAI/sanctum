@@ -67,7 +67,7 @@ def run_docker_sql(
 
     # Use list argv with stdin for SQL (no shell=True, no escaping needed)
     try:
-        result = subprocess.run(  # noqa: S603, S607
+        result = subprocess.run(  # noqa: S603
             cmd,
             input=sql_input,
             capture_output=True,
@@ -75,8 +75,8 @@ def run_docker_sql(
             cwd=REPO_ROOT,
             timeout=timeout,
         )
-    except subprocess.TimeoutExpired:
-        raise RuntimeError(f"sqlite3 command timed out after {timeout}s")
+    except subprocess.TimeoutExpired as e:
+        raise RuntimeError(f"sqlite3 command timed out after {timeout}s") from e
 
     # Surface sqlite3 failures
     if result.returncode != 0:

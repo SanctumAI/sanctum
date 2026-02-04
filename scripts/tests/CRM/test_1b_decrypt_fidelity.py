@@ -16,10 +16,10 @@ Requirements:
     - User must already exist (run test_1a first or use --user-id)
 """
 
-import os
 import sys
+import csv
 import json
-import sqlite3
+import io
 import hashlib
 import argparse
 import subprocess
@@ -27,10 +27,11 @@ from pathlib import Path
 
 # Add backend to path for imports
 SCRIPT_DIR = Path(__file__).parent
-REPO_ROOT = SCRIPT_DIR.parent.parent.parent
-sys.path.insert(0, str(REPO_ROOT / "backend" / "app"))
+sys.path.insert(0, str(SCRIPT_DIR.parent.parent.parent / "backend" / "app"))
 
 from coincurve import PrivateKey
+
+from test_helpers import run_docker_sql, REPO_ROOT
 
 
 def load_config() -> dict:
@@ -69,13 +70,14 @@ def inspect_raw_database(db_path: str, user_id: int) -> dict:
     # Validate user_id is an integer to prevent SQL injection
     user_id = int(user_id)
 
-    # Get user record using the hardened run_docker_sql() helper
+    # Get user record using the hardened run_docker_sql() helper with CSV output
     try:
         user_output = run_docker_sql(
             f"SELECT id, pubkey, email, encrypted_email, ephemeral_pubkey_email, "  # noqa: S608
             f"name, encrypted_name, ephemeral_pubkey_name, email_blind_index, "
             f"user_type_id, approved, created_at FROM users WHERE id = {user_id}",
-            db_path
+            db_path,
+            csv_mode=True,
         )
     except RuntimeError:
         return None
@@ -83,18 +85,19 @@ def inspect_raw_database(db_path: str, user_id: int) -> dict:
     if not user_output.strip():
         return None
 
-    # Parse pipe-separated output from sqlite3
-    lines = user_output.strip().split("\n")
-    if not lines or not lines[0]:
-        return None
-
-    # Column names in order from the SELECT
+    # Parse CSV output using csv.reader (handles embedded commas/quotes/newlines)
     columns = [
         "id", "pubkey", "email", "encrypted_email", "ephemeral_pubkey_email",
         "name", "encrypted_name", "ephemeral_pubkey_name", "email_blind_index",
         "user_type_id", "approved", "created_at"
     ]
-    values = lines[0].split("|")
+
+    reader = csv.reader(io.StringIO(user_output))
+    try:
+        values = next(reader)
+    except StopIteration:
+        return None
+
     if len(values) != len(columns):
         return None
 
@@ -102,28 +105,29 @@ def inspect_raw_database(db_path: str, user_id: int) -> dict:
     for col, val in zip(columns, values, strict=True):
         user_data[col] = val if val else None
 
-    # Get field values using the hardened helper
+    # Get field values using the hardened helper with CSV output
     try:
         fields_output = run_docker_sql(
             f"SELECT fd.field_name, ufv.value, ufv.encrypted_value, ufv.ephemeral_pubkey "  # noqa: S608
             f"FROM user_field_values ufv "
             f"JOIN user_field_definitions fd ON fd.id = ufv.field_id "
             f"WHERE ufv.user_id = {user_id}",
-            db_path
+            db_path,
+            csv_mode=True,
         )
     except RuntimeError:
         fields_output = ""
 
     field_values = []
     if fields_output.strip():
-        for line in fields_output.strip().split("\n"):
-            parts = line.split("|")
-            if len(parts) >= 4:
+        reader = csv.reader(io.StringIO(fields_output))
+        for row in reader:
+            if len(row) >= 4:
                 field_values.append({
-                    "field_name": parts[0] or None,
-                    "value": parts[1] or None,
-                    "encrypted_value": parts[2] or None,
-                    "ephemeral_pubkey": parts[3] or None,
+                    "field_name": row[0] or None,
+                    "value": row[1] or None,
+                    "encrypted_value": row[2] or None,
+                    "ephemeral_pubkey": row[3] or None,
                 })
 
     user_data["field_values"] = field_values
@@ -246,56 +250,6 @@ def test_decrypt_and_verify(db_path: str, user_id: int, admin_privkey: str, orig
     return passed
 
 
-def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db", timeout: int = 30) -> str:
-    """
-    Run read-only SQL inside Docker container and return output.
-
-    Security: Uses stdin to pass SQL (avoids shell injection), and
-    validates that only a single SELECT statement is allowed.
-
-    Raises:
-        ValueError: If SQL is not a single SELECT statement or db_path is invalid
-        RuntimeError: If sqlite3 command fails or times out
-    """
-    repo_root = SCRIPT_DIR.parent.parent.parent
-
-    # Validate db_path to prevent option injection (paths starting with "-")
-    if not db_path or db_path.startswith("-"):
-        raise ValueError(f"Invalid db_path: {db_path!r}")
-
-    # Normalize: strip whitespace and trailing semicolons
-    sql_normalized = sql.strip().rstrip(";").strip()
-
-    # Reject multi-statement input (internal semicolons)
-    if ";" in sql_normalized:
-        raise ValueError(f"run_docker_sql only allows single statements, got: {sql[:50]}")
-
-    # Validate: only allow SELECT statements (defense-in-depth for test helper)
-    if not sql_normalized.upper().startswith("SELECT"):
-        raise ValueError(f"run_docker_sql only allows SELECT statements, got: {sql[:50]}")
-
-    # Use list argv with stdin for SQL (no shell=True, no escaping needed)
-    try:
-        result = subprocess.run(  # noqa: S603, S607
-            ["docker", "compose", "exec", "-T", "backend", "sqlite3", db_path],
-            input=sql_normalized,
-            capture_output=True,
-            text=True,
-            cwd=repo_root,
-            timeout=timeout,
-        )
-    except subprocess.TimeoutExpired:
-        raise RuntimeError(f"sqlite3 command timed out after {timeout}s")
-
-    # Surface sqlite3 failures
-    if result.returncode != 0:
-        raise RuntimeError(
-            f"sqlite3 failed (exit {result.returncode}): {result.stderr.strip() or result.stdout.strip()}"
-        )
-
-    return result.stdout.strip()
-
-
 def compute_blind_index_in_docker(email: str) -> str | None:
     """
     Compute blind index inside Docker container where SECRET_KEY is available.
@@ -308,9 +262,9 @@ def compute_blind_index_in_docker(email: str) -> str | None:
     escaped_email = email.replace("\\", "\\\\").replace("'", "\\'")
 
     script = f"from encryption import compute_blind_index; print(compute_blind_index('{escaped_email}'))"
-    result = subprocess.run(
+    result = subprocess.run(  # noqa: S603, S607
         ["docker", "compose", "exec", "-T", "backend", "python", "-c", script],
-        capture_output=True, text=True, cwd=REPO_ROOT
+        capture_output=True, text=True, cwd=REPO_ROOT, timeout=30
     )
 
     if result.returncode != 0:

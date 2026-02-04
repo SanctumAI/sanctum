@@ -132,28 +132,45 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         search_query = _build_search_query(question, session)
         query_embedding = embed_texts([f"query: {search_query}"])[0]
 
-        # 2. Build filter for specific documents if requested
+        # 2. Build filter for document access control
+        # Admins can search all documents; non-admin users are restricted to their allowed documents
         search_filter = None
-        if request.job_ids and len(request.job_ids) > 0:
-            # Validate user has access to these documents
+        is_admin_user = user.get("type") == "admin"
+
+        if is_admin_user:
+            # Admins: only filter if they explicitly request specific job_ids
+            if request.job_ids and len(request.job_ids) > 0:
+                search_filter = {
+                    "should": [
+                        {"key": "job_id", "match": {"value": job_id}}
+                        for job_id in request.job_ids
+                    ]
+                }
+                logger.debug(f"Admin filtering search to {len(request.job_ids)} documents")
+        else:
+            # Non-admin users: always filter to their allowed documents
             available_job_ids = set(database.get_available_documents_for_user_type(user_type_id))
 
-            # Filter to only allowed documents
-            allowed_job_ids = [jid for jid in request.job_ids if jid in available_job_ids]
+            if request.job_ids and len(request.job_ids) > 0:
+                # User requested specific documents - intersect with allowed
+                allowed_job_ids = [jid for jid in request.job_ids if jid in available_job_ids]
+            else:
+                # No specific request - use all allowed documents for their user type
+                allowed_job_ids = list(available_job_ids)
 
             if not allowed_job_ids:
-                # User requested documents they can't access - return zero results
-                logger.warning(f"User requested inaccessible job_ids: {request.job_ids}")
+                # No accessible documents - return zero results
+                logger.warning(f"User has no accessible documents (user_type_id={user_type_id})")
                 search_filter = {"must": [{"key": "job_id", "match": {"value": "__impossible__"}}]}
             else:
-                # Build OR filter: match any of the job_ids
+                # Build OR filter: match any of the allowed job_ids
                 search_filter = {
                     "should": [
                         {"key": "job_id", "match": {"value": job_id}}
                         for job_id in allowed_job_ids
                     ]
                 }
-                logger.debug(f"Filtering search to {len(allowed_job_ids)} documents")
+                logger.debug(f"Filtering search to {len(allowed_job_ids)} documents for user_type_id={user_type_id}")
 
         # 3. Vector search in Qdrant
         qdrant_url = f"http://{QDRANT_HOST}:{QDRANT_PORT}/collections/{COLLECTION_NAME}/points/search"

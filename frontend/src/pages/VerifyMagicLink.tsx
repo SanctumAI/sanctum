@@ -89,8 +89,8 @@ export function VerifyMagicLink() {
             if (storedName) {
               localStorage.setItem(STORAGE_KEYS.USER_NAME, storedName)
             }
-            // Set mock session token for simulated auth
-            localStorage.setItem(STORAGE_KEYS.SESSION_TOKEN, 'simulated-auth-mock-token')
+            // Set mock session token for simulated auth (must match backend's expected token)
+            localStorage.setItem(STORAGE_KEYS.SESSION_TOKEN, 'dev-mode-mock-token')
             // Set approval to true for testing
             localStorage.setItem(STORAGE_KEYS.USER_APPROVED, 'true')
             setIsApproved(true)

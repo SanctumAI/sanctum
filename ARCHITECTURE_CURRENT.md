@@ -110,7 +110,7 @@ Document Upload → Text Extraction → Chunking → Embedding → Qdrant Storag
 ```
 
 1. Document uploaded via `/ingest/upload`
-2. Text extracted (PyMuPDF by default; Docling optional via `PDF_EXTRACT_MODE=quality`)
+2. Text extracted (PyMuPDF via `PDF_EXTRACT_MODE=fast` default; Docling via `PDF_EXTRACT_MODE=quality`)
 3. Text split into chunks (~1500 chars with overlap)
 4. Chunks embedded using `intfloat/multilingual-e5-base`
 5. Vectors stored in Qdrant with metadata

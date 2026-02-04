@@ -86,25 +86,38 @@ export function AdminDocumentUpload() {
       const data: JobsListResponse = await response.json()
 
       // Fetch full status for each job (with individual timeouts)
+      // On failure, fall back to list data so jobs aren't dropped from the UI
       const jobStatuses = await Promise.all(
-        data.jobs.slice(0, 10).map(async (job) => {
+        data.jobs.slice(0, 10).map(async (job): Promise<JobStatus> => {
           const statusController = new AbortController()
           const statusTimeout = setTimeout(() => statusController.abort(), 5000)
+
+          // Fallback using data from the jobs list
+          const fallbackStatus: JobStatus = {
+            job_id: job.job_id,
+            filename: job.filename,
+            status: job.status as JobStatus['status'],
+            created_at: job.created_at,
+            updated_at: job.created_at, // Best guess from list data
+            total_chunks: job.total_chunks,
+            processed_chunks: 0, // Unknown, default to 0
+          }
+
           try {
             const statusResponse = await adminFetch(`/ingest/status/${job.job_id}`, {
               signal: statusController.signal
             })
-            if (!statusResponse.ok) return null
+            if (!statusResponse.ok) return fallbackStatus
             return statusResponse.json() as Promise<JobStatus>
           } catch {
-            return null
+            return fallbackStatus
           } finally {
             clearTimeout(statusTimeout)
           }
         })
       )
 
-      setRecentJobs(jobStatuses.filter((j): j is JobStatus => j !== null))
+      setRecentJobs(jobStatuses)
     } catch (error) {
       console.error(t('errors.errorFetchingJobs'), error)
       if (error instanceof Error && error.name === 'AbortError') {

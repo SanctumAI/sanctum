@@ -15,7 +15,9 @@ Sanctum uses magic link email authentication. Users enter their email address, r
 
 ## Configuration
 
-All configuration is done via environment variables.
+Configuration can be set via environment variables **or** the admin deployment UI (`/admin/deployment`).
+Deployment config values stored in SQLite take precedence over environment variables at runtime.
+See `docs/admin-deployment-config.md` for UI behavior, validation, and restart rules.
 
 ### Required Variables
 
@@ -34,6 +36,7 @@ All configuration is done via environment variables.
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `SECRET_KEY` | Token signing key (auto-generated if not set) | Auto-generated |
+| `SMTP_TIMEOUT` | SMTP connection timeout (seconds) | `10` |
 
 > **Note:** `MOCK_SMTP` is a deployment config UI alias for `MOCK_EMAIL`. If both are set, `MOCK_EMAIL` takes precedence. Use `MOCK_EMAIL` when setting environment variables directly.
 

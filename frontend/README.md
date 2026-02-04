@@ -25,30 +25,41 @@ Open http://localhost:5173 in your browser.
 
 | Route | Page | Purpose |
 |-------|------|---------|
-| `/` | TestDashboard | Developer testing dashboard |
+| `/` | HomeRedirect | Smart redirect based on auth state |
+| `/test-dashboard` | TestDashboard | Developer testing dashboard |
 | `/chat` | ChatPage | Main chat interface with RAG |
 | `/admin` | AdminOnboarding | Admin login via Nostr NIP-07 |
-| `/admin/setup` | AdminSetup | Configure required user fields |
+| `/admin/setup` | AdminSetup | Admin dashboard (links to config areas) |
+| `/admin/instance` | AdminInstanceConfig | Branding, theme, and chat style |
+| `/admin/users` | AdminUserConfig | User types and onboarding fields |
+| `/admin/ai` | AdminAIConfig | Prompt sections, parameters, document defaults |
+| `/admin/deployment` | AdminDeploymentConfig | LLM/SMTP/domains/SSL configuration |
 | `/admin/upload` | AdminDocumentUpload | Upload documents to knowledge base |
 | `/admin/database` | AdminDatabaseExplorer | View and manage SQLite data |
 | `/login` | UserOnboarding | Language selector (first onboarding step) |
 | `/auth` | UserAuth | User signup/login via magic link |
+| `/user-type` | UserTypeSelection | Select a user type (if multiple) |
 | `/verify` | VerifyMagicLink | Magic link verification |
 | `/profile` | UserProfile | Complete custom profile fields |
+| `/pending` | PendingApproval | Waiting page for unapproved users |
 
 ## Authentication Flows
 
 ### Admin Flow (Nostr NIP-07)
 
 ```
-/admin → Connect with Nostr → /admin/setup → Configure fields → /admin/upload or /admin/database
+/admin → Connect with Nostr → /admin/setup → /admin/instance | /admin/users | /admin/ai | /admin/deployment → /admin/upload or /admin/database
 ```
 
 1. Admin navigates to `/admin`
 2. Clicks "Connect with Nostr" (requires NIP-07 browser extension like Alby)
 3. Extension prompts for public key approval
-4. On success, redirected to `/admin/setup` to configure user onboarding fields and instance branding
-5. From setup, admin can navigate to:
+4. On success, redirected to `/admin/setup` (admin dashboard)
+5. From the dashboard, navigate to:
+   - `/admin/instance` - Branding, theme, and chat style
+   - `/admin/users` - User types and onboarding fields
+   - `/admin/ai` - Prompts, parameters, document defaults
+   - `/admin/deployment` - LLM/SMTP/domains/SSL configuration
    - `/admin/upload` - Upload documents to the knowledge base (PDF, TXT, MD)
    - `/admin/database` - View and manage SQLite database tables
 
@@ -58,7 +69,7 @@ NIP-07 is a Nostr standard that allows websites to request your public key from 
 ### User Flow (Magic Link)
 
 ```
-/login → Select language → /auth → Enter email → Check inbox → Click link → /verify → /profile → /chat
+/login → Select language → /auth → Enter email → Check inbox → Click link → /verify → /user-type (if needed) → /profile (if needed) → /chat
 ```
 
 1. User navigates to `/login`
@@ -68,25 +79,38 @@ NIP-07 is a Nostr standard that allows websites to request your public key from 
 5. Enters name (signup) or email (login)
 6. Receives magic link via email
 7. Clicks link, redirected to `/verify`
-8. If custom fields configured, redirected to `/profile` to complete them
-9. On completion, redirected to `/chat`
+8. If multiple user types exist, redirected to `/user-type`
+9. If custom fields configured, redirected to `/profile` to complete them
+10. If user is not approved, redirected to `/pending`
+11. On completion, redirected to `/chat`
 
 ## LocalStorage Keys
 
 | Key | Purpose |
 |-----|---------|
 | `sanctum_admin_pubkey` | Admin's Nostr public key |
+| `sanctum_admin_session_token` | Admin session token |
 | `sanctum_user_email` | Verified user email |
 | `sanctum_user_name` | User's display name |
 | `sanctum_custom_fields` | Admin-configured custom fields schema |
 | `sanctum_user_profile` | User's completed profile data |
 | `sanctum_pending_email` | Email awaiting verification |
+| `sanctum_pending_name` | Name awaiting verification |
+| `sanctum_session_token` | User session token |
+| `sanctum_user_type_id` | Selected user type ID |
+| `sanctum_user_approved` | User approval status (see Security Note below) |
 | `sanctum_instance_config` | Instance branding configuration |
 | `sanctum_language` | User's selected language code (e.g., "en", "es", "ja") |
 
+### Security Considerations
+
+**Session Tokens**: Session tokens (`sanctum_session_token`, `sanctum_admin_session_token`) are stored in localStorage for simplicity. In XSS scenarios, an attacker could access these tokens. For production deployments with high security requirements, consider implementing httpOnly cookie-based sessions.
+
+**Approval Status**: The `sanctum_user_approved` localStorage value controls UI routing only. Approval status is validated server-side on each API request—unauthorized API access returns 403 Forbidden.
+
 ## Instance Branding
 
-Admins can fully customize the instance branding during setup at `/admin/setup`:
+Admins can fully customize the instance branding at `/admin/instance`:
 
 ### Display Name
 Custom name shown in headers and onboarding screens (default: "Sanctum").

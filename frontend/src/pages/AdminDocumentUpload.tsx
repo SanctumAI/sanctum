@@ -63,6 +63,7 @@ export function AdminDocumentUpload() {
   useEffect(() => {
     if (!isAdminAuthenticated()) {
       localStorage.removeItem(STORAGE_KEYS.ADMIN_PUBKEY)
+      localStorage.removeItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN)
       navigate('/admin')
     }
   }, [navigate])

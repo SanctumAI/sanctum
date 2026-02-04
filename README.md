@@ -14,6 +14,8 @@ Privacy-first Retrieval-Augmented Generation system for curated knowledge bases.
 ```bash
 cp .env.example .env
 # Set MAPLE_API_KEY in .env (required for LLM features)
+# For production email auth, set MOCK_EMAIL=false and configure SMTP_* + FRONTEND_URL
+# You can also manage LLM/SMTP/domain settings later in the admin UI at /admin/deployment
 ```
 
 ### Start the Stack
@@ -63,6 +65,14 @@ Expected response:
 ### Admin Setup (First Run)
 
 Sanctum requires a NIP-07 admin login before user signups are enabled. Open the frontend at `http://localhost:5173` and complete the admin login flow. Until the first admin authenticates, `/auth/magic-link` returns `503` ("Instance not configured").
+
+After the first admin login, additional configuration is available in the admin UI:
+- `/admin/instance` - branding and instance settings
+- `/admin/users` - user types and onboarding fields
+- `/admin/ai` - prompt and LLM parameters
+- `/admin/deployment` - deployment config (LLM, SMTP, domains, SSL)
+
+See `docs/admin-deployment-config.md` for deployment config details.
 
 ### Available Endpoints
 

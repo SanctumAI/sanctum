@@ -140,6 +140,40 @@ Responses include a `tools_used` array showing which tools were executed:
 }
 ```
 
+`/query` responses include additional fields for session continuity and debugging:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `session_id` | string (UUID v4) | Session identifier for conversation continuity |
+| `sources` | array | Retrieved chunks with `{score, type, text, chunk_id, source_file}` |
+| `graph_context` | object | Placeholder for future graph features (currently empty) |
+| `clarifying_questions` | array | Questions extracted from LLM response for follow-up |
+| `context_used` | string | Debug field showing prompt sent to LLM (user profile redacted) |
+| `temperature` | number | Model temperature parameter used for generation |
+
+**Example response:**
+```json
+{
+  "answer": "Based on the knowledge base...",
+  "session_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "sources": [
+    {
+      "score": 0.89,
+      "type": "document",
+      "text": "Relevant chunk text...",
+      "chunk_id": "doc123_chunk_0",
+      "source_file": "guide.pdf"
+    }
+  ],
+  "graph_context": {},
+  "clarifying_questions": ["Would you like more details about X?"],
+  "context_used": "[DEBUG] System prompt + retrieved context...",
+  "temperature": 0.7
+}
+```
+
+> **Note**: The `context_used` field exposes conversation history and is intended for debugging purposes. It should not be displayed to end users in production.
+
 ## SearXNG Configuration
 
 SearXNG is a privacy-respecting metasearch engine that aggregates results from multiple search engines.
@@ -288,6 +322,24 @@ curl -X POST http://localhost:8000/admin/tools/execute \
     "tool_id": "db-query",
     "query": "List the most recent users"
   }'
+```
+
+Example response:
+```json
+{
+  "success": true,
+  "tool_id": "db-query",
+  "tool_name": "db-query",
+  "data": {
+    "sql": "SELECT id, encrypted_email, created_at FROM users ORDER BY created_at DESC LIMIT 10",
+    "columns": ["id", "encrypted_email", "created_at"],
+    "rows": [
+      { "id": 1, "encrypted_email": "...", "created_at": "2026-02-04T12:34:56" }
+    ],
+    "row_count": 1,
+    "truncated": false
+  }
+}
 ```
 
 #### Chat with Decrypted Tool Context (Admin Only)

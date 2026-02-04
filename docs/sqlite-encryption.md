@@ -341,6 +341,7 @@ The admin key migration feature allows transferring encryption authority to a ne
 
 - **Atomic transaction**: All data migrated or none (no partial state)
 - **Authorization required**: Signed Nostr event proves current admin consent
+- **Replay protection**: Signed event must include `new_pubkey` tag matching the target pubkey (prevents captured events from being replayed for different migrations)
 - **Audit logged**: Migration recorded with old/new pubkey timestamps
 - **Session invalidated**: Must re-authenticate with new key
 

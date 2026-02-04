@@ -66,9 +66,15 @@ def derive_keypair_from_seed(seed: str) -> tuple[str, str]:
     return privkey_hex, pubkey_x_only
 
 
-def create_signed_auth_event(privkey_hex: str, pubkey_hex: str, action: str = "admin_auth") -> dict:
+def create_signed_auth_event(privkey_hex: str, pubkey_hex: str, action: str = "admin_auth", new_pubkey: str | None = None) -> dict:
     """
     Create and sign a Nostr event for authentication.
+
+    Args:
+        privkey_hex: Private key to sign with (hex)
+        pubkey_hex: Public key for the event (hex)
+        action: Action tag value (e.g., "admin_auth", "admin_key_migration")
+        new_pubkey: For admin_key_migration, the target pubkey to include in tags
     """
     event = {
         "pubkey": pubkey_hex,
@@ -78,7 +84,11 @@ def create_signed_auth_event(privkey_hex: str, pubkey_hex: str, action: str = "a
         "content": ""
     }
 
-    # Compute event ID
+    # Add new_pubkey tag if provided (required for admin_key_migration)
+    if new_pubkey is not None:
+        event["tags"].append(["new_pubkey", new_pubkey])
+
+    # Compute event ID (after all tags are set)
     serialized = json.dumps([
         0, event["pubkey"], event["created_at"], event["kind"], event["tags"], event["content"]
     ], separators=(',', ':'), ensure_ascii=False)
@@ -209,7 +219,7 @@ def test_error_cases(api_base: str, admin_token: str, admin_pubkey: str, new_adm
         "new_admin_pubkey": "abc123",  # Too short
         "users": [],
         "field_values": [],
-        "signature_event": create_signed_auth_event(old_admin_privkey, admin_pubkey, "admin_key_migration")
+        "signature_event": create_signed_auth_event(old_admin_privkey, admin_pubkey, "admin_key_migration", new_pubkey="abc123")
     }
     try:
         response = requests.post(f"{api_base}/admin/key-migration/execute", json=invalid_request, headers=headers, timeout=10)
@@ -228,7 +238,7 @@ def test_error_cases(api_base: str, admin_token: str, admin_pubkey: str, new_adm
         "new_admin_pubkey": admin_pubkey,  # Same as current
         "users": [],
         "field_values": [],
-        "signature_event": create_signed_auth_event(old_admin_privkey, admin_pubkey, "admin_key_migration")
+        "signature_event": create_signed_auth_event(old_admin_privkey, admin_pubkey, "admin_key_migration", new_pubkey=admin_pubkey)
     }
     try:
         response = requests.post(f"{api_base}/admin/key-migration/execute", json=same_pubkey_request, headers=headers, timeout=10)
@@ -245,7 +255,7 @@ def test_error_cases(api_base: str, admin_token: str, admin_pubkey: str, new_adm
     print("\n[TEST] Invalid signature (wrong private key)...")
     # Sign with the new admin key instead of current admin key
     new_admin_privkey, _ = derive_keypair_from_seed("sanctum-test-new-admin-keypair-v1")
-    wrong_sig_event = create_signed_auth_event(new_admin_privkey, admin_pubkey, "admin_key_migration")
+    wrong_sig_event = create_signed_auth_event(new_admin_privkey, admin_pubkey, "admin_key_migration", new_pubkey=new_admin_pubkey)
     invalid_sig_request = {
         "new_admin_pubkey": new_admin_pubkey,
         "users": [],
@@ -290,7 +300,7 @@ def test_error_cases(api_base: str, admin_token: str, admin_pubkey: str, new_adm
         "new_admin_pubkey": new_admin_pubkey,
         "users": [],
         "field_values": [],
-        "signature_event": create_signed_auth_event(old_admin_privkey, admin_pubkey, "admin_key_migration")
+        "signature_event": create_signed_auth_event(old_admin_privkey, admin_pubkey, "admin_key_migration", new_pubkey=new_admin_pubkey)
     }
     try:
         response = requests.post(f"{api_base}/admin/key-migration/execute", json=valid_request, timeout=10)
@@ -402,7 +412,7 @@ def test_full_migration_flow(api_base: str, admin_token: str, old_admin_privkey:
 
     # Step 3: Create signed migration event
     print("\n[STEP 3] Create signed migration authorization event...")
-    migration_event = create_signed_auth_event(old_admin_privkey, old_admin_pubkey, "admin_key_migration")
+    migration_event = create_signed_auth_event(old_admin_privkey, old_admin_pubkey, "admin_key_migration", new_pubkey=new_admin_pubkey)
     print(f"  Event ID: {migration_event['id'][:16]}...")
     print(f"  Signature: {migration_event['sig'][:16]}...")
 

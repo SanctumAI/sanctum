@@ -158,6 +158,8 @@ Response:
 }
 ```
 
+**Note:** You may also see a `sanctum_smoke_test` collection created by the `/test` endpoint.
+
 ### Test Vector Search
 
 Test that the embeddings are searchable:
@@ -208,15 +210,21 @@ The system uses PyMuPDF (fast) by default. For better quality extraction (slower
 PDF_EXTRACT_MODE=quality
 ```
 
-### Reset All Data
+### Reset Vector Data
 
-To wipe Qdrant and SQLite data and start fresh:
+To wipe Qdrant collections and start fresh:
 
 ```bash
 curl -X POST http://localhost:8000/ingest/wipe
 ```
 
-**Warning:** This deletes all stored knowledge!
+**Warning:** This deletes Qdrant collections only. It does **not** remove SQLite job records or files in `uploads/`.
+
+To fully reset everything in development:
+```bash
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml down -v
+rm -rf uploads/*
+```
 
 ### List All Jobs
 
@@ -225,7 +233,7 @@ curl http://localhost:8000/ingest/jobs \
   -H "Authorization: Bearer <session-token>"
 ```
 
-This endpoint requires an admin or approved user session token. See `docs/authentication.md` for how to obtain a token.
+This endpoint requires an admin or approved user session token. Non-admin users only see documents available to their user type. See `docs/authentication.md` for how to obtain a token.
 
 ### Delete a Document (Admin Only)
 

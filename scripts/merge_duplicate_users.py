@@ -222,7 +222,12 @@ def main() -> int:
                 # Update keep state for next iteration (both apply and dry-run)
                 if args.apply:
                     cur.execute("SELECT * FROM users WHERE id = ?", (keep["id"],))
-                    keep = dict(cur.fetchone())
+                    row = cur.fetchone()
+                    if row is None:
+                        raise RuntimeError(
+                            f"Failed to re-fetch keep user id={keep['id']} after merge - row unexpectedly missing"
+                        )
+                    keep = dict(row)
                 elif updates:
                     keep.update(updates)
 

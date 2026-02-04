@@ -273,7 +273,10 @@ curl "http://localhost:8000/auth/verify?token=eyJlbWFpbCI6..."
     "email": "user@example.com",
     "name": "John Doe",
     "user_type_id": null,
-    "created_at": "2024-01-15T10:30:00"
+    "approved": true,
+    "created_at": "2024-01-15T10:30:00",
+    "needs_onboarding": false,
+    "needs_user_type": false
   },
   "session_token": "eyJ1c2VyX2lkIjoxLC..."
 }
@@ -302,7 +305,10 @@ curl "http://localhost:8000/auth/me?token=eyJ1c2VyX2lkIjox..."
     "email": "user@example.com",
     "name": "John Doe",
     "user_type_id": null,
-    "created_at": "2024-01-15T10:30:00"
+    "approved": true,
+    "created_at": "2024-01-15T10:30:00",
+    "needs_onboarding": false,
+    "needs_user_type": false
   }
 }
 ```
@@ -450,7 +456,7 @@ Sanctum supports optional manual approval of new users before they can access th
 > - No dedicated admin endpoint exists for approving/rejecting users
 > - Admins can update the `approved` field via `PUT /users/{user_id}` or the database explorer
 > - No admin UI for viewing/managing pending users
-> - See [security-hardening.md](./security-hardening.md) for details
+> - See "Production Hardening" below for details
 
 ---
 
@@ -462,40 +468,33 @@ The codebase includes several development conveniences that are disabled by defa
 
 With `MOCK_EMAIL=true` (or `MOCK_SMTP=true` via deployment config), magic links are logged to console instead of sent via SMTP. This is controlled by the backend environment variable.
 
-### VITE_DEV_MODE (Frontend)
+### Simulation Flags (Backend)
 
-Mock authentication features are guarded by `VITE_DEV_MODE` environment variable:
+Mock auth features are controlled by backend config and exposed via `/config/public`.
 
-```bash
-# Enable for development
-VITE_DEV_MODE=true
-```
-
-When `VITE_DEV_MODE=true`:
-- **Mock Nostr Authentication**: "Continue with mock identity" button appears in `AdminOnboarding.tsx`
+When enabled:
+- **`SIMULATE_ADMIN_AUTH=true`**: "Mock Connection" button appears on `/admin`
   - Generates a fake 64-character hex pubkey
   - Bypasses real NIP-07 extension signing
   - Note: Admin API calls will fail (no valid session token)
+- **`SIMULATE_USER_AUTH=true`**: `/verify` can succeed without a token using `sanctum_pending_email` (testing only)
 
-- **Token-less Verification**: `VerifyMagicLink.tsx` allows verification using `sanctum_pending_email` from localStorage when no token is present
-
-When `VITE_DEV_MODE` is unset or `false` (default):
-- Mock buttons are hidden
-- Token-less verification fails with error
-- Users must use real authentication methods
+These flags can be set via the deployment config UI (`/admin/deployment`) or environment variables.
+Database values take precedence over env vars. Keep them disabled in production.
 
 ### Configuration
 
-Add to `frontend/.env` or `docker-compose.app.yml`:
+Add to your backend environment (e.g., `.env` or `docker-compose.app.yml`):
 ```bash
 # Development
-VITE_DEV_MODE=true
+SIMULATE_ADMIN_AUTH=true
+SIMULATE_USER_AUTH=true
 
 # Production (default - no action needed)
-# VITE_DEV_MODE is not set, mock features disabled
+# SIMULATE_* not set or set to false
 ```
 
-See [security-hardening.md](./security-hardening.md) for complete production deployment guidance.
+See "Production Hardening" below for complete production deployment guidance.
 
 ---
 
@@ -526,10 +525,17 @@ See [security-hardening.md](./security-hardening.md) for complete production dep
 The following security features are implemented:
 - **Endpoint authentication** - All admin endpoints require valid session token
 - **Rate limiting** - Auth endpoints are rate-limited (5/min for magic-link, 10/min for admin auth)
-- **Mock auth disabled by default** - Requires `VITE_DEV_MODE=true` to enable
+- **Simulated auth disabled by default** - Requires `SIMULATE_*` flags to enable
 - **Auto-generated SECRET_KEY** - Persisted to `/data/.secret_key` on first run
 
-> For additional production hardening recommendations, see [security-hardening.md](./security-hardening.md).
+### Production Hardening
+
+Recommended production steps:
+- Set a stable `SECRET_KEY` in your environment or ensure `/data/` is persisted
+- Configure SMTP with a verified domain and SPF/DKIM/DMARC
+- Disable `SIMULATE_*` flags and `MOCK_EMAIL` in production
+- Restrict admin access to trusted networks
+- Use HTTPS in front of the backend and configure `CORS_ORIGINS` appropriately
 
 ---
 

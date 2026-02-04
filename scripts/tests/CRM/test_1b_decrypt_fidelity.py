@@ -246,7 +246,7 @@ def test_decrypt_and_verify(db_path: str, user_id: int, admin_privkey: str, orig
     return passed
 
 
-def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db") -> str:
+def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db", timeout: int = 30) -> str:
     """
     Run read-only SQL inside Docker container and return output.
 
@@ -255,7 +255,7 @@ def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db") -> str:
 
     Raises:
         ValueError: If SQL is not a single SELECT statement or db_path is invalid
-        RuntimeError: If sqlite3 command fails
+        RuntimeError: If sqlite3 command fails or times out
     """
     repo_root = SCRIPT_DIR.parent.parent.parent
 
@@ -275,13 +275,17 @@ def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db") -> str:
         raise ValueError(f"run_docker_sql only allows SELECT statements, got: {sql[:50]}")
 
     # Use list argv with stdin for SQL (no shell=True, no escaping needed)
-    result = subprocess.run(
-        ["docker", "compose", "exec", "-T", "backend", "sqlite3", db_path],
-        input=sql_normalized,
-        capture_output=True,
-        text=True,
-        cwd=repo_root,
-    )
+    try:
+        result = subprocess.run(  # noqa: S603, S607
+            ["docker", "compose", "exec", "-T", "backend", "sqlite3", db_path],
+            input=sql_normalized,
+            capture_output=True,
+            text=True,
+            cwd=repo_root,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(f"sqlite3 command timed out after {timeout}s")
 
     # Surface sqlite3 failures
     if result.returncode != 0:

@@ -126,7 +126,7 @@ User Query → Embed → Qdrant Search → Top-K Results → LLM Context → Res
 2. Query embedded using same model
 3. Qdrant returns semantically similar chunks
 4. Chunks assembled into context
-5. LLM generates response with citations
+5. LLM generates response with sources (returned as `sources` in the `/query` response)
 6. Response returned to user
 
 ---
@@ -178,6 +178,15 @@ See [docs/tools.md](./docs/tools.md) for details.
 | `/health` | GET | Service health check (Qdrant status) |
 | `/test` | GET | Smoke test (verifies Qdrant seeded data) |
 | `/llm/test` | GET | LLM provider connectivity test |
+
+### Public Config
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/instance/status` | GET | Instance setup status for frontend routing |
+| `/settings/public` | GET | Public instance branding settings |
+| `/config/public` | GET | Simulation flags (`SIMULATE_*`). Note: These flags default to `false` and control frontend UI behavior. They must be disabled in production. |
+| `/session-defaults` | GET | Chat session defaults (optional `user_type_id`) |
 
 ### Ingest
 
@@ -258,6 +267,10 @@ docker compose -f docker-compose.infra.yml -f docker-compose.app.yml down -v
 
 ## Environment Variables
 
+**Configuration Precedence**: Values in SQLite (set via `/admin/deployment`) take priority over environment variables. This allows runtime configuration changes without container restarts.
+
+To use environment-variable-only mode, leave the SQLite config values empty (they will fall back to env vars). See `docs/admin-deployment-config.md` for override management.
+
 Key configuration options (see `.env.example`):
 
 | Variable | Default | Description |
@@ -274,7 +287,41 @@ Key configuration options (see `.env.example`):
 | `SEARXNG_URL` | `http://searxng:8080` | SearXNG endpoint |
 | `FRONTEND_URL` | `http://localhost:5173` | Base URL for magic links |
 | `MOCK_EMAIL` | `true` | Log magic links instead of sending (alias: `MOCK_SMTP`) |
+| `SMTP_TIMEOUT` | `10` | SMTP connection timeout (seconds) |
+| `SIMULATE_USER_AUTH` | `false` | ⚠️ **NEVER enable in production** — Bypasses magic link verification |
+| `SIMULATE_ADMIN_AUTH` | `false` | ⚠️ **NEVER enable in production** — Shows mock Nostr auth option |
 | `PDF_EXTRACT_MODE` | `fast` | PDF extraction mode (`fast` for PyMuPDF, `quality` for Docling) |
+| `BASE_DOMAIN` | `localhost` | Root domain name |
+| `INSTANCE_URL` | `http://localhost:5173` | Full app URL with protocol |
+| `API_BASE_URL` | `http://localhost:8000` | API base URL |
+| `ADMIN_BASE_URL` | `http://localhost:5173/admin` | Admin panel URL |
+| `EMAIL_DOMAIN` | `localhost` | Domain for email addresses |
+| `DKIM_SELECTOR` | `sanctum` | DKIM DNS selector |
+| `SPF_INCLUDE` | (empty) | SPF include directive (e.g., include:_spf.google.com) |
+| `DMARC_POLICY` | `v=DMARC1; p=none` | DMARC DNS policy record |
+| `CORS_ORIGINS` | `http://localhost:5173` | Comma-separated allowed CORS origins |
+| `WEBHOOK_BASE_URL` | `http://localhost:8000` | Webhook callback base URL |
+| `FORCE_HTTPS` | `false` | Redirect HTTP to HTTPS |
+| `HSTS_MAX_AGE` | `31536000` | HSTS max-age in seconds |
+| `MONITORING_URL` | `http://localhost:8000/health` | Health monitoring endpoint |
+| `SSL_CERT_PATH` | (empty) | SSL certificate file path |
+| `SSL_KEY_PATH` | (empty) | SSL private key file path |
+| `TRUSTED_PROXIES` | (empty) | Trusted reverse proxies |
+
+### Production Checklist
+
+Before deploying to production, ensure these variables are configured:
+
+| Variable | Requirement | Notes |
+|----------|-------------|-------|
+| `CORS_ORIGINS` | **Required** | Replace localhost with production domain(s) |
+| `FORCE_HTTPS` | **Required** | Set to `true` |
+| `MOCK_EMAIL` | **Required** | Set to `false` and configure SMTP |
+| `SIMULATE_USER_AUTH` | **Required** | Must be `false` or unset |
+| `SIMULATE_ADMIN_AUTH` | **Required** | Must be `false` or unset |
+| `DMARC_POLICY` | Recommended | Use `p=quarantine` or `p=reject` |
+| `TRUSTED_PROXIES` | Required if behind proxy | Configure to prevent IP spoofing |
+| `SSL_CERT_PATH` / `SSL_KEY_PATH` | If terminating TLS | Provide paths to certificates |
 
 ---
 
@@ -284,4 +331,5 @@ Key configuration options (see `.env.example`):
 - [docs/authentication.md](./docs/authentication.md) — Auth flows
 - [docs/tools.md](./docs/tools.md) — Tool system documentation
 - [docs/upload-documents.md](./docs/upload-documents.md) — Ingest guide
+- [docs/admin-deployment-config.md](./docs/admin-deployment-config.md) — Deployment config guide
 - [docs/sqlite-rag-docs-tracking.md](./docs/sqlite-rag-docs-tracking.md) — SQLite schema

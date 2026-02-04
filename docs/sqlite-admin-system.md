@@ -303,6 +303,7 @@ curl -X PUT http://localhost:8000/admin/settings \
 ### Deployment Configuration (Admin)
 
 Manage environment-level settings through the admin API. Values are stored in `deployment_config` and audited.
+See `docs/admin-deployment-config.md` for a full walkthrough and UI details.
 
 #### `GET /admin/deployment/config`
 Get all deployment config values grouped by category (secret values masked).
@@ -331,7 +332,11 @@ List keys changed since service start that require restart.
 #### `GET /admin/deployment/audit-log`
 Recent config changes (default 50, up to 1000).
 
-**Common keys:** `LLM_PROVIDER`, `LLM_API_URL`, `LLM_MODEL`, `EMBEDDING_MODEL`, `SMTP_*`, `MOCK_SMTP` (deployment UI alias for `MOCK_EMAIL`; `MOCK_EMAIL` takes precedence if both are set), `SQLITE_PATH`, `UPLOADS_DIR`, `QDRANT_HOST`, `QDRANT_PORT`, `SEARXNG_URL`, `FRONTEND_URL`, `RAG_TOP_K`, `PDF_EXTRACT_MODE`.
+**Common keys (LLM/embedding):** `LLM_PROVIDER`, `LLM_API_URL`, `LLM_MODEL`, `EMBEDDING_MODEL`, `RAG_TOP_K`, `PDF_EXTRACT_MODE`  
+**Common keys (email):** `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `SMTP_TIMEOUT`, `MOCK_SMTP` (deployment UI alias for `MOCK_EMAIL`; `MOCK_EMAIL` takes precedence if both are set), `SMTP_LAST_TEST_SUCCESS`, `SMTP_LAST_TEST_AT`  
+**Common keys (storage/search/security):** `SQLITE_PATH`, `UPLOADS_DIR`, `QDRANT_HOST`, `QDRANT_PORT`, `SEARXNG_URL`, `FRONTEND_URL`, `SIMULATE_USER_AUTH`, `SIMULATE_ADMIN_AUTH`  
+**Common keys (domains):** `BASE_DOMAIN`, `INSTANCE_URL`, `API_BASE_URL`, `ADMIN_BASE_URL`, `EMAIL_DOMAIN`, `DKIM_SELECTOR`, `SPF_INCLUDE`, `DMARC_POLICY`, `CORS_ORIGINS`, `CDN_DOMAINS`, `CUSTOM_SEARXNG_URL`, `WEBHOOK_BASE_URL`  
+**Common keys (SSL):** `TRUSTED_PROXIES`, `SSL_CERT_PATH`, `SSL_KEY_PATH`, `FORCE_HTTPS`, `HSTS_MAX_AGE`, `MONITORING_URL`
 
 ---
 
@@ -511,7 +516,7 @@ curl -X PUT http://localhost:8000/users/1 \
   -d '{"approved": true}'
 ```
 
-> There is currently no dedicated `/admin/users/{id}/approve` endpoint. See [security-hardening.md](./security-hardening.md) for planned improvements.
+> There is currently no dedicated `/admin/users/{id}/approve` endpoint. See "Production Hardening" in `docs/authentication.md` for deployment guidance.
 
 #### `DELETE /users/{user_id}`
 Delete a user and all their field values.
@@ -686,8 +691,9 @@ curl -X POST http://localhost:8000/users \
 | `frontend/src/pages/UserTypeSelection.tsx` | User type selection page |
 | `frontend/src/pages/UserProfile.tsx` | Dynamic profile form based on fields |
 | `frontend/src/pages/PendingApproval.tsx` | Waiting page for unapproved users |
-| `frontend/src/pages/AdminSetup.tsx` | Admin configuration UI (types + fields) |
+| `frontend/src/pages/AdminSetup.tsx` | Admin dashboard entry point |
 | `frontend/src/pages/AdminInstanceConfig.tsx` | Instance settings (name, branding, approvals) |
+| `frontend/src/pages/AdminUserConfig.tsx` | User types + onboarding fields |
 | `frontend/src/pages/AdminAIConfig.tsx` | AI prompt/parameter configuration |
 | `frontend/src/pages/AdminDeploymentConfig.tsx` | Deployment config + service health |
 | `frontend/src/pages/AdminDocumentUpload.tsx` | Document upload + defaults management |
@@ -709,6 +715,8 @@ The frontend uses localStorage for temporary state during onboarding:
 | `sanctum_user_email` | Verified user email |
 | `sanctum_user_name` | User display name |
 | `sanctum_user_type_id` | Selected user type ID |
+| `sanctum_user_approved` | User approval status |
+| `sanctum_custom_fields` | Admin-configured custom fields schema |
 | `sanctum_user_profile` | Complete user profile (JSON) |
 | `sanctum_pending_email` | Email awaiting verification |
 | `sanctum_pending_name` | Name awaiting verification |

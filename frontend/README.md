@@ -118,6 +118,12 @@ Custom name shown in headers and onboarding screens (default: "Sanctum").
 ### Icon
 Choose from 60+ curated Lucide icons for the instance logo. Icons are searchable and organized by category.
 
+### Logo URL (Optional)
+Provide a square image URL to replace the Lucide icon in the header and onboarding screens. If the image fails to load, the UI falls back to the selected icon.
+
+### Favicons (Optional)
+Set a `faviconUrl` and `appleTouchIconUrl` to update the browser tab icon and iOS home screen icon. The browser tab title always mirrors the instance name.
+
 ### Accent Color
 Six theme colors available:
 
@@ -134,11 +140,47 @@ Six theme colors available:
 
 ```typescript
 interface InstanceConfig {
-  name: string        // Display name
-  accentColor: string // 'blue' | 'purple' | 'green' | 'orange' | 'pink' | 'teal'
-  icon: string        // Lucide icon name (e.g., 'Sparkles', 'Shield', 'Brain')
+  name: string
+  accentColor: string
+  icon: string
+  logoUrl: string
+  faviconUrl: string
+  appleTouchIconUrl: string
+  assistantIcon: string
+  userIcon: string
+  assistantName: string
+  userLabel: string
+  headerLayout: string
+  headerTagline: string
+  chatBubbleStyle: string
+  chatBubbleShadow: boolean
+  surfaceStyle: string
+  statusIconSet: string
+  typographyPreset: string
 }
 ```
+
+#### Field Reference
+
+| Field | Type | Valid Values | Description |
+|-------|------|--------------|-------------|
+| `name` | string | Any text | Instance display name shown in headers and onboarding |
+| `accentColor` | string | `"blue"`, `"purple"`, `"green"`, `"orange"`, `"pink"`, `"teal"` | Theme accent color |
+| `icon` | string | Lucide icon names | Instance icon (e.g., `"shield"`, `"book"`) |
+| `logoUrl` | string | URL | Custom logo image URL (falls back to icon if empty or fails to load) |
+| `faviconUrl` | string | URL | Browser tab icon (recommended 32x32 or 64x64) |
+| `appleTouchIconUrl` | string | URL | iOS home screen icon (recommended 180x180) |
+| `assistantIcon` | string | Lucide icon names | Icon shown next to AI messages |
+| `userIcon` | string | Lucide icon names | Icon shown next to user messages |
+| `assistantName` | string | Any text | Display name above AI messages (empty to hide) |
+| `userLabel` | string | Any text | Label above user messages (empty to hide) |
+| `headerLayout` | string | `"icon_name"`, `"icon_only"`, `"name_only"` | How to display branding in header |
+| `headerTagline` | string | Any text | Optional subtitle under instance name |
+| `chatBubbleStyle` | string | `"soft"`, `"round"`, `"square"`, `"pill"` | Chat message bubble shape |
+| `chatBubbleShadow` | boolean | `true`/`false` | Whether bubbles have drop shadow |
+| `surfaceStyle` | string | `"plain"`, `"gradient"`, `"noise"`, `"grid"` | Background texture style |
+| `statusIconSet` | string | `"classic"`, `"minimal"`, `"playful"` | Status indicator icon style |
+| `typographyPreset` | string | `"modern"`, `"grotesk"`, `"humanist"` | Font family pairing |
 
 ## Internationalization (i18n)
 

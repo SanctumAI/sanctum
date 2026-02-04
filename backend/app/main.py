@@ -1073,6 +1073,7 @@ SAFE_PUBLIC_SETTINGS = {
     "description",
     "logo_url",
     "favicon_url",
+    "apple_touch_icon_url",
     "icon",
     "assistant_icon",
     "user_icon",

@@ -374,6 +374,7 @@ export function AdminDocumentUpload() {
 
   return (
     <OnboardingCard
+      size="xl"
       title={t('upload.title')}
       subtitle={t('upload.subtitle')}
       footer={footer}

@@ -485,6 +485,7 @@ export function AdminAIConfig() {
 
   return (
     <OnboardingCard
+      size="xl"
       title={t('adminAI.title', 'AI Configuration')}
       subtitle={t('adminAI.subtitle', 'Configure AI behavior, prompts, and session defaults')}
       footer={footer}

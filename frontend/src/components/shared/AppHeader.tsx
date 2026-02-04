@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '../../theme'
@@ -50,10 +50,19 @@ export function AppHeader({
   const resolvedBackLabel = backLabel ?? t('common.back')
   const { config } = useInstanceConfig()
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [logoError, setLogoError] = useState(false)
   const isAdmin = isAdminAuthenticated()
   const showIcon = config.headerLayout !== 'name_only'
   const showName = config.headerLayout !== 'icon_only'
   const showTagline = showName && Boolean(config.headerTagline?.trim())
+  const hasLogoImage = Boolean(config.logoUrl?.trim()) && !logoError
+  const brandingBadgeClass = hasLogoImage
+    ? 'bg-surface'
+    : 'bg-gradient-to-br from-accent to-accent-hover'
+
+  useEffect(() => {
+    setLogoError(false)
+  }, [config.logoUrl])
 
   return (
     <>
@@ -74,8 +83,17 @@ export function AppHeader({
           )}
           <div className="flex items-center gap-2.5">
             {showIcon && (
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center shadow-md ring-1 ring-white/10">
-                <DynamicIcon name={config.icon} size={18} className="text-white" />
+              <div className={`w-8 h-8 rounded-lg ${brandingBadgeClass} flex items-center justify-center shadow-md ring-1 ring-white/10`}>
+                {hasLogoImage ? (
+                  <img
+                    src={config.logoUrl}
+                    alt={`${config.name} logo`}
+                    className="w-5 h-5 object-contain"
+                    onError={() => setLogoError(true)}
+                  />
+                ) : (
+                  <DynamicIcon name={config.icon} size={18} className="text-white" />
+                )}
               </div>
             )}
             {showName && (

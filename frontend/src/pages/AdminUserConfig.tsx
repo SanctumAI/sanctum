@@ -575,6 +575,7 @@ export function AdminUserConfig() {
 
   return (
     <OnboardingCard
+      size="xl"
       title={t('admin.userConfig.title', 'User Configuration')}
       subtitle={t('admin.userConfig.subtitle', 'Configure user types and the questions users answer during onboarding.')}
       footer={footer}

@@ -58,6 +58,7 @@ export function AdminSetup() {
 
   return (
     <OnboardingCard
+      size="xl"
       title={t('adminDashboard.title', 'Admin Dashboard')}
       subtitle={t('adminDashboard.subtitle', 'Manage your Sanctum instance configuration')}
       footer={footer}

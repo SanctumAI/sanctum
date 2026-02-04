@@ -5,6 +5,7 @@ import { Paintbrush, Loader2, ArrowLeft } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { ColorPicker } from '../components/onboarding/ColorPicker'
 import { IconPicker } from '../components/onboarding/IconPicker'
+import { DynamicIcon } from '../components/shared/DynamicIcon'
 import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
 import { useInstanceConfig } from '../context/InstanceConfigContext'
 import { AccentColor } from '../types/instance'
@@ -18,6 +19,10 @@ export function AdminInstanceConfig() {
   // Preview state - only applies on save, not immediately
   const [previewAccentColor, setPreviewAccentColor] = useState<AccentColor>(config.accentColor)
   const [previewIcon, setPreviewIcon] = useState(config.icon)
+  const [previewLogoUrl, setPreviewLogoUrl] = useState(config.logoUrl)
+  const [previewFaviconUrl, setPreviewFaviconUrl] = useState(config.faviconUrl)
+  const [previewAppleTouchIconUrl, setPreviewAppleTouchIconUrl] = useState(config.appleTouchIconUrl)
+  const [logoPreviewError, setLogoPreviewError] = useState(false)
   const [previewAssistantIcon, setPreviewAssistantIcon] = useState(config.assistantIcon)
   const [previewUserIcon, setPreviewUserIcon] = useState(config.userIcon)
   const [previewAssistantName, setPreviewAssistantName] = useState(config.assistantName)
@@ -46,6 +51,10 @@ export function AdminInstanceConfig() {
       setInstanceName(config.name)
       setPreviewAccentColor(config.accentColor)
       setPreviewIcon(config.icon)
+      setPreviewLogoUrl(config.logoUrl)
+      setPreviewFaviconUrl(config.faviconUrl)
+      setPreviewAppleTouchIconUrl(config.appleTouchIconUrl)
+      setLogoPreviewError(false)
       setPreviewAssistantIcon(config.assistantIcon)
       setPreviewUserIcon(config.userIcon)
       setPreviewAssistantName(config.assistantName)
@@ -68,6 +77,22 @@ export function AdminInstanceConfig() {
 
   const handleIconChange = (newIcon: string) => {
     setPreviewIcon(newIcon)
+    setIsDirty(true)
+  }
+
+  const handleLogoUrlChange = (value: string) => {
+    setPreviewLogoUrl(value)
+    setLogoPreviewError(false)
+    setIsDirty(true)
+  }
+
+  const handleFaviconUrlChange = (value: string) => {
+    setPreviewFaviconUrl(value)
+    setIsDirty(true)
+  }
+
+  const handleAppleTouchIconUrlChange = (value: string) => {
+    setPreviewAppleTouchIconUrl(value)
     setIsDirty(true)
   }
 
@@ -141,6 +166,9 @@ export function AdminInstanceConfig() {
           instance_name: name,
           primary_color: previewAccentColor,
           icon: previewIcon,
+          logo_url: previewLogoUrl.trim(),
+          favicon_url: previewFaviconUrl.trim(),
+          apple_touch_icon_url: previewAppleTouchIconUrl.trim(),
           assistant_icon: previewAssistantIcon,
           user_icon: previewUserIcon,
           assistant_name: previewAssistantName.trim(),
@@ -161,6 +189,9 @@ export function AdminInstanceConfig() {
           name,
           accentColor: previewAccentColor,
           icon: previewIcon,
+          logoUrl: previewLogoUrl.trim(),
+          faviconUrl: previewFaviconUrl.trim(),
+          appleTouchIconUrl: previewAppleTouchIconUrl.trim(),
           assistantIcon: previewAssistantIcon,
           userIcon: previewUserIcon,
           assistantName: previewAssistantName.trim() || '',
@@ -302,6 +333,7 @@ export function AdminInstanceConfig() {
 
   return (
     <OnboardingCard
+      size="xl"
       title={t('admin.instanceConfig.title', 'Instance Configuration')}
       subtitle={t('admin.instanceConfig.subtitle', 'Set the name, icon, and colors shown across your instance.')}
       footer={footer}
@@ -341,6 +373,77 @@ export function AdminInstanceConfig() {
                 {t('admin.setup.icon')}
               </span>
               <IconPicker value={previewIcon} onChange={handleIconChange} aria-labelledby="instance-icon-label" />
+            </div>
+
+            {/* Logo URL */}
+            <div>
+              <label htmlFor="logo-url" className="text-sm font-medium text-text mb-1.5 block">
+                {t('admin.instanceConfig.logoUrlLabel', 'Logo URL')}
+              </label>
+              <input
+                id="logo-url"
+                type="url"
+                value={previewLogoUrl}
+                onChange={(e) => handleLogoUrlChange(e.target.value)}
+                placeholder={t('admin.instanceConfig.logoUrlPlaceholder', 'https://example.com/logo.png')}
+                className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              />
+              <p className="text-xs text-text-muted mt-1.5">
+                {t('admin.instanceConfig.logoUrlHint', 'Square image recommended (128x128 or 256x256).')}
+              </p>
+              <div className="mt-3 flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg border border-border bg-surface flex items-center justify-center overflow-hidden">
+                  {previewLogoUrl.trim() && !logoPreviewError ? (
+                    <img
+                      src={previewLogoUrl.trim()}
+                      alt={t('admin.instanceConfig.logoPreviewAlt', 'Logo preview')}
+                      className="w-8 h-8 object-contain"
+                      onError={() => setLogoPreviewError(true)}
+                    />
+                  ) : (
+                    <DynamicIcon name={previewIcon} size={20} className="text-text-muted" />
+                  )}
+                </div>
+                <span className="text-xs text-text-muted">
+                  {t('admin.instanceConfig.logoPreviewHint', 'Preview (falls back to the selected icon).')}
+                </span>
+              </div>
+            </div>
+
+            {/* Favicon URL */}
+            <div>
+              <label htmlFor="favicon-url" className="text-sm font-medium text-text mb-1.5 block">
+                {t('admin.instanceConfig.faviconLabel', 'Favicon URL')}
+              </label>
+              <input
+                id="favicon-url"
+                type="url"
+                value={previewFaviconUrl}
+                onChange={(e) => handleFaviconUrlChange(e.target.value)}
+                placeholder={t('admin.instanceConfig.faviconPlaceholder', 'https://example.com/favicon.png')}
+                className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              />
+              <p className="text-xs text-text-muted mt-1.5">
+                {t('admin.instanceConfig.faviconHint', 'Shown in the browser tab and bookmarks (recommended 32x32 or 64x64).')}
+              </p>
+            </div>
+
+            {/* Apple Touch Icon URL */}
+            <div>
+              <label htmlFor="apple-touch-icon-url" className="text-sm font-medium text-text mb-1.5 block">
+                {t('admin.instanceConfig.appleTouchIconLabel', 'Apple touch icon URL')}
+              </label>
+              <input
+                id="apple-touch-icon-url"
+                type="url"
+                value={previewAppleTouchIconUrl}
+                onChange={(e) => handleAppleTouchIconUrlChange(e.target.value)}
+                placeholder={t('admin.instanceConfig.appleTouchIconPlaceholder', 'https://example.com/apple-touch-icon.png')}
+                className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              />
+              <p className="text-xs text-text-muted mt-1.5">
+                {t('admin.instanceConfig.appleTouchIconHint', 'Used when adding to the iOS home screen (recommended 180x180).')}
+              </p>
             </div>
 
             {/* Accent Color */}

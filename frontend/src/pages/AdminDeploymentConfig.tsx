@@ -1017,6 +1017,7 @@ export function AdminDeploymentConfig() {
 
   return (
     <OnboardingCard
+      size="xl"
       title={t('adminDeployment.title', 'Deployment Configuration')}
       subtitle={t('adminDeployment.subtitle', 'Manage your server connections and infrastructure settings')}
       footer={footer}

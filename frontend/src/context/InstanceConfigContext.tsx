@@ -11,6 +11,9 @@ import {
   getInstanceConfig,
   saveInstanceConfig,
   applyAccentColor,
+  applyDocumentTitle,
+  applyFavicon,
+  applyAppleTouchIcon,
   AccentColor,
   CURATED_ICONS,
   HeaderLayout,
@@ -133,6 +136,9 @@ export function InstanceConfigProvider({ children }: { children: ReactNode }) {
     applyAccentColor(stored.accentColor)
     applySurfaceStyle(stored.surfaceStyle)
     applyTypographyPreset(stored.typographyPreset)
+    applyDocumentTitle(stored.name)
+    applyFavicon(stored.faviconUrl)
+    applyAppleTouchIcon(stored.appleTouchIconUrl)
 
     // Then fetch from backend to get the latest
     async function fetchSettings() {
@@ -149,6 +155,18 @@ export function InstanceConfigProvider({ children }: { children: ReactNode }) {
               stored.accentColor ??
               DEFAULT_INSTANCE_CONFIG.accentColor,
             icon: validateIcon(settings.icon) ?? stored.icon ?? DEFAULT_INSTANCE_CONFIG.icon,
+            logoUrl:
+              typeof settings.logo_url === 'string'
+                ? settings.logo_url
+                : (stored.logoUrl ?? DEFAULT_INSTANCE_CONFIG.logoUrl),
+            faviconUrl:
+              typeof settings.favicon_url === 'string'
+                ? settings.favicon_url
+                : (stored.faviconUrl ?? DEFAULT_INSTANCE_CONFIG.faviconUrl),
+            appleTouchIconUrl:
+              typeof settings.apple_touch_icon_url === 'string'
+                ? settings.apple_touch_icon_url
+                : (stored.appleTouchIconUrl ?? DEFAULT_INSTANCE_CONFIG.appleTouchIconUrl),
             assistantIcon:
               validateIcon(settings.assistant_icon) ??
               stored.assistantIcon ??
@@ -200,6 +218,9 @@ export function InstanceConfigProvider({ children }: { children: ReactNode }) {
           applyAccentColor(newConfig.accentColor)
           applySurfaceStyle(newConfig.surfaceStyle)
           applyTypographyPreset(newConfig.typographyPreset)
+          applyDocumentTitle(newConfig.name)
+          applyFavicon(newConfig.faviconUrl)
+          applyAppleTouchIcon(newConfig.appleTouchIconUrl)
         }
       } catch (error) {
         console.warn('Failed to fetch instance settings, using cached config:', error)
@@ -215,6 +236,9 @@ export function InstanceConfigProvider({ children }: { children: ReactNode }) {
     applyAccentColor(newConfig.accentColor)
     applySurfaceStyle(newConfig.surfaceStyle)
     applyTypographyPreset(newConfig.typographyPreset)
+    applyDocumentTitle(newConfig.name)
+    applyFavicon(newConfig.faviconUrl)
+    applyAppleTouchIcon(newConfig.appleTouchIconUrl)
   }
 
   const updateConfig = (updates: Partial<InstanceConfig>) => {

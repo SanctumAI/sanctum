@@ -18,6 +18,9 @@ export interface InstanceConfig {
   name: string
   accentColor: AccentColor
   icon: string
+  logoUrl: string
+  faviconUrl: string
+  appleTouchIconUrl: string
   assistantIcon: string
   userIcon: string
   assistantName: string
@@ -35,6 +38,9 @@ export const DEFAULT_INSTANCE_CONFIG: InstanceConfig = {
   name: 'Sanctum',
   accentColor: 'blue',
   icon: 'Sparkles',
+  logoUrl: '',
+  faviconUrl: '',
+  appleTouchIconUrl: '',
   assistantIcon: 'Sparkles',
   userIcon: 'User',
   assistantName: 'Sanctum AI',
@@ -146,6 +152,9 @@ export function getInstanceConfig(): InstanceConfig {
       name: parsed.name || DEFAULT_INSTANCE_CONFIG.name,
       accentColor: parsed.accentColor || DEFAULT_INSTANCE_CONFIG.accentColor,
       icon: parsed.icon || DEFAULT_INSTANCE_CONFIG.icon,
+      logoUrl: typeof parsed.logoUrl === 'string' ? parsed.logoUrl : DEFAULT_INSTANCE_CONFIG.logoUrl,
+      faviconUrl: typeof parsed.faviconUrl === 'string' ? parsed.faviconUrl : DEFAULT_INSTANCE_CONFIG.faviconUrl,
+      appleTouchIconUrl: typeof parsed.appleTouchIconUrl === 'string' ? parsed.appleTouchIconUrl : DEFAULT_INSTANCE_CONFIG.appleTouchIconUrl,
       assistantIcon: parsed.assistantIcon || DEFAULT_INSTANCE_CONFIG.assistantIcon,
       userIcon: parsed.userIcon || DEFAULT_INSTANCE_CONFIG.userIcon,
       assistantName: typeof parsed.assistantName === 'string' ? parsed.assistantName : DEFAULT_INSTANCE_CONFIG.assistantName,
@@ -178,6 +187,40 @@ export function applyAccentColor(color: AccentColor): void {
   })
   // Add the new one
   root.classList.add(`accent-${color}`)
+}
+
+function upsertLinkTag(rel: string, href: string): void {
+  const selector = `link[rel="${rel}"][data-instance-branding="true"]`
+  const existing = document.head.querySelector<HTMLLinkElement>(selector)
+
+  if (!href || !href.trim()) {
+    if (existing) existing.remove()
+    return
+  }
+
+  const link = existing ?? document.createElement('link')
+  link.rel = rel
+  link.href = href.trim()
+  link.setAttribute('data-instance-branding', 'true')
+
+  if (!existing) {
+    document.head.appendChild(link)
+  }
+}
+
+export function applyDocumentTitle(name: string): void {
+  const trimmed = name?.trim()
+  if (trimmed) {
+    document.title = trimmed
+  }
+}
+
+export function applyFavicon(url: string): void {
+  upsertLinkTag('icon', url)
+}
+
+export function applyAppleTouchIcon(url: string): void {
+  upsertLinkTag('apple-touch-icon', url)
 }
 
 export function applySurfaceStyle(style: SurfaceStyle): void {

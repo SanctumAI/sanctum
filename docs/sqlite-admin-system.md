@@ -85,6 +85,21 @@ Key-value store for instance configuration.
 - `instance_name`: "Sanctum"
 - `primary_color`: "#3B82F6"
 - `description`: "A privacy-first RAG knowledge base"
+- `icon`: "Sparkles"
+- `logo_url`: "" (optional image logo)
+- `favicon_url`: "" (optional tab icon)
+- `apple_touch_icon_url`: "" (optional iOS home icon)
+- `assistant_icon`: "Sparkles"
+- `user_icon`: "User"
+- `assistant_name`: "Sanctum AI"
+- `user_label`: "You"
+- `header_layout`: "icon_name"
+- `header_tagline`: ""
+- `chat_bubble_style`: "soft"
+- `chat_bubble_shadow`: "true"
+- `surface_style`: "plain"
+- `status_icon_set`: "classic"
+- `typography_preset`: "modern"
 - `auto_approve_users`: "true" - When "true", new users are automatically approved; when "false", users wait at `/pending` for admin approval
 
 #### `instance_state`
@@ -725,6 +740,10 @@ The frontend uses localStorage for temporary state during onboarding:
 
 ### Instance Settings
 - Edit instance name, branding color, and description
+- Choose a Lucide icon or provide a logo URL (image fallback to icon)
+- Configure favicon + Apple touch icon URLs
+- Adjust header layout and optional tagline
+- Tune chat identity labels, bubble style/shadow, background, status icons, and typography
 - Toggle auto-approve for new users
 
 ### Deployment Configuration

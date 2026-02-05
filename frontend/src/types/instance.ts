@@ -60,31 +60,67 @@ export const SURFACE_STYLES: SurfaceStyle[] = ['plain', 'gradient', 'noise', 'gr
 export const STATUS_ICON_SETS: StatusIconSet[] = ['classic', 'minimal', 'playful']
 export const TYPOGRAPHY_PRESETS: TypographyPreset[] = ['modern', 'grotesk', 'humanist']
 
-// Curated icons suitable for branding/logo use
+// Curated icons suitable for branding/logo use (~175 icons)
+// Removed Pentagon, Octagon - they look like circles at 18px
 export const CURATED_ICONS = [
   // Abstract/Decorative
-  'Sparkles', 'Star', 'Gem', 'Diamond', 'Hexagon', 'Pentagon', 'Octagon',
-  'Circle', 'Square', 'Triangle', 'Flower2', 'Snowflake', 'Sun', 'Moon',
+  'Sparkles', 'Star', 'Gem', 'Diamond', 'Hexagon', 'Circle', 'Square',
+  'Triangle', 'Flower2', 'Snowflake', 'Sun', 'Moon', 'Infinity',
   // Tech/AI
   'Brain', 'Cpu', 'Bot', 'Wand2', 'Lightbulb', 'Zap', 'Rocket', 'Atom',
+  'Binary', 'Code', 'Terminal', 'Database', 'Server', 'Wifi',
   // Knowledge/Learning
   'Book', 'BookOpen', 'GraduationCap', 'Library', 'Scroll', 'FileText',
+  'Notebook', 'ClipboardList',
   // Communication
-  'MessageCircle', 'MessageSquare', 'Mail', 'Send', 'Radio',
+  'MessageCircle', 'MessageSquare', 'Mail', 'Send', 'Radio', 'Bell',
+  'Megaphone',
   // People
-  'User', 'UserCircle', 'UserSquare', 'UserRound',
+  'User', 'UserCircle', 'UserSquare', 'UserRound', 'Users', 'UserPlus',
+  'UserCheck', 'Contact',
   // Security/Trust
   'Shield', 'ShieldCheck', 'Lock', 'Key', 'Fingerprint', 'Eye',
+  'KeyRound', 'ScanFace',
   // Navigation/Discovery
   'Compass', 'Map', 'Navigation', 'Crosshair', 'Target', 'Waypoints',
+  'MapPin', 'Globe', 'Search',
   // Growth/Success
   'TrendingUp', 'BarChart3', 'Activity', 'Award', 'Crown', 'Trophy',
+  'Medal', 'ThumbsUp', 'PartyPopper',
   // Nature/Organic
-  'Leaf', 'TreePine', 'Flame', 'Droplet', 'Cloud', 'Mountain',
-  // Objects
-  'Home', 'Building2', 'Landmark', 'Briefcase', 'Package', 'Blocks',
+  'Leaf', 'TreePine', 'Flame', 'Droplet', 'Cloud', 'Mountain', 'Waves',
+  'Wind', 'Sunrise',
+  // Business/Professional
+  'Briefcase', 'Building', 'Building2', 'Calendar', 'Clock', 'CreditCard',
+  'DollarSign', 'FileCheck', 'Folder', 'Inbox', 'Receipt', 'Scale',
+  'Timer', 'Wallet', 'Landmark',
+  // Health/Wellness
+  'Heart', 'HeartPulse', 'Pill', 'Stethoscope', 'Thermometer', 'Apple',
+  'Dumbbell', 'Smile',
+  // Media/Entertainment
+  'Camera', 'Film', 'Headphones', 'Music', 'Play', 'Mic', 'Video', 'Tv',
+  'Gamepad2', 'Speaker', 'Image',
+  // Food/Lifestyle
+  'Coffee', 'UtensilsCrossed', 'Wine', 'Pizza', 'Cookie', 'IceCream',
+  'Cake', 'Beer',
+  // Travel/Transport
+  'Plane', 'Car', 'Train', 'Ship', 'Bike', 'Bus', 'Truck', 'Luggage',
+  'Anchor',
+  // Tools/Utilities
+  'Wrench', 'Hammer', 'Scissors', 'Settings', 'Cog', 'SlidersHorizontal',
+  'Filter', 'Calculator',
+  // Social/Community
+  'Share2', 'Link', 'Gift', 'Handshake', 'HeartHandshake', 'Hand',
+  // Science/Education
+  'Flask', 'Microscope', 'TestTube', 'Dna', 'Beaker', 'Orbit', 'Telescope',
+  // Objects/Home
+  'Home', 'Package', 'Blocks', 'Box', 'Archive', 'Trash2', 'Recycle', 'Lamp',
   // Creative
   'Palette', 'PenTool', 'Brush', 'Aperture', 'Layers', 'Grid3X3',
+  'Crop', 'Eraser', 'Shapes',
+  // Misc Visual
+  'QrCode', 'Barcode', 'Scan', 'Focus', 'Minimize2', 'Maximize2',
+  'RotateCw', 'RefreshCw',
 ] as const
 
 export const INSTANCE_CONFIG_KEY = 'sanctum_instance_config'

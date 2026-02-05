@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Upload, FileText, X, CloudUpload, Loader2, Clock, ArrowLeft, HelpCircle, ChevronLeft, ChevronRight, CheckCircle2, Trash2, AlertTriangle } from 'lucide-react'
+import { Upload, FileText, X, CloudUpload, Loader2, Clock, ArrowLeft, HelpCircle, ChevronLeft, ChevronRight, CheckCircle2, Trash2, AlertTriangle, Layers } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { STORAGE_KEYS } from '../types/onboarding'
-import { useInstanceConfig } from '../context/InstanceConfigContext'
 import {
   UploadResponse,
   JobStatus,
@@ -13,7 +12,6 @@ import {
   getAllowedExtensionsDisplay,
 } from '../types/ingest'
 import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
-import { getStatusIcon } from '../utils/statusIcons'
 
 // TODO: Replace localStorage check with proper auth token validation
 // Current implementation only checks for admin pubkey in localStorage
@@ -21,7 +19,6 @@ import { getStatusIcon } from '../utils/statusIcons'
 export function AdminDocumentUpload() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { config } = useInstanceConfig()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // State
@@ -32,8 +29,10 @@ export function AdminDocumentUpload() {
   const [uploadSuccess, setUploadSuccess] = useState<{ filename: string; jobId: string } | null>(null)
   const [recentJobs, setRecentJobs] = useState<JobStatus[]>([])
   const [isLoadingJobs, setIsLoadingJobs] = useState(true)
+  const [isRefreshingJobs, setIsRefreshingJobs] = useState(false)
   const [jobsError, setJobsError] = useState<string | null>(null)
   const [jobsErrorTitle, setJobsErrorTitle] = useState<string | null>(null)
+  const [jobsWarning, setJobsWarning] = useState<string | null>(null)
 
   // Pipeline help modal state
   const [showPipelineHelpModal, setShowPipelineHelpModal] = useState(false)
@@ -49,6 +48,10 @@ export function AdminDocumentUpload() {
 
   // Timeout ref for cleanup
   const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isFetchingJobsRef = useRef(false)
+  const recentJobsRef = useRef<JobStatus[]>([])
+
+  const JOBS_FETCH_TIMEOUT_MS = 30000
 
   // Cleanup success timeout on unmount
   useEffect(() => {
@@ -69,13 +72,24 @@ export function AdminDocumentUpload() {
   }, [navigate])
 
   // Fetch recent jobs with timeout
-  const fetchJobs = useCallback(async () => {
-    setJobsError(null)
-    setJobsErrorTitle(null)
+  const fetchJobs = useCallback(async (options: { showLoading?: boolean; showErrors?: boolean } = {}) => {
+    const { showLoading = false, showErrors = false } = options
+    if (isFetchingJobsRef.current) return
+    isFetchingJobsRef.current = true
+
+    if (showErrors) {
+      setJobsError(null)
+      setJobsErrorTitle(null)
+      setJobsWarning(null)
+    }
+    if (showLoading) {
+      setIsLoadingJobs(true)
+    }
+    setIsRefreshingJobs(true)
 
     // Create abort controller for timeout
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10s timeout
+    const timeoutId = setTimeout(() => controller.abort(), JOBS_FETCH_TIMEOUT_MS)
 
     try {
       const response = await adminFetch('/ingest/jobs', {
@@ -118,27 +132,53 @@ export function AdminDocumentUpload() {
       )
 
       setRecentJobs(jobStatuses)
+      recentJobsRef.current = jobStatuses
+      setJobsError(null)
+      setJobsErrorTitle(null)
+      setJobsWarning(null)
     } catch (error) {
-      console.error(t('errors.errorFetchingJobs'), error)
       if (error instanceof Error && error.name === 'AbortError') {
-        setJobsErrorTitle(t('upload.serverBusy', 'Server is busy'))
-        setJobsError(t('upload.jobsTimeout', 'Server is busy processing documents. Try refreshing in a moment.'))
-      } else if (error instanceof Error && error.message.startsWith('errors.')) {
-        const errorMessage = t(error.message)
-        setJobsErrorTitle(errorMessage)
-        setJobsError(errorMessage)
+        if (showErrors) {
+          const message = t('upload.jobsTimeout', 'Server is busy processing documents. Try refreshing in a moment.')
+          if (recentJobsRef.current.length > 0) {
+            setJobsWarning(message)
+          } else {
+            setJobsErrorTitle(t('upload.serverBusy', 'Server is busy'))
+            setJobsError(message)
+          }
+        }
       } else {
-        setJobsErrorTitle(t('errors.failedToFetchJobs'))
-        setJobsError(t('errors.failedToFetchJobs'))
+        console.error(t('errors.errorFetchingJobs'), error)
+        if (showErrors) {
+          if (error instanceof Error && error.message.startsWith('errors.')) {
+            const errorMessage = t(error.message)
+            if (recentJobsRef.current.length > 0) {
+              setJobsWarning(errorMessage)
+            } else {
+              setJobsErrorTitle(t('errors.failedToFetchJobs'))
+              setJobsError(errorMessage)
+            }
+          } else {
+            const errorMessage = t('errors.failedToFetchJobs')
+            if (recentJobsRef.current.length > 0) {
+              setJobsWarning(errorMessage)
+            } else {
+              setJobsErrorTitle(errorMessage)
+              setJobsError(errorMessage)
+            }
+          }
+        }
       }
     } finally {
       clearTimeout(timeoutId)
       setIsLoadingJobs(false)
+      setIsRefreshingJobs(false)
+      isFetchingJobsRef.current = false
     }
   }, [t])
 
   useEffect(() => {
-    fetchJobs()
+    fetchJobs({ showLoading: true, showErrors: true })
   }, [fetchJobs])
 
   // Handle document deletion
@@ -159,7 +199,7 @@ export function AdminDocumentUpload() {
       // Close modal and refresh jobs
       setDeleteJobId(null)
       setDeleteJobFilename('')
-      await fetchJobs()
+      await fetchJobs({ showLoading: true, showErrors: true })
     } catch (error) {
       console.error('Delete error:', error)
       if (error instanceof Error && error.message.startsWith('errors.')) {
@@ -203,7 +243,7 @@ export function AdminDocumentUpload() {
     )
 
     if (hasActiveJobs) {
-      const interval = setInterval(fetchJobs, 3000)
+      const interval = setInterval(() => fetchJobs({ showLoading: false, showErrors: false }), 3000)
       return () => clearInterval(interval)
     }
   }, [recentJobs, fetchJobs])
@@ -287,7 +327,7 @@ export function AdminDocumentUpload() {
       }
 
       // Refresh job list
-      await fetchJobs()
+      await fetchJobs({ showLoading: true, showErrors: true })
 
       // Clear success message after 4 seconds
       if (successTimeoutRef.current) {
@@ -319,17 +359,17 @@ export function AdminDocumentUpload() {
   const getStatusDisplay = (status: JobStatus['status']) => {
     switch (status) {
       case 'pending':
-        return { label: t('upload.status.queued'), color: 'text-text-muted', icon: getStatusIcon(config.statusIconSet, 'queued') }
+        return { label: t('upload.status.queued'), color: 'text-text-muted', icon: <Clock className="w-3.5 h-3.5" /> }
       case 'processing':
-        return { label: t('upload.status.processing'), color: 'text-warning', icon: getStatusIcon(config.statusIconSet, 'processing') }
+        return { label: t('upload.status.processing'), color: 'text-warning', icon: <Loader2 className="w-3.5 h-3.5 animate-spin" /> }
       case 'chunked':
-        return { label: t('upload.status.chunked'), color: 'text-info', icon: getStatusIcon(config.statusIconSet, 'chunked') }
+        return { label: t('upload.status.chunked'), color: 'text-info', icon: <Layers className="w-3.5 h-3.5" /> }
       case 'completed':
-        return { label: t('upload.status.complete'), color: 'text-success', icon: getStatusIcon(config.statusIconSet, 'complete') }
+        return { label: t('upload.status.complete'), color: 'text-success', icon: <CheckCircle2 className="w-3.5 h-3.5" /> }
       case 'failed':
-        return { label: t('upload.status.failed'), color: 'text-error', icon: getStatusIcon(config.statusIconSet, 'failed') }
+        return { label: t('upload.status.failed'), color: 'text-error', icon: <AlertTriangle className="w-3.5 h-3.5" /> }
       default:
-        return { label: status, color: 'text-text-muted', icon: '?' }
+        return { label: status, color: 'text-text-muted', icon: <HelpCircle className="w-3.5 h-3.5" /> }
     }
   }
 
@@ -536,11 +576,11 @@ export function AdminDocumentUpload() {
               </button>
             </h3>
             <button
-              onClick={() => { setIsLoadingJobs(true); fetchJobs() }}
-              disabled={isLoadingJobs}
+              onClick={() => { fetchJobs({ showLoading: true, showErrors: true }) }}
+              disabled={isLoadingJobs || isRefreshingJobs}
               className="text-xs text-text-muted hover:text-accent transition-colors disabled:opacity-50 flex items-center gap-1"
             >
-              {isLoadingJobs ? (
+              {isLoadingJobs || isRefreshingJobs ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
                 <span>↻</span>
@@ -562,7 +602,7 @@ export function AdminDocumentUpload() {
               </p>
               <p className="text-xs text-text-muted mb-3">{jobsError}</p>
               <button
-                onClick={() => { setIsLoadingJobs(true); fetchJobs() }}
+                onClick={() => { fetchJobs({ showLoading: true, showErrors: true }) }}
                 className="text-xs text-accent hover:text-accent-hover transition-colors"
               >
                 {t('upload.tryRefresh', 'Try again')}
@@ -570,6 +610,11 @@ export function AdminDocumentUpload() {
             </div>
           ) : recentJobs.length > 0 ? (
             <div className="space-y-2">
+              {jobsWarning && (
+                <div className="px-3 py-2 rounded-lg bg-warning/10 border border-warning/20 text-warning text-xs">
+                  {jobsWarning}
+                </div>
+              )}
               {recentJobs.map((job) => {
                 const statusInfo = getStatusDisplay(job.status)
                 const canDelete = job.status !== 'pending' && job.status !== 'processing'
@@ -584,8 +629,9 @@ export function AdminDocumentUpload() {
                           {job.filename}
                         </p>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className={`text-xs ${statusInfo.color}`}>
-                            {statusInfo.icon} {statusInfo.label}
+                          <span className={`text-xs ${statusInfo.color} inline-flex items-center gap-1`}>
+                            {statusInfo.icon}
+                            <span>{statusInfo.label}</span>
                           </span>
                           {job.total_chunks > 0 && (
                             <span className="text-xs text-text-muted">

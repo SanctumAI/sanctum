@@ -41,7 +41,7 @@ const ICONS: Record<StatusIconSet, Record<StatusIconKey, string>> = {
     queued: '*',
     processing: '~',
     chunked: '+',
-    complete: 'y',
+    complete: 'v',
     failed: 'x',
     loading: '@',
     success: '+',

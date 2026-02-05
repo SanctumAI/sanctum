@@ -51,6 +51,17 @@ The validation endpoint enforces guardrails, including:
 
 It also warns if `INSTANCE_URL` is missing from `CORS_ORIGINS`.
 
+## Validation UI
+
+Click **Validate Config** to run server-side checks and display results in the admin UI.
+The validation banner includes:
+- The timestamp of the last validation.
+- A summary count and detailed lists of errors and warnings.
+- An **Out of date** indicator if configuration changes after validation.
+- A dismiss button, plus a quick **Revalidate** action when results are stale.
+
+If you edit any deployment setting after validating, the banner is marked out of date until you validate again.
+
 ## Common Workflows
 
 ### LLM Provider

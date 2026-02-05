@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -31,13 +31,19 @@ import {
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { isAdminAuthenticated } from '../utils/adminApi'
 import { useDeploymentConfig, useServiceHealth, useConfigAuditLog, useKeyMigration } from '../hooks/useAdminConfig'
-import type { DeploymentConfigItem, ServiceHealthItem, ConfigCategory, DeploymentConfigItemKey, MigrationPrepareResponse, DecryptedUserData, DecryptedFieldValue } from '../types/config'
+import type { DeploymentConfigItem, ServiceHealthItem, ConfigCategory, DeploymentConfigItemKey, MigrationPrepareResponse, DecryptedUserData, DecryptedFieldValue, DeploymentValidationResponse } from '../types/config'
 import { getConfigCategories, getDeploymentConfigItemMeta } from '../types/config'
 import { STORAGE_KEYS } from '../types/onboarding'
 import { hasNip04Support, decryptField } from '../utils/encryption'
 import { hasNostrExtension } from '../utils/nostrAuth'
 import { normalizePubkey } from '../utils/nostrKeys'
 import { clearAdminAuth } from '../utils/adminApi'
+
+type ValidationState = {
+  result: DeploymentValidationResponse
+  validatedAt: string
+  configFingerprint: string
+}
 
 export function AdminDeploymentConfig() {
   const { t } = useTranslation()
@@ -75,7 +81,9 @@ export function AdminDeploymentConfig() {
   const [revealError, setRevealError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
-  const [validationResult, setValidationResult] = useState<{ valid: boolean; errors: string[]; warnings: string[] } | null>(null)
+  const [validationState, setValidationState] = useState<ValidationState | null>(null)
+  const [validationDismissed, setValidationDismissed] = useState(false)
+  const [validationLoading, setValidationLoading] = useState(false)
   const [showAuditLog, setShowAuditLog] = useState(false)
   const [authChecked, setAuthChecked] = useState(false)
   const [exportError, setExportError] = useState<string | null>(null)
@@ -106,6 +114,28 @@ export function AdminDeploymentConfig() {
   const [domainsHelpPage, setDomainsHelpPage] = useState(0)
   const domainsHelpModalRef = useRef<HTMLDivElement>(null)
 
+  // Storage help modal state
+  const [showStorageHelpModal, setShowStorageHelpModal] = useState(false)
+  const [storageHelpPage, setStorageHelpPage] = useState(0)
+  const storageHelpModalRef = useRef<HTMLDivElement>(null)
+
+  // Search help modal state
+  const [showSearchHelpModal, setShowSearchHelpModal] = useState(false)
+  const [searchHelpPage, setSearchHelpPage] = useState(0)
+  const searchHelpModalRef = useRef<HTMLDivElement>(null)
+
+  // Security help modal state
+  const [showSecurityHelpModal, setShowSecurityHelpModal] = useState(false)
+  const [securityHelpPage, setSecurityHelpPage] = useState(0)
+  const securityHelpModalRef = useRef<HTMLDivElement>(null)
+
+  // SSL help modal state
+  const [showSslHelpModal, setShowSslHelpModal] = useState(false)
+  const [sslHelpPage, setSslHelpPage] = useState(0)
+  const sslHelpModalRef = useRef<HTMLDivElement>(null)
+
+  const [openHelpItemKey, setOpenHelpItemKey] = useState<string | null>(null)
+
   // Key migration hook and state
   const {
     loading: migrationLoading,
@@ -130,6 +160,50 @@ export function AdminDeploymentConfig() {
       setAuthChecked(true)
     }
   }, [navigate])
+
+  const configSignature = useMemo(() => {
+    if (!deploymentConfig) {
+      return { fingerprint: '', lastUpdatedAt: null as string | null }
+    }
+
+    const items = Object.values(deploymentConfig).flat()
+    if (items.length === 0) {
+      return { fingerprint: '', lastUpdatedAt: null as string | null }
+    }
+
+    const fingerprint = items
+      .map((item) => `${item.key}:${item.value ?? ''}:${item.updated_at ?? ''}`)
+      .sort()
+      .join('|')
+
+    let lastUpdatedAt: string | null = null
+    for (const item of items) {
+      if (!item.updated_at) continue
+      if (!lastUpdatedAt) {
+        lastUpdatedAt = item.updated_at
+        continue
+      }
+      const current = new Date(item.updated_at).getTime()
+      const existing = new Date(lastUpdatedAt).getTime()
+      if (!isNaN(current) && (isNaN(existing) || current > existing)) {
+        lastUpdatedAt = item.updated_at
+      }
+    }
+
+    return { fingerprint, lastUpdatedAt }
+  }, [deploymentConfig])
+
+  const validationIsStale = Boolean(
+    validationState
+    && configSignature.fingerprint
+    && validationState.configFingerprint !== configSignature.fingerprint
+  )
+
+  const formatTimestamp = (value?: string | null) => {
+    if (!value) return t('common.unknown', 'Unknown')
+    const date = new Date(value)
+    return isNaN(date.getTime()) ? value : date.toLocaleString()
+  }
 
   // Handle editing a config value
   const handleEdit = (item: DeploymentConfigItem) => {
@@ -236,16 +310,28 @@ export function AdminDeploymentConfig() {
 
   // Handle validate
   const handleValidate = async () => {
+    setValidationLoading(true)
+    setValidationDismissed(false)
     try {
       const result = await validate()
-      setValidationResult(result)
+      setValidationState({
+        result,
+        validatedAt: new Date().toISOString(),
+        configFingerprint: configSignature.fingerprint,
+      })
     } catch (err) {
       console.error('Validation failed:', err)
-      setValidationResult({
-        valid: false,
-        errors: [err instanceof Error ? err.message : t('adminDeployment.validationFailed', 'Validation request failed')],
-        warnings: [],
+      setValidationState({
+        result: {
+          valid: false,
+          errors: [err instanceof Error ? err.message : t('adminDeployment.validationFailed', 'Validation request failed')],
+          warnings: [],
+        },
+        validatedAt: new Date().toISOString(),
+        configFingerprint: configSignature.fingerprint,
       })
+    } finally {
+      setValidationLoading(false)
     }
   }
 
@@ -351,6 +437,26 @@ export function AdminDeploymentConfig() {
   const handleCloseDomainsHelpModal = () => {
     setShowDomainsHelpModal(false)
     setDomainsHelpPage(0)
+  }
+
+  const handleCloseStorageHelpModal = () => {
+    setShowStorageHelpModal(false)
+    setStorageHelpPage(0)
+  }
+
+  const handleCloseSearchHelpModal = () => {
+    setShowSearchHelpModal(false)
+    setSearchHelpPage(0)
+  }
+
+  const handleCloseSecurityHelpModal = () => {
+    setShowSecurityHelpModal(false)
+    setSecurityHelpPage(0)
+  }
+
+  const handleCloseSslHelpModal = () => {
+    setShowSslHelpModal(false)
+    setSslHelpPage(0)
   }
 
   // Key migration handlers
@@ -572,31 +678,232 @@ export function AdminDeploymentConfig() {
 
   // Focus trap for email help modal
   useEffect(() => {
-    if (showEmailHelpModal && emailHelpModalRef.current) {
-      emailHelpModalRef.current.focus()
+    if (!showEmailHelpModal || !emailHelpModalRef.current) return
+    const modal = emailHelpModalRef.current
+    modal.focus()
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const focusableElements = modal.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+      if (focusableElements.length === 0) return
+      const firstEl = focusableElements[0]
+      const lastEl = focusableElements[focusableElements.length - 1]
+      if (e.shiftKey && document.activeElement === firstEl) {
+        e.preventDefault()
+        lastEl.focus()
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault()
+        firstEl.focus()
+      }
     }
+
+    modal.addEventListener('keydown', handleKeyDown)
+    return () => modal.removeEventListener('keydown', handleKeyDown)
   }, [showEmailHelpModal])
 
   // Focus trap for LLM help modal
   useEffect(() => {
-    if (showLlmHelpModal && llmHelpModalRef.current) {
-      llmHelpModalRef.current.focus()
+    if (!showLlmHelpModal || !llmHelpModalRef.current) return
+    const modal = llmHelpModalRef.current
+    modal.focus()
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const focusableElements = modal.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+      if (focusableElements.length === 0) return
+      const firstEl = focusableElements[0]
+      const lastEl = focusableElements[focusableElements.length - 1]
+      if (e.shiftKey && document.activeElement === firstEl) {
+        e.preventDefault()
+        lastEl.focus()
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault()
+        firstEl.focus()
+      }
     }
+
+    modal.addEventListener('keydown', handleKeyDown)
+    return () => modal.removeEventListener('keydown', handleKeyDown)
   }, [showLlmHelpModal])
 
   // Focus trap for embedding help modal
   useEffect(() => {
-    if (showEmbeddingHelpModal && embeddingHelpModalRef.current) {
-      embeddingHelpModalRef.current.focus()
+    if (!showEmbeddingHelpModal || !embeddingHelpModalRef.current) return
+    const modal = embeddingHelpModalRef.current
+    modal.focus()
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const focusableElements = modal.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+      if (focusableElements.length === 0) return
+      const firstEl = focusableElements[0]
+      const lastEl = focusableElements[focusableElements.length - 1]
+      if (e.shiftKey && document.activeElement === firstEl) {
+        e.preventDefault()
+        lastEl.focus()
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault()
+        firstEl.focus()
+      }
     }
+
+    modal.addEventListener('keydown', handleKeyDown)
+    return () => modal.removeEventListener('keydown', handleKeyDown)
   }, [showEmbeddingHelpModal])
 
   // Focus trap for domains help modal
   useEffect(() => {
-    if (showDomainsHelpModal && domainsHelpModalRef.current) {
-      domainsHelpModalRef.current.focus()
+    if (!showDomainsHelpModal || !domainsHelpModalRef.current) return
+    const modal = domainsHelpModalRef.current
+    modal.focus()
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const focusableElements = modal.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+      if (focusableElements.length === 0) return
+      const firstEl = focusableElements[0]
+      const lastEl = focusableElements[focusableElements.length - 1]
+      if (e.shiftKey && document.activeElement === firstEl) {
+        e.preventDefault()
+        lastEl.focus()
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault()
+        firstEl.focus()
+      }
     }
-  }, [showDomainsHelpModal, domainsHelpModalRef])
+
+    modal.addEventListener('keydown', handleKeyDown)
+    return () => modal.removeEventListener('keydown', handleKeyDown)
+  }, [showDomainsHelpModal])
+
+  // Focus trap for storage help modal
+  useEffect(() => {
+    if (!showStorageHelpModal || !storageHelpModalRef.current) return
+    const modal = storageHelpModalRef.current
+    modal.focus()
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const focusableElements = modal.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+      if (focusableElements.length === 0) return
+      const firstEl = focusableElements[0]
+      const lastEl = focusableElements[focusableElements.length - 1]
+      if (e.shiftKey && document.activeElement === firstEl) {
+        e.preventDefault()
+        lastEl.focus()
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault()
+        firstEl.focus()
+      }
+    }
+
+    modal.addEventListener('keydown', handleKeyDown)
+    return () => modal.removeEventListener('keydown', handleKeyDown)
+  }, [showStorageHelpModal])
+
+  // Focus trap for search help modal
+  useEffect(() => {
+    if (!showSearchHelpModal || !searchHelpModalRef.current) return
+    const modal = searchHelpModalRef.current
+    modal.focus()
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const focusableElements = modal.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+      if (focusableElements.length === 0) return
+      const firstEl = focusableElements[0]
+      const lastEl = focusableElements[focusableElements.length - 1]
+      if (e.shiftKey && document.activeElement === firstEl) {
+        e.preventDefault()
+        lastEl.focus()
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault()
+        firstEl.focus()
+      }
+    }
+
+    modal.addEventListener('keydown', handleKeyDown)
+    return () => modal.removeEventListener('keydown', handleKeyDown)
+  }, [showSearchHelpModal])
+
+  // Focus trap for security help modal
+  useEffect(() => {
+    if (!showSecurityHelpModal || !securityHelpModalRef.current) return
+    const modal = securityHelpModalRef.current
+    modal.focus()
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const focusableElements = modal.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+      if (focusableElements.length === 0) return
+      const firstEl = focusableElements[0]
+      const lastEl = focusableElements[focusableElements.length - 1]
+      if (e.shiftKey && document.activeElement === firstEl) {
+        e.preventDefault()
+        lastEl.focus()
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault()
+        firstEl.focus()
+      }
+    }
+
+    modal.addEventListener('keydown', handleKeyDown)
+    return () => modal.removeEventListener('keydown', handleKeyDown)
+  }, [showSecurityHelpModal])
+
+  // Focus trap for SSL help modal
+  useEffect(() => {
+    if (!showSslHelpModal || !sslHelpModalRef.current) return
+    const modal = sslHelpModalRef.current
+    modal.focus()
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const focusableElements = modal.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+      if (focusableElements.length === 0) return
+      const firstEl = focusableElements[0]
+      const lastEl = focusableElements[focusableElements.length - 1]
+      if (e.shiftKey && document.activeElement === firstEl) {
+        e.preventDefault()
+        lastEl.focus()
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault()
+        firstEl.focus()
+      }
+    }
+
+    modal.addEventListener('keydown', handleKeyDown)
+    return () => modal.removeEventListener('keydown', handleKeyDown)
+  }, [showSslHelpModal])
+
+  // Close item help popover on outside click
+  useEffect(() => {
+    if (!openHelpItemKey) return
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null
+      if (!target) return
+      if (target.closest(`[data-help-item="${openHelpItemKey}"]`)) return
+      setOpenHelpItemKey(null)
+    }
+    document.addEventListener('click', handleClick, true)
+    return () => document.removeEventListener('click', handleClick, true)
+  }, [openHelpItemKey])
 
   // Email help pages data
   const EMAIL_HELP_PAGES = [
@@ -745,6 +1052,66 @@ export function AdminDeploymentConfig() {
     },
   ]
 
+  const STORAGE_HELP_PAGES = [
+    {
+      title: t('adminDeployment.storageHelp.overviewTitle', 'Data Storage Overview'),
+      content: 'overview',
+    },
+    {
+      title: t('adminDeployment.storageHelp.pathsTitle', 'Paths & Volumes'),
+      content: 'paths',
+    },
+    {
+      title: t('adminDeployment.storageHelp.backupsTitle', 'Backups & Moves'),
+      content: 'backups',
+    },
+  ]
+
+  const SEARCH_HELP_PAGES = [
+    {
+      title: t('adminDeployment.searchHelp.overviewTitle', 'Web Search Overview'),
+      content: 'overview',
+    },
+    {
+      title: t('adminDeployment.searchHelp.configTitle', 'Configure SearXNG'),
+      content: 'config',
+    },
+    {
+      title: t('adminDeployment.searchHelp.privacyTitle', 'Privacy & Limits'),
+      content: 'privacy',
+    },
+  ]
+
+  const SECURITY_HELP_PAGES = [
+    {
+      title: t('adminDeployment.securityHelp.overviewTitle', 'Security Overview'),
+      content: 'overview',
+    },
+    {
+      title: t('adminDeployment.securityHelp.devTitle', 'Development Flags'),
+      content: 'dev',
+    },
+    {
+      title: t('adminDeployment.securityHelp.frontendTitle', 'Frontend & Sessions'),
+      content: 'frontend',
+    },
+  ]
+
+  const SSL_HELP_PAGES = [
+    {
+      title: t('adminDeployment.sslHelp.overviewTitle', 'SSL & HTTPS Overview'),
+      content: 'overview',
+    },
+    {
+      title: t('adminDeployment.sslHelp.certsTitle', 'Certificates & Proxies'),
+      content: 'certs',
+    },
+    {
+      title: t('adminDeployment.sslHelp.httpsTitle', 'HTTPS Behavior'),
+      content: 'https',
+    },
+  ]
+
   // Get icon for category
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -822,13 +1189,31 @@ export function AdminDeploymentConfig() {
             <div className="flex items-center gap-2 flex-wrap">
               <p className="text-sm font-medium text-text">{label}</p>
               {helpText && (
-                <span
-                  className="text-text-muted"
-                  title={helpText}
-                  aria-label={helpText}
-                >
-                  <HelpCircle className="w-4 h-4" />
-                </span>
+                <div className="relative" data-help-item={item.key}>
+                  <button
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      setOpenHelpItemKey((current) => (current === item.key ? null : item.key))
+                    }}
+                    className="text-text-muted hover:text-accent transition-colors"
+                    aria-label={helpText}
+                    aria-expanded={openHelpItemKey === item.key}
+                    aria-controls={`help-item-popover-${item.key}`}
+                    aria-describedby={openHelpItemKey === item.key ? `help-item-popover-${item.key}` : undefined}
+                    type="button"
+                  >
+                    <HelpCircle className="w-4 h-4" />
+                  </button>
+                  {openHelpItemKey === item.key && (
+                    <div
+                      id={`help-item-popover-${item.key}`}
+                      role="tooltip"
+                      className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-lg border border-border bg-surface p-3 text-xs text-text-muted shadow-xl z-10"
+                    >
+                      {helpText}
+                    </div>
+                  )}
+                </div>
               )}
               {item.requires_restart && (
                 <span className="text-[10px] bg-warning/10 text-warning px-1.5 py-0.5 rounded">
@@ -936,7 +1321,7 @@ export function AdminDeploymentConfig() {
 
     const meta = configCategories[category]
     const helpText = meta.hint || meta.description
-    const hasModalHelp = category === 'email' || category === 'llm' || category === 'embedding' || category === 'domains'
+    const hasModalHelp = category === 'email' || category === 'llm' || category === 'embedding' || category === 'domains' || category === 'storage' || category === 'search' || category === 'security' || category === 'ssl'
 
     return (
       <div key={category} className="card card-sm p-5! bg-surface-overlay!">
@@ -978,6 +1363,46 @@ export function AdminDeploymentConfig() {
               onClick={() => setShowDomainsHelpModal(true)}
               className="ml-1 text-text-muted hover:text-accent transition-colors"
               aria-label={t('adminDeployment.domainsHelp.ariaLabel', 'Domains and DNS configuration help')}
+              title={helpText}
+            >
+              <HelpCircle className="w-5 h-5" />
+            </button>
+          )}
+          {category === 'storage' && (
+            <button
+              onClick={() => setShowStorageHelpModal(true)}
+              className="ml-1 text-text-muted hover:text-accent transition-colors"
+              aria-label={t('adminDeployment.storageHelp.ariaLabel', 'Data storage configuration help')}
+              title={helpText}
+            >
+              <HelpCircle className="w-5 h-5" />
+            </button>
+          )}
+          {category === 'search' && (
+            <button
+              onClick={() => setShowSearchHelpModal(true)}
+              className="ml-1 text-text-muted hover:text-accent transition-colors"
+              aria-label={t('adminDeployment.searchHelp.ariaLabel', 'Web search configuration help')}
+              title={helpText}
+            >
+              <HelpCircle className="w-5 h-5" />
+            </button>
+          )}
+          {category === 'security' && (
+            <button
+              onClick={() => setShowSecurityHelpModal(true)}
+              className="ml-1 text-text-muted hover:text-accent transition-colors"
+              aria-label={t('adminDeployment.securityHelp.ariaLabel', 'Security configuration help')}
+              title={helpText}
+            >
+              <HelpCircle className="w-5 h-5" />
+            </button>
+          )}
+          {category === 'ssl' && (
+            <button
+              onClick={() => setShowSslHelpModal(true)}
+              className="ml-1 text-text-muted hover:text-accent transition-colors"
+              aria-label={t('adminDeployment.sslHelp.ariaLabel', 'SSL and HTTPS configuration help')}
               title={helpText}
             >
               <HelpCircle className="w-5 h-5" />
@@ -1112,10 +1537,15 @@ export function AdminDeploymentConfig() {
         <div className="flex gap-3">
           <button
             onClick={handleValidate}
-            className="flex-1 flex items-center justify-center gap-2 border border-border hover:border-accent/50 text-text rounded-lg px-4 py-2.5 text-sm font-medium transition-all hover:bg-surface"
+            disabled={validationLoading}
+            className="flex-1 flex items-center justify-center gap-2 border border-border hover:border-accent/50 text-text rounded-lg px-4 py-2.5 text-sm font-medium transition-all hover:bg-surface disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <CheckCircle className="w-4 h-4" />
-            {t('adminDeployment.validate', 'Validate Config')}
+            {validationLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <CheckCircle className="w-4 h-4" />
+            )}
+            {validationLoading ? t('adminDeployment.validating', 'Validating...') : t('adminDeployment.validate', 'Validate Config')}
           </button>
           <button
             onClick={handleExport}
@@ -1154,33 +1584,124 @@ export function AdminDeploymentConfig() {
         )}
 
         {/* Validation Result */}
-        {validationResult && (
-          <div className={`border rounded-xl p-4 ${validationResult.valid ? 'bg-success/10 border-success/20' : 'bg-error/10 border-error/20'}`}>
-            <div className="flex items-center gap-2 mb-2">
-              {validationResult.valid ? (
-                <CheckCircle className="w-5 h-5 text-success" />
-              ) : (
-                <XCircle className="w-5 h-5 text-error" />
-              )}
-              <span className={`font-medium ${validationResult.valid ? 'text-success' : 'text-error'}`}>
-                {validationResult.valid
-                  ? t('adminDeployment.configValid', 'Configuration Valid')
-                  : t('adminDeployment.configInvalid', 'Configuration Invalid')}
-              </span>
+        {validationState && !validationDismissed && (
+          <div
+            className={`border rounded-xl p-4 ${
+              validationIsStale
+                ? 'bg-warning/5 border-warning/30'
+                : (validationState.result.valid ? 'bg-success/5 border-success/30' : 'bg-error/5 border-error/30')
+            }`}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-2">
+                {validationIsStale ? (
+                  <AlertCircle className="w-5 h-5 text-warning" />
+                ) : validationState.result.valid ? (
+                  <CheckCircle className="w-5 h-5 text-success" />
+                ) : (
+                  <XCircle className="w-5 h-5 text-error" />
+                )}
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`font-medium ${
+                        validationIsStale
+                          ? 'text-warning'
+                          : (validationState.result.valid ? 'text-success' : 'text-error')
+                      }`}
+                    >
+                      {validationIsStale
+                        ? t('adminDeployment.validationStaleTitle', 'Validation Out of Date')
+                        : (validationState.result.valid
+                          ? t('adminDeployment.configValid', 'Configuration Valid')
+                          : t('adminDeployment.configInvalid', 'Configuration Invalid'))}
+                    </span>
+                    {validationIsStale && (
+                      <span className="text-[10px] bg-warning/20 text-warning px-2 py-0.5 rounded-full">
+                        {t('adminDeployment.validationStalePill', 'Out of date')}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-text-secondary mt-1">
+                    {t('adminDeployment.validationTimestamp', 'Validated {{time}}', { time: formatTimestamp(validationState.validatedAt) })}
+                    {configSignature.lastUpdatedAt && (
+                      <> · {t('adminDeployment.validationConfigUpdated', 'Config updated {{time}}', { time: formatTimestamp(configSignature.lastUpdatedAt) })}</>
+                    )}
+                  </p>
+                  {validationIsStale && (
+                    <p className="text-xs text-warning mt-2">
+                      {t('adminDeployment.validationStaleDesc', 'Configuration changed since last validation. Revalidate to confirm.')}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => setValidationDismissed(true)}
+                className="text-text-secondary hover:text-text transition-colors"
+                aria-label={t('common.close', 'Close')}
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            {validationResult.errors.length > 0 && (
-              <ul className="text-sm text-error list-disc list-inside">
-                {validationResult.errors.map((err, i) => (
-                  <li key={i}>{err}</li>
-                ))}
-              </ul>
+
+            <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
+              <span className="text-text-secondary">
+                {validationIsStale
+                  ? t('adminDeployment.validationSummaryStale', 'Last result: {{errors}} errors, {{warnings}} warnings', {
+                      errors: validationState.result.errors.length,
+                      warnings: validationState.result.warnings.length,
+                    })
+                  : t('adminDeployment.validationSummary', '{{errors}} errors, {{warnings}} warnings', {
+                      errors: validationState.result.errors.length,
+                      warnings: validationState.result.warnings.length,
+                    })}
+              </span>
+              {validationIsStale && (
+                <button
+                  onClick={handleValidate}
+                  disabled={validationLoading}
+                  className="inline-flex items-center gap-1.5 text-xs text-accent hover:text-accent-hover transition-colors disabled:opacity-50"
+                >
+                  {validationLoading ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-3 h-3" />
+                  )}
+                  {t('adminDeployment.revalidate', 'Revalidate')}
+                </button>
+              )}
+            </div>
+
+            {validationState.result.errors.length === 0 && validationState.result.warnings.length === 0 && (
+              <p className="text-xs text-text-secondary mt-3">
+                {t('adminDeployment.validationNoIssues', 'No issues found')}
+              </p>
             )}
-            {validationResult.warnings.length > 0 && (
-              <ul className="text-sm text-warning list-disc list-inside mt-2">
-                {validationResult.warnings.map((warn, i) => (
-                  <li key={i}>{warn}</li>
-                ))}
-              </ul>
+
+            {validationState.result.errors.length > 0 && (
+              <>
+                <p className="text-xs font-medium text-error mt-3">
+                  {t('adminDeployment.validationErrors', 'Errors')}
+                </p>
+                <ul className="text-sm text-error list-disc list-inside mt-1">
+                  {validationState.result.errors.map((err, i) => (
+                    <li key={i}>{err}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+
+            {validationState.result.warnings.length > 0 && (
+              <>
+                <p className="text-xs font-medium text-warning mt-3">
+                  {t('adminDeployment.validationWarnings', 'Warnings')}
+                </p>
+                <ul className="text-sm text-warning list-disc list-inside mt-1">
+                  {validationState.result.warnings.map((warn, i) => (
+                    <li key={i}>{warn}</li>
+                  ))}
+                </ul>
+              </>
             )}
           </div>
         )}
@@ -1930,6 +2451,524 @@ export function AdminDeploymentConfig() {
                 <button
                   onClick={() => setDomainsHelpPage((prev) => Math.min(DOMAINS_HELP_PAGES.length - 1, prev + 1))}
                   disabled={domainsHelpPage === DOMAINS_HELP_PAGES.length - 1}
+                  className="flex items-center gap-1 text-sm text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  {t('common.next', 'Next')}
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Storage Help Modal */}
+        {showStorageHelpModal && (
+          <div
+            ref={storageHelpModalRef}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="storage-help-modal-title"
+            onKeyDown={(e) => e.key === 'Escape' && handleCloseStorageHelpModal()}
+            tabIndex={-1}
+          >
+            <div className="bg-surface border border-border rounded-xl p-6 w-full max-w-lg mx-4 shadow-xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 id="storage-help-modal-title" className="text-lg font-semibold text-text flex items-center gap-2">
+                  <HelpCircle className="w-5 h-5" />
+                  {STORAGE_HELP_PAGES[storageHelpPage].title}
+                </h3>
+                <button
+                  onClick={handleCloseStorageHelpModal}
+                  className="text-text-muted hover:text-text transition-colors"
+                  aria-label={t('common.close', 'Close')}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="min-h-[280px]">
+                {STORAGE_HELP_PAGES[storageHelpPage].content === 'overview' ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('adminDeployment.storageHelp.overviewDesc', 'This section controls where Sanctum keeps its data. Most admins can leave the defaults. You only need to change this if you’re moving files to a new disk, using external storage, or running on custom infrastructure.')}
+                    </p>
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                      <p className="text-xs text-text-muted">
+                        {t('adminDeployment.storageHelp.overviewWhen', 'When you’d change this: migrating servers, using a managed database, or adjusting volume mounts.')}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">SQLite Database</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {t('adminDeployment.storageHelp.sqliteDesc', 'Stores users, settings, and job status. Controlled by SQLITE_PATH.')}
+                        </p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">Uploads Folder</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {t('adminDeployment.storageHelp.uploadsDesc', 'Raw documents are saved here (UPLOADS_DIR). Mounted to the backend container.')}
+                        </p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">Vector Database</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {t('adminDeployment.storageHelp.qdrantDesc', 'Embeddings are stored in Qdrant at QDRANT_HOST:QDRANT_PORT.')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : STORAGE_HELP_PAGES[storageHelpPage].content === 'paths' ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('adminDeployment.storageHelp.pathsDesc', 'These are internal container paths. If you change them, you must also update your Docker volume mounts to match.')}
+                    </p>
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                      <p className="text-xs text-text-muted">
+                        {t('adminDeployment.storageHelp.pathsWhen', 'Use this if you need to store data on a different disk or a mounted network drive.')}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">SQLITE_PATH</p>
+                        <p className="text-xs text-text-muted mt-1">/data/sanctum.db</p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">UPLOADS_DIR</p>
+                        <p className="text-xs text-text-muted mt-1">/uploads</p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">QDRANT_HOST / QDRANT_PORT</p>
+                        <p className="text-xs text-text-muted mt-1">qdrant / 6333</p>
+                      </div>
+                    </div>
+                    <div className="bg-warning/10 border border-warning/20 rounded-lg p-3 mt-4">
+                      <p className="text-xs text-warning">
+                        {t('adminDeployment.storageHelp.pathsWarning', 'Changing these requires a service restart and matching volume mounts.')}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('adminDeployment.storageHelp.backupsDesc', 'For backups or migrations, you’ll want copies of the SQLite database and uploads folder. If you use Qdrant in production, snapshot it too.')}
+                    </p>
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                      <p className="text-xs text-text-muted">
+                        {t('adminDeployment.storageHelp.backupsWhen', 'Use this before upgrading servers or switching hosting providers.')}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-xs text-text-muted mb-1">{t('adminDeployment.storageHelp.backupStep1', '1) Stop services')}</p>
+                        <p className="text-xs text-text">{t('adminDeployment.storageHelp.backupStep1Desc', 'docker compose down')}</p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-xs text-text-muted mb-1">{t('adminDeployment.storageHelp.backupStep2', '2) Copy data')}</p>
+                        <p className="text-xs text-text">{t('adminDeployment.storageHelp.backupStep2Desc', 'Copy /data/sanctum.db and /uploads, plus Qdrant snapshots if used.')}</p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-xs text-text-muted mb-1">{t('adminDeployment.storageHelp.backupStep3', '3) Restore')}</p>
+                        <p className="text-xs text-text">{t('adminDeployment.storageHelp.backupStep3Desc', 'Mount the same paths and restart services.')}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
+                <button
+                  onClick={() => setStorageHelpPage((prev) => Math.max(0, prev - 1))}
+                  disabled={storageHelpPage === 0}
+                  className="flex items-center gap-1 text-sm text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  {t('common.previous', 'Previous')}
+                </button>
+
+                <div className="flex items-center gap-1.5">
+                  {STORAGE_HELP_PAGES.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setStorageHelpPage(index)}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        index === storageHelpPage
+                          ? 'bg-accent'
+                          : 'bg-border hover:bg-text-muted'
+                      }`}
+                      aria-label={`${t('adminDeployment.storageHelp.goToPage', 'Go to page')} ${index + 1}`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setStorageHelpPage((prev) => Math.min(STORAGE_HELP_PAGES.length - 1, prev + 1))}
+                  disabled={storageHelpPage === STORAGE_HELP_PAGES.length - 1}
+                  className="flex items-center gap-1 text-sm text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  {t('common.next', 'Next')}
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Search Help Modal */}
+        {showSearchHelpModal && (
+          <div
+            ref={searchHelpModalRef}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="search-help-modal-title"
+            onKeyDown={(e) => e.key === 'Escape' && handleCloseSearchHelpModal()}
+            tabIndex={-1}
+          >
+            <div className="bg-surface border border-border rounded-xl p-6 w-full max-w-lg mx-4 shadow-xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 id="search-help-modal-title" className="text-lg font-semibold text-text flex items-center gap-2">
+                  <HelpCircle className="w-5 h-5" />
+                  {SEARCH_HELP_PAGES[searchHelpPage].title}
+                </h3>
+                <button
+                  onClick={handleCloseSearchHelpModal}
+                  className="text-text-muted hover:text-text transition-colors"
+                  aria-label={t('common.close', 'Close')}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="min-h-[280px]">
+                {SEARCH_HELP_PAGES[searchHelpPage].content === 'overview' ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('adminDeployment.searchHelp.overviewDesc', 'Web search lets the assistant fetch current information. It relies on SearXNG, an open-source search proxy you control.')}
+                    </p>
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                      <p className="text-xs text-text-muted">
+                        {t('adminDeployment.searchHelp.overviewWhen', 'Change this when you want the assistant to search the web or if your SearXNG instance moves.')}
+                      </p>
+                    </div>
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                      <p className="text-xs text-text-muted mb-1">{t('adminDeployment.searchHelp.overviewNote', 'If you disable SearXNG, the AI will only use your uploaded documents.')}</p>
+                    </div>
+                  </div>
+                ) : SEARCH_HELP_PAGES[searchHelpPage].content === 'config' ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('adminDeployment.searchHelp.configDesc', 'Point SEARXNG_URL to your SearXNG instance. In Docker Compose, the default service name works.')}
+                    </p>
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3 font-mono text-xs">
+                      SEARXNG_URL=http://searxng:8080
+                    </div>
+                    <p className="text-xs text-text-muted">
+                      {t('adminDeployment.searchHelp.configNote', 'If SearXNG is hosted externally, use its public URL instead.')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('adminDeployment.searchHelp.privacyDesc', 'Search queries are sent to your SearXNG instance. Configure logging and rate limits there based on your privacy requirements.')}
+                    </p>
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                      <p className="text-xs text-text-muted">
+                        {t('adminDeployment.searchHelp.privacyWhen', 'Use this section when your org has specific privacy or compliance requirements.')}
+                      </p>
+                    </div>
+                    <div className="bg-warning/10 border border-warning/20 rounded-lg p-3">
+                      <p className="text-xs text-warning">
+                        {t('adminDeployment.searchHelp.privacyWarning', 'If you do not want external requests, disable web search by clearing SEARXNG_URL.')}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
+                <button
+                  onClick={() => setSearchHelpPage((prev) => Math.max(0, prev - 1))}
+                  disabled={searchHelpPage === 0}
+                  className="flex items-center gap-1 text-sm text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  {t('common.previous', 'Previous')}
+                </button>
+
+                <div className="flex items-center gap-1.5">
+                  {SEARCH_HELP_PAGES.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSearchHelpPage(index)}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        index === searchHelpPage
+                          ? 'bg-accent'
+                          : 'bg-border hover:bg-text-muted'
+                      }`}
+                      aria-label={`${t('adminDeployment.searchHelp.goToPage', 'Go to page')} ${index + 1}`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setSearchHelpPage((prev) => Math.min(SEARCH_HELP_PAGES.length - 1, prev + 1))}
+                  disabled={searchHelpPage === SEARCH_HELP_PAGES.length - 1}
+                  className="flex items-center gap-1 text-sm text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  {t('common.next', 'Next')}
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Security Help Modal */}
+        {showSecurityHelpModal && (
+          <div
+            ref={securityHelpModalRef}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="security-help-modal-title"
+            onKeyDown={(e) => e.key === 'Escape' && handleCloseSecurityHelpModal()}
+            tabIndex={-1}
+          >
+            <div className="bg-surface border border-border rounded-xl p-6 w-full max-w-lg mx-4 shadow-xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 id="security-help-modal-title" className="text-lg font-semibold text-text flex items-center gap-2">
+                  <HelpCircle className="w-5 h-5" />
+                  {SECURITY_HELP_PAGES[securityHelpPage].title}
+                </h3>
+                <button
+                  onClick={handleCloseSecurityHelpModal}
+                  className="text-text-muted hover:text-text transition-colors"
+                  aria-label={t('common.close', 'Close')}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="min-h-[280px]">
+                {SECURITY_HELP_PAGES[securityHelpPage].content === 'overview' ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('adminDeployment.securityHelp.overviewDesc', 'These settings affect authentication behavior and the URLs used in magic-link emails. Defaults are safe for local development.')}
+                    </p>
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                      <p className="text-xs text-text-muted mb-1">{t('adminDeployment.securityHelp.overviewNote', 'For production, keep simulation flags disabled and set a correct FRONTEND_URL.')}</p>
+                      <p className="text-xs text-text-muted mt-2">
+                        {t('adminDeployment.securityHelp.overviewWhen', 'Change these when moving from local testing to a public deployment.')}
+                      </p>
+                    </div>
+                  </div>
+                ) : SECURITY_HELP_PAGES[securityHelpPage].content === 'dev' ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('adminDeployment.securityHelp.devDesc', 'These flags are for testing only and should be off in production.')}
+                    </p>
+                    <div className="space-y-2">
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">SIMULATE_USER_AUTH</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {t('adminDeployment.securityHelp.simUserDesc', 'Bypasses magic-link verification for user logins.')}
+                        </p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">SIMULATE_ADMIN_AUTH</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {t('adminDeployment.securityHelp.simAdminDesc', 'Shows a mock Nostr auth option in the admin flow.')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="bg-warning/10 border border-warning/20 rounded-lg p-3 mt-4">
+                      <p className="text-xs text-warning">
+                        {t('adminDeployment.securityHelp.devWarning', 'Never enable these flags in production environments.')}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('adminDeployment.securityHelp.frontendDesc', 'FRONTEND_URL is used for magic-link emails and should match your public UI domain.')}
+                    </p>
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3 font-mono text-xs">
+                      FRONTEND_URL=https://app.example.com
+                    </div>
+                    <p className="text-xs text-text-muted">
+                      {t('adminDeployment.securityHelp.frontendNote', 'If this is wrong, login links may send users to the wrong place.')}
+                    </p>
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                      <p className="text-xs text-text-muted">
+                        {t('adminDeployment.securityHelp.frontendWhen', 'Update this whenever your public domain changes.')}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
+                <button
+                  onClick={() => setSecurityHelpPage((prev) => Math.max(0, prev - 1))}
+                  disabled={securityHelpPage === 0}
+                  className="flex items-center gap-1 text-sm text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  {t('common.previous', 'Previous')}
+                </button>
+
+                <div className="flex items-center gap-1.5">
+                  {SECURITY_HELP_PAGES.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSecurityHelpPage(index)}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        index === securityHelpPage
+                          ? 'bg-accent'
+                          : 'bg-border hover:bg-text-muted'
+                      }`}
+                      aria-label={`${t('adminDeployment.securityHelp.goToPage', 'Go to page')} ${index + 1}`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setSecurityHelpPage((prev) => Math.min(SECURITY_HELP_PAGES.length - 1, prev + 1))}
+                  disabled={securityHelpPage === SECURITY_HELP_PAGES.length - 1}
+                  className="flex items-center gap-1 text-sm text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  {t('common.next', 'Next')}
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SSL Help Modal */}
+        {showSslHelpModal && (
+          <div
+            ref={sslHelpModalRef}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ssl-help-modal-title"
+            onKeyDown={(e) => e.key === 'Escape' && handleCloseSslHelpModal()}
+            tabIndex={-1}
+          >
+            <div className="bg-surface border border-border rounded-xl p-6 w-full max-w-lg mx-4 shadow-xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 id="ssl-help-modal-title" className="text-lg font-semibold text-text flex items-center gap-2">
+                  <HelpCircle className="w-5 h-5" />
+                  {SSL_HELP_PAGES[sslHelpPage].title}
+                </h3>
+                <button
+                  onClick={handleCloseSslHelpModal}
+                  className="text-text-muted hover:text-text transition-colors"
+                  aria-label={t('common.close', 'Close')}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="min-h-[280px]">
+                {SSL_HELP_PAGES[sslHelpPage].content === 'overview' ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('adminDeployment.sslHelp.overviewDesc', 'Use these settings when enabling HTTPS. If a reverse proxy handles TLS for you, only the proxy settings are needed.')}
+                    </p>
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                      <p className="text-xs text-text-muted mb-1">
+                        {t('adminDeployment.sslHelp.overviewNote', 'If you use a reverse proxy like Nginx or Caddy, set TRUSTED_PROXIES and leave SSL_CERT_PATH/SSL_KEY_PATH empty.')}
+                      </p>
+                      <p className="text-xs text-text-muted mt-2">
+                        {t('adminDeployment.sslHelp.overviewWhen', 'Change this when you move from HTTP to HTTPS or add a proxy/CDN.')}
+                      </p>
+                    </div>
+                  </div>
+                ) : SSL_HELP_PAGES[sslHelpPage].content === 'certs' ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('adminDeployment.sslHelp.certsDesc', 'Only set certificate paths when the backend handles TLS directly.')}
+                    </p>
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                      <p className="text-xs text-text-muted">
+                        {t('adminDeployment.sslHelp.certsWhen', 'Use this if you are not terminating TLS in a reverse proxy.')}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">SSL_CERT_PATH</p>
+                        <p className="text-xs text-text-muted mt-1">/etc/ssl/certs/your-cert.pem</p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">SSL_KEY_PATH</p>
+                        <p className="text-xs text-text-muted mt-1">/etc/ssl/private/your-key.pem</p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">TRUSTED_PROXIES</p>
+                        <p className="text-xs text-text-muted mt-1">{t('adminDeployment.sslHelp.proxiesDesc', 'Comma-separated proxy identifiers (cloudflare, aws, custom).')}</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-muted mb-4">
+                      {t('adminDeployment.sslHelp.httpsDesc', 'Control HTTPS behavior and monitoring once TLS is enabled.')}
+                    </p>
+                    <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                      <p className="text-xs text-text-muted">
+                        {t('adminDeployment.sslHelp.httpsWhen', 'Adjust these after HTTPS is working and you want stricter security.')}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">FORCE_HTTPS</p>
+                        <p className="text-xs text-text-muted mt-1">{t('adminDeployment.sslHelp.forceDesc', 'Redirect HTTP requests to HTTPS.')}</p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">HSTS_MAX_AGE</p>
+                        <p className="text-xs text-text-muted mt-1">{t('adminDeployment.sslHelp.hstsDesc', 'Browser HSTS max-age in seconds (only enable after HTTPS is stable).')}</p>
+                      </div>
+                      <div className="bg-surface-overlay border border-border rounded-lg p-3">
+                        <p className="text-sm font-medium text-text">MONITORING_URL</p>
+                        <p className="text-xs text-text-muted mt-1">{t('adminDeployment.sslHelp.monitoringDesc', 'Public health endpoint used by monitoring services.')}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
+                <button
+                  onClick={() => setSslHelpPage((prev) => Math.max(0, prev - 1))}
+                  disabled={sslHelpPage === 0}
+                  className="flex items-center gap-1 text-sm text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  {t('common.previous', 'Previous')}
+                </button>
+
+                <div className="flex items-center gap-1.5">
+                  {SSL_HELP_PAGES.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSslHelpPage(index)}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        index === sslHelpPage
+                          ? 'bg-accent'
+                          : 'bg-border hover:bg-text-muted'
+                      }`}
+                      aria-label={`${t('adminDeployment.sslHelp.goToPage', 'Go to page')} ${index + 1}`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setSslHelpPage((prev) => Math.min(SSL_HELP_PAGES.length - 1, prev + 1))}
+                  disabled={sslHelpPage === SSL_HELP_PAGES.length - 1}
                   className="flex items-center gap-1 text-sm text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
                   {t('common.next', 'Next')}

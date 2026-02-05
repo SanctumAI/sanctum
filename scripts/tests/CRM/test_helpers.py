@@ -56,14 +56,15 @@ def run_docker_sql(
         raise ValueError(f"run_docker_sql only allows SELECT/WITH statements, got: {sql[:50]}")
 
     # Build command arguments based on output mode
+    # Use -readonly flag to enforce read-only at the file handle level (defense-in-depth)
     if csv_mode:
         # CSV mode: pass .mode csv pragma via stdin
         sql_input = f".mode csv\n{sql_normalized}"
-        cmd = ["docker", "compose", "exec", "-T", "backend", "sqlite3", db_path]
+        cmd = ["docker", "compose", "exec", "-T", "backend", "sqlite3", "-readonly", db_path]
     else:
         # JSON mode: use -json flag
         sql_input = sql_normalized
-        cmd = ["docker", "compose", "exec", "-T", "backend", "sqlite3", "-json", db_path]
+        cmd = ["docker", "compose", "exec", "-T", "backend", "sqlite3", "-readonly", "-json", db_path]
 
     # Use list argv with stdin for SQL (no shell=True, no escaping needed)
     try:

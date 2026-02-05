@@ -263,7 +263,7 @@ def compute_blind_index_in_docker(email: str) -> str | None:
 
     script = f"from encryption import compute_blind_index; print(compute_blind_index('{escaped_email}'))"
     result = subprocess.run(
-        ["docker", "compose", "exec", "-T", "backend", "python", "-c", script],  # noqa: S603, S607
+        ["docker", "compose", "exec", "-T", "backend", "python", "-c", script],  # noqa: S607
         capture_output=True, text=True, cwd=REPO_ROOT, timeout=30
     )
 

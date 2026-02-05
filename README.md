@@ -20,14 +20,18 @@ cp .env.example .env
 
 ### Start the Stack
 
-Docker Compose is split into infra and app files; include both for the full stack.
+Docker Compose is split into two files:
+- **`docker-compose.infra.yml`** — Infrastructure services (Qdrant, maple-proxy, SearXNG)
+- **`docker-compose.app.yml`** — Application services (backend, frontend)
+
+This separation lets you keep infrastructure running while rebuilding just the app, avoiding database restarts when only code changes.
 
 ```bash
-# Start all services
-docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build
-
-# Or run in detached mode
+# First time or full restart: start everything
 docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build -d
+
+# Rebuild only app (keeps Qdrant/SearXNG running)
+docker compose -f docker-compose.app.yml up --build -d
 ```
 
 First startup will:

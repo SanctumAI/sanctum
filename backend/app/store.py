@@ -6,6 +6,7 @@ Handles storing document chunks and embeddings to Qdrant.
 import os
 import uuid
 import logging
+import asyncio
 from typing import Any
 
 from qdrant_client import QdrantClient
@@ -136,18 +137,11 @@ def ensure_qdrant_collection():
         logger.info(f"Created Qdrant collection: {COLLECTION_NAME} (dim={vector_dim})")
 
 
-async def store_chunks_to_qdrant(
+def _store_chunk_sync(
     chunk_id: str,
     source_text: str,
     source_file: str,
 ) -> dict[str, Any]:
-    """
-    Store a text chunk and its embedding to Qdrant.
-
-    This is a simple storage function that embeds the raw text chunk.
-
-    Returns summary of what was stored.
-    """
     logger.info(f"[{chunk_id}] Storing chunk to Qdrant...")
     qdrant_result = {"points_inserted": 0}
 
@@ -188,6 +182,26 @@ async def store_chunks_to_qdrant(
     return {
         "qdrant": qdrant_result,
     }
+
+
+async def store_chunks_to_qdrant(
+    chunk_id: str,
+    source_text: str,
+    source_file: str,
+) -> dict[str, Any]:
+    """
+    Store a text chunk and its embedding to Qdrant.
+
+    This is a simple storage function that embeds the raw text chunk.
+
+    Returns summary of what was stored.
+    """
+    return await asyncio.to_thread(
+        _store_chunk_sync,
+        chunk_id,
+        source_text,
+        source_file,
+    )
 
 
 async def delete_chunks_from_qdrant(job_id: str) -> int:

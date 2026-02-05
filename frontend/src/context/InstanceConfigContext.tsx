@@ -176,11 +176,11 @@ export function InstanceConfigProvider({ children }: { children: ReactNode }) {
               stored.userIcon ??
               DEFAULT_INSTANCE_CONFIG.userIcon,
             assistantName:
-              settings.assistant_name !== undefined
+              typeof settings.assistant_name === 'string'
                 ? settings.assistant_name
                 : (stored.assistantName ?? DEFAULT_INSTANCE_CONFIG.assistantName),
             userLabel:
-              settings.user_label !== undefined
+              typeof settings.user_label === 'string'
                 ? settings.user_label
                 : (stored.userLabel ?? DEFAULT_INSTANCE_CONFIG.userLabel),
             headerLayout:
@@ -188,7 +188,7 @@ export function InstanceConfigProvider({ children }: { children: ReactNode }) {
               stored.headerLayout ??
               DEFAULT_INSTANCE_CONFIG.headerLayout,
             headerTagline:
-              settings.header_tagline !== undefined
+              typeof settings.header_tagline === 'string'
                 ? settings.header_tagline
                 : (stored.headerTagline ?? DEFAULT_INSTANCE_CONFIG.headerTagline),
             chatBubbleStyle:
@@ -253,9 +253,22 @@ export function InstanceConfigProvider({ children }: { children: ReactNode }) {
   )
 }
 
+let hasWarnedMissingProvider = false
+
 export function useInstanceConfig(): InstanceConfigContextValue {
   const context = useContext(InstanceConfigContext)
   if (!context) {
+    if (import.meta.env.DEV) {
+      if (!hasWarnedMissingProvider) {
+        console.warn('useInstanceConfig used without InstanceConfigProvider (dev fallback enabled).')
+        hasWarnedMissingProvider = true
+      }
+      return {
+        config: DEFAULT_INSTANCE_CONFIG,
+        setConfig: () => {},
+        updateConfig: () => {},
+      }
+    }
     throw new Error('useInstanceConfig must be used within an InstanceConfigProvider')
   }
   return context

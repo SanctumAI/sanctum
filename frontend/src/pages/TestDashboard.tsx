@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Sun, Moon, Settings, Database, ChevronDown, Key, Shield, Users, Sliders, FileText, Zap } from 'lucide-react'
+import { Sun, Moon, Settings, Database, ChevronDown, Key, Shield, Users, Sliders, FileText, Zap, Lock, Unlock } from 'lucide-react'
 import { useTheme } from '../theme'
 import {
   API_BASE,
@@ -2909,6 +2909,25 @@ export function TestDashboard() {
               {tableData && selectedDbTable && (() => {
                 // Filter out ephemeral_pubkey_* columns from display (they're technical data)
                 const displayColumns = tableData.columns.filter(col => !col.startsWith('ephemeral_pubkey_'))
+                const encryptedBaseNames = new Set(
+                  displayColumns
+                    .filter((col) => col.startsWith('encrypted_'))
+                    .map((col) => col.replace('encrypted_', ''))
+                )
+                const renderColumnHeader = (col: string) => {
+                  const isEncrypted = col.startsWith('encrypted_')
+                  const baseName = isEncrypted ? col.replace('encrypted_', '') : col
+                  const isPlaintextCounterpart = !isEncrypted && encryptedBaseNames.has(col)
+                  return (
+                    <span className="inline-flex items-center gap-1">
+                      {isEncrypted && <Lock className="w-3 h-3 text-warning" aria-hidden="true" />}
+                      {isPlaintextCounterpart && (
+                        <Unlock className="w-3 h-3 text-text-muted" aria-hidden="true" />
+                      )}
+                      <span>{baseName}</span>
+                    </span>
+                  )
+                }
                 return (
                   <div>
                     <p className="text-sm font-medium text-text mb-2">
@@ -2920,7 +2939,7 @@ export function TestDashboard() {
                           <tr className="border-b border-border">
                             {displayColumns.map((col) => (
                               <th key={col} className="text-left py-2 px-2 text-text-muted font-medium">
-                                {col.startsWith('encrypted_') ? col.replace('encrypted_', '') + ' 🔓' : col}
+                                {renderColumnHeader(col)}
                               </th>
                             ))}
                           </tr>
@@ -2967,6 +2986,25 @@ export function TestDashboard() {
                     ) : (() => {
                       // Filter out ephemeral_pubkey_* columns from display (they're technical data)
                       const displayColumns = dbQueryResult.columns.filter(col => !col.startsWith('ephemeral_pubkey_'))
+                      const encryptedBaseNames = new Set(
+                        displayColumns
+                          .filter((col) => col.startsWith('encrypted_'))
+                          .map((col) => col.replace('encrypted_', ''))
+                      )
+                      const renderColumnHeader = (col: string) => {
+                        const isEncrypted = col.startsWith('encrypted_')
+                        const baseName = isEncrypted ? col.replace('encrypted_', '') : col
+                        const isPlaintextCounterpart = !isEncrypted && encryptedBaseNames.has(col)
+                        return (
+                          <span className="inline-flex items-center gap-1">
+                            {isEncrypted && <Lock className="w-3 h-3 text-warning" aria-hidden="true" />}
+                            {isPlaintextCounterpart && (
+                              <Unlock className="w-3 h-3 text-text-muted" aria-hidden="true" />
+                            )}
+                            <span>{baseName}</span>
+                          </span>
+                        )
+                      }
                       return (
                         <div>
                           <p className="text-sm text-text-secondary mb-2">
@@ -2978,7 +3016,7 @@ export function TestDashboard() {
                                 <tr className="border-b border-border">
                                   {displayColumns.map((col) => (
                                     <th key={col} className="text-left py-2 px-2 text-text-muted font-medium">
-                                      {col.startsWith('encrypted_') ? col.replace('encrypted_', '') + ' 🔓' : col}
+                                      {renderColumnHeader(col)}
                                     </th>
                                   ))}
                                 </tr>

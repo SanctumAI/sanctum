@@ -1618,7 +1618,7 @@ export function AdminDeploymentConfig() {
                     </span>
                     {validationIsStale && (
                       <span className="text-[10px] bg-warning/20 text-warning px-2 py-0.5 rounded-full">
-                        {t('adminDeployment.validationStalePill', 'Out of date')}
+                        {t('adminDeployment.validationStalePill', 'Out-of-date')}
                       </span>
                     )}
                   </div>

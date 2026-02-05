@@ -24,7 +24,7 @@ services:
       # Magic Link Auth configuration
       - SECRET_KEY=${SECRET_KEY:-dev-secret-change-in-production}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
-      - MOCK_EMAIL=${MOCK_EMAIL:-false}
+      - MOCK_EMAIL=${MOCK_EMAIL:-true}
       # SMTP configuration (optional, not needed if MOCK_EMAIL=true)
       - SMTP_HOST=${SMTP_HOST:-}
       - SMTP_PORT=${SMTP_PORT:-587}

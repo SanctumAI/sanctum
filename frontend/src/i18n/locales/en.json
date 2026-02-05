@@ -571,7 +571,7 @@
     "exportFailed": "Export failed",
     "validationFailed": "Validation request failed",
     "validationStaleTitle": "Validation Out of Date",
-    "validationStalePill": "Out of date",
+    "validationStalePill": "Out-of-date",
     "validationStaleDesc": "Configuration changed since last validation. Revalidate to confirm.",
     "validationTimestamp": "Validated {{time}}",
     "validationConfigUpdated": "Config updated {{time}}",

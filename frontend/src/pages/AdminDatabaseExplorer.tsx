@@ -28,6 +28,7 @@ export function AdminDatabaseExplorer() {
   // Table data state
   const [tableData, setTableData] = useState<Record<string, unknown>[]>([])
   const [isLoadingData, setIsLoadingData] = useState(false)
+  const [tableError, setTableError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalRows, setTotalRows] = useState(0)
@@ -54,6 +55,8 @@ export function AdminDatabaseExplorer() {
   const [decryptNonce, setDecryptNonce] = useState(0)
   const [nip07Available, setNip07Available] = useState(hasNip04Support())
   const [nip07Access, setNip07Access] = useState(false)
+  const [showDecryptHelp, setShowDecryptHelp] = useState(false)
+  const decryptHelpRef = useRef<HTMLDivElement>(null)
 
   // Database help modal state
   const [showDbHelpModal, setShowDbHelpModal] = useState(false)
@@ -189,12 +192,32 @@ export function AdminDatabaseExplorer() {
   // Fetch table data when selection changes
   const fetchTableData = useCallback(async (tableName: string, page: number = 1, isRetry: boolean = false): Promise<void> => {
     setIsLoadingData(true)
+    setTableError(null)
     setExpandedCell(null)  // Clear expanded cell on any data fetch to avoid stale row index references
     try {
       const response = await adminFetch(
         `/admin/db/tables/${tableName}?page=${page}&page_size=${pageSize}`
       )
-      if (!response.ok) throw new Error(t('errors.failedToFetchTableData'))
+      if (!response.ok) {
+        let message = t('errors.failedToFetchTableData')
+        const contentType = response.headers.get('Content-Type') || ''
+        try {
+          if (contentType.includes('application/json')) {
+            const data = await response.json()
+            if (data?.detail) {
+              message = String(data.detail)
+            }
+          } else {
+            const text = await response.text()
+            if (text) {
+              message = text
+            }
+          }
+        } catch {
+          // Fallback to default message
+        }
+        throw new Error(message)
+      }
       const data = await response.json()
 
       // Handle out-of-range page (e.g., after deleting the last record on a page)
@@ -213,6 +236,7 @@ export function AdminDatabaseExplorer() {
       setTotalRows(data.totalRows)
     } catch (error) {
       console.error('Error fetching table data:', error)
+      setTableError(error instanceof Error ? error.message : t('errors.failedToFetchTableData'))
       setTableData([])
       setTotalPages(1)
       setTotalRows(0)
@@ -626,6 +650,31 @@ export function AdminDatabaseExplorer() {
     }
   }, [showDbHelpModal])
 
+  useEffect(() => {
+    if (!showDecryptHelp) return
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!decryptHelpRef.current) return
+      if (!decryptHelpRef.current.contains(event.target as Node)) {
+        setShowDecryptHelp(false)
+      }
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowDecryptHelp(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [showDecryptHelp])
+
   // Database help pages data
   const DB_HELP_PAGES = [
     {
@@ -742,20 +791,37 @@ export function AdminDatabaseExplorer() {
                 <Key className="w-3.5 h-3.5" />
                 {t('admin.database.unlockDecryption', 'Unlock decryption')}
               </button>
-              <button
-                type="button"
-                className="text-text-muted hover:text-accent transition-colors"
-                title={t(
-                  'admin.database.decryptHelp',
-                  'Decryption happens automatically in the background. If your NIP-07 extension did not prompt, click “Unlock decryption” to trigger it. Only admins with the private key in their NIP-07 extension can decrypt encrypted fields.'
+              <div className="relative" ref={decryptHelpRef}>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setShowDecryptHelp((current) => !current)
+                  }}
+                  className="btn-ghost p-1.5 rounded-lg transition-all text-text-muted hover:text-accent"
+                  aria-label={t(
+                    'admin.database.decryptHelp',
+                    'Decryption happens automatically in the background. If your NIP-07 extension did not prompt, click “Unlock decryption” to trigger it. Only admins with the private key in their NIP-07 extension can decrypt encrypted fields.'
+                  )}
+                  aria-expanded={showDecryptHelp}
+                  aria-controls="db-decrypt-help-popover"
+                  aria-describedby={showDecryptHelp ? 'db-decrypt-help-popover' : undefined}
+                >
+                  <HelpCircle className="w-4 h-4" />
+                </button>
+                {showDecryptHelp && (
+                  <div
+                    id="db-decrypt-help-popover"
+                    role="tooltip"
+                    className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-lg border border-border bg-surface p-3 text-xs text-text-muted shadow-xl z-50"
+                  >
+                    {t(
+                      'admin.database.decryptHelp',
+                      'Decryption happens automatically in the background. If your NIP-07 extension did not prompt, click “Unlock decryption” to trigger it. Only admins with the private key in their NIP-07 extension can decrypt encrypted fields.'
+                    )}
+                  </div>
                 )}
-                aria-label={t(
-                  'admin.database.decryptHelp',
-                  'Decryption happens automatically in the background. If your NIP-07 extension did not prompt, click “Unlock decryption” to trigger it. Only admins with the private key in their NIP-07 extension can decrypt encrypted fields.'
-                )}
-              >
-                <HelpCircle className="w-4 h-4" />
-              </button>
+              </div>
             </div>
 
             {/* Query Mode Toggle */}
@@ -1050,6 +1116,19 @@ export function AdminDatabaseExplorer() {
                 {isLoadingData ? (
                   <div className="flex items-center justify-center h-full">
                     <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : tableError ? (
+                  <div className="flex flex-col items-center justify-center h-full text-text-muted px-6">
+                    <div className="bg-error/10 border border-error/20 rounded-lg p-4 max-w-xl">
+                      <p className="text-sm text-error font-medium">{t('admin.database.error')}</p>
+                      <p className="text-xs text-text-muted mt-1 break-words">{tableError}</p>
+                      <button
+                        onClick={() => selectedTable && fetchTableData(selectedTable, currentPage)}
+                        className="mt-3 btn btn-ghost btn-sm"
+                      >
+                        {t('common.retry', 'Retry')}
+                      </button>
+                    </div>
                   </div>
                 ) : tableData.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-text-muted">

@@ -1695,20 +1695,27 @@ async def get_db_table_data(
     if table_name not in ALLOWED_TABLES:
         raise HTTPException(status_code=403, detail=f"Access to table '{table_name}' is not allowed")
 
-    columns = get_table_columns(table_name)
-    total_rows = get_table_row_count(table_name)
-    total_pages = math.ceil(total_rows / page_size) if total_rows > 0 else 1
+    try:
+        columns = get_table_columns(table_name)
+        total_rows = get_table_row_count(table_name)
+        total_pages = math.ceil(total_rows / page_size) if total_rows > 0 else 1
 
-    # Get paginated rows
-    offset = (page - 1) * page_size
-    conn = database.get_connection()
-    cursor = conn.cursor()
-    cursor.execute(f"SELECT * FROM {table_name} LIMIT ? OFFSET ?", (page_size, offset))
+        # Get paginated rows
+        offset = (page - 1) * page_size
+        conn = database.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT * FROM {table_name} LIMIT ? OFFSET ?", (page_size, offset))
 
-    # Convert to list of dicts
-    col_names = [col.name for col in columns]
-    rows = [dict(zip(col_names, row)) for row in cursor.fetchall()]
-    cursor.close()
+        # Convert to list of dicts
+        col_names = [col.name for col in columns]
+        rows = [dict(zip(col_names, row)) for row in cursor.fetchall()]
+        cursor.close()
+    except sqlite3.Error as error:
+        logger.exception("Database error fetching table data", extra={"table": table_name})
+        raise HTTPException(
+            status_code=500,
+            detail=f"Database error reading table '{table_name}': {error}"
+        )
 
     return TableDataResponse(
         table=table_name,

@@ -32,6 +32,8 @@ def get_connection():
         _connection = sqlite3.connect(SQLITE_PATH, check_same_thread=False)
         _connection.row_factory = sqlite3.Row  # Enable dict-like access
         _connection.execute("PRAGMA foreign_keys = ON")  # Enable FK constraints
+        _connection.execute("PRAGMA journal_mode = WAL")  # Improve read/write concurrency
+        _connection.execute("PRAGMA busy_timeout = 3000")  # Wait briefly if DB is locked
         logger.info(f"Connected to SQLite database: {SQLITE_PATH}")
     return _connection
 

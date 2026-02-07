@@ -351,7 +351,7 @@ def main():
             print(f"  ⚠ Backend returned {health.status_code}")
     except Exception as e:
         print(f"  ✗ Backend unreachable: {e}")
-        print("\nRun: docker compose up --build")
+        print("\nRun: docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build")
         return
     
     # Run sessions

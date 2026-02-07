@@ -11,6 +11,7 @@ Key principles:
 """
 
 import os
+import re
 import logging
 import uuid
 from typing import Optional
@@ -28,10 +29,12 @@ from store import (
     QDRANT_PORT,
 )
 from llm import get_provider
+from utils import sanitize_profile_value
 
 logger = logging.getLogger("sanctum.query")
 
 router = APIRouter(prefix="/query", tags=["query"])
+
 
 # Configuration
 TOP_K_VECTORS = int(os.getenv("RAG_TOP_K", "8"))  # More context for nuance
@@ -56,6 +59,7 @@ class QueryRequest(BaseModel):
     jurisdiction: Optional[str] = None  # e.g., "California", "Germany"
     situation_details: Optional[str] = None  # Any facts they share
     tools: list[str] = []  # Tool IDs enabled for this request
+    job_ids: Optional[list[str]] = None  # Filter to specific documents by job ID
 
 
 class QueryResponse(BaseModel):
@@ -85,7 +89,11 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
     from ai_config import get_llm_parameters
 
     question = request.question
-    llm_params = get_llm_parameters()
+
+    # Get user_type_id from authenticated user for per-type config
+    user_type_id = user.get("user_type_id")
+
+    llm_params = get_llm_parameters(user_type_id=user_type_id) or {}
 
     # Get top_k from config if not specified in request
     if request.top_k is not None:
@@ -117,19 +125,71 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
     logger.info(f"RAG query (session={session_id[:8]}): '{question[:50]}...'")
     
     try:
+        # Import database module once at the start of the function
+        import database
+
         # 1. Embed the query (include conversation context for better retrieval)
         search_query = _build_search_query(question, session)
         query_embedding = embed_texts([f"query: {search_query}"])[0]
-        
-        # 2. Vector search in Qdrant
+
+        # 2. Build filter for document access control
+        # Admins can search all documents; non-admin users are restricted to their allowed documents
+        search_filter = None
+        is_admin_user = user.get("type") == "admin"
+
+        if is_admin_user:
+            # Admins: only filter if they explicitly request specific job_ids
+            if request.job_ids and len(request.job_ids) > 0:
+                search_filter = {
+                    "should": [
+                        {"key": "job_id", "match": {"value": job_id}}
+                        for job_id in request.job_ids
+                    ]
+                }
+                logger.debug(f"Admin filtering search to {len(request.job_ids)} documents")
+        else:
+            # Non-admin users: always filter to their allowed documents
+            if user_type_id is None:
+                # No user type means no document access for non-admin users.
+                # Avoid querying availability with None to prevent global access.
+                available_job_ids: set[str] = set()
+            else:
+                available_job_ids = set(database.get_available_documents_for_user_type(user_type_id))
+
+            if request.job_ids and len(request.job_ids) > 0:
+                # User requested specific documents - intersect with allowed
+                allowed_job_ids = [jid for jid in request.job_ids if jid in available_job_ids]
+            else:
+                # No specific request - use all allowed documents for their user type
+                allowed_job_ids = list(available_job_ids)
+
+            if not allowed_job_ids:
+                # No accessible documents - return zero results
+                logger.warning(f"User has no accessible documents (user_type_id={user_type_id})")
+                search_filter = {"must": [{"key": "job_id", "match": {"value": "__impossible__"}}]}
+            else:
+                # Build OR filter: match any of the allowed job_ids
+                search_filter = {
+                    "should": [
+                        {"key": "job_id", "match": {"value": job_id}}
+                        for job_id in allowed_job_ids
+                    ]
+                }
+                logger.debug(f"Filtering search to {len(allowed_job_ids)} documents for user_type_id={user_type_id}")
+
+        # 3. Vector search in Qdrant
         qdrant_url = f"http://{QDRANT_HOST}:{QDRANT_PORT}/collections/{COLLECTION_NAME}/points/search"
+        search_payload = {
+            "vector": query_embedding,
+            "limit": top_k,
+            "with_payload": True,
+        }
+        if search_filter:
+            search_payload["filter"] = search_filter
+
         search_response = httpx.post(
             qdrant_url,
-            json={
-                "vector": query_embedding,
-                "limit": top_k,
-                "with_payload": True,
-            },
+            json=search_payload,
             timeout=30.0,
         )
         search_response.raise_for_status()
@@ -144,8 +204,23 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         # 4. Build context and call LLM with context-aware prompt
         context = _build_context(chunk_texts, sources)
         session["_last_sources"] = sources  # For dynamic citation
+
+        # Get user profile context for chat personalization (unencrypted fields only)
+        # Skip for dev mode (id=-1) and admin accounts (no user profile in users table)
+        user_profile_context = None
+        user_id = user.get("id")
+        if user_id and user_id != -1 and user.get("type") != "admin":
+            user_profile_context = database.get_user_chat_context_values(
+                user_id=user_id,
+                user_type_id=user_type_id
+            )
+            # Only pass if there's actual data
+            if not user_profile_context:
+                user_profile_context = None
+
         answer, clarifying_questions, full_prompt, search_term = _call_llm_contextual(
-            question, context, session, tools=request.tools
+            question, context, session, tools=request.tools, user_type_id=user_type_id,
+            user_profile_context=user_profile_context
         )
         
         # Add assistant response to history
@@ -176,6 +251,15 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
 
         logger.info(f"RAG complete. Answer: {len(answer)} chars, {len(clarifying_questions)} clarifying Qs, search_term={search_term}, facts={session.get('facts_gathered', {})}")
 
+        # Redact user profile section from debug output to avoid exposing sensitive data
+        # Use line-anchored pattern to avoid stopping at === inside values
+        debug_prompt = re.sub(
+            r'^=== USER PROFILE ===.*?(?=^===|\Z)',
+            '=== USER PROFILE ===\n[REDACTED]\n\n',
+            full_prompt,
+            flags=re.MULTILINE | re.DOTALL
+        )
+
         return QueryResponse(
             answer=answer,
             session_id=session_id,
@@ -183,7 +267,7 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
             graph_context=graph_context,
             clarifying_questions=clarifying_questions,
             search_term=search_term,  # Auto-search trigger (if web-search tool enabled)
-            context_used=full_prompt,  # For debugging - see exactly what LLM received
+            context_used=debug_prompt,  # For debugging - redacted to protect user data
             temperature=actual_temperature,
         )
         
@@ -331,19 +415,34 @@ def _build_context(chunk_texts: list[str], sources: list[dict]) -> str:
     return "\n".join(parts)
 
 
-def _call_llm_contextual(question: str, context: str, session: dict, tools: Optional[list[str]] = None) -> tuple[str, list[str], str, Optional[str]]:
+def _call_llm_contextual(
+    question: str,
+    context: str,
+    session: dict,
+    tools: Optional[list[str]] = None,
+    user_type_id: int | None = None,
+    user_profile_context: dict[str, str] | None = None
+) -> tuple[str, list[str], str, Optional[str]]:
     """
     Call LLM with context-aware prompt.
     Returns (answer, list of clarifying questions, full_prompt for debugging, search_term or None).
+
+    Args:
+        question: The user's question
+        context: Retrieved context from vector search
+        session: Session state dict
+        tools: List of enabled tool IDs
+        user_type_id: If provided, uses user-type-specific prompt sections and parameters
+        user_profile_context: Optional dict of {field_name: value} for user profile data
     """
     import re
     from ai_config import get_prompt_sections, get_llm_parameters
     llm = get_provider()
     tools = tools or []
 
-    # Get prompt sections from database (with defensive fallbacks)
-    prompt_sections = get_prompt_sections() or {}
-    llm_params = get_llm_parameters() or {}
+    # Get prompt sections from database with user-type overrides if applicable
+    prompt_sections = get_prompt_sections(user_type_id=user_type_id) or {}
+    llm_params = get_llm_parameters(user_type_id=user_type_id) or {}
 
     # Get temperature from config (with fallback and type coercion)
     try:
@@ -380,6 +479,12 @@ def _call_llm_contextual(question: str, context: str, session: dict, tools: Opti
     else:
         known_facts_section = "=== NO FACTS CONFIRMED YET ===\nAsk about location and context early, but only once per conversation."
         jurisdiction_note = "We don't know location yet. Ask about it, but don't repeatedly ask if user doesn't answer."
+
+    # Build user profile section (if any profile data is available)
+    user_profile_section = ""
+    if user_profile_context:
+        profile_lines = [f"  - {field_name}: {sanitize_profile_value(value)}" for field_name, value in user_profile_context.items()]
+        user_profile_section = "\n\n=== USER PROFILE ===\nThe following information is known about the user:\n" + "\n".join(profile_lines)
 
     # Auto-search instruction if web-search tool is enabled
     search_instruction = ""
@@ -425,7 +530,7 @@ Make search terms specific: "[SEARCH: local library hours downtown]"
 
     prompt = f"""You are a helpful, knowledgeable assistant.
 
-{known_facts_section}
+{known_facts_section}{user_profile_section}
 
 {style_section}
 

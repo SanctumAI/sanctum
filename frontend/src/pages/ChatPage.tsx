@@ -9,7 +9,7 @@ import { DocumentScope, DocumentSource } from '../components/chat/DocumentScope'
 import { ExportButton } from '../components/chat/ExportButton'
 import { AppHeader } from '../components/shared/AppHeader'
 import { Message } from '../components/chat/ChatMessage'
-import { API_BASE, STORAGE_KEYS } from '../types/onboarding'
+import { API_BASE, STORAGE_KEYS, getSelectedUserTypeId } from '../types/onboarding'
 import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
 import { decryptField, hasNip04Support } from '../utils/encryption'
 
@@ -198,7 +198,11 @@ export function ChatPage() {
 
     const fetchSessionDefaults = async () => {
       try {
-        const res = await fetch(`${API_BASE}/session-defaults`)
+        const userTypeId = getSelectedUserTypeId()
+        const url = userTypeId !== null
+          ? `${API_BASE}/session-defaults?user_type_id=${userTypeId}`
+          : `${API_BASE}/session-defaults`
+        const res = await fetch(url)
         if (res.ok) {
           const data = await res.json()
           // Apply web search default
@@ -356,7 +360,7 @@ export function ChatPage() {
       if (!response) {
         const endpoint = useRag ? '/query' : '/llm/chat'
         const body = useRag
-          ? { question: content, top_k: 8, tools: selectedTools, ...(ragSessionId && { session_id: ragSessionId }) }
+          ? { question: content, top_k: 8, tools: selectedTools, job_ids: selectedDocuments, ...(ragSessionId && { session_id: ragSessionId }) }
           : { message: content, tools: selectedTools }
 
         response = await fetch(`${API_BASE}${endpoint}`, {

@@ -9,14 +9,29 @@ Privacy-first Retrieval-Augmented Generation system for curated knowledge bases.
 - Docker & Docker Compose
 - ~4GB disk space (for embedding model cache)
 
-### Start the Stack
+### Configure Environment (Recommended)
 
 ```bash
-# Start all services
-docker compose up --build
+cp .env.example .env
+# Set MAPLE_API_KEY in .env (required for LLM features)
+# For production email auth, set MOCK_EMAIL=false and configure SMTP_* + FRONTEND_URL
+# You can also manage LLM/SMTP/domain settings later in the admin UI at /admin/deployment
+```
 
-# Or run in detached mode
-docker compose up --build -d
+### Start the Stack
+
+Docker Compose is split into two files:
+- **`docker-compose.infra.yml`** — Infrastructure services (Qdrant, maple-proxy, SearXNG)
+- **`docker-compose.app.yml`** — Application services (backend, frontend)
+
+This separation lets you keep infrastructure running while rebuilding just the app, avoiding database restarts when only code changes.
+
+```bash
+# First time or full restart: start everything
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build -d
+
+# Rebuild only app (keeps infra services running: qdrant, maple-proxy, searxng)
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build -d backend frontend
 ```
 
 First startup will:
@@ -51,6 +66,18 @@ Expected response:
 }
 ```
 
+### Admin Setup (First Run)
+
+Sanctum requires a NIP-07 admin login before user signups are enabled. Open the frontend at `http://localhost:5173` and complete the admin login flow. Until the first admin authenticates, `/auth/magic-link` returns `503` ("Instance not configured").
+
+After the first admin login, additional configuration is available in the admin UI:
+- `/admin/instance` - branding and instance settings
+- `/admin/users` - user types and onboarding fields
+- `/admin/ai` - prompt and LLM parameters
+- `/admin/deployment` - deployment config (LLM, SMTP, domains, SSL)
+
+See `docs/admin-deployment-config.md` for deployment config details.
+
 ### Available Endpoints
 
 | Endpoint | Description |
@@ -58,6 +85,7 @@ Expected response:
 | `GET /` | API info |
 | `GET /health` | Service health check |
 | `GET /test` | Smoke test (Qdrant + health check) |
+| `GET /llm/test` | LLM provider connectivity test |
 
 ### Service URLs
 
@@ -71,10 +99,10 @@ Expected response:
 ### Stop the Stack
 
 ```bash
-docker compose down
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml down
 
 # To also remove volumes (clears all data)
-docker compose down -v
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml down -v
 ```
 
 ## Architecture
@@ -106,13 +134,13 @@ Uses `intfloat/multilingual-e5-base`:
 ### View Logs
 
 ```bash
-docker compose logs -f backend
-docker compose logs -f qdrant
-docker compose logs -f maple-proxy
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs -f backend
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs -f qdrant
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs -f maple-proxy
 ```
 
 ### Rebuild Backend
 
 ```bash
-docker compose up --build backend
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build backend
 ```

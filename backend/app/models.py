@@ -3,7 +3,7 @@ Sanctum Pydantic Models
 Request and response models for user/admin management.
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
@@ -60,6 +60,21 @@ class InstanceSettings(BaseModel):
     instance_name: Optional[str] = None
     primary_color: Optional[str] = None
     description: Optional[str] = None
+    logo_url: Optional[str] = None
+    favicon_url: Optional[str] = None
+    apple_touch_icon_url: Optional[str] = None
+    icon: Optional[str] = None
+    assistant_icon: Optional[str] = None
+    user_icon: Optional[str] = None
+    assistant_name: Optional[str] = None
+    user_label: Optional[str] = None
+    header_layout: Optional[str] = None
+    header_tagline: Optional[str] = None
+    chat_bubble_style: Optional[str] = None
+    chat_bubble_shadow: Optional[str] = None
+    surface_style: Optional[str] = None
+    status_icon_set: Optional[str] = None
+    typography_preset: Optional[str] = None
 
     class Config:
         extra = "allow"  # Allow arbitrary additional settings
@@ -70,12 +85,21 @@ class InstanceSettingsResponse(BaseModel):
     settings: dict
 
 
+class InstanceStatusResponse(BaseModel):
+    """Response model for instance status and setup state"""
+    initialized: bool  # Whether an admin has been configured
+    setup_complete: bool = False  # Whether admin has completed setup/auth
+    ready_for_users: bool = False  # Whether users can register/login
+    settings: dict = Field(default_factory=dict)  # Public instance settings
+
+
 # --- User Type Models ---
 
 class UserTypeCreate(BaseModel):
     """Request model for creating a user type"""
     name: str
     description: Optional[str] = None
+    icon: Optional[str] = None
     display_order: int = 0
 
 
@@ -83,6 +107,7 @@ class UserTypeUpdate(BaseModel):
     """Request model for updating a user type"""
     name: Optional[str] = None
     description: Optional[str] = None
+    icon: Optional[str] = None
     display_order: Optional[int] = None
 
 
@@ -91,6 +116,7 @@ class UserTypeResponse(BaseModel):
     id: int
     name: str
     description: Optional[str] = None
+    icon: Optional[str] = None
     display_order: int
     created_at: Optional[str] = None
 
@@ -111,6 +137,8 @@ class FieldDefinitionCreate(BaseModel):
     user_type_id: Optional[int] = None  # None = global field (shown for all types)
     placeholder: Optional[str] = None  # Placeholder text for input
     options: Optional[list[str]] = None  # Options for select fields
+    encryption_enabled: bool = True  # Secure default: encrypt field values
+    include_in_chat: bool = False  # Include field value in AI chat context (only for unencrypted fields)
 
 
 class FieldDefinitionUpdate(BaseModel):
@@ -122,6 +150,8 @@ class FieldDefinitionUpdate(BaseModel):
     user_type_id: Optional[int] = None
     placeholder: Optional[str] = None
     options: Optional[list[str]] = None
+    encryption_enabled: Optional[bool] = None  # Toggle encryption for field
+    include_in_chat: Optional[bool] = None  # Toggle AI chat context inclusion
 
 
 class FieldDefinitionResponse(BaseModel):
@@ -134,12 +164,28 @@ class FieldDefinitionResponse(BaseModel):
     user_type_id: Optional[int] = None  # None = global field
     placeholder: Optional[str] = None
     options: Optional[list[str]] = None
+    encryption_enabled: bool = True  # Whether field values are encrypted
+    include_in_chat: bool = False  # Whether field value is included in AI chat context
     created_at: Optional[str] = None
 
 
 class FieldDefinitionListResponse(BaseModel):
     """Response model for list of field definitions"""
     fields: list[FieldDefinitionResponse]
+
+
+class FieldEncryptionRequest(BaseModel):
+    """Request model for updating field encryption setting"""
+    encryption_enabled: bool
+    force: bool = False  # Override warnings about existing data
+
+
+class FieldEncryptionResponse(BaseModel):
+    """Response model for field encryption update"""
+    field_id: int
+    encryption_enabled: bool
+    warning: Optional[str] = None
+    migrated_values: Optional[int] = None  # Number of values migrated
 
 
 # --- Encrypted Data Models ---
@@ -219,6 +265,8 @@ class AuthUserResponse(BaseModel):
     user_type_id: Optional[int] = None
     approved: bool = True
     created_at: Optional[str] = None
+    needs_onboarding: bool = False
+    needs_user_type: bool = False
 
 
 class VerifyTokenResponse(BaseModel):
@@ -352,6 +400,42 @@ class SessionDefaultsResponse(BaseModel):
     default_document_ids: list[str] = []
 
 
+# --- AI Config User-Type Override Models ---
+
+class AIConfigWithInheritance(BaseModel):
+    """AI config item with inheritance information"""
+    key: str
+    value: str
+    value_type: str  # 'string', 'number', 'boolean', 'json'
+    category: str  # 'prompt_section', 'parameter', 'default'
+    description: Optional[str] = None
+    updated_at: Optional[str] = None
+    is_override: bool = False
+    override_user_type_id: Optional[int] = None
+
+
+class AIConfigOverrideItem(BaseModel):
+    """Single AI config override for a user type"""
+    key: str
+    value: str
+    user_type_id: int
+    updated_at: Optional[str] = None
+
+
+class AIConfigUserTypeResponse(BaseModel):
+    """Response model for AI config with user-type inheritance"""
+    user_type_id: int
+    user_type_name: Optional[str] = None
+    prompt_sections: list[AIConfigWithInheritance] = []
+    parameters: list[AIConfigWithInheritance] = []
+    defaults: list[AIConfigWithInheritance] = []
+
+
+class AIConfigOverrideUpdate(BaseModel):
+    """Request model for updating an AI config override"""
+    value: str
+
+
 # --- Document Defaults Models ---
 
 class DocumentDefaultItem(BaseModel):
@@ -391,6 +475,36 @@ class DocumentDefaultsBatchUpdate(BaseModel):
     updates: list[DocumentDefaultBatchItem]
 
 
+# --- Document Defaults User-Type Override Models ---
+
+class DocumentDefaultWithInheritance(BaseModel):
+    """Document default item with inheritance information"""
+    job_id: str
+    filename: Optional[str] = None
+    status: Optional[str] = None
+    total_chunks: Optional[int] = None
+    is_available: bool = True
+    is_default_active: bool = True
+    display_order: int = 0
+    updated_at: Optional[str] = None
+    is_override: bool = False
+    override_user_type_id: Optional[int] = None
+    override_updated_at: Optional[str] = None
+
+
+class DocumentDefaultsUserTypeResponse(BaseModel):
+    """Response model for document defaults with user-type inheritance"""
+    user_type_id: int
+    user_type_name: Optional[str] = None
+    documents: list[DocumentDefaultWithInheritance]
+
+
+class DocumentDefaultOverrideUpdate(BaseModel):
+    """Request model for updating document defaults override"""
+    is_available: Optional[bool] = None
+    is_default_active: Optional[bool] = None
+
+
 # --- Deployment Configuration Models ---
 
 class DeploymentConfigItem(BaseModel):
@@ -412,6 +526,8 @@ class DeploymentConfigResponse(BaseModel):
     storage: list[DeploymentConfigItem] = []
     security: list[DeploymentConfigItem] = []
     search: list[DeploymentConfigItem] = []
+    domains: list[DeploymentConfigItem] = []
+    ssl: list[DeploymentConfigItem] = []
     general: list[DeploymentConfigItem] = []
 
 
@@ -473,3 +589,15 @@ class TestEmailResponse(BaseModel):
     success: bool
     message: str
     error: Optional[str] = None
+
+
+# --- Public Configuration Models ---
+
+class PublicConfigResponse(BaseModel):
+    """Response model for public (unauthenticated) configuration settings.
+
+    These settings control simulation/development features and are safe
+    to expose without authentication.
+    """
+    simulate_user_auth: bool = False
+    simulate_admin_auth: bool = False

@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { HelpCircle, X } from 'lucide-react'
 import { CustomField, FieldType, UserType } from '../../types/onboarding'
 
 interface FieldEditorProps {
@@ -25,7 +26,22 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
   const [placeholder, setPlaceholder] = useState(initialField?.placeholder || '')
   const [options, setOptions] = useState<string[]>(initialField?.options || [''])
   const [userTypeId, setUserTypeId] = useState<number | null>(initialField?.user_type_id ?? null)
+  const [encryptionEnabled, setEncryptionEnabled] = useState(initialField?.encryption_enabled ?? true)
+  const [includeInChat, setIncludeInChat] = useState(initialField?.include_in_chat ?? false)
   const [errors, setErrors] = useState<{ name?: string; options?: string }>({})
+  const [showEncryptionHelpModal, setShowEncryptionHelpModal] = useState(false)
+  const encryptionHelpModalRef = useRef<HTMLDivElement>(null)
+  const triggerElementRef = useRef<HTMLElement | null>(null)
+
+  // Focus modal when opened, restore focus when closed
+  useEffect(() => {
+    if (showEncryptionHelpModal && encryptionHelpModalRef.current) {
+      encryptionHelpModalRef.current.focus()
+    } else if (!showEncryptionHelpModal && triggerElementRef.current) {
+      triggerElementRef.current.focus()
+      triggerElementRef.current = null
+    }
+  }, [showEncryptionHelpModal])
 
   const handleAddOption = () => {
     setOptions([...options, ''])
@@ -70,9 +86,22 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
       placeholder: placeholder.trim() || undefined,
       options: type === 'select' ? options.filter((o) => o.trim()) : undefined,
       user_type_id: userTypeId,
+      encryption_enabled: encryptionEnabled,
+      // Only include in chat if not encrypted
+      include_in_chat: encryptionEnabled ? false : includeInChat,
     }
 
     onSave(field)
+  }
+
+  // Auto-disable include_in_chat when encryption is enabled
+  const handleEncryptionToggle = () => {
+    const newEncryption = !encryptionEnabled
+    setEncryptionEnabled(newEncryption)
+    // If enabling encryption, auto-disable include_in_chat
+    if (newEncryption) {
+      setIncludeInChat(false)
+    }
   }
 
   return (
@@ -225,13 +254,17 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
         )}
 
         {/* Required Toggle */}
-        <label className="flex items-center gap-3 cursor-pointer py-2">
-          <div
-            onClick={() => setRequired(!required)}
-            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
-              required ? 'bg-accent border-accent' : 'border-border hover:border-accent/50'
-            }`}
-          >
+        <div
+          role="checkbox"
+          aria-checked={required}
+          tabIndex={0}
+          onClick={() => setRequired(!required)}
+          onKeyDown={(e) => e.key === ' ' && (e.preventDefault(), setRequired(!required))}
+          className="flex items-center gap-3 cursor-pointer py-2"
+        >
+          <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
+            required ? 'bg-accent border-accent' : 'border-border hover:border-accent/50'
+          }`}>
             {required && (
               <svg className="w-3 h-3 text-accent-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -239,7 +272,122 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
             )}
           </div>
           <span className="text-sm text-text">{t('admin.fields.requiredField')}</span>
-        </label>
+        </div>
+
+        {/* Data Security Section */}
+        <div className="border border-border rounded-xl p-4 space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-text">{t('admin.fields.dataSecurityTitle')}</span>
+            <button
+              type="button"
+              onClick={(e) => {
+                triggerElementRef.current = e.currentTarget
+                setShowEncryptionHelpModal(true)
+              }}
+              aria-label={t('admin.fields.encryptionHelpAria')}
+              className="text-text-muted hover:text-accent transition-colors"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
+          </div>
+
+          <p className="text-xs text-text-muted">
+            {t('admin.fields.dataSecurityIntro')}
+          </p>
+
+          {/* Encryption Toggle */}
+          <div
+            role="checkbox"
+            aria-checked={encryptionEnabled}
+            tabIndex={0}
+            onClick={handleEncryptionToggle}
+            onKeyDown={(e) => e.key === ' ' && (e.preventDefault(), handleEncryptionToggle())}
+            className="flex items-start gap-3 cursor-pointer"
+          >
+            <div className={`w-5 h-5 shrink-0 rounded-md border-2 flex items-center justify-center transition-colors mt-0.5 ${
+              encryptionEnabled ? 'bg-accent border-accent' : 'border-border hover:border-accent/50'
+            }`}>
+              {encryptionEnabled && (
+                <svg className="w-3 h-3 text-accent-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </div>
+            <div className="flex-1">
+              <span className="text-sm text-text font-medium">
+                {encryptionEnabled ? t('admin.fields.encryptEnabled') : t('admin.fields.encryptDisabled')}
+              </span>
+              <p className={`text-xs mt-1 ${
+                encryptionEnabled
+                  ? 'text-text-muted'
+                  : 'text-warning font-medium'
+              }`}>
+                {encryptionEnabled
+                  ? t('admin.fields.encryptedHint')
+                  : t('admin.fields.plaintextHint')}
+              </p>
+            </div>
+          </div>
+
+          {/* Conditional content based on encryption state */}
+          {encryptionEnabled ? (
+            <div className="bg-surface-overlay border border-border rounded-lg p-3.5">
+              <p className="text-sm text-text-secondary leading-relaxed">
+                {t('admin.fields.encryptedSummary')}
+              </p>
+              <p className="text-xs text-text-muted mt-2">
+                {t('admin.fields.encryptedNoAI')}
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Security Warning */}
+              <div className="bg-warning/10 border border-warning/20 rounded-lg p-3.5">
+                <div className="flex items-start gap-2.5">
+                  <svg className="w-4 h-4 text-warning mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.582 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-warning">{t('admin.fields.securityWarning')}</p>
+                    <p className="text-xs text-text-secondary mt-1.5 leading-relaxed">
+                      {t('admin.fields.securityWarningBody')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* AI Chat Toggle */}
+              <div
+                role="checkbox"
+                aria-checked={includeInChat}
+                tabIndex={0}
+                onClick={() => setIncludeInChat(!includeInChat)}
+                onKeyDown={(e) => e.key === ' ' && (e.preventDefault(), setIncludeInChat(!includeInChat))}
+                className="flex items-start gap-3 cursor-pointer"
+              >
+                <div className={`w-5 h-5 shrink-0 rounded-md border-2 flex items-center justify-center transition-colors mt-0.5 ${
+                  includeInChat ? 'bg-accent border-accent' : 'border-border hover:border-accent/50'
+                }`}>
+                  {includeInChat && (
+                    <svg className="w-3 h-3 text-accent-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <span className="text-sm text-text font-medium">
+                    {t('admin.fields.includeInChat')}
+                  </span>
+                  <p className="text-xs text-text-muted mt-1">
+                    {includeInChat
+                      ? t('admin.fields.aiPersonalizationBody')
+                      : t('admin.fields.includeInChatHint')}
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Actions */}
@@ -259,6 +407,68 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
           {initialField ? t('common.saveChanges') : t('admin.fields.addField')}
         </button>
       </div>
+
+      {/* Encryption Help Modal */}
+      {showEncryptionHelpModal && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() => setShowEncryptionHelpModal(false)}
+        >
+          <div
+            ref={encryptionHelpModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="encryption-help-title"
+            tabIndex={-1}
+            onKeyDown={(e) => e.key === 'Escape' && setShowEncryptionHelpModal(false)}
+            className="bg-surface border border-border rounded-xl p-6 max-w-lg mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 id="encryption-help-title" className="heading-lg">{t('admin.fields.encryptionHelpTitle')}</h3>
+              <button
+                type="button"
+                onClick={() => setShowEncryptionHelpModal(false)}
+                aria-label={t('common.close')}
+                className="p-1 text-text-muted hover:text-text transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4 text-sm text-text-secondary">
+              <p>{t('admin.fields.encryptionHelpDesc')}</p>
+
+              <div>
+                <p className="font-medium text-text mb-2">{t('admin.fields.encryptionHelpWhenEnabled')}</p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                  <li>{t('admin.fields.encryptionHelpPoint1')}</li>
+                  <li>{t('admin.fields.encryptionHelpPoint2')}</li>
+                  <li>{t('admin.fields.encryptionHelpPoint3')}</li>
+                  <li>{t('admin.fields.encryptionHelpPoint4')}</li>
+                </ul>
+              </div>
+
+              <div>
+                <p className="font-medium text-text mb-2">{t('admin.fields.encryptionHelpWhenDisabled')}</p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                  <li>{t('admin.fields.encryptionHelpDisabledPoint1')}</li>
+                  <li>{t('admin.fields.encryptionHelpDisabledPoint2')}</li>
+                  <li>{t('admin.fields.encryptionHelpDisabledPoint3')}</li>
+                </ul>
+              </div>
+
+              <p className="text-text-muted italic">{t('admin.fields.encryptionHelpRecommendation')}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowEncryptionHelpModal(false)}
+              className="btn btn-primary btn-md w-full mt-6"
+            >
+              {t('common.gotIt')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -7,7 +7,7 @@ This guide explains how to upload documents to your locally running Sanctum serv
 Make sure the Docker stack is running:
 
 ```bash
-docker compose up --build -d
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build -d
 ```
 
 Verify all services are healthy:
@@ -76,7 +76,7 @@ curl http://localhost:8000/ingest/status/ab442f508fae94f8
 {
   "job_id": "ab442f508fae94f8",
   "filename": "example-document.pdf",
-  "status": "extracting",
+  "status": "processing",
   "ontology_id": "general",
   "created_at": "2026-01-17T22:30:00.000000",
   "updated_at": "2026-01-17T22:35:00.000000",
@@ -91,8 +91,7 @@ curl http://localhost:8000/ingest/status/ab442f508fae94f8
 | Status | Description |
 |--------|-------------|
 | `pending` | Job created, waiting to start |
-| `processing` | Extracting text from document and creating chunks |
-| `extracting` | Running LLM extraction on chunks |
+| `processing` | Extracting text, chunking, embedding, and running ontology extraction |
 | `completed` | All chunks processed successfully |
 | `completed_with_errors` | Processing finished but some chunks failed |
 | `failed` | Job failed entirely (check `error` field) |
@@ -159,6 +158,8 @@ Response:
 }
 ```
 
+**Note:** You may also see a `sanctum_smoke_test` collection created by the `/test` endpoint.
+
 ### Test Vector Search
 
 Test that the embeddings are searchable:
@@ -181,6 +182,14 @@ List available ontologies:
 curl http://localhost:8000/ingest/ontologies
 ```
 
+Response:
+```json
+{
+  "ontologies": ["bitcoin", "general"],
+  "default": "general"
+}
+```
+
 Common ontologies:
 - `general` - General-purpose knowledge extraction (default)
 - `bitcoin` - Bitcoin/cryptocurrency concepts
@@ -191,7 +200,7 @@ Common ontologies:
 
 Check backend logs:
 ```bash
-docker compose logs -f backend
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs -f backend
 ```
 
 ### PDF Extraction Issues
@@ -201,21 +210,41 @@ The system uses PyMuPDF (fast) by default. For better quality extraction (slower
 PDF_EXTRACT_MODE=quality
 ```
 
-### Reset All Data
+### Reset Vector Data
 
-To wipe Qdrant and SQLite data and start fresh:
+To wipe Qdrant collections and start fresh:
 
 ```bash
 curl -X POST http://localhost:8000/ingest/wipe
 ```
 
-**Warning:** This deletes all stored knowledge!
+**Warning:** This deletes Qdrant collections only. It does **not** remove SQLite job records or files in `uploads/`.
+
+To fully reset everything in development:
+```bash
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml down -v
+rm -rf uploads/*
+```
 
 ### List All Jobs
 
 ```bash
-curl http://localhost:8000/ingest/jobs
+curl http://localhost:8000/ingest/jobs \
+  -H "Authorization: Bearer <session-token>"
 ```
+
+This endpoint requires an admin or approved user session token. Non-admin users only see documents available to their user type. See `docs/authentication.md` for how to obtain a token.
+
+### Delete a Document (Admin Only)
+
+```bash
+curl -X DELETE http://localhost:8000/ingest/jobs/{job_id} \
+  -H "Authorization: Bearer <admin-token>"
+```
+
+**Notes:**
+- Returns `409` if the job is still `pending` or `processing`
+- Deletes Qdrant vectors, the uploaded file, and the SQLite job record
 
 ## Complete Example
 

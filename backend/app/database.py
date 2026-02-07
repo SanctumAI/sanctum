@@ -32,6 +32,8 @@ def get_connection():
         _connection = sqlite3.connect(SQLITE_PATH, check_same_thread=False)
         _connection.row_factory = sqlite3.Row  # Enable dict-like access
         _connection.execute("PRAGMA foreign_keys = ON")  # Enable FK constraints
+        _connection.execute("PRAGMA journal_mode = WAL")  # Improve read/write concurrency
+        _connection.execute("PRAGMA busy_timeout = 3000")  # Wait briefly if DB is locked
         logger.info(f"Connected to SQLite database: {SQLITE_PATH}")
     return _connection
 
@@ -56,7 +58,7 @@ def init_schema():
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Admins table - stores Nostr pubkeys
+    # Admins table - stores single Nostr pubkey (max 1 admin per instance)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS admins (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,6 +66,37 @@ def init_schema():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+
+    # Instance state - tracks setup completion and governance
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS instance_state (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    
+    # Initialize instance state if not exists
+    cursor.execute("""
+        INSERT OR IGNORE INTO instance_state (key, value)
+        VALUES ('setup_complete', 'false')
+    """)
+    cursor.execute("""
+        INSERT OR IGNORE INTO instance_state (key, value)
+        VALUES ('admin_initialized', 'false')
+    """)
+
+    # Fix for upgraded installs: if admins already exist, ensure admin_initialized is true
+    # This handles cases where the DB was created before instance_state tracking was added
+    cursor.execute("SELECT COUNT(*) FROM admins")
+    admin_count = cursor.fetchone()[0]
+    if admin_count > 0:
+        cursor.execute("""
+            UPDATE instance_state SET value = 'true', updated_at = CURRENT_TIMESTAMP
+            WHERE key = 'admin_initialized' AND value = 'false'
+        """)
+        if cursor.rowcount > 0:
+            logger.info("Migration: Fixed admin_initialized state for existing admin")
 
     # Instance settings - key-value store for admin configuration
     cursor.execute("""
@@ -80,6 +113,7 @@ def init_schema():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT UNIQUE NOT NULL,
             description TEXT,
+            icon TEXT,
             display_order INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -87,6 +121,7 @@ def init_schema():
 
     # User field definitions - admin-defined custom fields for users
     # user_type_id: NULL = global field (shown for all types), non-NULL = type-specific
+    # encryption_enabled: 1 = encrypt field values (default), 0 = store plaintext
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS user_field_definitions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -95,6 +130,7 @@ def init_schema():
             required INTEGER DEFAULT 0,
             display_order INTEGER DEFAULT 0,
             user_type_id INTEGER,
+            encryption_enabled INTEGER DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_type_id) REFERENCES user_types(id) ON DELETE CASCADE,
             UNIQUE(field_name, user_type_id)
@@ -148,6 +184,7 @@ def init_schema():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_values_user ON user_field_values(user_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_values_field ON user_field_values(field_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_definitions_type ON user_field_definitions(user_type_id)")
+    # Note: idx_user_field_definitions_encryption created in _migrate_add_encryption_enabled_column()
 
     # AI Configuration table - stores AI/LLM settings
     cursor.execute("""
@@ -202,6 +239,40 @@ def init_schema():
         )
     """)
 
+    # AI config user-type overrides - stores per-user-type AI config overrides
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ai_config_user_type_overrides (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ai_config_key TEXT NOT NULL,
+            user_type_id INTEGER NOT NULL,
+            value TEXT NOT NULL,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_type_id) REFERENCES user_types(id) ON DELETE CASCADE,
+            UNIQUE(ai_config_key, user_type_id)
+        )
+    """)
+
+    # Document defaults user-type overrides - stores per-user-type document defaults
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS document_defaults_user_type_overrides (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_id TEXT NOT NULL,
+            user_type_id INTEGER NOT NULL,
+            is_available INTEGER,
+            is_default_active INTEGER,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (job_id) REFERENCES ingest_jobs(job_id) ON DELETE CASCADE,
+            FOREIGN KEY (user_type_id) REFERENCES user_types(id) ON DELETE CASCADE,
+            UNIQUE(job_id, user_type_id)
+        )
+    """)
+
+    # Indexes for user-type override tables
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_ai_config_overrides_type ON ai_config_user_type_overrides(user_type_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_ai_config_overrides_key ON ai_config_user_type_overrides(ai_config_key)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_doc_defaults_overrides_type ON document_defaults_user_type_overrides(user_type_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_doc_defaults_overrides_job ON document_defaults_user_type_overrides(job_id)")
+
     conn.commit()
     logger.info("SQLite schema initialized")
 
@@ -209,6 +280,9 @@ def init_schema():
     _migrate_add_approved_column()
     _migrate_add_encryption_columns()  # This adds email_blind_index column AND creates its index
     _migrate_add_field_metadata_columns()  # Add placeholder and options columns
+    _migrate_add_encryption_enabled_column()  # Add encryption_enabled column for optional field encryption
+    _migrate_add_include_in_chat_column()  # Add include_in_chat column for AI chat context
+    _migrate_add_user_type_icon_column()  # Add icon column to user_types table
 
     # Initialize ingest job tables
     from ingest_db import init_ingest_schema
@@ -308,12 +382,91 @@ def _migrate_add_field_metadata_columns() -> None:
     cursor.close()
 
 
+def _migrate_add_encryption_enabled_column() -> None:
+    """Add encryption_enabled column to user_field_definitions if it doesn't exist"""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Check existing columns
+    cursor.execute("PRAGMA table_info(user_field_definitions)")
+    columns = [row[1] for row in cursor.fetchall()]
+
+    if 'encryption_enabled' not in columns:
+        # Add column with secure default (1 = encrypted)
+        cursor.execute("ALTER TABLE user_field_definitions ADD COLUMN encryption_enabled INTEGER DEFAULT 1")
+        logger.info("Migration: Added 'encryption_enabled' column to user_field_definitions table (default: encrypted)")
+
+    # Always ensure index exists (idempotent via IF NOT EXISTS)
+    # This runs after column is guaranteed to exist (either from CREATE TABLE or ALTER TABLE above)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_definitions_encryption ON user_field_definitions(encryption_enabled)")
+
+    conn.commit()
+    cursor.close()
+
+
+def _migrate_add_include_in_chat_column() -> None:
+    """Add include_in_chat column to user_field_definitions if it doesn't exist.
+
+    This column controls whether a field's value should be included in AI chat context
+    to personalize responses. Only unencrypted fields can be included (encrypted fields
+    require admin's private key to decrypt, but chat runs in user context).
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Check existing columns
+    cursor.execute("PRAGMA table_info(user_field_definitions)")
+    columns = [row[1] for row in cursor.fetchall()]
+
+    if 'include_in_chat' not in columns:
+        # Add column with default 0 (not included in chat)
+        cursor.execute("ALTER TABLE user_field_definitions ADD COLUMN include_in_chat INTEGER DEFAULT 0")
+        logger.info("Migration: Added 'include_in_chat' column to user_field_definitions table (default: not included)")
+
+    # Create index for efficient lookups of fields to include in chat
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_field_definitions_include_in_chat ON user_field_definitions(include_in_chat)")
+
+    conn.commit()
+    cursor.close()
+
+
+def _migrate_add_user_type_icon_column() -> None:
+    """Add icon column to user_types if it doesn't exist."""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("PRAGMA table_info(user_types)")
+    columns = [row[1] for row in cursor.fetchall()]
+
+    if 'icon' not in columns:
+        cursor.execute("ALTER TABLE user_types ADD COLUMN icon TEXT")
+        logger.info("Migration: Added 'icon' column to user_types table")
+
+    conn.commit()
+    cursor.close()
+
+
 def seed_default_settings():
     """Seed default instance settings if not present"""
     defaults = {
         "instance_name": "Sanctum",
         "primary_color": "#3B82F6",
         "description": "A privacy-first RAG knowledge base",
+        "logo_url": "",
+        "favicon_url": "",
+        "apple_touch_icon_url": "",
+        "icon": "Sparkles",
+        "assistant_icon": "Sparkles",
+        "user_icon": "User",
+        "assistant_name": "Sanctum AI",
+        "user_label": "You",
+        "header_layout": "icon_name",
+        "header_tagline": "",
+        "chat_bubble_style": "soft",
+        "chat_bubble_shadow": "true",
+        "surface_style": "plain",
+        "status_icon_set": "classic",
+        "typography_preset": "modern",
         "auto_approve_users": "true",  # true = auto-approve, false = require manual approval
     }
 
@@ -330,13 +483,33 @@ def seed_default_settings():
 # --- Admin Operations ---
 
 def add_admin(pubkey: str) -> int:
-    """Add an admin by pubkey. Returns admin id."""
+    """
+    Add the single admin by pubkey. Enforces single admin constraint.
+    Returns admin id if successful.
+    
+    Raises:
+        ValueError: If an admin already exists
+    """
     with get_cursor() as cursor:
-        cursor.execute(
-            "INSERT INTO admins (pubkey) VALUES (?)",
-            (pubkey,)
-        )
-        return cursor.lastrowid
+        # Atomic INSERT that only succeeds if no admin exists
+        cursor.execute("""
+            INSERT INTO admins (pubkey) 
+            SELECT ? WHERE NOT EXISTS (SELECT 1 FROM admins)
+        """, (pubkey,))
+        
+        # Check if the insert succeeded
+        if cursor.rowcount == 0:
+            raise ValueError("Instance already has an admin. Only one admin per instance is allowed.")
+        
+        admin_id = cursor.lastrowid
+        
+        # Mark admin as initialized
+        cursor.execute("""
+            INSERT OR REPLACE INTO instance_state (key, value, updated_at)
+            VALUES ('admin_initialized', 'true', CURRENT_TIMESTAMP)
+        """)
+        
+        return admin_id
 
 
 def get_admin_by_pubkey(pubkey: str) -> dict | None:
@@ -363,7 +536,25 @@ def remove_admin(pubkey: str) -> bool:
     """Remove admin by pubkey. Returns True if removed."""
     with get_cursor() as cursor:
         cursor.execute("DELETE FROM admins WHERE pubkey = ?", (pubkey,))
-        return cursor.rowcount > 0
+        removed = cursor.rowcount > 0
+        
+        # Check if any admins remain after deletion
+        if removed:
+            cursor.execute("SELECT COUNT(*) FROM admins")
+            remaining_admins = cursor.fetchone()[0]
+            
+            # If no admins remain, reset instance state
+            if remaining_admins == 0:
+                cursor.execute("""
+                    INSERT OR REPLACE INTO instance_state (key, value, updated_at)
+                    VALUES ('admin_initialized', 'false', CURRENT_TIMESTAMP)
+                """)
+                cursor.execute("""
+                    INSERT OR REPLACE INTO instance_state (key, value, updated_at)
+                    VALUES ('setup_complete', 'false', CURRENT_TIMESTAMP)
+                """)
+        
+        return removed
 
 
 # --- Instance Settings Operations ---
@@ -407,19 +598,66 @@ def get_auto_approve_users() -> bool:
     return setting != "false"  # Default to true if not set or not "false"
 
 
+# --- Instance State Operations ---
+
+def get_instance_state(key: str) -> str | None:
+    """Get instance state value by key"""
+    with get_cursor() as cursor:
+        cursor.execute("SELECT value FROM instance_state WHERE key = ?", (key,))
+        row = cursor.fetchone()
+        return row["value"] if row else None
+
+
+def set_instance_state(key: str, value: str) -> None:
+    """Set instance state value"""
+    with get_cursor() as cursor:
+        cursor.execute("""
+            INSERT OR REPLACE INTO instance_state (key, value, updated_at)
+            VALUES (?, ?, CURRENT_TIMESTAMP)
+        """, (key, value))
+
+
+def is_instance_setup_complete() -> bool:
+    """Check if instance setup is complete"""
+    admin_initialized = get_instance_state('admin_initialized') == 'true'
+    setup_complete = get_instance_state('setup_complete') == 'true'
+    return admin_initialized and setup_complete
+
+
+def mark_instance_setup_complete() -> None:
+    """Mark instance setup as complete (called after admin authentication)"""
+    set_instance_state('setup_complete', 'true')
+
+
+def has_admin() -> bool:
+    """Check if instance has an admin configured"""
+    with get_cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM admins")
+        return cursor.fetchone()[0] > 0
+
+
+def get_single_admin() -> dict | None:
+    """Get the single admin for this instance"""
+    with get_cursor() as cursor:
+        cursor.execute("SELECT * FROM admins LIMIT 1")
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+
 # --- User Type Operations ---
 
 def create_user_type(
     name: str,
     description: str | None = None,
+    icon: str | None = None,
     display_order: int = 0
 ) -> int:
     """Create a user type. Returns type id."""
     with get_cursor() as cursor:
         cursor.execute("""
-            INSERT INTO user_types (name, description, display_order)
-            VALUES (?, ?, ?)
-        """, (name, description, display_order))
+            INSERT INTO user_types (name, description, icon, display_order)
+            VALUES (?, ?, ?, ?)
+        """, (name, description, icon, display_order))
         return cursor.lastrowid
 
 
@@ -453,6 +691,7 @@ def update_user_type(
     type_id: int,
     name: str | None = None,
     description: str | None = None,
+    icon: str | None = None,
     display_order: int | None = None
 ) -> bool:
     """Update a user type. Returns True if updated."""
@@ -465,6 +704,9 @@ def update_user_type(
     if description is not None:
         updates.append("description = ?")
         values.append(description)
+    if icon is not None:
+        updates.append("icon = ?")
+        values.append(icon)
     if display_order is not None:
         updates.append("display_order = ?")
         values.append(display_order)
@@ -498,19 +740,27 @@ def create_field_definition(
     display_order: int = 0,
     user_type_id: int | None = None,
     placeholder: str | None = None,
-    options: list[str] | None = None
+    options: list[str] | None = None,
+    encryption_enabled: bool = True,
+    include_in_chat: bool = False
 ) -> int:
     """Create a user field definition. Returns field id.
     user_type_id: None = global field (shown for all types)
     placeholder: Placeholder text for the field input
     options: List of options for select fields (stored as JSON)
+    encryption_enabled: True = encrypt field values (secure default), False = store plaintext
+    include_in_chat: True = include field value in AI chat context (only for unencrypted fields)
     """
+    # Enforce data consistency: encrypted fields cannot be included in chat context
+    if encryption_enabled:
+        include_in_chat = False
+
     options_json = json.dumps(options) if options is not None else None
     with get_cursor() as cursor:
         cursor.execute("""
-            INSERT INTO user_field_definitions (field_name, field_type, required, display_order, user_type_id, placeholder, options)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (field_name, field_type, int(required), display_order, user_type_id, placeholder, options_json))
+            INSERT INTO user_field_definitions (field_name, field_type, required, display_order, user_type_id, placeholder, options, encryption_enabled, include_in_chat)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (field_name, field_type, int(required), display_order, user_type_id, placeholder, options_json, int(encryption_enabled), int(include_in_chat)))
         return cursor.lastrowid
 
 
@@ -593,9 +843,14 @@ def update_field_definition(
     display_order: int | None = None,
     user_type_id: int | None = ...,  # Use ... as sentinel for "not provided"
     placeholder: str | None = ...,
-    options: list[str] | None = ...
+    options: list[str] | None = ...,
+    encryption_enabled: bool | None = None,
+    include_in_chat: bool | None = None
 ) -> bool:
-    """Update a field definition. Returns True if updated."""
+    """Update a field definition. Returns True if updated.
+
+    WARNING: Changing encryption_enabled may require data migration for existing field values.
+    """
     updates = []
     values = []
 
@@ -620,6 +875,27 @@ def update_field_definition(
     if options is not ...:
         updates.append("options = ?")
         values.append(json.dumps(options) if options is not None else None)
+    if encryption_enabled is not None:
+        updates.append("encryption_enabled = ?")
+        values.append(int(encryption_enabled))
+
+    # Determine effective encryption status (incoming value or stored value)
+    effective_encryption = bool(encryption_enabled) if encryption_enabled is not None else False
+    if encryption_enabled is None:
+        existing_field = get_field_definition_by_id(field_id)
+        if existing_field is not None:
+            existing_encryption = existing_field.get("encryption_enabled")
+            effective_encryption = existing_encryption is True or existing_encryption == 1
+
+    # Handle include_in_chat based on effective encryption status
+    # Encrypted fields must always have include_in_chat=0 for data consistency
+    if effective_encryption:
+        updates.append("include_in_chat = ?")
+        values.append(0)
+    elif include_in_chat is not None:
+        # Non-encrypted fields can have include_in_chat set from parameter
+        updates.append("include_in_chat = ?")
+        values.append(int(include_in_chat))
 
     if not updates:
         return False
@@ -701,6 +977,16 @@ def create_user(
             )
         )
         return cursor.lastrowid
+
+
+def update_user_type_id(user_id: int, user_type_id: int | None) -> bool:
+    """Update a user's type selection. Returns True if updated."""
+    with get_cursor() as cursor:
+        cursor.execute(
+            "UPDATE users SET user_type_id = ? WHERE id = ?",
+            (user_type_id, user_id)
+        )
+        return cursor.rowcount > 0
 
 
 def get_user(user_id: int) -> dict | None:
@@ -798,7 +1084,7 @@ def get_user_by_email(email: str) -> dict | None:
     with get_cursor() as cursor:
         # Try blind index first (encrypted emails)
         cursor.execute(
-            "SELECT id FROM users WHERE email_blind_index = ?",
+            "SELECT id FROM users WHERE email_blind_index = ? ORDER BY id DESC LIMIT 1",
             (blind_index,)
         )
         row = cursor.fetchone()
@@ -807,7 +1093,10 @@ def get_user_by_email(email: str) -> dict | None:
 
         # Fall back to plaintext email (legacy/unencrypted data)
         # Use normalized email for consistent matching
-        cursor.execute("SELECT id FROM users WHERE LOWER(email) = ?", (normalized_email,))
+        cursor.execute(
+            "SELECT id FROM users WHERE LOWER(email) = ? ORDER BY id DESC LIMIT 1",
+            (normalized_email,)
+        )
         row = cursor.fetchone()
         if row:
             return get_user(row["id"])
@@ -825,7 +1114,8 @@ def list_users() -> list[dict]:
 def set_user_field(user_id: int, field_name: str, value: object, user_type_id: int | None = None):
     """Set a field value for a user.
 
-    Values are encrypted using NIP-04 if an admin exists.
+    Values are encrypted using NIP-04 if the field definition has encryption_enabled=True
+    and an admin exists. Otherwise, stored as plaintext.
     """
     from encryption import encrypt_for_admin_required, serialize_field_value
 
@@ -833,26 +1123,90 @@ def set_user_field(user_id: int, field_name: str, value: object, user_type_id: i
     if not field_def:
         raise ValueError(f"Unknown field: {field_name}")
 
-    # Encrypt the value
+    # Serialize value to string
     serialized = serialize_field_value(value)
-    encrypted_value, ephemeral_pubkey = encrypt_for_admin_required(serialized)
 
-    # Store encrypted - clear plaintext
-    with get_cursor() as cursor:
-        cursor.execute("""
-            INSERT INTO user_field_values (user_id, field_id, value, encrypted_value, ephemeral_pubkey)
-            VALUES (?, ?, NULL, ?, ?)
-            ON CONFLICT(user_id, field_id) DO UPDATE SET
-                value = NULL,
-                encrypted_value = excluded.encrypted_value,
-                ephemeral_pubkey = excluded.ephemeral_pubkey
-        """, (user_id, field_def["id"], encrypted_value, ephemeral_pubkey))
+    # Check if encryption is enabled for this field
+    if field_def.get("encryption_enabled", 1):  # Default to encrypted for backward compatibility
+        # ENCRYPTED PATH - encrypt the value
+        encrypted_value, ephemeral_pubkey = encrypt_for_admin_required(serialized)
+        
+        # Store encrypted - clear plaintext
+        with get_cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO user_field_values (user_id, field_id, value, encrypted_value, ephemeral_pubkey)
+                VALUES (?, ?, NULL, ?, ?)
+                ON CONFLICT(user_id, field_id) DO UPDATE SET
+                    value = NULL,
+                    encrypted_value = excluded.encrypted_value,
+                    ephemeral_pubkey = excluded.ephemeral_pubkey
+            """, (user_id, field_def["id"], encrypted_value, ephemeral_pubkey))
+    else:
+        # PLAINTEXT PATH - store value directly
+        with get_cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO user_field_values (user_id, field_id, value, encrypted_value, ephemeral_pubkey)
+                VALUES (?, ?, ?, NULL, NULL)
+                ON CONFLICT(user_id, field_id) DO UPDATE SET
+                    value = excluded.value,
+                    encrypted_value = NULL,
+                    ephemeral_pubkey = NULL
+            """, (user_id, field_def["id"], serialized))
 
 
 def set_user_fields(user_id: int, fields: dict, user_type_id: int | None = None):
     """Set multiple field values for a user"""
     for field_name, value in fields.items():
         set_user_field(user_id, field_name, value, user_type_id)
+
+
+def get_user_chat_context_values(user_id: int, user_type_id: int | None = None) -> dict[str, str]:
+    """Get unencrypted field values for fields marked include_in_chat=1.
+
+    Returns a dict of {field_name: value} for use in AI chat context.
+    Only returns plaintext values (not encrypted_value) from fields that have:
+    - encryption_enabled=0 (unencrypted)
+    - include_in_chat=1 (marked for chat inclusion)
+
+    Args:
+        user_id: The user's ID
+        user_type_id: If provided, also includes type-specific fields
+
+    Returns:
+        Dict mapping field names to their plaintext values
+    """
+    with get_cursor() as cursor:
+        # Query joins field definitions with field values
+        # Only gets unencrypted fields marked for chat inclusion
+        if user_type_id is not None:
+            # Include global fields (user_type_id IS NULL) and type-specific fields
+            cursor.execute("""
+                SELECT fd.field_name, ufv.value
+                FROM user_field_values ufv
+                JOIN user_field_definitions fd ON fd.id = ufv.field_id
+                WHERE ufv.user_id = ?
+                  AND fd.encryption_enabled = 0
+                  AND fd.include_in_chat = 1
+                  AND (fd.user_type_id IS NULL OR fd.user_type_id = ?)
+                  AND ufv.value IS NOT NULL
+                  AND ufv.value != ''
+                ORDER BY fd.user_type_id IS NULL DESC
+            """, (user_id, user_type_id))
+        else:
+            # Only global fields
+            cursor.execute("""
+                SELECT fd.field_name, ufv.value
+                FROM user_field_values ufv
+                JOIN user_field_definitions fd ON fd.id = ufv.field_id
+                WHERE ufv.user_id = ?
+                  AND fd.encryption_enabled = 0
+                  AND fd.include_in_chat = 1
+                  AND fd.user_type_id IS NULL
+                  AND ufv.value IS NOT NULL
+                  AND ufv.value != ''
+            """, (user_id,))
+
+        return {row["field_name"]: row["value"] for row in cursor.fetchall()}
 
 
 def delete_user(user_id: int) -> bool:
@@ -1075,6 +1429,125 @@ def update_ai_config(key: str, value: str, changed_by: str) -> bool:
         return False
 
 
+# --- AI Config User-Type Override Operations ---
+
+def get_ai_config_override(key: str, user_type_id: int) -> dict | None:
+    """Get a single AI config override for a user type"""
+    with get_cursor() as cursor:
+        cursor.execute("""
+            SELECT * FROM ai_config_user_type_overrides
+            WHERE ai_config_key = ? AND user_type_id = ?
+        """, (key, user_type_id))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+
+def get_ai_config_overrides_by_type(user_type_id: int) -> list[dict]:
+    """Get all AI config overrides for a user type"""
+    with get_cursor() as cursor:
+        cursor.execute("""
+            SELECT * FROM ai_config_user_type_overrides
+            WHERE user_type_id = ?
+            ORDER BY ai_config_key
+        """, (user_type_id,))
+        return [dict(row) for row in cursor.fetchall()]
+
+
+def upsert_ai_config_override(key: str, user_type_id: int, value: str, changed_by: str) -> bool:
+    """Create or update an AI config override for a user type"""
+    with get_cursor() as cursor:
+        # Get old value for audit log
+        cursor.execute("""
+            SELECT value FROM ai_config_user_type_overrides
+            WHERE ai_config_key = ? AND user_type_id = ?
+        """, (key, user_type_id))
+        old_row = cursor.fetchone()
+        old_value = old_row["value"] if old_row else None
+
+        cursor.execute("""
+            INSERT INTO ai_config_user_type_overrides (ai_config_key, user_type_id, value)
+            VALUES (?, ?, ?)
+            ON CONFLICT(ai_config_key, user_type_id) DO UPDATE SET
+                value = excluded.value,
+                updated_at = CURRENT_TIMESTAMP
+        """, (key, user_type_id, value))
+
+        # Log the change (only if changed_by is provided)
+        if changed_by:
+            cursor.execute("""
+                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
+                VALUES (?, ?, ?, ?, ?)
+            """, ("ai_config_user_type_overrides", f"{key}:type_{user_type_id}", old_value, value, changed_by))
+
+        return True
+
+
+def delete_ai_config_override(key: str, user_type_id: int, changed_by: str = "") -> bool:
+    """Delete an AI config override (revert to global). Returns True if deleted."""
+    with get_cursor() as cursor:
+        # Get old value for audit log
+        cursor.execute("""
+            SELECT value FROM ai_config_user_type_overrides
+            WHERE ai_config_key = ? AND user_type_id = ?
+        """, (key, user_type_id))
+        old_row = cursor.fetchone()
+        old_value = old_row["value"] if old_row else None
+
+        cursor.execute("""
+            DELETE FROM ai_config_user_type_overrides
+            WHERE ai_config_key = ? AND user_type_id = ?
+        """, (key, user_type_id))
+
+        deleted = cursor.rowcount > 0
+
+        # Log the change if something was deleted
+        if deleted and changed_by:
+            cursor.execute("""
+                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
+                VALUES (?, ?, ?, ?, ?)
+            """, ("ai_config_user_type_overrides", f"{key}:type_{user_type_id}", old_value, "(reverted to global)", changed_by))
+
+        return deleted
+
+
+def get_effective_ai_config(user_type_id: int | None = None) -> list[dict]:
+    """
+    Get all AI config values with inheritance applied.
+
+    If user_type_id is provided, returns global config merged with user-type overrides.
+    Override values replace global values for matching keys.
+    Each item includes is_override flag and override_user_type_id if applicable.
+    """
+    # Start with global config
+    all_config = get_all_ai_config()
+
+    if user_type_id is None:
+        # No user type, return global config with is_override=False
+        for config in all_config:
+            config["is_override"] = False
+            config["override_user_type_id"] = None
+        return all_config
+
+    # Get overrides for this user type
+    overrides = get_ai_config_overrides_by_type(user_type_id)
+    overrides_by_key = {o["ai_config_key"]: o for o in overrides}
+
+    # Merge: overrides win
+    for config in all_config:
+        key = config["key"]
+        if key in overrides_by_key:
+            override = overrides_by_key[key]
+            config["value"] = override["value"]
+            config["is_override"] = True
+            config["override_user_type_id"] = user_type_id
+            config["updated_at"] = override["updated_at"]
+        else:
+            config["is_override"] = False
+            config["override_user_type_id"] = None
+
+    return all_config
+
+
 # --- Document Defaults Operations ---
 
 def get_document_defaults(job_id: str) -> dict | None:
@@ -1152,6 +1625,217 @@ def get_available_documents() -> list[str]:
             ORDER BY display_order
         """)
         return [row["job_id"] for row in cursor.fetchall()]
+
+
+# --- Document Defaults User-Type Override Operations ---
+
+def get_document_defaults_override(job_id: str, user_type_id: int) -> dict | None:
+    """Get document defaults override for a specific job and user type"""
+    with get_cursor() as cursor:
+        cursor.execute("""
+            SELECT * FROM document_defaults_user_type_overrides
+            WHERE job_id = ? AND user_type_id = ?
+        """, (job_id, user_type_id))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+
+def get_document_defaults_overrides_by_type(user_type_id: int) -> list[dict]:
+    """Get all document defaults overrides for a user type"""
+    with get_cursor() as cursor:
+        cursor.execute("""
+            SELECT * FROM document_defaults_user_type_overrides
+            WHERE user_type_id = ?
+            ORDER BY job_id
+        """, (user_type_id,))
+        return [dict(row) for row in cursor.fetchall()]
+
+
+def upsert_document_defaults_override(
+    job_id: str,
+    user_type_id: int,
+    is_available: bool | None = None,
+    is_default_active: bool | None = None,
+    changed_by: str = ""
+) -> bool:
+    """Create or update document defaults override for a user type"""
+    with get_cursor() as cursor:
+        # Get old value for audit log
+        cursor.execute("""
+            SELECT is_available, is_default_active FROM document_defaults_user_type_overrides
+            WHERE job_id = ? AND user_type_id = ?
+        """, (job_id, user_type_id))
+        old_row = cursor.fetchone()
+        old_value = json.dumps({
+            "is_available": bool(old_row["is_available"]) if old_row and old_row["is_available"] is not None else None,
+            "is_default_active": bool(old_row["is_default_active"]) if old_row and old_row["is_default_active"] is not None else None
+        }) if old_row else None
+
+        # Handle None values - only update fields that are provided
+        if old_row:
+            # Merge with existing values
+            final_available = is_available if is_available is not None else (
+                bool(old_row["is_available"]) if old_row["is_available"] is not None else None
+            )
+            final_active = is_default_active if is_default_active is not None else (
+                bool(old_row["is_default_active"]) if old_row["is_default_active"] is not None else None
+            )
+        else:
+            final_available = is_available
+            final_active = is_default_active
+
+        cursor.execute("""
+            INSERT INTO document_defaults_user_type_overrides (job_id, user_type_id, is_available, is_default_active)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(job_id, user_type_id) DO UPDATE SET
+                is_available = excluded.is_available,
+                is_default_active = excluded.is_default_active,
+                updated_at = CURRENT_TIMESTAMP
+        """, (
+            job_id,
+            user_type_id,
+            int(final_available) if final_available is not None else None,
+            int(final_active) if final_active is not None else None
+        ))
+
+        # Log the change
+        new_value = json.dumps({"is_available": final_available, "is_default_active": final_active})
+        if changed_by:
+            cursor.execute("""
+                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
+                VALUES (?, ?, ?, ?, ?)
+            """, ("document_defaults_user_type_overrides", f"{job_id}:type_{user_type_id}", old_value, new_value, changed_by))
+
+        return True
+
+
+def delete_document_defaults_override(job_id: str, user_type_id: int, changed_by: str = "") -> bool:
+    """Delete document defaults override (revert to global). Returns True if deleted."""
+    with get_cursor() as cursor:
+        # Get old value for audit log
+        cursor.execute("""
+            SELECT is_available, is_default_active FROM document_defaults_user_type_overrides
+            WHERE job_id = ? AND user_type_id = ?
+        """, (job_id, user_type_id))
+        old_row = cursor.fetchone()
+        old_value = json.dumps({
+            "is_available": bool(old_row["is_available"]) if old_row and old_row["is_available"] is not None else None,
+            "is_default_active": bool(old_row["is_default_active"]) if old_row and old_row["is_default_active"] is not None else None
+        }) if old_row else None
+
+        cursor.execute("""
+            DELETE FROM document_defaults_user_type_overrides
+            WHERE job_id = ? AND user_type_id = ?
+        """, (job_id, user_type_id))
+
+        deleted = cursor.rowcount > 0
+
+        if deleted and changed_by:
+            cursor.execute("""
+                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
+                VALUES (?, ?, ?, ?, ?)
+            """, ("document_defaults_user_type_overrides", f"{job_id}:type_{user_type_id}", old_value, "(reverted to global)", changed_by))
+
+        return deleted
+
+
+def get_effective_document_defaults(user_type_id: int | None = None) -> list[dict]:
+    """
+    Get all document defaults with inheritance applied.
+
+    If user_type_id is provided, returns global defaults merged with user-type overrides.
+    Override values replace global values for matching job_ids.
+    Each item includes is_override flag if applicable.
+
+    Also includes "orphan overrides" - documents with user-type overrides but no global entry.
+    """
+    # Get global defaults
+    defaults = list_document_defaults()
+
+    if user_type_id is None:
+        # No user type, return global with is_override=False
+        for doc in defaults:
+            doc["is_override"] = False
+            doc["override_user_type_id"] = None
+        return defaults
+
+    # Track which job_ids have global defaults
+    global_job_ids = {doc["job_id"] for doc in defaults}
+
+    # Get overrides for this user type
+    overrides = get_document_defaults_overrides_by_type(user_type_id)
+    overrides_by_job = {o["job_id"]: o for o in overrides}
+
+    # Merge: overrides win for is_available and is_default_active
+    for doc in defaults:
+        job_id = doc["job_id"]
+        if job_id in overrides_by_job:
+            override = overrides_by_job[job_id]
+            # Only override if the override has a non-None value
+            if override["is_available"] is not None:
+                doc["is_available"] = bool(override["is_available"])
+            if override["is_default_active"] is not None:
+                doc["is_default_active"] = bool(override["is_default_active"])
+            doc["is_override"] = True
+            doc["override_user_type_id"] = user_type_id
+            doc["override_updated_at"] = override["updated_at"]
+        else:
+            doc["is_override"] = False
+            doc["override_user_type_id"] = None
+
+    # Add orphan overrides (overrides without global defaults)
+    for job_id, override in overrides_by_job.items():
+        if job_id not in global_job_ids:
+            # Get job info from ingest_jobs
+            with get_cursor() as cursor:
+                cursor.execute("""
+                    SELECT job_id, filename, status, total_chunks
+                    FROM ingest_jobs WHERE job_id = ?
+                """, (job_id,))
+                job_row = cursor.fetchone()
+                if job_row:
+                    defaults.append({
+                        "id": None,  # No global default entry exists
+                        "job_id": job_id,
+                        "filename": job_row["filename"],
+                        "status": job_row["status"],
+                        "total_chunks": job_row["total_chunks"],
+                        "is_available": bool(override["is_available"]) if override["is_available"] is not None else True,
+                        "is_default_active": bool(override["is_default_active"]) if override["is_default_active"] is not None else True,
+                        "display_order": 0,
+                        "updated_at": override["updated_at"],
+                        "is_override": True,
+                        "override_user_type_id": user_type_id,
+                        "override_updated_at": override["updated_at"],
+                    })
+
+    return defaults
+
+
+def get_active_documents_for_user_type(user_type_id: int | None = None) -> list[str]:
+    """
+    Get list of job_ids that should be default active for a user type.
+
+    Uses inheritance: user-type overrides take precedence over global defaults.
+    """
+    if user_type_id is None:
+        return get_default_active_documents()
+
+    effective = get_effective_document_defaults(user_type_id)
+    return [doc["job_id"] for doc in effective if doc.get("is_available") and doc.get("is_default_active")]
+
+
+def get_available_documents_for_user_type(user_type_id: int | None = None) -> list[str]:
+    """
+    Get list of job_ids that are available for a user type.
+
+    Uses inheritance: user-type overrides take precedence over global defaults.
+    """
+    if user_type_id is None:
+        return get_available_documents()
+
+    effective = get_effective_document_defaults(user_type_id)
+    return [doc["job_id"] for doc in effective if doc.get("is_available")]
 
 
 # --- Deployment Configuration Operations ---

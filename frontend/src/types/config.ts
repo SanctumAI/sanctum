@@ -21,7 +21,49 @@ export interface AIConfigResponse {
   defaults: AIConfigItem[]
 }
 
+// Type that allows config items with optional inheritance metadata
+// Used when config may come from user-type endpoints that include is_override
+export type AIConfigItemWithOptionalInheritance = AIConfigItem | AIConfigWithInheritance
+
+export interface AIConfigResponseWithInheritance {
+  prompt_sections: AIConfigItemWithOptionalInheritance[]
+  parameters: AIConfigItemWithOptionalInheritance[]
+  defaults: AIConfigItemWithOptionalInheritance[]
+}
+
 export interface AIConfigUpdate {
+  value: string
+}
+
+// --- AI Config User-Type Override Types ---
+
+export interface AIConfigWithInheritance {
+  key: string
+  value: string
+  value_type: 'string' | 'number' | 'boolean' | 'json'
+  category: 'prompt_section' | 'parameter' | 'default'
+  description?: string
+  updated_at?: string
+  is_override: boolean
+  override_user_type_id?: number
+}
+
+export interface AIConfigOverrideItem {
+  key: string
+  value: string
+  user_type_id: number
+  updated_at?: string
+}
+
+export interface AIConfigUserTypeResponse {
+  user_type_id: number
+  user_type_name?: string
+  prompt_sections: AIConfigWithInheritance[]
+  parameters: AIConfigWithInheritance[]
+  defaults: AIConfigWithInheritance[]
+}
+
+export interface AIConfigOverrideUpdate {
   value: string
 }
 
@@ -67,6 +109,33 @@ export interface DocumentDefaultsBatchUpdate {
   }>
 }
 
+// --- Document Defaults User-Type Override Types ---
+
+export interface DocumentDefaultWithInheritance {
+  job_id: string
+  filename?: string
+  status?: string
+  total_chunks?: number
+  is_available: boolean
+  is_default_active: boolean
+  display_order: number
+  updated_at?: string
+  is_override: boolean
+  override_user_type_id?: number
+  override_updated_at?: string
+}
+
+export interface DocumentDefaultsUserTypeResponse {
+  user_type_id: number
+  user_type_name?: string
+  documents: DocumentDefaultWithInheritance[]
+}
+
+export interface DocumentDefaultOverrideUpdate {
+  is_available?: boolean
+  is_default_active?: boolean
+}
+
 // --- Deployment Configuration Types ---
 
 export interface DeploymentConfigItem {
@@ -86,6 +155,8 @@ export interface DeploymentConfigResponse {
   storage: DeploymentConfigItem[]
   security: DeploymentConfigItem[]
   search: DeploymentConfigItem[]
+  domains: DeploymentConfigItem[]
+  ssl: DeploymentConfigItem[]
   general: DeploymentConfigItem[]
 }
 
@@ -129,6 +200,68 @@ export interface ConfigAuditLogResponse {
   entries: ConfigAuditLogEntry[]
 }
 
+// --- Key Migration Types ---
+
+export interface EncryptedUserData {
+  id: number
+  encrypted_email?: string
+  ephemeral_pubkey_email?: string
+  encrypted_name?: string
+  ephemeral_pubkey_name?: string
+}
+
+export interface EncryptedFieldValue {
+  id: number
+  user_id: number
+  field_id: number
+  encrypted_value?: string
+  ephemeral_pubkey?: string
+}
+
+export interface MigrationPrepareResponse {
+  admin_pubkey: string
+  users: EncryptedUserData[]
+  field_values: EncryptedFieldValue[]
+  user_count: number
+  field_value_count: number
+}
+
+export interface DecryptedUserData {
+  id: number
+  email?: string
+  name?: string
+}
+
+export interface DecryptedFieldValue {
+  id: number
+  value?: string
+}
+
+export interface MigrationExecuteRequest {
+  new_admin_pubkey: string
+  users: DecryptedUserData[]
+  field_values: DecryptedFieldValue[]
+  signature_event: NostrEvent
+}
+
+export interface MigrationExecuteResponse {
+  success: boolean
+  message: string
+  users_migrated: number
+  field_values_migrated: number
+}
+
+// Nostr event for signing
+export interface NostrEvent {
+  id: string
+  pubkey: string
+  created_at: number
+  kind: number
+  tags: string[][]
+  content: string
+  sig: string
+}
+
 // --- Config Categories for UI ---
 
 export interface ConfigCategoryMeta {
@@ -137,7 +270,7 @@ export interface ConfigCategoryMeta {
   hint: string
 }
 
-export const CONFIG_CATEGORY_KEYS = ['llm', 'embedding', 'email', 'storage', 'security', 'search', 'general'] as const
+export const CONFIG_CATEGORY_KEYS = ['llm', 'embedding', 'email', 'storage', 'security', 'search', 'domains', 'ssl', 'general'] as const
 
 export type ConfigCategory = typeof CONFIG_CATEGORY_KEYS[number]
 
@@ -167,14 +300,24 @@ export function getConfigCategories(t: TFunction): Record<ConfigCategory, Config
       hint: t('configCategories.storage.hint', "Control file paths for the database and uploaded documents. These typically don't need to change unless you're customizing your deployment."),
     },
     security: {
-      label: t('configCategories.security.label', 'Security & URLs'),
+      label: t('configCategories.security.label', 'Security'),
       description: t('configCategories.security.description', 'Configure access and security settings'),
-      hint: t('configCategories.security.hint', 'Set your public URLs and security options. The frontend URL is where users access the app. Make sure these match your actual deployment.'),
+      hint: t('configCategories.security.hint', 'Configure security options like authentication simulation modes for development and testing.'),
     },
     search: {
       label: t('configCategories.search.label', 'Web Search'),
       description: t('configCategories.search.description', 'Enable AI web search capabilities'),
       hint: t('configCategories.search.hint', "Configure the search engine that powers the AI's web search feature. When enabled, the AI can look up current information online."),
+    },
+    domains: {
+      label: t('configCategories.domains.label', 'Domain & URLs'),
+      description: t('configCategories.domains.description', 'Configure domain names, URLs, and DNS settings'),
+      hint: t('configCategories.domains.hint', 'Use these when moving to a custom domain. Defaults assume local development (localhost). Configure your root domain, public URLs, CORS origins, and email DNS records (DKIM/SPF/DMARC).'),
+    },
+    ssl: {
+      label: t('configCategories.ssl.label', 'SSL & Security'),
+      description: t('configCategories.ssl.description', 'Configure SSL certificates and HTTPS settings'),
+      hint: t('configCategories.ssl.hint', 'Configure TLS and proxy settings when serving over HTTPS. Defaults are safe for local dev; enable HTTPS only after certificates are mounted.'),
     },
     general: {
       label: t('configCategories.general.label', 'General'),
@@ -313,7 +456,14 @@ export const DEPLOYMENT_CONFIG_KEY_LIST = [
   // Search
   'SEARXNG_URL',
   // Security
-  'FRONTEND_URL',
+  'FRONTEND_URL', 'SIMULATE_USER_AUTH', 'SIMULATE_ADMIN_AUTH',
+  // Domain & URLs
+  'BASE_DOMAIN', 'INSTANCE_URL', 'API_BASE_URL', 'ADMIN_BASE_URL',
+  'EMAIL_DOMAIN', 'DKIM_SELECTOR', 'SPF_INCLUDE', 'DMARC_POLICY',
+  'CORS_ORIGINS', 'CDN_DOMAINS', 'CUSTOM_SEARXNG_URL', 'WEBHOOK_BASE_URL',
+  // SSL & Security
+  'TRUSTED_PROXIES', 'SSL_CERT_PATH', 'SSL_KEY_PATH',
+  'FORCE_HTTPS', 'HSTS_MAX_AGE', 'MONITORING_URL',
 ] as const
 
 export type DeploymentConfigItemKey = typeof DEPLOYMENT_CONFIG_KEY_LIST[number]
@@ -412,6 +562,108 @@ export function getDeploymentConfigItemMeta(t: TFunction): Record<DeploymentConf
       label: t('deploymentConfigItems.FRONTEND_URL.label', 'App URL'),
       description: t('deploymentConfigItems.FRONTEND_URL.description', 'Public URL for the application'),
       hint: t('deploymentConfigItems.FRONTEND_URL.hint', 'The public URL where users access the app. Used for generating magic links.'),
+    },
+    SIMULATE_USER_AUTH: {
+      label: t('deploymentConfigItems.SIMULATE_USER_AUTH.label', 'Simulate User Auth'),
+      description: t('deploymentConfigItems.SIMULATE_USER_AUTH.description', 'Allow user verification without magic link token (testing only)'),
+      hint: t('deploymentConfigItems.SIMULATE_USER_AUTH.hint', 'Enable for development/testing. Allows users to complete email verification without clicking the magic link. Should be disabled in production.'),
+    },
+    SIMULATE_ADMIN_AUTH: {
+      label: t('deploymentConfigItems.SIMULATE_ADMIN_AUTH.label', 'Simulate Admin Auth'),
+      description: t('deploymentConfigItems.SIMULATE_ADMIN_AUTH.description', 'Show mock Nostr connection button for admin auth (testing only)'),
+      hint: t('deploymentConfigItems.SIMULATE_ADMIN_AUTH.hint', 'Enable for development/testing. Shows a "Mock Connection" button on admin login that bypasses Nostr extension requirement. Should be disabled in production.'),
+    },
+    // Domain & URLs
+    BASE_DOMAIN: {
+      label: t('deploymentConfigItems.BASE_DOMAIN.label', 'Root Domain'),
+      description: t('deploymentConfigItems.BASE_DOMAIN.description', 'Primary domain name'),
+      hint: t('deploymentConfigItems.BASE_DOMAIN.hint', 'Root domain without protocol. Example: example.com. Leave blank for local dev.'),
+    },
+    INSTANCE_URL: {
+      label: t('deploymentConfigItems.INSTANCE_URL.label', 'Application URL'),
+      description: t('deploymentConfigItems.INSTANCE_URL.description', 'Full URL with protocol'),
+      hint: t('deploymentConfigItems.INSTANCE_URL.hint', 'Public app URL with protocol. Example: https://app.example.com. Default: http://localhost:5173.'),
+    },
+    API_BASE_URL: {
+      label: t('deploymentConfigItems.API_BASE_URL.label', 'API URL'),
+      description: t('deploymentConfigItems.API_BASE_URL.description', 'API subdomain URL (optional)'),
+      hint: t('deploymentConfigItems.API_BASE_URL.hint', 'Only set if API is on a separate domain. Example: https://api.example.com. Default: http://localhost:8000.'),
+    },
+    ADMIN_BASE_URL: {
+      label: t('deploymentConfigItems.ADMIN_BASE_URL.label', 'Admin URL'),
+      description: t('deploymentConfigItems.ADMIN_BASE_URL.description', 'Admin panel subdomain URL (optional)'),
+      hint: t('deploymentConfigItems.ADMIN_BASE_URL.hint', 'Only if admin UI is on a separate domain. Example: https://admin.example.com. Default: http://localhost:5173/admin.'),
+    },
+    EMAIL_DOMAIN: {
+      label: t('deploymentConfigItems.EMAIL_DOMAIN.label', 'Email Domain'),
+      description: t('deploymentConfigItems.EMAIL_DOMAIN.description', 'Domain for email addresses'),
+      hint: t('deploymentConfigItems.EMAIL_DOMAIN.hint', 'Domain used for From addresses and DNS records. Example: example.com or mail.example.com.'),
+    },
+    DKIM_SELECTOR: {
+      label: t('deploymentConfigItems.DKIM_SELECTOR.label', 'DKIM Selector'),
+      description: t('deploymentConfigItems.DKIM_SELECTOR.description', 'DKIM DNS record selector'),
+      hint: t('deploymentConfigItems.DKIM_SELECTOR.hint', 'Selector prefix for your DKIM TXT record. Default: sanctum. Your provider may require a specific selector.'),
+    },
+    SPF_INCLUDE: {
+      label: t('deploymentConfigItems.SPF_INCLUDE.label', 'SPF Include'),
+      description: t('deploymentConfigItems.SPF_INCLUDE.description', 'SPF DNS include directive'),
+      hint: t('deploymentConfigItems.SPF_INCLUDE.hint', 'Replace with your provider include value (e.g., include:sendgrid.net). Default: include:_spf.google.com.'),
+    },
+    DMARC_POLICY: {
+      label: t('deploymentConfigItems.DMARC_POLICY.label', 'DMARC Policy'),
+      description: t('deploymentConfigItems.DMARC_POLICY.description', 'DMARC DNS policy record'),
+      hint: t('deploymentConfigItems.DMARC_POLICY.hint', 'Start with v=DMARC1; p=none; rua=mailto:dmarc@example.com and tighten later.'),
+    },
+    CORS_ORIGINS: {
+      label: t('deploymentConfigItems.CORS_ORIGINS.label', 'CORS Origins'),
+      description: t('deploymentConfigItems.CORS_ORIGINS.description', 'Comma-separated allowed CORS origins'),
+      hint: t('deploymentConfigItems.CORS_ORIGINS.hint', 'Comma-separated full origins (scheme + host). Example: https://app.example.com,https://admin.example.com. Default: http://localhost:5173.'),
+    },
+    CDN_DOMAINS: {
+      label: t('deploymentConfigItems.CDN_DOMAINS.label', 'CDN Domains'),
+      description: t('deploymentConfigItems.CDN_DOMAINS.description', 'Content delivery domains'),
+      hint: t('deploymentConfigItems.CDN_DOMAINS.hint', 'Comma-separated CDN hostnames for static assets (e.g., cdn.example.com). Leave blank if not using a CDN.'),
+    },
+    CUSTOM_SEARXNG_URL: {
+      label: t('deploymentConfigItems.CUSTOM_SEARXNG_URL.label', 'Custom SearXNG URL'),
+      description: t('deploymentConfigItems.CUSTOM_SEARXNG_URL.description', 'Private SearXNG instance URL'),
+      hint: t('deploymentConfigItems.CUSTOM_SEARXNG_URL.hint', 'Set only if using a separate SearXNG host. Example: https://search.example.com.'),
+    },
+    WEBHOOK_BASE_URL: {
+      label: t('deploymentConfigItems.WEBHOOK_BASE_URL.label', 'Webhook URL'),
+      description: t('deploymentConfigItems.WEBHOOK_BASE_URL.description', 'Webhook callback base URL'),
+      hint: t('deploymentConfigItems.WEBHOOK_BASE_URL.hint', 'Base URL used to construct webhook callbacks. Example: https://api.example.com/webhooks. Default: http://localhost:8000.'),
+    },
+    // SSL & Security
+    TRUSTED_PROXIES: {
+      label: t('deploymentConfigItems.TRUSTED_PROXIES.label', 'Trusted Proxies'),
+      description: t('deploymentConfigItems.TRUSTED_PROXIES.description', 'Trusted reverse proxies (cloudflare, aws, custom)'),
+      hint: t('deploymentConfigItems.TRUSTED_PROXIES.hint', 'Set to cloudflare, aws, or a comma-separated list of IP ranges. Leave blank if not behind a proxy.'),
+    },
+    SSL_CERT_PATH: {
+      label: t('deploymentConfigItems.SSL_CERT_PATH.label', 'SSL Certificate Path'),
+      description: t('deploymentConfigItems.SSL_CERT_PATH.description', 'SSL certificate file path'),
+      hint: t('deploymentConfigItems.SSL_CERT_PATH.hint', 'Absolute path to the certificate file. Example: /etc/ssl/certs/fullchain.pem.'),
+    },
+    SSL_KEY_PATH: {
+      label: t('deploymentConfigItems.SSL_KEY_PATH.label', 'SSL Key Path'),
+      description: t('deploymentConfigItems.SSL_KEY_PATH.description', 'SSL private key file path'),
+      hint: t('deploymentConfigItems.SSL_KEY_PATH.hint', 'Absolute path to the private key file. Example: /etc/ssl/private/privkey.pem.'),
+    },
+    FORCE_HTTPS: {
+      label: t('deploymentConfigItems.FORCE_HTTPS.label', 'Force HTTPS'),
+      description: t('deploymentConfigItems.FORCE_HTTPS.description', 'Redirect HTTP to HTTPS'),
+      hint: t('deploymentConfigItems.FORCE_HTTPS.hint', 'Set to true only after SSL_CERT_PATH and SSL_KEY_PATH are configured.'),
+    },
+    HSTS_MAX_AGE: {
+      label: t('deploymentConfigItems.HSTS_MAX_AGE.label', 'HSTS Max Age'),
+      description: t('deploymentConfigItems.HSTS_MAX_AGE.description', 'HSTS max-age in seconds'),
+      hint: t('deploymentConfigItems.HSTS_MAX_AGE.hint', 'Seconds browsers should enforce HTTPS. Default: 31536000 (1 year). Use 0 to disable.'),
+    },
+    MONITORING_URL: {
+      label: t('deploymentConfigItems.MONITORING_URL.label', 'Monitoring URL'),
+      description: t('deploymentConfigItems.MONITORING_URL.description', 'Health monitoring endpoint URL'),
+      hint: t('deploymentConfigItems.MONITORING_URL.hint', 'Health check URL for external monitors. Default: http://localhost:8000/health.'),
     },
   }
 }

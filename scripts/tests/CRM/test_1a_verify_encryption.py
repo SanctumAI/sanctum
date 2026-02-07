@@ -16,23 +16,20 @@ Requirements:
     - coincurve package
 """
 
-import os
 import sys
 import json
-import sqlite3
-import shlex
 import hashlib
 import argparse
-import subprocess
 import requests
 from pathlib import Path
 
 # Add backend to path for imports
 SCRIPT_DIR = Path(__file__).parent
-REPO_ROOT = SCRIPT_DIR.parent.parent.parent
-sys.path.insert(0, str(REPO_ROOT / "backend" / "app"))
+sys.path.insert(0, str(SCRIPT_DIR.parent.parent.parent / "backend" / "app"))
 
 from coincurve import PrivateKey
+
+from test_helpers import run_docker_sql
 
 
 def load_config() -> dict:
@@ -93,24 +90,6 @@ def create_test_user(api_base: str, user_data: dict, admin_token: str = None) ->
         return None
     
     return response.json()
-
-
-def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db") -> str:
-    """Run SQL inside Docker container and return output."""
-    repo_root = SCRIPT_DIR.parent.parent.parent
-
-    escaped_sql = sql.replace("'", "'\\''")
-    cmd = f"docker compose exec -T backend sqlite3 -json {shlex.quote(db_path)} '{escaped_sql}'"
-
-    result = subprocess.run(
-        cmd,
-        shell=True,
-        capture_output=True,
-        text=True,
-        cwd=repo_root
-    )
-
-    return result.stdout.strip()
 
 
 def inspect_raw_database(db_path: str, user_id: int) -> dict:

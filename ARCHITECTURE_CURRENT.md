@@ -54,10 +54,9 @@ This document describes the **current** implementation of Sanctum. For the plann
 All structured data is stored in SQLite:
 
 - **Users**: Nostr pubkeys (admin), email users, sessions
-- **Documents**: Uploaded files metadata, ingest jobs
+- **Documents**: Uploaded files metadata, ingest jobs (including `ontology_id` — taxonomy for categorizing documents; valid values: `general`, `bitcoin`; see `/ingest/ontologies`)
 - **Settings**: Instance configuration (branding, SMTP, LLM settings)
 - **Custom Fields**: Admin-defined user profile fields
-- **Ontologies**: Extraction schemas for document processing
 
 Volume: `sqlite_data:/data`
 
@@ -84,15 +83,17 @@ Volume: `qdrant_data:/qdrant/storage`
 
 1. Admin clicks "Login with Nostr"
 2. Browser extension signs challenge
-3. Backend verifies signature against allowed pubkeys
-4. JWT session token issued
+3. Backend verifies the signed event (kind `22242`) and registers the **first** admin
+4. Signed session token issued (single-admin instance)
 
 ### User Authentication (Email Magic Link)
 
 1. User enters email address
 2. Backend sends magic link via SMTP
 3. User clicks link, verifies token
-4. JWT session token issued
+4. Signed session token issued
+
+> User onboarding is blocked until an admin has authenticated at least once (instance setup complete).
 
 See [docs/authentication.md](./docs/authentication.md) for details.
 
@@ -109,8 +110,8 @@ Document Upload → Text Extraction → Chunking → Embedding → Qdrant Storag
 ```
 
 1. Document uploaded via `/ingest/upload`
-2. Text extracted (PyMuPDF for PDFs)
-3. Text split into chunks (~500 tokens)
+2. Text extracted (PyMuPDF via `PDF_EXTRACT_MODE=fast` default; Docling via `PDF_EXTRACT_MODE=quality`)
+3. Text split into chunks (~1500 chars with overlap)
 4. Chunks embedded using `intfloat/multilingual-e5-base`
 5. Vectors stored in Qdrant with metadata
 6. Job status tracked in SQLite
@@ -125,7 +126,7 @@ User Query → Embed → Qdrant Search → Top-K Results → LLM Context → Res
 2. Query embedded using same model
 3. Qdrant returns semantically similar chunks
 4. Chunks assembled into context
-5. LLM generates response with citations
+5. LLM generates response with sources (returned as `sources` in the `/query` response)
 6. Response returned to user
 
 ---
@@ -161,8 +162,8 @@ The RAG system supports tool use for enhanced responses:
 
 | Tool | Description | Access |
 |------|-------------|--------|
-| `web_search` | SearXNG metasearch | All users |
-| `sqlite_query` | Direct database queries | Admin only |
+| `web-search` | SearXNG metasearch | All users |
+| `db-query` | Direct database queries | Admin only |
 
 See [docs/tools.md](./docs/tools.md) for details.
 
@@ -178,14 +179,26 @@ See [docs/tools.md](./docs/tools.md) for details.
 | `/test` | GET | Smoke test (verifies Qdrant seeded data) |
 | `/llm/test` | GET | LLM provider connectivity test |
 
+### Public Config
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/instance/status` | GET | Instance setup status for frontend routing |
+| `/settings/public` | GET | Public instance branding settings |
+| `/config/public` | GET | Simulation flags (`SIMULATE_*`). Note: These flags default to `false` and control frontend UI behavior. They must be disabled in production. |
+| `/session-defaults` | GET | Chat session defaults (optional `user_type_id`) |
+
 ### Ingest
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/ingest/upload` | POST | Upload document for processing |
-| `/ingest/jobs` | GET | List all ingest jobs |
+| `/ingest/ontologies` | GET | List valid ontology IDs |
+| `/ingest/jobs` | GET | List ingest jobs (admin or approved user — see [authentication.md](./docs/authentication.md#user-approval-workflow)) |
 | `/ingest/status/{job_id}` | GET | Get job status |
+| `/ingest/jobs/{job_id}` | DELETE | Delete document + vectors (admin only) |
 | `/ingest/stats` | GET | Qdrant collection statistics |
+| `/ingest/wipe` | POST | Delete Qdrant collections (dev only) |
 
 ### Query
 
@@ -241,27 +254,74 @@ services:
 
 ```bash
 # Start all services
-docker compose up --build
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build
 
 # View logs
-docker compose logs -f backend
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs -f backend
 
 # Reset all data
-docker compose down -v
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml down -v
 ```
 
 ---
 
 ## Environment Variables
 
+**Configuration Precedence**: Values in SQLite (set via `/admin/deployment`) take priority over environment variables. This allows runtime configuration changes without container restarts.
+
+To use environment-variable-only mode, leave the SQLite config values empty (they will fall back to env vars). See `docs/admin-deployment-config.md` for override management.
+
 Key configuration options (see `.env.example`):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `LLM_PROVIDER` | `maple` | LLM backend (`maple` or `ollama`) |
-| `MAPLE_URL` | `http://maple-proxy:8080/v1` | maple-proxy endpoint |
-| `QDRANT_URL` | `http://qdrant:6333` | Qdrant endpoint |
+| `LLM_API_URL` | (provider-specific) | Base URL for LLM provider. Set this generic variable OR the provider-specific `MAPLE_BASE_URL`/`OLLAMA_BASE_URL` |
+| `LLM_MODEL` | (provider-specific) | Model name. Set this generic variable OR the provider-specific `MAPLE_MODEL`/`OLLAMA_MODEL` |
+| `MAPLE_API_KEY` | (required) | API key for maple-proxy when `LLM_PROVIDER=maple` |
+| `QDRANT_HOST` | `qdrant` | Qdrant hostname |
+| `QDRANT_PORT` | `6333` | Qdrant port |
+| `EMBEDDING_PROVIDER` | `local` | Embedding backend (`local` or `openai`) |
+| `EMBEDDING_MODEL` | `intfloat/multilingual-e5-base` | Embedding model name |
+| `OPENAI_API_KEY` | (required for OpenAI embeddings) | OpenAI key when `EMBEDDING_PROVIDER=openai` |
 | `SEARXNG_URL` | `http://searxng:8080` | SearXNG endpoint |
+| `FRONTEND_URL` | `http://localhost:5173` | Base URL for magic links |
+| `MOCK_EMAIL` | `true` | Log magic links instead of sending (alias: `MOCK_SMTP`) |
+| `SMTP_TIMEOUT` | `10` | SMTP connection timeout (seconds) |
+| `SIMULATE_USER_AUTH` | `false` | ⚠️ **NEVER enable in production** — Bypasses magic link verification |
+| `SIMULATE_ADMIN_AUTH` | `false` | ⚠️ **NEVER enable in production** — Shows mock Nostr auth option |
+| `PDF_EXTRACT_MODE` | `fast` | PDF extraction mode (`fast` for PyMuPDF, `quality` for Docling) |
+| `BASE_DOMAIN` | `localhost` | Root domain name |
+| `INSTANCE_URL` | `http://localhost:5173` | Full app URL with protocol |
+| `API_BASE_URL` | `http://localhost:8000` | API base URL |
+| `ADMIN_BASE_URL` | `http://localhost:5173/admin` | Admin panel URL |
+| `EMAIL_DOMAIN` | `localhost` | Domain for email addresses |
+| `DKIM_SELECTOR` | `sanctum` | DKIM DNS selector |
+| `SPF_INCLUDE` | (empty) | SPF include directive (e.g., include:_spf.google.com) |
+| `DMARC_POLICY` | `v=DMARC1; p=none` | DMARC DNS policy record |
+| `CORS_ORIGINS` | `http://localhost:5173` | Comma-separated allowed CORS origins |
+| `WEBHOOK_BASE_URL` | `http://localhost:8000` | Webhook callback base URL |
+| `FORCE_HTTPS` | `false` | Redirect HTTP to HTTPS |
+| `HSTS_MAX_AGE` | `31536000` | HSTS max-age in seconds |
+| `MONITORING_URL` | `http://localhost:8000/health` | Health monitoring endpoint |
+| `SSL_CERT_PATH` | (empty) | SSL certificate file path |
+| `SSL_KEY_PATH` | (empty) | SSL private key file path |
+| `TRUSTED_PROXIES` | (empty) | Trusted reverse proxies |
+
+### Production Checklist
+
+Before deploying to production, ensure these variables are configured:
+
+| Variable | Requirement | Notes |
+|----------|-------------|-------|
+| `CORS_ORIGINS` | **Required** | Replace localhost with production domain(s) |
+| `FORCE_HTTPS` | **Required** | Set to `true` |
+| `MOCK_EMAIL` | **Required** | Set to `false` and configure SMTP |
+| `SIMULATE_USER_AUTH` | **Required** | Must be `false` or unset |
+| `SIMULATE_ADMIN_AUTH` | **Required** | Must be `false` or unset |
+| `DMARC_POLICY` | Recommended | Use `p=quarantine` or `p=reject` |
+| `TRUSTED_PROXIES` | Required if behind proxy | Configure to prevent IP spoofing |
+| `SSL_CERT_PATH` / `SSL_KEY_PATH` | If terminating TLS | Provide paths to certificates |
 
 ---
 
@@ -271,4 +331,5 @@ Key configuration options (see `.env.example`):
 - [docs/authentication.md](./docs/authentication.md) — Auth flows
 - [docs/tools.md](./docs/tools.md) — Tool system documentation
 - [docs/upload-documents.md](./docs/upload-documents.md) — Ingest guide
+- [docs/admin-deployment-config.md](./docs/admin-deployment-config.md) — Deployment config guide
 - [docs/sqlite-rag-docs-tracking.md](./docs/sqlite-rag-docs-tracking.md) — SQLite schema

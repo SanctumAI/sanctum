@@ -7,9 +7,10 @@ import { DynamicIcon } from '../shared/DynamicIcon'
 interface IconPickerProps {
   value: string
   onChange: (icon: string) => void
+  'aria-labelledby'?: string
 }
 
-export function IconPicker({ value, onChange }: IconPickerProps) {
+export function IconPicker({ value, onChange, 'aria-labelledby': ariaLabelledby }: IconPickerProps) {
   const { t } = useTranslation()
   const [search, setSearch] = useState('')
 
@@ -18,7 +19,7 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
   )
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" role="group" aria-labelledby={ariaLabelledby}>
       {/* Search input */}
       <div className="relative">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />

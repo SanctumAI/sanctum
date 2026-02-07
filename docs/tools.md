@@ -35,7 +35,7 @@ User message + selectedTools
 └─────────────────────┘
 ```
 
-Tools are executed **before** the LLM call. Results are injected into the prompt as context, following the same pattern as RAG retrieval.
+Tools are executed **before** the LLM call for `/llm/chat`. `/query` does not execute tools server-side; it only uses selected tool IDs to enable auto-search hints in the prompt.
 
 ## Usage
 
@@ -47,10 +47,10 @@ In the chat interface, click the **"Web"** button in the toolbar to enable web s
 
 ### API
 
-Both `/llm/chat` and `/query` endpoints accept an optional `tools` array:
+`/llm/chat` executes tools server-side. `/query` accepts `tools` only to enable auto-search hints (no tool execution).
 
 ```bash
-# Pure LLM chat with web search
+# Pure LLM chat with web search (server-side tool execution)
 curl -X POST http://localhost:8000/llm/chat \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <token>" \
@@ -59,7 +59,7 @@ curl -X POST http://localhost:8000/llm/chat \
     "tools": ["web-search"]
   }'
 
-# RAG + web search combined
+# RAG with auto-search hints (no tool execution)
 curl -X POST http://localhost:8000/query \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <token>" \
@@ -68,7 +68,58 @@ curl -X POST http://localhost:8000/query \
     "tools": ["web-search"],
     "top_k": 5
   }'
+
 ```
+
+### Auto-Search Hints
+
+If `web-search` is included in the `tools` array for `/query`, the LLM may identify queries that would benefit from live web data. When this happens, the response includes a `search_term` field.
+
+**Example response with search_term:**
+```json
+{
+  "answer": "Based on the knowledge base, I can explain the general concepts...",
+  "search_term": "Bitcoin price January 2025",
+  "sources": [...],
+  "clarifying_questions": []
+}
+```
+
+**Client workflow:**
+```text
+┌────────────────┐
+│ POST /query    │
+│ tools: ["web-  │
+│   search"]     │
+└───────┬────────┘
+        ▼
+┌────────────────┐      search_term present?
+│ Response with  │ ─────────────────────────┐
+│ answer         │                          │
+└───────┬────────┘                          ▼
+        │                           ┌───────────────┐
+        │ No search_term            │ Option A:     │
+        │                           │ Display hint  │
+        ▼                           │ to user       │
+┌────────────────┐                  └───────────────┘
+│ Done - display │                          │
+│ answer         │                          ▼
+└────────────────┘                  ┌───────────────┐
+                                    │ Option B:     │
+                                    │ Auto-execute  │
+                                    │ POST /llm/chat│
+                                    │ with search   │
+                                    └───────┬───────┘
+                                            ▼
+                                    ┌───────────────┐
+                                    │ Final answer  │
+                                    │ with live data│
+                                    └───────────────┘
+```
+
+When `search_term` is present, the client can:
+1. **Display as suggestion** - Show the search term to the user and let them decide whether to search
+2. **Auto-execute** - Call `/llm/chat` with `tools: ["web-search"]` using the original question to get an answer with live web data
 
 ### Response Format
 
@@ -77,7 +128,7 @@ Responses include a `tools_used` array showing which tools were executed:
 ```json
 {
   "message": "Based on current search results...",
-  "model": "gpt-oss-120b",
+  "model": "kimi-k2-thinking",
   "provider": "maple",
   "tools_used": [
     {
@@ -89,6 +140,40 @@ Responses include a `tools_used` array showing which tools were executed:
 }
 ```
 
+`/query` responses include additional fields for session continuity and debugging:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `session_id` | string (UUID v4) | Session identifier for conversation continuity |
+| `sources` | array | Retrieved chunks with `{score, type, text, chunk_id, source_file}` |
+| `graph_context` | object | Placeholder for future graph features (currently empty) |
+| `clarifying_questions` | array | Questions extracted from LLM response for follow-up |
+| `context_used` | string | Debug field showing prompt sent to LLM (user profile redacted) |
+| `temperature` | number | Model temperature parameter used for generation |
+
+**Example response:**
+```json
+{
+  "answer": "Based on the knowledge base...",
+  "session_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "sources": [
+    {
+      "score": 0.89,
+      "type": "document",
+      "text": "Relevant chunk text...",
+      "chunk_id": "doc123_chunk_0",
+      "source_file": "guide.pdf"
+    }
+  ],
+  "graph_context": {},
+  "clarifying_questions": ["Would you like more details about X?"],
+  "context_used": "[DEBUG] System prompt + retrieved context...",
+  "temperature": 0.7
+}
+```
+
+> **Note**: The `context_used` field exposes conversation history and is intended for debugging purposes. It should not be displayed to end users in production.
+
 ## SearXNG Configuration
 
 SearXNG is a privacy-respecting metasearch engine that aggregates results from multiple search engines.
@@ -98,7 +183,7 @@ SearXNG is a privacy-respecting metasearch engine that aggregates results from m
 SearXNG runs as a Docker container on the internal network (not exposed to host):
 
 ```yaml
-# docker-compose.yml
+# docker-compose.infra.yml
 searxng:
   image: searxng/searxng:latest
   container_name: sanctum-searxng
@@ -239,6 +324,24 @@ curl -X POST http://localhost:8000/admin/tools/execute \
   }'
 ```
 
+Example response:
+```json
+{
+  "success": true,
+  "tool_id": "db-query",
+  "tool_name": "db-query",
+  "data": {
+    "sql": "SELECT id, encrypted_email, created_at FROM users ORDER BY created_at DESC LIMIT 10",
+    "columns": ["id", "encrypted_email", "created_at"],
+    "rows": [
+      { "id": 1, "encrypted_email": "...", "created_at": "2026-02-04T12:34:56" }
+    ],
+    "row_count": 1,
+    "truncated": false
+  }
+}
+```
+
 #### Chat with Decrypted Tool Context (Admin Only)
 
 ```bash
@@ -344,7 +447,7 @@ searxng/
 
 Check if the container is healthy:
 ```bash
-docker compose logs searxng
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs searxng
 docker exec sanctum-backend curl -s "http://searxng:8080/search?q=test&format=json"
 ```
 
@@ -356,7 +459,7 @@ Ensure the tool ID in `ToolSelector.tsx` matches the tool's `definition.name`.
 
 Check backend logs for the actual error:
 ```bash
-docker compose logs backend --tail 50
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs backend --tail 50
 ```
 
 Common issues:

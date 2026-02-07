@@ -250,12 +250,29 @@ def update_job_status(
 
 
 # =============================================================================
-# DELETE OPERATIONS (TODO - not yet needed for MVP)
+# DELETE OPERATIONS
 # =============================================================================
 
-# def delete_job(job_id: str) -> bool:
-#     """Delete a job and its associated chunks."""
-#     pass
+def delete_job(job_id: str) -> bool:
+    """
+    Delete a job from ingest_jobs table.
+
+    Note: CASCADE on foreign keys automatically handles deletion
+    from document_defaults and document_defaults_user_type_overrides tables.
+
+    Args:
+        job_id: Job to delete
+
+    Returns:
+        True if job was deleted, False if not found
+    """
+    with get_cursor() as cursor:
+        cursor.execute("DELETE FROM ingest_jobs WHERE job_id = ?", (job_id,))
+        deleted = cursor.rowcount > 0
+        if deleted:
+            logger.info(f"Deleted ingest job: {job_id}")
+        return deleted
+
 
 # def purge_old_jobs(days: int = 30) -> int:
 #     """Delete jobs older than specified days. Returns count deleted."""

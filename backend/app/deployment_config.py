@@ -65,9 +65,31 @@ ENV_CONFIG_MAP = {
     "SEARXNG_URL": {"category": "search", "description": "SearXNG instance URL", "requires_restart": False, "default": "http://searxng:8080"},
     # Security Settings
     "FRONTEND_URL": {"category": "security", "description": "Frontend application URL", "requires_restart": False, "default": "http://localhost:5173"},
+    "SIMULATE_USER_AUTH": {"category": "security", "description": "Allow user verification without magic link token (testing only)", "requires_restart": False, "default": "false"},
+    "SIMULATE_ADMIN_AUTH": {"category": "security", "description": "Show mock Nostr connection button for admin auth (testing only)", "requires_restart": False, "default": "false"},
     # RAG Settings
     "RAG_TOP_K": {"category": "llm", "description": "Default RAG retrieval count", "requires_restart": False, "default": "8"},
     "PDF_EXTRACT_MODE": {"category": "llm", "description": "PDF extraction mode (fast/quality)", "requires_restart": False, "default": "fast"},
+    # Domain & URLs Settings
+    "BASE_DOMAIN": {"category": "domains", "description": "Root domain name", "requires_restart": False, "default": "localhost"},
+    "INSTANCE_URL": {"category": "domains", "description": "Full application URL with protocol", "requires_restart": True, "default": "http://localhost:5173"},
+    "API_BASE_URL": {"category": "domains", "description": "API subdomain URL (optional)", "requires_restart": True, "default": "http://localhost:8000"},
+    "ADMIN_BASE_URL": {"category": "domains", "description": "Admin panel subdomain URL (optional)", "requires_restart": True, "default": "http://localhost:5173/admin"},
+    "EMAIL_DOMAIN": {"category": "domains", "description": "Domain for email addresses", "requires_restart": False, "default": "localhost"},
+    "DKIM_SELECTOR": {"category": "domains", "description": "DKIM DNS record selector", "requires_restart": False, "default": "sanctum"},
+    "SPF_INCLUDE": {"category": "domains", "description": "SPF DNS include directive (e.g., include:_spf.google.com)", "requires_restart": False, "default": ""},
+    "DMARC_POLICY": {"category": "domains", "description": "DMARC DNS policy record", "requires_restart": False, "default": "v=DMARC1; p=none"},
+    "CORS_ORIGINS": {"category": "domains", "description": "Comma-separated allowed CORS origins", "requires_restart": True, "default": "http://localhost:5173"},
+    "CDN_DOMAINS": {"category": "domains", "description": "Content delivery domains", "requires_restart": False},
+    "CUSTOM_SEARXNG_URL": {"category": "domains", "description": "Private SearXNG instance URL", "requires_restart": True},
+    "WEBHOOK_BASE_URL": {"category": "domains", "description": "Webhook callback base URL", "requires_restart": False, "default": "http://localhost:8000"},
+    # SSL & Security Settings
+    "TRUSTED_PROXIES": {"category": "ssl", "description": "Trusted reverse proxies (cloudflare, aws, custom)", "requires_restart": True},
+    "SSL_CERT_PATH": {"category": "ssl", "description": "SSL certificate file path", "requires_restart": True},
+    "SSL_KEY_PATH": {"category": "ssl", "description": "SSL private key file path", "requires_restart": True, "is_secret": True},
+    "FORCE_HTTPS": {"category": "ssl", "description": "Redirect HTTP to HTTPS", "requires_restart": True, "default": "false"},
+    "HSTS_MAX_AGE": {"category": "ssl", "description": "HSTS max-age in seconds", "requires_restart": False, "default": "31536000"},
+    "MONITORING_URL": {"category": "general", "description": "Health monitoring endpoint URL", "requires_restart": False, "default": "http://localhost:8000/health"},
 }
 
 # Keys that should never be exposed or editable
@@ -107,10 +129,7 @@ def _sync_env_to_db() -> None:
         if key in FORBIDDEN_KEYS:
             continue
 
-        # Check if already in DB
         existing = database.get_deployment_config(key)
-        if existing:
-            continue
 
         # Try to get value from env, with key translation
         value = None
@@ -131,6 +150,31 @@ def _sync_env_to_db() -> None:
         # 4. Fall back to default from config map
         if value is None:
             value = meta.get("default", "")
+
+        if existing:
+            # Backfill empty values with defaults/env values
+            existing_value = existing.get("value")
+            should_backfill_value = (existing_value is None or existing_value == "") and value not in (None, "")
+            # Keep metadata in sync for known one-off category corrections.
+            should_sync_metadata = (
+                key == "MONITORING_URL" and existing.get("category") != meta["category"]
+            )
+
+            if should_backfill_value or should_sync_metadata:
+                value_to_store = existing_value if existing_value not in (None, "") else value
+                database.upsert_deployment_config(
+                    key=key,
+                    value=value_to_store,
+                    is_secret=meta.get("is_secret", False),
+                    requires_restart=meta.get("requires_restart", False),
+                    category=meta["category"],
+                    description=meta.get("description", ""),
+                )
+                if should_backfill_value:
+                    logger.debug(f"Backfilled empty config: {key} (value: {'***' if meta.get('is_secret') else value_to_store})")
+                elif should_sync_metadata:
+                    logger.debug(f"Synchronized config metadata: {key} (category -> {meta['category']})")
+            continue
 
         database.upsert_deployment_config(
             key=key,
@@ -177,6 +221,10 @@ async def get_deployment_config(admin: dict = Depends(auth.require_admin)):
             response.security.append(item)
         elif category == "search":
             response.search.append(item)
+        elif category == "domains":
+            response.domains.append(item)
+        elif category == "ssl":
+            response.ssl.append(item)
         else:
             response.general.append(item)
 
@@ -309,6 +357,37 @@ async def update_deployment_config_value(
         except ValueError:
             raise HTTPException(status_code=400, detail="RAG_TOP_K must be between 1 and 100")
 
+    # URL validation for URL-type fields
+    URL_KEYS = {"INSTANCE_URL", "API_BASE_URL", "ADMIN_BASE_URL", "CUSTOM_SEARXNG_URL",
+                "WEBHOOK_BASE_URL", "MONITORING_URL"}
+    if key in URL_KEYS and value_to_save:
+        from urllib.parse import urlparse
+        parsed = urlparse(value_to_save)
+        if not parsed.scheme or not parsed.netloc:
+            raise HTTPException(status_code=400, detail=f"{key} must be a valid URL with protocol (e.g., https://example.com)")
+
+    # Domain validation
+    DOMAIN_KEYS = {"BASE_DOMAIN", "EMAIL_DOMAIN"}
+    if key in DOMAIN_KEYS and value_to_save:
+        import re
+        domain_pattern = r'^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$'
+        if not re.match(domain_pattern, value_to_save):
+            raise HTTPException(status_code=400, detail=f"{key} must be a valid domain name")
+
+    # HSTS max-age validation
+    if key == "HSTS_MAX_AGE" and value_to_save:
+        try:
+            hsts = int(value_to_save)
+            if hsts < 0:
+                raise ValueError()
+        except ValueError:
+            raise HTTPException(status_code=400, detail="HSTS_MAX_AGE must be a non-negative integer")
+
+    # Boolean validation for FORCE_HTTPS
+    if key == "FORCE_HTTPS" and value_to_save:
+        if value_to_save.lower() not in ("true", "false", "1", "0", "yes", "no", "on", "off"):
+            raise HTTPException(status_code=400, detail="FORCE_HTTPS must be a boolean value (true/false, 1/0, yes/no, on/off)")
+
     # Get admin pubkey for audit log
     admin_pubkey = admin.get("pubkey")
     if not admin_pubkey:
@@ -396,6 +475,29 @@ async def validate_config(admin: dict = Depends(auth.require_admin)):
 
     if not config_dict.get("SEARXNG_URL"):
         warnings.append("SEARXNG_URL not configured - web search will not work")
+
+    # Check for SSL configuration consistency
+    ssl_cert = config_dict.get("SSL_CERT_PATH", "")
+    ssl_key = config_dict.get("SSL_KEY_PATH", "")
+    force_https = config_dict.get("FORCE_HTTPS", "").lower() in ("true", "1", "yes", "on")
+
+    if force_https and (not ssl_cert or not ssl_key):
+        warnings.append("FORCE_HTTPS is enabled but SSL certificate paths are not configured")
+
+    if ssl_cert and not ssl_key:
+        warnings.append("SSL_CERT_PATH is set but SSL_KEY_PATH is missing")
+
+    if ssl_key and not ssl_cert:
+        warnings.append("SSL_KEY_PATH is set but SSL_CERT_PATH is missing")
+
+    # Check CORS origins match configured domains
+    cors_origins_raw = config_dict.get("CORS_ORIGINS", "")
+    instance_url = config_dict.get("INSTANCE_URL", "").rstrip("/")
+    if instance_url and cors_origins_raw:
+        # Parse comma-separated origins and normalize (strip whitespace and trailing slashes)
+        cors_origins_list = [origin.strip().rstrip("/") for origin in cors_origins_raw.split(",") if origin.strip()]
+        if instance_url not in cors_origins_list:
+            warnings.append("INSTANCE_URL is not included in CORS_ORIGINS - this may cause CORS errors")
 
     return DeploymentValidationResponse(
         valid=len(errors) == 0,

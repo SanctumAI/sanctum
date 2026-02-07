@@ -72,6 +72,8 @@ Admin auth uses a custom Nostr event kind `22242`:
 - Timestamp must be within 5 minutes of server time
 - Signature must be valid BIP-340 Schnorr
 
+**Single-admin constraint:** The first admin to authenticate becomes the only admin for the instance. Subsequent admin auth attempts return `403` ("Admin registration is closed"). The admin can migrate to a new Nostr keypair using key migration, but this does not transfer ownership to a different person.
+
 ### API Endpoint
 
 #### `POST /admin/auth`
@@ -113,6 +115,7 @@ The `session_token` must be included in subsequent admin API requests as `Author
 
 **Errors:**
 - `401` - Invalid signature, wrong event kind, expired timestamp, or missing action tag
+- `403` - Admin registration is closed (an admin already exists)
 - `429` - Rate limit exceeded (10 requests per minute per IP)
 
 **Rate Limiting:** 10 requests per minute per IP address. Returns 429 after limit is exceeded.
@@ -158,11 +161,20 @@ Any NIP-07 compatible browser extension:
 - [Flamingo](https://www.flamingo.zip/)
 - [Nostr Connect](https://nostrconnect.com/)
 
+### Admin Key Migration
+
+Admins can migrate to a new Nostr keypair without losing access to encrypted user data.
+This re-encrypts all PII to the new pubkey.
+
+See [sqlite-encryption.md](./sqlite-encryption.md#admin-key-migration) for details.
+
 ---
 
 ## User Authentication (Magic Link)
 
 Users authenticate via email magic links - no password required.
+
+**Setup requirement:** User auth endpoints are disabled until an admin has authenticated at least once (instance setup complete). If no admin exists, `/auth/magic-link` returns `503` with "Instance not configured."
 
 ### How It Works
 
@@ -237,6 +249,7 @@ curl -X POST http://localhost:8000/auth/magic-link \
 - `400` - Email is required
 - `429` - Rate limit exceeded (5 requests per minute per IP)
 - `500` - Failed to send email
+- `503` - Instance not configured (no admin has authenticated yet)
 
 **Rate Limiting:** 5 requests per minute per IP address. Prevents email flooding attacks.
 
@@ -260,7 +273,10 @@ curl "http://localhost:8000/auth/verify?token=eyJlbWFpbCI6..."
     "email": "user@example.com",
     "name": "John Doe",
     "user_type_id": null,
-    "created_at": "2024-01-15T10:30:00"
+    "approved": true,
+    "created_at": "2024-01-15T10:30:00",
+    "needs_onboarding": false,
+    "needs_user_type": false
   },
   "session_token": "eyJ1c2VyX2lkIjoxLC..."
 }
@@ -289,7 +305,10 @@ curl "http://localhost:8000/auth/me?token=eyJ1c2VyX2lkIjox..."
     "email": "user@example.com",
     "name": "John Doe",
     "user_type_id": null,
-    "created_at": "2024-01-15T10:30:00"
+    "approved": true,
+    "created_at": "2024-01-15T10:30:00",
+    "needs_onboarding": false,
+    "needs_user_type": false
   }
 }
 ```
@@ -304,6 +323,43 @@ curl "http://localhost:8000/auth/me?token=eyJ1c2VyX2lkIjox..."
 
 ---
 
+#### `POST /auth/test-email`
+
+Send a test email to verify SMTP configuration (admin only).
+
+**Request:**
+```bash
+curl -X POST http://localhost:8000/auth/test-email \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <admin-token>" \
+  -d '{"email": "you@example.com"}'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Test email sent successfully"
+}
+```
+
+**Response (mock mode):**
+```json
+{
+  "success": true,
+  "message": "Test email sent successfully (mock mode enabled - check backend logs)"
+}
+```
+
+If `MOCK_EMAIL=true` (or `MOCK_SMTP=true` via deployment config), the response notes that mock mode is enabled.
+
+**Errors:**
+- `401/403` - Unauthorized or not an admin
+- `400` - Email address required
+- `500` - Failed to send test email
+
+---
+
 ## Configuration
 
 ### Environment Variables
@@ -313,6 +369,7 @@ curl "http://localhost:8000/auth/me?token=eyJ1c2VyX2lkIjox..."
 | `SECRET_KEY` | (auto-generated) | Key for signing tokens. If not set, auto-generates and persists to `/data/.secret_key` |
 | `FRONTEND_URL` | `http://localhost:5173` | Base URL for magic link emails |
 | `MOCK_EMAIL` | `true` | Log magic links instead of sending emails |
+| `MOCK_SMTP` | (alias) | Deployment-config alias for `MOCK_EMAIL` |
 | `SMTP_HOST` | (empty) | SMTP server hostname |
 | `SMTP_PORT` | `587` | SMTP server port |
 | `SMTP_USER` | (empty) | SMTP username |
@@ -321,7 +378,7 @@ curl "http://localhost:8000/auth/me?token=eyJ1c2VyX2lkIjox..."
 
 ### Development Mode (Mock Email)
 
-With `MOCK_EMAIL=true` (default), magic links are logged to the console instead of being sent via email:
+With `MOCK_EMAIL=true` (default), or `MOCK_SMTP=true` via deployment config, magic links are logged to the console instead of being sent via email:
 
 ```
 ============================================================
@@ -399,7 +456,7 @@ Sanctum supports optional manual approval of new users before they can access th
 > - No dedicated admin endpoint exists for approving/rejecting users
 > - Admins can update the `approved` field via `PUT /users/{user_id}` or the database explorer
 > - No admin UI for viewing/managing pending users
-> - See [security-hardening.md](./security-hardening.md) for details
+> - See "Production Hardening" below for details
 
 ---
 
@@ -409,42 +466,35 @@ The codebase includes several development conveniences that are disabled by defa
 
 ### Mock Email Mode
 
-With `MOCK_EMAIL=true`, magic links are logged to console instead of sent via SMTP. This is controlled by the backend environment variable.
+With `MOCK_EMAIL=true` (or `MOCK_SMTP=true` via deployment config), magic links are logged to console instead of sent via SMTP. This is controlled by the backend environment variable.
 
-### VITE_DEV_MODE (Frontend)
+### Simulation Flags (Backend)
 
-Mock authentication features are guarded by `VITE_DEV_MODE` environment variable:
+Mock auth features are controlled by backend config and exposed via `/config/public`.
 
-```bash
-# Enable for development
-VITE_DEV_MODE=true
-```
-
-When `VITE_DEV_MODE=true`:
-- **Mock Nostr Authentication**: "Continue with mock identity" button appears in `AdminOnboarding.tsx`
+When enabled:
+- **`SIMULATE_ADMIN_AUTH=true`**: "Mock Connection" button appears on `/admin`
   - Generates a fake 64-character hex pubkey
   - Bypasses real NIP-07 extension signing
   - Note: Admin API calls will fail (no valid session token)
+- **`SIMULATE_USER_AUTH=true`**: `/verify` can succeed without a token using `sanctum_pending_email` (testing only)
 
-- **Token-less Verification**: `VerifyMagicLink.tsx` allows verification using `sanctum_pending_email` from localStorage when no token is present
-
-When `VITE_DEV_MODE` is unset or `false` (default):
-- Mock buttons are hidden
-- Token-less verification fails with error
-- Users must use real authentication methods
+These flags can be set via the deployment config UI (`/admin/deployment`) or environment variables.
+Database values take precedence over env vars. Keep them disabled in production.
 
 ### Configuration
 
-Add to `frontend/.env` or `docker-compose.yml`:
+Add to your backend environment (e.g., `.env` or `docker-compose.app.yml`):
 ```bash
 # Development
-VITE_DEV_MODE=true
+SIMULATE_ADMIN_AUTH=true
+SIMULATE_USER_AUTH=true
 
 # Production (default - no action needed)
-# VITE_DEV_MODE is not set, mock features disabled
+# SIMULATE_* not set or set to false
 ```
 
-See [security-hardening.md](./security-hardening.md) for complete production deployment guidance.
+See "Production Hardening" below for complete production deployment guidance.
 
 ---
 
@@ -475,10 +525,17 @@ See [security-hardening.md](./security-hardening.md) for complete production dep
 The following security features are implemented:
 - **Endpoint authentication** - All admin endpoints require valid session token
 - **Rate limiting** - Auth endpoints are rate-limited (5/min for magic-link, 10/min for admin auth)
-- **Mock auth disabled by default** - Requires `VITE_DEV_MODE=true` to enable
+- **Simulated auth disabled by default** - Requires `SIMULATE_*` flags to enable
 - **Auto-generated SECRET_KEY** - Persisted to `/data/.secret_key` on first run
 
-> For additional production hardening recommendations, see [security-hardening.md](./security-hardening.md).
+### Production Hardening
+
+Recommended production steps:
+- Set a stable `SECRET_KEY` in your environment or ensure `/data/` is persisted
+- Configure SMTP with a verified domain and SPF/DKIM/DMARC
+- Disable `SIMULATE_*` flags and `MOCK_EMAIL` in production
+- Restrict admin access to trusted networks
+- Use HTTPS in front of the backend and configure `CORS_ORIGINS` appropriately
 
 ---
 
@@ -529,6 +586,6 @@ Magic links expire after 15 minutes. Request a new one from the login page.
 2. Verify SMTP configuration is correct
 3. Check backend logs for send errors:
    ```bash
-   docker compose logs backend | grep -i "magic link"
+   docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs backend | grep -i "magic link"
    ```
 4. In development, ensure you're checking the backend logs for mock mode output

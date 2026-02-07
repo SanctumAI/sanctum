@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, SquareTerminal, RefreshCw, Loader2, Play, Database, Key, X, Pencil, Trash2, ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react'
+import { ArrowLeft, SquareTerminal, RefreshCw, Loader2, Play, Database, Key, X, Pencil, Trash2, ChevronLeft, ChevronRight, HelpCircle, Download, Lock, Unlock } from 'lucide-react'
 import {
+  ColumnInfo,
   TableInfo,
   QueryResponse,
   formatCellValue,
@@ -10,7 +11,7 @@ import {
   isJsonValue,
 } from '../types/database'
 import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
-import { decryptField } from '../utils/encryption'
+import { decryptField, hasNip04Support } from '../utils/encryption'
 
 export function AdminDatabaseExplorer() {
   const { t } = useTranslation()
@@ -27,6 +28,7 @@ export function AdminDatabaseExplorer() {
   // Table data state
   const [tableData, setTableData] = useState<Record<string, unknown>[]>([])
   const [isLoadingData, setIsLoadingData] = useState(false)
+  const [tableError, setTableError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalRows, setTotalRows] = useState(0)
@@ -48,7 +50,13 @@ export function AdminDatabaseExplorer() {
   const [expandedCell, setExpandedCell] = useState<{ row: number; col: string } | null>(null)
 
   // Decrypted values cache: maps rowIndex -> { columnName -> decryptedValue }
-  const [decryptedData, setDecryptedData] = useState<Record<number, Record<string, string>>>({})
+  const [decryptedData, setDecryptedData] = useState<Record<number, Record<string, string | null>>>({})
+  const decryptRunIdRef = useRef(0)
+  const [decryptNonce, setDecryptNonce] = useState(0)
+  const [nip07Available, setNip07Available] = useState(hasNip04Support())
+  const [nip07Access, setNip07Access] = useState(false)
+  const [showDecryptHelp, setShowDecryptHelp] = useState(false)
+  const decryptHelpRef = useRef<HTMLDivElement>(null)
 
   // Database help modal state
   const [showDbHelpModal, setShowDbHelpModal] = useState(false)
@@ -58,6 +66,60 @@ export function AdminDatabaseExplorer() {
 
   // Get current table info (moved up so useEffects can reference it)
   const currentTableInfo = tables.find((t) => t.name === selectedTable)
+  const encryptedBaseNames = useMemo(() => {
+    if (!currentTableInfo) return new Set<string>()
+    return new Set(
+      currentTableInfo.columns
+        .filter((col) => col.name.startsWith('encrypted_'))
+        .map((col) => col.name.replace('encrypted_', ''))
+    )
+  }, [currentTableInfo])
+
+  const getColumnDisplay = (col: ColumnInfo) => {
+    const isEncrypted = col.name.startsWith('encrypted_')
+    const baseName = isEncrypted ? col.name.replace('encrypted_', '') : col.name
+    const isPlaintextCounterpart = !isEncrypted && encryptedBaseNames.has(col.name)
+    return { baseName, isEncrypted, isPlaintextCounterpart }
+  }
+
+  const renderColumnName = (
+    col: ColumnInfo,
+    options: { className?: string } = {}
+  ) => {
+    const { baseName, isEncrypted, isPlaintextCounterpart } = getColumnDisplay(col)
+    return (
+      <span className={`inline-flex items-center gap-1 ${options.className ?? ''}`}>
+        {col.primaryKey && (
+          <span
+            className="inline-flex"
+            title={t('admin.database.primaryKeyIcon', 'Primary key')}
+            aria-label={t('admin.database.primaryKeyIcon', 'Primary key')}
+          >
+            <Key className="w-3 h-3 text-warning" aria-hidden="true" />
+          </span>
+        )}
+        {isEncrypted && (
+          <span
+            className="inline-flex"
+            title={t('admin.database.encryptedFieldIcon', 'Encrypted field')}
+            aria-label={t('admin.database.encryptedFieldIcon', 'Encrypted field')}
+          >
+            <Lock className="w-3 h-3 text-warning" aria-hidden="true" />
+          </span>
+        )}
+        {isPlaintextCounterpart && (
+          <span
+            className="inline-flex"
+            title={t('admin.database.plaintextFieldIcon', 'Plaintext field')}
+            aria-label={t('admin.database.plaintextFieldIcon', 'Plaintext field')}
+          >
+            <Unlock className="w-3 h-3 text-text-muted" aria-hidden="true" />
+          </span>
+        )}
+        <span>{baseName}</span>
+      </span>
+    )
+  }
 
   // Check if admin is logged in
   useEffect(() => {
@@ -89,6 +151,40 @@ export function AdminDatabaseExplorer() {
     }
   }, [selectedTable])
 
+  // Export database
+  const exportDatabase = async () => {
+    try {
+      const response = await adminFetch('/admin/database/export')
+      if (!response.ok) throw new Error(t('errors.exportFailed'))
+      
+      // Get the filename from the Content-Disposition header
+      const disposition = response.headers.get('Content-Disposition')
+      let filename = 'sanctum_backup.db'
+      if (disposition) {
+        const filenameMatch = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
+        if (filenameMatch) {
+          filename = filenameMatch[1].replace(/['"]/g, '')
+        }
+      }
+      
+      // Create blob and download
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      window.setTimeout(() => {
+        window.URL.revokeObjectURL(url)
+      }, 0)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Database export failed:', error)
+      // You might want to add a toast notification here
+    }
+  }
+
   useEffect(() => {
     if (isAuthorized) {
       fetchTables()
@@ -98,12 +194,32 @@ export function AdminDatabaseExplorer() {
   // Fetch table data when selection changes
   const fetchTableData = useCallback(async (tableName: string, page: number = 1, isRetry: boolean = false): Promise<void> => {
     setIsLoadingData(true)
+    setTableError(null)
     setExpandedCell(null)  // Clear expanded cell on any data fetch to avoid stale row index references
     try {
       const response = await adminFetch(
         `/admin/db/tables/${tableName}?page=${page}&page_size=${pageSize}`
       )
-      if (!response.ok) throw new Error(t('errors.failedToFetchTableData'))
+      if (!response.ok) {
+        let message = t('errors.failedToFetchTableData')
+        const contentType = response.headers.get('Content-Type') || ''
+        try {
+          if (contentType.includes('application/json')) {
+            const data = await response.json()
+            if (data?.detail) {
+              message = String(data.detail)
+            }
+          } else {
+            const text = await response.text()
+            if (text) {
+              message = text
+            }
+          }
+        } catch {
+          // Fallback to default message
+        }
+        throw new Error(message)
+      }
       const data = await response.json()
 
       // Handle out-of-range page (e.g., after deleting the last record on a page)
@@ -122,6 +238,7 @@ export function AdminDatabaseExplorer() {
       setTotalRows(data.totalRows)
     } catch (error) {
       console.error('Error fetching table data:', error)
+      setTableError(error instanceof Error ? error.message : t('errors.failedToFetchTableData'))
       setTableData([])
       setTotalPages(1)
       setTotalRows(0)
@@ -146,45 +263,153 @@ export function AdminDatabaseExplorer() {
     // Clear stale decrypted data immediately when dependencies change
     setDecryptedData({})
 
-    let cancelled = false
+    const runId = decryptRunIdRef.current + 1
+    decryptRunIdRef.current = runId
 
-    const decryptRows = async () => {
-      const decrypted: Record<number, Record<string, string>> = {}
+    const encryptedColumns = currentTableInfo.columns.filter((col) => col.name.startsWith('encrypted_'))
+    if (encryptedColumns.length === 0) {
+      return
+    }
 
-      for (let i = 0; i < tableData.length; i++) {
-        if (cancelled) return
+    const initialDecrypted: Record<number, Record<string, string | null>> = {}
+    const tasks: Array<{
+      rowIndex: number
+      colName: string
+      ciphertext: string
+      ephemeralPubkey: string
+    }> = []
 
-        const row = tableData[i]
-        decrypted[i] = {}
+    for (let i = 0; i < tableData.length; i++) {
+      const row = tableData[i]
+      const rowDecrypted: Record<string, string | null> = {}
 
-        for (const col of currentTableInfo.columns) {
-          if (col.name.startsWith('encrypted_')) {
-            const fieldName = col.name.replace('encrypted_', '')
-            const ephemeralCol = `ephemeral_pubkey_${fieldName}`
-            const ciphertext = row[col.name] as string | null
-            const ephemeralPubkey = row[ephemeralCol] as string | null
+      for (const col of encryptedColumns) {
+        const fieldName = col.name.replace('encrypted_', '')
+        const ephemeralCol = `ephemeral_pubkey_${fieldName}`
+        const ciphertext = row[col.name] as string | null
+        const ephemeralPubkey =
+          (row[ephemeralCol] as string | null) ?? (row['ephemeral_pubkey'] as string | null)
 
-            if (ciphertext && ephemeralPubkey) {
-              const result = await decryptField({ ciphertext, ephemeral_pubkey: ephemeralPubkey })
-              if (cancelled) return
-              decrypted[i][col.name] = result ?? t('admin.database.encrypted')
-            } else if (ciphertext) {
-              decrypted[i][col.name] = t('admin.database.encryptedMissingKey')
-            }
-          }
+        if (!ciphertext) {
+          rowDecrypted[col.name] = null
+          continue
+        }
+
+        if (!ephemeralPubkey) {
+          rowDecrypted[col.name] = t('admin.database.encryptedMissingKey')
+          continue
+        }
+
+        rowDecrypted[col.name] = t('admin.database.decrypting')
+        tasks.push({
+          rowIndex: i,
+          colName: col.name,
+          ciphertext,
+          ephemeralPubkey,
+        })
+      }
+
+      if (Object.keys(rowDecrypted).length > 0) {
+        initialDecrypted[i] = rowDecrypted
+      }
+    }
+
+    setDecryptedData(initialDecrypted)
+
+    if (tasks.length === 0) {
+      return
+    }
+
+    const setCellValue = (rowIndex: number, colName: string, value: string | null) => {
+      if (decryptRunIdRef.current !== runId) return
+      setDecryptedData((prev) => ({
+        ...prev,
+        [rowIndex]: {
+          ...(prev[rowIndex] ?? {}),
+          [colName]: value,
+        },
+      }))
+    }
+
+    const withTimeout = async <T,>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
+      let timeoutHandle: ReturnType<typeof setTimeout> | null = null
+      try {
+        return await Promise.race([
+          promise,
+          new Promise<T>((_, reject) => {
+            timeoutHandle = setTimeout(() => reject(new Error('Decrypt timeout')), timeoutMs)
+          }),
+        ])
+      } finally {
+        if (timeoutHandle) {
+          clearTimeout(timeoutHandle)
         }
       }
-      if (!cancelled) {
-        setDecryptedData(decrypted)
+    }
+
+    const nip04Available = hasNip04Support()
+    if (nip07Available !== nip04Available) {
+      setNip07Available(nip04Available)
+      if (!nip04Available) {
+        setNip07Access(false)
       }
     }
 
-    decryptRows()
+    const decryptTask = async (task: {
+      rowIndex: number
+      colName: string
+      ciphertext: string
+      ephemeralPubkey: string
+    }) => {
+      if (!nip04Available) {
+        setCellValue(task.rowIndex, task.colName, t('admin.database.encrypted'))
+        return
+      }
 
-    return () => {
-      cancelled = true
+      try {
+        const result = await withTimeout(
+          decryptField({ ciphertext: task.ciphertext, ephemeral_pubkey: task.ephemeralPubkey }),
+          15000
+        )
+        if (result !== null) {
+          setNip07Access(true)
+        }
+        setCellValue(
+          task.rowIndex,
+          task.colName,
+          result ?? t('admin.database.encrypted')
+        )
+      } catch (error) {
+        console.warn('Decryption timed out or failed:', error)
+        setCellValue(task.rowIndex, task.colName, t('admin.database.encrypted'))
+      }
     }
-  }, [tableData, currentTableInfo])
+
+    const runWithConcurrency = async (items: typeof tasks, limit: number) => {
+      if (!nip04Available) {
+        for (const item of items) {
+          setCellValue(item.rowIndex, item.colName, t('admin.database.encrypted'))
+        }
+        return
+      }
+      let index = 0
+      const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+        while (index < items.length) {
+          const current = items[index]
+          index += 1
+          await decryptTask(current)
+        }
+      })
+      await Promise.all(workers)
+    }
+
+    void runWithConcurrency(tasks, 3).catch((error) => {
+      console.error('runWithConcurrency failed:', error)
+      for (const item of tasks) {
+        setCellValue(item.rowIndex, item.colName, t('admin.database.encrypted'))
+      }
+    })
+  }, [tableData, currentTableInfo, decryptNonce, nip07Available, t])
 
   // Run SQL query
   const runQuery = async () => {
@@ -312,6 +537,45 @@ export function AdminDatabaseExplorer() {
     setRecordFormData({})
   }
 
+  const handleUnlockDecryption = async () => {
+    const available = hasNip04Support()
+    setNip07Available(available)
+    if (!available) {
+      setNip07Access(false)
+      alert(
+        t(
+          'admin.database.decryptNoExtension',
+          'No NIP-07 extension with NIP-04 support detected. Install or enable your Nostr extension to decrypt.'
+        )
+      )
+      return
+    }
+
+    try {
+      const nostrApi = window.nostr
+      if (!nostrApi || typeof nostrApi.getPublicKey !== 'function') {
+        console.warn('NIP-07 extension detected but getPublicKey is unavailable.')
+        setNip07Access(false)
+        return
+      }
+
+      const pubkey = await nostrApi.getPublicKey()
+      const hasValidPubkey = typeof pubkey === 'string' && pubkey.trim().length > 0
+      if (!hasValidPubkey) {
+        console.warn('NIP-07 getPublicKey returned an invalid pubkey value.')
+        setNip07Access(false)
+        return
+      }
+
+      setNip07Access(true)
+    } catch (error) {
+      console.warn('Failed to trigger NIP-07 permission prompt:', error)
+      setNip07Access(false)
+    } finally {
+      setDecryptNonce((current) => current + 1)
+    }
+  }
+
   // Close database help modal
   const handleCloseDbHelpModal = () => {
     setShowDbHelpModal(false)
@@ -408,6 +672,31 @@ export function AdminDatabaseExplorer() {
     }
   }, [showDbHelpModal])
 
+  useEffect(() => {
+    if (!showDecryptHelp) return
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!decryptHelpRef.current) return
+      if (!decryptHelpRef.current.contains(event.target as Node)) {
+        setShowDecryptHelp(false)
+      }
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowDecryptHelp(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [showDecryptHelp])
+
   // Database help pages data
   const DB_HELP_PAGES = [
     {
@@ -427,6 +716,24 @@ export function AdminDatabaseExplorer() {
       content: 'warnings',
     },
   ]
+
+  const nip07Status = !nip07Available
+    ? {
+        label: t('admin.database.nip07Unavailable', 'NIP-07 not detected'),
+        dot: 'bg-error',
+        text: 'text-error',
+      }
+    : nip07Access
+      ? {
+          label: t('admin.database.nip07Connected', 'NIP-07 connected'),
+          dot: 'bg-success',
+          text: 'text-success',
+        }
+      : {
+          label: t('admin.database.nip07Locked', 'NIP-07 locked'),
+          dot: 'bg-warning',
+          text: 'text-warning',
+        }
 
   // tableData is already server-paginated, so use it directly
 
@@ -468,6 +775,73 @@ export function AdminDatabaseExplorer() {
             >
               <HelpCircle className="w-4 h-4" />
             </button>
+
+            {/* Export Database */}
+            <button
+              onClick={exportDatabase}
+              className="btn-ghost p-2 rounded-lg transition-all"
+              title={t('admin.database.exportDatabase', 'Export Database')}
+              aria-label={t('admin.database.exportDatabase', 'Export Database')}
+            >
+              <Download className="w-4 h-4" />
+            </button>
+
+            {/* NIP-07 Status */}
+            <div
+              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs border border-border bg-surface-overlay"
+              title={t(
+                'admin.database.nip07StatusHelp',
+                'Shows whether your NIP-07 extension is connected and authorized to decrypt.'
+              )}
+              aria-label={t(
+                'admin.database.nip07StatusHelp',
+                'Shows whether your NIP-07 extension is connected and authorized to decrypt.'
+              )}
+            >
+              <span className={`w-2 h-2 rounded-full ${nip07Status.dot}`} />
+              <span className={`font-medium ${nip07Status.text}`}>{nip07Status.label}</span>
+            </div>
+
+            {/* Unlock Decryption */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleUnlockDecryption}
+                className="btn-ghost px-2 py-1.5 rounded-lg transition-all text-xs inline-flex items-center gap-1.5"
+                title={t('admin.database.unlockDecryption', 'Unlock decryption')}
+                aria-label={t('admin.database.unlockDecryption', 'Unlock decryption')}
+              >
+                <Key className="w-3.5 h-3.5" />
+                {t('admin.database.unlockDecryption', 'Unlock decryption')}
+              </button>
+              <div className="relative" ref={decryptHelpRef}>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setShowDecryptHelp((current) => !current)
+                  }}
+                  className="btn-ghost p-1.5 rounded-lg transition-all text-text-muted hover:text-accent"
+                  aria-label="Decryption help"
+                  aria-expanded={showDecryptHelp}
+                  aria-controls="db-decrypt-help-popover"
+                  aria-describedby={showDecryptHelp ? 'db-decrypt-help-popover' : undefined}
+                >
+                  <HelpCircle className="w-4 h-4" />
+                </button>
+                {showDecryptHelp && (
+                  <div
+                    id="db-decrypt-help-popover"
+                    role="tooltip"
+                    className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-lg border border-border bg-surface p-3 text-xs text-text-muted shadow-xl z-50"
+                  >
+                    {t(
+                      'admin.database.decryptHelp',
+                      'Decryption happens automatically in the background. If your NIP-07 extension did not prompt, click “Unlock decryption” to trigger it. Only admins with the private key in their NIP-07 extension can decrypt encrypted fields.'
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Query Mode Toggle */}
             <button
@@ -714,7 +1088,7 @@ export function AdminDatabaseExplorer() {
                         .map((col) => (
                           <div key={col.name}>
                             <label className="text-xs font-medium text-text mb-1.5 block">
-                              {col.name}
+                              {renderColumnName(col)}
                               {!col.nullable && <span className="text-error ml-0.5">*</span>}
                               <span className="text-text-muted ml-1 font-normal">({col.type})</span>
                             </label>
@@ -762,6 +1136,19 @@ export function AdminDatabaseExplorer() {
                   <div className="flex items-center justify-center h-full">
                     <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
                   </div>
+                ) : tableError ? (
+                  <div className="flex flex-col items-center justify-center h-full text-text-muted px-6">
+                    <div className="bg-error/10 border border-error/20 rounded-lg p-4 max-w-xl">
+                      <p className="text-sm text-error font-medium">{t('admin.database.error')}</p>
+                      <p className="text-xs text-text-muted mt-1 break-words">{tableError}</p>
+                      <button
+                        onClick={() => selectedTable && fetchTableData(selectedTable, currentPage)}
+                        className="mt-3 btn btn-ghost btn-sm"
+                      >
+                        {t('common.retry', 'Retry')}
+                      </button>
+                    </div>
+                  </div>
                 ) : tableData.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-text-muted">
                     <Database className="w-12 h-12 mb-3" strokeWidth={1} />
@@ -785,12 +1172,7 @@ export function AdminDatabaseExplorer() {
                             className="text-left px-3 py-2 font-medium text-text-secondary border-b border-border whitespace-nowrap"
                           >
                             <div className="flex items-center gap-1">
-                              {col.primaryKey && (
-                                <Key className="w-3 h-3 text-warning" />
-                              )}
-                              {col.name.startsWith('encrypted_')
-                                ? col.name.replace('encrypted_', '') + ' 🔓'
-                                : col.name}
+                              {renderColumnName(col)}
                               <span className="text-xs text-text-muted font-normal">
                                 {col.type}
                               </span>
@@ -811,8 +1193,13 @@ export function AdminDatabaseExplorer() {
                           {currentTableInfo?.columns
                             .filter(col => !col.name.startsWith('ephemeral_pubkey_'))
                             .map((col) => {
+                            const hasDecryptedValue =
+                              !!decryptedData[rowIndex] &&
+                              Object.prototype.hasOwnProperty.call(decryptedData[rowIndex], col.name)
                             const value = col.name.startsWith('encrypted_')
-                              ? decryptedData[rowIndex]?.[col.name] ?? t('admin.database.decrypting')
+                              ? (hasDecryptedValue
+                                  ? decryptedData[rowIndex]?.[col.name]
+                                  : t('admin.database.decrypting'))
                               : row[col.name]
                             const displayValue = formatCellValue(value)
                             const isExpanded =
@@ -828,11 +1215,7 @@ export function AdminDatabaseExplorer() {
                                 {isExpanded ? (
                                   <div className="absolute z-20 left-0 top-0 min-w-[300px] max-w-[500px] bg-surface-raised border border-border rounded-lg shadow-lg p-3 animate-fade-in">
                                     <div className="flex items-center justify-between mb-2">
-                                      <span className="text-xs font-medium text-text-secondary">
-                                        {col.name.startsWith('encrypted_')
-                                          ? col.name.replace('encrypted_', '') + ' 🔓'
-                                          : col.name}
-                                      </span>
+                                      {renderColumnName(col, { className: 'text-xs font-medium text-text-secondary' })}
                                       <button
                                         onClick={() => setExpandedCell(null)}
                                         className="p-1 text-text-muted hover:text-text"
@@ -1021,11 +1404,12 @@ export function AdminDatabaseExplorer() {
                   <div className="space-y-2">
                     <div className="bg-surface-overlay border border-border rounded-lg p-3">
                       <p className="text-sm font-medium text-text flex items-center gap-2">
-                        <Key className="w-4 h-4" />
-                        {t('admin.database.help.lockIcon', 'The lock icon')}
+                        <Lock className="w-4 h-4 text-warning" />
+                        <Unlock className="w-4 h-4 text-text-muted" />
+                        {t('admin.database.help.lockIcon', 'Encryption icons')}
                       </p>
                       <p className="text-xs text-text-muted mt-1">
-                        {t('admin.database.help.lockIconDesc', 'Columns with a lock icon (🔓) store encrypted data. The browser automatically decrypts this using your admin keys.')}
+                        {t('admin.database.help.lockIconDesc', 'Lock means encrypted data. Unlock means plaintext. The browser automatically decrypts encrypted fields using your admin keys.')}
                       </p>
                     </div>
                     <div className="bg-surface-overlay border border-border rounded-lg p-3">

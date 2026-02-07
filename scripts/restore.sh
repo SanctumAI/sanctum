@@ -129,7 +129,7 @@ check_services() {
         read -p "Stop services now? (yes/no): " stop_services
         if [ "$stop_services" = "yes" ]; then
             log_step "Stopping services..."
-            docker compose down 2>/dev/null || docker-compose down 2>/dev/null || true
+            docker compose -f docker-compose.infra.yml -f docker-compose.app.yml down 2>/dev/null || docker-compose -f docker-compose.infra.yml -f docker-compose.app.yml down 2>/dev/null || true
             log_info "Services stopped."
         else
             log_warn "Proceeding with services running (may cause issues)..."
@@ -304,7 +304,7 @@ main() {
     log_info "========================================="
     echo ""
     log_info "Next steps:"
-    echo "  1. Start services: docker compose up -d"
+    echo "  1. Start services: docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up -d"
     echo "  2. Verify Neo4j: http://localhost:7474"
     echo "  3. Verify Qdrant: http://localhost:6333/dashboard"
     echo ""

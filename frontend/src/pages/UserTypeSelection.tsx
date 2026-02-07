@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Check, Loader2, Users } from 'lucide-react'
+import { Check, Loader2 } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
+import { DynamicIcon } from '../components/shared/DynamicIcon'
 import {
   UserType,
   STORAGE_KEYS,
@@ -44,7 +45,7 @@ function UserTypeCard({ userType, isSelected, onSelect }: UserTypeCardProps) {
         </div>
       )}
       <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center mb-3">
-        <Users className="w-5 h-5 text-accent" />
+        <DynamicIcon name={userType.icon || 'Users'} size={20} className="text-accent" />
       </div>
       <span className="text-lg font-semibold text-text">{userType.name}</span>
       {userType.description && (

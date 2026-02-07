@@ -9,17 +9,20 @@ Sanctum is a privacy-first Retrieval-Augmented Generation (RAG) system for build
 ## Common Commands
 
 ### Start/Stop Services
+
+Docker Compose is split into `docker-compose.infra.yml` (Qdrant, maple-proxy, SearXNG) and `docker-compose.app.yml` (backend, frontend). This allows rebuilding the app without restarting infrastructure services.
+
 ```bash
-docker compose up --build          # Start all services (blocking)
-docker compose up --build -d       # Start detached
-docker compose down                # Stop services
-docker compose down -v             # Stop and clear all data
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build          # Start all services (blocking)
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build -d       # Start detached
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml down                # Stop services
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml down -v             # Stop and clear all data
 ```
 
 ### View Logs
 ```bash
-docker compose logs -f backend     # Backend logs
-docker compose logs -f qdrant      # Qdrant logs
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs -f backend     # Backend logs
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs -f qdrant      # Qdrant logs
 ```
 
 ### Verify Services
@@ -46,7 +49,8 @@ curl http://localhost:8000/health  # Health check
 - `backend/app/query.py` - RAG query endpoint
 - `backend/app/store.py` - Qdrant storage operations
 - `backend/app/seed.py` - Database seeding with test data
-- `docker-compose.yml` - Service orchestration
+- `docker-compose.infra.yml` - Infra services
+- `docker-compose.app.yml` - App services
 
 **Data Model**:
 - Qdrant collection: `sanctum_knowledge` for ingested documents
@@ -85,20 +89,20 @@ The proxy is configured in `frontend/vite.config.ts` and routes `/api/*` to the 
 **"CORS errors" with null status code:**
 This usually means the backend isn't running. Check logs:
 ```bash
-docker compose logs backend
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs backend
 ```
 
 **SQLite schema errors (e.g., "no such column"):**
 The database schema changed but the old database file persists. Reset the SQLite volume:
 ```bash
-docker compose down
-docker volume rm sanctum-rag-runtime_sqlite_data
-docker compose up --build
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml down
+docker volume rm sanctum_sqlite_data
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build
 ```
 
 **Backend container not starting:**
 Check if all services it depends on are healthy:
 ```bash
-docker compose ps
-docker compose logs backend --tail 50
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml ps
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs backend --tail 50
 ```

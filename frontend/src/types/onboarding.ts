@@ -5,6 +5,7 @@ export interface UserType {
   id: number
   name: string
   description?: string
+  icon?: string
   display_order: number
 }
 
@@ -16,6 +17,9 @@ export interface CustomField {
   placeholder?: string
   options?: string[]  // for select type
   user_type_id?: number | null  // null = global field (shown for all types)
+  encryption_enabled?: boolean  // true = encrypt field values (secure default)
+  include_in_chat?: boolean  // true = include field value in AI chat context (only for unencrypted fields)
+  display_order?: number  // ordering for display purposes
 }
 
 export interface UserProfile {
@@ -125,6 +129,8 @@ export interface AuthUserResponse {
   user_type_id: number | null
   approved: boolean
   created_at: string | null
+  needs_onboarding?: boolean
+  needs_user_type?: boolean
 }
 
 export interface VerifyTokenResponse {

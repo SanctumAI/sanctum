@@ -5,15 +5,16 @@ import { AccentColor, getAccentColors } from '../../types/instance'
 interface ColorPickerProps {
   value: AccentColor
   onChange: (color: AccentColor) => void
+  'aria-labelledby'?: string
 }
 
-export function ColorPicker({ value, onChange }: ColorPickerProps) {
+export function ColorPicker({ value, onChange, 'aria-labelledby': ariaLabelledby }: ColorPickerProps) {
   const { t } = useTranslation()
   const accentColors = getAccentColors(t)
   const colors = Object.entries(accentColors) as [AccentColor, typeof accentColors[AccentColor]][]
 
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-3" role="group" aria-labelledby={ariaLabelledby}>
       {colors.map(([colorKey, colorConfig]) => {
         const isSelected = value === colorKey
         return (

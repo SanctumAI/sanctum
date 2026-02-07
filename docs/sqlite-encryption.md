@@ -265,7 +265,7 @@ Important:
 #### SECRET_KEY Management
 
 `SECRET_KEY` (in `.env` or environment) is used for:
-- JWT signing (auth tokens)
+- Session token signing (magic links + admin/user sessions)
 - Blind index key derivation
 
 **Backup procedures:**
@@ -274,29 +274,24 @@ Important:
 - Never commit to version control
 
 **Rotation process:**
-1. **Warning**: Rotating `SECRET_KEY` invalidates all blind indexes and active JWTs
+1. **Warning**: Rotating `SECRET_KEY` invalidates all blind indexes and active session tokens
 2. Export all user data (requires admin decryption of emails)
 3. Update `SECRET_KEY` in environment
 4. Restart backend
 5. Run `migrate_encrypt_existing_data()` to recompute blind indexes
-6. Users will need to re-authenticate (JWTs invalidated)
+6. Users will need to re-authenticate (sessions invalidated)
 
-### Multi-Admin Support
+### Single-Admin Constraint
 
-Current implementation uses the **first admin's pubkey** for all encryption. To support multiple admins:
+Sanctum enforces a **single admin per instance**. The first successful NIP-07 admin auth creates the admin record; subsequent admin auth attempts are rejected. This keeps encryption tied to one pubkey.
 
-**Adding admins:**
-- Additional admins can be added via `/admin/admins` endpoint
-- However, only the first admin can decrypt existing PII
-- New admins can authenticate but cannot decrypt data encrypted to the original admin
+**Admin transfer options:**
+- **Recommended:** Use **admin key migration** to rotate to a new keypair while preserving access to all encrypted data
+- **Destructive:** Remove the current admin to reset setup, then re-register a new admin (requires existing admin access). **WARNING: This permanently destroys access to all existing encrypted PII.** Data is encrypted to the old admin's pubkey and cannot be recovered by a new admin. Only use this for fresh instances or when encrypted data is no longer needed.
 
 **Future enhancement:**
 - Re-encrypt PII to multiple admin pubkeys (one ciphertext per admin)
 - Or use a shared admin key with secure key distribution
-
-**Revoking admin access:**
-- Remove admin from `admins` table
-- If revoking the primary (first) admin: must first re-encrypt all PII to a new admin pubkey
 
 ### Emergency Access and Recovery
 
@@ -322,6 +317,52 @@ For organizations requiring continuity:
 - Document reconstruction procedure
 - Test reconstruction annually
 
+### Admin Key Migration
+
+The admin key migration feature allows transferring encryption authority to a new Nostr keypair. This is useful when:
+- Admin needs to rotate keys for security reasons
+- Transferring admin responsibility to a different person
+- Recovering from a potentially compromised key
+
+#### Migration Process
+
+1. **Preparation**: Backend returns all encrypted PII (emails, names, field values) with their ephemeral pubkeys
+2. **Decryption**: Frontend decrypts each field using current admin's NIP-07 extension
+3. **Authorization**: Admin signs a Nostr event (kind 22242, action: "admin_key_migration")
+4. **Execution**: Backend re-encrypts all data to new admin pubkey in atomic transaction
+5. **Cleanup**: Admin pubkey updated, session cleared, redirect to login
+
+#### API Endpoints
+
+- `GET /admin/key-migration/prepare` - Returns encrypted data for decryption
+- `POST /admin/key-migration/execute` - Submits decrypted data with new pubkey
+
+#### Security Properties
+
+- **Atomic transaction**: All data migrated or none (no partial state)
+- **Authorization required**: Signed Nostr event proves current admin consent
+- **Replay protection**: Signed event must include `new_pubkey` tag matching the target pubkey (prevents captured events from being replayed for different migrations)
+- **Audit logged**: Migration recorded with old/new pubkey timestamps
+- **Session invalidated**: Must re-authenticate with new key
+
+#### What Migrates vs What Doesn't
+
+| Data | Migrates? | Notes |
+| ---- | --------- | ----- |
+| `encrypted_email` | Yes | Re-encrypted to new pubkey |
+| `encrypted_name` | Yes | Re-encrypted to new pubkey |
+| `encrypted_value` (fields) | Yes | Re-encrypted to new pubkey |
+| `email_blind_index` | No | Derived from SECRET_KEY, unchanged |
+| `admins.pubkey` | Yes | Updated to new pubkey |
+
+#### Accessing the Migration UI
+
+1. Log in as admin
+2. Navigate to Admin → Deployment Configuration
+3. Scroll to "Admin Key Migration" section
+4. Click "Migrate to New Key"
+5. Follow the multi-step wizard
+
 ## Reference Files
 
 Backend:
@@ -329,6 +370,7 @@ Backend:
 - `backend/app/nostr_keys.py`
 - `backend/app/database.py`
 - `backend/app/main.py`
+- `backend/app/key_migration.py` - Admin key migration endpoints
 
 Frontend:
 - `frontend/src/utils/encryption.ts`

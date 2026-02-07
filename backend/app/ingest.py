@@ -29,6 +29,9 @@ from models import (
     DocumentDefaultsResponse,
     DocumentDefaultUpdate,
     DocumentDefaultsBatchUpdate,
+    DocumentDefaultWithInheritance,
+    DocumentDefaultsUserTypeResponse,
+    DocumentDefaultOverrideUpdate,
     SuccessResponse,
 )
 
@@ -184,6 +187,11 @@ class JobStatus(BaseModel):
     total_chunks: int
     processed_chunks: int
     error: Optional[str] = None
+
+
+class OntologiesResponse(BaseModel):
+    ontologies: list[str]
+    default: str
 
 
 class ChunkInfo(BaseModel):
@@ -506,6 +514,15 @@ async def get_datastore_stats():
     return stats
 
 
+@router.get("/ontologies", response_model=OntologiesResponse)
+async def list_ontologies() -> OntologiesResponse:
+    """List valid ontology IDs for document extraction."""
+    return OntologiesResponse(
+        ontologies=sorted(VALID_ONTOLOGIES),
+        default="general",
+    )
+
+
 @router.post("/upload", response_model=UploadResponse)
 async def upload_document(
     background_tasks: BackgroundTasks,
@@ -607,12 +624,26 @@ async def get_job_status(job_id: str):
 
 
 @router.get("/jobs")
-async def list_jobs():
-    """List all ingest jobs (from SQLite for persistence across restarts)"""
+async def list_jobs(user: dict = Depends(auth.require_admin_or_approved_user)) -> dict:
+    """List ingest jobs available to the current user"""
     # Read directly from SQLite to ensure we get persisted data
     jobs_from_db = ingest_db.list_jobs(limit=500)
+
+    # Admins see all jobs
+    if user.get("type") == "admin":
+        filtered_jobs = jobs_from_db
+    else:
+        # Regular users only see available documents for their type
+        user_type_id = user.get("user_type_id")
+        if user_type_id is None:
+            # User without assigned type sees no documents
+            filtered_jobs = []
+        else:
+            available_job_ids = set(database.get_available_documents_for_user_type(user_type_id))
+            filtered_jobs = [j for j in jobs_from_db if j["job_id"] in available_job_ids]
+
     return {
-        "total": len(jobs_from_db),
+        "total": len(filtered_jobs),
         "jobs": [
             {
                 "job_id": j["job_id"],
@@ -621,8 +652,117 @@ async def list_jobs():
                 "total_chunks": j["total_chunks"],
                 "created_at": j["created_at"],
             }
-            for j in jobs_from_db
+            for j in filtered_jobs
         ]
+    }
+
+
+@router.delete("/jobs/{job_id}")
+async def delete_document(job_id: str, admin: dict = Depends(auth.require_admin)) -> dict:
+    """
+    Delete a document and all its associated data.
+    Requires admin authentication.
+
+    This removes:
+    1. Chunks from Qdrant vector database
+    2. Uploaded file from filesystem
+    3. Job record from SQLite (CASCADE handles document_defaults tables)
+    4. In-memory job/chunk entries
+
+    Cannot delete documents that are currently processing.
+    """
+    from store import delete_chunks_from_qdrant
+
+    # 1. Check if job exists
+    job = ingest_db.get_job(job_id)
+    if not job:
+        # Also check in-memory (for jobs not yet synced)
+        if job_id not in JOBS:
+            raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
+        job = JOBS[job_id]
+
+    # 2. Block deletion if job is currently processing
+    status = job.get("status", "")
+    if status in ("pending", "processing"):
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot delete document while it is {status}. Wait for processing to complete."
+        )
+
+    logger.info(f"[{job_id}] Starting document deletion...")
+    result = {
+        "job_id": job_id,
+        "filename": job.get("filename", "unknown"),
+        "qdrant_deleted": 0,
+        "file_deleted": False,
+        "db_deleted": False,
+    }
+
+    # 3. Delete chunks from Qdrant (fail-fast to avoid orphaned data)
+    try:
+        deleted_count = await delete_chunks_from_qdrant(job_id)
+        result["qdrant_deleted"] = deleted_count
+        logger.info(f"[{job_id}] Deleted {deleted_count} chunks from Qdrant")
+    except Exception as e:
+        logger.error(f"[{job_id}] Failed to delete from Qdrant: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to delete document chunks from vector database: {e}"
+        ) from e
+
+    # 4. Delete uploaded file from filesystem
+    file_path = Path(job.get("file_path", ""))
+    if file_path.exists():
+        try:
+            file_path.unlink()
+            result["file_deleted"] = True
+            logger.info(f"[{job_id}] Deleted file: {file_path}")
+        except Exception as e:
+            result["file_deleted"] = False
+            logger.error(f"[{job_id}] Failed to delete file {file_path}: {e}")
+    else:
+        logger.debug(f"[{job_id}] File not found (already deleted?): {file_path}")
+        result["file_deleted"] = True  # Consider it deleted if not present
+
+    # 5. Delete from SQLite (CASCADE handles document_defaults tables)
+    try:
+        db_deleted = ingest_db.delete_job(job_id)
+        result["db_deleted"] = db_deleted
+        logger.info(f"[{job_id}] Deleted from SQLite: {db_deleted}")
+    except Exception as e:
+        logger.error(f"[{job_id}] Failed to delete from SQLite: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to delete job from database: {e}"
+        ) from e
+
+    # 6. Clear in-memory entries
+    JOBS.pop(job_id, None)
+    # Clear chunks for this job
+    chunks_to_delete = [cid for cid, c in CHUNKS.items() if c.get("job_id") == job_id]
+    for cid in chunks_to_delete:
+        CHUNKS.pop(cid, None)
+    logger.info(f"[{job_id}] Cleared {len(chunks_to_delete)} in-memory chunks")
+
+    logger.info(f"[{job_id}] Document deletion complete")
+    file_deleted = result.get("file_deleted", True)
+    db_deleted = result.get("db_deleted", False)
+    overall_success = file_deleted and db_deleted
+
+    # Build specific message based on what failed
+    if overall_success:
+        status_msg = "deleted successfully"
+    elif not file_deleted and db_deleted:
+        status_msg = "partially deleted (file deletion failed)"
+    elif file_deleted and not db_deleted:
+        status_msg = "partially deleted (database deletion failed)"
+    else:
+        status_msg = "deletion failed (both file and database deletion failed)"
+
+    return {
+        "success": overall_success,
+        "message": f"Document '{result['filename']}' {status_msg}",
+        "details": result,
     }
 
 
@@ -887,4 +1027,217 @@ async def get_available_documents(admin: dict = Depends(auth.require_admin)):
     Requires admin authentication.
     """
     job_ids = database.get_available_documents()
+    return {"job_ids": job_ids}
+
+
+# =============================================================================
+# DOCUMENT DEFAULTS USER-TYPE OVERRIDE ENDPOINTS (Admin)
+# =============================================================================
+
+@router.get("/admin/documents/defaults/user-type/{user_type_id}", response_model=DocumentDefaultsUserTypeResponse)
+async def get_document_defaults_for_user_type(
+    user_type_id: int,
+    admin: dict = Depends(auth.require_admin)
+):
+    """
+    Get document defaults with inheritance applied for a user type.
+    Shows which values are overridden vs inherited from global defaults.
+    Requires admin authentication.
+    """
+    # Verify user type exists
+    user_type = database.get_user_type(user_type_id)
+    if not user_type:
+        raise HTTPException(status_code=404, detail=f"User type not found: {user_type_id}")
+
+    # Get effective defaults with inheritance (only includes jobs WITH defaults)
+    effective_defaults = database.get_effective_document_defaults(user_type_id)
+    effective_by_job = {d["job_id"]: d for d in effective_defaults}
+
+    # Get all completed jobs to include ones without defaults (same pattern as global endpoint)
+    completed_jobs = ingest_db.list_completed_jobs()
+
+    # Prefetch all overrides for this user type to avoid N+1 queries
+    all_overrides = database.get_document_defaults_overrides_by_type(user_type_id)
+    overrides_by_job = {o["job_id"]: o for o in all_overrides}
+
+    documents = []
+    for job in completed_jobs:
+        job_id = job["job_id"]
+
+        if job_id in effective_by_job:
+            # Job has defaults (possibly with override)
+            doc = effective_by_job[job_id]
+            documents.append(DocumentDefaultWithInheritance(
+                job_id=job_id,
+                filename=job["filename"],
+                status=job["status"],
+                total_chunks=job["total_chunks"],
+                is_available=bool(doc.get("is_available", True)),
+                is_default_active=bool(doc.get("is_default_active", True)),
+                display_order=doc.get("display_order", 0),
+                updated_at=doc.get("updated_at"),
+                is_override=doc.get("is_override", False),
+                override_user_type_id=doc.get("override_user_type_id"),
+                override_updated_at=doc.get("override_updated_at"),
+            ))
+        else:
+            # Job exists but no defaults set - check for user-type override only
+            override = overrides_by_job.get(job_id)
+            if override:
+                # Has override but no global default
+                documents.append(DocumentDefaultWithInheritance(
+                    job_id=job_id,
+                    filename=job["filename"],
+                    status=job["status"],
+                    total_chunks=job["total_chunks"],
+                    is_available=bool(override["is_available"]) if override["is_available"] is not None else True,
+                    is_default_active=bool(override["is_default_active"]) if override["is_default_active"] is not None else True,
+                    display_order=0,
+                    updated_at=None,
+                    is_override=True,
+                    override_user_type_id=user_type_id,
+                    override_updated_at=override.get("updated_at"),
+                ))
+            else:
+                # No defaults and no override - use sensible defaults
+                documents.append(DocumentDefaultWithInheritance(
+                    job_id=job_id,
+                    filename=job["filename"],
+                    status=job["status"],
+                    total_chunks=job["total_chunks"],
+                    is_available=True,
+                    is_default_active=True,
+                    display_order=0,
+                    updated_at=None,
+                    is_override=False,
+                    override_user_type_id=None,
+                    override_updated_at=None,
+                ))
+
+    return DocumentDefaultsUserTypeResponse(
+        user_type_id=user_type_id,
+        user_type_name=user_type.get("name"),
+        documents=documents
+    )
+
+
+@router.put("/admin/documents/{job_id}/defaults/user-type/{user_type_id}", response_model=DocumentDefaultWithInheritance)
+async def set_document_defaults_override(
+    job_id: str,
+    user_type_id: int,
+    update: DocumentDefaultOverrideUpdate,
+    admin: dict = Depends(auth.require_admin)
+):
+    """
+    Set a document defaults override for a user type.
+    This value will override the global default for users of this type.
+    Requires admin authentication.
+    """
+    # Verify user type exists
+    user_type = database.get_user_type(user_type_id)
+    if not user_type:
+        raise HTTPException(status_code=404, detail=f"User type not found: {user_type_id}")
+
+    # Verify job exists
+    job = ingest_db.get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
+
+    # Get admin pubkey for audit log - fail if missing (auth integrity check)
+    admin_pubkey = admin.get("pubkey")
+    if not admin_pubkey:
+        logger.error("Admin pubkey missing from authenticated context")
+        raise HTTPException(status_code=500, detail="Authentication context incomplete")
+
+    # Create/update the override
+    database.upsert_document_defaults_override(
+        job_id=job_id,
+        user_type_id=user_type_id,
+        is_available=update.is_available,
+        is_default_active=update.is_default_active,
+        changed_by=admin_pubkey,
+    )
+
+    # Get the effective state after update
+    override = database.get_document_defaults_override(job_id, user_type_id)
+    global_defaults = database.get_document_defaults(job_id)
+
+    # Calculate effective values
+    is_available = (
+        bool(override["is_available"]) if override and override["is_available"] is not None
+        else (bool(global_defaults["is_available"]) if global_defaults else True)
+    )
+    is_default_active = (
+        bool(override["is_default_active"]) if override and override["is_default_active"] is not None
+        else (bool(global_defaults["is_default_active"]) if global_defaults else True)
+    )
+
+    return DocumentDefaultWithInheritance(
+        job_id=job_id,
+        filename=job["filename"],
+        status=job["status"],
+        total_chunks=job["total_chunks"],
+        is_available=is_available,
+        is_default_active=is_default_active,
+        display_order=global_defaults["display_order"] if global_defaults else 0,
+        is_override=True,
+        override_user_type_id=user_type_id,
+        override_updated_at=override["updated_at"] if override else None,
+    )
+
+
+@router.delete("/admin/documents/{job_id}/defaults/user-type/{user_type_id}")
+async def delete_document_defaults_override(
+    job_id: str,
+    user_type_id: int,
+    admin: dict = Depends(auth.require_admin)
+):
+    """
+    Remove a document defaults override for a user type (revert to global default).
+    Requires admin authentication.
+    """
+    # Verify user type exists
+    user_type = database.get_user_type(user_type_id)
+    if not user_type:
+        raise HTTPException(status_code=404, detail=f"User type not found: {user_type_id}")
+
+    # Verify job exists
+    job = ingest_db.get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
+
+    # Get admin pubkey for audit log - fail if missing (auth integrity check)
+    admin_pubkey = admin.get("pubkey")
+    if not admin_pubkey:
+        logger.error("Admin pubkey missing from authenticated context")
+        raise HTTPException(status_code=500, detail="Authentication context incomplete")
+
+    # Delete the override
+    deleted = database.delete_document_defaults_override(job_id, user_type_id, changed_by=admin_pubkey)
+
+    if not deleted:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No override found for job '{job_id}' and user type {user_type_id}"
+        )
+
+    return {"success": True, "message": f"Override for document '{job_id}' reverted to global default"}
+
+
+@router.get("/admin/documents/defaults/user-type/{user_type_id}/active")
+async def get_active_documents_for_user_type(
+    user_type_id: int,
+    admin: dict = Depends(auth.require_admin)
+):
+    """
+    Get list of job_ids that are default active for a user type.
+    Uses inheritance: user-type overrides take precedence over global defaults.
+    Requires admin authentication.
+    """
+    # Verify user type exists
+    user_type = database.get_user_type(user_type_id)
+    if not user_type:
+        raise HTTPException(status_code=404, detail=f"User type not found: {user_type_id}")
+
+    job_ids = database.get_active_documents_for_user_type(user_type_id)
     return {"job_ids": job_ids}

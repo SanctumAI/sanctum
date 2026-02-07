@@ -25,13 +25,39 @@
           if (config.accentColor && validColors.includes(config.accentColor)) {
             document.documentElement.classList.add('accent-' + config.accentColor);
           }
+
+          if (typeof config.name === 'string' && config.name.trim()) {
+            document.title = config.name.trim();
+          }
+
+          if (typeof config.faviconUrl === 'string' && config.faviconUrl.trim()) {
+            const existing = document.head.querySelector('link[rel="icon"][data-instance-branding="true"]');
+            const link = existing || document.createElement('link');
+            link.setAttribute('rel', 'icon');
+            link.setAttribute('data-instance-branding', 'true');
+            link.setAttribute('href', config.faviconUrl.trim());
+            if (!existing) {
+              document.head.appendChild(link);
+            }
+          }
+
+          if (typeof config.appleTouchIconUrl === 'string' && config.appleTouchIconUrl.trim()) {
+            const existing = document.head.querySelector('link[rel="apple-touch-icon"][data-instance-branding="true"]');
+            const link = existing || document.createElement('link');
+            link.setAttribute('rel', 'apple-touch-icon');
+            link.setAttribute('data-instance-branding', 'true');
+            link.setAttribute('href', config.appleTouchIconUrl.trim());
+            if (!existing) {
+              document.head.appendChild(link);
+            }
+          }
         } catch (e) {
           // Ignore parse errors, React will handle defaults
         }
       })();
     </script>
-    <script type="module" crossorigin src="/assets/index-C-RZOLla.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CZ0X0Gzn.css">
+    <script type="module" crossorigin src="/assets/index-DJpZZC9g.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BcQjkGSy.css">
   </head>
   <body>
     <div id="root"></div>

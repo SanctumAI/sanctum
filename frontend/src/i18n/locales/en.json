@@ -27,7 +27,8 @@
     "loading": "Loading...",
     "unknown": "Unknown",
     "enabled": "Enabled",
-    "disabled": "Disabled"
+    "disabled": "Disabled",
+    "gotIt": "Got it"
   },
   "settings": {
     "title": "Settings",
@@ -43,8 +44,10 @@
       "documentUploadDesc": "Add documents to knowledge base",
       "databaseExplorer": "Database Explorer",
       "databaseExplorerDesc": "Browse SQLite database",
-      "instanceBranding": "Instance Branding",
-      "instanceBrandingDesc": "Colors, icons, user types",
+      "instanceBranding": "Instance Configuration",
+      "instanceBrandingDesc": "Branding and theme options",
+      "userConfig": "User Configuration",
+      "userConfigDesc": "User types and onboarding questions",
       "aiConfig": "AI Configuration",
       "aiConfigDesc": "Prompts, parameters, defaults",
       "deploymentConfig": "Deployment Config",
@@ -61,12 +64,16 @@
       "backToChat": "Back to Chat",
       "title": "Configure Your Instance",
       "subtitle": "Customize the branding and user onboarding experience",
+      "instanceSectionTitle": "Instance Configuration",
+      "instanceSectionDesc": "Set the name, icon, and colors shown across your instance.",
       "branding": "Instance Branding",
       "displayName": "Display Name",
       "defaultName": "Sanctum",
       "displayNameHint": "This name appears in the header and onboarding screens",
       "icon": "Icon",
       "accentColor": "Accent Color",
+      "userSectionTitle": "User Configuration",
+      "userSectionDesc": "Configure user types and the questions users answer during onboarding.",
       "userTypes": "User Types",
       "userTypesHint": "Define different user types to show type-specific onboarding questions. If you have more than one type, users will choose their type during onboarding.",
       "typeName": "Type Name",
@@ -76,6 +83,7 @@
       "addType": "Add Type",
       "addUserType": "Add User Type",
       "onboardingFields": "User Onboarding Fields",
+      "onboardingFieldsHint": "Create the questions users answer during onboarding.",
       "optionsCount_one": "{{count}} option",
       "optionsCount_other": "{{count}} options",
       "noFields": "No custom fields",
@@ -87,6 +95,88 @@
       "databaseHint": "View and manage your instance data directly in the SQLite database.",
       "openDatabase": "Open Database Explorer",
       "save": "Save Configuration"
+    },
+    "instanceConfig": {
+      "title": "Instance Configuration",
+      "subtitle": "Control branding, chat style, and theme settings for your instance.",
+      "chatIconsTitle": "Chat Icons",
+      "chatIconsDesc": "Set the default icons used in chat messages.",
+      "assistantIconLabel": "AI assistant icon",
+      "userIconLabel": "User icon",
+      "logoUrlLabel": "Logo URL",
+      "logoUrlPlaceholder": "https://example.com/logo.png",
+      "logoUrlHint": "Square image recommended (128x128 or 256x256).",
+      "logoPreviewAlt": "Logo preview",
+      "logoPreviewHint": "Preview (falls back to the selected icon).",
+      "faviconLabel": "Favicon URL",
+      "faviconPlaceholder": "https://example.com/favicon.png",
+      "faviconHint": "Shown in the browser tab and bookmarks (recommended 32x32 or 64x64).",
+      "appleTouchIconLabel": "Apple touch icon URL",
+      "appleTouchIconPlaceholder": "https://example.com/apple-touch-icon.png",
+      "appleTouchIconHint": "Used when adding to the iOS home screen (recommended 180x180).",
+      "headerTitle": "Header Branding",
+      "headerDesc": "Control how your instance appears in the top header.",
+      "headerLayoutLabel": "Header layout",
+      "headerLayoutIconName": "Icon + Name",
+      "headerLayoutIconNameDesc": "Show both the icon and instance name.",
+      "headerLayoutIconOnly": "Icon Only",
+      "headerLayoutIconOnlyDesc": "Minimal header with just the icon.",
+      "headerLayoutNameOnly": "Name Only",
+      "headerLayoutNameOnlyDesc": "Text-only header with the instance name.",
+      "headerTaglineLabel": "Tagline (optional)",
+      "headerTaglinePlaceholder": "Short descriptor shown under the name",
+      "headerTaglineHint": "Leave blank to hide the tagline.",
+      "chatIdentityTitle": "Chat Identity",
+      "chatIdentityDesc": "Set the labels shown above chat messages.",
+      "assistantNameLabel": "Assistant display name",
+      "assistantNamePlaceholder": "e.g., Sanctum AI",
+      "userLabelLabel": "User label",
+      "userLabelPlaceholder": "e.g., You",
+      "chatIdentityHint": "Leave a label empty to hide it.",
+      "bubbleStyleTitle": "Chat Bubble Style",
+      "bubbleStyleDesc": "Choose the shape and depth of chat bubbles.",
+      "bubbleStyleSoft": "Soft",
+      "bubbleStyleSoftDesc": "Rounded corners with a subtle chat feel.",
+      "bubbleStyleRound": "Round",
+      "bubbleStyleRoundDesc": "Extra-round bubbles with a friendly shape.",
+      "bubbleStyleSquare": "Square",
+      "bubbleStyleSquareDesc": "Sharper corners for a structured look.",
+      "bubbleStylePill": "Pill",
+      "bubbleStylePillDesc": "Full pill style for a bold look.",
+      "bubbleShadowLabel": "Add subtle bubble shadow",
+      "surfaceTitle": "Background Style",
+      "surfaceDesc": "Pick the background texture for your instance.",
+      "surfacePlain": "Plain",
+      "surfacePlainDesc": "Clean and minimal background.",
+      "surfaceGradient": "Soft Gradient",
+      "surfaceGradientDesc": "Subtle gradient glow in the background.",
+      "surfaceNoise": "Paper Grain",
+      "surfaceNoiseDesc": "Gentle texture for warmth.",
+      "surfaceGrid": "Grid",
+      "surfaceGridDesc": "Faint grid for a technical vibe.",
+      "statusIconsTitle": "Status Icons",
+      "statusIconsDesc": "Choose how status updates are displayed.",
+      "statusIconsClassic": "Classic",
+      "statusIconsClassicDesc": "Simple dots and symbols.",
+      "statusIconsMinimal": "Minimal",
+      "statusIconsMinimalDesc": "Compact glyphs with a light touch.",
+      "statusIconsPlayful": "Playful",
+      "statusIconsPlayfulDesc": "Playful symbols for friendly feedback.",
+      "typographyTitle": "Typography",
+      "typographyDesc": "Pick a font pairing for the entire interface.",
+      "typographyModern": "Modern",
+      "typographyModernDesc": "Clean and familiar sans-serif.",
+      "typographyGrotesk": "Grotesk",
+      "typographyGroteskDesc": "Bold, contemporary type with personality.",
+      "typographyHumanist": "Humanist",
+      "typographyHumanistDesc": "Warm, readable typography with clarity."
+    },
+    "userConfig": {
+      "title": "User Configuration",
+      "subtitle": "Configure user types and the questions users answer during onboarding.",
+      "typeIcon": "Type Icon",
+      "typeName": "Type Name",
+      "typeDescription": "Description"
     },
     "database": {
       "backToSetup": "Back to Admin Setup",
@@ -147,7 +237,38 @@
       "placeholder": "Placeholder",
       "placeholderOptional": "(optional)",
       "placeholderHint": "Hint text shown in the input",
-      "requiredField": "Required field"
+      "requiredField": "Required field",
+      "dataSecurityTitle": "Data Security",
+      "dataSecurityIntro": "Choose how this field's data is stored. This affects both security and AI personalization capabilities.",
+      "encryptEnabled": "Encrypt field values",
+      "encryptDisabled": "Store as plaintext",
+      "encryptedHint": "Field values will be encrypted with NIP-04 (recommended)",
+      "plaintextHint": "Field values will be stored in plaintext (not recommended for sensitive data)",
+      "encryptedSummary": "This field is encrypted. Only you can view the data when logged in.",
+      "encryptedNoAI": "AI personalization is not available for encrypted fields.",
+      "securityWarning": "Security Warning",
+      "securityWarningBody": "Disabling encryption will store user data in plaintext. Only disable for non-sensitive fields like preferences or public information.",
+      "plaintextAIOption": "Since this field is unencrypted, you can optionally share it with the AI assistant:",
+      "includeInChat": "Include in AI Chat Context",
+      "includeInChatHint": "Share this field's value with the AI assistant to personalize responses",
+      "aiPersonalization": "AI Personalization",
+      "aiPersonalizationBody": "The AI assistant will see this field's value to provide more relevant, personalized responses to users.",
+      "encryptionHelpAria": "Learn about field encryption",
+      "encryptionHelpTitle": "About Field Encryption",
+      "encryptionHelpDesc": "Encryption protects sensitive user data by scrambling it before storage.",
+      "encryptionHelpWhenEnabled": "When encryption is enabled:",
+      "encryptionHelpPoint1": "Data is encrypted using the admin's Nostr key (NIP-04)",
+      "encryptionHelpPoint2": "Only the admin can decrypt and view the data",
+      "encryptionHelpPoint3": "Protects against database breaches",
+      "encryptionHelpPoint4": "Cannot be shared with the AI assistant",
+      "encryptionHelpWhenDisabled": "When encryption is disabled:",
+      "encryptionHelpDisabledPoint1": "Data is stored as readable plaintext",
+      "encryptionHelpDisabledPoint2": "Anyone with database access can read it",
+      "encryptionHelpDisabledPoint3": "Can be shared with AI for personalization",
+      "encryptionHelpRecommendation": "Recommendation: Keep encryption enabled for any personally identifiable information (names, emails, phone numbers, addresses).",
+      "encryptedBadge": "Encrypted",
+      "plaintextBadge": "Plaintext",
+      "inChatBadge": "In Chat"
     },
     "fieldTypes": {
       "text": "Text",
@@ -178,6 +299,7 @@
       "loadFailed": "Failed to load data",
       "saveFailed": "Failed to save settings. Please try again.",
       "addTypeFailed": "Failed to add user type",
+      "updateTypeFailed": "Failed to update user type",
       "removeTypeFailed": "Failed to remove user type",
       "addFieldFailed": "Failed to add field",
       "updateFieldFailed": "Failed to update field",
@@ -396,7 +518,9 @@
     "title": "Admin Dashboard",
     "subtitle": "Manage your Sanctum instance configuration",
     "instance": "Instance Configuration",
-    "instanceDesc": "Customize branding, user types, and onboarding fields",
+    "instanceDesc": "Branding, chat style, and theme settings",
+    "user": "User Configuration",
+    "userDesc": "Define user types and onboarding questions",
     "ai": "AI Configuration",
     "aiDesc": "Configure prompts, LLM parameters, and document defaults",
     "deployment": "Deployment Configuration",
@@ -438,6 +562,7 @@
     "refresh": "Refresh",
     "restartRequired": "Service restart required",
     "validate": "Validate Config",
+    "validating": "Validating...",
     "exportEnv": "Export .env",
     "auditLog": "Recent Changes",
     "configValid": "Configuration Valid",
@@ -445,9 +570,45 @@
     "noRecentChanges": "No recent changes",
     "exportFailed": "Export failed",
     "validationFailed": "Validation request failed",
+    "validationStaleTitle": "Validation Out of Date",
+    "validationStalePill": "Out-of-date",
+    "validationStaleDesc": "Configuration changed since last validation. Revalidate to confirm.",
+    "validationTimestamp": "Validated {{time}}",
+    "validationConfigUpdated": "Config updated {{time}}",
+    "validationSummary": "{{errors}} errors, {{warnings}} warnings",
+    "validationSummaryStale": "Last result: {{errors}} errors, {{warnings}} warnings",
+    "validationNoIssues": "No issues found",
+    "validationErrors": "Errors",
+    "validationWarnings": "Warnings",
+    "revalidate": "Revalidate",
     "requiresRestart": "Requires Restart",
     "secret": "Secret",
-    "leaveEmptyForSecret": "Leave empty to keep current value"
+    "leaveEmptyForSecret": "Leave empty to keep current value",
+    "domainsHelp": {
+      "ariaLabel": "Domains and DNS configuration help",
+      "overviewTitle": "Domains & URLs Overview",
+      "urlsTitle": "Public URLs & CORS",
+      "dnsTitle": "DNS Records (Email)",
+      "edgeTitle": "CDN & Webhooks",
+      "overviewDesc": "These settings control where your app lives on the internet and how services find each other. Defaults are set for local development.",
+      "whatToSet": "Set these when you go live:",
+      "overviewUrl": "INSTANCE_URL / API_BASE_URL / ADMIN_BASE_URL for public entry points",
+      "overviewCORS": "CORS_ORIGINS to allow your frontend domain",
+      "overviewDns": "Email DNS (DKIM/SPF/DMARC) for deliverability",
+      "overviewNote": "If you are staying on localhost, you can keep the defaults.",
+      "urlsDesc": "Public URLs and CORS origins must match exactly (scheme + domain + port).",
+      "urlsNote": "If your API is served from the same domain as the app, you can leave API_BASE_URL empty.",
+      "dnsDesc": "These values help you create DNS records for email deliverability.",
+      "spfExample": "Example TXT record: v=spf1 include:sendgrid.net ~all",
+      "dkimExample": "Use the selector from DKIM_SELECTOR and the public key from your provider.",
+      "dmarcExample": "Example TXT record: v=DMARC1; p=none; rua=mailto:dmarc@example.com",
+      "dnsNote": "Use your email provider's recommended records for best deliverability.",
+      "edgeDesc": "Optional settings for advanced setups.",
+      "cdnDesc": "Comma-separated CDN hostnames for static assets. Leave blank if not using a CDN.",
+      "webhookDesc": "Base URL used to construct webhook callbacks. Use your public API domain.",
+      "searxDesc": "Only needed if your SearXNG instance lives on a different host.",
+      "goToPage": "Go to page"
+    }
   },
   "upload": {
     "invalidFileType": "Invalid file type. Allowed: {{extensions}}",
@@ -459,9 +620,15 @@
     "supported": "Supported: {{extensions}}",
     "removeFile": "Remove file",
     "uploading": "Uploading...",
+    "uploadingStatus": "Uploading to server...",
+    "uploadedSuccess": "Uploaded successfully — processing started",
     "uploadDocument": "Upload Document",
     "recentUploads": "Recent Uploads",
     "noUploads": "No uploads yet",
+    "refresh": "Refresh",
+    "serverBusy": "Server is busy",
+    "jobsTimeout": "Server is busy processing documents. Try refreshing in a moment.",
+    "tryRefresh": "Try again",
     "backToDashboard": "Back to Dashboard",
     "backToSetup": "Back to Setup",
     "status": {
@@ -471,7 +638,13 @@
       "complete": "Complete",
       "failed": "Failed"
     },
-    "chunks": "{{processed}}/{{total}} chunks"
+    "chunks": "{{processed}}/{{total}} chunks",
+    "deleteDocument": "Delete document",
+    "confirmDelete": "Delete this document?",
+    "confirmDeleteDesc": "This will permanently remove the document and all its chunks from the knowledge base. This action cannot be undone.",
+    "deleting": "Deleting...",
+    "deleteSuccess": "Document deleted successfully",
+    "deleteFailed": "Failed to delete document"
   },
   "configCategories": {
     "llm": {
@@ -503,6 +676,16 @@
       "label": "Web Search",
       "description": "Enable AI web search capabilities",
       "hint": "Configure the search engine that powers the AI's web search feature. When enabled, the AI can look up current information online."
+    },
+    "domains": {
+      "label": "Domain & URLs",
+      "description": "Configure domain names, URLs, and DNS settings",
+      "hint": "Use these when moving to a custom domain. Defaults assume local development (localhost). Configure your root domain, public URLs, CORS origins, and email DNS records (DKIM/SPF/DMARC)."
+    },
+    "ssl": {
+      "label": "SSL & Security",
+      "description": "Configure SSL certificates and HTTPS settings",
+      "hint": "Configure TLS and proxy settings when serving over HTTPS. Defaults are safe for local dev; enable HTTPS only after certificates are mounted."
     },
     "general": {
       "label": "General",
@@ -645,6 +828,106 @@
       "label": "App URL",
       "description": "Public URL for the application",
       "hint": "The public URL where users access the app. Used for generating magic links."
+    },
+    "SIMULATE_USER_AUTH": {
+      "label": "Simulate User Auth",
+      "description": "Allow user verification without magic link token (testing only)",
+      "hint": "Enable for development/testing. Allows users to complete email verification without clicking the magic link. Should be disabled in production."
+    },
+    "SIMULATE_ADMIN_AUTH": {
+      "label": "Simulate Admin Auth",
+      "description": "Show mock Nostr connection button for admin auth (testing only)",
+      "hint": "Enable for development/testing. Shows a \"Mock Connection\" button on admin login that bypasses Nostr extension requirement. Should be disabled in production."
+    },
+    "BASE_DOMAIN": {
+      "label": "Root Domain",
+      "description": "Primary domain name",
+      "hint": "Root domain without protocol. Example: example.com. Leave blank for local dev."
+    },
+    "INSTANCE_URL": {
+      "label": "Application URL",
+      "description": "Full URL with protocol",
+      "hint": "Public app URL with protocol. Example: https://app.example.com. Default: http://localhost:5173."
+    },
+    "API_BASE_URL": {
+      "label": "API URL",
+      "description": "API subdomain URL (optional)",
+      "hint": "Only set if API is on a separate domain. Example: https://api.example.com. Default: http://localhost:8000."
+    },
+    "ADMIN_BASE_URL": {
+      "label": "Admin URL",
+      "description": "Admin panel subdomain URL (optional)",
+      "hint": "Only if admin UI is on a separate domain. Example: https://admin.example.com. Default: http://localhost:5173/admin."
+    },
+    "EMAIL_DOMAIN": {
+      "label": "Email Domain",
+      "description": "Domain for email addresses",
+      "hint": "Domain used for From addresses and DNS records. Example: example.com or mail.example.com."
+    },
+    "DKIM_SELECTOR": {
+      "label": "DKIM Selector",
+      "description": "DKIM DNS record selector",
+      "hint": "Selector prefix for your DKIM TXT record. Default: sanctum. Your provider may require a specific selector."
+    },
+    "SPF_INCLUDE": {
+      "label": "SPF Include",
+      "description": "SPF DNS include directive",
+      "hint": "Replace with your provider include value (e.g., include:sendgrid.net, include:_spf.google.com)."
+    },
+    "DMARC_POLICY": {
+      "label": "DMARC Policy",
+      "description": "DMARC DNS policy record",
+      "hint": "Start with v=DMARC1; p=none; rua=mailto:dmarc@example.com and tighten later."
+    },
+    "CORS_ORIGINS": {
+      "label": "CORS Origins",
+      "description": "Comma-separated allowed CORS origins",
+      "hint": "Comma-separated full origins (scheme + host). Example: https://app.example.com,https://admin.example.com. Default: http://localhost:5173."
+    },
+    "CDN_DOMAINS": {
+      "label": "CDN Domains",
+      "description": "Content delivery domains",
+      "hint": "Comma-separated CDN hostnames for static assets (e.g., cdn.example.com). Leave blank if not using a CDN."
+    },
+    "CUSTOM_SEARXNG_URL": {
+      "label": "Custom SearXNG URL",
+      "description": "Private SearXNG instance URL",
+      "hint": "Set only if using a separate SearXNG host. Example: https://search.example.com."
+    },
+    "WEBHOOK_BASE_URL": {
+      "label": "Webhook URL",
+      "description": "Webhook callback base URL",
+      "hint": "Base URL used to construct webhook callbacks. Example: https://api.example.com/webhooks. Default: http://localhost:8000."
+    },
+    "TRUSTED_PROXIES": {
+      "label": "Trusted Proxies",
+      "description": "Trusted reverse proxies (cloudflare, aws, custom)",
+      "hint": "Set to cloudflare, aws, or a comma-separated list of IP ranges. Leave blank if not behind a proxy."
+    },
+    "SSL_CERT_PATH": {
+      "label": "SSL Certificate Path",
+      "description": "SSL certificate file path",
+      "hint": "Absolute path to the certificate file. Example: /etc/ssl/certs/fullchain.pem."
+    },
+    "SSL_KEY_PATH": {
+      "label": "SSL Key Path",
+      "description": "SSL private key file path",
+      "hint": "Absolute path to the private key file. Example: /etc/ssl/private/privkey.pem."
+    },
+    "FORCE_HTTPS": {
+      "label": "Force HTTPS",
+      "description": "Redirect HTTP to HTTPS",
+      "hint": "Set to true only after SSL_CERT_PATH and SSL_KEY_PATH are configured."
+    },
+    "HSTS_MAX_AGE": {
+      "label": "HSTS Max Age",
+      "description": "HSTS max-age in seconds",
+      "hint": "Seconds browsers should enforce HTTPS. Default: 31536000 (1 year). Use 0 to disable."
+    },
+    "MONITORING_URL": {
+      "label": "Monitoring URL",
+      "description": "Health monitoring endpoint URL",
+      "hint": "Health check URL for external monitors. Default: http://localhost:8000/health."
     }
   },
   "colors": {

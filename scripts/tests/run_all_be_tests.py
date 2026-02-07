@@ -36,6 +36,7 @@ from coincurve import PrivateKey
 
 SCRIPT_DIR = Path(__file__).parent
 REPO_ROOT = SCRIPT_DIR.parent.parent
+COMPOSE_CMD = "docker compose -f docker-compose.infra.yml -f docker-compose.app.yml"
 
 # Paths
 DOCKER_DB_PATH = "/data/sanctum.db"
@@ -65,7 +66,7 @@ def load_crm_config() -> dict:
 
 def run_docker_cmd(cmd: str, container: str = "backend") -> Tuple[int, str]:
     """Run a command inside the Docker container."""
-    full_cmd = f"docker compose exec -T {container} {cmd}"
+    full_cmd = f"{COMPOSE_CMD} exec -T {container} {cmd}"
     result = subprocess.run(
         full_cmd,
         shell=True,
@@ -97,7 +98,7 @@ def backup_database() -> Optional[Path]:
     
     print(f"  [HARNESS] Backing up database...")
     
-    cmd = f"docker compose cp backend:{DOCKER_DB_PATH} {backup_path}"
+    cmd = f"{COMPOSE_CMD} cp backend:{DOCKER_DB_PATH} {backup_path}"
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=REPO_ROOT)
     
     if result.returncode != 0:
@@ -116,7 +117,7 @@ def restore_database(backup_path: Path) -> bool:
     
     print(f"  [HARNESS] Restoring database...")
     
-    cmd = f"docker compose cp {backup_path} backend:{DOCKER_DB_PATH}"
+    cmd = f"{COMPOSE_CMD} cp {backup_path} backend:{DOCKER_DB_PATH}"
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=REPO_ROOT)
     
     if result.returncode != 0:
@@ -235,7 +236,7 @@ def restart_backend() -> bool:
     print(f"  [HARNESS] Restarting backend to apply changes...")
     
     result = subprocess.run(
-        "docker compose restart backend",
+        f"{COMPOSE_CMD} restart backend",
         shell=True,
         capture_output=True,
         text=True,
@@ -251,7 +252,7 @@ def restart_backend() -> bool:
     for i in range(30):
         time.sleep(1)
         check = subprocess.run(
-            "docker compose exec -T backend curl -sf http://localhost:8000/health",
+            f"{COMPOSE_CMD} exec -T backend curl -sf http://localhost:8000/health",
             shell=True,
             capture_output=True,
             text=True,
@@ -565,7 +566,7 @@ Examples:
         # Check Docker
         if not check_docker_running():
             print("  [HARNESS] ✗ Cannot connect to Docker backend")
-            print("  [HARNESS]   Run: docker compose up -d")
+            print(f"  [HARNESS]   Run: {COMPOSE_CMD} up -d")
             sys.exit(1)
         
         # Backup

@@ -1,0 +1,21 @@
+{
+  "description": "AUTH test configuration for admin key migration",
+  "test_admin": {
+    "description": "Well-known test admin keypair (SHA256 of seed = private key). DO NOT use in production.",
+    "keypair_seed": "sanctum-test-admin-keypair-v1"
+  },
+  "new_admin": {
+    "description": "New admin keypair for migration testing. DO NOT use in production.",
+    "keypair_seed": "sanctum-test-new-admin-keypair-v1"
+  },
+  "test_user": {
+    "description": "Test user for migration. Must match CRM test-config for cross-domain consistency.",
+    "email": "testuser@example.com",
+    "name": "Jane Doe",
+    "pubkey": "abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234",
+    "fields": {
+      "Phone Number": "+1-555-123-4567",
+      "Country": "United States"
+    }
+  }
+}

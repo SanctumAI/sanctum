@@ -16,11 +16,10 @@ Requirements:
     - User must already exist (run test_1a first or use --user-id)
 """
 
-import os
 import sys
+import csv
 import json
-import shlex
-import sqlite3
+import io
 import hashlib
 import argparse
 import subprocess
@@ -28,10 +27,11 @@ from pathlib import Path
 
 # Add backend to path for imports
 SCRIPT_DIR = Path(__file__).parent
-REPO_ROOT = SCRIPT_DIR.parent.parent.parent
-sys.path.insert(0, str(REPO_ROOT / "backend" / "app"))
+sys.path.insert(0, str(SCRIPT_DIR.parent.parent.parent / "backend" / "app"))
 
 from coincurve import PrivateKey
+
+from test_helpers import run_docker_sql, REPO_ROOT
 
 
 def load_config() -> dict:
@@ -64,31 +64,73 @@ def inspect_raw_database(db_path: str, user_id: int) -> dict:
     Directly inspect the SQLite database via docker exec.
 
     Returns raw column values for the user.
+
+    Uses run_docker_sql() helper to avoid shell injection vulnerabilities.
     """
     # Validate user_id is an integer to prevent SQL injection
     user_id = int(user_id)
 
-    repo_root = SCRIPT_DIR.parent.parent.parent
-
-    # Get user record with -json flag for structured output
-    # Use shlex.quote for db_path to handle paths with spaces/special chars
-    cmd = f"docker compose exec -T backend sqlite3 -json {shlex.quote(db_path)} 'SELECT * FROM users WHERE id = {user_id}'"
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=repo_root)
-
-    if not result.stdout.strip() or result.stdout.strip() == "[]":
+    # Get user record using the hardened run_docker_sql() helper with CSV output
+    try:
+        user_output = run_docker_sql(
+            f"SELECT id, pubkey, email, encrypted_email, ephemeral_pubkey_email, "  # noqa: S608
+            f"name, encrypted_name, ephemeral_pubkey_name, email_blind_index, "
+            f"user_type_id, approved, created_at FROM users WHERE id = {user_id}",
+            db_path,
+            csv_mode=True,
+        )
+    except RuntimeError:
         return None
 
-    users = json.loads(result.stdout.strip())
-    if not users:
+    if not user_output.strip():
         return None
 
-    user_data = users[0]
+    # Parse CSV output using csv.reader (handles embedded commas/quotes/newlines)
+    columns = [
+        "id", "pubkey", "email", "encrypted_email", "ephemeral_pubkey_email",
+        "name", "encrypted_name", "ephemeral_pubkey_name", "email_blind_index",
+        "user_type_id", "approved", "created_at"
+    ]
 
-    # Get field values
-    cmd = f"docker compose exec -T backend sqlite3 -json {shlex.quote(db_path)} 'SELECT fd.field_name, ufv.value, ufv.encrypted_value, ufv.ephemeral_pubkey FROM user_field_values ufv JOIN user_field_definitions fd ON fd.id = ufv.field_id WHERE ufv.user_id = {user_id}'"
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=repo_root)
+    reader = csv.reader(io.StringIO(user_output))
+    try:
+        values = next(reader)
+    except StopIteration:
+        return None
 
-    user_data["field_values"] = json.loads(result.stdout.strip()) if result.stdout.strip() else []
+    if len(values) != len(columns):
+        return None
+
+    user_data = {}
+    for col, val in zip(columns, values, strict=True):
+        user_data[col] = val if val else None
+
+    # Get field values using the hardened helper with CSV output
+    try:
+        fields_output = run_docker_sql(
+            f"SELECT fd.field_name, ufv.value, ufv.encrypted_value, ufv.ephemeral_pubkey "  # noqa: S608
+            f"FROM user_field_values ufv "
+            f"JOIN user_field_definitions fd ON fd.id = ufv.field_id "
+            f"WHERE ufv.user_id = {user_id}",
+            db_path,
+            csv_mode=True,
+        )
+    except RuntimeError:
+        fields_output = ""
+
+    field_values = []
+    if fields_output.strip():
+        reader = csv.reader(io.StringIO(fields_output))
+        for row in reader:
+            if len(row) >= 4:
+                field_values.append({
+                    "field_name": row[0] or None,
+                    "value": row[1] or None,
+                    "encrypted_value": row[2] or None,
+                    "ephemeral_pubkey": row[3] or None,
+                })
+
+    user_data["field_values"] = field_values
 
     return user_data
 
@@ -208,16 +250,6 @@ def test_decrypt_and_verify(db_path: str, user_id: int, admin_privkey: str, orig
     return passed
 
 
-def run_docker_sql(sql: str, db_path: str = "/data/sanctum.db") -> str:
-    """Run SQL inside Docker container and return output."""
-    repo_root = SCRIPT_DIR.parent.parent.parent
-    escaped_sql = sql.replace("'", "'\\''")
-    cmd = f"docker compose exec -T backend sqlite3 {shlex.quote(db_path)} '{escaped_sql}'"
-    
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=repo_root)
-    return result.stdout.strip()
-
-
 def compute_blind_index_in_docker(email: str) -> str | None:
     """
     Compute blind index inside Docker container where SECRET_KEY is available.
@@ -231,8 +263,8 @@ def compute_blind_index_in_docker(email: str) -> str | None:
 
     script = f"from encryption import compute_blind_index; print(compute_blind_index('{escaped_email}'))"
     result = subprocess.run(
-        ["docker", "compose", "exec", "-T", "backend", "python", "-c", script],
-        capture_output=True, text=True, cwd=REPO_ROOT
+        ["docker", "compose", "exec", "-T", "backend", "python", "-c", script],  # noqa: S607
+        capture_output=True, text=True, cwd=REPO_ROOT, timeout=30
     )
 
     if result.returncode != 0:

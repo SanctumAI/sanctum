@@ -11,11 +11,14 @@ import logging
 import time
 import re
 import math
-from fastapi import FastAPI, HTTPException, Query, Depends, Request
+import tempfile
+import sqlite3
+from fastapi import FastAPI, HTTPException, Query, Depends, Request, BackgroundTasks
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from qdrant_client import QdrantClient
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict
 from sentence_transformers import SentenceTransformer
 
 from llm import get_provider
@@ -24,11 +27,12 @@ import database
 from models import (
     AdminAuth, AdminResponse, AdminListResponse,
     AdminAuthRequest, AdminAuthResponse,
-    InstanceSettings, InstanceSettingsResponse,
+    InstanceSettings, InstanceSettingsResponse, InstanceStatusResponse,
     # User Type models
     UserTypeCreate, UserTypeUpdate, UserTypeResponse, UserTypeListResponse,
     # Field Definition models
     FieldDefinitionCreate, FieldDefinitionUpdate, FieldDefinitionResponse, FieldDefinitionListResponse,
+    FieldEncryptionRequest, FieldEncryptionResponse,
     UserCreate, UserUpdate, UserResponse, UserListResponse,
     SuccessResponse,
     # Database Explorer models
@@ -62,6 +66,7 @@ from ingest import router as ingest_router
 from query import router as query_router
 from ai_config import router as ai_config_router
 from deployment_config import router as deployment_config_router
+from key_migration import router as key_migration_router
 
 logger.info("Starting Sanctum API...")
 
@@ -85,6 +90,7 @@ app.include_router(ingest_router)
 app.include_router(query_router)
 app.include_router(ai_config_router)
 app.include_router(deployment_config_router)
+app.include_router(key_migration_router)
 
 
 @app.on_event("startup")
@@ -486,15 +492,32 @@ async def chat(request: ChatRequest, user: dict = Depends(auth.require_admin_or_
         # Import AI config functions for dynamic prompt building
         from ai_config import build_chat_prompt, get_llm_parameters
 
-        # Get LLM parameters from config
-        llm_params = get_llm_parameters()
+        # Get user_type_id from authenticated user for per-type config
+        user_type_id = user.get("user_type_id")
+
+        # Get LLM parameters from config (with user-type overrides if applicable)
+        llm_params = get_llm_parameters(user_type_id=user_type_id)
         temperature = llm_params.get("temperature", 0.1)
 
-        # Build prompt using AI config
+        # Get user profile context for chat personalization (unencrypted fields only)
+        user_profile_context = None
+        user_id = user.get("id")
+        if user_id and user_id != -1:  # Skip dev mode mock user (id=-1)
+            user_profile_context = database.get_user_chat_context_values(
+                user_id=user_id,
+                user_type_id=user_type_id
+            )
+            # Only pass if there's actual data
+            if not user_profile_context:
+                user_profile_context = None
+
+        # Build prompt using AI config (with user-type overrides if applicable)
         combined_context = "\n\n".join(tool_context_parts) if tool_context_parts else ""
         prompt = build_chat_prompt(
             message=request.message,
             context=combined_context,
+            user_type_id=user_type_id,
+            user_profile_context=user_profile_context,
         )
 
         provider = get_provider()
@@ -614,12 +637,15 @@ async def vector_search(request: VectorSearchRequest):
 async def send_magic_link(
     request: Request,
     body: MagicLinkRequest,
-    _: None = Depends(magic_link_limiter)
+    _: None = Depends(magic_link_limiter),
+    __: None = Depends(auth.require_instance_setup_complete)
 ):
     """
     Send a magic link to the user's email for authentication.
     Creates a signed, time-limited token and sends it via email.
     Rate limited to 5 requests per minute per IP.
+    
+    Requires instance setup to be complete (admin must authenticate first).
     """
     email = body.email.strip().lower()
     name = body.name.strip()
@@ -649,19 +675,73 @@ async def send_magic_link(
     )
 
 
+def _compute_onboarding_flags(user: dict) -> tuple[bool, bool]:
+    """Return (needs_onboarding, needs_user_type) for the given user."""
+    if not user:
+        return False, False
+
+    user_type_id = user.get("user_type_id")
+    user_types = database.list_user_types()
+
+    needs_user_type = len(user_types) > 1 and not user_type_id
+    if needs_user_type:
+        return True, True
+
+    # If only one type exists, treat it as the effective type even if not yet stored
+    effective_type_id = user_type_id
+    if effective_type_id is None and len(user_types) == 1:
+        effective_type_id = user_types[0]["id"]
+
+    if effective_type_id is None:
+        # Only global fields apply when no type is selected
+        field_defs = [
+            f for f in database.get_field_definitions()
+            if f.get("user_type_id") is None
+        ]
+    else:
+        field_defs = database.get_field_definitions(
+            user_type_id=effective_type_id,
+            include_global=True
+        )
+
+    if not field_defs:
+        return False, False
+
+    fields = user.get("fields") or {}
+    fields_encrypted = user.get("fields_encrypted") or {}
+    user_fields = set(fields.keys()) | set(fields_encrypted.keys())
+
+    # If there are fields configured but none stored, onboarding hasn't been completed yet
+    if not user_fields:
+        return True, False
+
+    required_fields = [f["field_name"] for f in field_defs if f.get("required")]
+    if not required_fields:
+        return False, False
+
+    for field_name in required_fields:
+        if field_name in fields_encrypted:
+            continue
+        value = fields.get(field_name)
+        if value is None:
+            return True, False
+        if isinstance(value, str) and not value.strip():
+            return True, False
+
+    return False, False
+
+
 @app.get("/auth/verify", response_model=VerifyTokenResponse)
-async def verify_magic_link(token: str = Query(..., description="Magic link token")):
+async def verify_magic_link(
+    token: str = Query(..., description="Magic link token"),
+    _: None = Depends(auth.require_instance_setup_complete)
+):
     """
     Verify a magic link token and create/return the user.
     Returns a session token for subsequent authenticated requests.
+    
+    Requires instance setup to be complete (admin must authenticate first).
     """
-    # Require admin to be configured before onboarding
-    if not database.list_admins():
-        raise HTTPException(
-            status_code=503,
-            detail="Instance not configured. An admin must be registered before users can sign up."
-        )
-
     # Verify token
     data = auth.verify_magic_link_token(token)
     if not data:
@@ -680,6 +760,8 @@ async def verify_magic_link(token: str = Query(..., description="Magic link toke
     # Create session token
     session_token = auth.create_session_token(user["id"], email)
 
+    needs_onboarding, needs_user_type = _compute_onboarding_flags(user)
+
     return VerifyTokenResponse(
         success=True,
         user=AuthUserResponse(
@@ -688,17 +770,24 @@ async def verify_magic_link(token: str = Query(..., description="Magic link toke
             name=name or user.get("name"),
             user_type_id=user.get("user_type_id"),
             approved=bool(user.get("approved", 1)),
-            created_at=user.get("created_at")
+            created_at=user.get("created_at"),
+            needs_onboarding=needs_onboarding,
+            needs_user_type=needs_user_type
         ),
         session_token=session_token
     )
 
 
 @app.get("/auth/me", response_model=SessionUserResponse)
-async def get_current_user(token: str = Query(None, description="Session token")):
+async def get_current_user(
+    token: str = Query(None, description="Session token"),
+    _: None = Depends(auth.require_instance_setup_complete)
+):
     """
     Get the current authenticated user from session token.
     Returns authenticated: false if no valid session.
+    
+    Requires instance setup to be complete (admin must authenticate first).
     """
     if not token:
         return SessionUserResponse(authenticated=False)
@@ -713,6 +802,8 @@ async def get_current_user(token: str = Query(None, description="Session token")
     if not user:
         return SessionUserResponse(authenticated=False)
 
+    needs_onboarding, needs_user_type = _compute_onboarding_flags(user)
+
     return SessionUserResponse(
         authenticated=True,
         user=AuthUserResponse(
@@ -721,7 +812,9 @@ async def get_current_user(token: str = Query(None, description="Session token")
             name=user.get("name"),
             user_type_id=user.get("user_type_id"),
             approved=bool(user.get("approved", 1)),
-            created_at=user.get("created_at")
+            created_at=user.get("created_at"),
+            needs_onboarding=needs_onboarding,
+            needs_user_type=needs_user_type
         )
     )
 
@@ -905,37 +998,41 @@ async def admin_auth(
     existing = database.get_admin_by_pubkey(pubkey)
 
     # ==========================================================================
-    # SECURITY: Single-admin restriction (v1)
+    # SECURITY: Single-admin restriction (ENFORCED)
     #
-    # Only the FIRST person to authenticate via NIP-07 can become the admin.
-    # After an admin exists, new registrations are rejected. Existing admins
-    # can still re-authenticate to get new session tokens.
-    #
-    # TODO: Future enhancement - allow existing admins to invite new admins
+    # Only ONE admin can exist per instance. The first person to authenticate
+    # via NIP-07 becomes the admin. Subsequent attempts are rejected.
     # ==========================================================================
-    all_admins = database.list_admins()
-    instance_initialized = len(all_admins) > 0
+    
+    is_new = existing is None
+    instance_has_admin = database.has_admin()
 
-    if existing is None and instance_initialized:
+    if is_new and instance_has_admin:
         # Someone is trying to register as admin but an admin already exists
         raise HTTPException(
             status_code=403,
             detail="Admin registration is closed. This instance already has an admin."
         )
 
-    is_new = existing is None
-
     if is_new:
-        # First admin creation - only happens when no admins exist yet
-        database.add_admin(pubkey)
-        admin = database.get_admin_by_pubkey(pubkey)
-
-        # Migrate any existing plaintext data to encrypted format
-        # This happens when users signed up before an admin was configured
-        # Run in a thread to avoid blocking the event loop
-        await asyncio.to_thread(database.migrate_encrypt_existing_data)
+        # First admin creation - use our single admin constraint
+        try:
+            database.add_admin(pubkey)
+            admin = database.get_admin_by_pubkey(pubkey)
+            
+            # Migrate any existing plaintext data to encrypted format
+            # This happens when users signed up before an admin was configured
+            # Run in a thread to avoid blocking the event loop
+            await asyncio.to_thread(database.migrate_encrypt_existing_data)
+            
+        except ValueError as e:
+            # This should not happen due to our check above, but safety first
+            raise HTTPException(status_code=403, detail=str(e)) from e
     else:
         admin = existing
+
+    # Mark instance setup as complete after successful admin authentication
+    database.mark_instance_setup_complete()
 
     # Create session token for subsequent authenticated requests
     session_token = auth.create_admin_session_token(admin["id"], pubkey)
@@ -943,7 +1040,7 @@ async def admin_auth(
     return AdminAuthResponse(
         admin=AdminResponse(**admin),
         is_new=is_new,
-        instance_initialized=instance_initialized,
+        instance_initialized=instance_has_admin or is_new,  # True if had admin or just created one
         session_token=session_token
     )
 
@@ -969,6 +1066,12 @@ async def remove_admin(pubkey: str, admin: dict = Depends(auth.require_admin)):
     raise HTTPException(status_code=404, detail="Admin not found")
 
 
+@app.get("/admin/session", response_model=SuccessResponse)
+async def validate_admin_session(admin: dict = Depends(auth.require_admin)):
+    """Validate the current admin session token."""
+    return SuccessResponse(success=True, message="Admin session is valid")
+
+
 # --- Instance Settings ---
 
 # Settings safe to expose publicly (branding only)
@@ -978,7 +1081,19 @@ SAFE_PUBLIC_SETTINGS = {
     "description",
     "logo_url",
     "favicon_url",
+    "apple_touch_icon_url",
     "icon",
+    "assistant_icon",
+    "user_icon",
+    "assistant_name",
+    "user_label",
+    "header_layout",
+    "header_tagline",
+    "chat_bubble_style",
+    "chat_bubble_shadow",
+    "surface_style",
+    "status_icon_set",
+    "typography_preset",
 }
 
 
@@ -987,25 +1102,21 @@ def filter_public_settings(settings: dict) -> dict:
     return {k: v for k, v in settings.items() if k in SAFE_PUBLIC_SETTINGS}
 
 
-class InstanceStatusResponse(BaseModel):
-    """Response model for instance status"""
-    initialized: bool  # True if an admin has been registered
-    settings: dict
-
-
 @app.get("/instance/status", response_model=InstanceStatusResponse)
 async def get_instance_status():
     """
-    Public endpoint: Check if instance is initialized (has an admin).
+    Public endpoint: Check if instance is initialized and ready for users.
 
     Used by frontend to determine whether to show:
     - Admin setup flow (if not initialized)
-    - User registration (if initialized)
+    - User waiting page (if admin exists but setup incomplete)
+    - User registration (if setup complete)
     """
-    admins = database.list_admins()
     settings = filter_public_settings(database.get_all_settings())
     return InstanceStatusResponse(
-        initialized=len(admins) > 0,
+        initialized=database.has_admin(),
+        setup_complete=database.is_instance_setup_complete(),
+        ready_for_users=database.is_instance_setup_complete(),
         settings=settings
     )
 
@@ -1017,16 +1128,77 @@ async def get_public_settings():
     return InstanceSettingsResponse(settings=settings)
 
 
+# Import for public config
+from models import PublicConfigResponse
+
+
+def _get_simulation_setting(key: str, default: str = "true") -> bool:
+    """Get a simulation setting from database with env var fallback.
+
+    Args:
+        key: The config key (e.g., "SIMULATE_USER_AUTH")
+        default: Default value if not found anywhere ("true" or "false")
+
+    Returns:
+        Boolean value of the setting
+    """
+    # First try database
+    db_value = database.get_deployment_config_value(key)
+    if db_value is not None:
+        return db_value.lower() in ("true", "1", "yes")
+
+    # Then try environment variable
+    env_value = os.getenv(key)
+    if env_value is not None:
+        return env_value.lower() in ("true", "1", "yes")
+
+    # Fall back to default
+    return default.lower() in ("true", "1", "yes")
+
+
+@app.get("/config/public", response_model=PublicConfigResponse)
+async def get_public_config() -> PublicConfigResponse:
+    """
+    Public endpoint: Get simulation/development settings.
+
+    Returns configuration flags that control testing features.
+    No authentication required - these settings affect client-side behavior.
+    """
+    simulate_user_auth = _get_simulation_setting("SIMULATE_USER_AUTH", "false")
+    simulate_admin_auth = _get_simulation_setting("SIMULATE_ADMIN_AUTH", "false")
+
+    # Defense-in-depth: never expose simulation flags as enabled in production.
+    if auth.is_production_mode():
+        if simulate_user_auth or simulate_admin_auth:
+            logger.warning("Simulation auth flags forced off in production mode")
+        simulate_user_auth = False
+        simulate_admin_auth = False
+
+    return PublicConfigResponse(
+        simulate_user_auth=simulate_user_auth,
+        simulate_admin_auth=simulate_admin_auth,
+    )
+
+
 @app.get("/session-defaults", response_model=SessionDefaultsResponse)
-async def get_session_defaults_public():
+async def get_session_defaults_public(
+    user_type_id: Optional[int] = Query(None, description="User type ID for type-specific defaults")
+) -> SessionDefaultsResponse:
     """
     Public endpoint: Get session defaults for chat initialization.
     No authentication required - returns safe defaults for new chat sessions.
+
+    If user_type_id is provided, returns defaults with user-type-specific overrides applied.
     """
     try:
         from ai_config import get_session_defaults
-        defaults = get_session_defaults()
-        default_docs = database.get_default_active_documents()
+        defaults = get_session_defaults(user_type_id)
+
+        # Get document defaults with user-type inheritance if applicable
+        if user_type_id is not None:
+            default_docs = database.get_active_documents_for_user_type(user_type_id)
+        else:
+            default_docs = database.get_default_active_documents()
 
         return SessionDefaultsResponse(
             web_search_enabled=defaults.get("web_search_default", False),
@@ -1094,6 +1266,7 @@ async def create_user_type(user_type: UserTypeCreate, admin: dict = Depends(auth
         type_id = database.create_user_type(
             name=user_type.name,
             description=user_type.description,
+            icon=user_type.icon,
             display_order=user_type.display_order
         )
         created = database.get_user_type(type_id)
@@ -1115,6 +1288,7 @@ async def update_user_type(type_id: int, user_type: UserTypeUpdate, admin: dict 
         type_id,
         name=user_type.name,
         description=user_type.description,
+        icon=user_type.icon,
         display_order=user_type.display_order
     )
     updated = database.get_user_type(type_id)
@@ -1152,6 +1326,13 @@ async def create_field_definition(field: FieldDefinitionCreate, admin: dict = De
         if not database.get_user_type(field.user_type_id):
             raise HTTPException(status_code=400, detail="User type not found")
 
+    # Validation: Cannot include encrypted fields in chat context
+    if field.include_in_chat and field.encryption_enabled:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot include encrypted fields in chat context. Encrypted fields require admin's private key to decrypt."
+        )
+
     try:
         field_id = database.create_field_definition(
             field_name=field.field_name,
@@ -1160,7 +1341,9 @@ async def create_field_definition(field: FieldDefinitionCreate, admin: dict = De
             display_order=field.display_order,
             user_type_id=field.user_type_id,
             placeholder=field.placeholder,
-            options=field.options
+            options=field.options,
+            encryption_enabled=field.encryption_enabled,
+            include_in_chat=field.include_in_chat
         )
         created = database.get_field_definition_by_id(field_id)
         return FieldDefinitionResponse(**created)
@@ -1182,6 +1365,17 @@ async def update_field_definition(field_id: int, field: FieldDefinitionUpdate, a
         if not database.get_user_type(field.user_type_id):
             raise HTTPException(status_code=400, detail="User type not found")
 
+    # Determine effective encryption state (use existing if not specified)
+    effective_encryption = field.encryption_enabled if field.encryption_enabled is not None else existing.get("encryption_enabled", 1)
+    effective_include_in_chat = field.include_in_chat if field.include_in_chat is not None else existing.get("include_in_chat", 0)
+
+    # Validation: Cannot include encrypted fields in chat context
+    if effective_include_in_chat and effective_encryption:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot include encrypted fields in chat context. Encrypted fields require admin's private key to decrypt."
+        )
+
     database.update_field_definition(
         field_id,
         field_name=field.field_name,
@@ -1190,7 +1384,9 @@ async def update_field_definition(field_id: int, field: FieldDefinitionUpdate, a
         display_order=field.display_order,
         user_type_id=field.user_type_id if field.user_type_id != 0 else None,
         placeholder=field.placeholder,
-        options=field.options
+        options=field.options,
+        encryption_enabled=field.encryption_enabled,
+        include_in_chat=field.include_in_chat
     )
     updated = database.get_field_definition_by_id(field_id)
     return FieldDefinitionResponse(**updated)
@@ -1204,6 +1400,75 @@ async def delete_field_definition(field_id: int, admin: dict = Depends(auth.requ
     raise HTTPException(status_code=404, detail="Field definition not found")
 
 
+@app.put("/admin/user-fields/{field_id}/encryption", response_model=FieldEncryptionResponse)
+async def update_field_encryption(
+    field_id: int,
+    encryption_request: FieldEncryptionRequest,
+    _admin: dict = Depends(auth.require_admin)
+) -> FieldEncryptionResponse:
+    """Update encryption setting for a field definition (requires admin auth).
+
+    WARNING: Changing encryption settings may affect existing data.
+    - Enabling encryption: Future values will be encrypted, existing plaintext remains
+    - Disabling encryption: Future values stored as plaintext, existing encrypted data remains
+
+    Use force=true to bypass warnings about data migration complexity.
+
+    Note: Enabling encryption will auto-disable include_in_chat since encrypted
+    fields cannot be included in AI chat context.
+    """
+    # Check if field exists
+    field_def = database.get_field_definition_by_id(field_id)
+    if not field_def:
+        raise HTTPException(status_code=404, detail="Field definition not found")
+
+    current_encryption = field_def.get("encryption_enabled", 1)
+    new_encryption = encryption_request.encryption_enabled
+
+    warning = None
+
+    # Check for potential data impact
+    if current_encryption != int(new_encryption):
+        # TODO: Check if field has existing values that would be affected
+        # For now, provide general warning
+        if not new_encryption:
+            warning = "⚠️ Disabling encryption will store future values as plaintext. Existing encrypted data remains encrypted."
+        else:
+            warning = "Enabling encryption will encrypt future values. Existing plaintext data remains unencrypted."
+
+        if not encryption_request.force and warning:
+            raise HTTPException(
+                status_code=400,
+                detail=f"{warning} Use force=true to confirm this change."
+            )
+
+    # When enabling encryption, auto-disable include_in_chat
+    include_in_chat_update = None
+    if new_encryption and field_def.get("include_in_chat", 0):
+        include_in_chat_update = False
+        if warning:
+            warning += " Also disabled 'include in chat' since encrypted fields cannot be included in AI chat context."
+        else:
+            warning = "Disabled 'include in chat' since encrypted fields cannot be included in AI chat context."
+
+    # Update encryption setting (and include_in_chat if needed)
+    success = database.update_field_definition(
+        field_id,
+        encryption_enabled=new_encryption,
+        include_in_chat=include_in_chat_update
+    )
+
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to update field encryption")
+
+    return FieldEncryptionResponse(
+        field_id=field_id,
+        encryption_enabled=new_encryption,
+        warning=warning,
+        migrated_values=0  # TODO: Implement data migration counting
+    )
+
+
 # --- Users ---
 
 @app.get("/admin/users", response_model=UserListResponse)
@@ -1213,8 +1478,25 @@ async def list_users(admin: dict = Depends(auth.require_admin)):
     return UserListResponse(users=[UserResponse(**u) for u in users])
 
 
+def _is_admin_actor(actor: dict) -> bool:
+    """Return True when auth context represents an admin."""
+    return actor.get("type") == "admin"
+
+
+def _require_self_or_admin(target_user_id: int, actor: dict) -> None:
+    """Allow access for admins or the user who owns target_user_id."""
+    if _is_admin_actor(actor):
+        return
+
+    if actor.get("id") != target_user_id:
+        raise HTTPException(status_code=403, detail="Forbidden: cannot access another user")
+
+
 @app.post("/users", response_model=UserResponse)
-async def create_user(user: UserCreate):
+async def create_user(
+    user: UserCreate,
+    requester: dict = Depends(auth.require_admin_or_user)
+):
     """Create/onboard a new user.
 
     Args:
@@ -1224,7 +1506,8 @@ async def create_user(user: UserCreate):
         user_type_id: Optional ID of the user type they selected during onboarding
         fields: Dynamic fields defined by admin for the user type
 
-    Requires admin to be configured first (for encryption to work properly).
+    Requires authenticated user/admin context and admin to be configured first
+    (for encryption to work properly).
     """
     # Check if admin is configured (required for data encryption)
     admins = database.list_admins()
@@ -1239,16 +1522,68 @@ async def create_user(user: UserCreate):
         if not database.get_user_type(user.user_type_id):
             raise HTTPException(status_code=400, detail="User type not found")
 
+    # Normalize pubkey if provided
+    pubkey = None
+    if user.pubkey:
+        from nostr_keys import normalize_pubkey
+        try:
+            pubkey = normalize_pubkey(user.pubkey)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+
+    # Check for existing user (by pubkey or email) to avoid duplicates
+    existing_user = None
+    if pubkey:
+        existing_user = database.get_user_by_pubkey(pubkey)
+    if not existing_user and user.email:
+        existing_user = database.get_user_by_email(user.email)
+
+    # Non-admin callers may only operate on their own user record.
+    # This blocks anonymous/third-party profile mutation by email/pubkey collision.
+    if not _is_admin_actor(requester):
+        requester_id = requester.get("id")
+        if requester_id is None:
+            raise HTTPException(status_code=401, detail="Invalid user session")
+
+        session_user = database.get_user(requester_id) if requester_id != -1 else None
+        if existing_user:
+            if existing_user["id"] != requester_id:
+                raise HTTPException(status_code=403, detail="Forbidden: cannot modify another user")
+        elif session_user:
+            existing_user = session_user
+        elif not requester.get("dev_mode"):
+            raise HTTPException(status_code=401, detail="User session is not linked to an account")
+
+    # Resolve effective user_type_id (use existing if not provided)
+    effective_user_type_id = user.user_type_id
+    if effective_user_type_id is None and existing_user:
+        effective_user_type_id = existing_user.get("user_type_id")
+
     # Get field definitions for this user type (global + type-specific)
-    field_defs = database.get_field_definitions(
-        user_type_id=user.user_type_id,
-        include_global=True
-    )
+    if effective_user_type_id is None:
+        field_defs = [
+            f for f in database.get_field_definitions()
+            if f.get("user_type_id") is None
+        ]
+    else:
+        field_defs = database.get_field_definitions(
+            user_type_id=effective_user_type_id,
+            include_global=True
+        )
 
     # Validate required fields
+    # For partial updates (existing user), consider both existing and provided fields
     required_fields = {f["field_name"] for f in field_defs if f["required"]}
     provided_fields = set(user.fields.keys())
-    missing = required_fields - provided_fields
+
+    if existing_user:
+        # Union the existing user's fields with provided fields for validation
+        existing_fields = set(existing_user.get("fields", {}).keys()) | set(existing_user.get("fields_encrypted", {}).keys())
+        all_fields = existing_fields | provided_fields
+        missing = required_fields - all_fields
+    else:
+        # New user: only check provided fields
+        missing = required_fields - provided_fields
 
     if missing:
         raise HTTPException(
@@ -1265,14 +1600,14 @@ async def create_user(user: UserCreate):
             detail=f"Unknown fields: {', '.join(unknown)}"
         )
 
-    # Normalize pubkey if provided
-    pubkey = None
-    if user.pubkey:
-        from nostr_keys import normalize_pubkey
-        try:
-            pubkey = normalize_pubkey(user.pubkey)
-        except ValueError as e:
-            raise HTTPException(status_code=400, detail=str(e)) from e
+    if existing_user:
+        # Update existing user (avoid duplicate accounts)
+        if user.user_type_id is not None and user.user_type_id != existing_user.get("user_type_id"):
+            database.update_user_type_id(existing_user["id"], user.user_type_id)
+            effective_user_type_id = user.user_type_id
+        if user.fields:
+            database.set_user_fields(existing_user["id"], user.fields, user_type_id=effective_user_type_id)
+        return UserResponse(**database.get_user(existing_user["id"]))
 
     # Create user
     try:
@@ -1283,7 +1618,7 @@ async def create_user(user: UserCreate):
             user_type_id=user.user_type_id
         )
         if user.fields:
-            database.set_user_fields(user_id, user.fields, user_type_id=user.user_type_id)
+            database.set_user_fields(user_id, user.fields, user_type_id=effective_user_type_id)
         return UserResponse(**database.get_user(user_id))
     except Exception as e:
         if "UNIQUE constraint" in str(e):
@@ -1292,8 +1627,12 @@ async def create_user(user: UserCreate):
 
 
 @app.get("/users/{user_id}", response_model=UserResponse)
-async def get_user(user_id: int):
-    """Get a user by ID"""
+async def get_user(
+    user_id: int,
+    requester: dict = Depends(auth.require_admin_or_user)
+):
+    """Get a user by ID (self or admin)."""
+    _require_self_or_admin(user_id, requester)
     user = database.get_user(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -1301,8 +1640,13 @@ async def get_user(user_id: int):
 
 
 @app.put("/users/{user_id}", response_model=UserResponse)
-async def update_user(user_id: int, user: UserUpdate):
-    """Update a user's fields"""
+async def update_user(
+    user_id: int,
+    user: UserUpdate,
+    requester: dict = Depends(auth.require_admin_or_user)
+):
+    """Update a user's fields (self or admin)."""
+    _require_self_or_admin(user_id, requester)
     existing = database.get_user(user_id)
     if not existing:
         raise HTTPException(status_code=404, detail="User not found")
@@ -1323,8 +1667,12 @@ async def update_user(user_id: int, user: UserUpdate):
 
 
 @app.delete("/users/{user_id}", response_model=SuccessResponse)
-async def delete_user(user_id: int):
-    """Delete a user"""
+async def delete_user(
+    user_id: int,
+    requester: dict = Depends(auth.require_admin_or_user)
+):
+    """Delete a user (self or admin)."""
+    _require_self_or_admin(user_id, requester)
     if database.delete_user(user_id):
         return SuccessResponse(success=True, message="User deleted")
     raise HTTPException(status_code=404, detail="User not found")
@@ -1412,20 +1760,27 @@ async def get_db_table_data(
     if table_name not in ALLOWED_TABLES:
         raise HTTPException(status_code=403, detail=f"Access to table '{table_name}' is not allowed")
 
-    columns = get_table_columns(table_name)
-    total_rows = get_table_row_count(table_name)
-    total_pages = math.ceil(total_rows / page_size) if total_rows > 0 else 1
+    try:
+        columns = get_table_columns(table_name)
+        total_rows = get_table_row_count(table_name)
+        total_pages = math.ceil(total_rows / page_size) if total_rows > 0 else 1
 
-    # Get paginated rows
-    offset = (page - 1) * page_size
-    conn = database.get_connection()
-    cursor = conn.cursor()
-    cursor.execute(f"SELECT * FROM {table_name} LIMIT ? OFFSET ?", (page_size, offset))
+        # Get paginated rows
+        offset = (page - 1) * page_size
+        conn = database.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT * FROM {table_name} LIMIT ? OFFSET ?", (page_size, offset))
 
-    # Convert to list of dicts
-    col_names = [col.name for col in columns]
-    rows = [dict(zip(col_names, row)) for row in cursor.fetchall()]
-    cursor.close()
+        # Convert to list of dicts
+        col_names = [col.name for col in columns]
+        rows = [dict(zip(col_names, row)) for row in cursor.fetchall()]
+        cursor.close()
+    except sqlite3.Error as error:
+        logger.exception("Database error fetching table data", extra={"table": table_name})
+        raise HTTPException(
+            status_code=500,
+            detail=f"Database error reading table '{table_name}': {error}"
+        ) from error
 
     return TableDataResponse(
         table=table_name,
@@ -1678,3 +2033,90 @@ async def delete_db_row(table_name: str, row_id: int, admin: dict = Depends(auth
         return RowMutationResponse(success=True, id=row_id)
     except Exception as e:
         return RowMutationResponse(success=False, error=str(e))
+
+
+@app.get("/admin/database/export")
+async def export_database(background_tasks: BackgroundTasks, _admin: Dict = Depends(auth.require_admin)) -> FileResponse:
+    """
+    Export the SQLite database as a downloadable backup file.
+    
+    Creates a consistent snapshot of the database using SQLite's backup mechanism
+    to avoid locking the live database during export. The backup file is served
+    with a timestamped filename for easy organization.
+    
+    Args:
+        _admin (Dict): Admin authentication dependency (unused but required)
+        
+    Returns:
+        FileResponse: Database backup file with timestamped filename
+        
+    Raises:
+        HTTPException: 
+            - 404 if database file not found
+            - 500 if backup creation or export fails
+    """
+    try:
+        # Get the database file path
+        db_path = database.SQLITE_PATH
+        
+        # Check if database file exists
+        if not os.path.exists(db_path):
+            raise HTTPException(status_code=404, detail="Database file not found")
+        
+        # Generate filename with timestamp
+        import datetime
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"sanctum_backup_{timestamp}.db"
+        
+        # Create a temporary file for the backup
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".db")
+        temp_path = temp_file.name
+        temp_file.close()
+        
+        try:
+            # Helper to run blocking backup in thread pool
+            def perform_backup():
+                source_conn = sqlite3.connect(db_path)
+                try:
+                    backup_conn = sqlite3.connect(temp_path)
+                    try:
+                        source_conn.backup(backup_conn)
+                    finally:
+                        backup_conn.close()
+                finally:
+                    source_conn.close()
+
+            # Run blocking backup operation in a thread to avoid stalling event loop
+            await asyncio.to_thread(perform_backup)
+
+            # Return the backup file as a download with cleanup
+            def cleanup_temp_file():
+                try:
+                    os.unlink(temp_path)
+                except OSError:
+                    pass
+            
+            # Schedule cleanup after response is sent using BackgroundTasks
+            background_tasks.add_task(cleanup_temp_file)
+            
+            return FileResponse(
+                path=temp_path,
+                filename=filename,
+                media_type="application/octet-stream",
+                headers={"Content-Disposition": f"attachment; filename={filename}"}
+            )
+            
+        except Exception:
+            # Clean up temp file on backup failure
+            try:
+                os.unlink(temp_path)
+            except OSError:
+                pass
+            raise
+
+    except HTTPException:
+        # Re-raise HTTPExceptions to preserve status codes
+        raise
+    except Exception as e:
+        logger.exception("Database export failed")
+        raise HTTPException(status_code=500, detail=f"Export failed: {e!r}") from e

@@ -52,7 +52,7 @@ test_endpoint() {
 echo "Checking backend connectivity..."
 if ! curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/health" | grep -q "200"; then
     echo "✗ Backend not reachable at $BASE_URL"
-    echo "  Make sure the backend is running: docker compose up backend"
+    echo "  Make sure the backend is running: docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up backend"
     exit 1
 fi
 echo "✓ Backend is reachable"
@@ -69,6 +69,7 @@ echo "=== Protected Endpoints (should return 401 without auth) ==="
 
 # Admin management
 test_endpoint "GET" "/admin/list" "401"
+test_endpoint "GET" "/admin/session" "401"
 test_endpoint "DELETE" "/admin/testpubkey" "401"
 
 # Instance settings

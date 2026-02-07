@@ -541,6 +541,7 @@ export function AdminDatabaseExplorer() {
     const available = hasNip04Support()
     setNip07Available(available)
     if (!available) {
+      setNip07Access(false)
       alert(
         t(
           'admin.database.decryptNoExtension',
@@ -551,7 +552,21 @@ export function AdminDatabaseExplorer() {
     }
 
     try {
-      await window.nostr?.getPublicKey?.()
+      const nostrApi = window.nostr
+      if (!nostrApi || typeof nostrApi.getPublicKey !== 'function') {
+        console.warn('NIP-07 extension detected but getPublicKey is unavailable.')
+        setNip07Access(false)
+        return
+      }
+
+      const pubkey = await nostrApi.getPublicKey()
+      const hasValidPubkey = typeof pubkey === 'string' && pubkey.trim().length > 0
+      if (!hasValidPubkey) {
+        console.warn('NIP-07 getPublicKey returned an invalid pubkey value.')
+        setNip07Access(false)
+        return
+      }
+
       setNip07Access(true)
     } catch (error) {
       console.warn('Failed to trigger NIP-07 permission prompt:', error)

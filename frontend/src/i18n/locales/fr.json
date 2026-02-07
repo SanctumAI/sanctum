@@ -444,7 +444,7 @@
       "complete": "Terminé",
       "failed": "Échoué"
     },
-    "chunks": "{{processed}}/{{total}} morceaux",
+    "chunks": "{{processed}}/{{total}} fragments",
     "deleteDocument": "Supprimer le document",
     "confirmDelete": "Supprimer ce document ?",
     "confirmDeleteDesc": "Cela supprimera définitivement le document et tous ses fragments de la base de connaissances. Cette action est irréversible.",
@@ -487,7 +487,7 @@
     "noDocuments": "Aucun document téléchargé pour le moment",
     "promptPreview": "Aperçu du prompt",
     "invalidJson": "Format JSON invalide",
-    "chunks": "morceaux"
+    "chunks": "fragments"
   },
   "adminDeployment": {
     "title": "Configuration du déploiement",

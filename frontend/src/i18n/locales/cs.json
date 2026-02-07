@@ -452,7 +452,7 @@
     "noDocuments": "Zatím nebyly nahrány žádné dokumenty",
     "promptPreview": "Náhled promptu",
     "invalidJson": "Neplatný formát JSON",
-    "chunks": "bloky"
+    "chunks": "části"
   },
   "adminDeployment": {
     "title": "Konfigurace nasazení",

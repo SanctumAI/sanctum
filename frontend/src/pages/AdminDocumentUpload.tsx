@@ -655,6 +655,7 @@ export function AdminDocumentUpload() {
                             : 'text-text-muted/30 cursor-not-allowed'
                         }`}
                         title={canDelete ? t('upload.deleteDocument') : t('upload.status.processing')}
+                        aria-label={canDelete ? t('upload.deleteDocument') : t('upload.status.processing')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

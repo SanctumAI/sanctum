@@ -125,8 +125,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
       assistant: 'rounded-lg',
     },
     pill: {
-      user: 'rounded-full',
-      assistant: 'rounded-full',
+      user: 'rounded-3xl',
+      assistant: 'rounded-3xl',
     },
   } as const
 

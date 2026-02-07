@@ -2075,7 +2075,7 @@ async def export_database(background_tasks: BackgroundTasks, _admin: Dict = Depe
         
         try:
             # Helper to run blocking backup in thread pool
-            def perform_backup():
+            def perform_backup() -> None:
                 source_conn = sqlite3.connect(db_path)
                 try:
                     backup_conn = sqlite3.connect(temp_path)
@@ -2090,7 +2090,7 @@ async def export_database(background_tasks: BackgroundTasks, _admin: Dict = Depe
             await asyncio.to_thread(perform_backup)
 
             # Return the backup file as a download with cleanup
-            def cleanup_temp_file():
+            def cleanup_temp_file() -> None:
                 try:
                     os.unlink(temp_path)
                 except OSError:

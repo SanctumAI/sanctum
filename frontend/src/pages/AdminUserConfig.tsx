@@ -31,6 +31,7 @@ export function AdminUserConfig() {
   const [addTypeError, setAddTypeError] = useState<string | null>(null)
   const [isAddingTypeLoading, setIsAddingTypeLoading] = useState(false)
   const [removeTypeError, setRemoveTypeError] = useState<string | null>(null)
+  const [deletingTypeIds, setDeletingTypeIds] = useState<Set<number>>(new Set())
   const [editingTypeId, setEditingTypeId] = useState<number | null>(null)
   const [editingTypeName, setEditingTypeName] = useState('')
   const [editingTypeDescription, setEditingTypeDescription] = useState('')
@@ -47,6 +48,7 @@ export function AdminUserConfig() {
   const [userHelpPage, setUserHelpPage] = useState(0)
   const userHelpModalRef = useRef<HTMLDivElement>(null)
   const helpButtonRef = useRef<HTMLButtonElement>(null)
+  const deletingTypeIdsRef = useRef<Set<number>>(new Set())
 
   // Check if admin is logged in
   useEffect(() => {
@@ -210,6 +212,8 @@ export function AdminUserConfig() {
   }
 
   const handleRemoveUserType = async (typeId: number) => {
+    if (deletingTypeIdsRef.current.has(typeId)) return
+
     // Count fields that will be deleted
     const fieldCount = fields.filter((f) => f.user_type_id === typeId).length
     const userType = userTypes.find((ut) => ut.id === typeId)
@@ -232,6 +236,12 @@ export function AdminUserConfig() {
     }
 
     setRemoveTypeError(null)
+    deletingTypeIdsRef.current.add(typeId)
+    setDeletingTypeIds((prev) => {
+      const next = new Set(prev)
+      next.add(typeId)
+      return next
+    })
 
     try {
       const response = await adminFetch(`/admin/user-types/${typeId}`, {
@@ -239,15 +249,23 @@ export function AdminUserConfig() {
       })
 
       if (response.ok) {
-        setUserTypes(userTypes.filter((ut) => ut.id !== typeId))
+        setUserTypes((prev) => prev.filter((ut) => ut.id !== typeId))
         // Remove fields associated with this type from local state
-        setFields(fields.filter((f) => f.user_type_id !== typeId))
+        setFields((prev) => prev.filter((f) => f.user_type_id !== typeId))
       } else {
         setRemoveTypeError(t('admin.errors.removeTypeFailed', 'Failed to remove user type'))
       }
     } catch (err) {
       console.error('Error removing user type:', err)
       setRemoveTypeError(err instanceof Error ? err.message : t('admin.errors.removeTypeFailed', 'Failed to remove user type'))
+    } finally {
+      deletingTypeIdsRef.current.delete(typeId)
+      setDeletingTypeIds((prev) => {
+        if (!prev.has(typeId)) return prev
+        const next = new Set(prev)
+        next.delete(typeId)
+        return next
+      })
     }
   }
 
@@ -325,7 +343,20 @@ export function AdminUserConfig() {
       })
 
       if (response.ok) {
-        setFields(fields.map((f) => (f.id === field.id ? field : f)))
+        const updatedField = await response.json()
+        const normalizedField: CustomField = {
+          id: String(updatedField.id),
+          name: updatedField.field_name,
+          type: updatedField.field_type,
+          required: updatedField.required,
+          placeholder: updatedField.placeholder,
+          options: updatedField.options,
+          user_type_id: updatedField.user_type_id,
+          encryption_enabled: updatedField.encryption_enabled ?? true,
+          include_in_chat: updatedField.include_in_chat ?? false,
+          display_order: updatedField.display_order ?? 0,
+        }
+        setFields(fields.map((f) => (f.id === field.id ? normalizedField : f)))
         setIsEditing(false)
         setEditingField(undefined)
       } else {
@@ -642,6 +673,7 @@ export function AdminUserConfig() {
             {userTypes.length > 0 && (
               <div className="space-y-2 mb-4">
                 {userTypes.map((userType) => (
+                  // Disable delete controls per type while request is in flight.
                   editingTypeId === userType.id ? (
                     <div
                       key={userType.id}
@@ -722,10 +754,20 @@ export function AdminUserConfig() {
                         </button>
                         <button
                           onClick={() => handleRemoveUserType(userType.id)}
-                          className="p-1 text-text-muted hover:text-error transition-colors"
+                          disabled={deletingTypeIds.has(userType.id)}
+                          className={`p-1 transition-colors ${
+                            deletingTypeIds.has(userType.id)
+                              ? 'text-text-muted/50 cursor-not-allowed'
+                              : 'text-text-muted hover:text-error'
+                          }`}
                           title={t('common.remove')}
+                          aria-busy={deletingTypeIds.has(userType.id)}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          {deletingTypeIds.has(userType.id) ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
                         </button>
                       </div>
                     </div>

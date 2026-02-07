@@ -403,7 +403,12 @@ export function AdminDatabaseExplorer() {
       await Promise.all(workers)
     }
 
-    runWithConcurrency(tasks, 3)
+    void runWithConcurrency(tasks, 3).catch((error) => {
+      console.error('runWithConcurrency failed:', error)
+      for (const item of tasks) {
+        setCellValue(item.rowIndex, item.colName, t('admin.database.encrypted'))
+      }
+    })
   }, [tableData, currentTableInfo, decryptNonce, nip07Available, t])
 
   // Run SQL query

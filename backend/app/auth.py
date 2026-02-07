@@ -622,10 +622,7 @@ async def require_admin_or_user(authorization: Optional[str] = Header(None)) -> 
     if admin_data:
         admin = database.get_admin_by_pubkey(admin_data["pubkey"])
         if admin:
-            admin_context = dict(admin)
-            admin_context["type"] = "admin"
-            admin_context["pubkey"] = admin_data["pubkey"]
-            return admin_context
+            return {"id": admin["id"], "type": "admin", "approved": True, "pubkey": admin_data["pubkey"]}
 
     # Try user token (approval not required)
     user_data = verify_session_token(token)

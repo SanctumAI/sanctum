@@ -276,7 +276,7 @@ def test_error_cases(api_base: str, admin_token: str, admin_pubkey: str, new_adm
 
     # Error case 4: Wrong action tag
     print("\n[TEST] Wrong action tag in signature event...")
-    wrong_action_event = create_signed_auth_event(old_admin_privkey, admin_pubkey, "wrong_action")
+    wrong_action_event = create_signed_auth_event(old_admin_privkey, admin_pubkey, "wrong_action", new_pubkey=new_admin_pubkey)
     wrong_action_request = {
         "new_admin_pubkey": new_admin_pubkey,
         "users": [],

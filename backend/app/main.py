@@ -1162,9 +1162,19 @@ async def get_public_config() -> PublicConfigResponse:
     Returns configuration flags that control testing features.
     No authentication required - these settings affect client-side behavior.
     """
+    simulate_user_auth = _get_simulation_setting("SIMULATE_USER_AUTH", "false")
+    simulate_admin_auth = _get_simulation_setting("SIMULATE_ADMIN_AUTH", "false")
+
+    # Defense-in-depth: never expose simulation flags as enabled in production.
+    if auth.is_production_mode():
+        if simulate_user_auth or simulate_admin_auth:
+            logger.warning("Simulation auth flags forced off in production mode")
+        simulate_user_auth = False
+        simulate_admin_auth = False
+
     return PublicConfigResponse(
-        simulate_user_auth=_get_simulation_setting("SIMULATE_USER_AUTH", "false"),
-        simulate_admin_auth=_get_simulation_setting("SIMULATE_ADMIN_AUTH", "false"),
+        simulate_user_auth=simulate_user_auth,
+        simulate_admin_auth=simulate_admin_auth,
     )
 
 

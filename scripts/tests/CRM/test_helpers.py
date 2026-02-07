@@ -11,6 +11,11 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent
 REPO_ROOT = SCRIPT_DIR.parent.parent.parent
+COMPOSE_ARGS = [
+    "docker", "compose",
+    "-f", "docker-compose.infra.yml",
+    "-f", "docker-compose.app.yml",
+]
 
 
 def run_docker_sql(
@@ -60,11 +65,11 @@ def run_docker_sql(
     if csv_mode:
         # CSV mode: pass .mode csv pragma via stdin
         sql_input = f".mode csv\n{sql_normalized}"
-        cmd = ["docker", "compose", "exec", "-T", "backend", "sqlite3", "-readonly", db_path]
+        cmd = [*COMPOSE_ARGS, "exec", "-T", "backend", "sqlite3", "-readonly", db_path]
     else:
         # JSON mode: use -json flag
         sql_input = sql_normalized
-        cmd = ["docker", "compose", "exec", "-T", "backend", "sqlite3", "-readonly", "-json", db_path]
+        cmd = [*COMPOSE_ARGS, "exec", "-T", "backend", "sqlite3", "-readonly", "-json", db_path]
 
     # Use list argv with stdin for SQL (no shell=True, no escaping needed)
     try:

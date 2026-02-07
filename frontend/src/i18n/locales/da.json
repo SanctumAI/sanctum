@@ -505,7 +505,7 @@
     "chunks": "{{processed}}/{{total}} dele",
     "deleteDocument": "Slet dokument",
     "confirmDelete": "Slet dette dokument?",
-    "confirmDeleteDesc": "Dette vil permanent fjerne dokumentet og alle dets stykker fra vidensbasen. Denne handling kan ikke fortrydes.",
+    "confirmDeleteDesc": "Dette vil permanent fjerne dokumentet og alle dets dele fra vidensbasen. Denne handling kan ikke fortrydes.",
     "deleting": "Sletter...",
     "deleteSuccess": "Dokument slettet",
     "deleteFailed": "Kunne ikke slette dokument"

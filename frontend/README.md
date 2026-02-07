@@ -47,7 +47,7 @@ Open http://localhost:5173 in your browser.
 
 ### Admin Flow (Nostr NIP-07)
 
-```
+```text
 /admin → Connect with Nostr → /admin/setup → /admin/instance | /admin/users | /admin/ai | /admin/deployment → /admin/upload or /admin/database
 ```
 

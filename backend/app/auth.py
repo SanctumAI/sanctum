@@ -19,6 +19,24 @@ from fastapi import Depends, HTTPException, Header
 logger = logging.getLogger("sanctum.auth")
 
 
+def is_production_mode() -> bool:
+    """
+    Determine whether backend should run in production-safe mode.
+
+    Production mode is enabled when one of these environment variables is set
+    to a production value:
+    - SANCTUM_ENV
+    - APP_ENV
+    - ENVIRONMENT
+    """
+    production_values = {"production", "prod"}
+    for key in ("SANCTUM_ENV", "APP_ENV", "ENVIRONMENT"):
+        value = os.getenv(key)
+        if value and value.strip().lower() in production_values:
+            return True
+    return False
+
+
 def _get_or_create_secret_key() -> str:
     """
     Get SECRET_KEY from environment, or generate and persist one.
@@ -319,10 +337,14 @@ def verify_session_token(token: str) -> Optional[dict]:
     Returns {"user_id": ..., "email": ...} if valid, None otherwise.
     """
     # Dev mode: accept mock token for frontend testing
-    if MOCK_EMAIL and token == "dev-mode-mock-token":
-        logger.debug("Accepting dev-mode-mock-token (MOCK_EMAIL=true)")
-        # Return a placeholder that get_current_user will handle
-        return {"user_id": -1, "email": "dev-mode", "dev_mode": True}
+    if token == "dev-mode-mock-token":
+        if MOCK_EMAIL and not is_production_mode():
+            logger.debug("Accepting dev-mode-mock-token (MOCK_EMAIL=true, non-production)")
+            # Return a placeholder that get_current_user will handle
+            return {"user_id": -1, "email": "dev-mode", "dev_mode": True}
+
+        logger.warning("Rejected dev-mode-mock-token (disabled in production or when MOCK_EMAIL=false)")
+        return None
 
     try:
         data = _session_serializer.loads(

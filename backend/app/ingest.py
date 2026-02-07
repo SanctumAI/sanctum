@@ -708,7 +708,7 @@ async def delete_document(job_id: str, admin: dict = Depends(auth.require_admin)
         raise HTTPException(
             status_code=500,
             detail=f"Failed to delete document chunks from vector database: {e}"
-        )
+        ) from e
 
     # 4. Delete uploaded file from filesystem
     file_path = Path(job.get("file_path", ""))
@@ -734,7 +734,7 @@ async def delete_document(job_id: str, admin: dict = Depends(auth.require_admin)
         raise HTTPException(
             status_code=500,
             detail=f"Failed to delete job from database: {e}"
-        )
+        ) from e
 
     # 6. Clear in-memory entries
     JOBS.pop(job_id, None)

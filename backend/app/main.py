@@ -707,7 +707,9 @@ def _compute_onboarding_flags(user: dict) -> tuple[bool, bool]:
     if not field_defs:
         return False, False
 
-    user_fields = set(user.get("fields", {}).keys()) | set(user.get("fields_encrypted", {}).keys())
+    fields = user.get("fields") or {}
+    fields_encrypted = user.get("fields_encrypted") or {}
+    user_fields = set(fields.keys()) | set(fields_encrypted.keys())
 
     # If there are fields configured but none stored, onboarding hasn't been completed yet
     if not user_fields:
@@ -718,9 +720,9 @@ def _compute_onboarding_flags(user: dict) -> tuple[bool, bool]:
         return False, False
 
     for field_name in required_fields:
-        if field_name in user.get("fields_encrypted", {}):
+        if field_name in fields_encrypted:
             continue
-        value = user.get("fields", {}).get(field_name)
+        value = fields.get(field_name)
         if value is None:
             return True, False
         if isinstance(value, str) and not value.strip():
@@ -1190,7 +1192,7 @@ async def get_session_defaults_public(
     """
     try:
         from ai_config import get_session_defaults
-        defaults = get_session_defaults()
+        defaults = get_session_defaults(user_type_id)
 
         # Get document defaults with user-type inheritance if applicable
         if user_type_id is not None:

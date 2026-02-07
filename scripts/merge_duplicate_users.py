@@ -120,7 +120,8 @@ def merge_user_rows(cur: sqlite3.Cursor, keep: sqlite3.Row, dup: sqlite3.Row, ap
 
     if is_missing(keep["encrypted_email"]) and not is_missing(dup["encrypted_email"]):
         updates["encrypted_email"] = dup["encrypted_email"]
-        updates["ephemeral_pubkey_email"] = dup["ephemeral_pubkey_email"]
+        if not is_missing(dup["ephemeral_pubkey_email"]):
+            updates["ephemeral_pubkey_email"] = dup["ephemeral_pubkey_email"]
         if is_missing(keep["email_blind_index"]) and not is_missing(dup["email_blind_index"]):
             updates["email_blind_index"] = dup["email_blind_index"]
 
@@ -134,7 +135,8 @@ def merge_user_rows(cur: sqlite3.Cursor, keep: sqlite3.Row, dup: sqlite3.Row, ap
 
     if is_missing(keep["encrypted_name"]) and not is_missing(dup["encrypted_name"]):
         updates["encrypted_name"] = dup["encrypted_name"]
-        updates["ephemeral_pubkey_name"] = dup["ephemeral_pubkey_name"]
+        if not is_missing(dup["ephemeral_pubkey_name"]):
+            updates["ephemeral_pubkey_name"] = dup["ephemeral_pubkey_name"]
 
     if is_missing(keep["encrypted_name"]) and is_missing(keep["name"]) and not is_missing(dup["name"]):
         updates["name"] = dup["name"]

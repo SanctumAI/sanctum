@@ -68,7 +68,7 @@ NIP-07 is a Nostr standard that allows websites to request your public key from 
 
 ### User Flow (Magic Link)
 
-```
+```text
 /login → Select language → /auth → Enter email → Check inbox → Click link → /verify → /user-type (if needed) → /profile (if needed) → /chat
 ```
 

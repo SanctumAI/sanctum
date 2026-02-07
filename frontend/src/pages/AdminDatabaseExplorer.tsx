@@ -175,7 +175,9 @@ export function AdminDatabaseExplorer() {
       a.download = filename
       document.body.appendChild(a)
       a.click()
-      window.URL.revokeObjectURL(url)
+      window.setTimeout(() => {
+        window.URL.revokeObjectURL(url)
+      }, 0)
       document.body.removeChild(a)
     } catch (error) {
       console.error('Database export failed:', error)

@@ -69,6 +69,7 @@ echo "=== Protected Endpoints (should return 401 without auth) ==="
 
 # Admin management
 test_endpoint "GET" "/admin/list" "401"
+test_endpoint "GET" "/admin/session" "401"
 test_endpoint "DELETE" "/admin/testpubkey" "401"
 
 # Instance settings

@@ -1064,6 +1064,12 @@ async def remove_admin(pubkey: str, admin: dict = Depends(auth.require_admin)):
     raise HTTPException(status_code=404, detail="Admin not found")
 
 
+@app.get("/admin/session", response_model=SuccessResponse)
+async def validate_admin_session(admin: dict = Depends(auth.require_admin)):
+    """Validate the current admin session token."""
+    return SuccessResponse(success=True, message="Admin session is valid")
+
+
 # --- Instance Settings ---
 
 # Settings safe to expose publicly (branding only)
@@ -1715,7 +1721,7 @@ async def get_db_table_data(
         raise HTTPException(
             status_code=500,
             detail=f"Database error reading table '{table_name}': {error}"
-        )
+        ) from error
 
     return TableDataResponse(
         table=table_name,

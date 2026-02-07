@@ -5,6 +5,8 @@
 
 import { STORAGE_KEYS, API_BASE } from '../types/onboarding'
 
+export type AdminSessionValidationState = 'authenticated' | 'unauthenticated' | 'unavailable'
+
 /**
  * Make an authenticated admin API request.
  * Automatically adds Authorization header with admin session token.
@@ -60,4 +62,40 @@ export function isAdminAuthenticated(): boolean {
 export function clearAdminAuth(): void {
   localStorage.removeItem(STORAGE_KEYS.ADMIN_PUBKEY)
   localStorage.removeItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN)
+}
+
+/**
+ * Validate admin session token against the backend.
+ * Returns:
+ * - authenticated: token accepted by backend
+ * - unauthenticated: token missing/expired/invalid (401)
+ * - unavailable: backend error/unreachable (5xx/network)
+ */
+export async function validateAdminSession(): Promise<AdminSessionValidationState> {
+  const token = localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN)
+
+  if (!token) {
+    return 'unauthenticated'
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/admin/session`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (response.status === 401) {
+      clearAdminAuth()
+      return 'unauthenticated'
+    }
+
+    if (response.ok) {
+      return 'authenticated'
+    }
+
+    return 'unavailable'
+  } catch {
+    return 'unavailable'
+  }
 }

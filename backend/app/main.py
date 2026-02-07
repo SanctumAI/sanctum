@@ -1466,8 +1466,25 @@ async def list_users(admin: dict = Depends(auth.require_admin)):
     return UserListResponse(users=[UserResponse(**u) for u in users])
 
 
+def _is_admin_actor(actor: dict) -> bool:
+    """Return True when auth context represents an admin."""
+    return actor.get("type") == "admin"
+
+
+def _require_self_or_admin(target_user_id: int, actor: dict) -> None:
+    """Allow access for admins or the user who owns target_user_id."""
+    if _is_admin_actor(actor):
+        return
+
+    if actor.get("id") != target_user_id:
+        raise HTTPException(status_code=403, detail="Forbidden: cannot access another user")
+
+
 @app.post("/users", response_model=UserResponse)
-async def create_user(user: UserCreate):
+async def create_user(
+    user: UserCreate,
+    requester: dict = Depends(auth.require_admin_or_user)
+):
     """Create/onboard a new user.
 
     Args:
@@ -1477,7 +1494,8 @@ async def create_user(user: UserCreate):
         user_type_id: Optional ID of the user type they selected during onboarding
         fields: Dynamic fields defined by admin for the user type
 
-    Requires admin to be configured first (for encryption to work properly).
+    Requires authenticated user/admin context and admin to be configured first
+    (for encryption to work properly).
     """
     # Check if admin is configured (required for data encryption)
     admins = database.list_admins()
@@ -1507,6 +1525,22 @@ async def create_user(user: UserCreate):
         existing_user = database.get_user_by_pubkey(pubkey)
     if not existing_user and user.email:
         existing_user = database.get_user_by_email(user.email)
+
+    # Non-admin callers may only operate on their own user record.
+    # This blocks anonymous/third-party profile mutation by email/pubkey collision.
+    if not _is_admin_actor(requester):
+        requester_id = requester.get("id")
+        if requester_id is None:
+            raise HTTPException(status_code=401, detail="Invalid user session")
+
+        session_user = database.get_user(requester_id) if requester_id != -1 else None
+        if existing_user:
+            if existing_user["id"] != requester_id:
+                raise HTTPException(status_code=403, detail="Forbidden: cannot modify another user")
+        elif session_user:
+            existing_user = session_user
+        elif not requester.get("dev_mode"):
+            raise HTTPException(status_code=401, detail="User session is not linked to an account")
 
     # Resolve effective user_type_id (use existing if not provided)
     effective_user_type_id = user.user_type_id
@@ -1581,8 +1615,12 @@ async def create_user(user: UserCreate):
 
 
 @app.get("/users/{user_id}", response_model=UserResponse)
-async def get_user(user_id: int):
-    """Get a user by ID"""
+async def get_user(
+    user_id: int,
+    requester: dict = Depends(auth.require_admin_or_user)
+):
+    """Get a user by ID (self or admin)."""
+    _require_self_or_admin(user_id, requester)
     user = database.get_user(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -1590,8 +1628,13 @@ async def get_user(user_id: int):
 
 
 @app.put("/users/{user_id}", response_model=UserResponse)
-async def update_user(user_id: int, user: UserUpdate):
-    """Update a user's fields"""
+async def update_user(
+    user_id: int,
+    user: UserUpdate,
+    requester: dict = Depends(auth.require_admin_or_user)
+):
+    """Update a user's fields (self or admin)."""
+    _require_self_or_admin(user_id, requester)
     existing = database.get_user(user_id)
     if not existing:
         raise HTTPException(status_code=404, detail="User not found")
@@ -1612,8 +1655,12 @@ async def update_user(user_id: int, user: UserUpdate):
 
 
 @app.delete("/users/{user_id}", response_model=SuccessResponse)
-async def delete_user(user_id: int):
-    """Delete a user"""
+async def delete_user(
+    user_id: int,
+    requester: dict = Depends(auth.require_admin_or_user)
+):
+    """Delete a user (self or admin)."""
+    _require_self_or_admin(user_id, requester)
     if database.delete_user(user_id):
         return SuccessResponse(success=True, message="User deleted")
     raise HTTPException(status_code=404, detail="User not found")

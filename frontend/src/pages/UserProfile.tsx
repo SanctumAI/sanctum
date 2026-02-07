@@ -166,9 +166,13 @@ export function UserProfile() {
       saveUserProfile(profile)
 
       // Also save to backend
-      await fetch(`${API_BASE}/users`, {
+      const sessionToken = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
+      const response = await fetch(`${API_BASE}/users`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {}),
+        },
         body: JSON.stringify({
           email: localStorage.getItem(STORAGE_KEYS.USER_EMAIL) || undefined,
           name: localStorage.getItem(STORAGE_KEYS.USER_NAME) || undefined,
@@ -176,6 +180,10 @@ export function UserProfile() {
           fields: values,
         }),
       })
+
+      if (!response.ok) {
+        throw new Error(`Failed to save profile: ${response.status}`)
+      }
 
       // Navigate to chat
       navigate('/chat')

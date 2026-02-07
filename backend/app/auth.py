@@ -599,3 +599,52 @@ async def require_admin_or_approved_user(authorization: Optional[str] = Header(N
             return user
 
     raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+
+async def require_admin_or_user(authorization: Optional[str] = Header(None)) -> dict:
+    """
+    FastAPI dependency that accepts EITHER:
+    - A valid admin session token, OR
+    - A valid user session token (approved or unapproved)
+
+    Use this on endpoints where authenticated users should be able to access
+    their own data before approval, while admins retain full access.
+    """
+    import database
+
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+
+    token = authorization[7:]
+
+    # Try admin token first
+    admin_data = verify_admin_session_token(token)
+    if admin_data:
+        admin = database.get_admin_by_pubkey(admin_data["pubkey"])
+        if admin:
+            admin_context = dict(admin)
+            admin_context["type"] = "admin"
+            admin_context["pubkey"] = admin_data["pubkey"]
+            return admin_context
+
+    # Try user token (approval not required)
+    user_data = verify_session_token(token)
+    if user_data:
+        # Dev mode: return mock user
+        if user_data.get("dev_mode"):
+            logger.debug("Returning dev mode mock user for admin_or_user")
+            return {
+                "id": -1,
+                "email": "dev@localhost",
+                "name": "Dev User",
+                "approved": True,
+                "type": "user",
+                "dev_mode": True
+            }
+
+        user = database.get_user(user_data["user_id"])
+        if user:
+            user["type"] = "user"
+            return user
+
+    raise HTTPException(status_code=401, detail="Invalid or expired token")

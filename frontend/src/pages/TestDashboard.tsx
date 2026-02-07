@@ -827,9 +827,14 @@ export function TestDashboard() {
         return
       }
 
+      const userToken = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
+      const authToken = adminToken || userToken
       const res = await fetch(`${API_BASE}/users`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+        },
         body: JSON.stringify({
           pubkey: normalizedPubkey,
           email: testEmail || undefined,
@@ -1180,7 +1185,13 @@ export function TestDashboard() {
     setLookupLoading(true)
     setSingleUser(null)
     try {
-      const res = await fetch(`${API_BASE}/users/${lookupUserId.trim()}`)
+      const userToken = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
+      const authToken = adminToken || userToken
+      const res = await fetch(`${API_BASE}/users/${lookupUserId.trim()}`, {
+        headers: {
+          ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+        },
+      })
       if (res.ok) {
         const data = await res.json()
         const raw = (data.user ?? data) as UserWithEncryption
@@ -1200,9 +1211,14 @@ export function TestDashboard() {
     setUpdateUserLoading(true)
     setUpdateUserResult(null)
     try {
+      const userToken = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
+      const authToken = adminToken || userToken
       const res = await fetch(`${API_BASE}/users/${userId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+        },
         body: JSON.stringify({ approved })
       })
       setUpdateUserResult(await res.json())
@@ -1221,7 +1237,14 @@ export function TestDashboard() {
   const deleteUser = async (userId: number) => {
     setDeleteUserLoading(true)
     try {
-      await fetch(`${API_BASE}/users/${userId}`, { method: 'DELETE' })
+      const userToken = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
+      const authToken = adminToken || userToken
+      await fetch(`${API_BASE}/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+        },
+      })
       fetchAllUsers()
       if (singleUser?.id === userId) {
         setSingleUser(null)

@@ -801,10 +801,7 @@ export function AdminDatabaseExplorer() {
                     setShowDecryptHelp((current) => !current)
                   }}
                   className="btn-ghost p-1.5 rounded-lg transition-all text-text-muted hover:text-accent"
-                  aria-label={t(
-                    'admin.database.decryptHelp',
-                    'Decryption happens automatically in the background. If your NIP-07 extension did not prompt, click “Unlock decryption” to trigger it. Only admins with the private key in their NIP-07 extension can decrypt encrypted fields.'
-                  )}
+                  aria-label="Decryption help"
                   aria-expanded={showDecryptHelp}
                   aria-controls="db-decrypt-help-popover"
                   aria-describedby={showDecryptHelp ? 'db-decrypt-help-popover' : undefined}

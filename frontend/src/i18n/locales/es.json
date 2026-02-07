@@ -312,21 +312,21 @@
       "placeholderHint": "Texto de ayuda mostrado en el campo",
       "requiredField": "Campo obligatorio",
       "dataSecurityTitle": "Seguridad de datos",
-      "dataSecurityIntro": "Elija cómo se almacenan los datos de este campo. Esto afecta tanto la seguridad como las capacidades de personalización de IA.",
+      "dataSecurityIntro": "Elige cómo se almacenan los datos de este campo. Esto afecta tanto la seguridad como las capacidades de personalización de IA.",
       "encryptEnabled": "Cifrar valores del campo",
       "encryptDisabled": "Almacenar como texto plano",
       "encryptedHint": "Los valores del campo se cifrarán con NIP-04 (recomendado)",
       "plaintextHint": "Los valores del campo se almacenarán como texto plano (no recomendado para datos sensibles)",
-      "encryptedSummary": "Este campo está cifrado. Solo usted puede ver los datos cuando inicia sesión.",
+      "encryptedSummary": "Este campo está cifrado. Solo tú puedes ver los datos cuando inicias sesión.",
       "encryptedNoAI": "La personalización de IA no está disponible para campos cifrados.",
       "securityWarning": "Advertencia de seguridad",
-      "securityWarningBody": "Desactivar el cifrado almacenará los datos del usuario como texto plano. Solo desactive para campos no sensibles como preferencias o información pública.",
-      "plaintextAIOption": "Dado que este campo no está cifrado, puede compartirlo opcionalmente con el asistente de IA:",
+      "securityWarningBody": "Desactivar el cifrado almacenará los datos del usuario como texto plano. Solo desactiva para campos no sensibles como preferencias o información pública.",
+      "plaintextAIOption": "Dado que este campo no está cifrado, puedes compartirlo opcionalmente con el asistente de IA:",
       "includeInChat": "Incluir en contexto de chat de IA",
-      "includeInChatHint": "Comparta el valor de este campo con el asistente de IA para personalizar respuestas",
+      "includeInChatHint": "Comparte el valor de este campo con el asistente de IA para personalizar respuestas",
       "aiPersonalization": "Personalización de IA",
       "aiPersonalizationBody": "El asistente de IA verá el valor de este campo para proporcionar respuestas más relevantes y personalizadas a los usuarios.",
-      "encryptionHelpAria": "Aprenda sobre el cifrado de campos",
+      "encryptionHelpAria": "Aprende sobre el cifrado de campos",
       "encryptionHelpTitle": "Acerca del cifrado de campos",
       "encryptionHelpDesc": "El cifrado protege los datos sensibles del usuario codificándolos antes del almacenamiento.",
       "encryptionHelpWhenEnabled": "Cuando el cifrado está habilitado:",
@@ -338,7 +338,7 @@
       "encryptionHelpDisabledPoint1": "Los datos se almacenan como texto plano legible",
       "encryptionHelpDisabledPoint2": "Cualquier persona con acceso a la base de datos puede leerlos",
       "encryptionHelpDisabledPoint3": "Se puede compartir con IA para personalización",
-      "encryptionHelpRecommendation": "Recomendación: Mantenga el cifrado habilitado para cualquier información de identificación personal (nombres, correos electrónicos, números de teléfono, direcciones).",
+      "encryptionHelpRecommendation": "Recomendación: Mantén el cifrado habilitado para cualquier información de identificación personal (nombres, correos electrónicos, números de teléfono, direcciones).",
       "encryptedBadge": "Cifrado",
       "plaintextBadge": "Texto plano",
       "inChatBadge": "En chat"
@@ -536,7 +536,7 @@
       "label": "Estilo de Respuesta",
       "description": "Cómo la IA estructura sus respuestas",
       "hint": "Controla preferencias de formato como si usar viñetas, encabezados o párrafos conversacionales. Esto afecta cómo se presentan visualmente las respuestas.",
-      "placeholder": "Use viñetas para listas, encabezados para secciones..."
+      "placeholder": "Usa viñetas para listas, encabezados para secciones..."
     }
   },
   "parameters": {
@@ -606,12 +606,12 @@
     "LLM_PROVIDER": {
       "label": "Servicio de IA",
       "description": "Proveedor de LLM (maple, ollama)",
-      "hint": "Elija \"maple\" para el proxy Maple (recomendado para privacidad) o \"ollama\" para modelos locales."
+      "hint": "Elige \"maple\" para el proxy Maple (recomendado para privacidad) o \"ollama\" para modelos locales."
     },
     "LLM_MODEL": {
       "label": "Nombre del modelo",
       "description": "Nombre/identificador del modelo",
-      "hint": "El identificador del modelo a usar (ej: \"kimi-k2-thinking\"). Consulte la documentación de su proveedor para modelos disponibles."
+      "hint": "El identificador del modelo a usar (ej: \"kimi-k2-thinking\"). Consulta la documentación de tu proveedor para modelos disponibles."
     },
     "LLM_API_URL": {
       "label": "Endpoint de API",
@@ -631,32 +631,32 @@
     "EMBEDDING_MODEL": {
       "label": "Modelo de embedding",
       "description": "Modelo de HuggingFace para embeddings",
-      "hint": "El modelo de HuggingFace para convertir texto en vectores. Solo cambie si necesita un idioma o dominio diferente."
+      "hint": "El modelo de HuggingFace para convertir texto en vectores. Solo cambia si necesitas un idioma o dominio diferente."
     },
     "SMTP_HOST": {
       "label": "Servidor de correo",
       "description": "Dirección del servidor SMTP",
-      "hint": "Su dirección del servidor SMTP (ej: smtp.gmail.com, smtp.sendgrid.net)."
+      "hint": "Tu dirección del servidor SMTP (ej: smtp.gmail.com, smtp.sendgrid.net)."
     },
     "SMTP_PORT": {
       "label": "Puerto de correo",
       "description": "Puerto del servidor SMTP",
-      "hint": "Normalmente 587 para TLS o 465 para SSL. Verifique la configuración de su proveedor de correo."
+      "hint": "Normalmente 587 para TLS o 465 para SSL. Verifica la configuración de tu proveedor de correo."
     },
     "SMTP_USER": {
       "label": "Usuario SMTP",
       "description": "Nombre de usuario del servicio de correo",
-      "hint": "Su nombre de usuario del servicio de correo o clave API."
+      "hint": "Tu nombre de usuario del servicio de correo o clave API."
     },
     "SMTP_PASS": {
       "label": "Contraseña SMTP",
       "description": "Contraseña del servicio de correo",
-      "hint": "Su contraseña del servicio de correo o secreto de clave API."
+      "hint": "Tu contraseña del servicio de correo o secreto de clave API."
     },
     "SMTP_FROM": {
       "label": "Dirección del remitente",
       "description": "Dirección de envío para correos",
-      "hint": "La dirección \"de\" para correos salientes (ej: noreply@sudominio.com)."
+      "hint": "La dirección \"de\" para correos salientes (ej: noreply@tudominio.com)."
     },
     "MOCK_SMTP": {
       "label": "Modo de prueba",
@@ -686,7 +686,7 @@
     "SEARXNG_URL": {
       "label": "URL del motor de búsqueda",
       "description": "URL de instancia SearXNG",
-      "hint": "URL de su instancia SearXNG para funcionalidad de búsqueda web."
+      "hint": "URL de tu instancia SearXNG para funcionalidad de búsqueda web."
     },
     "FRONTEND_URL": {
       "label": "URL de la aplicación",

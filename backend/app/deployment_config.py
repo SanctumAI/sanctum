@@ -89,7 +89,7 @@ ENV_CONFIG_MAP = {
     "SSL_KEY_PATH": {"category": "ssl", "description": "SSL private key file path", "requires_restart": True, "is_secret": True},
     "FORCE_HTTPS": {"category": "ssl", "description": "Redirect HTTP to HTTPS", "requires_restart": True, "default": "false"},
     "HSTS_MAX_AGE": {"category": "ssl", "description": "HSTS max-age in seconds", "requires_restart": False, "default": "31536000"},
-    "MONITORING_URL": {"category": "ssl", "description": "Health monitoring endpoint URL", "requires_restart": False, "default": "http://localhost:8000/health"},
+    "MONITORING_URL": {"category": "general", "description": "Health monitoring endpoint URL", "requires_restart": False, "default": "http://localhost:8000/health"},
 }
 
 # Keys that should never be exposed or editable
@@ -154,16 +154,26 @@ def _sync_env_to_db() -> None:
         if existing:
             # Backfill empty values with defaults/env values
             existing_value = existing.get("value")
-            if (existing_value is None or existing_value == "") and value not in (None, ""):
+            should_backfill_value = (existing_value is None or existing_value == "") and value not in (None, "")
+            # Keep metadata in sync for known one-off category corrections.
+            should_sync_metadata = (
+                key == "MONITORING_URL" and existing.get("category") != meta["category"]
+            )
+
+            if should_backfill_value or should_sync_metadata:
+                value_to_store = existing_value if existing_value not in (None, "") else value
                 database.upsert_deployment_config(
                     key=key,
-                    value=value,
+                    value=value_to_store,
                     is_secret=meta.get("is_secret", False),
                     requires_restart=meta.get("requires_restart", False),
                     category=meta["category"],
                     description=meta.get("description", ""),
                 )
-                logger.debug(f"Backfilled empty config: {key} (value: {'***' if meta.get('is_secret') else value})")
+                if should_backfill_value:
+                    logger.debug(f"Backfilled empty config: {key} (value: {'***' if meta.get('is_secret') else value_to_store})")
+                elif should_sync_metadata:
+                    logger.debug(f"Synchronized config metadata: {key} (category -> {meta['category']})")
             continue
 
         database.upsert_deployment_config(

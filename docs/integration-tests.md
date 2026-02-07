@@ -182,7 +182,7 @@ python run_all_be_tests.py --verbose
 # Run all CRM tests (1x)
 python run_all_be_tests.py --pattern "test_1*"
 
-# Run all AUTH tests (3x)
+# Run all AUTH tests (2x)
 python run_all_be_tests.py --pattern "test_3*"
 
 # Run specific test (2A)

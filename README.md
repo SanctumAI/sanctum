@@ -30,8 +30,8 @@ This separation lets you keep infrastructure running while rebuilding just the a
 # First time or full restart: start everything
 docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build -d
 
-# Rebuild only app (keeps Qdrant/SearXNG running)
-docker compose -f docker-compose.app.yml up --build -d
+# Rebuild only app (keeps infra services running: qdrant, maple-proxy, searxng)
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml up --build -d backend frontend
 ```
 
 First startup will:

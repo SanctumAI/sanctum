@@ -1196,7 +1196,7 @@ export function AdminDeploymentConfig() {
                       setOpenHelpItemKey((current) => (current === item.key ? null : item.key))
                     }}
                     className="text-text-muted hover:text-accent transition-colors"
-                    aria-label={helpText}
+                    aria-label={`Open help for ${label}`}
                     aria-expanded={openHelpItemKey === item.key}
                     aria-controls={`help-item-popover-${item.key}`}
                     aria-describedby={openHelpItemKey === item.key ? `help-item-popover-${item.key}` : undefined}

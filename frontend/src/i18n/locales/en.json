@@ -872,7 +872,7 @@
     "SPF_INCLUDE": {
       "label": "SPF Include",
       "description": "SPF DNS include directive",
-      "hint": "Replace with your provider include value (e.g., include:sendgrid.net). Default: include:_spf.google.com."
+      "hint": "Replace with your provider include value (e.g., include:sendgrid.net, include:_spf.google.com)."
     },
     "DMARC_POLICY": {
       "label": "DMARC Policy",

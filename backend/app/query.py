@@ -149,7 +149,12 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
                 logger.debug(f"Admin filtering search to {len(request.job_ids)} documents")
         else:
             # Non-admin users: always filter to their allowed documents
-            available_job_ids = set(database.get_available_documents_for_user_type(user_type_id))
+            if user_type_id is None:
+                # No user type means no document access for non-admin users.
+                # Avoid querying availability with None to prevent global access.
+                available_job_ids: set[str] = set()
+            else:
+                available_job_ids = set(database.get_available_documents_for_user_type(user_type_id))
 
             if request.job_ids and len(request.job_ids) > 0:
                 # User requested specific documents - intersect with allowed

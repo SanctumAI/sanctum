@@ -153,11 +153,11 @@
       "encryptDisabled": "以純文字儲存",
       "encryptedHint": "欄位值將使用 NIP-04 加密（建議）",
       "plaintextHint": "欄位值將以純文字儲存（不建議用於敏感資料）",
-      "encryptedSummary": "此欄位已加密。只有您登入後才能檢視資料。",
+      "encryptedSummary": "此欄位已加密。只有你登入後才能檢視資料。",
       "encryptedNoAI": "加密欄位無法使用 AI 個人化功能。",
       "securityWarning": "安全警告",
       "securityWarningBody": "停用加密會將使用者資料以純文字儲存。僅對偏好設定或公開資訊等非敏感欄位停用。",
-      "plaintextAIOption": "由於此欄位未加密，您可以選擇與 AI 助手分享：",
+      "plaintextAIOption": "由於此欄位未加密，你可以選擇與 AI 助手分享：",
       "includeInChat": "包含在 AI 聊天上下文中",
       "includeInChatHint": "與 AI 助手分享此欄位的值以個人化回應",
       "aiPersonalization": "AI 個人化",
@@ -636,22 +636,22 @@
     "SMTP_HOST": {
       "label": "郵件伺服器",
       "description": "SMTP 伺服器位址",
-      "hint": "您的 SMTP 伺服器位址（例如 smtp.gmail.com、smtp.sendgrid.net）。"
+      "hint": "你的 SMTP 伺服器位址（例如 smtp.gmail.com、smtp.sendgrid.net）。"
     },
     "SMTP_PORT": {
       "label": "郵件連接埠",
       "description": "SMTP 伺服器連接埠",
-      "hint": "通常 TLS 使用 587，SSL 使用 465。請檢查您的郵件提供者設定。"
+      "hint": "通常 TLS 使用 587，SSL 使用 465。請檢查你的郵件提供者設定。"
     },
     "SMTP_USER": {
       "label": "SMTP 使用者名稱",
       "description": "郵件服務使用者名稱",
-      "hint": "您的郵件服務使用者名稱或 API 金鑰。"
+      "hint": "你的郵件服務使用者名稱或 API 金鑰。"
     },
     "SMTP_PASS": {
       "label": "SMTP 密碼",
       "description": "郵件服務密碼",
-      "hint": "您的郵件服務密碼或 API 金鑰密文。"
+      "hint": "你的郵件服務密碼或 API 金鑰密文。"
     },
     "SMTP_FROM": {
       "label": "寄件人地址",

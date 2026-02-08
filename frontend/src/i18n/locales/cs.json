@@ -341,7 +341,7 @@
       "inChatBadge": "V chatu",
       "complianceAcknowledgeLabel": "Potvrzuji, že toto pole může být uloženo jako prostý text a/nebo sdíleno s AI v souladu s našimi platnými právními požadavky.",
       "complianceAcknowledgeHint": "Povolte toto až po aktualizaci uživatelských upozornění, toků souhlasu (pokud jsou vyžadovány) a interních pravidel pro nakládání s daty.",
-      "complianceAcknowledgeRequired": "Před uložením konfigurace tohoto pole musíte potvrdit právní odpovědnost/odpovědnost za shodu."
+      "complianceAcknowledgeRequired": "Před uložením konfigurace tohoto pole musíte potvrdit právní a regulační odpovědnost."
     },
     "fieldTypes": {
       "text": "Text",

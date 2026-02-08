@@ -251,6 +251,27 @@ def test_secret_encrypted_at_rest(api_base: str, headers: dict[str, str], db_pat
     print("\n[TEST 3D.1] Secret-at-rest encryption")
     secret_key = "SMTP_PASS"
     test_secret = f"phase3-secret-{uuid.uuid4().hex}"
+    original_secret = ""
+
+    try:
+        original_response = requests.get(
+            f"{api_base}/admin/deployment/config/{secret_key}/reveal",
+            headers=headers,
+            timeout=20,
+        )
+    except requests.exceptions.RequestException as e:
+        print(f"  [FAIL] Read original secret request failed: {e}")
+        return False
+
+    if original_response.status_code != 200:
+        print(f"  [FAIL] Read original secret failed: {original_response.status_code} {original_response.text}")
+        return False
+
+    try:
+        original_secret = str(original_response.json().get("value", ""))
+    except (ValueError, Exception):
+        print(f"  [FAIL] Could not parse original secret response: {original_response.text}")
+        return False
 
     try:
         update_response = requests.put(
@@ -259,57 +280,64 @@ def test_secret_encrypted_at_rest(api_base: str, headers: dict[str, str], db_pat
             json={"value": test_secret},
             timeout=20,
         )
-    except requests.exceptions.RequestException as e:
-        print(f"  [FAIL] Update secret request failed: {e}")
-        return False
 
-    if update_response.status_code != 200:
-        print(f"  [FAIL] Secret update failed: {update_response.status_code} {update_response.text}")
-        return False
+        if update_response.status_code != 200:
+            print(f"  [FAIL] Secret update failed: {update_response.status_code} {update_response.text}")
+            return False
 
-    try:
-        reveal_response = requests.get(
-            f"{api_base}/admin/deployment/config/{secret_key}/reveal",
-            headers=headers,
-            timeout=20,
-        )
-    except requests.exceptions.RequestException as e:
-        print(f"  [FAIL] Reveal secret request failed: {e}")
-        return False
+        try:
+            reveal_response = requests.get(
+                f"{api_base}/admin/deployment/config/{secret_key}/reveal",
+                headers=headers,
+                timeout=20,
+            )
+        except requests.exceptions.RequestException as e:
+            print(f"  [FAIL] Reveal secret request failed: {e}")
+            return False
 
-    if reveal_response.status_code != 200:
-        print(f"  [FAIL] Secret reveal failed: {reveal_response.status_code} {reveal_response.text}")
-        return False
+        if reveal_response.status_code != 200:
+            print(f"  [FAIL] Secret reveal failed: {reveal_response.status_code} {reveal_response.text}")
+            return False
 
-    try:
-        revealed = reveal_response.json().get("value")
-    except (ValueError, Exception):
-        print(f"  [FAIL] Could not parse reveal response: {reveal_response.text}")
-        return False
-    if revealed != test_secret:
-        print("  [FAIL] Revealed secret does not match updated value")
-        return False
+        try:
+            revealed = reveal_response.json().get("value")
+        except (ValueError, Exception):
+            print(f"  [FAIL] Could not parse reveal response: {reveal_response.text}")
+            return False
+        if revealed != test_secret:
+            print("  [FAIL] Revealed secret does not match updated value")
+            return False
 
-    try:
-        raw_db_value = get_raw_config_value_from_db(secret_key, db_path)
-    except Exception as e:
-        print(f"  [FAIL] Could not read raw secret value from SQLite: {e}")
-        return False
+        try:
+            raw_db_value = get_raw_config_value_from_db(secret_key, db_path)
+        except Exception as e:
+            print(f"  [FAIL] Could not read raw secret value from SQLite: {e}")
+            return False
 
-    if not raw_db_value:
-        print("  [FAIL] Raw deployment_config value not found")
-        return False
+        if not raw_db_value:
+            print("  [FAIL] Raw deployment_config value not found")
+            return False
 
-    if not raw_db_value.startswith(SECRET_PREFIX):
-        print("  [FAIL] Raw value is not encrypted with expected prefix")
-        return False
+        if not raw_db_value.startswith(SECRET_PREFIX):
+            print("  [FAIL] Raw value is not encrypted with expected prefix")
+            return False
 
-    if test_secret in raw_db_value:
-        print("  [FAIL] Plaintext secret leaked in raw SQLite value")
-        return False
+        if test_secret in raw_db_value:
+            print("  [FAIL] Plaintext secret leaked in raw SQLite value")
+            return False
 
-    print("  [OK] Secret is encrypted at rest and reveal endpoint decrypts correctly")
-    return True
+        print("  [OK] Secret is encrypted at rest and reveal endpoint decrypts correctly")
+        return True
+    finally:
+        try:
+            requests.put(
+                f"{api_base}/admin/deployment/config/{secret_key}",
+                headers=headers,
+                json={"value": original_secret},
+                timeout=20,
+            )
+        except Exception:
+            pass
 
 
 def test_audit_chain_with_interleaved_tables(api_base: str, headers: dict[str, str]) -> bool:

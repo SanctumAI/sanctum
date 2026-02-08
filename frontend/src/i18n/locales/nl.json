@@ -36,7 +36,7 @@
     "signOut": "Uitloggen",
     "adminTools": "Beheertools",
     "admin": {
-      "instanceConfig": "Instance-configuratie",
+      "instanceConfig": "Instantie-configuratie",
       "instanceConfigDesc": "Branding, gebruikerstypen, velden",
       "testDashboard": "Testdashboard",
       "testDashboardDesc": "API-tests, debugging tools",
@@ -62,11 +62,11 @@
     "global": "Globaal",
     "setup": {
       "backToChat": "Terug naar chat",
-      "title": "Configureer je instance",
+      "title": "Configureer je instantie",
       "subtitle": "Pas de branding en gebruikerservaring aan",
-      "instanceSectionTitle": "Instance-configuratie",
-      "instanceSectionDesc": "Stel de naam, het pictogram en de kleuren in die overal in je instance worden weergegeven.",
-      "branding": "Instance branding",
+      "instanceSectionTitle": "Instantie-configuratie",
+      "instanceSectionDesc": "Stel de naam, het pictogram en de kleuren in die overal in je instantie worden weergegeven.",
+      "branding": "Instantie-branding",
       "displayName": "Weergavenaam",
       "defaultName": "Sanctum",
       "displayNameHint": "Deze naam verschijnt in de header en onboarding-schermen",
@@ -92,13 +92,13 @@
       "knowledgeBaseHint": "Upload documenten om je RAG-kennisbank voor AI-gestuurde antwoorden op te bouwen.",
       "uploadDocuments": "Documenten uploaden",
       "database": "Database",
-      "databaseHint": "Bekijk en beheer je instance-gegevens direct in de SQLite-database.",
+      "databaseHint": "Bekijk en beheer de gegevens van je instantie direct in de SQLite-database.",
       "openDatabase": "Database-verkenner openen",
       "save": "Configuratie opslaan"
     },
     "instanceConfig": {
-      "title": "Instance-configuratie",
-      "subtitle": "Beheer branding, chatstijl en thema-instellingen voor je instance.",
+      "title": "Instantie-configuratie",
+      "subtitle": "Beheer branding, chatstijl en thema-instellingen voor je instantie.",
       "chatIconsTitle": "Chatpictogrammen",
       "chatIconsDesc": "Stel de standaardpictogrammen in voor chatberichten.",
       "assistantIconLabel": "AI-assistentpictogram",
@@ -115,7 +115,7 @@
       "appleTouchIconPlaceholder": "https://voorbeeld.com/apple-touch-icon.png",
       "appleTouchIconHint": "Gebruikt bij toevoegen aan het iOS-beginscherm (aanbevolen 180x180).",
       "headerTitle": "Header-branding",
-      "headerDesc": "Bepaal hoe je instance verschijnt in de bovenste header.",
+      "headerDesc": "Bepaal hoe je instantie verschijnt in de bovenste header.",
       "headerLayoutLabel": "Header-indeling",
       "headerLayoutIconName": "Pictogram + Naam",
       "headerLayoutIconNameDesc": "Toon zowel het pictogram als de instancenaam.",
@@ -145,7 +145,7 @@
       "bubbleStylePillDesc": "Volledige pilvorm voor een opvallende uitstraling.",
       "bubbleShadowLabel": "Subtiele ballonschaduw toevoegen",
       "surfaceTitle": "Achtergrondstijl",
-      "surfaceDesc": "Kies de achtergrondtextuur voor je instance.",
+      "surfaceDesc": "Kies de achtergrondtextuur voor je instantie.",
       "surfacePlain": "Effen",
       "surfacePlainDesc": "Schone en minimale achtergrond.",
       "surfaceGradient": "Zacht verloop",
@@ -314,7 +314,7 @@
     "notAdmin": "Geen beheerder?",
     "signInAsUser": "Inloggen als gebruiker",
     "title": "Beheerderconfiguratie",
-    "subtitle": "Verbind met je Nostr-identiteit om deze instance te beheren",
+    "subtitle": "Verbind met je Nostr-identiteit om deze instantie te beheren",
     "connectNostr": "Verbinden met Nostr",
     "orForTesting": "of voor testen",
     "continueMock": "Doorgaan met mock-identiteit",
@@ -368,8 +368,8 @@
       "noResults": "Geen talen gevonden voor \"{{query}}\"",
       "continue": "Doorgaan",
       "changeInSettings": "Je kunt dit later wijzigen in je instellingen.",
-      "dataHandlingNoticeTitle": "Gegevensverwerking wordt per instance geconfigureerd",
-      "dataHandlingNoticeBody": "Sanctum ondersteunt wachtwoordloze aanmelding en versleuteling-compatibele profielinstellingen. De uiteindelijke gegevensverwerking, bewaring en AI-deelgedrag worden geconfigureerd door de beheerder van deze instance."
+      "dataHandlingNoticeTitle": "Gegevensverwerking wordt per instantie geconfigureerd",
+      "dataHandlingNoticeBody": "Sanctum ondersteunt wachtwoordloze aanmelding en versleuteling-compatibele profielinstellingen. De uiteindelijke gegevensverwerking, bewaring en AI-deelgedrag worden geconfigureerd door de beheerder van deze instantie."
     },
     "auth": {
       "signUp": "Registreren",
@@ -402,7 +402,7 @@
       "encryptionTitle": "Standaard versleuteld",
       "encryptionBody": "Profielvelden worden standaard versleuteld, maar de beheerder van deze instantie beheert instellingen op veldniveau en kan toestaan dat geselecteerde gegevens anders worden opgeslagen of gedeeld.",
       "adminControlNotice": "Gegevensverwerking wordt geconfigureerd door de beheerder van deze instantie, inclusief wat onversleuteld mag worden opgeslagen of gedeeld met AI-tools.",
-      "retentionNotice": "Bewaar- en verwijdertermijnen worden ingesteld door de beheerder van deze instance. Neem contact met hen op voor toegangs-, correctie- of verwijderverzoeken.",
+      "retentionNotice": "Bewaar- en verwijdertermijnen worden ingesteld door de beheerder van deze instantie. Neem contact met hen op voor toegangs-, correctie- of verwijderverzoeken.",
       "noWarrantyNotice": "Sanctum-software wordt geleverd zonder garantie. Het gebruik van deze instantie is onderworpen aan het beleid van de beheerder."
     },
     "verify": {
@@ -538,10 +538,10 @@
   },
   "adminDashboard": {
     "title": "Beheerdashboard",
-    "subtitle": "Beheer de configuratie van je Sanctum-instance",
+    "subtitle": "Beheer de configuratie van je Sanctum-instantie",
     "configureTitle": "Wat je kunt configureren",
     "configureSubtitle": "Deze secties beheren branding, verzameling van gebruikersdata, AI-gedrag, deploymentbeveiliging en opgeslagen inhoud.",
-    "securityBreadcrumbTitle": "Bescherm je instance in 3 stappen",
+    "securityBreadcrumbTitle": "Bescherm je instantie in 3 stappen",
     "securityStep1Label": "Stap 1",
     "securityStep1Title": "Beveilig toegang",
     "securityStep1Body": "Stel publieke URL's in, schakel simulatievlaggen buiten ontwikkeling uit en kies of gebruikers goedkeuring nodig hebben.",
@@ -557,7 +557,7 @@
     "securityStep3Body": "Valideer configuratie, controleer servicegezondheid, beveilig e-mail en HTTPS en beoordeel opgeslagen records regelmatig.",
     "securityStep3Primary": "Voer configuratievalidatie uit",
     "securityStep3Secondary": "Bekijk opgeslagen data",
-    "instance": "Instance-configuratie",
+    "instance": "Instantie-configuratie",
     "instanceDesc": "Branding, chatstijl en thema-instellingen",
     "user": "Gebruikersconfiguratie",
     "userDesc": "Gebruikerstypen en onboarding-vragen definiëren",
@@ -648,7 +648,7 @@
       "edgeDesc": "Optionele instellingen voor geavanceerde configuraties.",
       "cdnDesc": "Kommagescheiden CDN-hostnamen voor statische bestanden. Laat leeg als je geen CDN gebruikt.",
       "webhookDesc": "Basis-URL voor het samenstellen van webhook-callbacks. Gebruik je publieke API-domein.",
-      "searxDesc": "Alleen nodig als je SearXNG-instance op een andere host draait.",
+      "searxDesc": "Alleen nodig als je SearXNG-instantie op een andere host draait.",
       "goToPage": "Ga naar pagina"
     }
   },
@@ -933,7 +933,7 @@
     },
     "CUSTOM_SEARXNG_URL": {
       "label": "Aangepaste SearXNG-URL",
-      "description": "Privé SearXNG-instance-URL",
+      "description": "Privé SearXNG-instantie-URL",
       "hint": "Alleen instellen als je een aparte SearXNG-host gebruikt. Voorbeeld: https://search.example.com."
     },
     "WEBHOOK_BASE_URL": {

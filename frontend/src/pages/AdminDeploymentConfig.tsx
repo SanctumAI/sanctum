@@ -29,16 +29,16 @@ import {
   Lock,
 } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
-import { isAdminAuthenticated } from '../utils/adminApi'
+import { isAdminAuthenticated, adminFetch } from '../utils/adminApi'
 import { useDeploymentConfig, useServiceHealth, useConfigAuditLog, useKeyMigration } from '../hooks/useAdminConfig'
 import { useFocusTrap } from '../hooks/useFocusTrap'
 import type { DeploymentConfigItem, ServiceHealthItem, ConfigCategory, DeploymentConfigItemKey, MigrationPrepareResponse, DecryptedUserData, DecryptedFieldValue, DeploymentValidationResponse } from '../types/config'
 import { getConfigCategories, getDeploymentConfigItemMeta } from '../types/config'
-import { STORAGE_KEYS } from '../types/onboarding'
 import { hasNip04Support, decryptField } from '../utils/encryption'
 import { hasNostrExtension } from '../utils/nostrAuth'
 import { normalizePubkey } from '../utils/nostrKeys'
 import { clearAdminAuth } from '../utils/adminApi'
+import { STORAGE_KEYS } from '../types/onboarding'
 
 type ValidationState = {
   result: DeploymentValidationResponse
@@ -344,21 +344,10 @@ export function AdminDeploymentConfig() {
     setTestEmailResult(null)
 
     try {
-      const token = localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN)
-      if (!token) {
-        setTestEmailResult({
-          success: false,
-          message: t('adminDeployment.testEmailResult.requestFailed', 'Request failed'),
-          error: t('adminDeployment.testEmailResult.notAuthenticated', 'Not authenticated'),
-        })
-        setTestEmailSending(false)
-        return
-      }
-      const response = await fetch('/api/auth/test-email', {
+      const response = await adminFetch('/auth/test-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ email: testEmailAddress.trim() }),
       })

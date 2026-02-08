@@ -8,13 +8,14 @@ import time
 import logging
 from datetime import datetime, timezone
 from typing import Optional
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Request
 from fastapi.responses import PlainTextResponse
 
 import httpx
 
 import auth
 import database
+from rate_limit import RateLimiter
 from models import (
     DeploymentConfigItem,
     DeploymentConfigResponse,
@@ -34,6 +35,18 @@ logger = logging.getLogger("sanctum.deployment_config")
 SERVICE_START_TIME = datetime.now(timezone.utc)
 
 router = APIRouter(prefix="/admin/deployment", tags=["deployment"])
+
+# High-risk export endpoint limiter (best-effort in-memory)
+def _parse_rate_limit() -> int:
+    try:
+        return int(os.getenv("RATE_LIMIT_CONFIG_EXPORT_PER_HOUR", "5"))
+    except ValueError:
+        return 5
+
+config_export_limiter = RateLimiter(
+    limit=_parse_rate_limit(),
+    window_seconds=60 * 60,
+)
 
 
 # Environment variable to config key mapping
@@ -232,12 +245,21 @@ async def get_deployment_config(admin: dict = Depends(auth.require_admin)):
 
 
 @router.get("/config/export", response_class=PlainTextResponse)
-async def export_env_file(admin: dict = Depends(auth.require_admin)):
+async def export_env_file(
+    request: Request,
+    admin: dict = Depends(auth.require_admin),
+    _: None = Depends(config_export_limiter),
+):
     """
     Export current configuration as .env file format.
     Secret values are included (not masked).
     Requires admin authentication.
     """
+    logger.warning(
+        "High-risk config export requested by admin=%s from ip=%s",
+        admin.get("pubkey", "unknown"),
+        request.client.host if request.client else "unknown",
+    )
     lines = ["# Sanctum Configuration Export", f"# Generated: {datetime.now(timezone.utc).isoformat()}", ""]
 
     # Get raw values from database (not masked)
@@ -257,7 +279,10 @@ async def export_env_file(admin: dict = Depends(auth.require_admin)):
             lines.append(f"# {config['category'].upper()}")
             current_category = config["category"]
 
-        value = config["value"] or ""
+        if config.get("is_secret"):
+            value = database.get_deployment_config_value(config["key"]) or ""
+        else:
+            value = config["value"] or ""
         # Quote values with spaces or special chars, escape backslashes, newlines, tabs, and dollar signs
         if " " in value or "=" in value or "#" in value or '"' in value or "\\" in value or "\n" in value or "\r" in value or "\t" in value or "$" in value:
             # Escape backslashes first, then quotes, then dollar signs, then control characters
@@ -265,6 +290,19 @@ async def export_env_file(admin: dict = Depends(auth.require_admin)):
             value = f'"{value}"'
 
         lines.append(f"{config['key']}={value}")
+
+    # Explicitly audit high-risk export action.
+    # old/new values are intentionally omitted to avoid logging secret material.
+    database.log_config_audit_event(
+        table_name="deployment_config",
+        config_key=".env_export",
+        old_value=None,
+        new_value=(
+            f"exported_keys={len([c for c in configs if c.get('key') not in FORBIDDEN_KEYS])};"
+            f"ip={request.client.host if request.client else 'unknown'}"
+        ),
+        changed_by=admin.get("pubkey", "unknown"),
+    )
 
     return "\n".join(lines)
 
@@ -731,3 +769,20 @@ async def get_audit_log(
             for e in entries
         ]
     )
+
+
+@router.get("/audit-log/verify", response_model=dict)
+async def verify_audit_log_chain(
+    table_name: Optional[str] = Query(default=None),
+    admin: dict = Depends(auth.require_admin),
+):
+    """
+    Verify tamper-evident hash chain integrity for configuration audit log.
+    The chain is global across all config tables; optional `table_name` limits
+    reporting scope while integrity is validated end-to-end.
+    Requires admin authentication.
+    """
+    if table_name is not None and table_name not in ALLOWED_AUDIT_TABLES:
+        raise HTTPException(status_code=400, detail=f"Invalid table_name: {table_name}")
+
+    return database.verify_config_audit_log_chain(table_name=table_name)

@@ -156,7 +156,7 @@
       "encryptDisabled": "以明文存储",
       "encryptedHint": "字段值将使用NIP-04加密（推荐）",
       "plaintextHint": "字段值将以明文存储（不建议用于敏感数据）",
-      "encryptedSummary": "此字段已加密。只有你在登录时才能查看数据。",
+      "encryptedSummary": "此字段已加密。只有持有相应 Nostr 私钥的管理员才能解密并查看数据。",
       "encryptedNoAI": "加密字段不支持AI个性化。",
       "securityWarning": "安全警告",
       "securityWarningBody": "禁用加密将以明文存储用户数据。仅对偏好设置或公开信息等非敏感字段禁用。",
@@ -171,7 +171,7 @@
       "encryptionHelpWhenEnabled": "启用加密时：",
       "encryptionHelpPoint1": "使用管理员的Nostr密钥（NIP-04）加密数据",
       "encryptionHelpPoint2": "只有管理员可以解密和查看数据",
-      "encryptionHelpPoint3": "防止数据库泄露",
+      "encryptionHelpPoint3": "在部分数据库泄露场景中可减少暴露风险，但无法完全消除风险",
       "encryptionHelpPoint4": "无法与AI助手共享",
       "encryptionHelpWhenDisabled": "禁用加密时：",
       "encryptionHelpDisabledPoint1": "数据以可读的明文存储",
@@ -180,7 +180,10 @@
       "encryptionHelpRecommendation": "建议：对任何个人身份信息（姓名、电子邮件、电话号码、地址）保持启用加密。",
       "encryptedBadge": "已加密",
       "plaintextBadge": "明文",
-      "inChatBadge": "聊天中"
+      "inChatBadge": "聊天中",
+      "complianceAcknowledgeLabel": "我确认此字段可以明文存储和/或在适用的法律要求下与 AI 共享。",
+      "complianceAcknowledgeHint": "请在更新用户通知、同意流程（如需要）及内部数据处理政策后再启用此项。",
+      "complianceAcknowledgeRequired": "保存此字段配置前，必须确认法律/合规责任。"
     },
     "fieldTypes": {
       "text": "文本",
@@ -239,7 +242,8 @@
     "securityJourneyStep1": "保护访问：设置公开 URL，在非开发环境关闭模拟开关，并确定用户审批规则。",
     "securityJourneyStep2": "定义数据边界：只收集必要字段，保持敏感字段加密，并限制可进入聊天上下文的字段。",
     "securityJourneyStep3": "验证与监控：运行配置验证，检查服务健康，并定期审查已存储数据。",
-    "securityJourneyNote": "这能为生产环境提供稳健的安全基线。"
+    "securityJourneyNote": "这能为生产环境提供稳健的安全基线。",
+    "legalResponsibilityNotice": "你有责任确保此实例的配置合法，并制定适当的用户告知和数据处理政策。"
   },
   "onboarding": {
     "nostr": {
@@ -274,9 +278,7 @@
       "searchLabel": "搜索语言",
       "noResults": "未找到与「{{query}}」匹配的语言",
       "continue": "继续",
-      "changeInSettings": "你可以稍后在设置中更改。",
-      "privacyNoticeTitle": "默认私密",
-      "privacyNoticeBody": "Sanctum 使用无密码登录，并以加密优先的方式管理资料设置。"
+      "changeInSettings": "你可以稍后在设置中更改。"
     },
     "auth": {
       "signUp": "注册",
@@ -307,7 +309,9 @@
       "expiringLinkTitle": "短时效登录链接",
       "expiringLinkBody": "每个魔法链接都经过签名，并在 15 分钟后失效。",
       "encryptionTitle": "默认加密",
-      "encryptionBody": "资料字段默认加密，管理员只会选择非敏感信息用于个性化。"
+      "encryptionBody": "个人资料字段默认加密，但此实例管理员控制字段级设置，可能会允许部分数据以不同方式存储或共享。",
+      "adminControlNotice": "数据处理方式由此实例管理员配置，包括哪些数据可能以未加密形式存储或与 AI 工具共享。",
+      "noWarrantyNotice": "Sanctum 软件按原样提供，不附带任何保证。使用此实例须遵守管理员的相关政策。"
     },
     "verify": {
       "verifying": "正在验证你的链接...",

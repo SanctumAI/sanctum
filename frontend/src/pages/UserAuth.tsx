@@ -366,6 +366,18 @@ export function UserAuth() {
                 </div>
               </div>
             </div>
+
+            <div className="rounded-lg border border-border bg-surface p-3">
+              <p className="text-xs text-text-muted leading-relaxed">
+                {t('onboarding.auth.adminControlNotice')}
+              </p>
+              <p className="text-xs text-text-muted leading-relaxed mt-2">
+                {t('onboarding.auth.retentionNotice', 'Data retention and deletion timelines are set by this instance administrator. Contact them for access, correction, or deletion requests.')}
+              </p>
+              <p className="text-xs text-text-muted leading-relaxed mt-2">
+                {t('onboarding.auth.noWarrantyNotice')}
+              </p>
+            </div>
           </form>
         </>
       )}

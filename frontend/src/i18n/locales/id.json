@@ -154,7 +154,7 @@
       "encryptDisabled": "Simpan sebagai teks biasa",
       "encryptedHint": "Nilai field akan dienkripsi dengan NIP-04 (disarankan)",
       "plaintextHint": "Nilai field akan disimpan sebagai teks biasa (tidak disarankan untuk data sensitif)",
-      "encryptedSummary": "Field ini terenkripsi. Hanya Anda yang dapat melihat data saat masuk.",
+      "encryptedSummary": "Field ini terenkripsi. Hanya admin dengan kunci privat Nostr yang sesuai yang dapat mendekripsi dan melihat data.",
       "encryptedNoAI": "Personalisasi AI tidak tersedia untuk field terenkripsi.",
       "securityWarning": "Peringatan Keamanan",
       "securityWarningBody": "Menonaktifkan enkripsi akan menyimpan data pengguna sebagai teks biasa. Hanya nonaktifkan untuk field non-sensitif seperti preferensi atau informasi publik.",
@@ -169,7 +169,7 @@
       "encryptionHelpWhenEnabled": "Saat enkripsi diaktifkan:",
       "encryptionHelpPoint1": "Data dienkripsi menggunakan kunci Nostr admin (NIP-04)",
       "encryptionHelpPoint2": "Hanya admin yang dapat mendekripsi dan melihat data",
-      "encryptionHelpPoint3": "Melindungi dari pembobolan database",
+      "encryptionHelpPoint3": "Mengurangi paparan dalam beberapa skenario pelanggaran database, tetapi tidak menghilangkan risiko sepenuhnya",
       "encryptionHelpPoint4": "Tidak dapat dibagikan dengan asisten AI",
       "encryptionHelpWhenDisabled": "Saat enkripsi dinonaktifkan:",
       "encryptionHelpDisabledPoint1": "Data disimpan sebagai teks biasa yang dapat dibaca",
@@ -178,7 +178,10 @@
       "encryptionHelpRecommendation": "Rekomendasi: Pertahankan enkripsi aktif untuk informasi yang dapat mengidentifikasi pribadi (nama, email, nomor telepon, alamat).",
       "encryptedBadge": "Terenkripsi",
       "plaintextBadge": "Teks Biasa",
-      "inChatBadge": "Di Obrolan"
+      "inChatBadge": "Di Obrolan",
+      "complianceAcknowledgeLabel": "Saya mengonfirmasi bahwa field ini dapat disimpan dalam teks biasa dan/atau dibagikan dengan AI sesuai persyaratan hukum yang berlaku.",
+      "complianceAcknowledgeHint": "Aktifkan ini hanya setelah memperbarui pemberitahuan pengguna, alur persetujuan (jika diperlukan), dan kebijakan penanganan data internal Anda.",
+      "complianceAcknowledgeRequired": "Anda harus mengonfirmasi tanggung jawab hukum/kepatuhan sebelum menyimpan konfigurasi field ini."
     },
     "fieldTypes": {
       "text": "Teks",
@@ -237,7 +240,8 @@
     "securityJourneyStep1": "Amankan akses: atur URL publik, nonaktifkan flag simulasi di luar pengembangan, dan pilih aturan persetujuan pengguna.",
     "securityJourneyStep2": "Tetapkan batasan data: kumpulkan hanya field yang diperlukan, jaga field sensitif tetap terenkripsi, dan batasi field konteks obrolan.",
     "securityJourneyStep3": "Validasi dan pantau: jalankan validasi konfigurasi, periksa kesehatan layanan, dan tinjau data tersimpan secara berkala.",
-    "securityJourneyNote": "Ini memberikan fondasi yang kuat untuk produksi."
+    "securityJourneyNote": "Ini memberikan fondasi yang kuat untuk produksi.",
+    "legalResponsibilityNotice": "Anda bertanggung jawab atas konfigurasi yang sah secara hukum, pengungkapan kepada pengguna, dan kebijakan penanganan data untuk instance ini."
   },
   "onboarding": {
     "nostr": {
@@ -272,9 +276,7 @@
       "searchLabel": "Cari bahasa",
       "noResults": "Tidak ditemukan bahasa untuk \"{{query}}\"",
       "continue": "Lanjutkan",
-      "changeInSettings": "Anda dapat mengubahnya nanti di pengaturan.",
-      "privacyNoticeTitle": "Privat secara bawaan",
-      "privacyNoticeBody": "Sanctum menggunakan masuk tanpa kata sandi dan pengaturan profil yang mengutamakan enkripsi."
+      "changeInSettings": "Anda dapat mengubahnya nanti di pengaturan."
     },
     "auth": {
       "signUp": "Daftar",
@@ -305,7 +307,9 @@
       "expiringLinkTitle": "Tautan masuk berdurasi singkat",
       "expiringLinkBody": "Setiap tautan ajaib ditandatangani dan kedaluwarsa setelah 15 menit.",
       "encryptionTitle": "Enkripsi secara bawaan",
-      "encryptionBody": "Field profil dienkripsi secara bawaan, dan admin memilih informasi non-sensitif apa yang dapat digunakan untuk personalisasi."
+      "encryptionBody": "Field profil dienkripsi secara bawaan, tetapi administrator instance ini mengontrol pengaturan tingkat field dan dapat mengizinkan data tertentu disimpan atau dibagikan secara berbeda.",
+      "adminControlNotice": "Penanganan data dikonfigurasi oleh administrator instance ini, termasuk data apa yang boleh disimpan tanpa enkripsi atau dibagikan dengan alat AI.",
+      "noWarrantyNotice": "Perangkat lunak Sanctum disediakan apa adanya tanpa jaminan. Penggunaan instance ini tunduk pada kebijakan administrator."
     },
     "verify": {
       "verifying": "Memverifikasi tautan Anda...",

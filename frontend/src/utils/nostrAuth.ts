@@ -51,6 +51,7 @@ export async function submitAuthEvent(signedEvent: Event): Promise<AuthResult> {
   const response = await fetch(`${API_BASE}/admin/auth`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify({ event: signedEvent }),
   })
 

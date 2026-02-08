@@ -27,7 +27,8 @@
     "loading": "Laden...",
     "unknown": "Onbekend",
     "enabled": "Ingeschakeld",
-    "disabled": "Uitgeschakeld"
+    "disabled": "Uitgeschakeld",
+    "gotIt": "Begrepen"
   },
   "settings": {
     "title": "Instellingen",
@@ -35,7 +36,7 @@
     "signOut": "Uitloggen",
     "adminTools": "Beheertools",
     "admin": {
-      "instanceConfig": "Instance-configuratie",
+      "instanceConfig": "Instantie-configuratie",
       "instanceConfigDesc": "Branding, gebruikerstypen, velden",
       "testDashboard": "Testdashboard",
       "testDashboardDesc": "API-tests, debugging tools",
@@ -45,6 +46,8 @@
       "databaseExplorerDesc": "SQLite-database bekijken",
       "instanceBranding": "Instantie-branding",
       "instanceBrandingDesc": "Kleuren, pictogrammen, gebruikerstypen",
+      "userConfig": "Gebruikersconfiguratie",
+      "userConfigDesc": "Gebruikerstypen en onboarding-vragen",
       "aiConfig": "AI-configuratie",
       "aiConfigDesc": "Prompts, parameters, standaardwaarden",
       "deploymentConfig": "Implementatieconfiguratie",
@@ -59,14 +62,18 @@
     "global": "Globaal",
     "setup": {
       "backToChat": "Terug naar chat",
-      "title": "Configureer je instance",
+      "title": "Configureer je instantie",
       "subtitle": "Pas de branding en gebruikerservaring aan",
-      "branding": "Instance branding",
+      "instanceSectionTitle": "Instantie-configuratie",
+      "instanceSectionDesc": "Stel de naam, het pictogram en de kleuren in die overal in je instantie worden weergegeven.",
+      "branding": "Instantie-branding",
       "displayName": "Weergavenaam",
       "defaultName": "Sanctum",
       "displayNameHint": "Deze naam verschijnt in de header en onboarding-schermen",
       "icon": "Pictogram",
       "accentColor": "Accentkleur",
+      "userSectionTitle": "Gebruikersconfiguratie",
+      "userSectionDesc": "Configureer gebruikerstypen en de vragen die gebruikers beantwoorden tijdens de onboarding.",
       "userTypes": "Gebruikerstypen",
       "userTypesHint": "Definieer verschillende gebruikerstypen om type-specifieke onboarding-vragen te tonen. Als je meer dan één type hebt, kiezen gebruikers hun type tijdens de onboarding.",
       "typeName": "Typenaam",
@@ -76,6 +83,7 @@
       "addType": "Type toevoegen",
       "addUserType": "Gebruikerstype toevoegen",
       "onboardingFields": "Gebruikers onboarding-velden",
+      "onboardingFieldsHint": "Maak de vragen die gebruikers beantwoorden tijdens de onboarding.",
       "optionsCount_one": "{{count}} optie",
       "optionsCount_other": "{{count}} opties",
       "noFields": "Geen aangepaste velden",
@@ -84,9 +92,91 @@
       "knowledgeBaseHint": "Upload documenten om je RAG-kennisbank voor AI-gestuurde antwoorden op te bouwen.",
       "uploadDocuments": "Documenten uploaden",
       "database": "Database",
-      "databaseHint": "Bekijk en beheer je instance-gegevens direct in de SQLite-database.",
+      "databaseHint": "Bekijk en beheer de gegevens van je instantie direct in de SQLite-database.",
       "openDatabase": "Database-verkenner openen",
       "save": "Configuratie opslaan"
+    },
+    "instanceConfig": {
+      "title": "Instantie-configuratie",
+      "subtitle": "Beheer branding, chatstijl en thema-instellingen voor je instantie.",
+      "chatIconsTitle": "Chatpictogrammen",
+      "chatIconsDesc": "Stel de standaardpictogrammen in voor chatberichten.",
+      "assistantIconLabel": "AI-assistentpictogram",
+      "userIconLabel": "Gebruikerspictogram",
+      "logoUrlLabel": "Logo-URL",
+      "logoUrlPlaceholder": "https://voorbeeld.com/logo.png",
+      "logoUrlHint": "Vierkante afbeelding aanbevolen (128x128 of 256x256).",
+      "logoPreviewAlt": "Logo-voorbeeld",
+      "logoPreviewHint": "Voorbeeld (valt terug op het geselecteerde pictogram).",
+      "faviconLabel": "Favicon-URL",
+      "faviconPlaceholder": "https://voorbeeld.com/favicon.png",
+      "faviconHint": "Wordt getoond in het browsertabblad en bladwijzers (aanbevolen 32x32 of 64x64).",
+      "appleTouchIconLabel": "Apple touch-pictogram URL",
+      "appleTouchIconPlaceholder": "https://voorbeeld.com/apple-touch-icon.png",
+      "appleTouchIconHint": "Gebruikt bij toevoegen aan het iOS-beginscherm (aanbevolen 180x180).",
+      "headerTitle": "Header-branding",
+      "headerDesc": "Bepaal hoe je instantie verschijnt in de bovenste header.",
+      "headerLayoutLabel": "Header-indeling",
+      "headerLayoutIconName": "Pictogram + Naam",
+      "headerLayoutIconNameDesc": "Toon zowel het pictogram als de instancenaam.",
+      "headerLayoutIconOnly": "Alleen pictogram",
+      "headerLayoutIconOnlyDesc": "Minimale header met alleen het pictogram.",
+      "headerLayoutNameOnly": "Alleen naam",
+      "headerLayoutNameOnlyDesc": "Tekst-header met alleen de instancenaam.",
+      "headerTaglineLabel": "Tagline (optioneel)",
+      "headerTaglinePlaceholder": "Korte beschrijving onder de naam",
+      "headerTaglineHint": "Laat leeg om de tagline te verbergen.",
+      "chatIdentityTitle": "Chatidentiteit",
+      "chatIdentityDesc": "Stel de labels in die boven chatberichten worden getoond.",
+      "assistantNameLabel": "Weergavenaam assistent",
+      "assistantNamePlaceholder": "bijv. Sanctum AI",
+      "userLabelLabel": "Gebruikerslabel",
+      "userLabelPlaceholder": "bijv. Jij",
+      "chatIdentityHint": "Laat een label leeg om het te verbergen.",
+      "bubbleStyleTitle": "Chatballonstijl",
+      "bubbleStyleDesc": "Kies de vorm en diepte van chatballonnen.",
+      "bubbleStyleSoft": "Zacht",
+      "bubbleStyleSoftDesc": "Afgeronde hoeken met een subtiel chatgevoel.",
+      "bubbleStyleRound": "Rond",
+      "bubbleStyleRoundDesc": "Extra-ronde ballonnen met een vriendelijke vorm.",
+      "bubbleStyleSquare": "Vierkant",
+      "bubbleStyleSquareDesc": "Scherpere hoeken voor een gestructureerde uitstraling.",
+      "bubbleStylePill": "Pilvorm",
+      "bubbleStylePillDesc": "Volledige pilvorm voor een opvallende uitstraling.",
+      "bubbleShadowLabel": "Subtiele ballonschaduw toevoegen",
+      "surfaceTitle": "Achtergrondstijl",
+      "surfaceDesc": "Kies de achtergrondtextuur voor je instantie.",
+      "surfacePlain": "Effen",
+      "surfacePlainDesc": "Schone en minimale achtergrond.",
+      "surfaceGradient": "Zacht verloop",
+      "surfaceGradientDesc": "Subtiel kleurverloop op de achtergrond.",
+      "surfaceNoise": "Papierstructuur",
+      "surfaceNoiseDesc": "Zachte textuur voor warmte.",
+      "surfaceGrid": "Raster",
+      "surfaceGridDesc": "Vaag raster voor een technische uitstraling.",
+      "statusIconsTitle": "Statuspictogrammen",
+      "statusIconsDesc": "Kies hoe statusupdates worden weergegeven.",
+      "statusIconsClassic": "Klassiek",
+      "statusIconsClassicDesc": "Eenvoudige stippen en symbolen.",
+      "statusIconsMinimal": "Minimaal",
+      "statusIconsMinimalDesc": "Compacte tekens met een lichte toets.",
+      "statusIconsPlayful": "Speels",
+      "statusIconsPlayfulDesc": "Speelse symbolen voor vriendelijke feedback.",
+      "typographyTitle": "Typografie",
+      "typographyDesc": "Kies een lettertype-combinatie voor de hele interface.",
+      "typographyModern": "Modern",
+      "typographyModernDesc": "Schoon en vertrouwd schreefloos lettertype.",
+      "typographyGrotesk": "Grotesk",
+      "typographyGroteskDesc": "Vet, eigentijds lettertype met persoonlijkheid.",
+      "typographyHumanist": "Humanist",
+      "typographyHumanistDesc": "Warm, leesbaar lettertype met helderheid."
+    },
+    "userConfig": {
+      "title": "Gebruikersconfiguratie",
+      "subtitle": "Configureer gebruikerstypen en de vragen die gebruikers beantwoorden tijdens de onboarding.",
+      "typeIcon": "Typepictogram",
+      "typeName": "Typenaam",
+      "typeDescription": "Beschrijving"
     },
     "database": {
       "backToSetup": "Terug naar beheerconfiguratie",
@@ -154,7 +244,7 @@
       "encryptDisabled": "Opslaan als platte tekst",
       "encryptedHint": "Veldwaarden worden versleuteld met NIP-04 (aanbevolen)",
       "plaintextHint": "Veldwaarden worden opgeslagen als platte tekst (niet aanbevolen voor gevoelige gegevens)",
-      "encryptedSummary": "Dit veld is versleuteld. Alleen jij kunt de gegevens bekijken wanneer je bent ingelogd.",
+      "encryptedSummary": "Dit veld is versleuteld. Alleen een beheerder met de bijbehorende Nostr-privésleutel kan de gegevens ontsleutelen en bekijken.",
       "encryptedNoAI": "AI-personalisatie is niet beschikbaar voor versleutelde velden.",
       "securityWarning": "Beveiligingswaarschuwing",
       "securityWarningBody": "Het uitschakelen van versleuteling slaat gebruikersgegevens op als platte tekst. Schakel alleen uit voor niet-gevoelige velden zoals voorkeuren of openbare informatie.",
@@ -169,7 +259,7 @@
       "encryptionHelpWhenEnabled": "Wanneer versleuteling is ingeschakeld:",
       "encryptionHelpPoint1": "Gegevens worden versleuteld met de Nostr-sleutel van de beheerder (NIP-04)",
       "encryptionHelpPoint2": "Alleen de beheerder kan de gegevens ontsleutelen en bekijken",
-      "encryptionHelpPoint3": "Beschermt tegen databaselekken",
+      "encryptionHelpPoint3": "Vermindert de blootstelling bij sommige databaselekken, maar elimineert het risico niet",
       "encryptionHelpPoint4": "Kan niet worden gedeeld met de AI-assistent",
       "encryptionHelpWhenDisabled": "Wanneer versleuteling is uitgeschakeld:",
       "encryptionHelpDisabledPoint1": "Gegevens worden opgeslagen als leesbare platte tekst",
@@ -178,7 +268,10 @@
       "encryptionHelpRecommendation": "Aanbeveling: Houd versleuteling ingeschakeld voor alle persoonlijk identificeerbare informatie (namen, e-mails, telefoonnummers, adressen).",
       "encryptedBadge": "Versleuteld",
       "plaintextBadge": "Platte tekst",
-      "inChatBadge": "In chat"
+      "inChatBadge": "In chat",
+      "complianceAcknowledgeLabel": "Ik bevestig dat dit veld als platte tekst kan worden opgeslagen en/of gedeeld met AI onder onze toepasselijke wettelijke vereisten.",
+      "complianceAcknowledgeHint": "Schakel dit pas in nadat je je gebruikersmededelingen, toestemmingsprocessen (indien vereist) en intern gegevensverwerkingsbeleid hebt bijgewerkt.",
+      "complianceAcknowledgeRequired": "Je moet de wettelijke/nalevingsverantwoordelijkheid bevestigen voordat je deze veldconfiguratie opslaat."
     },
     "fieldTypes": {
       "text": "Tekst",
@@ -209,6 +302,7 @@
       "loadFailed": "Kan gegevens niet laden",
       "saveFailed": "Opslaan mislukt. Probeer het opnieuw.",
       "addTypeFailed": "Kan gebruikerstype niet toevoegen",
+      "updateTypeFailed": "Kan gebruikerstype niet bijwerken",
       "removeTypeFailed": "Kan gebruikerstype niet verwijderen",
       "addFieldFailed": "Kan veld niet toevoegen",
       "updateFieldFailed": "Kan veld niet bijwerken",
@@ -220,7 +314,7 @@
     "notAdmin": "Geen beheerder?",
     "signInAsUser": "Inloggen als gebruiker",
     "title": "Beheerderconfiguratie",
-    "subtitle": "Verbind met je Nostr-identiteit om deze instance te beheren",
+    "subtitle": "Verbind met je Nostr-identiteit om deze instantie te beheren",
     "connectNostr": "Verbinden met Nostr",
     "orForTesting": "of voor testen",
     "continueMock": "Doorgaan met mock-identiteit",
@@ -234,10 +328,11 @@
     "connectionFailed": "Verbinding mislukt",
     "securityJourneyTitle": "Snelle beveiligingsroute",
     "securityJourneyIntro": "Volg na het verbinden met Nostr dit eenvoudige setup-pad:",
-    "securityJourneyStep1": "Beveilig toegang: stel publieke URL’s in, schakel simulatievlaggen buiten ontwikkeling uit en kies goedkeuringsregels voor gebruikers.",
+    "securityJourneyStep1": "Beveilig toegang: stel publieke URL's in, schakel simulatievlaggen buiten ontwikkeling uit en kies goedkeuringsregels voor gebruikers.",
     "securityJourneyStep2": "Bepaal datagrenzen: verzamel alleen noodzakelijke velden, houd gevoelige velden versleuteld en beperk chat-contextvelden.",
     "securityJourneyStep3": "Valideer en bewaak: voer configuratievalidatie uit, controleer servicegezondheid en beoordeel opgeslagen gegevens regelmatig.",
-    "securityJourneyNote": "Dit geeft je een sterke basis voor productie."
+    "securityJourneyNote": "Dit geeft je een sterke basis voor productie.",
+    "legalResponsibilityNotice": "Je bent verantwoordelijk voor een rechtmatige configuratie, gebruikersmededelingen en gegevensverwerkingsbeleid voor deze instantie."
   },
   "onboarding": {
     "nostr": {
@@ -273,8 +368,8 @@
       "noResults": "Geen talen gevonden voor \"{{query}}\"",
       "continue": "Doorgaan",
       "changeInSettings": "Je kunt dit later wijzigen in je instellingen.",
-      "privacyNoticeTitle": "Standaard privé",
-      "privacyNoticeBody": "Sanctum gebruikt wachtwoordloos inloggen en profielinstellingen met versleuteling als uitgangspunt."
+      "dataHandlingNoticeTitle": "Gegevensverwerking wordt per instantie geconfigureerd",
+      "dataHandlingNoticeBody": "Sanctum ondersteunt wachtwoordloze aanmelding en versleuteling-compatibele profielinstellingen. De uiteindelijke gegevensverwerking, bewaring en AI-deelgedrag worden geconfigureerd door de beheerder van deze instantie."
     },
     "auth": {
       "signUp": "Registreren",
@@ -305,7 +400,10 @@
       "expiringLinkTitle": "Kortdurende inloglinks",
       "expiringLinkBody": "Elke magic link is ondertekend en verloopt na 15 minuten.",
       "encryptionTitle": "Standaard versleuteld",
-      "encryptionBody": "Profielvelden zijn standaard versleuteld en beheerders kiezen welke niet-gevoelige gegevens voor personalisatie mogen worden gebruikt."
+      "encryptionBody": "Profielvelden worden standaard versleuteld, maar de beheerder van deze instantie beheert instellingen op veldniveau en kan toestaan dat geselecteerde gegevens anders worden opgeslagen of gedeeld.",
+      "adminControlNotice": "Gegevensverwerking wordt geconfigureerd door de beheerder van deze instantie, inclusief wat onversleuteld mag worden opgeslagen of gedeeld met AI-tools.",
+      "retentionNotice": "Bewaar- en verwijdertermijnen worden ingesteld door de beheerder van deze instantie. Neem contact met hen op voor toegangs-, correctie- of verwijderverzoeken.",
+      "noWarrantyNotice": "Sanctum-software wordt geleverd zonder garantie. Het gebruik van deze instantie is onderworpen aan het beleid van de beheerder."
     },
     "verify": {
       "verifying": "Je link wordt geverifieerd...",
@@ -440,25 +538,13 @@
   },
   "adminDashboard": {
     "title": "Beheerdashboard",
-    "subtitle": "Beheer de configuratie van je Sanctum-instance",
-    "instance": "Instance-configuratie",
-    "instanceDesc": "Pas branding, gebruikerstypen en onboarding-velden aan",
-    "ai": "AI-configuratie",
-    "aiDesc": "Configureer prompts, LLM-parameters en documentstandaarden",
-    "deployment": "Deployment-configuratie",
-    "deploymentDesc": "Beheer omgevingsinstellingen en servicestatus",
-    "upload": "Documenten uploaden",
-    "uploadDesc": "Voeg documenten toe aan je kennisbank",
-    "database": "Database-verkenner",
-    "databaseDesc": "Blader door en query de SQLite-database",
-    "configSectionLabel": "Configuratie",
-    "dataSectionLabel": "Gegevens en inhoud",
+    "subtitle": "Beheer de configuratie van je Sanctum-instantie",
     "configureTitle": "Wat je kunt configureren",
     "configureSubtitle": "Deze secties beheren branding, verzameling van gebruikersdata, AI-gedrag, deploymentbeveiliging en opgeslagen inhoud.",
-    "securityBreadcrumbTitle": "Bescherm je instance in 3 stappen",
+    "securityBreadcrumbTitle": "Bescherm je instantie in 3 stappen",
     "securityStep1Label": "Stap 1",
     "securityStep1Title": "Beveilig toegang",
-    "securityStep1Body": "Stel publieke URL’s in, schakel simulatievlaggen buiten ontwikkeling uit en kies of gebruikers goedkeuring nodig hebben.",
+    "securityStep1Body": "Stel publieke URL's in, schakel simulatievlaggen buiten ontwikkeling uit en kies of gebruikers goedkeuring nodig hebben.",
     "securityStep1Primary": "Open deployment-instellingen",
     "securityStep1Secondary": "Open gebruikersinstellingen",
     "securityStep2Label": "Stap 2",
@@ -470,7 +556,21 @@
     "securityStep3Title": "Valideer en bewaak",
     "securityStep3Body": "Valideer configuratie, controleer servicegezondheid, beveilig e-mail en HTTPS en beoordeel opgeslagen records regelmatig.",
     "securityStep3Primary": "Voer configuratievalidatie uit",
-    "securityStep3Secondary": "Bekijk opgeslagen data"
+    "securityStep3Secondary": "Bekijk opgeslagen data",
+    "instance": "Instantie-configuratie",
+    "instanceDesc": "Branding, chatstijl en thema-instellingen",
+    "user": "Gebruikersconfiguratie",
+    "userDesc": "Gebruikerstypen en onboarding-vragen definiëren",
+    "ai": "AI-configuratie",
+    "aiDesc": "Configureer prompts, LLM-parameters en documentstandaarden",
+    "deployment": "Deployment-configuratie",
+    "deploymentDesc": "Beheer omgevingsinstellingen en servicestatus",
+    "upload": "Documenten uploaden",
+    "uploadDesc": "Voeg documenten toe aan je kennisbank",
+    "database": "Database-verkenner",
+    "databaseDesc": "Blader door en query de SQLite-database",
+    "configSectionLabel": "Configuratie",
+    "dataSectionLabel": "Gegevens en inhoud"
   },
   "adminAI": {
     "title": "AI-configuratie",
@@ -504,6 +604,7 @@
     "refresh": "Vernieuwen",
     "restartRequired": "Service herstart vereist",
     "validate": "Configuratie valideren",
+    "validating": "Valideren...",
     "exportEnv": "Exporteer .env",
     "auditLog": "Recente wijzigingen",
     "configValid": "Configuratie geldig",
@@ -511,9 +612,45 @@
     "noRecentChanges": "Geen recente wijzigingen",
     "exportFailed": "Export mislukt",
     "validationFailed": "Validatieverzoek mislukt",
+    "validationStaleTitle": "Validatie verouderd",
+    "validationStalePill": "Verouderd",
+    "validationStaleDesc": "Configuratie is gewijzigd sinds de laatste validatie. Valideer opnieuw om te bevestigen.",
+    "validationTimestamp": "Gevalideerd {{time}}",
+    "validationConfigUpdated": "Configuratie bijgewerkt {{time}}",
+    "validationSummary": "{{errors}} fouten, {{warnings}} waarschuwingen",
+    "validationSummaryStale": "Laatste resultaat: {{errors}} fouten, {{warnings}} waarschuwingen",
+    "validationNoIssues": "Geen problemen gevonden",
+    "validationErrors": "Fouten",
+    "validationWarnings": "Waarschuwingen",
+    "revalidate": "Opnieuw valideren",
     "requiresRestart": "Vereist herstart",
     "secret": "Geheim",
-    "leaveEmptyForSecret": "Laat leeg om huidige waarde te behouden"
+    "leaveEmptyForSecret": "Laat leeg om huidige waarde te behouden",
+    "domainsHelp": {
+      "ariaLabel": "Hulp bij domeinen en DNS-configuratie",
+      "overviewTitle": "Overzicht domeinen & URL's",
+      "urlsTitle": "Publieke URL's & CORS",
+      "dnsTitle": "DNS-records (e-mail)",
+      "edgeTitle": "CDN & Webhooks",
+      "overviewDesc": "Deze instellingen bepalen waar je app op internet staat en hoe services elkaar vinden. Standaardwaarden zijn ingesteld voor lokale ontwikkeling.",
+      "whatToSet": "Stel deze in wanneer je live gaat:",
+      "overviewUrl": "INSTANCE_URL / API_BASE_URL / ADMIN_BASE_URL voor publieke toegangspunten",
+      "overviewCORS": "CORS_ORIGINS om je frontend-domein toe te staan",
+      "overviewDns": "E-mail-DNS (DKIM/SPF/DMARC) voor afleveringsbetrouwbaarheid",
+      "overviewNote": "Als je op localhost blijft, kun je de standaardwaarden behouden.",
+      "urlsDesc": "Publieke URL's en CORS-origins moeten exact overeenkomen (schema + domein + poort).",
+      "urlsNote": "Als je API vanaf hetzelfde domein als de app wordt geserveerd, kun je API_BASE_URL leeg laten.",
+      "dnsDesc": "Deze waarden helpen je DNS-records aan te maken voor e-mailbezorging.",
+      "spfExample": "Voorbeeld TXT-record: v=spf1 include:sendgrid.net ~all",
+      "dkimExample": "Gebruik de selector van DKIM_SELECTOR en de publieke sleutel van je provider.",
+      "dmarcExample": "Voorbeeld TXT-record: v=DMARC1; p=none; rua=mailto:dmarc@example.com",
+      "dnsNote": "Gebruik de aanbevolen records van je e-mailprovider voor de beste afleveringsbetrouwbaarheid.",
+      "edgeDesc": "Optionele instellingen voor geavanceerde configuraties.",
+      "cdnDesc": "Kommagescheiden CDN-hostnamen voor statische bestanden. Laat leeg als je geen CDN gebruikt.",
+      "webhookDesc": "Basis-URL voor het samenstellen van webhook-callbacks. Gebruik je publieke API-domein.",
+      "searxDesc": "Alleen nodig als je SearXNG-instantie op een andere host draait.",
+      "goToPage": "Ga naar pagina"
+    }
   },
   "upload": {
     "invalidFileType": "Ongeldig bestandstype. Toegestaan: {{extensions}}",
@@ -525,9 +662,15 @@
     "supported": "Ondersteund: {{extensions}}",
     "removeFile": "Bestand verwijderen",
     "uploading": "Uploaden...",
+    "uploadingStatus": "Uploaden naar server...",
+    "uploadedSuccess": "Succesvol geüpload — verwerking gestart",
     "uploadDocument": "Document uploaden",
     "recentUploads": "Recente uploads",
     "noUploads": "Nog geen uploads",
+    "refresh": "Vernieuwen",
+    "serverBusy": "Server is bezig",
+    "jobsTimeout": "Server is bezig met het verwerken van documenten. Probeer even later te vernieuwen.",
+    "tryRefresh": "Probeer opnieuw",
     "backToDashboard": "Terug naar dashboard",
     "backToSetup": "Terug naar configuratie",
     "status": {
@@ -575,6 +718,16 @@
       "label": "Webzoeken",
       "description": "Schakel AI-webzoekmogelijkheden in",
       "hint": "Configureer de zoekmachine die de webzoekfunctie van de AI aandrijft. Wanneer ingeschakeld, kan de AI online naar actuele informatie zoeken."
+    },
+    "domains": {
+      "label": "Domein & URL's",
+      "description": "Configureer domeinnamen, URL's en DNS-instellingen",
+      "hint": "Gebruik deze bij het overstappen naar een eigen domein. Standaardwaarden gaan uit van lokale ontwikkeling (localhost). Configureer je hoofddomein, publieke URL's, CORS-origins en e-mail DNS-records (DKIM/SPF/DMARC)."
+    },
+    "ssl": {
+      "label": "SSL & Beveiliging",
+      "description": "Configureer SSL-certificaten en HTTPS-instellingen",
+      "hint": "Configureer TLS- en proxy-instellingen bij het serveren via HTTPS. Standaardwaarden zijn veilig voor lokale ontwikkeling; schakel HTTPS pas in nadat certificaten zijn gekoppeld."
     },
     "general": {
       "label": "Algemeen",
@@ -626,17 +779,6 @@
       "description": "Sta de AI toe om op internet te zoeken",
       "hint": "Wanneer ingeschakeld, kan de AI op het web zoeken naar actuele informatie die niet in je documenten staat. Schakel dit uit als je wilt dat reacties alleen uit je geüploade kennisbank komen."
     }
-  },
-  "colors": {
-    "blue": "Blauw",
-    "purple": "Paars",
-    "green": "Groen",
-    "orange": "Oranje",
-    "pink": "Roze",
-    "teal": "Blauwgroen"
-  },
-  "promptPreview": {
-    "sampleQuestion": "Wat moet ik weten over dit onderwerp?"
   },
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
@@ -728,6 +870,117 @@
       "label": "App-URL",
       "description": "Openbare URL van de applicatie",
       "hint": "De openbare URL waar gebruikers toegang hebben tot de app. Wordt gebruikt voor het genereren van magische links."
+    },
+    "SIMULATE_USER_AUTH": {
+      "label": "Gebruikersauth simuleren",
+      "description": "Gebruikersverificatie zonder magic-link-token toestaan (alleen testen)",
+      "hint": "Schakel in voor ontwikkeling/testen. Hiermee kunnen gebruikers e-mailverificatie voltooien zonder op de magic link te klikken. Moet uitgeschakeld zijn in productie."
+    },
+    "SIMULATE_ADMIN_AUTH": {
+      "label": "Beheerderauth simuleren",
+      "description": "Mock Nostr-verbindingsknop tonen voor beheerderauth (alleen testen)",
+      "hint": "Schakel in voor ontwikkeling/testen. Toont een \"Mock-verbinding\"-knop bij het inloggen als beheerder die de Nostr-extensie-eis omzeilt. Moet uitgeschakeld zijn in productie."
+    },
+    "BASE_DOMAIN": {
+      "label": "Hoofddomein",
+      "description": "Primaire domeinnaam",
+      "hint": "Hoofddomein zonder protocol. Voorbeeld: example.com. Laat leeg voor lokale ontwikkeling."
+    },
+    "INSTANCE_URL": {
+      "label": "Applicatie-URL",
+      "description": "Volledige URL met protocol",
+      "hint": "Publieke app-URL met protocol. Voorbeeld: https://app.example.com. Standaard: http://localhost:5173."
+    },
+    "API_BASE_URL": {
+      "label": "API-URL",
+      "description": "API-subdomein-URL (optioneel)",
+      "hint": "Alleen instellen als de API op een apart domein staat. Voorbeeld: https://api.example.com. Standaard: http://localhost:8000."
+    },
+    "ADMIN_BASE_URL": {
+      "label": "Beheerder-URL",
+      "description": "Beheerpaneel subdomein-URL (optioneel)",
+      "hint": "Alleen als de beheerder-UI op een apart domein staat. Voorbeeld: https://admin.example.com. Standaard: http://localhost:5173/admin."
+    },
+    "EMAIL_DOMAIN": {
+      "label": "E-maildomein",
+      "description": "Domein voor e-mailadressen",
+      "hint": "Domein gebruikt voor afzenderadressen en DNS-records. Voorbeeld: example.com of mail.example.com."
+    },
+    "DKIM_SELECTOR": {
+      "label": "DKIM-selector",
+      "description": "DKIM DNS-record selector",
+      "hint": "Selectorprefix voor je DKIM TXT-record. Standaard: sanctum. Je provider kan een specifieke selector vereisen."
+    },
+    "SPF_INCLUDE": {
+      "label": "SPF-include",
+      "description": "SPF DNS include-directive",
+      "hint": "Vervang door de include-waarde van je provider (bijv. include:sendgrid.net, include:_spf.google.com)."
+    },
+    "DMARC_POLICY": {
+      "label": "DMARC-beleid",
+      "description": "DMARC DNS-beleidsrecord",
+      "hint": "Begin met v=DMARC1; p=none; rua=mailto:dmarc@example.com en verscherp later."
+    },
+    "CORS_ORIGINS": {
+      "label": "CORS-origins",
+      "description": "Kommagescheiden toegestane CORS-origins",
+      "hint": "Kommagescheiden volledige origins (schema + host). Voorbeeld: https://app.example.com,https://admin.example.com. Standaard: http://localhost:5173."
+    },
+    "CDN_DOMAINS": {
+      "label": "CDN-domeinen",
+      "description": "Content-delivery-domeinen",
+      "hint": "Kommagescheiden CDN-hostnamen voor statische bestanden (bijv. cdn.example.com). Laat leeg als je geen CDN gebruikt."
+    },
+    "CUSTOM_SEARXNG_URL": {
+      "label": "Aangepaste SearXNG-URL",
+      "description": "Privé SearXNG-instantie-URL",
+      "hint": "Alleen instellen als je een aparte SearXNG-host gebruikt. Voorbeeld: https://search.example.com."
+    },
+    "WEBHOOK_BASE_URL": {
+      "label": "Webhook-URL",
+      "description": "Webhook-callback basis-URL",
+      "hint": "Basis-URL voor het samenstellen van webhook-callbacks. Voorbeeld: https://api.example.com/webhooks. Standaard: http://localhost:8000."
+    },
+    "TRUSTED_PROXIES": {
+      "label": "Vertrouwde proxy's",
+      "description": "Vertrouwde reverse proxy's (cloudflare, aws, aangepast)",
+      "hint": "Stel in op cloudflare, aws of een kommagescheiden lijst van IP-bereiken. Laat leeg als je niet achter een proxy zit."
+    },
+    "SSL_CERT_PATH": {
+      "label": "SSL-certificaatpad",
+      "description": "Pad naar SSL-certificaatbestand",
+      "hint": "Absoluut pad naar het certificaatbestand. Voorbeeld: /etc/ssl/certs/fullchain.pem."
+    },
+    "SSL_KEY_PATH": {
+      "label": "SSL-sleutelpad",
+      "description": "Pad naar SSL-privésleutelbestand",
+      "hint": "Absoluut pad naar het privésleutelbestand. Voorbeeld: /etc/ssl/private/privkey.pem."
+    },
+    "FORCE_HTTPS": {
+      "label": "HTTPS forceren",
+      "description": "HTTP doorsturen naar HTTPS",
+      "hint": "Stel in op true pas nadat SSL_CERT_PATH en SSL_KEY_PATH zijn geconfigureerd."
+    },
+    "HSTS_MAX_AGE": {
+      "label": "HSTS maximale leeftijd",
+      "description": "HSTS max-age in seconden",
+      "hint": "Aantal seconden dat browsers HTTPS moeten afdwingen. Standaard: 31536000 (1 jaar). Gebruik 0 om uit te schakelen."
+    },
+    "MONITORING_URL": {
+      "label": "Monitoring-URL",
+      "description": "URL voor gezondheidsmonitoring",
+      "hint": "Gezondheidscontrole-URL voor externe monitors. Standaard: http://localhost:8000/health."
     }
+  },
+  "colors": {
+    "blue": "Blauw",
+    "purple": "Paars",
+    "green": "Groen",
+    "orange": "Oranje",
+    "pink": "Roze",
+    "teal": "Blauwgroen"
+  },
+  "promptPreview": {
+    "sampleQuestion": "Wat moet ik weten over dit onderwerp?"
   }
 }

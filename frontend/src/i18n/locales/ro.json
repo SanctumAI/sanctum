@@ -32,9 +32,7 @@
       "searchLabel": "Caută limbi",
       "noResults": "Nu s-au găsit limbi pentru \"{{query}}\"",
       "continue": "Continuă",
-      "changeInSettings": "Poți schimba asta mai târziu în setări.",
-      "privacyNoticeTitle": "Privat implicit",
-      "privacyNoticeBody": "Sanctum folosește autentificare fără parolă și setări de profil cu criptare prioritară."
+      "changeInSettings": "Poți schimba asta mai târziu în setări."
     },
     "auth": {
       "signUp": "Înregistrează-te",
@@ -65,7 +63,9 @@
       "expiringLinkTitle": "Linkuri de autentificare cu durată scurtă",
       "expiringLinkBody": "Fiecare link magic este semnat și expiră după 15 minute.",
       "encryptionTitle": "Criptare implicită",
-      "encryptionBody": "Câmpurile de profil sunt criptate implicit, iar administratorii aleg ce informații nesensibile pot fi folosite pentru personalizare."
+      "encryptionBody": "Câmpurile profilului sunt criptate implicit, dar administratorul acestei instanțe controlează setările la nivel de câmp și poate permite ca anumite date să fie stocate sau partajate diferit.",
+      "adminControlNotice": "Gestionarea datelor este configurată de administratorul acestei instanțe, inclusiv ce poate fi stocat necriptat sau partajat cu instrumente AI.",
+      "noWarrantyNotice": "Software-ul Sanctum este furnizat ca atare, fără garanție. Utilizarea acestei instanțe este supusă politicilor administratorului."
     },
     "verify": {
       "verifying": "Se verifică linkul...",
@@ -325,7 +325,7 @@
       "encryptDisabled": "Stochează ca text simplu",
       "encryptedHint": "Valorile câmpului vor fi criptate cu NIP-04 (recomandat)",
       "plaintextHint": "Valorile câmpului vor fi stocate ca text simplu (nerecomandat pentru date sensibile)",
-      "encryptedSummary": "Acest câmp este criptat. Doar tu poți vedea datele când ești autentificat.",
+      "encryptedSummary": "Acest câmp este criptat. Doar un administrator cu cheia privată Nostr corespunzătoare poate decripta și vizualiza datele.",
       "encryptedNoAI": "Personalizarea AI nu este disponibilă pentru câmpurile criptate.",
       "securityWarning": "Avertisment de securitate",
       "securityWarningBody": "Dezactivarea criptării va stoca datele utilizatorului ca text simplu. Dezactivează doar pentru câmpuri nesensibile precum preferințele sau informațiile publice.",
@@ -340,7 +340,7 @@
       "encryptionHelpWhenEnabled": "Când criptarea este activată:",
       "encryptionHelpPoint1": "Datele sunt criptate folosind cheia Nostr a administratorului (NIP-04)",
       "encryptionHelpPoint2": "Doar administratorul poate decripta și vedea datele",
-      "encryptionHelpPoint3": "Protejează împotriva breșelor de bază de date",
+      "encryptionHelpPoint3": "Reduce expunerea în unele scenarii de breșă a bazei de date, dar nu elimină riscul",
       "encryptionHelpPoint4": "Nu pot fi partajate cu asistentul AI",
       "encryptionHelpWhenDisabled": "Când criptarea este dezactivată:",
       "encryptionHelpDisabledPoint1": "Datele sunt stocate ca text simplu lizibil",
@@ -349,7 +349,10 @@
       "encryptionHelpRecommendation": "Recomandare: Păstrează criptarea activată pentru orice informații de identificare personală (nume, emailuri, numere de telefon, adrese).",
       "encryptedBadge": "Criptat",
       "plaintextBadge": "Text simplu",
-      "inChatBadge": "În chat"
+      "inChatBadge": "În chat",
+      "complianceAcknowledgeLabel": "Confirm că acest câmp poate fi stocat ca text simplu și/sau partajat cu AI conform cerințelor noastre legale aplicabile.",
+      "complianceAcknowledgeHint": "Activează aceasta doar după actualizarea notificărilor pentru utilizatori, fluxurilor de consimțământ (dacă sunt necesare) și politicilor interne de gestionare a datelor.",
+      "complianceAcknowledgeRequired": "Trebuie să confirmi responsabilitatea legală/de conformitate înainte de a salva această configurare de câmp."
     },
     "fieldTypes": {
       "text": "Text",
@@ -408,7 +411,8 @@
     "securityJourneyStep1": "Securizează accesul: setează URL-urile publice, dezactivează flagurile de simulare în afara dezvoltării și alege regulile de aprobare a utilizatorilor.",
     "securityJourneyStep2": "Stabilește limitele datelor: colectează doar câmpurile necesare, păstrează câmpurile sensibile criptate și limitează câmpurile din contextul chat-ului.",
     "securityJourneyStep3": "Validează și monitorizează: rulează validarea configurației, verifică starea serviciilor și revizuiește datele stocate în mod regulat.",
-    "securityJourneyNote": "Aceasta îți oferă o bază solidă pentru producție."
+    "securityJourneyNote": "Aceasta îți oferă o bază solidă pentru producție.",
+    "legalResponsibilityNotice": "Ești responsabil pentru configurarea legală, informările utilizatorilor și politicile de gestionare a datelor pentru această instanță."
   },
   "errors": {
     "requestFailed": "Cererea a eșuat",

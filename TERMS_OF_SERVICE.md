@@ -1,6 +1,6 @@
 # Terms of Service
 
-**Last Updated:** January 2026
+**Last Updated:** February 8, 2026
 
 ## 1. Acceptance of Terms
 
@@ -33,7 +33,18 @@ You agree to:
 - Not use the Software for any illegal, harmful, or malicious purposes
 - Not rely on the Software for any critical, life-safety, or high-stakes decisions without independent professional verification
 
-## 4. Disclaimer of Warranties
+## 4. Data Protection Roles and Responsibilities
+
+Sanctum is distributed as self-hosted open-source software. The person or organization operating an instance ("Instance Administrator") determines what data is collected, how it is configured, where it is processed, and which third-party services are enabled.
+
+By operating or using an instance, you acknowledge that:
+
+- The Instance Administrator is responsible for legal compliance obligations related to data processing, notices, consent (where required by applicable law), retention, deletion, and security configuration
+- Encryption and AI-context behavior can be configured by the Instance Administrator, including storage of selected fields in plaintext when encryption is disabled for those fields
+  - **Security Note:** Disabling encryption for a field means that field's data will be stored as readable plaintext in the database. Instance Administrators should ensure appropriate notices and safeguards are in place before disabling encryption for any field containing personal or sensitive information.
+- The developer(s), contributor(s), and copyright holder(s) are not the default data controller or processor for third-party deployments, except where a separate written agreement explicitly states otherwise
+
+## 5. Disclaimer of Warranties
 
 **THE SOFTWARE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT.**
 
@@ -45,7 +56,7 @@ The developer(s) make no warranty that:
 - Any errors in the Software will be corrected
 - The Software is free of viruses or other harmful components
 
-## 5. Limitation of Liability
+## 6. Limitation of Liability
 
 **TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE DEVELOPER(S), CONTRIBUTOR(S), OR COPYRIGHT HOLDER(S) BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, CONSEQUENTIAL, OR PUNITIVE DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; BUSINESS INTERRUPTION; PERSONAL INJURY; PRIVACY VIOLATIONS; OR ANY OTHER PECUNIARY OR NON-PECUNIARY LOSS) ARISING OUT OF OR IN CONNECTION WITH:**
 
@@ -59,7 +70,7 @@ The developer(s) make no warranty that:
 
 **THIS LIMITATION APPLIES REGARDLESS OF THE LEGAL THEORY (CONTRACT, TORT, NEGLIGENCE, STRICT LIABILITY, OR OTHERWISE), EVEN IF THE DEVELOPER(S) HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.**
 
-## 6. Indemnification
+## 7. Indemnification
 
 You agree to indemnify, defend, and hold harmless the developer(s), contributor(s), and their respective affiliates, officers, directors, employees, and agents from and against any and all claims, damages, obligations, losses, liabilities, costs, and expenses (including but not limited to attorney's fees) arising from:
 
@@ -69,7 +80,7 @@ You agree to indemnify, defend, and hold harmless the developer(s), contributor(
 - Your violation of any third-party rights
 - Any content you submit, post, or transmit through the Software
 
-## 7. Assumption of Risk
+## 8. Assumption of Risk
 
 You expressly acknowledge and assume all risks associated with using the Software, including but not limited to:
 
@@ -80,23 +91,23 @@ You expressly acknowledge and assume all risks associated with using the Softwar
 - **Third-Party Dependencies:** Risk arising from external services, APIs, or integrations that may fail, change, or become unavailable
 - **Regulatory Risks:** Risk that use of the Software may be subject to evolving legal and regulatory requirements
 
-## 8. No Professional Advice
+## 9. No Professional Advice
 
 Nothing in this Software constitutes legal, financial, medical, security, or other professional advice. The Software is not a substitute for professional consultation. Always seek the advice of qualified professionals for specific situations.
 
-## 9. Modifications to Terms
+## 10. Modifications to Terms
 
 The developer(s) reserve the right to modify these Terms at any time. Continued use of the Software after any such changes constitutes your acceptance of the new Terms.
 
-## 10. Severability
+## 11. Severability
 
 If any provision of these Terms is held to be unenforceable or invalid, such provision will be changed and interpreted to accomplish the objectives of such provision to the greatest extent possible under applicable law, and the remaining provisions will continue in full force and effect.
 
-## 11. Governing Law
+## 12. Governing Law
 
 These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which the primary developer resides, without regard to its conflict of law provisions.
 
-## 12. Entire Agreement
+## 13. Entire Agreement
 
 These Terms, together with the GPL-3.0 License, constitute the entire agreement between you and the developer(s) regarding the use of the Software and supersede all prior agreements and understandings.
 

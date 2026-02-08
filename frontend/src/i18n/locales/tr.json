@@ -32,9 +32,7 @@
       "searchLabel": "Dilleri ara",
       "noResults": "\"{{query}}\" için dil bulunamadı",
       "continue": "Devam et",
-      "changeInSettings": "Bunu daha sonra ayarlarda değiştirebilirsiniz.",
-      "privacyNoticeTitle": "Varsayılan olarak gizli",
-      "privacyNoticeBody": "Sanctum, parolasız oturum açma ve şifreleme öncelikli profil ayarları kullanır."
+      "changeInSettings": "Bunu daha sonra ayarlarda değiştirebilirsiniz."
     },
     "auth": {
       "signUp": "Kayıt ol",
@@ -65,7 +63,9 @@
       "expiringLinkTitle": "Kısa ömürlü giriş bağlantıları",
       "expiringLinkBody": "Her sihirli bağlantı imzalanır ve 15 dakika sonra süresi dolar.",
       "encryptionTitle": "Varsayılan olarak şifreleme",
-      "encryptionBody": "Profil alanları varsayılan olarak şifrelenir ve yöneticiler kişiselleştirme için hangi hassas olmayan bilgilerin kullanılabileceğini seçer."
+      "encryptionBody": "Profil alanları varsayılan olarak şifrelenir, ancak bu örneğin yöneticisi alan düzeyinde ayarları kontrol eder ve seçili verilerin farklı şekilde saklanmasına veya paylaşılmasına izin verebilir.",
+      "adminControlNotice": "Veri işleme bu örneğin yöneticisi tarafından yapılandırılır; bu, nelerin şifrelenmeden saklanabileceğini veya yapay zeka araçlarıyla paylaşılabileceğini de kapsar.",
+      "noWarrantyNotice": "Sanctum yazılımı olduğu gibi, herhangi bir garanti olmaksızın sunulmaktadır. Bu örneğin kullanımı yönetici politikalarına tabidir."
     },
     "verify": {
       "verifying": "Bağlantınız doğrulanıyor...",
@@ -320,7 +320,7 @@
       "encryptDisabled": "Düz metin olarak sakla",
       "encryptedHint": "Alan değerleri NIP-04 ile şifrelenecek (önerilen)",
       "plaintextHint": "Alan değerleri düz metin olarak saklanacak (hassas veriler için önerilmez)",
-      "encryptedSummary": "Bu alan şifrelenmiş. Sadece oturum açtığınızda verileri görüntüleyebilirsiniz.",
+      "encryptedSummary": "Bu alan şifrelenmiştir. Verilerin şifresini yalnızca ilgili Nostr özel anahtarına sahip bir yönetici çözebilir ve görüntüleyebilir.",
       "encryptedNoAI": "Şifrelenmiş alanlar için AI kişiselleştirme kullanılamaz.",
       "securityWarning": "Güvenlik Uyarısı",
       "securityWarningBody": "Şifrelemeyi devre dışı bırakmak kullanıcı verilerini düz metin olarak saklayacaktır. Yalnızca tercihler veya genel bilgiler gibi hassas olmayan alanlar için devre dışı bırakın.",
@@ -335,7 +335,7 @@
       "encryptionHelpWhenEnabled": "Şifreleme etkinleştirildiğinde:",
       "encryptionHelpPoint1": "Veriler yöneticinin Nostr anahtarı kullanılarak şifrelenir (NIP-04)",
       "encryptionHelpPoint2": "Yalnızca yönetici verilerin şifresini çözebilir ve görüntüleyebilir",
-      "encryptionHelpPoint3": "Veritabanı ihlallerine karşı korur",
+      "encryptionHelpPoint3": "Bazı veritabanı ihlali senaryolarında maruziyeti azaltır, ancak riski tamamen ortadan kaldırmaz",
       "encryptionHelpPoint4": "AI asistanıyla paylaşılamaz",
       "encryptionHelpWhenDisabled": "Şifreleme devre dışı bırakıldığında:",
       "encryptionHelpDisabledPoint1": "Veriler okunabilir düz metin olarak saklanır",
@@ -344,7 +344,10 @@
       "encryptionHelpRecommendation": "Öneri: Kişisel tanımlayıcı bilgiler (isimler, e-postalar, telefon numaraları, adresler) için şifrelemeyi etkin tutun.",
       "encryptedBadge": "Şifreli",
       "plaintextBadge": "Düz Metin",
-      "inChatBadge": "Sohbette"
+      "inChatBadge": "Sohbette",
+      "complianceAcknowledgeLabel": "Bu alanın düz metin olarak saklanabileceğini ve/veya geçerli yasal gereksinimlerimiz kapsamında yapay zeka ile paylaşılabileceğini onaylıyorum.",
+      "complianceAcknowledgeHint": "Bunu yalnızca kullanıcı bildirimlerinizi, onay akışlarınızı (gerekiyorsa) ve dahili veri işleme politikalarınızı güncelledikten sonra etkinleştirin.",
+      "complianceAcknowledgeRequired": "Bu alan yapılandırmasını kaydetmeden önce yasal/uyumluluk sorumluluğunu onaylamanız gerekir."
     },
     "fieldTypes": {
       "text": "Metin",
@@ -403,7 +406,8 @@
     "securityJourneyStep1": "Erişimi güvence altına alın: genel URL'leri ayarlayın, geliştirme dışında simülasyon bayraklarını devre dışı bırakın ve kullanıcı onay kurallarını seçin.",
     "securityJourneyStep2": "Veri sınırlarını belirleyin: yalnızca gerekli alanları toplayın, hassas alanları şifreli tutun ve sohbet bağlamı alanlarını sınırlayın.",
     "securityJourneyStep3": "Doğrulayın ve izleyin: yapılandırma doğrulaması yapın, servis durumunu kontrol edin ve saklanan verileri düzenli olarak gözden geçirin.",
-    "securityJourneyNote": "Bu size üretim için güçlü bir temel sağlar."
+    "securityJourneyNote": "Bu size üretim için güçlü bir temel sağlar.",
+    "legalResponsibilityNotice": "Bu örneğin yasal yapılandırması, kullanıcı bildirimleri ve veri işleme politikalarından siz sorumlusunuz."
   },
   "errors": {
     "requestFailed": "İstek başarısız oldu",

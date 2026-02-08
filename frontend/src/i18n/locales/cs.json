@@ -31,9 +31,7 @@
       "searchLabel": "Hledat jazyky",
       "noResults": "Pro \"{{query}}\" nebyly nalezeny žádné jazyky",
       "continue": "Pokračovat",
-      "changeInSettings": "Později to můžete změnit v nastavení.",
-      "privacyNoticeTitle": "Soukromí jako standard",
-      "privacyNoticeBody": "Sanctum používá přihlášení bez hesla a nastavení profilu s prioritou šifrování."
+      "changeInSettings": "Později to můžete změnit v nastavení."
     },
     "auth": {
       "signUp": "Zaregistrovat se",
@@ -64,7 +62,9 @@
       "expiringLinkTitle": "Krátkodobé přihlašovací odkazy",
       "expiringLinkBody": "Každý magický odkaz je podepsaný a vyprší po 15 minutách.",
       "encryptionTitle": "Šifrování jako standard",
-      "encryptionBody": "Pole profilu jsou ve výchozím nastavení šifrována a správci volí, jaké necitlivé informace lze použít pro personalizaci."
+      "encryptionBody": "Pole profilu jsou ve výchozím stavu šifrována, ale správce této instance řídí nastavení na úrovni polí a může povolit, aby vybraná data byla uložena nebo sdílena jinak.",
+      "adminControlNotice": "Nakládání s daty konfiguruje správce této instance, včetně toho, co může být uloženo nešifrovaně nebo sdíleno s AI nástroji.",
+      "noWarrantyNotice": "Software Sanctum je poskytován tak, jak je, bez záruky. Používání této instance podléhá pravidlům správce."
     },
     "verify": {
       "verifying": "Ověřování odkazu...",
@@ -314,7 +314,7 @@
       "encryptDisabled": "Uložit jako prostý text",
       "encryptedHint": "Hodnoty pole budou šifrovány pomocí NIP-04 (doporučeno)",
       "plaintextHint": "Hodnoty pole budou uloženy jako prostý text (nedoporučuje se pro citlivá data)",
-      "encryptedSummary": "Toto pole je šifrováno. Pouze vy můžete zobrazit data, když jste přihlášeni.",
+      "encryptedSummary": "Toto pole je šifrováno. Pouze správce s odpovídajícím soukromým klíčem Nostr může data dešifrovat a zobrazit.",
       "encryptedNoAI": "Personalizace AI není k dispozici pro šifrovaná pole.",
       "securityWarning": "Bezpečnostní varování",
       "securityWarningBody": "Vypnutí šifrování uloží uživatelská data jako prostý text. Vypněte pouze pro necitlivá pole jako preference nebo veřejné informace.",
@@ -329,7 +329,7 @@
       "encryptionHelpWhenEnabled": "Když je šifrování zapnuto:",
       "encryptionHelpPoint1": "Data jsou šifrována pomocí Nostr klíče administrátora (NIP-04)",
       "encryptionHelpPoint2": "Pouze administrátor může dešifrovat a zobrazit data",
-      "encryptionHelpPoint3": "Chrání před narušením databáze",
+      "encryptionHelpPoint3": "Snižuje míru vystavení v některých scénářích narušení databáze, ale neodstraňuje riziko",
       "encryptionHelpPoint4": "Nelze sdílet s AI asistentem",
       "encryptionHelpWhenDisabled": "Když je šifrování vypnuto:",
       "encryptionHelpDisabledPoint1": "Data jsou uložena jako čitelný prostý text",
@@ -338,7 +338,10 @@
       "encryptionHelpRecommendation": "Doporučení: Ponechte šifrování zapnuté pro všechny osobní identifikační údaje (jména, emaily, telefonní čísla, adresy).",
       "encryptedBadge": "Šifrováno",
       "plaintextBadge": "Prostý text",
-      "inChatBadge": "V chatu"
+      "inChatBadge": "V chatu",
+      "complianceAcknowledgeLabel": "Potvrzuji, že toto pole může být uloženo jako prostý text a/nebo sdíleno s AI v souladu s našimi platnými právními požadavky.",
+      "complianceAcknowledgeHint": "Povolte toto až po aktualizaci uživatelských upozornění, toků souhlasu (pokud jsou vyžadovány) a interních pravidel pro nakládání s daty.",
+      "complianceAcknowledgeRequired": "Před uložením konfigurace tohoto pole musíte potvrdit právní a regulační odpovědnost."
     },
     "fieldTypes": {
       "text": "Text",
@@ -397,7 +400,8 @@
     "securityJourneyStep1": "Zabezpečte přístup: nastavte veřejné URL, vypněte simulační příznaky mimo vývoj a zvolte pravidla schvalování uživatelů.",
     "securityJourneyStep2": "Stanovte datové hranice: sbírejte pouze potřebná pole, udržujte citlivá pole šifrovaná a omezte pole kontextu chatu.",
     "securityJourneyStep3": "Ověřte a monitorujte: spusťte ověření konfigurace, zkontrolujte stav služeb a pravidelně kontrolujte uložená data.",
-    "securityJourneyNote": "Tím získáte silný základ pro produkční nasazení."
+    "securityJourneyNote": "Tím získáte silný základ pro produkční nasazení.",
+    "legalResponsibilityNotice": "Nesete odpovědnost za zákonnou konfiguraci, informování uživatelů a pravidla nakládání s daty pro tuto instanci."
   },
   "errors": {
     "requestFailed": "Požadavek selhal",

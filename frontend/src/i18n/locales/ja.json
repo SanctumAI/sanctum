@@ -32,9 +32,7 @@
       "searchLabel": "言語を検索",
       "noResults": "「{{query}}」に一致する言語が見つかりません",
       "continue": "続行",
-      "changeInSettings": "後で設定で変更できます。",
-      "privacyNoticeTitle": "デフォルトでプライベート",
-      "privacyNoticeBody": "Sanctumはパスワード不要のサインインと、暗号化を前提としたプロフィール設定を採用しています。"
+      "changeInSettings": "後で設定で変更できます。"
     },
     "auth": {
       "signUp": "新規登録",
@@ -65,7 +63,9 @@
       "expiringLinkTitle": "短時間で失効するサインインリンク",
       "expiringLinkBody": "各マジックリンクは署名されており、15分で期限切れになります。",
       "encryptionTitle": "デフォルトで暗号化",
-      "encryptionBody": "プロフィール項目はデフォルトで暗号化され、管理者はパーソナライズに使う非機密情報のみを選択できます。"
+      "encryptionBody": "プロフィールフィールドはデフォルトで暗号化されますが、このインスタンスの管理者がフィールドレベルの設定を管理しており、選択されたデータを異なる方法で保存または共有することを許可する場合があります。",
+      "adminControlNotice": "データの取り扱いは、暗号化なしで保存される可能性のあるデータやAIツールと共有されるデータを含め、このインスタンスの管理者が設定します。",
+      "noWarrantyNotice": "Sanctum ソフトウェアは保証なしで現状のまま提供されます。このインスタンスの使用は管理者のポリシーに従います。"
     },
     "verify": {
       "verifying": "リンクを確認中...",
@@ -320,7 +320,7 @@
       "encryptDisabled": "プレーンテキストとして保存",
       "encryptedHint": "フィールド値はNIP-04で暗号化されます（推奨）",
       "plaintextHint": "フィールド値はプレーンテキストで保存されます（機密データには非推奨）",
-      "encryptedSummary": "このフィールドは暗号化されています。ログイン時のみデータを表示できます。",
+      "encryptedSummary": "このフィールドは暗号化されています。対応するNostr秘密鍵を持つ管理者のみがデータを復号化して閲覧できます。",
       "encryptedNoAI": "暗号化されたフィールドではAIパーソナライゼーションは利用できません。",
       "securityWarning": "セキュリティ警告",
       "securityWarningBody": "暗号化を無効にすると、ユーザーデータがプレーンテキストで保存されます。設定や公開情報などの機密性の低いフィールドのみ無効にしてください。",
@@ -335,7 +335,7 @@
       "encryptionHelpWhenEnabled": "暗号化が有効な場合：",
       "encryptionHelpPoint1": "データは管理者のNostrキー（NIP-04）を使用して暗号化されます",
       "encryptionHelpPoint2": "管理者のみがデータを復号化して表示できます",
-      "encryptionHelpPoint3": "データベース侵害から保護します",
+      "encryptionHelpPoint3": "一部のデータベース侵害シナリオにおけるリスクを軽減しますが、リスクを完全に排除するものではありません",
       "encryptionHelpPoint4": "AIアシスタントと共有できません",
       "encryptionHelpWhenDisabled": "暗号化が無効な場合：",
       "encryptionHelpDisabledPoint1": "データは読み取り可能なプレーンテキストとして保存されます",
@@ -344,7 +344,10 @@
       "encryptionHelpRecommendation": "推奨：個人を特定できる情報（名前、メール、電話番号、住所）には暗号化を有効のままにしてください。",
       "encryptedBadge": "暗号化済み",
       "plaintextBadge": "プレーンテキスト",
-      "inChatBadge": "チャット内"
+      "inChatBadge": "チャット内",
+      "complianceAcknowledgeLabel": "適用される法的要件に基づき、このフィールドがプレーンテキストで保存および/またはAIと共有される可能性があることを確認します。",
+      "complianceAcknowledgeHint": "ユーザー通知、同意フロー（必要な場合）、および内部データ取り扱いポリシーを更新した後にのみ有効にしてください。",
+      "complianceAcknowledgeRequired": "このフィールド設定を保存する前に、法的/コンプライアンス上の責任を確認する必要があります。"
     },
     "fieldTypes": {
       "text": "テキスト",
@@ -403,7 +406,8 @@
     "securityJourneyStep1": "アクセスを保護: 公開URLを設定し、開発環境以外ではシミュレーションフラグを無効化し、ユーザー承認ルールを決めます。",
     "securityJourneyStep2": "データ境界を定義: 必要な項目だけ収集し、機密項目は暗号化したままにし、チャット文脈に入れる項目を制限します。",
     "securityJourneyStep3": "検証と監視: 設定検証を実行し、サービスヘルスを確認し、保存データを定期的に見直します。",
-    "securityJourneyNote": "これで本番運用向けの強いベースラインを作れます。"
+    "securityJourneyNote": "これで本番運用向けの強いベースラインを作れます。",
+    "legalResponsibilityNotice": "このインスタンスの適法な設定、ユーザーへの開示、およびデータ取り扱いポリシーについては、あなたが責任を負います。"
   },
   "errors": {
     "requestFailed": "リクエストに失敗しました",

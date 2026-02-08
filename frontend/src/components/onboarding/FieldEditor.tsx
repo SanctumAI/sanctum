@@ -28,7 +28,10 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
   const [userTypeId, setUserTypeId] = useState<number | null>(initialField?.user_type_id ?? null)
   const [encryptionEnabled, setEncryptionEnabled] = useState(initialField?.encryption_enabled ?? true)
   const [includeInChat, setIncludeInChat] = useState(initialField?.include_in_chat ?? false)
-  const [errors, setErrors] = useState<{ name?: string; options?: string }>({})
+  const [complianceAcknowledged, setComplianceAcknowledged] = useState(
+    (initialField?.encryption_enabled ?? true) === false || (initialField?.include_in_chat ?? false)
+  )
+  const [errors, setErrors] = useState<{ name?: string; options?: string; compliance?: string }>({})
   const [showEncryptionHelpModal, setShowEncryptionHelpModal] = useState(false)
   const encryptionHelpModalRef = useRef<HTMLDivElement>(null)
   const triggerElementRef = useRef<HTMLElement | null>(null)
@@ -58,7 +61,8 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
   }
 
   const validate = (): boolean => {
-    const newErrors: { name?: string; options?: string } = {}
+    const newErrors: { name?: string; options?: string; compliance?: string } = {}
+    const requiresComplianceAcknowledgement = !encryptionEnabled || includeInChat
 
     if (!name.trim()) {
       newErrors.name = t('admin.fields.nameRequired')
@@ -69,6 +73,10 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
       if (validOptions.length < 2) {
         newErrors.options = t('admin.fields.optionsRequired')
       }
+    }
+
+    if (requiresComplianceAcknowledgement && !complianceAcknowledged) {
+      newErrors.compliance = t('admin.fields.complianceAcknowledgeRequired')
     }
 
     setErrors(newErrors)
@@ -98,11 +106,26 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
   const handleEncryptionToggle = () => {
     const newEncryption = !encryptionEnabled
     setEncryptionEnabled(newEncryption)
+    if (!newEncryption) {
+      setComplianceAcknowledged(false)
+      if (errors.compliance) setErrors((prev) => ({ ...prev, compliance: undefined }))
+    }
     // If enabling encryption, auto-disable include_in_chat
     if (newEncryption) {
       setIncludeInChat(false)
     }
   }
+
+  const handleIncludeInChatToggle = () => {
+    const nextInclude = !includeInChat
+    setIncludeInChat(nextInclude)
+    if (nextInclude) {
+      setComplianceAcknowledged(false)
+    }
+    if (errors.compliance) setErrors((prev) => ({ ...prev, compliance: undefined }))
+  }
+
+  const requiresComplianceAcknowledgement = !encryptionEnabled || includeInChat
 
   return (
     <div className="card card-sm animate-fade-in p-6">
@@ -361,8 +384,8 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
                 role="checkbox"
                 aria-checked={includeInChat}
                 tabIndex={0}
-                onClick={() => setIncludeInChat(!includeInChat)}
-                onKeyDown={(e) => e.key === ' ' && (e.preventDefault(), setIncludeInChat(!includeInChat))}
+                onClick={handleIncludeInChatToggle}
+                onKeyDown={(e) => e.key === ' ' && (e.preventDefault(), handleIncludeInChatToggle())}
                 className="flex items-start gap-3 cursor-pointer"
               >
                 <div className={`w-5 h-5 shrink-0 rounded-md border-2 flex items-center justify-center transition-colors mt-0.5 ${
@@ -385,6 +408,47 @@ export function FieldEditor({ onSave, onCancel, initialField, userTypes = [] }: 
                   </p>
                 </div>
               </div>
+
+              {requiresComplianceAcknowledgement && (
+                <div className="bg-surface-overlay border border-border rounded-lg p-3.5">
+                  <div
+                    role="checkbox"
+                    aria-checked={complianceAcknowledged}
+                    tabIndex={0}
+                    onClick={() => {
+                      setComplianceAcknowledged(!complianceAcknowledged)
+                      if (errors.compliance) setErrors((prev) => ({ ...prev, compliance: undefined }))
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === ' ') {
+                        e.preventDefault()
+                        setComplianceAcknowledged(!complianceAcknowledged)
+                        if (errors.compliance) setErrors((prev) => ({ ...prev, compliance: undefined }))
+                      }
+                    }}
+                    className="flex items-start gap-3 cursor-pointer"
+                  >
+                    <div className={`w-5 h-5 shrink-0 rounded-md border-2 flex items-center justify-center transition-colors mt-0.5 ${
+                      complianceAcknowledged ? 'bg-accent border-accent' : 'border-border hover:border-accent/50'
+                    }`}>
+                      {complianceAcknowledged && (
+                        <svg className="w-3 h-3 text-accent-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-sm text-text font-medium">
+                        {t('admin.fields.complianceAcknowledgeLabel')}
+                      </span>
+                      <p className="text-xs text-text-muted mt-1 leading-relaxed">
+                        {t('admin.fields.complianceAcknowledgeHint')}
+                      </p>
+                    </div>
+                  </div>
+                  {errors.compliance && <p className="text-xs text-error mt-2">{errors.compliance}</p>}
+                </div>
+              )}
             </>
           )}
         </div>

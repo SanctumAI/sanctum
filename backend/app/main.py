@@ -13,8 +13,11 @@ import re
 import math
 import tempfile
 import sqlite3
-from fastapi import FastAPI, HTTPException, Query, Depends, Request, BackgroundTasks
-from fastapi.responses import FileResponse
+import hashlib
+import secrets
+from urllib.parse import urlparse
+from fastapi import FastAPI, HTTPException, Query, Depends, Request, BackgroundTasks, Response, Header, Cookie
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from qdrant_client import QdrantClient
 from pydantic import BaseModel
@@ -40,7 +43,7 @@ from models import (
     TableDataResponse, DBQueryRequest, DBQueryResponse,
     RowMutationRequest, RowMutationResponse,
     # Magic Link Auth models
-    MagicLinkRequest, MagicLinkResponse,
+    MagicLinkRequest, MagicLinkResponse, VerifyTokenRequest,
     VerifyTokenResponse, AuthUserResponse, SessionUserResponse,
     # Session defaults
     SessionDefaultsResponse,
@@ -76,11 +79,159 @@ app = FastAPI(
     version="0.1.0"
 )
 
+def _normalize_origin(origin: str) -> str:
+    """
+    Normalize an origin value for CORS matching.
+    Keeps only scheme + host[:port], strips paths/trailing slashes, and rejects wildcard.
+    """
+    raw = origin.strip()
+    if not raw or raw == "*":
+        return ""
+
+    parsed = urlparse(raw)
+    if parsed.scheme and parsed.netloc:
+        return f"{parsed.scheme}://{parsed.netloc}"
+    logger.warning(
+        "Ignoring schemeless/invalid origin %r; expected format 'scheme://host[:port]'",
+        raw,
+    )
+    return ""
+
+
+def _get_cors_allow_origins() -> list[str]:
+    """
+    Resolve explicit CORS allowlist.
+    Wildcard origins are intentionally rejected for authenticated deployments.
+    """
+    configured = os.getenv("CORS_ALLOW_ORIGINS") or os.getenv("CORS_ORIGINS", "")
+    raw_origins = [origin.strip() for origin in configured.split(",") if origin.strip()]
+    if "*" in raw_origins:
+        logger.warning("Ignoring '*' in CORS allowlist; explicit origins are required for credentialed auth")
+
+    origins: list[str] = []
+    for raw_origin in raw_origins:
+        normalized = _normalize_origin(raw_origin)
+        if normalized and normalized not in origins:
+            origins.append(normalized)
+
+    frontend_origin = _normalize_origin(os.getenv("FRONTEND_URL", ""))
+    if frontend_origin and frontend_origin not in origins:
+        origins.append(frontend_origin)
+
+    if not origins:
+        origins = [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        ]
+
+    return origins
+
+
+def _csrf_allowed_origins() -> set[str]:
+    """Origins trusted for cookie-authenticated state-changing requests."""
+    return set(_get_cors_allow_origins())
+
+
+def _request_origin(request: Request) -> str | None:
+    """Resolve origin from Origin header, with Referer fallback."""
+    origin = _normalize_origin(request.headers.get("origin", ""))
+    if origin:
+        return origin
+
+    referer = request.headers.get("referer")
+    if referer:
+        return _normalize_origin(referer)
+
+    return None
+
+
+def _is_secure_request(request: Request) -> bool:
+    """Detect HTTPS requests (direct or behind trusted proxy)."""
+    forwarded_proto = request.headers.get("x-forwarded-proto", "").lower()
+    if forwarded_proto == "https":
+        return True
+    return request.url.scheme == "https"
+
+
+def _api_content_security_policy() -> str:
+    """
+    CSP for API responses.
+    Keep strict defaults while allowing explicit override for deployments.
+    """
+    configured = os.getenv("SECURITY_CSP", "").strip()
+    if configured:
+        return configured
+    return "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
+
+
+def _apply_security_headers(request: Request, response: Response) -> None:
+    """Attach baseline security headers to backend responses."""
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+
+    # Keep docs usable by not forcing strict CSP on docs assets.
+    if not request.url.path.startswith(("/docs", "/redoc", "/openapi.json")):
+        response.headers.setdefault("Content-Security-Policy", _api_content_security_policy())
+
+    if _is_secure_request(request):
+        max_age = os.getenv("HSTS_MAX_AGE", "31536000").strip() or "31536000"
+        response.headers.setdefault("Strict-Transport-Security", f"max-age={max_age}; includeSubDomains")
+
+
+def _has_cookie_session(request: Request) -> bool:
+    """Whether request carries Sanctum auth cookies."""
+    return bool(
+        request.cookies.get(auth.USER_SESSION_COOKIE_NAME)
+        or request.cookies.get(auth.ADMIN_SESSION_COOKIE_NAME)
+    )
+
+
+def _has_bearer_auth(request: Request) -> bool:
+    """Whether request carries Authorization bearer token."""
+    header = request.headers.get("authorization", "")
+    return header.startswith("Bearer ")
+
+
+def _should_enforce_csrf(request: Request) -> bool:
+    """CSRF applies to unsafe methods when cookie auth is used."""
+    if request.method.upper() in {"GET", "HEAD", "OPTIONS", "TRACE"}:
+        return False
+
+    # Token/header-based clients are not subject to cookie-CSRF checks.
+    if _has_bearer_auth(request):
+        return False
+
+    return _has_cookie_session(request)
+
+
+@app.middleware("http")
+async def security_middleware(request: Request, call_next):
+    """
+    Unified security middleware:
+    - Enforces CSRF for cookie-authenticated unsafe requests
+    - Applies standard security headers
+    """
+    if _should_enforce_csrf(request):
+        origin = _request_origin(request)
+        if not origin or origin not in _csrf_allowed_origins():
+            return JSONResponse(status_code=403, content={"detail": "Invalid request origin"})
+
+        csrf_cookie = request.cookies.get(auth.CSRF_COOKIE_NAME)
+        csrf_header = request.headers.get("X-CSRF-Token")
+        if not csrf_cookie or not csrf_header or not secrets.compare_digest(csrf_cookie, csrf_header):
+            return JSONResponse(status_code=403, content={"detail": "CSRF validation failed"})
+
+    response = await call_next(request)
+    _apply_security_headers(request, response)
+    return response
+
 # CORS middleware for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=_get_cors_allow_origins(),
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -104,6 +255,51 @@ async def startup_event():
 # Rate limiters for auth endpoints
 magic_link_limiter = RateLimiter(limit=5, window_seconds=60)   # 5 per minute
 admin_auth_limiter = RateLimiter(limit=10, window_seconds=60)  # 10 per minute
+
+
+def _rate_limit_key(request: Request) -> str:
+    """
+    Stable key for API rate limiting.
+    Prefer auth identity (bearer/cookie), fallback to client IP.
+    """
+    auth_header = request.headers.get("authorization", "")
+    if auth_header.startswith("Bearer "):
+        token = auth_header[7:]
+        digest = hashlib.sha256(token.encode("utf-8")).hexdigest()[:20]
+        return f"bearer:{digest}"
+
+    cookie_token = request.cookies.get(auth.ADMIN_SESSION_COOKIE_NAME) or request.cookies.get(auth.USER_SESSION_COOKIE_NAME)
+    if cookie_token:
+        digest = hashlib.sha256(cookie_token.encode("utf-8")).hexdigest()[:20]
+        return f"cookie:{digest}"
+
+    client_host = request.client.host if request.client else "unknown"
+    return f"ip:{client_host}"
+
+
+def _safe_int_env(key: str, default: int) -> int:
+    """Read an env var as int, falling back to *default* on bad values."""
+    raw = os.getenv(key)
+    if raw is None:
+        return default
+    try:
+        return int(raw)
+    except (ValueError, TypeError):
+        logger.warning("Invalid integer for env %s=%r, using default %d", key, raw, default)
+        return default
+
+
+chat_limiter = RateLimiter(
+    limit=_safe_int_env("RATE_LIMIT_CHAT_PER_MINUTE", 120),
+    window_seconds=60,
+    key_func=_rate_limit_key,
+)
+
+vector_search_limiter = RateLimiter(
+    limit=_safe_int_env("RATE_LIMIT_VECTOR_SEARCH_PER_MINUTE", 30),
+    window_seconds=60,
+    key_func=_rate_limit_key,
+)
 
 # Configuration from environment
 QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
@@ -407,7 +603,11 @@ async def llm_smoke_test():
 
 
 @app.post("/llm/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest, user: dict = Depends(auth.require_admin_or_approved_user)):
+async def chat(
+    request: ChatRequest,
+    user: dict = Depends(auth.require_admin_or_approved_user),
+    _: None = Depends(chat_limiter),
+):
     """
     Chat endpoint with optional tool support.
 
@@ -583,7 +783,11 @@ async def execute_admin_tool(request: ToolExecuteRequest, admin: dict = Depends(
 
 
 @app.post("/vector-search", response_model=VectorSearchResponse)
-async def vector_search(request: VectorSearchRequest):
+async def vector_search(
+    request: VectorSearchRequest,
+    admin: dict = Depends(auth.require_admin),
+    _: None = Depends(vector_search_limiter),
+):
     """
     Direct vector search endpoint (no LLM generation).
 
@@ -731,16 +935,9 @@ def _compute_onboarding_flags(user: dict) -> tuple[bool, bool]:
     return False, False
 
 
-@app.get("/auth/verify", response_model=VerifyTokenResponse)
-async def verify_magic_link(
-    token: str = Query(..., description="Magic link token"),
-    _: None = Depends(auth.require_instance_setup_complete)
-):
+async def _verify_magic_link_and_create_session(token: str, response: Response) -> VerifyTokenResponse:
     """
-    Verify a magic link token and create/return the user.
-    Returns a session token for subsequent authenticated requests.
-    
-    Requires instance setup to be complete (admin must authenticate first).
+    Verify a magic link token, create/return the user, and set session cookie.
     """
     # Verify token
     data = auth.verify_magic_link_token(token)
@@ -759,6 +956,7 @@ async def verify_magic_link(
 
     # Create session token
     session_token = auth.create_session_token(user["id"], email)
+    auth.set_user_session_cookie(response, session_token)
 
     needs_onboarding, needs_user_type = _compute_onboarding_flags(user)
 
@@ -778,9 +976,69 @@ async def verify_magic_link(
     )
 
 
+@app.post("/auth/verify", response_model=VerifyTokenResponse)
+async def verify_magic_link(
+    body: VerifyTokenRequest,
+    response: Response,
+    _: None = Depends(auth.require_instance_setup_complete),
+):
+    """
+    Verify a magic link token and create/return the user.
+    Active clients should use this POST endpoint (token in JSON body).
+    """
+    token = body.token.strip()
+    if not token:
+        raise HTTPException(status_code=400, detail="Token is required")
+    return await _verify_magic_link_and_create_session(token, response)
+
+
+@app.post("/auth/dev-session", response_model=VerifyTokenResponse)
+async def create_dev_session(
+    body: MagicLinkRequest,
+    response: Response,
+    _: None = Depends(auth.require_instance_setup_complete),
+):
+    """
+    Development-only auth helper for simulated user onboarding.
+    Enabled only when SIMULATE_USER_AUTH=true and never in production mode.
+    """
+    if auth.is_production_mode() or not _get_simulation_setting("SIMULATE_USER_AUTH", "false"):
+        raise HTTPException(status_code=403, detail="Simulated auth is disabled")
+
+    email = body.email.strip().lower()
+    name = body.name.strip()
+    if not email:
+        raise HTTPException(status_code=400, detail="Email is required")
+
+    user = database.get_user_by_email(email)
+    if not user:
+        user_id = database.create_user(email=email, name=name)
+        user = database.get_user(user_id)
+
+    session_token = auth.create_session_token(user["id"], email)
+    auth.set_user_session_cookie(response, session_token)
+    needs_onboarding, needs_user_type = _compute_onboarding_flags(user)
+
+    return VerifyTokenResponse(
+        success=True,
+        user=AuthUserResponse(
+            id=user["id"],
+            email=email,
+            name=name or user.get("name"),
+            user_type_id=user.get("user_type_id"),
+            approved=bool(user.get("approved", 1)),
+            created_at=user.get("created_at"),
+            needs_onboarding=needs_onboarding,
+            needs_user_type=needs_user_type,
+        ),
+        session_token=session_token,
+    )
+
+
 @app.get("/auth/me", response_model=SessionUserResponse)
 async def get_current_user(
-    token: str = Query(None, description="Session token"),
+    authorization: Optional[str] = Header(None),
+    session_cookie: Optional[str] = Cookie(None, alias=auth.USER_SESSION_COOKIE_NAME),
     _: None = Depends(auth.require_instance_setup_complete)
 ):
     """
@@ -789,6 +1047,12 @@ async def get_current_user(
     
     Requires instance setup to be complete (admin must authenticate first).
     """
+    token = None
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization[7:].strip()
+    if not token:
+        token = session_cookie
+
     if not token:
         return SessionUserResponse(authenticated=False)
 
@@ -796,6 +1060,22 @@ async def get_current_user(
     data = auth.verify_session_token(token)
     if not data:
         return SessionUserResponse(authenticated=False)
+
+    # Simulated auth mode support (dev-only token)
+    if data.get("dev_mode"):
+        return SessionUserResponse(
+            authenticated=True,
+            user=AuthUserResponse(
+                id=-1,
+                email="dev@localhost",
+                name="Dev User",
+                user_type_id=None,
+                approved=True,
+                created_at=None,
+                needs_onboarding=False,
+                needs_user_type=False,
+            ),
+        )
 
     # Get user
     user = database.get_user(data["user_id"])
@@ -817,6 +1097,13 @@ async def get_current_user(
             needs_user_type=needs_user_type
         )
     )
+
+
+@app.post("/auth/logout", response_model=SuccessResponse)
+async def logout_user(response: Response):
+    """Clear auth session cookies for the current browser."""
+    auth.clear_auth_cookies(response)
+    return SuccessResponse(success=True, message="Logged out")
 
 
 @app.post("/auth/test-email", response_model=TestEmailResponse)
@@ -966,6 +1253,7 @@ async def send_test_email(
 
 @app.post("/admin/auth", response_model=AdminAuthResponse)
 async def admin_auth(
+    response: Response,
     request: Request,
     body: AdminAuthRequest,
     _: None = Depends(admin_auth_limiter)
@@ -1035,7 +1323,12 @@ async def admin_auth(
     database.mark_instance_setup_complete()
 
     # Create session token for subsequent authenticated requests
-    session_token = auth.create_admin_session_token(admin["id"], pubkey)
+    session_token = auth.create_admin_session_token(
+        admin["id"],
+        pubkey,
+        int(admin.get("session_nonce", 0) or 0),
+    )
+    auth.set_admin_session_cookie(response, session_token)
 
     return AdminAuthResponse(
         admin=AdminResponse(**admin),
@@ -1043,6 +1336,33 @@ async def admin_auth(
         instance_initialized=instance_has_admin or is_new,  # True if had admin or just created one
         session_token=session_token
     )
+
+
+@app.post("/admin/logout", response_model=SuccessResponse)
+async def logout_admin(
+    response: Response,
+    authorization: Optional[str] = Header(None),
+    admin_session_cookie: Optional[str] = Cookie(None, alias=auth.ADMIN_SESSION_COOKIE_NAME),
+):
+    """
+    Clear auth session cookies for the current browser and revoke active admin tokens.
+    Revocation is best-effort: if a valid admin token is present, rotate session nonce.
+    """
+    token = auth._resolve_auth_token(authorization, admin_session_cookie)
+    if token:
+        token_data = auth.verify_admin_session_token(token)
+        if token_data:
+            admin_pubkey = token_data.get("pubkey")
+            if admin_pubkey:
+                admin_record = database.get_admin_by_pubkey(admin_pubkey)
+                if admin_record and auth.is_admin_session_current(admin_record, token_data):
+                    try:
+                        database.increment_admin_session_nonce(admin_pubkey)
+                    except Exception as e:
+                        logger.warning(f"Failed to rotate admin session nonce on logout: {e}")
+
+    auth.clear_auth_cookies(response)
+    return SuccessResponse(success=True, message="Logged out")
 
 
 @app.get("/admin/list", response_model=AdminListResponse)

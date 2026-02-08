@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthFlow, clearAllAuth } from '../../hooks/useAuthFlow'
+import { API_BASE } from '../../types/onboarding'
 
 interface SettingsDrawerProps {
   open: boolean
@@ -69,7 +70,16 @@ export function SettingsDrawer({ open, onClose }: SettingsDrawerProps) {
     }
   }, [open, onClose])
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    try {
+      await Promise.all([
+        fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include' }),
+        fetch(`${API_BASE}/admin/logout`, { method: 'POST', credentials: 'include' }),
+      ])
+    } catch {
+      // Best-effort logout
+    }
+
     clearAllAuth()
     onClose()
     navigate('/login')

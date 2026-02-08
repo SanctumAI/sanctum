@@ -451,6 +451,8 @@
     "uploadDesc": "Tambahkan dokumen ke basis pengetahuan Anda",
     "database": "Penjelajah Database",
     "databaseDesc": "Jelajahi dan query database SQLite",
+    "configSectionLabel": "Konfigurasi",
+    "dataSectionLabel": "Data dan Konten",
     "configureTitle": "Yang dapat Anda konfigurasi",
     "configureSubtitle": "Bagian-bagian ini mengontrol branding, pengumpulan data pengguna, perilaku AI, keamanan deployment, dan konten tersimpan.",
     "securityBreadcrumbTitle": "Lindungi instance Anda dalam 3 langkah",

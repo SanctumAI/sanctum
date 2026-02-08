@@ -450,6 +450,8 @@
     "uploadDesc": "將文件新增至你的知識庫",
     "database": "資料庫瀏覽器",
     "databaseDesc": "瀏覽和查詢 SQLite 資料庫",
+    "configSectionLabel": "配置",
+    "dataSectionLabel": "資料與內容",
     "configureTitle": "你可以設定的內容",
     "configureSubtitle": "這些區塊可管理品牌、使用者資料收集、AI 行為、部署安全與已儲存內容。",
     "securityBreadcrumbTitle": "用 3 個步驟保護你的實例",

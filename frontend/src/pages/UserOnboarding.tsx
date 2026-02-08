@@ -61,7 +61,7 @@ function LanguageButton({
       }}
       className={`relative flex flex-col items-start p-4 rounded-xl border-2 transition-all text-left cursor-pointer hover:-translate-y-0.5 ${
         isSelected
-          ? 'border-accent bg-accent-subtle/30 shadow-md'
+          ? 'border-accent bg-accent/10 shadow-md'
           : 'border-border bg-surface-raised hover:border-accent/50 hover:shadow-sm'
       }`}
     >

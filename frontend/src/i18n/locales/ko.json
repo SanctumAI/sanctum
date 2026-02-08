@@ -451,6 +451,8 @@
     "uploadDesc": "지식 베이스에 문서 추가",
     "database": "데이터베이스 탐색기",
     "databaseDesc": "SQLite 데이터베이스 탐색 및 쿼리",
+    "configSectionLabel": "구성",
+    "dataSectionLabel": "데이터 및 콘텐츠",
     "configureTitle": "구성할 수 있는 항목",
     "configureSubtitle": "이 섹션에서 브랜딩, 사용자 데이터 수집, AI 동작, 배포 보안, 저장 콘텐츠를 관리합니다.",
     "securityBreadcrumbTitle": "3단계로 인스턴스 보호",

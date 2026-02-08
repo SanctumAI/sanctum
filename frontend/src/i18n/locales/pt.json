@@ -413,6 +413,8 @@
     "uploadDesc": "Adicione documentos à sua base de conhecimento",
     "database": "Explorador de Banco de Dados",
     "databaseDesc": "Navegue e consulte o banco de dados SQLite",
+    "configSectionLabel": "Configuração",
+    "dataSectionLabel": "Dados e conteúdo",
     "configureTitle": "O que você pode configurar",
     "configureSubtitle": "Estas seções controlam marca, coleta de dados de usuários, comportamento da IA, segurança de implantação e conteúdo armazenado.",
     "securityBreadcrumbTitle": "Proteja sua instância em 3 passos",

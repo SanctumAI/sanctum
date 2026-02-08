@@ -42,7 +42,7 @@ export function PendingApproval() {
         </p>
         <button
           onClick={handleLogout}
-          className="inline-flex items-center gap-2 px-4 py-2 text-text-secondary hover:text-text hover:bg-surface-overlay rounded-lg transition-all"
+          className="btn btn-ghost btn-md inline-flex items-center gap-2"
         >
           <LogOut className="w-4 h-4" />
           {t('common.logout')}

@@ -451,6 +451,8 @@
     "uploadDesc": "Voeg documenten toe aan je kennisbank",
     "database": "Database-verkenner",
     "databaseDesc": "Blader door en query de SQLite-database",
+    "configSectionLabel": "Configuratie",
+    "dataSectionLabel": "Gegevens en inhoud",
     "configureTitle": "Wat je kunt configureren",
     "configureSubtitle": "Deze secties beheren branding, verzameling van gebruikersdata, AI-gedrag, deploymentbeveiliging en opgeslagen inhoud.",
     "securityBreadcrumbTitle": "Bescherm je instance in 3 stappen",

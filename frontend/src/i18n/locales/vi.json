@@ -453,6 +453,8 @@
     "uploadDesc": "Thêm tài liệu vào cơ sở kiến thức của bạn",
     "database": "Trình khám phá cơ sở dữ liệu",
     "databaseDesc": "Duyệt và truy vấn cơ sở dữ liệu SQLite",
+    "configSectionLabel": "Cấu hình",
+    "dataSectionLabel": "Dữ liệu và nội dung",
     "configureTitle": "Những gì bạn có thể cấu hình",
     "configureSubtitle": "Các phần này kiểm soát thương hiệu, thu thập dữ liệu người dùng, hành vi AI, bảo mật triển khai và nội dung lưu trữ.",
     "securityBreadcrumbTitle": "Bảo vệ phiên bản của bạn trong 3 bước",

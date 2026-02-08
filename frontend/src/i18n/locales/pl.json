@@ -461,6 +461,8 @@
     "uploadDesc": "Dodaj dokumenty do bazy wiedzy",
     "database": "Eksplorator bazy danych",
     "databaseDesc": "Przeglądaj i odpytuj bazę danych SQLite",
+    "configSectionLabel": "Konfiguracja",
+    "dataSectionLabel": "Dane i treści",
     "configureTitle": "Co możesz skonfigurować",
     "configureSubtitle": "Te sekcje kontrolują branding, zbieranie danych użytkowników, zachowanie AI, bezpieczeństwo wdrożenia i przechowywaną zawartość.",
     "securityBreadcrumbTitle": "Chroń swoją instancję w 3 krokach",

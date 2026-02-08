@@ -451,6 +451,8 @@
     "uploadDesc": "Dokumentumok hozzáadása a tudásbázishoz",
     "database": "Adatbázis böngésző",
     "databaseDesc": "Az SQLite adatbázis böngészése és lekérdezése",
+    "configSectionLabel": "Beállítás",
+    "dataSectionLabel": "Adatok és tartalom",
     "configureTitle": "Mit konfigurálhatsz",
     "configureSubtitle": "Ezek a szakaszok vezérlik a márkázást, a felhasználói adatgyűjtést, az AI viselkedését, a telepítési biztonságot és a tárolt tartalmakat.",
     "securityBreadcrumbTitle": "Védd meg a példányodat 3 lépésben",

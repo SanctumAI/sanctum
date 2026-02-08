@@ -257,7 +257,7 @@ export function VerifyMagicLink() {
           </p>
           <button
             onClick={() => navigate('/login')}
-            className="bg-accent text-accent-text rounded-xl px-6 py-3 font-medium hover:bg-accent-hover transition-all active-press"
+            className="btn btn-primary btn-lg"
           >
             {t('onboarding.verify.requestNewLink')}
           </button>

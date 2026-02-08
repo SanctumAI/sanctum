@@ -451,6 +451,8 @@
     "uploadDesc": "ナレッジベースにドキュメントを追加",
     "database": "データベースエクスプローラー",
     "databaseDesc": "SQLiteデータベースを閲覧・クエリ",
+    "configSectionLabel": "設定",
+    "dataSectionLabel": "データとコンテンツ",
     "configureTitle": "設定できる内容",
     "configureSubtitle": "これらのセクションで、ブランディング、ユーザーデータ収集、AI挙動、デプロイセキュリティ、保存コンテンツを管理できます。",
     "securityBreadcrumbTitle": "3ステップでインスタンスを保護",

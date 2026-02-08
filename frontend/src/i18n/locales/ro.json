@@ -456,6 +456,8 @@
     "uploadDesc": "Adaugă documente în baza ta de cunoștințe",
     "database": "Explorator bază de date",
     "databaseDesc": "Explorează și interogează baza de date SQLite",
+    "configSectionLabel": "Configurare",
+    "dataSectionLabel": "Date și conținut",
     "configureTitle": "Ce poți configura",
     "configureSubtitle": "Aceste secțiuni controlează brandingul, colectarea datelor utilizatorilor, comportamentul AI, securitatea implementării și conținutul stocat.",
     "securityBreadcrumbTitle": "Protejează-ți instanța în 3 pași",

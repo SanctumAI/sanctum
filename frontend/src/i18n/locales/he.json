@@ -451,6 +451,8 @@
     "uploadDesc": "הוסף מסמכים לבסיס הידע שלך",
     "database": "סייר מסד נתונים",
     "databaseDesc": "עיין ושאל את מסד הנתונים SQLite",
+    "configSectionLabel": "הגדרות",
+    "dataSectionLabel": "נתונים ותוכן",
     "configureTitle": "מה ניתן להגדיר",
     "configureSubtitle": "סעיפים אלו שולטים במיתוג, איסוף נתוני משתמשים, התנהגות AI, אבטחת פריסה ותוכן מאוחסן.",
     "securityBreadcrumbTitle": "הגן על המופע שלך ב-3 צעדים",

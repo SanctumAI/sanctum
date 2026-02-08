@@ -454,6 +454,8 @@
     "uploadDesc": "将文档添加到你的知识库",
     "database": "数据库浏览器",
     "databaseDesc": "浏览和查询 SQLite 数据库",
+    "configSectionLabel": "配置",
+    "dataSectionLabel": "数据与内容",
     "configureTitle": "可配置内容",
     "configureSubtitle": "这些模块用于管理品牌、用户数据收集、AI 行为、部署安全和已存储内容。",
     "securityBreadcrumbTitle": "3 步保护你的实例",

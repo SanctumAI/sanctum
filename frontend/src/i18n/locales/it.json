@@ -412,6 +412,8 @@
     "uploadDesc": "Aggiungi documenti alla tua base di conoscenza",
     "database": "Esplora Database",
     "databaseDesc": "Sfoglia e interroga il database SQLite",
+    "configSectionLabel": "Configurazione",
+    "dataSectionLabel": "Dati e contenuti",
     "configureTitle": "Cosa puoi configurare",
     "configureSubtitle": "Queste sezioni controllano branding, raccolta dati utenti, comportamento IA, sicurezza di deploy e contenuti archiviati.",
     "securityBreadcrumbTitle": "Proteggi la tua istanza in 3 passaggi",

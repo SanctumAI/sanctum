@@ -561,7 +561,9 @@
     "upload": "Document Upload",
     "uploadDesc": "Add documents to your knowledge base",
     "database": "Database Explorer",
-    "databaseDesc": "Browse and query the SQLite database"
+    "databaseDesc": "Browse and query the SQLite database",
+    "configSectionLabel": "Configuration",
+    "dataSectionLabel": "Data & Content"
   },
   "adminAI": {
     "title": "AI Configuration",

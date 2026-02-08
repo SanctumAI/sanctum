@@ -451,6 +451,8 @@
     "uploadDesc": "Lisää dokumentteja tietokantaasi",
     "database": "Tietokantaselain",
     "databaseDesc": "Selaa ja kysy SQLite-tietokantaa",
+    "configSectionLabel": "Asetukset",
+    "dataSectionLabel": "Tiedot ja sisältö",
     "configureTitle": "Mitä voit määrittää",
     "configureSubtitle": "Nämä osiot ohjaavat brändäystä, käyttäjätietojen keruuta, tekoälyn käyttäytymistä, käyttöönoton turvallisuutta ja tallennettua sisältöä.",
     "securityBreadcrumbTitle": "Suojaa instanssisi 3 vaiheessa",

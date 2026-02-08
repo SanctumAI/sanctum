@@ -451,6 +451,8 @@
     "uploadDesc": "Bilgi tabanınıza belge ekleyin",
     "database": "Veritabanı Gezgini",
     "databaseDesc": "SQLite veritabanına göz atın ve sorgulayın",
+    "configSectionLabel": "Yapılandırma",
+    "dataSectionLabel": "Veri ve İçerik",
     "configureTitle": "Yapılandırabilecekleriniz",
     "configureSubtitle": "Bu bölümler marka, kullanıcı veri toplama, yapay zeka davranışı, dağıtım güvenliği ve saklanan içerikleri kontrol eder.",
     "securityBreadcrumbTitle": "Örneğinizi 3 adımda koruyun",

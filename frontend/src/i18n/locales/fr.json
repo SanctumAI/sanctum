@@ -480,6 +480,8 @@
     "uploadDesc": "Ajoutez des documents à votre base de connaissances",
     "database": "Explorateur de base de données",
     "databaseDesc": "Parcourez et interrogez la base de données SQLite",
+    "configSectionLabel": "Configuration",
+    "dataSectionLabel": "Données et contenu",
     "configureTitle": "Ce que vous pouvez configurer",
     "configureSubtitle": "Ces sections contrôlent la marque, la collecte de données utilisateur, le comportement IA, la sécurité de déploiement et le contenu stocké.",
     "securityBreadcrumbTitle": "Protégez votre instance en 3 étapes",

@@ -450,6 +450,8 @@
     "uploadDesc": "Legg til dokumenter i kunnskapsbasen din",
     "database": "Databaseutforsker",
     "databaseDesc": "Bla gjennom og søk i SQLite-databasen",
+    "configSectionLabel": "Konfigurasjon",
+    "dataSectionLabel": "Data og innhold",
     "configureTitle": "Hva du kan konfigurere",
     "configureSubtitle": "Disse seksjonene styrer merkevarebygging, innsamling av brukerdata, AI-oppførsel, distribusjonssikkerhet og lagret innhold.",
     "securityBreadcrumbTitle": "Beskytt instansen din i 3 steg",

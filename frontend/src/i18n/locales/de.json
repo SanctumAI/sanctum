@@ -415,6 +415,8 @@
     "uploadDesc": "Füge Dokumente zu deiner Wissensbasis hinzu",
     "database": "Datenbank-Explorer",
     "databaseDesc": "Durchsuche und frage die SQLite-Datenbank ab",
+    "configSectionLabel": "Konfiguration",
+    "dataSectionLabel": "Daten und Inhalte",
     "configureTitle": "Was du konfigurieren kannst",
     "configureSubtitle": "Diese Bereiche steuern Branding, Erhebung von Nutzerdaten, KI-Verhalten, Deployment-Sicherheit und gespeicherte Inhalte.",
     "securityBreadcrumbTitle": "Schütze deine Instanz in 3 Schritten",

@@ -33,7 +33,7 @@ function UserTypeCard({ userType, isSelected, onSelect }: UserTypeCardProps) {
       }}
       className={`relative flex flex-col items-start p-8 rounded-xl border-2 transition-all text-left hover-lift cursor-pointer w-full ${
         isSelected
-          ? 'border-accent bg-accent-subtle/30'
+          ? 'border-accent bg-accent/10'
           : 'border-border bg-surface-raised hover:border-accent/50'
       }`}
     >
@@ -131,7 +131,7 @@ export function UserTypeSelection() {
         >
           <button
             onClick={() => window.location.reload()}
-            className="w-full py-3 rounded-xl bg-accent text-accent-text font-medium transition-all hover:opacity-90"
+            className="btn btn-primary btn-lg w-full"
           >
             {t('common.tryAgain')}
           </button>
@@ -165,11 +165,7 @@ export function UserTypeSelection() {
         <button
           onClick={handleContinue}
           disabled={selectedTypeId === null}
-          className={`w-full py-4 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
-            selectedTypeId !== null
-              ? 'bg-accent text-accent-text hover:opacity-90'
-              : 'bg-border text-text-muted cursor-not-allowed'
-          }`}
+          className="btn btn-primary btn-lg w-full"
         >
           {t('common.continue')}
         </button>

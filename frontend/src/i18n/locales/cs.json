@@ -445,6 +445,8 @@
     "uploadDesc": "Přidejte dokumenty do znalostní báze",
     "database": "Prohlížeč databáze",
     "databaseDesc": "Procházejte a dotazujte SQLite databázi",
+    "configSectionLabel": "Konfigurace",
+    "dataSectionLabel": "Data a obsah",
     "configureTitle": "Co můžete nastavit",
     "configureSubtitle": "Tyto sekce řídí branding, sběr uživatelských dat, chování AI, zabezpečení nasazení a uložený obsah.",
     "securityBreadcrumbTitle": "Chraňte svou instanci ve 3 krocích",

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
-import { Link2, AlertCircle, Check, ShieldCheck, Lock, CheckCircle2 } from 'lucide-react'
+import { Link2, AlertCircle, Check, ShieldCheck, CheckCircle2 } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { NostrInfo, NostrExtensionLinks } from '../components/onboarding/NostrInfo'
 import { STORAGE_KEYS } from '../types/onboarding'

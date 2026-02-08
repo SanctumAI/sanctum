@@ -32,7 +32,9 @@
       "searchLabel": "Hae kieliä",
       "noResults": "Ei löytynyt kieliä haulle \"{{query}}\"",
       "continue": "Jatka",
-      "changeInSettings": "Voit muuttaa tämän myöhemmin asetuksissa."
+      "changeInSettings": "Voit muuttaa tämän myöhemmin asetuksissa.",
+      "privacyNoticeTitle": "Yksityinen oletuksena",
+      "privacyNoticeBody": "Sanctum käyttää salasanatonta kirjautumista ja salaus-ensisijaisia profiiliasetuksia."
     },
     "auth": {
       "signUp": "Rekisteröidy",
@@ -56,7 +58,14 @@
       "clickLink": "Klikkaa sähköpostissa olevaa linkkiä kirjautuaksesi.",
       "checkSpam": "Etkö näe sitä? Tarkista roskapostikansio.",
       "simulateMagicLink": "Simuloi taikalinkin klikkausta",
-      "forTesting": "Testaustarkoituksiin:"
+      "forTesting": "Testaustarkoituksiin:",
+      "dataProtectionTitle": "Miten Sanctum suojaa tietojasi",
+      "noPasswordTitle": "Ei tallennettuja salasanoja",
+      "noPasswordBody": "Kirjaudut kertakäyttöisellä linkillä, joten salasanatietokantaa ei tarvitse hallita.",
+      "expiringLinkTitle": "Lyhytikäiset kirjautumislinkit",
+      "expiringLinkBody": "Jokainen taikalinkki on allekirjoitettu ja vanhenee 15 minuutin kuluttua.",
+      "encryptionTitle": "Salaus oletuksena",
+      "encryptionBody": "Profiilikentät salataan oletuksena, ja ylläpitäjät valitsevat mitkä ei-arkaluontoiset tiedot voidaan käyttää personointiin."
     },
     "verify": {
       "verifying": "Linkkiäsi vahvistetaan...",
@@ -388,7 +397,13 @@
     "welcomeAdmin": "Tervetuloa, ylläpitäjä!",
     "connectedAs": "Yhdistetty nimellä",
     "redirecting": "Ohjataan kojelaudalle...",
-    "connectionFailed": "Yhteys epäonnistui"
+    "connectionFailed": "Yhteys epäonnistui",
+    "securityJourneyTitle": "Nopea turvallisuuspolku",
+    "securityJourneyIntro": "Nostr-yhteyden jälkeen seuraa tätä yksinkertaista asetuspolkua:",
+    "securityJourneyStep1": "Turvaa pääsy: aseta julkiset URL-osoitteet, poista simulointiliput käytöstä kehitysympäristön ulkopuolella ja valitse käyttäjien hyväksymissäännöt.",
+    "securityJourneyStep2": "Aseta datarajat: kerää vain tarvittavat kentät, pidä arkaluontoiset kentät salattuina ja rajoita keskustelukontekstin kenttiä.",
+    "securityJourneyStep3": "Vahvista ja seuraa: suorita asetusten vahvistus, tarkista palveluiden tila ja tarkastele tallennettuja tietoja säännöllisesti.",
+    "securityJourneyNote": "Tämä antaa sinulle vahvan perustan tuotantokäyttöön."
   },
   "errors": {
     "requestFailed": "Pyyntö epäonnistui",
@@ -435,7 +450,27 @@
     "upload": "Dokumenttien lataus",
     "uploadDesc": "Lisää dokumentteja tietokantaasi",
     "database": "Tietokantaselain",
-    "databaseDesc": "Selaa ja kysy SQLite-tietokantaa"
+    "databaseDesc": "Selaa ja kysy SQLite-tietokantaa",
+    "configSectionLabel": "Asetukset",
+    "dataSectionLabel": "Tiedot ja sisältö",
+    "configureTitle": "Mitä voit määrittää",
+    "configureSubtitle": "Nämä osiot ohjaavat brändäystä, käyttäjätietojen keruuta, tekoälyn käyttäytymistä, käyttöönoton turvallisuutta ja tallennettua sisältöä.",
+    "securityBreadcrumbTitle": "Suojaa instanssisi 3 vaiheessa",
+    "securityStep1Label": "Vaihe 1",
+    "securityStep1Title": "Turvaa pääsy",
+    "securityStep1Body": "Aseta julkiset URL-osoitteet, poista simulointiliput käytöstä kehitysympäristön ulkopuolella ja valitse tarvitsevatko käyttäjät hyväksynnän.",
+    "securityStep1Primary": "Avaa käyttöönottoasetukset",
+    "securityStep1Secondary": "Avaa käyttäjäasetukset",
+    "securityStep2Label": "Vaihe 2",
+    "securityStep2Title": "Määritä datarajat",
+    "securityStep2Body": "Kerää vain tarvittavat kentät, pidä arkaluontoiset kentät salattuina ja sisällytä keskustelukontekstiin vain turvalliset kentät.",
+    "securityStep2Primary": "Määritä käyttäjäkentät",
+    "securityStep2Secondary": "Tarkista tekoälyn oletukset",
+    "securityStep3Label": "Vaihe 3",
+    "securityStep3Title": "Vahvista ja seuraa",
+    "securityStep3Body": "Vahvista asetukset, tarkista palveluiden tila, turvaa sähköposti- ja HTTPS-asetukset ja tarkastele tallennettuja tietueita säännöllisesti.",
+    "securityStep3Primary": "Suorita asetusten vahvistus",
+    "securityStep3Secondary": "Tarkastele tallennettuja tietoja"
   },
   "adminAI": {
     "title": "Tekoälyn asetukset",

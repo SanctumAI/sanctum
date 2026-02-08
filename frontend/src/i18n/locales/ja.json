@@ -32,7 +32,9 @@
       "searchLabel": "言語を検索",
       "noResults": "「{{query}}」に一致する言語が見つかりません",
       "continue": "続行",
-      "changeInSettings": "後で設定で変更できます。"
+      "changeInSettings": "後で設定で変更できます。",
+      "privacyNoticeTitle": "デフォルトでプライベート",
+      "privacyNoticeBody": "Sanctumはパスワード不要のサインインと、暗号化を前提としたプロフィール設定を採用しています。"
     },
     "auth": {
       "signUp": "新規登録",
@@ -56,7 +58,14 @@
       "clickLink": "メール内のリンクをクリックしてログインしてください。",
       "checkSpam": "見当たりませんか？迷惑メールフォルダを確認してください。",
       "simulateMagicLink": "マジックリンクのクリックをシミュレート",
-      "forTesting": "テスト用:"
+      "forTesting": "テスト用:",
+      "dataProtectionTitle": "Sanctumがあなたのデータを守る仕組み",
+      "noPasswordTitle": "保存されるパスワードなし",
+      "noPasswordBody": "ワンタイムリンクでサインインするため、管理すべきパスワードデータベースがありません。",
+      "expiringLinkTitle": "短時間で失効するサインインリンク",
+      "expiringLinkBody": "各マジックリンクは署名されており、15分で期限切れになります。",
+      "encryptionTitle": "デフォルトで暗号化",
+      "encryptionBody": "プロフィール項目はデフォルトで暗号化され、管理者はパーソナライズに使う非機密情報のみを選択できます。"
     },
     "verify": {
       "verifying": "リンクを確認中...",
@@ -388,7 +397,13 @@
     "welcomeAdmin": "ようこそ、管理者！",
     "connectedAs": "接続中",
     "redirecting": "ダッシュボードにリダイレクト中...",
-    "connectionFailed": "接続失敗"
+    "connectionFailed": "接続失敗",
+    "securityJourneyTitle": "セキュリティのクイック手順",
+    "securityJourneyIntro": "Nostr接続後は、次のシンプルな手順で設定してください。",
+    "securityJourneyStep1": "アクセスを保護: 公開URLを設定し、開発環境以外ではシミュレーションフラグを無効化し、ユーザー承認ルールを決めます。",
+    "securityJourneyStep2": "データ境界を定義: 必要な項目だけ収集し、機密項目は暗号化したままにし、チャット文脈に入れる項目を制限します。",
+    "securityJourneyStep3": "検証と監視: 設定検証を実行し、サービスヘルスを確認し、保存データを定期的に見直します。",
+    "securityJourneyNote": "これで本番運用向けの強いベースラインを作れます。"
   },
   "errors": {
     "requestFailed": "リクエストに失敗しました",
@@ -435,7 +450,27 @@
     "upload": "ドキュメントアップロード",
     "uploadDesc": "ナレッジベースにドキュメントを追加",
     "database": "データベースエクスプローラー",
-    "databaseDesc": "SQLiteデータベースを閲覧・クエリ"
+    "databaseDesc": "SQLiteデータベースを閲覧・クエリ",
+    "configSectionLabel": "設定",
+    "dataSectionLabel": "データとコンテンツ",
+    "configureTitle": "設定できる内容",
+    "configureSubtitle": "これらのセクションで、ブランディング、ユーザーデータ収集、AI挙動、デプロイセキュリティ、保存コンテンツを管理できます。",
+    "securityBreadcrumbTitle": "3ステップでインスタンスを保護",
+    "securityStep1Label": "ステップ 1",
+    "securityStep1Title": "アクセスを保護",
+    "securityStep1Body": "公開URLを設定し、開発環境以外ではシミュレーションフラグを無効化し、ユーザー承認の要否を決めます。",
+    "securityStep1Primary": "デプロイ設定を開く",
+    "securityStep1Secondary": "ユーザー設定を開く",
+    "securityStep2Label": "ステップ 2",
+    "securityStep2Title": "データ境界を定義",
+    "securityStep2Body": "必要な項目のみ収集し、機密項目を暗号化し、チャット文脈には安全な項目だけを含めます。",
+    "securityStep2Primary": "ユーザー項目を設定",
+    "securityStep2Secondary": "AIデフォルトを確認",
+    "securityStep3Label": "ステップ 3",
+    "securityStep3Title": "検証と監視",
+    "securityStep3Body": "設定を検証し、サービスヘルスを確認し、メールとHTTPSを保護し、保存レコードを定期的に見直します。",
+    "securityStep3Primary": "設定検証を実行",
+    "securityStep3Secondary": "保存データを確認"
   },
   "adminAI": {
     "title": "AI設定",

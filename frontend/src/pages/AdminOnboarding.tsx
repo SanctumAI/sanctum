@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
-import { Link2, AlertCircle, Check } from 'lucide-react'
+import { Link2, AlertCircle, Check, ShieldCheck, CheckCircle2 } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { NostrInfo, NostrExtensionLinks } from '../components/onboarding/NostrInfo'
 import { STORAGE_KEYS } from '../types/onboarding'
@@ -132,7 +132,7 @@ export function AdminOnboarding() {
         <div className="space-y-4">
           <button
             onClick={handleConnect}
-            className="w-full flex items-center justify-center gap-2 bg-accent text-accent-text rounded-xl px-6 py-3.5 font-medium hover:bg-accent-hover transition-all active-press shadow-md"
+            className="btn btn-primary btn-lg w-full flex items-center justify-center gap-2"
           >
             <Link2 className="w-5 h-5" />
             {t('adminOnboarding.connectNostr')}
@@ -158,6 +158,48 @@ export function AdminOnboarding() {
               </button>
             </>
           )}
+
+          <div className="card card-sm bg-surface-raised border-accent/20">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-4 h-4 text-accent" />
+              </div>
+              <h3 className="text-sm font-semibold text-text">{t('adminOnboarding.securityJourneyTitle')}</h3>
+            </div>
+            <p className="text-xs text-text-secondary mb-4 leading-relaxed">{t('adminOnboarding.securityJourneyIntro')}</p>
+            <div className="space-y-3 mb-4">
+              <div className="flex gap-3">
+                <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-xs font-semibold text-accent">1</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-text-secondary leading-relaxed">{t('adminOnboarding.securityJourneyStep1')}</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-xs font-semibold text-accent">2</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-text-secondary leading-relaxed">{t('adminOnboarding.securityJourneyStep2')}</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-xs font-semibold text-accent">3</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-text-secondary leading-relaxed">{t('adminOnboarding.securityJourneyStep3')}</p>
+                </div>
+              </div>
+            </div>
+            <div className="pt-3 border-t border-border/50">
+              <p className="text-xs text-text-muted leading-relaxed flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-accent shrink-0" />
+                {t('adminOnboarding.securityJourneyNote')}
+              </p>
+            </div>
+          </div>
 
           <NostrInfo />
         </div>
@@ -185,7 +227,7 @@ export function AdminOnboarding() {
           <div className="flex gap-3">
             <button
               onClick={handleRetry}
-              className={`${simulateAdminAuth ? 'flex-1' : 'w-full'} bg-surface-overlay border border-border text-text rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-surface-raised transition-all`}
+              className={`btn btn-secondary btn-md ${simulateAdminAuth ? 'flex-1' : 'w-full'}`}
             >
               {t('common.tryAgain')}
             </button>
@@ -193,7 +235,7 @@ export function AdminOnboarding() {
             {simulateAdminAuth && (
               <button
                 onClick={handleMockConnect}
-                className="flex-1 bg-accent text-accent-text rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-accent-hover transition-all active-press"
+                className="btn btn-primary btn-md flex-1"
               >
                 {t('adminOnboarding.useMock')}
               </button>
@@ -230,7 +272,7 @@ export function AdminOnboarding() {
 
           <button
             onClick={handleRetry}
-            className="w-full bg-accent text-accent-text rounded-xl px-6 py-3 font-medium hover:bg-accent-hover transition-all active-press"
+            className="btn btn-primary btn-lg w-full"
           >
             {t('common.tryAgain')}
           </button>

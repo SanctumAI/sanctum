@@ -32,7 +32,9 @@
       "searchLabel": "Sok etter sprak",
       "noResults": "Ingen sprak funnet for \"{{query}}\"",
       "continue": "Fortsett",
-      "changeInSettings": "Du kan endre dette senere i innstillingene."
+      "changeInSettings": "Du kan endre dette senere i innstillingene.",
+      "privacyNoticeTitle": "Privat som standard",
+      "privacyNoticeBody": "Sanctum bruker passordløs innlogging og kryptering-først profilinnstillinger."
     },
     "auth": {
       "signUp": "Registrer deg",
@@ -56,7 +58,14 @@
       "clickLink": "Klikk pa lenken i e-posten for aa logge inn.",
       "checkSpam": "Ser du den ikke? Sjekk soppelposten.",
       "simulateMagicLink": "Simuler klikk pa magisk lenke",
-      "forTesting": "For testformal:"
+      "forTesting": "For testformal:",
+      "dataProtectionTitle": "Slik beskytter Sanctum dataene dine",
+      "noPasswordTitle": "Ingen lagrede passord",
+      "noPasswordBody": "Du logger inn med en engangslenke, så det er ingen passorddatabase å administrere.",
+      "expiringLinkTitle": "Kortlivede innloggingslenker",
+      "expiringLinkBody": "Hver magisk lenke er signert og utløper etter 15 minutter.",
+      "encryptionTitle": "Kryptering som standard",
+      "encryptionBody": "Profilfelt er kryptert som standard, og administratorer velger hvilken ikke-sensitiv informasjon som kan brukes til tilpasning."
     },
     "verify": {
       "verifying": "Verifiserer lenken din...",
@@ -387,7 +396,13 @@
     "welcomeAdmin": "Velkommen, Admin!",
     "connectedAs": "Tilkoblet som",
     "redirecting": "Omdirigerer til kontrollpanel...",
-    "connectionFailed": "Tilkobling mislyktes"
+    "connectionFailed": "Tilkobling mislyktes",
+    "securityJourneyTitle": "Rask sikkerhetsvei",
+    "securityJourneyIntro": "Etter tilkobling med Nostr, følg denne enkle oppsettsveien:",
+    "securityJourneyStep1": "Sikre tilgang: sett offentlige URL-er, deaktiver simuleringsflagg utenfor utvikling, og velg regler for brukergodkjenning.",
+    "securityJourneyStep2": "Sett datagrenser: samle bare nødvendige felt, hold sensitive felt kryptert, og begrens chattkontekstfelt.",
+    "securityJourneyStep3": "Valider og overvåk: kjør konfigurasjonsvalidering, sjekk tjenestehelse, og gjennomgå lagrede data jevnlig.",
+    "securityJourneyNote": "Dette gir deg et solid grunnlag for produksjon."
   },
   "errors": {
     "requestFailed": "Forespørsel mislyktes",
@@ -434,7 +449,27 @@
     "upload": "Dokumentopplasting",
     "uploadDesc": "Legg til dokumenter i kunnskapsbasen din",
     "database": "Databaseutforsker",
-    "databaseDesc": "Bla gjennom og søk i SQLite-databasen"
+    "databaseDesc": "Bla gjennom og søk i SQLite-databasen",
+    "configSectionLabel": "Konfigurasjon",
+    "dataSectionLabel": "Data og innhold",
+    "configureTitle": "Hva du kan konfigurere",
+    "configureSubtitle": "Disse seksjonene styrer merkevarebygging, innsamling av brukerdata, AI-oppførsel, distribusjonssikkerhet og lagret innhold.",
+    "securityBreadcrumbTitle": "Beskytt instansen din i 3 steg",
+    "securityStep1Label": "Steg 1",
+    "securityStep1Title": "Sikre tilgang",
+    "securityStep1Body": "Sett offentlige URL-er, deaktiver simuleringsflagg utenfor utvikling, og velg om brukere krever godkjenning.",
+    "securityStep1Primary": "Åpne distribusjonsinnstillinger",
+    "securityStep1Secondary": "Åpne brukerinnstillinger",
+    "securityStep2Label": "Steg 2",
+    "securityStep2Title": "Definer datagrenser",
+    "securityStep2Body": "Samle bare nødvendige felt, hold sensitive felt kryptert, og inkluder bare trygge felt i chattkonteksten.",
+    "securityStep2Primary": "Konfigurer brukerfelt",
+    "securityStep2Secondary": "Gjennomgå AI-standarder",
+    "securityStep3Label": "Steg 3",
+    "securityStep3Title": "Valider og overvåk",
+    "securityStep3Body": "Valider konfigurasjon, sjekk tjenestehelse, sikre e-post- og HTTPS-innstillinger, og gjennomgå lagrede poster jevnlig.",
+    "securityStep3Primary": "Kjør konfigurasjonsvalidering",
+    "securityStep3Secondary": "Gjennomgå lagrede data"
   },
   "adminAI": {
     "title": "AI-konfigurasjon",

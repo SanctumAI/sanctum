@@ -32,7 +32,9 @@
       "searchLabel": "חפש שפות",
       "noResults": "לא נמצאו שפות עבור \"{{query}}\"",
       "continue": "המשך",
-      "changeInSettings": "תוכל לשנות זאת מאוחר יותר בהגדרות."
+      "changeInSettings": "תוכל לשנות זאת מאוחר יותר בהגדרות.",
+      "privacyNoticeTitle": "פרטי כברירת מחדל",
+      "privacyNoticeBody": "Sanctum משתמש בכניסה ללא סיסמה והגדרות פרופיל עם הצפנה כברירת מחדל."
     },
     "auth": {
       "signUp": "הרשמה",
@@ -56,7 +58,14 @@
       "clickLink": "לחץ על הקישור באימייל כדי להתחבר.",
       "checkSpam": "לא רואה? בדוק את תיקיית הספאם.",
       "simulateMagicLink": "הדמיית לחיצה על קישור קסם",
-      "forTesting": "למטרות בדיקה:"
+      "forTesting": "למטרות בדיקה:",
+      "dataProtectionTitle": "כיצד Sanctum מגן על הנתונים שלך",
+      "noPasswordTitle": "ללא סיסמאות מאוחסנות",
+      "noPasswordBody": "אתה מתחבר באמצעות קישור חד-פעמי, כך שאין מסד נתונים של סיסמאות לנהל.",
+      "expiringLinkTitle": "קישורי כניסה קצרי מועד",
+      "expiringLinkBody": "כל קישור קסם חתום ופג תוקף לאחר 15 דקות.",
+      "encryptionTitle": "הצפנה כברירת מחדל",
+      "encryptionBody": "שדות הפרופיל מוצפנים כברירת מחדל, והמנהלים בוחרים איזה מידע לא רגיש ניתן לשימוש להתאמה אישית."
     },
     "verify": {
       "verifying": "מאמתים את הקישור שלך...",
@@ -388,7 +397,13 @@
     "welcomeAdmin": "ברוך הבא, מנהל!",
     "connectedAs": "מחובר כ",
     "redirecting": "מפנה ללוח הבקרה...",
-    "connectionFailed": "החיבור נכשל"
+    "connectionFailed": "החיבור נכשל",
+    "securityJourneyTitle": "מסלול אבטחה מהיר",
+    "securityJourneyIntro": "לאחר ההתחברות עם Nostr, עקוב אחר מסלול ההגדרה הפשוט הזה:",
+    "securityJourneyStep1": "אבטח גישה: הגדר כתובות URL ציבוריות, השבת דגלי סימולציה מחוץ לפיתוח, ובחר כללי אישור משתמשים.",
+    "securityJourneyStep2": "הגדר גבולות נתונים: אסוף רק שדות נדרשים, שמור שדות רגישים מוצפנים, והגבל שדות הקשר בצ'אט.",
+    "securityJourneyStep3": "אמת ונטר: הרץ אימות הגדרות, בדוק בריאות שירותים, וסקור נתונים מאוחסנים באופן קבוע.",
+    "securityJourneyNote": "זה נותן לך בסיס חזק לייצור."
   },
   "errors": {
     "requestFailed": "הבקשה נכשלה",
@@ -435,7 +450,27 @@
     "upload": "העלאת מסמכים",
     "uploadDesc": "הוסף מסמכים לבסיס הידע שלך",
     "database": "סייר מסד נתונים",
-    "databaseDesc": "עיין ושאל את מסד הנתונים SQLite"
+    "databaseDesc": "עיין ושאל את מסד הנתונים SQLite",
+    "configSectionLabel": "הגדרות",
+    "dataSectionLabel": "נתונים ותוכן",
+    "configureTitle": "מה ניתן להגדיר",
+    "configureSubtitle": "סעיפים אלו שולטים במיתוג, איסוף נתוני משתמשים, התנהגות AI, אבטחת פריסה ותוכן מאוחסן.",
+    "securityBreadcrumbTitle": "הגן על המופע שלך ב-3 צעדים",
+    "securityStep1Label": "צעד 1",
+    "securityStep1Title": "אבטח גישה",
+    "securityStep1Body": "הגדר כתובות URL ציבוריות, השבת דגלי סימולציה מחוץ לפיתוח, ובחר האם משתמשים דורשים אישור.",
+    "securityStep1Primary": "פתח הגדרות פריסה",
+    "securityStep1Secondary": "פתח הגדרות משתמשים",
+    "securityStep2Label": "צעד 2",
+    "securityStep2Title": "הגדר גבולות נתונים",
+    "securityStep2Body": "אסוף רק שדות הכרחיים, שמור שדות רגישים מוצפנים, וכלול רק שדות בטוחים בהקשר הצ'אט.",
+    "securityStep2Primary": "הגדר שדות משתמשים",
+    "securityStep2Secondary": "סקור ברירות מחדל של AI",
+    "securityStep3Label": "צעד 3",
+    "securityStep3Title": "אמת ונטר",
+    "securityStep3Body": "אמת הגדרות, בדוק בריאות שירותים, אבטח הגדרות אימייל ו-HTTPS, וסקור רשומות מאוחסנות באופן קבוע.",
+    "securityStep3Primary": "הרץ אימות הגדרות",
+    "securityStep3Secondary": "סקור נתונים מאוחסנים"
   },
   "adminAI": {
     "title": "הגדרות AI",

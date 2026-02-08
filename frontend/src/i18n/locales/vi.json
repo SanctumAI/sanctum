@@ -32,7 +32,9 @@
       "searchLabel": "Tìm kiếm ngôn ngữ",
       "noResults": "Không tìm thấy ngôn ngữ cho \"{{query}}\"",
       "continue": "Tiếp tục",
-      "changeInSettings": "Bạn có thể thay đổi sau trong phần cài đặt."
+      "changeInSettings": "Bạn có thể thay đổi sau trong phần cài đặt.",
+      "privacyNoticeTitle": "Riêng tư theo mặc định",
+      "privacyNoticeBody": "Sanctum sử dụng đăng nhập không cần mật khẩu và cài đặt hồ sơ ưu tiên mã hóa."
     },
     "auth": {
       "signUp": "Đăng ký",
@@ -56,7 +58,14 @@
       "clickLink": "Nhấn vào liên kết trong email để đăng nhập.",
       "checkSpam": "Không thấy? Hãy kiểm tra thư mục spam.",
       "simulateMagicLink": "Mô phỏng nhấn vào liên kết ma thuật",
-      "forTesting": "Cho mục đích thử nghiệm:"
+      "forTesting": "Cho mục đích thử nghiệm:",
+      "dataProtectionTitle": "Sanctum bảo vệ dữ liệu của bạn như thế nào",
+      "noPasswordTitle": "Không lưu trữ mật khẩu",
+      "noPasswordBody": "Bạn đăng nhập bằng liên kết dùng một lần, nên không có cơ sở dữ liệu mật khẩu cần quản lý.",
+      "expiringLinkTitle": "Liên kết đăng nhập ngắn hạn",
+      "expiringLinkBody": "Mỗi liên kết ma thuật được ký và hết hạn sau 15 phút.",
+      "encryptionTitle": "Mã hóa theo mặc định",
+      "encryptionBody": "Các trường hồ sơ được mã hóa theo mặc định, và quản trị viên chọn thông tin không nhạy cảm nào có thể được sử dụng để cá nhân hóa."
     },
     "verify": {
       "verifying": "Đang xác minh liên kết của bạn...",
@@ -390,7 +399,13 @@
     "welcomeAdmin": "Chào mừng, Quản trị viên!",
     "connectedAs": "Đã kết nối với tư cách",
     "redirecting": "Đang chuyển hướng đến bảng điều khiển...",
-    "connectionFailed": "Kết nối thất bại"
+    "connectionFailed": "Kết nối thất bại",
+    "securityJourneyTitle": "Lộ trình bảo mật nhanh",
+    "securityJourneyIntro": "Sau khi kết nối với Nostr, hãy làm theo lộ trình thiết lập đơn giản này:",
+    "securityJourneyStep1": "Bảo mật truy cập: đặt URL công khai, tắt cờ mô phỏng ngoài môi trường phát triển và chọn quy tắc phê duyệt người dùng.",
+    "securityJourneyStep2": "Đặt ranh giới dữ liệu: chỉ thu thập trường cần thiết, giữ các trường nhạy cảm được mã hóa và giới hạn trường ngữ cảnh trò chuyện.",
+    "securityJourneyStep3": "Xác thực và giám sát: chạy xác thực cấu hình, kiểm tra tình trạng dịch vụ và xem xét dữ liệu lưu trữ thường xuyên.",
+    "securityJourneyNote": "Điều này mang lại cho bạn nền tảng vững chắc cho môi trường sản xuất."
   },
   "errors": {
     "requestFailed": "Yêu cầu thất bại",
@@ -437,7 +452,27 @@
     "upload": "Tải lên tài liệu",
     "uploadDesc": "Thêm tài liệu vào cơ sở kiến thức của bạn",
     "database": "Trình khám phá cơ sở dữ liệu",
-    "databaseDesc": "Duyệt và truy vấn cơ sở dữ liệu SQLite"
+    "databaseDesc": "Duyệt và truy vấn cơ sở dữ liệu SQLite",
+    "configSectionLabel": "Cấu hình",
+    "dataSectionLabel": "Dữ liệu và nội dung",
+    "configureTitle": "Những gì bạn có thể cấu hình",
+    "configureSubtitle": "Các phần này kiểm soát thương hiệu, thu thập dữ liệu người dùng, hành vi AI, bảo mật triển khai và nội dung lưu trữ.",
+    "securityBreadcrumbTitle": "Bảo vệ phiên bản của bạn trong 3 bước",
+    "securityStep1Label": "Bước 1",
+    "securityStep1Title": "Bảo mật truy cập",
+    "securityStep1Body": "Đặt URL công khai, tắt cờ mô phỏng ngoài môi trường phát triển và chọn xem người dùng có cần phê duyệt hay không.",
+    "securityStep1Primary": "Mở cài đặt triển khai",
+    "securityStep1Secondary": "Mở cài đặt người dùng",
+    "securityStep2Label": "Bước 2",
+    "securityStep2Title": "Xác định ranh giới dữ liệu",
+    "securityStep2Body": "Chỉ thu thập trường cần thiết, giữ các trường nhạy cảm được mã hóa và chỉ đưa các trường an toàn vào ngữ cảnh trò chuyện.",
+    "securityStep2Primary": "Cấu hình trường người dùng",
+    "securityStep2Secondary": "Xem xét mặc định AI",
+    "securityStep3Label": "Bước 3",
+    "securityStep3Title": "Xác thực và giám sát",
+    "securityStep3Body": "Xác thực cấu hình, kiểm tra tình trạng dịch vụ, bảo mật cài đặt email và HTTPS, và xem xét bản ghi lưu trữ thường xuyên.",
+    "securityStep3Primary": "Chạy xác thực cấu hình",
+    "securityStep3Secondary": "Xem xét dữ liệu lưu trữ"
   },
   "adminAI": {
     "title": "Cấu hình AI",

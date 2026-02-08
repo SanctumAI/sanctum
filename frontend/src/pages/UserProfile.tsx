@@ -225,7 +225,7 @@ export function UserProfile() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full flex items-center justify-center gap-2 bg-accent text-accent-text rounded-xl px-6 py-3.5 font-medium hover:bg-accent-hover transition-all active-press disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+          className="btn btn-primary btn-lg w-full flex items-center justify-center gap-2 mt-6"
         >
           {isSubmitting ? (
             <>

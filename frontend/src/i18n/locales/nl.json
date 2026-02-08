@@ -231,7 +231,13 @@
     "welcomeAdmin": "Welkom, Beheerder!",
     "connectedAs": "Verbonden als",
     "redirecting": "Doorsturen naar dashboard...",
-    "connectionFailed": "Verbinding mislukt"
+    "connectionFailed": "Verbinding mislukt",
+    "securityJourneyTitle": "Snelle beveiligingsroute",
+    "securityJourneyIntro": "Volg na het verbinden met Nostr dit eenvoudige setup-pad:",
+    "securityJourneyStep1": "Beveilig toegang: stel publieke URL’s in, schakel simulatievlaggen buiten ontwikkeling uit en kies goedkeuringsregels voor gebruikers.",
+    "securityJourneyStep2": "Bepaal datagrenzen: verzamel alleen noodzakelijke velden, houd gevoelige velden versleuteld en beperk chat-contextvelden.",
+    "securityJourneyStep3": "Valideer en bewaak: voer configuratievalidatie uit, controleer servicegezondheid en beoordeel opgeslagen gegevens regelmatig.",
+    "securityJourneyNote": "Dit geeft je een sterke basis voor productie."
   },
   "onboarding": {
     "nostr": {
@@ -266,7 +272,9 @@
       "searchLabel": "Talen zoeken",
       "noResults": "Geen talen gevonden voor \"{{query}}\"",
       "continue": "Doorgaan",
-      "changeInSettings": "Je kunt dit later wijzigen in je instellingen."
+      "changeInSettings": "Je kunt dit later wijzigen in je instellingen.",
+      "privacyNoticeTitle": "Standaard privé",
+      "privacyNoticeBody": "Sanctum gebruikt wachtwoordloos inloggen en profielinstellingen met versleuteling als uitgangspunt."
     },
     "auth": {
       "signUp": "Registreren",
@@ -290,7 +298,14 @@
       "clickLink": "Klik op de link in de e-mail om in te loggen.",
       "checkSpam": "Niet te zien? Controleer je spammap.",
       "simulateMagicLink": "Klikken op magic link simuleren",
-      "forTesting": "Voor testdoeleinden:"
+      "forTesting": "Voor testdoeleinden:",
+      "dataProtectionTitle": "Hoe Sanctum je gegevens beschermt",
+      "noPasswordTitle": "Geen opgeslagen wachtwoorden",
+      "noPasswordBody": "Je logt in met een eenmalige link, dus er is geen wachtwoorddatabase om te beheren.",
+      "expiringLinkTitle": "Kortdurende inloglinks",
+      "expiringLinkBody": "Elke magic link is ondertekend en verloopt na 15 minuten.",
+      "encryptionTitle": "Standaard versleuteld",
+      "encryptionBody": "Profielvelden zijn standaard versleuteld en beheerders kiezen welke niet-gevoelige gegevens voor personalisatie mogen worden gebruikt."
     },
     "verify": {
       "verifying": "Je link wordt geverifieerd...",
@@ -435,7 +450,27 @@
     "upload": "Documenten uploaden",
     "uploadDesc": "Voeg documenten toe aan je kennisbank",
     "database": "Database-verkenner",
-    "databaseDesc": "Blader door en query de SQLite-database"
+    "databaseDesc": "Blader door en query de SQLite-database",
+    "configSectionLabel": "Configuratie",
+    "dataSectionLabel": "Gegevens en inhoud",
+    "configureTitle": "Wat je kunt configureren",
+    "configureSubtitle": "Deze secties beheren branding, verzameling van gebruikersdata, AI-gedrag, deploymentbeveiliging en opgeslagen inhoud.",
+    "securityBreadcrumbTitle": "Bescherm je instance in 3 stappen",
+    "securityStep1Label": "Stap 1",
+    "securityStep1Title": "Beveilig toegang",
+    "securityStep1Body": "Stel publieke URL’s in, schakel simulatievlaggen buiten ontwikkeling uit en kies of gebruikers goedkeuring nodig hebben.",
+    "securityStep1Primary": "Open deployment-instellingen",
+    "securityStep1Secondary": "Open gebruikersinstellingen",
+    "securityStep2Label": "Stap 2",
+    "securityStep2Title": "Bepaal datagrenzen",
+    "securityStep2Body": "Verzamel alleen noodzakelijke velden, houd gevoelige velden versleuteld en neem alleen veilige velden op in chat-context.",
+    "securityStep2Primary": "Configureer gebruikersvelden",
+    "securityStep2Secondary": "Bekijk AI-standaarden",
+    "securityStep3Label": "Stap 3",
+    "securityStep3Title": "Valideer en bewaak",
+    "securityStep3Body": "Valideer configuratie, controleer servicegezondheid, beveilig e-mail en HTTPS en beoordeel opgeslagen records regelmatig.",
+    "securityStep3Primary": "Voer configuratievalidatie uit",
+    "securityStep3Secondary": "Bekijk opgeslagen data"
   },
   "adminAI": {
     "title": "AI-configuratie",

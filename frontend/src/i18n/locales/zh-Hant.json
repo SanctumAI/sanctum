@@ -230,7 +230,13 @@
     "welcomeAdmin": "歡迎，管理員！",
     "connectedAs": "已連接為",
     "redirecting": "正在前往儀表板...",
-    "connectionFailed": "連接失敗"
+    "connectionFailed": "連接失敗",
+    "securityJourneyTitle": "安全快速路徑",
+    "securityJourneyIntro": "完成 Nostr 連線後，請依照以下簡單步驟設定：",
+    "securityJourneyStep1": "保護存取：設定公開 URL，在非開發環境關閉模擬旗標，並決定使用者審核規則。",
+    "securityJourneyStep2": "定義資料邊界：只收集必要欄位，保持敏感欄位加密，並限制可進入聊天脈絡的欄位。",
+    "securityJourneyStep3": "驗證與監控：執行設定驗證、檢查服務健康，並定期審查已儲存資料。",
+    "securityJourneyNote": "這能為正式環境提供穩健的安全基線。"
   },
   "onboarding": {
     "nostr": {
@@ -265,7 +271,9 @@
       "searchLabel": "搜尋語言",
       "noResults": "找不到與「{{query}}」相符的語言",
       "continue": "繼續",
-      "changeInSettings": "你可以稍後在設定中更改。"
+      "changeInSettings": "你可以稍後在設定中更改。",
+      "privacyNoticeTitle": "預設私密",
+      "privacyNoticeBody": "Sanctum 採用免密碼登入，並以加密優先方式管理個人資料設定。"
     },
     "auth": {
       "signUp": "註冊",
@@ -289,7 +297,14 @@
       "clickLink": "點擊郵件中的連結即可登入。",
       "checkSpam": "沒有看到？請檢查垃圾郵件資料夾。",
       "simulateMagicLink": "模擬點擊魔法連結",
-      "forTesting": "用於測試："
+      "forTesting": "用於測試：",
+      "dataProtectionTitle": "Sanctum 如何保護你的資料",
+      "noPasswordTitle": "不儲存密碼",
+      "noPasswordBody": "你透過一次性連結登入，因此不需要管理密碼資料庫。",
+      "expiringLinkTitle": "短時效登入連結",
+      "expiringLinkBody": "每個魔法連結都經過簽章，並在 15 分鐘後失效。",
+      "encryptionTitle": "預設加密",
+      "encryptionBody": "個人資料欄位預設加密，管理員只會選擇非敏感資訊用於個人化。"
     },
     "verify": {
       "verifying": "正在驗證你的連結...",
@@ -434,7 +449,27 @@
     "upload": "文件上傳",
     "uploadDesc": "將文件新增至你的知識庫",
     "database": "資料庫瀏覽器",
-    "databaseDesc": "瀏覽和查詢 SQLite 資料庫"
+    "databaseDesc": "瀏覽和查詢 SQLite 資料庫",
+    "configSectionLabel": "配置",
+    "dataSectionLabel": "資料與內容",
+    "configureTitle": "你可以設定的內容",
+    "configureSubtitle": "這些區塊可管理品牌、使用者資料收集、AI 行為、部署安全與已儲存內容。",
+    "securityBreadcrumbTitle": "用 3 個步驟保護你的實例",
+    "securityStep1Label": "步驟 1",
+    "securityStep1Title": "保護存取",
+    "securityStep1Body": "設定公開 URL，在非開發環境關閉模擬旗標，並決定使用者是否需要審核。",
+    "securityStep1Primary": "開啟部署設定",
+    "securityStep1Secondary": "開啟使用者設定",
+    "securityStep2Label": "步驟 2",
+    "securityStep2Title": "定義資料邊界",
+    "securityStep2Body": "只收集必要欄位，保持敏感欄位加密，並只將安全欄位納入聊天脈絡。",
+    "securityStep2Primary": "設定使用者欄位",
+    "securityStep2Secondary": "檢視 AI 預設值",
+    "securityStep3Label": "步驟 3",
+    "securityStep3Title": "驗證與監控",
+    "securityStep3Body": "驗證設定、檢查服務健康、強化郵件與 HTTPS 設定，並定期審查已儲存紀錄。",
+    "securityStep3Primary": "執行設定驗證",
+    "securityStep3Secondary": "審查已儲存資料"
   },
   "adminAI": {
     "title": "AI 設定",

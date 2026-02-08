@@ -31,7 +31,9 @@
       "searchLabel": "Pesquisar idiomas",
       "noResults": "Nenhum idioma encontrado para \"{{query}}\"",
       "continue": "Continuar",
-      "changeInSettings": "Você pode mudar isso mais tarde nas configurações."
+      "changeInSettings": "Você pode mudar isso mais tarde nas configurações.",
+      "privacyNoticeTitle": "Privado por padrão",
+      "privacyNoticeBody": "O Sanctum usa login sem senha e configurações de perfil com foco em criptografia."
     },
     "auth": {
       "signUp": "Cadastre-se",
@@ -55,7 +57,14 @@
       "clickLink": "Clique no link no e-mail para entrar.",
       "checkSpam": "Não encontrou? Verifique sua pasta de spam.",
       "simulateMagicLink": "Simular clique no link mágico",
-      "forTesting": "Para fins de teste:"
+      "forTesting": "Para fins de teste:",
+      "dataProtectionTitle": "Como o Sanctum protege seus dados",
+      "noPasswordTitle": "Sem senhas armazenadas",
+      "noPasswordBody": "Você entra com um link de uso único, então não há banco de senhas para administrar.",
+      "expiringLinkTitle": "Links de acesso de curta duração",
+      "expiringLinkBody": "Cada link mágico é assinado e expira em 15 minutos.",
+      "encryptionTitle": "Criptografia por padrão",
+      "encryptionBody": "Os campos de perfil são criptografados por padrão, e os administradores escolhem quais dados não sensíveis podem ser usados para personalização."
     },
     "verify": {
       "verifying": "Verificando seu link...",
@@ -383,7 +392,13 @@
     "welcomeAdmin": "Bem-vindo, Administrador!",
     "connectedAs": "Conectado como",
     "redirecting": "Redirecionando para o painel...",
-    "connectionFailed": "Falha na conexão"
+    "connectionFailed": "Falha na conexão",
+    "securityJourneyTitle": "Caminho rápido de segurança",
+    "securityJourneyIntro": "Depois de conectar com Nostr, siga este caminho simples de configuração:",
+    "securityJourneyStep1": "Proteja o acesso: defina URLs públicas, desative flags de simulação fora de desenvolvimento e escolha regras de aprovação de usuários.",
+    "securityJourneyStep2": "Defina limites de dados: colete apenas os campos necessários, mantenha campos sensíveis criptografados e limite os campos no contexto do chat.",
+    "securityJourneyStep3": "Valide e monitore: execute validação de configuração, confira a saúde dos serviços e revise os dados armazenados regularmente.",
+    "securityJourneyNote": "Isso fornece uma base forte para produção."
   },
   "adminDashboard": {
     "title": "Painel de Administração",
@@ -397,7 +412,27 @@
     "upload": "Upload de Documentos",
     "uploadDesc": "Adicione documentos à sua base de conhecimento",
     "database": "Explorador de Banco de Dados",
-    "databaseDesc": "Navegue e consulte o banco de dados SQLite"
+    "databaseDesc": "Navegue e consulte o banco de dados SQLite",
+    "configSectionLabel": "Configuração",
+    "dataSectionLabel": "Dados e conteúdo",
+    "configureTitle": "O que você pode configurar",
+    "configureSubtitle": "Estas seções controlam marca, coleta de dados de usuários, comportamento da IA, segurança de implantação e conteúdo armazenado.",
+    "securityBreadcrumbTitle": "Proteja sua instância em 3 passos",
+    "securityStep1Label": "Passo 1",
+    "securityStep1Title": "Proteja o acesso",
+    "securityStep1Body": "Defina URLs públicas, desative flags de simulação fora de desenvolvimento e escolha se usuários precisam de aprovação.",
+    "securityStep1Primary": "Abrir configurações de implantação",
+    "securityStep1Secondary": "Abrir configurações de usuários",
+    "securityStep2Label": "Passo 2",
+    "securityStep2Title": "Defina limites de dados",
+    "securityStep2Body": "Colete apenas os campos necessários, mantenha campos sensíveis criptografados e inclua no chat apenas campos seguros.",
+    "securityStep2Primary": "Configurar campos de usuário",
+    "securityStep2Secondary": "Revisar padrões de IA",
+    "securityStep3Label": "Passo 3",
+    "securityStep3Title": "Validar e monitorar",
+    "securityStep3Body": "Valide a configuração, confira saúde dos serviços, proteja e-mail e HTTPS e revise registros armazenados regularmente.",
+    "securityStep3Primary": "Executar validação de configuração",
+    "securityStep3Secondary": "Revisar dados armazenados"
   },
   "adminAI": {
     "title": "Configuração de IA",

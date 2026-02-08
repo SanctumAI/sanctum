@@ -32,7 +32,9 @@
       "searchLabel": "Caută limbi",
       "noResults": "Nu s-au găsit limbi pentru \"{{query}}\"",
       "continue": "Continuă",
-      "changeInSettings": "Poți schimba asta mai târziu în setări."
+      "changeInSettings": "Poți schimba asta mai târziu în setări.",
+      "privacyNoticeTitle": "Privat implicit",
+      "privacyNoticeBody": "Sanctum folosește autentificare fără parolă și setări de profil cu criptare prioritară."
     },
     "auth": {
       "signUp": "Înregistrează-te",
@@ -56,7 +58,14 @@
       "clickLink": "Fă clic pe linkul din email pentru a te autentifica.",
       "checkSpam": "Nu îl vezi? Verifică folderul de spam.",
       "simulateMagicLink": "Simulează clic pe linkul magic",
-      "forTesting": "În scopuri de testare:"
+      "forTesting": "În scopuri de testare:",
+      "dataProtectionTitle": "Cum protejează Sanctum datele tale",
+      "noPasswordTitle": "Fără parole stocate",
+      "noPasswordBody": "Te autentifici cu un link de unică folosință, deci nu există nicio bază de date cu parole de administrat.",
+      "expiringLinkTitle": "Linkuri de autentificare cu durată scurtă",
+      "expiringLinkBody": "Fiecare link magic este semnat și expiră după 15 minute.",
+      "encryptionTitle": "Criptare implicită",
+      "encryptionBody": "Câmpurile de profil sunt criptate implicit, iar administratorii aleg ce informații nesensibile pot fi folosite pentru personalizare."
     },
     "verify": {
       "verifying": "Se verifică linkul...",
@@ -393,7 +402,13 @@
     "welcomeAdmin": "Bine ai venit, Admin!",
     "connectedAs": "Conectat ca",
     "redirecting": "Redirecționare către panou...",
-    "connectionFailed": "Conexiunea a eșuat"
+    "connectionFailed": "Conexiunea a eșuat",
+    "securityJourneyTitle": "Cale rapidă de securitate",
+    "securityJourneyIntro": "După conectarea cu Nostr, urmează această cale simplă de configurare:",
+    "securityJourneyStep1": "Securizează accesul: setează URL-urile publice, dezactivează flagurile de simulare în afara dezvoltării și alege regulile de aprobare a utilizatorilor.",
+    "securityJourneyStep2": "Stabilește limitele datelor: colectează doar câmpurile necesare, păstrează câmpurile sensibile criptate și limitează câmpurile din contextul chat-ului.",
+    "securityJourneyStep3": "Validează și monitorizează: rulează validarea configurației, verifică starea serviciilor și revizuiește datele stocate în mod regulat.",
+    "securityJourneyNote": "Aceasta îți oferă o bază solidă pentru producție."
   },
   "errors": {
     "requestFailed": "Cererea a eșuat",
@@ -440,7 +455,27 @@
     "upload": "Încărcare documente",
     "uploadDesc": "Adaugă documente în baza ta de cunoștințe",
     "database": "Explorator bază de date",
-    "databaseDesc": "Explorează și interogează baza de date SQLite"
+    "databaseDesc": "Explorează și interogează baza de date SQLite",
+    "configSectionLabel": "Configurare",
+    "dataSectionLabel": "Date și conținut",
+    "configureTitle": "Ce poți configura",
+    "configureSubtitle": "Aceste secțiuni controlează brandingul, colectarea datelor utilizatorilor, comportamentul AI, securitatea implementării și conținutul stocat.",
+    "securityBreadcrumbTitle": "Protejează-ți instanța în 3 pași",
+    "securityStep1Label": "Pasul 1",
+    "securityStep1Title": "Securizează accesul",
+    "securityStep1Body": "Setează URL-urile publice, dezactivează flagurile de simulare în afara dezvoltării și alege dacă utilizatorii necesită aprobare.",
+    "securityStep1Primary": "Deschide setările de implementare",
+    "securityStep1Secondary": "Deschide setările utilizatorilor",
+    "securityStep2Label": "Pasul 2",
+    "securityStep2Title": "Definește limitele datelor",
+    "securityStep2Body": "Colectează doar câmpurile necesare, păstrează câmpurile sensibile criptate și include doar câmpuri sigure în contextul chat-ului.",
+    "securityStep2Primary": "Configurează câmpurile utilizatorilor",
+    "securityStep2Secondary": "Revizuiește valorile implicite AI",
+    "securityStep3Label": "Pasul 3",
+    "securityStep3Title": "Validează și monitorizează",
+    "securityStep3Body": "Validează configurația, verifică starea serviciilor, securizează setările de email și HTTPS și revizuiește înregistrările stocate în mod regulat.",
+    "securityStep3Primary": "Rulează validarea configurației",
+    "securityStep3Secondary": "Revizuiește datele stocate"
   },
   "adminAI": {
     "title": "Configurare AI",

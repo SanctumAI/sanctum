@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Search, Check, HelpCircle, ArrowRight } from 'lucide-react'
+import { Search, Check, HelpCircle, ArrowRight, ShieldCheck } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { LANGUAGES, Language, STORAGE_KEY_LANGUAGE } from '../utils/languages'
 
@@ -61,7 +61,7 @@ function LanguageButton({
       }}
       className={`relative flex flex-col items-start p-4 rounded-xl border-2 transition-all text-left cursor-pointer hover:-translate-y-0.5 ${
         isSelected
-          ? 'border-accent bg-accent-subtle/30 shadow-md'
+          ? 'border-accent bg-accent/10 shadow-md'
           : 'border-border bg-surface-raised hover:border-accent/50 hover:shadow-sm'
       }`}
     >
@@ -139,6 +139,16 @@ export function UserOnboarding() {
       subtitle={t('onboarding.language.subtitle')}
       footer={footer}
     >
+      <div className="rounded-xl border border-border bg-surface-overlay p-4 mb-5">
+        <div className="flex items-center gap-2 mb-1.5">
+          <ShieldCheck className="w-4 h-4 text-accent shrink-0" />
+          <h3 className="text-sm font-semibold text-text">{t('onboarding.language.privacyNoticeTitle')}</h3>
+        </div>
+        <p className="text-xs text-text-muted leading-relaxed">
+          {t('onboarding.language.privacyNoticeBody')}
+        </p>
+      </div>
+
       <SearchInput
         value={searchQuery}
         onChange={setSearchQuery}

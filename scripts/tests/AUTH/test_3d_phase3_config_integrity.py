@@ -380,7 +380,11 @@ def test_audit_chain_with_interleaved_tables(api_base: str, headers: dict[str, s
         print(f"  [FAIL] Could not parse deployment config response: {deployment_current.text}")
         return False
 
-    current_temp = str(ai_current.json().get("value", "0.1"))
+    try:
+        current_temp = str(ai_current.json().get("value", "0.1"))
+    except (json.JSONDecodeError, Exception):
+        print(f"  [FAIL] Could not parse AI config response: {ai_current.text}")
+        current_temp = "0.1"
     temp_override = "0.2" if current_temp != "0.2" else "0.3"
 
     restore_temp = current_temp

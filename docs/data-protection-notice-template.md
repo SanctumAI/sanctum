@@ -46,7 +46,6 @@ Suggested policy text:
 Suggested confirmation text for risky field settings:
 
 > I confirm this field can be stored in plaintext and/or shared with AI under our applicable legal requirements.
-
 > Enable this only after updating user notices, consent flows (if required), and internal data-handling policies.
 
 ## 4. Notes

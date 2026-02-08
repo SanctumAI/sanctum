@@ -13,7 +13,7 @@ import {
   FieldDefinitionResponse
 } from '../types/onboarding'
 import { authenticateWithNostr, hasNostrExtension, AuthResult } from '../utils/nostrAuth'
-import { adminFetch, clearAdminAuth, isAdminAuthenticated } from '../utils/adminApi'
+import { adminFetch as baseAdminFetch, clearAdminAuth, isAdminAuthenticated } from '../utils/adminApi'
 import {
   decryptField,
   decryptUser,
@@ -343,6 +343,15 @@ export function TestDashboard() {
   // Admin session state (shared across admin modules)
   const [adminToken, setAdminToken] = useState<string>('')
   const [, setAdminPubkey] = useState<string>('')
+
+  const adminFetch = (endpoint: string, options: RequestInit = {}): Promise<Response> => {
+    const headers = new Headers(options.headers)
+    const authToken = adminToken.trim()
+    if (authToken && !headers.has('Authorization')) {
+      headers.set('Authorization', `Bearer ${authToken}`)
+    }
+    return baseAdminFetch(endpoint, { ...options, headers })
+  }
 
   // Module 10: Authentication Testing state
   const [magicLinkEmail, setMagicLinkEmail] = useState('')

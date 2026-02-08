@@ -142,10 +142,15 @@ export function UserOnboarding() {
       <div className="rounded-xl border border-border bg-surface-overlay p-4 mb-5">
         <div className="flex items-center gap-2 mb-1.5">
           <ShieldCheck className="w-4 h-4 text-accent shrink-0" />
-          <h3 className="text-sm font-semibold text-text">{t('onboarding.language.privacyNoticeTitle')}</h3>
+          <h3 className="text-sm font-semibold text-text">
+            {t('onboarding.language.dataHandlingNoticeTitle', 'Data handling is instance-configured')}
+          </h3>
         </div>
         <p className="text-xs text-text-muted leading-relaxed">
-          {t('onboarding.language.privacyNoticeBody')}
+          {t(
+            'onboarding.language.dataHandlingNoticeBody',
+            'Sanctum supports passwordless sign-in and encryption-capable profile settings. Final data handling, retention, and AI-sharing behavior are configured by this instance administrator.'
+          )}
         </p>
       </div>
 

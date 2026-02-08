@@ -8,6 +8,8 @@ import os
 import sqlite3
 import logging
 import hashlib
+import hmac
+from typing import Iterator
 from contextlib import contextmanager
 from base64 import b64encode, b64decode
 from datetime import datetime
@@ -22,6 +24,7 @@ SQLITE_PATH = os.getenv("SQLITE_PATH", "/data/sanctum.db")
 # Lazy-loaded connection
 _connection = None
 _deployment_secret_key = None
+_audit_hmac_key = None
 
 # Deployment secret encryption format:
 # enc::v1::<base64_nonce>:<base64_tag>:<base64_ciphertext>
@@ -63,7 +66,7 @@ def get_cursor():
 
 
 @contextmanager
-def get_write_cursor():
+def get_write_cursor() -> Iterator[sqlite3.Cursor]:
     """Context manager that acquires a write lock via BEGIN IMMEDIATE.
 
     Use this instead of get_cursor() when the transaction includes
@@ -95,6 +98,23 @@ def _get_deployment_secret_key() -> bytes:
             f"sanctum-deployment-config:{SECRET_KEY}".encode("utf-8")
         ).digest()
     return _deployment_secret_key
+
+
+def _get_audit_hmac_key() -> bytes:
+    """Load and cache the secret key used for audit-chain HMACs."""
+    global _audit_hmac_key
+    if _audit_hmac_key is None:
+        from auth import SECRET_KEY
+
+        if not SECRET_KEY:
+            raise RuntimeError("SECRET_KEY must be configured to compute config audit HMAC hashes")
+        _audit_hmac_key = SECRET_KEY.encode("utf-8")
+    return _audit_hmac_key
+
+
+def _compute_audit_entry_hash(payload: str) -> str:
+    """Compute deterministic HMAC-SHA256 hash for an audit-chain payload."""
+    return hmac.new(_get_audit_hmac_key(), payload.encode("utf-8"), hashlib.sha256).hexdigest()
 
 
 def _is_deployment_secret_encrypted(value: str | None) -> bool:
@@ -147,6 +167,7 @@ def init_schema():
         CREATE TABLE IF NOT EXISTS admins (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             pubkey TEXT UNIQUE NOT NULL,
+            session_nonce INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -371,6 +392,7 @@ def init_schema():
     _migrate_add_user_type_icon_column()  # Add icon column to user_types table
     _migrate_encrypt_deployment_config_secrets()  # Encrypt plaintext deployment secrets at rest
     _migrate_add_config_audit_hash_columns()  # Add tamper-evident hash chain to config audit log
+    _migrate_add_admin_session_nonce_column()  # Add admin session nonce for server-side session revocation
 
     # Initialize ingest job tables
     from ingest_db import init_ingest_schema
@@ -534,6 +556,23 @@ def _migrate_add_user_type_icon_column() -> None:
     cursor.close()
 
 
+def _migrate_add_admin_session_nonce_column() -> None:
+    """Add session_nonce column to admins if it doesn't exist."""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("PRAGMA table_info(admins)")
+    columns = [row[1] for row in cursor.fetchall()]
+
+    if "session_nonce" not in columns:
+        cursor.execute("ALTER TABLE admins ADD COLUMN session_nonce INTEGER DEFAULT 0")
+        logger.info("Migration: Added 'session_nonce' column to admins table (default: 0)")
+        cursor.execute("UPDATE admins SET session_nonce = 0 WHERE session_nonce IS NULL")
+
+    conn.commit()
+    cursor.close()
+
+
 def _migrate_encrypt_deployment_config_secrets() -> None:
     """Encrypt existing plaintext deployment_config secrets in place."""
     conn = get_connection()
@@ -636,7 +675,7 @@ def _insert_config_audit_log(
     prev_hash = prev_row["entry_hash"] if prev_row and prev_row["entry_hash"] else ""
 
     payload = _audit_hash_payload(prev_hash, table_name, config_key, old_value, new_value, changed_by, changed_at)
-    entry_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+    entry_hash = _compute_audit_entry_hash(payload)
 
     cursor.execute(
         """
@@ -703,7 +742,7 @@ def _migrate_add_config_audit_hash_columns() -> None:
             changed_by=row["changed_by"],
             changed_at=changed_at,
         )
-        entry_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        entry_hash = _compute_audit_entry_hash(payload)
         cursor.execute(
             """
             UPDATE config_audit_log
@@ -790,6 +829,27 @@ def get_admin_by_pubkey(pubkey: str) -> dict | None:
         cursor.execute("SELECT * FROM admins WHERE pubkey = ?", (pubkey,))
         row = cursor.fetchone()
         return dict(row) if row else None
+
+
+def increment_admin_session_nonce(pubkey: str) -> int:
+    """
+    Increment and return the current session nonce for the given admin.
+    Incrementing invalidates all previously issued admin session tokens.
+    """
+    with get_cursor() as cursor:
+        cursor.execute(
+            """
+            UPDATE admins
+            SET session_nonce = COALESCE(session_nonce, 0) + 1
+            WHERE pubkey = ?
+            RETURNING session_nonce
+            """,
+            (pubkey,),
+        )
+        row = cursor.fetchone()
+        if not row:
+            raise ValueError("Admin not found")
+        return int(row["session_nonce"])
 
 
 def is_admin(pubkey: str) -> bool:
@@ -2325,7 +2385,7 @@ def verify_config_audit_log_chain(table_name: str | None = None) -> dict:
             changed_by=row["changed_by"],
             changed_at=changed_at,
         )
-        expected_entry_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        expected_entry_hash = _compute_audit_entry_hash(payload)
 
         if row["prev_hash"] != prev_hash:
             return {
@@ -2336,7 +2396,7 @@ def verify_config_audit_log_chain(table_name: str | None = None) -> dict:
                 "reason": "prev_hash mismatch",
             }
 
-        if row["entry_hash"] != expected_entry_hash:
+        if not hmac.compare_digest(row["entry_hash"] or "", expected_entry_hash):
             return {
                 "valid": False,
                 "checked_entries": scoped_entries if table_name is not None else len(rows),

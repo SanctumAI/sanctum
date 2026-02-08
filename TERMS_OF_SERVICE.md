@@ -40,8 +40,8 @@ Sanctum is distributed as self-hosted open-source software. The person or organi
 By operating or using an instance, you acknowledge that:
 
 - The Instance Administrator is responsible for legal compliance obligations related to data processing, notices, consent (where required by applicable law), retention, deletion, and security configuration
-- Encryption and AI-context behavior can be configured by the Instance Administrator, including storage of selected fields in plaintext when plaintext storage is explicitly enabled for those fields
-  - **Security Note:** Disabling encryption for a field means that field's data will be stored as readable plaintext in the database. Instance Administrators should ensure appropriate notices and safeguards are in place before enabling plaintext storage for any field containing personal or sensitive information.
+- Encryption and AI-context behavior can be configured by the Instance Administrator, including storage of selected fields in plaintext when encryption is disabled for those fields
+  - **Security Note:** Disabling encryption for a field means that field's data will be stored as readable plaintext in the database. Instance Administrators should ensure appropriate notices and safeguards are in place before disabling encryption for any field containing personal or sensitive information.
 - The developer(s), contributor(s), and copyright holder(s) are not the default data controller or processor for third-party deployments, except where a separate written agreement explicitly states otherwise
 
 ## 5. Disclaimer of Warranties

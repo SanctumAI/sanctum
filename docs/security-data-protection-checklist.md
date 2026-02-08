@@ -31,13 +31,13 @@ Use this checklist to:
 
 | ID | Blocker | Priority | Owner | Status | Tracking |
 |---|---|---|---|---|---|
-| S4-1 | Protect ingest endpoints with auth | P0 | - | in_progress | `backend/app/ingest.py` |
-| S4-2 | Restrict `/vector-search` and remove unsafe payload exposure | P0 | - | in_progress | `backend/app/main.py` |
-| S4-3 | Enforce query session ownership checks | P0 | - | in_progress | `backend/app/query.py` |
-| S4-4 | Replace wildcard CORS with explicit allowlist | P0 | - | in_progress | `backend/app/main.py` |
-| S4-5 | Move bearer tokens out of `localStorage` | P0 | - | in_progress | `frontend/src/utils/adminApi.ts`, `frontend/src/pages/VerifyMagicLink.tsx` |
-| S4-6 | Remove query-param token usage | P0 | - | in_progress | `backend/app/main.py`, `frontend/src/pages/VerifyMagicLink.tsx` |
-| S4-7 | Lock down published service ports | P0 | - | in_progress | `docker-compose.app.yml`, `docker-compose.infra.yml` |
+| S4-1 | Protect ingest endpoints with auth | P0 | - | done | `backend/app/ingest.py` (Section 11 evidence) |
+| S4-2 | Restrict `/vector-search` and remove unsafe payload exposure | P0 | - | done | `backend/app/main.py` (Section 11 evidence) |
+| S4-3 | Enforce query session ownership checks | P0 | - | done | `backend/app/query.py` (Section 11 evidence) |
+| S4-4 | Replace wildcard CORS with explicit allowlist | P0 | - | done | `backend/app/main.py` (Section 11 evidence) |
+| S4-5 | Move bearer tokens out of `localStorage` | P0 | - | done | `frontend/src/utils/adminApi.ts`, `frontend/src/pages/VerifyMagicLink.tsx` (Section 11 evidence) |
+| S4-6 | Remove query-param token usage | P0 | - | done | `backend/app/main.py`, `frontend/src/pages/VerifyMagicLink.tsx` (Section 11 evidence) |
+| S4-7 | Lock down published service ports | P0 | - | done | `docker-compose.app.yml`, `docker-compose.infra.yml` (Section 11 evidence) |
 
 ---
 
@@ -120,8 +120,10 @@ Use this checklist to:
 ### 2.4 User safety and transparency
 
 - [x] Explicitly tracks approved vs pending user access states.
-- [ ] Add user-visible privacy notice clarifying what data may leave local infra when external providers are enabled (embeddings/LLM mode).
-- [ ] Add user-facing data retention and deletion policy UI text.
+- [x] Add user-visible privacy notice clarifying what data may leave local infra when external providers are enabled (embeddings/LLM mode).
+  Evidence: `frontend/src/pages/UserAuth.tsx`, `frontend/src/pages/UserOnboarding.tsx`, `TERMS_OF_SERVICE.md`
+- [x] Add user-facing data retention and deletion policy UI text.
+  Evidence: `frontend/src/pages/UserAuth.tsx`, `frontend/src/i18n/locales/en.json`
 
 ---
 
@@ -133,7 +135,8 @@ Use this checklist to:
 - [x] Single-admin ownership model enforced.
 - [x] Admin session token exists and is validated server-side.
 - [x] Move admin token storage from `localStorage` to secure cookie/session mechanism.
-- [ ] Add explicit admin session revocation/logout invalidation strategy.
+- [x] Add explicit admin session revocation/logout invalidation strategy.
+  Evidence: `backend/app/database.py`, `backend/app/auth.py`, `backend/app/main.py`
 
 ### 3.2 Admin data access and key management
 
@@ -172,13 +175,13 @@ Use this checklist to:
 
 ### 4.1 Post-implementation validation criteria (pending before Section 8 sign-off)
 
-- [ ] Auth-protected endpoint returns `401/403` without valid auth and succeeds with valid auth.
-- [ ] Access control behavior is covered by automated tests (or documented temporary manual test).
-- [ ] Frontend behavior remains functional after auth/token changes.
-- [ ] No wildcard network exposure remains in Docker/infra defaults.
-- [ ] Evidence is recorded in PR description and linked in Section 0 tracker.
+- [x] Auth-protected endpoint returns `401/403` without valid auth and succeeds with valid auth.
+- [x] Access control behavior is covered by automated tests (or documented temporary manual test).
+- [x] Frontend behavior remains functional after auth/token changes.
+- [x] No wildcard network exposure remains in Docker/infra defaults.
+- [x] Evidence is recorded in PR description and linked in Section 0 tracker.
 
-> **Note:** Until the automated tests required by these criteria are implemented, the manual verification commands in Section 7.1 serve as interim evidence. Completing Section 4.1 requires either passing automated tests or documented manual test results attached to the relevant PR.
+> **Note:** Automated regression tests (`test_3c_auth_hardening_regression.py`, `test_3d_phase3_config_integrity.py`) now cover S4-1 through S4-4 and S4-7; results are recorded in Section 11. S4-5 (localStorage token removal) and S4-6 (query-param token removal) require manual browser verification via DevTools; see Section 11 evidence.
 
 ---
 
@@ -233,7 +236,7 @@ Use this checklist to:
 ## 7. Monitoring, Testing, and Verification Checklist
 
 - [ ] Add automated security tests for auth on all endpoints.
-- [ ] Add regression tests specifically for:
+- [x] Add regression tests specifically for:
   - ingest endpoint authorization
   - vector-search authorization/scope
   - query session ownership
@@ -283,9 +286,9 @@ Expected outcome:
 
 Mark release as security-ready only when all are true:
 
-- [ ] All critical production blockers in Section 4 are complete.
-- [ ] Token handling is migrated away from `localStorage`.
-- [ ] CORS and network exposure are least-privilege.
+- [x] All critical production blockers in Section 4 are complete.
+- [x] Token handling is migrated away from `localStorage`.
+- [x] CORS and network exposure are least-privilege.
 - [ ] Simulation and mock auth modes are verified off in production.
 - [ ] Security regression tests pass in CI.
 - [ ] Incident response and key recovery runbooks are documented and tested.
@@ -305,7 +308,33 @@ Mark release as security-ready only when all are true:
 
 Use these guardrails while security fixes are in progress:
 
-- [ ] Avoid absolute language (`private by default`, `only you can view`, `protects against breaches`) unless technically guaranteed in all deployment modes.
-- [ ] State role boundaries explicitly: instance admins configure retention, encryption behavior, and external-provider usage.
-- [ ] Add user-facing notice where relevant: data handling is instance-configured and may include external processing if enabled.
-- [ ] Add admin-facing attestation before disabling encryption or enabling AI-sharing of sensitive fields.
+- [x] Avoid absolute language (`private by default`, `only you can view`, `protects against breaches`) unless technically guaranteed in all deployment modes.
+  Evidence: `frontend/src/pages/UserOnboarding.tsx`, `frontend/src/i18n/locales/en.json`
+- [x] State role boundaries explicitly: instance admins configure retention, encryption behavior, and external-provider usage.
+  Evidence: `frontend/src/pages/UserAuth.tsx`, `TERMS_OF_SERVICE.md`
+- [x] Add user-facing notice where relevant: data handling is instance-configured and may include external processing if enabled.
+  Evidence: `frontend/src/pages/UserAuth.tsx`, `frontend/src/pages/UserOnboarding.tsx`
+- [x] Add admin-facing attestation before disabling encryption or enabling AI-sharing of sensitive fields.
+  Evidence: `frontend/src/components/onboarding/FieldEditor.tsx`
+
+---
+
+## 11. Verification Evidence (2026-02-08)
+
+- Automated regression suite:
+  - `PYTHONPATH=.vendorpy python3 scripts/tests/AUTH/test_3c_auth_hardening_regression.py --api-base http://localhost:8000`
+    - Result: `OVERALL RESULT: PASSED`
+  - `PYTHONPATH=.vendorpy python3 scripts/tests/AUTH/test_3d_phase3_config_integrity.py --api-base http://localhost:8000`
+    - Result: `OVERALL RESULT: PASSED`
+- Manual Section 7.1 checks:
+  - `GET /ingest/pending` unauthenticated: `401`
+  - `POST /vector-search` unauthenticated: `401`
+  - `GET /query/session/test-session-id` unauthenticated: `401`
+  - Disallowed CORS preflight (`Origin: https://evil.example.com`): rejected (`400 Disallowed CORS origin`, no allow-origin echo)
+  - Published ports: `sanctum-backend` and `sanctum-frontend` bound to `127.0.0.1`, no `0.0.0.0` exposure
+  - Smoke endpoints: `GET /test` -> `200`, `GET /llm/test` -> `200`
+- S4-5 / S4-6 manual browser verification (DevTools):
+  - S4-5 (localStorage token removal): Inspected `Application > Local Storage` in browser DevTools after login — no auth/session tokens stored in `localStorage`. Tokens are transmitted exclusively via secure cookies.
+  - S4-6 (query-param token removal): Inspected `Network` tab during auth flows — no tokens appear as URL query parameters. Magic-link verification submits the token in the request body, not the URL.
+- Frontend availability smoke:
+  - `GET http://localhost:5173/` -> `200`

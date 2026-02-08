@@ -368,6 +368,8 @@
       "noResults": "No languages found for \"{{query}}\"",
       "continue": "Continue",
       "changeInSettings": "You can change this later in your settings.",
+      "dataHandlingNoticeTitle": "Data handling is instance-configured",
+      "dataHandlingNoticeBody": "Sanctum supports passwordless sign-in and encryption-capable profile settings. Final data handling, retention, and AI-sharing behavior are configured by this instance administrator.",
       "privacyNoticeTitle": "Private by default",
       "privacyNoticeBody": "Sanctum uses passwordless sign-in and encryption-first profile settings. Final data-handling choices are configured by this instance administrator."
     },
@@ -402,6 +404,7 @@
       "encryptionTitle": "Encryption by default",
       "encryptionBody": "Profile fields are encrypted by default, but this instance administrator controls field-level settings and may allow selected data to be stored or shared differently.",
       "adminControlNotice": "Data handling is configured by this instance administrator, including what may be stored unencrypted or shared with AI tools.",
+      "retentionNotice": "Data retention and deletion timelines are set by this instance administrator. Contact them for access, correction, or deletion requests.",
       "noWarrantyNotice": "Sanctum software is provided as-is without warranty. Use of this instance is subject to administrator policies."
     },
     "verify": {

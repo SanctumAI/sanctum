@@ -180,8 +180,8 @@
       "plaintextBadge": "Platte tekst",
       "inChatBadge": "In chat",
       "complianceAcknowledgeLabel": "Ik bevestig dat dit veld als platte tekst kan worden opgeslagen en/of gedeeld met AI onder onze toepasselijke wettelijke vereisten.",
-      "complianceAcknowledgeHint": "Schakel dit pas in nadat u uw gebruikersmededelingen, toestemmingsprocessen (indien vereist) en intern gegevensverwerkingsbeleid hebt bijgewerkt.",
-      "complianceAcknowledgeRequired": "U moet de wettelijke/nalevingsverantwoordelijkheid bevestigen voordat u deze veldconfiguratie opslaat."
+      "complianceAcknowledgeHint": "Schakel dit pas in nadat je je gebruikersmededelingen, toestemmingsprocessen (indien vereist) en intern gegevensverwerkingsbeleid hebt bijgewerkt.",
+      "complianceAcknowledgeRequired": "Je moet de wettelijke/nalevingsverantwoordelijkheid bevestigen voordat je deze veldconfiguratie opslaat."
     },
     "fieldTypes": {
       "text": "Tekst",
@@ -241,7 +241,7 @@
     "securityJourneyStep2": "Bepaal datagrenzen: verzamel alleen noodzakelijke velden, houd gevoelige velden versleuteld en beperk chat-contextvelden.",
     "securityJourneyStep3": "Valideer en bewaak: voer configuratievalidatie uit, controleer servicegezondheid en beoordeel opgeslagen gegevens regelmatig.",
     "securityJourneyNote": "Dit geeft je een sterke basis voor productie.",
-    "legalResponsibilityNotice": "U bent verantwoordelijk voor een rechtmatige configuratie, gebruikersmededelingen en gegevensverwerkingsbeleid voor deze instantie."
+    "legalResponsibilityNotice": "Je bent verantwoordelijk voor een rechtmatige configuratie, gebruikersmededelingen en gegevensverwerkingsbeleid voor deze instantie."
   },
   "onboarding": {
     "nostr": {

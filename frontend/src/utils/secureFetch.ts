@@ -42,15 +42,16 @@ export function installSecureFetch(): void {
   const csrfCookieName = import.meta.env.VITE_CSRF_COOKIE_NAME || DEFAULT_CSRF_COOKIE_NAME
 
   window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-    const request = input instanceof Request ? input : new Request(input, init)
-    const url = new URL(request.url, window.location.origin)
+    const request = input instanceof Request ? input : undefined
+    const inputUrl = request?.url || (input instanceof URL ? input.href : String(input))
+    const url = new URL(inputUrl, window.location.origin)
 
     if (!isApiRequest(url)) {
       return originalFetch(input, init)
     }
 
-    const method = (init?.method || request.method || 'GET').toUpperCase()
-    const headers = new Headers(request.headers)
+    const method = (init?.method || request?.method || 'GET').toUpperCase()
+    const headers = request ? new Headers(request.headers) : new Headers()
     if (init?.headers) {
       const initHeaders = new Headers(init.headers)
       initHeaders.forEach((value, key) => {
@@ -68,11 +69,7 @@ export function installSecureFetch(): void {
     const mergedInit: RequestInit = {
       ...init,
       headers,
-      credentials: init?.credentials || request.credentials || 'include',
-    }
-
-    if (input instanceof Request) {
-      return originalFetch(new Request(request, mergedInit))
+      credentials: init?.credentials || request?.credentials || 'include',
     }
 
     return originalFetch(input, mergedInit)

@@ -91,7 +91,11 @@ def _normalize_origin(origin: str) -> str:
     parsed = urlparse(raw)
     if parsed.scheme and parsed.netloc:
         return f"{parsed.scheme}://{parsed.netloc}"
-    return raw.rstrip("/")
+    logger.warning(
+        "Ignoring schemeless/invalid origin %r; expected format 'scheme://host[:port]'",
+        raw,
+    )
+    return ""
 
 
 def _get_cors_allow_origins() -> list[str]:
@@ -1319,7 +1323,11 @@ async def admin_auth(
     database.mark_instance_setup_complete()
 
     # Create session token for subsequent authenticated requests
-    session_token = auth.create_admin_session_token(admin["id"], pubkey)
+    session_token = auth.create_admin_session_token(
+        admin["id"],
+        pubkey,
+        int(admin.get("session_nonce", 0) or 0),
+    )
     auth.set_admin_session_cookie(response, session_token)
 
     return AdminAuthResponse(
@@ -1331,8 +1339,28 @@ async def admin_auth(
 
 
 @app.post("/admin/logout", response_model=SuccessResponse)
-async def logout_admin(response: Response):
-    """Clear auth session cookies for the current browser."""
+async def logout_admin(
+    response: Response,
+    authorization: Optional[str] = Header(None),
+    admin_session_cookie: Optional[str] = Cookie(None, alias=auth.ADMIN_SESSION_COOKIE_NAME),
+):
+    """
+    Clear auth session cookies for the current browser and revoke active admin tokens.
+    Revocation is best-effort: if a valid admin token is present, rotate session nonce.
+    """
+    token = auth._resolve_auth_token(authorization, admin_session_cookie)
+    if token:
+        token_data = auth.verify_admin_session_token(token)
+        if token_data:
+            admin_pubkey = token_data.get("pubkey")
+            if admin_pubkey:
+                admin_record = database.get_admin_by_pubkey(admin_pubkey)
+                if admin_record and auth.is_admin_session_current(admin_record, token_data):
+                    try:
+                        database.increment_admin_session_nonce(admin_pubkey)
+                    except Exception as e:
+                        logger.warning(f"Failed to rotate admin session nonce on logout: {e}")
+
     auth.clear_auth_cookies(response)
     return SuccessResponse(success=True, message="Logged out")
 

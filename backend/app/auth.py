@@ -455,10 +455,15 @@ ADMIN_SESSION_SALT = "admin-session"
 ADMIN_SESSION_MAX_AGE = 7 * 24 * 60 * 60  # 7 days
 
 
-def create_admin_session_token(admin_id: int, pubkey: str) -> str:
+def create_admin_session_token(admin_id: int, pubkey: str, session_nonce: int = 0) -> str:
     """Generate a signed admin session token."""
     return _session_serializer.dumps(
-        {"admin_id": admin_id, "pubkey": pubkey, "type": "admin"},
+        {
+            "admin_id": admin_id,
+            "pubkey": pubkey,
+            "type": "admin",
+            "session_nonce": int(session_nonce),
+        },
         salt=ADMIN_SESSION_SALT
     )
 
@@ -476,6 +481,30 @@ def verify_admin_session_token(token: str) -> Optional[dict]:
         return data
     except (SignatureExpired, BadSignature):
         return None
+
+
+def _admin_session_nonce_from_record(admin: dict) -> int:
+    """Extract normalized session nonce from admin DB record."""
+    try:
+        return int(admin.get("session_nonce", 0) or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _admin_session_nonce_from_token(token_data: dict) -> int:
+    """Extract normalized session nonce from token payload."""
+    try:
+        return int(token_data.get("session_nonce", 0) or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def is_admin_session_current(admin: dict, token_data: dict) -> bool:
+    """
+    Check whether the token's admin session nonce matches the DB nonce.
+    Mismatch indicates logout/revocation happened after token issuance.
+    """
+    return _admin_session_nonce_from_record(admin) == _admin_session_nonce_from_token(token_data)
 
 
 def send_magic_link_email(to_email: str, token: str) -> bool:
@@ -589,6 +618,8 @@ async def require_admin(
     admin = database.get_admin_by_pubkey(data["pubkey"])
     if not admin:
         raise HTTPException(status_code=401, detail="Admin not found")
+    if not is_admin_session_current(admin, data):
+        raise HTTPException(status_code=401, detail="Admin session revoked or expired")
 
     return admin
 
@@ -639,6 +670,8 @@ async def require_admin_or_setup_complete(
     admin = database.get_admin_by_pubkey(data["pubkey"])
     if not admin:
         raise HTTPException(status_code=401, detail="Admin not found")
+    if not is_admin_session_current(admin, data):
+        raise HTTPException(status_code=401, detail="Admin session revoked or expired")
 
     return admin
 
@@ -711,7 +744,7 @@ async def require_admin_or_approved_user(
     admin_data = verify_admin_session_token(admin_token) if admin_token else None
     if admin_data:
         admin = database.get_admin_by_pubkey(admin_data["pubkey"])
-        if admin:
+        if admin and is_admin_session_current(admin, admin_data):
             return {"id": admin["id"], "type": "admin", "approved": True, "pubkey": admin_data["pubkey"]}
     
     # Try user token
@@ -762,7 +795,7 @@ async def require_admin_or_user(
     admin_data = verify_admin_session_token(admin_token) if admin_token else None
     if admin_data:
         admin = database.get_admin_by_pubkey(admin_data["pubkey"])
-        if admin:
+        if admin and is_admin_session_current(admin, admin_data):
             return {"id": admin["id"], "type": "admin", "approved": True, "pubkey": admin_data["pubkey"]}
 
     # Try user token (approval not required)

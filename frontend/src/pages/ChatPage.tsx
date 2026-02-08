@@ -176,18 +176,18 @@ export function ChatPage() {
 
   // Check auth and approval status on mount
   useEffect(() => {
-    const sessionToken = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
-    const adminToken = localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN)
+    const isAdmin = isAdminAuthenticated()
+    const userEmail = localStorage.getItem(STORAGE_KEYS.USER_EMAIL)
 
     // Not authenticated at all - redirect to login
-    if (!sessionToken && !adminToken) {
+    if (!isAdmin && !userEmail) {
       navigate('/login')
       return
     }
 
     // User authenticated but not approved - redirect to pending
     const approved = localStorage.getItem(STORAGE_KEYS.USER_APPROVED)
-    if (!adminToken && approved === 'false') {
+    if (!isAdmin && approved === 'false') {
       navigate('/pending')
     }
   }, [navigate])
@@ -235,11 +235,9 @@ export function ChatPage() {
   // Fetch available documents from ingest jobs
   useEffect(() => {
     const fetchDocuments = async () => {
-      const token = localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN) ||
-                    localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
       try {
         const res = await fetch(`${API_BASE}/ingest/jobs`, {
-          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+          credentials: 'include',
         })
         if (res.ok) {
           const data = await res.json()
@@ -306,12 +304,7 @@ export function ChatPage() {
       const wantsDbQuery = selectedTools.includes('db-query')
       const useRag = selectedDocuments.length > 0 && !wantsDbQuery
 
-      // Admin token takes priority, fall back to user token
-      const adminToken = localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN)
-      const userToken = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
-      const token = adminToken || userToken
-
-      const canDecryptDbQuery = !useRag && wantsDbQuery && !!adminToken && hasNip04Support()
+      const canDecryptDbQuery = !useRag && wantsDbQuery && isAdminAuthenticated() && hasNip04Support()
       let response: Response | null = null
       let responseIsRag = useRag
 
@@ -340,8 +333,8 @@ export function ChatPage() {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
-                    ...(token && { 'Authorization': `Bearer ${token}` })
                   },
+                  credentials: 'include',
                   body: JSON.stringify({
                     message: content,
                     tools: selectedTools,
@@ -367,8 +360,8 @@ export function ChatPage() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            ...(token && { 'Authorization': `Bearer ${token}` })
           },
+          credentials: 'include',
           body: JSON.stringify(body),
         })
         responseIsRag = useRag
@@ -418,7 +411,7 @@ export function ChatPage() {
       
       // Handle auto-search if backend returned a search term
       if (responseIsRag && data.search_term) {
-        await triggerAutoSearch(data.search_term, token)
+        await triggerAutoSearch(data.search_term)
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : t('errors.failedToSendMessage'))
@@ -428,7 +421,7 @@ export function ChatPage() {
   }
   
   // Auto-search triggered by backend - injects results back into RAG session
-  const triggerAutoSearch = async (searchTerm: string, token: string | null) => {
+  const triggerAutoSearch = async (searchTerm: string) => {
     try {
       // Show searching indicator
       const searchingMessage: Message = {
@@ -453,8 +446,8 @@ IMPORTANT: Return a CONDENSED response:
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
         },
+        credentials: 'include',
         body: JSON.stringify({
           message: searchPrompt,
           tools: ['web-search']
@@ -490,8 +483,8 @@ IMPORTANT: Return a CONDENSED response:
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            ...(token && { 'Authorization': `Bearer ${token}` })
           },
+          credentials: 'include',
           body: JSON.stringify({
             question: `[SYSTEM: Search results for "${searchTerm}" have been provided to the user. The results included: ${searchResults.slice(0, 500)}...]`,
             session_id: ragSessionId,

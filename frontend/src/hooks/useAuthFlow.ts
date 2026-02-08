@@ -18,12 +18,11 @@ export interface AuthFlowState {
 export function useAuthFlow(): AuthFlowState {
   return useMemo(() => {
     const isAdmin = isAdminAuthenticated()
-    const sessionToken = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
     const userEmail = localStorage.getItem(STORAGE_KEYS.USER_EMAIL)
     const userName = localStorage.getItem(STORAGE_KEYS.USER_NAME)
     const approvedStr = localStorage.getItem(STORAGE_KEYS.USER_APPROVED)
 
-    const isAuthenticated = !!(sessionToken || isAdmin)
+    const isAuthenticated = !!(userEmail || isAdmin)
     const isApproved = approvedStr === 'true' || isAdmin
 
     // Determine redirect path based on auth state
@@ -32,7 +31,7 @@ export function useAuthFlow(): AuthFlowState {
     if (isAdmin) {
       // Admins go to chat
       redirectPath = '/chat'
-    } else if (!sessionToken) {
+    } else if (!userEmail) {
       // Not authenticated at all
       redirectPath = '/login'
     } else if (!isApproved) {

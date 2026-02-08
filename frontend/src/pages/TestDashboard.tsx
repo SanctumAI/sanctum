@@ -4,7 +4,6 @@ import { Sun, Moon, Settings, Database, ChevronDown, Key, Shield, Users, Sliders
 import { useTheme } from '../theme'
 import {
   API_BASE,
-  STORAGE_KEYS,
   AdminResponse,
   InstanceSettingsResponse,
   MagicLinkResponse,
@@ -342,12 +341,8 @@ export function TestDashboard() {
   // === NEW MODULE STATE ===
 
   // Admin session state (shared across admin modules)
-  const [adminToken, setAdminToken] = useState<string>(() => {
-    return localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN) || ''
-  })
-  const [, setAdminPubkey] = useState<string>(() => {
-    return localStorage.getItem(STORAGE_KEYS.ADMIN_PUBKEY) || ''
-  })
+  const [adminToken, setAdminToken] = useState<string>('')
+  const [, setAdminPubkey] = useState<string>('')
 
   // Module 10: Authentication Testing state
   const [magicLinkEmail, setMagicLinkEmail] = useState('')
@@ -611,6 +606,7 @@ export function TestDashboard() {
           'Content-Type': 'application/json',
           ...(adminToken && { 'Authorization': `Bearer ${adminToken}` })
         },
+        credentials: 'include',
         body: JSON.stringify({ message: userMessage }),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -631,7 +627,7 @@ export function TestDashboard() {
     try {
       const formData = new FormData()
       formData.append('file', uploadFile)
-      const res = await fetch(`${API_BASE}/ingest/upload`, {
+      const res = await adminFetch('/ingest/upload', {
         method: 'POST',
         body: formData,
       })
@@ -649,7 +645,7 @@ export function TestDashboard() {
   const fetchJobs = async () => {
     setJobsLoading(true)
     try {
-      const res = await fetch(`${API_BASE}/ingest/jobs`)
+      const res = await adminFetch('/ingest/jobs')
       const data = await res.json()
       setJobs(data.jobs)
     } catch (e) {
@@ -664,7 +660,7 @@ export function TestDashboard() {
     if (!id) return
     setJobStatusLoading(true)
     try {
-      const res = await fetch(`${API_BASE}/ingest/status/${id}`)
+      const res = await adminFetch(`/ingest/status/${id}`)
       setJobStatus(await res.json())
     } catch (e) {
       setJobStatus({ error: e instanceof Error ? e.message : 'Failed' })
@@ -677,10 +673,10 @@ export function TestDashboard() {
     setChunksLoading(true)
     try {
       const id = jobId || selectedJobId
-      const url = id
-        ? `${API_BASE}/ingest/pending?job_id=${id}`
-        : `${API_BASE}/ingest/pending`
-      const res = await fetch(url)
+      const endpoint = id
+        ? `/ingest/pending?job_id=${id}`
+        : '/ingest/pending'
+      const res = await adminFetch(endpoint)
       const data = await res.json()
       setChunks(data.chunks)
     } catch (e) {
@@ -695,7 +691,7 @@ export function TestDashboard() {
     if (!id) return
     setChunkLoading(true)
     try {
-      const res = await fetch(`${API_BASE}/ingest/chunk/${id}`)
+      const res = await adminFetch(`/ingest/chunk/${id}`)
       setChunkDetail(await res.json())
     } catch (e) {
       setChunkDetail({ error: e instanceof Error ? e.message : 'Failed' })
@@ -710,7 +706,7 @@ export function TestDashboard() {
     setExtractionResult(null)
     try {
       const parsed = JSON.parse(extractionJson)
-      const res = await fetch(`${API_BASE}/ingest/chunk/${selectedChunkId}/extract`, {
+      const res = await adminFetch(`/ingest/chunk/${selectedChunkId}/extract`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(parsed),
@@ -730,7 +726,7 @@ export function TestDashboard() {
     setStoreLoading(true)
     setStoreResult(null)
     try {
-      const res = await fetch(`${API_BASE}/ingest/chunk/${selectedChunkId}/store`, {
+      const res = await adminFetch(`/ingest/chunk/${selectedChunkId}/store`, {
         method: 'POST',
       })
       setStoreResult(await res.json())
@@ -746,7 +742,7 @@ export function TestDashboard() {
   const fetchIngestStats = async () => {
     setStatsLoading(true)
     try {
-      const res = await fetch(`${API_BASE}/ingest/stats`)
+      const res = await adminFetch('/ingest/stats')
       setIngestStats(await res.json())
     } catch (e) {
       setIngestStats(null)
@@ -761,7 +757,7 @@ export function TestDashboard() {
     setVectorLoading(true)
     setVectorResults(null)
     try {
-      const res = await fetch(`${API_BASE}/vector-search`, {
+      const res = await adminFetch('/vector-search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -827,14 +823,14 @@ export function TestDashboard() {
         return
       }
 
-      const userToken = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
-      const authToken = adminToken || userToken
+      const authToken = adminToken.trim() || null
       const res = await fetch(`${API_BASE}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
         },
+        credentials: 'include',
         body: JSON.stringify({
           pubkey: normalizedPubkey,
           email: testEmail || undefined,
@@ -877,8 +873,6 @@ export function TestDashboard() {
 
   // Admin session helpers
   const saveAdminSession = (token: string, pubkey: string) => {
-    localStorage.setItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN, token)
-    localStorage.setItem(STORAGE_KEYS.ADMIN_PUBKEY, pubkey)
     setAdminToken(token)
     setAdminPubkey(pubkey)
   }
@@ -918,7 +912,12 @@ export function TestDashboard() {
     setVerifyLoading(true)
     setVerifyResult(null)
     try {
-      const res = await fetch(`${API_BASE}/auth/verify?token=${encodeURIComponent(verifyToken.trim())}`)
+      const res = await fetch(`${API_BASE}/auth/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ token: verifyToken.trim() }),
+      })
       setVerifyResult(await res.json())
     } catch (e) {
       setVerifyResult({ error: e instanceof Error ? e.message : 'Failed' })
@@ -928,11 +927,17 @@ export function TestDashboard() {
   }
 
   const checkAuthStatus = async () => {
-    if (!sessionCheckToken.trim()) return
     setSessionCheckLoading(true)
     setSessionCheckResult(null)
     try {
-      const res = await fetch(`${API_BASE}/auth/me?token=${encodeURIComponent(sessionCheckToken.trim())}`)
+      const headers: HeadersInit = {}
+      if (sessionCheckToken.trim()) {
+        headers.Authorization = `Bearer ${sessionCheckToken.trim()}`
+      }
+      const res = await fetch(`${API_BASE}/auth/me`, {
+        headers,
+        credentials: 'include',
+      })
       setSessionCheckResult(await res.json())
     } catch (e) {
       setSessionCheckResult({ authenticated: false, user: null })
@@ -1185,12 +1190,12 @@ export function TestDashboard() {
     setLookupLoading(true)
     setSingleUser(null)
     try {
-      const userToken = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
-      const authToken = adminToken || userToken
+      const authToken = adminToken.trim() || null
       const res = await fetch(`${API_BASE}/users/${lookupUserId.trim()}`, {
         headers: {
           ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
         },
+        credentials: 'include',
       })
       if (res.ok) {
         const data = await res.json()
@@ -1211,14 +1216,14 @@ export function TestDashboard() {
     setUpdateUserLoading(true)
     setUpdateUserResult(null)
     try {
-      const userToken = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
-      const authToken = adminToken || userToken
+      const authToken = adminToken.trim() || null
       const res = await fetch(`${API_BASE}/users/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
         },
+        credentials: 'include',
         body: JSON.stringify({ approved })
       })
       setUpdateUserResult(await res.json())
@@ -1237,13 +1242,13 @@ export function TestDashboard() {
   const deleteUser = async (userId: number) => {
     setDeleteUserLoading(true)
     try {
-      const userToken = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
-      const authToken = adminToken || userToken
+      const authToken = adminToken.trim() || null
       await fetch(`${API_BASE}/users/${userId}`, {
         method: 'DELETE',
         headers: {
           ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
         },
+        credentials: 'include',
       })
       fetchAllUsers()
       if (singleUser?.id === userId) {
@@ -2225,19 +2230,15 @@ export function TestDashboard() {
                 />
                 <Button
                   variant="secondary"
-                  onClick={() => {
-                    if (adminToken) {
-                      localStorage.setItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN, adminToken)
-                    }
-                  }}
+                  onClick={() => setAdminToken(adminToken.trim())}
                 >
-                  Save
+                  Use
                 </Button>
               </div>
             </div>
             {adminToken && (
               <p className="text-xs text-text-muted">
-                Token stored: {adminToken.slice(0, 20)}...
+                Token in-memory: {adminToken.slice(0, 20)}...
               </p>
             )}
           </div>
@@ -2283,7 +2284,7 @@ export function TestDashboard() {
           <div className="border-t border-border pt-6 mb-6">
             <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Verify Magic Link Token</p>
             <InfoBox>
-              <strong className="text-text">GET /auth/verify?token=...</strong> — Verify a magic link token and get session token.
+              <strong className="text-text">POST /auth/verify</strong> — Verify a magic link token and get session info (cookie-based session).
             </InfoBox>
             <div className="flex gap-3 mb-3">
               <input
@@ -2306,7 +2307,7 @@ export function TestDashboard() {
           <div className="border-t border-border pt-6 mb-6">
             <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Check Session Status</p>
             <InfoBox>
-              <strong className="text-text">GET /auth/me?token=...</strong> — Check if a session token is valid and get user info.
+              <strong className="text-text">GET /auth/me</strong> — Check current cookie session (or pass Authorization bearer token).
             </InfoBox>
             <div className="flex gap-3 mb-3">
               <input
@@ -2316,8 +2317,8 @@ export function TestDashboard() {
                 placeholder="Paste session token..."
                 className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm font-mono placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
               />
-              <Button onClick={checkAuthStatus} disabled={sessionCheckLoading || !sessionCheckToken.trim()}>
-                {sessionCheckLoading ? 'Checking...' : 'Check Status'}
+              <Button onClick={checkAuthStatus} disabled={sessionCheckLoading}>
+                {sessionCheckLoading ? 'Checking...' : sessionCheckToken.trim() ? 'Check Status' : 'Check Cookie Session'}
               </Button>
             </div>
             {sessionCheckResult && (

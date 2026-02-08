@@ -33,7 +33,7 @@
       "continue": "Weiter",
       "changeInSettings": "Du kannst das später in den Einstellungen ändern.",
       "privacyNoticeTitle": "Standardmäßig privat",
-      "privacyNoticeBody": "Sanctum nutzt passwortlose Anmeldung und profilspezifische Einstellungen mit Fokus auf Verschlüsselung."
+      "privacyNoticeBody": "Sanctum verwendet passwortlose Anmeldung und profilbezogene Einstellungen mit Verschlüsselung als Standard. Die endgültigen Entscheidungen zur Datenverarbeitung werden vom Administrator dieser Instanz festgelegt."
     },
     "auth": {
       "signUp": "Registrieren",
@@ -64,7 +64,9 @@
       "expiringLinkTitle": "Kurzlebige Anmeldelinks",
       "expiringLinkBody": "Jeder Magic Link ist signiert und läuft nach 15 Minuten ab.",
       "encryptionTitle": "Verschlüsselung als Standard",
-      "encryptionBody": "Profilfelder sind standardmäßig verschlüsselt, und Admins entscheiden, welche nicht sensiblen Daten zur Personalisierung genutzt werden dürfen."
+      "encryptionBody": "Profilfelder sind standardmäßig verschlüsselt, aber der Administrator dieser Instanz steuert die Einstellungen pro Feld und kann zulassen, dass ausgewählte Daten anders gespeichert oder geteilt werden.",
+      "adminControlNotice": "Die Datenverarbeitung wird vom Administrator dieser Instanz konfiguriert, einschließlich dessen, was unverschlüsselt gespeichert oder mit KI-Tools geteilt werden darf.",
+      "noWarrantyNotice": "Die Sanctum-Software wird ohne Gewähr bereitgestellt. Die Nutzung dieser Instanz unterliegt den Richtlinien des Administrators."
     },
     "verify": {
       "verifying": "Link wird überprüft...",
@@ -329,7 +331,7 @@
       "encryptDisabled": "Als Klartext speichern",
       "encryptedHint": "Feldwerte werden mit NIP-04 verschlüsselt (empfohlen)",
       "plaintextHint": "Feldwerte werden als Klartext gespeichert (nicht empfohlen für sensible Daten)",
-      "encryptedSummary": "Dieses Feld ist verschlüsselt. Nur du kannst die Daten einsehen, wenn du angemeldet bist.",
+      "encryptedSummary": "Dieses Feld ist verschlüsselt. Nur ein Administrator mit dem entsprechenden Nostr-Privatschlüssel kann die Daten entschlüsseln und einsehen.",
       "encryptedNoAI": "KI-Personalisierung ist für verschlüsselte Felder nicht verfügbar.",
       "securityWarning": "Sicherheitswarnung",
       "securityWarningBody": "Das Deaktivieren der Verschlüsselung speichert Benutzerdaten als Klartext. Deaktiviere dies nur für nicht sensible Felder wie Einstellungen oder öffentliche Informationen.",
@@ -344,7 +346,7 @@
       "encryptionHelpWhenEnabled": "Wenn Verschlüsselung aktiviert ist:",
       "encryptionHelpPoint1": "Daten werden mit dem Nostr-Schlüssel des Administrators verschlüsselt (NIP-04)",
       "encryptionHelpPoint2": "Nur der Administrator kann die Daten entschlüsseln und einsehen",
-      "encryptionHelpPoint3": "Schützt vor Datenbankverletzungen",
+      "encryptionHelpPoint3": "Verringert die Offenlegung in bestimmten Szenarien einer Datenbankverletzung, beseitigt das Risiko jedoch nicht",
       "encryptionHelpPoint4": "Kann nicht mit dem KI-Assistenten geteilt werden",
       "encryptionHelpWhenDisabled": "Wenn Verschlüsselung deaktiviert ist:",
       "encryptionHelpDisabledPoint1": "Daten werden als lesbarer Klartext gespeichert",
@@ -353,7 +355,10 @@
       "encryptionHelpRecommendation": "Empfehlung: Behalte die Verschlüsselung für alle persönlich identifizierbaren Informationen aktiviert (Namen, E-Mails, Telefonnummern, Adressen).",
       "encryptedBadge": "Verschlüsselt",
       "plaintextBadge": "Klartext",
-      "inChatBadge": "Im Chat"
+      "inChatBadge": "Im Chat",
+      "complianceAcknowledgeLabel": "Ich bestätige, dass dieses Feld gemäß unseren geltenden rechtlichen Anforderungen im Klartext gespeichert und/oder mit KI geteilt werden darf.",
+      "complianceAcknowledgeHint": "Aktiviere dies erst, nachdem du Nutzerhinweise, Einwilligungsabläufe (falls erforderlich) und interne Richtlinien zur Datenverarbeitung aktualisiert hast.",
+      "complianceAcknowledgeRequired": "Du musst die rechtliche/compliance-bezogene Verantwortung bestätigen, bevor du diese Feldkonfiguration speichern kannst."
     },
     "fieldTypes": {
       "text": "Text",
@@ -400,7 +405,8 @@
     "securityJourneyStep1": "Zugriff absichern: Öffentliche URLs setzen, Simulations-Flags außerhalb der Entwicklung deaktivieren und Freigaberegeln für Nutzer festlegen.",
     "securityJourneyStep2": "Datengrenzen festlegen: Nur notwendige Felder erfassen, sensible Felder verschlüsseln und Chat-Kontextfelder begrenzen.",
     "securityJourneyStep3": "Validieren und überwachen: Konfiguration validieren, Service-Status prüfen und gespeicherte Daten regelmäßig kontrollieren.",
-    "securityJourneyNote": "Das bietet eine starke Basis für Produktion."
+    "securityJourneyNote": "Das bietet eine starke Basis für Produktion.",
+    "legalResponsibilityNotice": "Du bist für eine rechtskonforme Konfiguration, Nutzermitteilungen und Datenverarbeitungsrichtlinien dieser Instanz verantwortlich."
   },
   "adminDashboard": {
     "title": "Admin-Dashboard",

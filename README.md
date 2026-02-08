@@ -77,6 +77,7 @@ After the first admin login, additional configuration is available in the admin 
 - `/admin/deployment` - deployment config (LLM, SMTP, domains, SSL)
 
 See `docs/admin-deployment-config.md` for deployment config details.
+See `docs/data-protection-notice-template.md` for instance-level data protection notice language you can adapt for users.
 
 ### Available Endpoints
 

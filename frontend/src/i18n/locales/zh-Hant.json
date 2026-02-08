@@ -153,7 +153,7 @@
       "encryptDisabled": "以純文字儲存",
       "encryptedHint": "欄位值將使用 NIP-04 加密（建議）",
       "plaintextHint": "欄位值將以純文字儲存（不建議用於敏感資料）",
-      "encryptedSummary": "此欄位已加密。只有你登入後才能檢視資料。",
+      "encryptedSummary": "此欄位已加密。只有持有相應 Nostr 私鑰的管理員才能解密並檢視資料。",
       "encryptedNoAI": "加密欄位無法使用 AI 個人化功能。",
       "securityWarning": "安全警告",
       "securityWarningBody": "停用加密會將使用者資料以純文字儲存。僅對偏好設定或公開資訊等非敏感欄位停用。",
@@ -168,7 +168,7 @@
       "encryptionHelpWhenEnabled": "啟用加密時：",
       "encryptionHelpPoint1": "資料使用管理員的 Nostr 金鑰（NIP-04）加密",
       "encryptionHelpPoint2": "只有管理員可以解密和檢視資料",
-      "encryptionHelpPoint3": "防止資料庫洩漏",
+      "encryptionHelpPoint3": "在部分資料庫外洩場景中可減少暴露風險，但無法完全消除風險",
       "encryptionHelpPoint4": "無法與 AI 助手分享",
       "encryptionHelpWhenDisabled": "停用加密時：",
       "encryptionHelpDisabledPoint1": "資料以可讀的純文字儲存",
@@ -177,7 +177,10 @@
       "encryptionHelpRecommendation": "建議：對任何個人識別資訊（姓名、電子郵件、電話號碼、地址）保持啟用加密。",
       "encryptedBadge": "已加密",
       "plaintextBadge": "純文字",
-      "inChatBadge": "在聊天中"
+      "inChatBadge": "在聊天中",
+      "complianceAcknowledgeLabel": "我確認此欄位可以純文字儲存和/或在適用的法律要求下與 AI 分享。",
+      "complianceAcknowledgeHint": "請在更新使用者通知、同意流程（如需要）及內部資料處理政策後再啟用此項。",
+      "complianceAcknowledgeRequired": "儲存此欄位設定前，必須確認法律/合規責任。"
     },
     "fieldTypes": {
       "text": "文字",
@@ -236,7 +239,8 @@
     "securityJourneyStep1": "保護存取：設定公開 URL，在非開發環境關閉模擬旗標，並決定使用者審核規則。",
     "securityJourneyStep2": "定義資料邊界：只收集必要欄位，保持敏感欄位加密，並限制可進入聊天脈絡的欄位。",
     "securityJourneyStep3": "驗證與監控：執行設定驗證、檢查服務健康，並定期審查已儲存資料。",
-    "securityJourneyNote": "這能為正式環境提供穩健的安全基線。"
+    "securityJourneyNote": "這能為正式環境提供穩健的安全基線。",
+    "legalResponsibilityNotice": "你有責任確保此實例的設定合法，並制定適當的使用者告知和資料處理政策。"
   },
   "onboarding": {
     "nostr": {
@@ -273,7 +277,7 @@
       "continue": "繼續",
       "changeInSettings": "你可以稍後在設定中更改。",
       "privacyNoticeTitle": "預設私密",
-      "privacyNoticeBody": "Sanctum 採用免密碼登入，並以加密優先方式管理個人資料設定。"
+      "privacyNoticeBody": "Sanctum 使用無密碼登入和加密優先的個人資料設定。最終的資料處理方式由此實例的管理員設定。"
     },
     "auth": {
       "signUp": "註冊",
@@ -304,7 +308,9 @@
       "expiringLinkTitle": "短時效登入連結",
       "expiringLinkBody": "每個魔法連結都經過簽章，並在 15 分鐘後失效。",
       "encryptionTitle": "預設加密",
-      "encryptionBody": "個人資料欄位預設加密，管理員只會選擇非敏感資訊用於個人化。"
+      "encryptionBody": "個人資料欄位預設加密，但此實例管理員控制欄位層級設定，可能會允許部分資料以不同方式儲存或分享。",
+      "adminControlNotice": "資料處理方式由此實例管理員設定，包括哪些資料可能以未加密形式儲存或與 AI 工具分享。",
+      "noWarrantyNotice": "Sanctum 軟體按原樣提供，不附帶任何保證。使用此實例須遵守管理員的相關政策。"
     },
     "verify": {
       "verifying": "正在驗證你的連結...",

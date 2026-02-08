@@ -34,7 +34,7 @@
       "continue": "Tovább",
       "changeInSettings": "Ezt később a beállításokban módosíthatod.",
       "privacyNoticeTitle": "Alapértelmezetten privát",
-      "privacyNoticeBody": "A Sanctum jelszó nélküli bejelentkezést és titkosítás-elsődleges profilbeállításokat használ."
+      "privacyNoticeBody": "A Sanctum jelszó nélküli bejelentkezést és alapértelmezetten titkosított profilbeállításokat használ. A végleges adatkezelési beállításokat ennek a példánynak az adminisztrátora konfigurálja."
     },
     "auth": {
       "signUp": "Regisztráció",
@@ -65,7 +65,9 @@
       "expiringLinkTitle": "Rövid élettartamú bejelentkezési linkek",
       "expiringLinkBody": "Minden mágikus link aláírt és 15 perc után lejár.",
       "encryptionTitle": "Alapértelmezett titkosítás",
-      "encryptionBody": "A profilmezők alapértelmezetten titkosítottak, és az adminisztrátorok választják ki, mely nem érzékeny adatok használhatók személyre szabáshoz."
+      "encryptionBody": "A profilmezők alapértelmezetten titkosítottak, de a példány adminisztrátora szabályozza a mezőszintű beállításokat, és engedélyezheti egyes adatok eltérő tárolását vagy megosztását.",
+      "adminControlNotice": "Az adatkezelést a példány adminisztrátora konfigurálja, beleértve azt is, hogy mi tárolható titkosítás nélkül, illetve mi osztható meg AI eszközökkel.",
+      "noWarrantyNotice": "A Sanctum szoftver jelenlegi állapotában, garancia nélkül kerül rendelkezésre bocsátásra. A példány használata az adminisztrátor szabályzatainak hatálya alá tartozik."
     },
     "verify": {
       "verifying": "Link ellenőrzése...",
@@ -320,7 +322,7 @@
       "encryptDisabled": "Tárolás egyszerű szövegként",
       "encryptedHint": "A mezőértékek NIP-04-gyel lesznek titkosítva (ajánlott)",
       "plaintextHint": "A mezőértékek egyszerű szövegként tárolódnak (nem ajánlott érzékeny adatokhoz)",
-      "encryptedSummary": "Ez a mező titkosított. Csak te láthatod az adatokat bejelentkezve.",
+      "encryptedSummary": "Ez a mező titkosított. Csak a megfelelő Nostr privát kulccsal rendelkező adminisztrátor tudja visszafejteni és megtekinteni az adatokat.",
       "encryptedNoAI": "Az AI személyre szabás nem érhető el titkosított mezőkhöz.",
       "securityWarning": "Biztonsági figyelmeztetés",
       "securityWarningBody": "A titkosítás kikapcsolása egyszerű szövegként tárolja a felhasználói adatokat. Csak nem érzékeny mezőknél kapcsold ki, mint preferenciák vagy nyilvános információk.",
@@ -335,7 +337,7 @@
       "encryptionHelpWhenEnabled": "Amikor a titkosítás engedélyezve van:",
       "encryptionHelpPoint1": "Az adatok az admin Nostr kulcsával titkosítódnak (NIP-04)",
       "encryptionHelpPoint2": "Csak az admin tudja visszafejteni és megtekinteni az adatokat",
-      "encryptionHelpPoint3": "Védelmet nyújt adatbázis-betörések ellen",
+      "encryptionHelpPoint3": "Csökkenti a kitettséget bizonyos adatbázis-feltörési esetekben, de nem szünteti meg teljesen a kockázatot",
       "encryptionHelpPoint4": "Nem osztható meg az AI asszisztenssel",
       "encryptionHelpWhenDisabled": "Amikor a titkosítás ki van kapcsolva:",
       "encryptionHelpDisabledPoint1": "Az adatok olvasható egyszerű szövegként tárolódnak",
@@ -344,7 +346,10 @@
       "encryptionHelpRecommendation": "Javaslat: Tartsd bekapcsolva a titkosítást minden személyazonosításra alkalmas információnál (nevek, e-mailek, telefonszámok, címek).",
       "encryptedBadge": "Titkosított",
       "plaintextBadge": "Egyszerű szöveg",
-      "inChatBadge": "Csevegésben"
+      "inChatBadge": "Csevegésben",
+      "complianceAcknowledgeLabel": "Megerősítem, hogy ez a mező egyszerű szövegként tárolható és/vagy megosztható az AI-val a vonatkozó jogi követelményeink szerint.",
+      "complianceAcknowledgeHint": "Csak a felhasználói értesítések, hozzájárulási folyamatok (ha szükséges) és belső adatkezelési szabályzatok frissítése után engedélyezd.",
+      "complianceAcknowledgeRequired": "A mező konfigurációjának mentése előtt meg kell erősítened a jogi/megfelelőségi felelősséget."
     },
     "fieldTypes": {
       "text": "Szöveg",
@@ -403,7 +408,8 @@
     "securityJourneyStep1": "Hozzáférés biztosítása: állítsd be a nyilvános URL-eket, tiltsd le a szimulációs jelzőket a fejlesztésen kívül, és válaszd ki a felhasználó-jóváhagyási szabályokat.",
     "securityJourneyStep2": "Adathatárok beállítása: gyűjts csak szükséges mezőket, tartsd az érzékeny mezőket titkosítva, és korlátozd a csevegési kontextus mezőit.",
     "securityJourneyStep3": "Ellenőrzés és felügyelet: futtass konfigurációs ellenőrzést, ellenőrizd a szolgáltatások állapotát, és rendszeresen tekintsd át a tárolt adatokat.",
-    "securityJourneyNote": "Ez erős alapot biztosít a termelési környezethez."
+    "securityJourneyNote": "Ez erős alapot biztosít a termelési környezethez.",
+    "legalResponsibilityNotice": "Te felelsz a példány jogszerű konfigurálásáért, a felhasználói tájékoztatásért és az adatkezelési szabályzatokért."
   },
   "errors": {
     "requestFailed": "A kérés sikertelen",

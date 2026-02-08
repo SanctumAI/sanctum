@@ -2,14 +2,23 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Clock, LogOut } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
-import { STORAGE_KEYS } from '../types/onboarding'
+import { API_BASE, STORAGE_KEYS } from '../types/onboarding'
 
 export function PendingApproval() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const email = localStorage.getItem(STORAGE_KEYS.USER_EMAIL)
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch(`${API_BASE}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      })
+    } catch {
+      // Best-effort logout
+    }
+
     // Clear all user data
     localStorage.removeItem(STORAGE_KEYS.SESSION_TOKEN)
     localStorage.removeItem(STORAGE_KEYS.USER_EMAIL)

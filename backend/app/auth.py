@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
-from fastapi import Depends, HTTPException, Header
+from fastapi import Depends, HTTPException, Header, Cookie, Response
 
 logger = logging.getLogger("sanctum.auth")
 
@@ -216,6 +216,95 @@ MAGIC_LINK_MAX_AGE = 15 * 60
 
 # Session expiration (7 days)
 SESSION_MAX_AGE = 7 * 24 * 60 * 60
+
+# Session cookie configuration
+USER_SESSION_COOKIE_NAME = os.getenv("USER_SESSION_COOKIE_NAME", "sanctum_session")
+ADMIN_SESSION_COOKIE_NAME = os.getenv("ADMIN_SESSION_COOKIE_NAME", "sanctum_admin_session")
+CSRF_COOKIE_NAME = os.getenv("CSRF_COOKIE_NAME", "sanctum_csrf")
+SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "lax").strip().lower()
+SESSION_COOKIE_DOMAIN = os.getenv("SESSION_COOKIE_DOMAIN", "").strip() or None
+
+
+def _is_cookie_secure() -> bool:
+    """
+    Determine whether auth cookies should be marked Secure.
+    Defaults to secure in production mode.
+    """
+    raw = os.getenv("SESSION_COOKIE_SECURE", "").strip().lower()
+    if raw in {"1", "true", "yes", "on"}:
+        return True
+    if raw in {"0", "false", "no", "off"}:
+        return False
+    return is_production_mode()
+
+
+def _normalized_samesite() -> str:
+    """Normalize SameSite to FastAPI-supported values."""
+    if SESSION_COOKIE_SAMESITE in {"strict", "lax", "none"}:
+        return SESSION_COOKIE_SAMESITE
+    return "lax"
+
+
+def _effective_cookie_secure() -> bool:
+    """
+    Determine the effective Secure flag for cookies.
+    Forces Secure=True when SameSite=None because browsers silently reject
+    SameSite=None cookies that lack the Secure attribute.
+    """
+    if _normalized_samesite() == "none":
+        return True
+    return _is_cookie_secure()
+
+
+def _set_session_cookie(response: Response, key: str, token: str, max_age: int) -> None:
+    """Set an httpOnly session cookie with secure defaults."""
+    response.set_cookie(
+        key=key,
+        value=token,
+        max_age=max_age,
+        httponly=True,
+        secure=_effective_cookie_secure(),
+        samesite=_normalized_samesite(),
+        path="/",
+        domain=SESSION_COOKIE_DOMAIN,
+    )
+
+
+def _set_csrf_cookie(response: Response, max_age: int) -> None:
+    """Set non-httpOnly CSRF cookie for double-submit protection."""
+    response.set_cookie(
+        key=CSRF_COOKIE_NAME,
+        value=secrets.token_urlsafe(32),
+        max_age=max_age,
+        httponly=False,
+        secure=_effective_cookie_secure(),
+        samesite=_normalized_samesite(),
+        path="/",
+        domain=SESSION_COOKIE_DOMAIN,
+    )
+
+
+def set_user_session_cookie(response: Response, token: str) -> None:
+    """Set user session cookie."""
+    _set_session_cookie(response, USER_SESSION_COOKIE_NAME, token, SESSION_MAX_AGE)
+    _set_csrf_cookie(response, SESSION_MAX_AGE)
+
+
+def set_admin_session_cookie(response: Response, token: str) -> None:
+    """Set admin session cookie."""
+    _set_session_cookie(response, ADMIN_SESSION_COOKIE_NAME, token, ADMIN_SESSION_MAX_AGE)
+    _set_csrf_cookie(response, ADMIN_SESSION_MAX_AGE)
+
+
+def clear_auth_cookies(response: Response) -> None:
+    """Clear both user and admin session cookies."""
+    cookie_kwargs = {
+        "path": "/",
+        "domain": SESSION_COOKIE_DOMAIN,
+    }
+    response.delete_cookie(USER_SESSION_COOKIE_NAME, **cookie_kwargs)
+    response.delete_cookie(ADMIN_SESSION_COOKIE_NAME, **cookie_kwargs)
+    response.delete_cookie(CSRF_COOKIE_NAME, **cookie_kwargs)
 
 # Serializers
 _magic_link_serializer = URLSafeTimedSerializer(SECRET_KEY)
@@ -463,7 +552,25 @@ def send_magic_link_email(to_email: str, token: str) -> bool:
         return False
 
 
-async def require_admin(authorization: Optional[str] = Header(None)) -> dict:
+def _extract_bearer_token(authorization: Optional[str]) -> Optional[str]:
+    """Extract Bearer token from Authorization header."""
+    if not authorization:
+        return None
+    if not authorization.startswith("Bearer "):
+        return None
+    token = authorization[7:].strip()
+    return token or None
+
+
+def _resolve_auth_token(authorization: Optional[str], cookie_token: Optional[str]) -> Optional[str]:
+    """Prefer Authorization bearer token, then fall back to cookie token."""
+    return _extract_bearer_token(authorization) or cookie_token
+
+
+async def require_admin(
+    authorization: Optional[str] = Header(None),
+    admin_session_cookie: Optional[str] = Cookie(None, alias=ADMIN_SESSION_COOKIE_NAME),
+) -> dict:
     """
     FastAPI dependency requiring valid admin authentication.
     Returns admin dict or raises 401.
@@ -471,10 +578,10 @@ async def require_admin(authorization: Optional[str] = Header(None)) -> dict:
     # Import here to avoid circular imports
     import database
 
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+    token = _resolve_auth_token(authorization, admin_session_cookie)
+    if not token:
+        raise HTTPException(status_code=401, detail="Missing or invalid authentication token")
 
-    token = authorization[7:]
     data = verify_admin_session_token(token)
     if not data:
         raise HTTPException(status_code=401, detail="Invalid or expired admin token")
@@ -505,7 +612,10 @@ async def require_instance_setup_complete() -> None:
         )
 
 
-async def require_admin_or_setup_complete(authorization: Optional[str] = Header(None)) -> dict:
+async def require_admin_or_setup_complete(
+    authorization: Optional[str] = Header(None),
+    admin_session_cookie: Optional[str] = Cookie(None, alias=ADMIN_SESSION_COOKIE_NAME),
+) -> dict:
     """
     FastAPI dependency that allows admin access OR blocks if setup not complete.
     Used for admin-only endpoints during setup phase.
@@ -515,13 +625,13 @@ async def require_admin_or_setup_complete(authorization: Optional[str] = Header(
     
     # If setup is complete, require normal admin auth
     if database.is_instance_setup_complete():
-        return await require_admin(authorization)
+        return await require_admin(authorization, admin_session_cookie)
     
     # If setup not complete, allow admin auth but don't require setup completion
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+    token = _resolve_auth_token(authorization, admin_session_cookie)
+    if not token:
+        raise HTTPException(status_code=401, detail="Missing or invalid authentication token")
 
-    token = authorization[7:]
     data = verify_admin_session_token(token)
     if not data:
         raise HTTPException(status_code=401, detail="Invalid or expired admin token")
@@ -533,17 +643,20 @@ async def require_admin_or_setup_complete(authorization: Optional[str] = Header(
     return admin
 
 
-async def get_current_user(authorization: Optional[str] = Header(None)) -> dict:
+async def get_current_user(
+    authorization: Optional[str] = Header(None),
+    session_cookie: Optional[str] = Cookie(None, alias=USER_SESSION_COOKIE_NAME),
+) -> dict:
     """
     FastAPI dependency requiring valid user authentication.
     Returns user dict or raises 401.
     """
     import database
 
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+    token = _resolve_auth_token(authorization, session_cookie)
+    if not token:
+        raise HTTPException(status_code=401, detail="Missing or invalid authentication token")
 
-    token = authorization[7:]
     data = verify_session_token(token)
     if not data:
         raise HTTPException(status_code=401, detail="Invalid or expired session token")
@@ -576,7 +689,11 @@ async def require_approved_user(user: dict = Depends(get_current_user)) -> dict:
     return user
 
 
-async def require_admin_or_approved_user(authorization: Optional[str] = Header(None)) -> dict:
+async def require_admin_or_approved_user(
+    authorization: Optional[str] = Header(None),
+    admin_session_cookie: Optional[str] = Cookie(None, alias=ADMIN_SESSION_COOKIE_NAME),
+    user_session_cookie: Optional[str] = Cookie(None, alias=USER_SESSION_COOKIE_NAME),
+) -> dict:
     """
     FastAPI dependency that accepts EITHER:
     - A valid admin session token, OR
@@ -586,20 +703,19 @@ async def require_admin_or_approved_user(authorization: Optional[str] = Header(N
     """
     import database
 
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
-
-    token = authorization[7:]
+    token = _extract_bearer_token(authorization)
+    admin_token = token or admin_session_cookie
+    user_token = token or user_session_cookie
     
     # Try admin token first
-    admin_data = verify_admin_session_token(token)
+    admin_data = verify_admin_session_token(admin_token) if admin_token else None
     if admin_data:
         admin = database.get_admin_by_pubkey(admin_data["pubkey"])
         if admin:
             return {"id": admin["id"], "type": "admin", "approved": True, "pubkey": admin_data["pubkey"]}
     
     # Try user token
-    user_data = verify_session_token(token)
+    user_data = verify_session_token(user_token) if user_token else None
     if user_data:
         # Dev mode: return mock user
         if user_data.get("dev_mode"):
@@ -623,7 +739,11 @@ async def require_admin_or_approved_user(authorization: Optional[str] = Header(N
     raise HTTPException(status_code=401, detail="Invalid or expired token")
 
 
-async def require_admin_or_user(authorization: Optional[str] = Header(None)) -> dict:
+async def require_admin_or_user(
+    authorization: Optional[str] = Header(None),
+    admin_session_cookie: Optional[str] = Cookie(None, alias=ADMIN_SESSION_COOKIE_NAME),
+    user_session_cookie: Optional[str] = Cookie(None, alias=USER_SESSION_COOKIE_NAME),
+) -> dict:
     """
     FastAPI dependency that accepts EITHER:
     - A valid admin session token, OR
@@ -634,20 +754,19 @@ async def require_admin_or_user(authorization: Optional[str] = Header(None)) -> 
     """
     import database
 
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
-
-    token = authorization[7:]
+    token = _extract_bearer_token(authorization)
+    admin_token = token or admin_session_cookie
+    user_token = token or user_session_cookie
 
     # Try admin token first
-    admin_data = verify_admin_session_token(token)
+    admin_data = verify_admin_session_token(admin_token) if admin_token else None
     if admin_data:
         admin = database.get_admin_by_pubkey(admin_data["pubkey"])
         if admin:
             return {"id": admin["id"], "type": "admin", "approved": True, "pubkey": admin_data["pubkey"]}
 
     # Try user token (approval not required)
-    user_data = verify_session_token(token)
+    user_data = verify_session_token(user_token) if user_token else None
     if user_data:
         # Dev mode: return mock user
         if user_data.get("dev_mode"):

@@ -34,7 +34,7 @@
       "continue": "Fortsätt",
       "changeInSettings": "Du kan ändra detta senare i dina inställningar.",
       "privacyNoticeTitle": "Privat som standard",
-      "privacyNoticeBody": "Sanctum använder lösenordsfri inloggning och kryptering som standard för profilinställningar."
+      "privacyNoticeBody": "Sanctum använder lösenordsfri inloggning och kryptering som standard för profilinställningar. Slutgiltiga val för datahantering konfigureras av administratören för denna instans."
     },
     "auth": {
       "signUp": "Registrera dig",
@@ -65,7 +65,9 @@
       "expiringLinkTitle": "Kortlivade inloggningslänkar",
       "expiringLinkBody": "Varje magisk länk är signerad och upphör efter 15 minuter.",
       "encryptionTitle": "Kryptering som standard",
-      "encryptionBody": "Profilfält krypteras som standard, och administratörer väljer vilken icke-känslig information som kan användas för personalisering."
+      "encryptionBody": "Profilfält är krypterade som standard, men administratören för denna instans styr inställningar på fältnivå och kan tillåta att vald data lagras eller delas på annat sätt.",
+      "adminControlNotice": "Datahantering konfigureras av administratören för denna instans, inklusive vad som kan lagras okrypterat eller delas med AI-verktyg.",
+      "noWarrantyNotice": "Sanctum-programvaran tillhandahålls i befintligt skick utan garanti. Användning av denna instans omfattas av administratörens policyer."
     },
     "verify": {
       "verifying": "Verifierar din länk...",
@@ -320,7 +322,7 @@
       "encryptDisabled": "Lagra som klartext",
       "encryptedHint": "Fältvärden krypteras med NIP-04 (rekommenderas)",
       "plaintextHint": "Fältvärden lagras som klartext (rekommenderas inte för känslig data)",
-      "encryptedSummary": "Detta fält är krypterat. Endast du kan se datan när du är inloggad.",
+      "encryptedSummary": "Detta fält är krypterat. Endast en administratör med motsvarande privata Nostr-nyckel kan dekryptera och visa datan.",
       "encryptedNoAI": "AI-personalisering är inte tillgänglig för krypterade fält.",
       "securityWarning": "Säkerhetsvarning",
       "securityWarningBody": "Att inaktivera kryptering lagrar användardata som klartext. Inaktivera endast för icke-känsliga fält som preferenser eller offentlig information.",
@@ -335,7 +337,7 @@
       "encryptionHelpWhenEnabled": "När kryptering är aktiverad:",
       "encryptionHelpPoint1": "Data krypteras med administratörens Nostr-nyckel (NIP-04)",
       "encryptionHelpPoint2": "Endast administratören kan dekryptera och se datan",
-      "encryptionHelpPoint3": "Skyddar mot databasintrång",
+      "encryptionHelpPoint3": "Minskar exponeringen vid vissa databasintrång, men eliminerar inte risken",
       "encryptionHelpPoint4": "Kan inte delas med AI-assistenten",
       "encryptionHelpWhenDisabled": "När kryptering är inaktiverad:",
       "encryptionHelpDisabledPoint1": "Data lagras som läsbar klartext",
@@ -344,7 +346,10 @@
       "encryptionHelpRecommendation": "Rekommendation: Behåll kryptering aktiverad för all personligt identifierbar information (namn, e-post, telefonnummer, adresser).",
       "encryptedBadge": "Krypterad",
       "plaintextBadge": "Klartext",
-      "inChatBadge": "I chatten"
+      "inChatBadge": "I chatten",
+      "complianceAcknowledgeLabel": "Jag bekräftar att detta fält kan lagras som klartext och/eller delas med AI enligt våra tillämpliga juridiska krav.",
+      "complianceAcknowledgeHint": "Aktivera detta först efter att du har uppdaterat dina användarmeddelanden, samtyckesflöden (om det krävs) och interna policyer för datahantering.",
+      "complianceAcknowledgeRequired": "Du måste bekräfta juridiskt ansvar och regelefterlevnad innan du sparar denna fältkonfiguration."
     },
     "fieldTypes": {
       "text": "Text",
@@ -403,7 +408,8 @@
     "securityJourneyStep1": "Säkra åtkomst: ange publika URL:er, inaktivera simuleringsflaggor utanför utveckling och välj regler för användargodkännande.",
     "securityJourneyStep2": "Sätt datagränser: samla bara nödvändiga fält, håll känsliga fält krypterade och begränsa chattens kontextfält.",
     "securityJourneyStep3": "Validera och övervaka: kör konfigurationsvalidering, kontrollera tjänsternas hälsa och granska lagrad data regelbundet.",
-    "securityJourneyNote": "Detta ger dig en stark grund för produktion."
+    "securityJourneyNote": "Detta ger dig en stark grund för produktion.",
+    "legalResponsibilityNotice": "Du ansvarar för laglig konfiguration, användarinformation och policyer för datahantering för denna instans."
   },
   "errors": {
     "requestFailed": "Förfrågan misslyckades",

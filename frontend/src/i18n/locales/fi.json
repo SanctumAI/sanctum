@@ -34,7 +34,7 @@
       "continue": "Jatka",
       "changeInSettings": "Voit muuttaa tämän myöhemmin asetuksissa.",
       "privacyNoticeTitle": "Yksityinen oletuksena",
-      "privacyNoticeBody": "Sanctum käyttää salasanatonta kirjautumista ja salaus-ensisijaisia profiiliasetuksia."
+      "privacyNoticeBody": "Sanctum käyttää salasanatonta kirjautumista ja salaus edellä -profiiliasetuksia. Lopulliset tietojen käsittelyvalinnat määrittää tämän instanssin ylläpitäjä."
     },
     "auth": {
       "signUp": "Rekisteröidy",
@@ -65,7 +65,9 @@
       "expiringLinkTitle": "Lyhytikäiset kirjautumislinkit",
       "expiringLinkBody": "Jokainen taikalinkki on allekirjoitettu ja vanhenee 15 minuutin kuluttua.",
       "encryptionTitle": "Salaus oletuksena",
-      "encryptionBody": "Profiilikentät salataan oletuksena, ja ylläpitäjät valitsevat mitkä ei-arkaluontoiset tiedot voidaan käyttää personointiin."
+      "encryptionBody": "Profilikentät salataan oletuksena, mutta tämän instanssin ylläpitäjä hallitsee kenttäkohtaisia asetuksia ja voi sallia valittujen tietojen tallentamisen tai jakamisen eri tavalla.",
+      "adminControlNotice": "Tietojen käsittelyn määrittää tämän instanssin ylläpitäjä, mukaan lukien mitä voidaan tallentaa salaamattomana tai jakaa AI-työkalujen kanssa.",
+      "noWarrantyNotice": "Sanctum-ohjelmisto tarjotaan sellaisenaan ilman takuuta. Tämän instanssin käyttöön sovelletaan ylläpitäjän käytäntöjä."
     },
     "verify": {
       "verifying": "Linkkiäsi vahvistetaan...",
@@ -320,7 +322,7 @@
       "encryptDisabled": "Tallenna selkotekstinä",
       "encryptedHint": "Kenttien arvot salataan NIP-04:llä (suositeltu)",
       "plaintextHint": "Kenttien arvot tallennetaan selkotekstinä (ei suositella arkaluontoisille tiedoille)",
-      "encryptedSummary": "Tämä kenttä on salattu. Vain sinä voit tarkastella tietoja kirjautuneena.",
+      "encryptedSummary": "Tämä kenttä on salattu. Vain ylläpitäjä, jolla on vastaava Nostr-yksityisavain, voi purkaa salauksen ja tarkastella tietoja.",
       "encryptedNoAI": "Tekoälyn personointi ei ole käytettävissä salatuille kentille.",
       "securityWarning": "Turvallisuusvaroitus",
       "securityWarningBody": "Salauksen poistaminen käytöstä tallentaa käyttäjätiedot selkotekstinä. Poista käytöstä vain ei-arkaluontoisille kentille, kuten asetuksille tai julkisille tiedoille.",
@@ -335,7 +337,7 @@
       "encryptionHelpWhenEnabled": "Kun salaus on käytössä:",
       "encryptionHelpPoint1": "Tiedot salataan ylläpitäjän Nostr-avaimella (NIP-04)",
       "encryptionHelpPoint2": "Vain ylläpitäjä voi purkaa salauksen ja tarkastella tietoja",
-      "encryptionHelpPoint3": "Suojaa tietokantamurroilta",
+      "encryptionHelpPoint3": "Vähentää altistumista joissakin tietokantamurtotilanteissa, mutta ei poista riskiä kokonaan",
       "encryptionHelpPoint4": "Ei voi jakaa tekoälyavustajan kanssa",
       "encryptionHelpWhenDisabled": "Kun salaus ei ole käytössä:",
       "encryptionHelpDisabledPoint1": "Tiedot tallennetaan luettavana selkotekstinä",
@@ -344,7 +346,10 @@
       "encryptionHelpRecommendation": "Suositus: Pidä salaus käytössä kaikille henkilötiedoille (nimet, sähköpostit, puhelinnumerot, osoitteet).",
       "encryptedBadge": "Salattu",
       "plaintextBadge": "Selkoteksti",
-      "inChatBadge": "Keskustelussa"
+      "inChatBadge": "Keskustelussa",
+      "complianceAcknowledgeLabel": "Vahvistan, että tämä kenttä voidaan tallentaa selkotekstinä ja/tai jakaa tekoälyn kanssa sovellettavien lakisääteisten vaatimustemme mukaisesti.",
+      "complianceAcknowledgeHint": "Ota tämä käyttöön vasta sen jälkeen, kun olet päivittänyt käyttäjäilmoituksesi, suostumuskulkusi (tarvittaessa) ja sisäiset tietojenkäsittelykäytäntösi.",
+      "complianceAcknowledgeRequired": "Sinun on vahvistettava lakisääteinen/vaatimustenmukaisuusvastuu ennen tämän kenttäasetuksen tallentamista."
     },
     "fieldTypes": {
       "text": "Teksti",
@@ -403,7 +408,8 @@
     "securityJourneyStep1": "Turvaa pääsy: aseta julkiset URL-osoitteet, poista simulointiliput käytöstä kehitysympäristön ulkopuolella ja valitse käyttäjien hyväksymissäännöt.",
     "securityJourneyStep2": "Aseta datarajat: kerää vain tarvittavat kentät, pidä arkaluontoiset kentät salattuina ja rajoita keskustelukontekstin kenttiä.",
     "securityJourneyStep3": "Vahvista ja seuraa: suorita asetusten vahvistus, tarkista palveluiden tila ja tarkastele tallennettuja tietoja säännöllisesti.",
-    "securityJourneyNote": "Tämä antaa sinulle vahvan perustan tuotantokäyttöön."
+    "securityJourneyNote": "Tämä antaa sinulle vahvan perustan tuotantokäyttöön.",
+    "legalResponsibilityNotice": "Olet vastuussa tämän instanssin lainmukaisesta määrityksestä, käyttäjäilmoituksista ja tietojenkäsittelykäytännöistä."
   },
   "errors": {
     "requestFailed": "Pyyntö epäonnistui",

@@ -34,7 +34,7 @@
       "continue": "Kontynuuj",
       "changeInSettings": "Możesz to później zmienić w ustawieniach.",
       "privacyNoticeTitle": "Prywatne domyślnie",
-      "privacyNoticeBody": "Sanctum korzysta z logowania bez hasła i ustawień profilu z szyfrowaniem jako priorytetem."
+      "privacyNoticeBody": "Sanctum wykorzystuje logowanie bez hasła i ustawienia profilu z priorytetem szyfrowania. Ostateczne decyzje dotyczące przetwarzania danych konfiguruje administrator tej instancji."
     },
     "auth": {
       "signUp": "Zarejestruj się",
@@ -65,7 +65,9 @@
       "expiringLinkTitle": "Krótkotrwałe linki logowania",
       "expiringLinkBody": "Każdy magiczny link jest podpisany i wygasa po 15 minutach.",
       "encryptionTitle": "Szyfrowanie domyślnie",
-      "encryptionBody": "Pola profilu są domyślnie szyfrowane, a administratorzy wybierają, jakie niewrażliwe informacje mogą być wykorzystane do personalizacji."
+      "encryptionBody": "Pola profilu są domyślnie szyfrowane, ale administrator tej instancji kontroluje ustawienia na poziomie pól i może zezwolić na inne przechowywanie lub udostępnianie wybranych danych.",
+      "adminControlNotice": "Przetwarzanie danych jest konfigurowane przez administratora tej instancji, w tym to, co może być przechowywane bez szyfrowania lub udostępniane narzędziom AI.",
+      "noWarrantyNotice": "Oprogramowanie Sanctum jest dostarczane w stanie takim, w jakim jest, bez gwarancji. Korzystanie z tej instancji podlega zasadom administratora."
     },
     "verify": {
       "verifying": "Weryfikujemy Twój link...",
@@ -330,7 +332,7 @@
       "encryptDisabled": "Przechowuj jako zwykły tekst",
       "encryptedHint": "Wartości pola będą szyfrowane przy użyciu NIP-04 (zalecane)",
       "plaintextHint": "Wartości pola będą przechowywane jako zwykły tekst (niezalecane dla danych wrażliwych)",
-      "encryptedSummary": "To pole jest zaszyfrowane. Tylko Ty możesz zobaczyć dane po zalogowaniu.",
+      "encryptedSummary": "To pole jest zaszyfrowane. Tylko administrator posiadający odpowiedni klucz prywatny Nostr może odszyfrować i wyświetlić dane.",
       "encryptedNoAI": "Personalizacja AI nie jest dostępna dla zaszyfrowanych pól.",
       "securityWarning": "Ostrzeżenie bezpieczeństwa",
       "securityWarningBody": "Wyłączenie szyfrowania spowoduje przechowywanie danych użytkownika jako zwykły tekst. Wyłączaj tylko dla pól niewrażliwych, takich jak preferencje lub informacje publiczne.",
@@ -345,7 +347,7 @@
       "encryptionHelpWhenEnabled": "Gdy szyfrowanie jest włączone:",
       "encryptionHelpPoint1": "Dane są szyfrowane przy użyciu klucza Nostr administratora (NIP-04)",
       "encryptionHelpPoint2": "Tylko administrator może odszyfrować i zobaczyć dane",
-      "encryptionHelpPoint3": "Chroni przed włamaniami do bazy danych",
+      "encryptionHelpPoint3": "Zmniejsza narażenie w niektórych scenariuszach naruszenia bazy danych, ale nie eliminuje ryzyka",
       "encryptionHelpPoint4": "Nie może być udostępnione asystentowi AI",
       "encryptionHelpWhenDisabled": "Gdy szyfrowanie jest wyłączone:",
       "encryptionHelpDisabledPoint1": "Dane są przechowywane jako czytelny tekst",
@@ -354,7 +356,10 @@
       "encryptionHelpRecommendation": "Zalecenie: Pozostaw szyfrowanie włączone dla wszelkich danych umożliwiających identyfikację osoby (imiona, e-maile, numery telefonów, adresy).",
       "encryptedBadge": "Zaszyfrowane",
       "plaintextBadge": "Zwykły tekst",
-      "inChatBadge": "W czacie"
+      "inChatBadge": "W czacie",
+      "complianceAcknowledgeLabel": "Potwierdzam, że to pole może być przechowywane jako zwykły tekst i/lub udostępniane AI zgodnie z obowiązującymi nas wymogami prawnymi.",
+      "complianceAcknowledgeHint": "Włącz tę opcję dopiero po zaktualizowaniu powiadomień dla użytkowników, procesów uzyskiwania zgody (jeśli wymagane) oraz wewnętrznych zasad przetwarzania danych.",
+      "complianceAcknowledgeRequired": "Przed zapisaniem tej konfiguracji pola musisz potwierdzić odpowiedzialność prawną/zgodność z przepisami."
     },
     "fieldTypes": {
       "text": "Tekst",
@@ -413,7 +418,8 @@
     "securityJourneyStep1": "Zabezpiecz dostęp: ustaw publiczne adresy URL, wyłącz flagi symulacji poza środowiskiem deweloperskim i wybierz zasady zatwierdzania użytkowników.",
     "securityJourneyStep2": "Ustaw granice danych: zbieraj tylko potrzebne pola, utrzymuj wrażliwe pola zaszyfrowane i ogranicz pola kontekstu czatu.",
     "securityJourneyStep3": "Waliduj i monitoruj: uruchom walidację konfiguracji, sprawdź stan usług i regularnie przeglądaj przechowywane dane.",
-    "securityJourneyNote": "To daje solidną podstawę dla środowiska produkcyjnego."
+    "securityJourneyNote": "To daje solidną podstawę dla środowiska produkcyjnego.",
+    "legalResponsibilityNotice": "Ponosisz odpowiedzialność za zgodną z prawem konfigurację, informowanie użytkowników oraz zasady przetwarzania danych dla tej instancji."
   },
   "errors": {
     "requestFailed": "Żądanie nie powiodło się",

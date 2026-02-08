@@ -34,7 +34,7 @@
       "continue": "Continuer",
       "changeInSettings": "Vous pourrez le modifier plus tard dans vos paramètres.",
       "privacyNoticeTitle": "Privé par défaut",
-      "privacyNoticeBody": "Sanctum utilise une connexion sans mot de passe et des paramètres de profil orientés chiffrement."
+      "privacyNoticeBody": "Sanctum utilise une connexion sans mot de passe et des paramètres de profil orientés chiffrement. Les choix finaux de traitement des données sont configurés par l'administrateur de cette instance."
     },
     "auth": {
       "signUp": "S'inscrire",
@@ -65,7 +65,9 @@
       "expiringLinkTitle": "Liens de connexion à courte durée",
       "expiringLinkBody": "Chaque lien magique est signé et expire après 15 minutes.",
       "encryptionTitle": "Chiffrement par défaut",
-      "encryptionBody": "Les champs de profil sont chiffrés par défaut, et les administrateurs choisissent quelles données non sensibles peuvent servir à la personnalisation."
+      "encryptionBody": "Les champs de profil sont chiffrés par défaut, mais l'administrateur de cette instance contrôle les paramètres au niveau de chaque champ et peut autoriser un stockage ou un partage différent pour certaines données.",
+      "adminControlNotice": "Le traitement des données est configuré par l'administrateur de cette instance, y compris ce qui peut être stocké non chiffré ou partagé avec des outils d'IA.",
+      "noWarrantyNotice": "Le logiciel Sanctum est fourni en l'état, sans garantie. L'utilisation de cette instance est soumise aux politiques de l'administrateur."
     },
     "verify": {
       "verifying": "Vérification de votre lien...",
@@ -331,7 +333,7 @@
       "encryptDisabled": "Stocker en texte clair",
       "encryptedHint": "Les valeurs du champ seront chiffrées avec NIP-04 (recommandé)",
       "plaintextHint": "Les valeurs du champ seront stockées en texte clair (non recommandé pour les données sensibles)",
-      "encryptedSummary": "Ce champ est chiffré. Vous seul pouvez voir les données lorsque vous êtes connecté.",
+      "encryptedSummary": "Ce champ est chiffré. Seul un administrateur disposant de la clé privée Nostr correspondante peut déchiffrer et consulter les données.",
       "encryptedNoAI": "La personnalisation IA n'est pas disponible pour les champs chiffrés.",
       "securityWarning": "Avertissement de sécurité",
       "securityWarningBody": "Désactiver le chiffrement stockera les données utilisateur en texte clair. Ne désactivez que pour les champs non sensibles comme les préférences ou les informations publiques.",
@@ -346,7 +348,7 @@
       "encryptionHelpWhenEnabled": "Lorsque le chiffrement est activé :",
       "encryptionHelpPoint1": "Les données sont chiffrées avec la clé Nostr de l'administrateur (NIP-04)",
       "encryptionHelpPoint2": "Seul l'administrateur peut déchiffrer et voir les données",
-      "encryptionHelpPoint3": "Protège contre les violations de base de données",
+      "encryptionHelpPoint3": "Réduit l'exposition dans certains scénarios de compromission de base de données, sans éliminer le risque",
       "encryptionHelpPoint4": "Ne peut pas être partagé avec l'assistant IA",
       "encryptionHelpWhenDisabled": "Lorsque le chiffrement est désactivé :",
       "encryptionHelpDisabledPoint1": "Les données sont stockées en texte clair lisible",
@@ -355,7 +357,10 @@
       "encryptionHelpRecommendation": "Recommandation : Gardez le chiffrement activé pour toute information personnellement identifiable (noms, emails, numéros de téléphone, adresses).",
       "encryptedBadge": "Chiffré",
       "plaintextBadge": "Texte clair",
-      "inChatBadge": "Dans le chat"
+      "inChatBadge": "Dans le chat",
+      "complianceAcknowledgeLabel": "Je confirme que ce champ peut être stocké en clair et/ou partagé avec l'IA conformément à nos obligations légales applicables.",
+      "complianceAcknowledgeHint": "Activez ceci uniquement après avoir mis à jour vos informations utilisateurs, vos flux de consentement (si requis) et vos politiques internes de traitement des données.",
+      "complianceAcknowledgeRequired": "Vous devez confirmer la responsabilité juridique/de conformité avant d'enregistrer cette configuration de champ."
     },
     "fieldTypes": {
       "text": "Texte",
@@ -402,7 +407,8 @@
     "securityJourneyStep1": "Sécurisez l’accès : définissez les URLs publiques, désactivez les modes simulation hors développement et choisissez les règles d’approbation des utilisateurs.",
     "securityJourneyStep2": "Définissez les limites des données : collectez seulement les champs nécessaires, gardez les champs sensibles chiffrés et limitez les champs inclus dans le contexte chat.",
     "securityJourneyStep3": "Validez et surveillez : lancez la validation de configuration, vérifiez l’état des services et contrôlez régulièrement les données stockées.",
-    "securityJourneyNote": "Cela vous donne une base solide pour la production."
+    "securityJourneyNote": "Cela vous donne une base solide pour la production.",
+    "legalResponsibilityNotice": "Vous êtes responsable d'une configuration conforme à la loi, des informations communiquées aux utilisateurs et des politiques de traitement des données de cette instance."
   },
   "errors": {
     "requestFailed": "La requête a échoué",

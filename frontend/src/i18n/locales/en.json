@@ -244,7 +244,7 @@
       "encryptDisabled": "Store as plaintext",
       "encryptedHint": "Field values will be encrypted with NIP-04 (recommended)",
       "plaintextHint": "Field values will be stored in plaintext (not recommended for sensitive data)",
-      "encryptedSummary": "This field is encrypted. Only you can view the data when logged in.",
+      "encryptedSummary": "This field is encrypted. Only an admin with the corresponding Nostr private key can decrypt and view the data.",
       "encryptedNoAI": "AI personalization is not available for encrypted fields.",
       "securityWarning": "Security Warning",
       "securityWarningBody": "Disabling encryption will store user data in plaintext. Only disable for non-sensitive fields like preferences or public information.",
@@ -259,13 +259,16 @@
       "encryptionHelpWhenEnabled": "When encryption is enabled:",
       "encryptionHelpPoint1": "Data is encrypted using the admin's Nostr key (NIP-04)",
       "encryptionHelpPoint2": "Only the admin can decrypt and view the data",
-      "encryptionHelpPoint3": "Protects against database breaches",
+      "encryptionHelpPoint3": "Reduces exposure in some database breach scenarios, but does not eliminate risk",
       "encryptionHelpPoint4": "Cannot be shared with the AI assistant",
       "encryptionHelpWhenDisabled": "When encryption is disabled:",
       "encryptionHelpDisabledPoint1": "Data is stored as readable plaintext",
       "encryptionHelpDisabledPoint2": "Anyone with database access can read it",
       "encryptionHelpDisabledPoint3": "Can be shared with AI for personalization",
       "encryptionHelpRecommendation": "Recommendation: Keep encryption enabled for any personally identifiable information (names, emails, phone numbers, addresses).",
+      "complianceAcknowledgeLabel": "I confirm this field can be stored in plaintext and/or shared with AI under our applicable legal requirements.",
+      "complianceAcknowledgeHint": "Enable this only after updating your user notices, consent flows (if required), and internal data-handling policies.",
+      "complianceAcknowledgeRequired": "You must confirm legal/compliance responsibility before saving this field configuration.",
       "encryptedBadge": "Encrypted",
       "plaintextBadge": "Plaintext",
       "inChatBadge": "In Chat"
@@ -328,7 +331,8 @@
     "securityJourneyStep1": "Secure access: set public URLs, disable simulation flags outside development, and choose user approval rules.",
     "securityJourneyStep2": "Set data boundaries: collect only needed fields, keep sensitive fields encrypted, and limit chat context fields.",
     "securityJourneyStep3": "Validate and monitor: run config validation, check service health, and review stored data regularly.",
-    "securityJourneyNote": "This gives you a strong baseline for production."
+    "securityJourneyNote": "This gives you a strong baseline for production.",
+    "legalResponsibilityNotice": "You are responsible for lawful configuration, user disclosures, and data-handling policies for this instance."
   },
   "onboarding": {
     "nostr": {
@@ -365,7 +369,7 @@
       "continue": "Continue",
       "changeInSettings": "You can change this later in your settings.",
       "privacyNoticeTitle": "Private by default",
-      "privacyNoticeBody": "Sanctum uses passwordless sign-in and encryption-first profile settings."
+      "privacyNoticeBody": "Sanctum uses passwordless sign-in and encryption-first profile settings. Final data-handling choices are configured by this instance administrator."
     },
     "auth": {
       "signUp": "Sign Up",
@@ -396,7 +400,9 @@
       "expiringLinkTitle": "Short-lived sign-in links",
       "expiringLinkBody": "Each magic link is signed and expires after 15 minutes.",
       "encryptionTitle": "Encryption by default",
-      "encryptionBody": "Profile fields are encrypted by default, and admins choose what non-sensitive info can be used for personalization."
+      "encryptionBody": "Profile fields are encrypted by default, but this instance administrator controls field-level settings and may allow selected data to be stored or shared differently.",
+      "adminControlNotice": "Data handling is configured by this instance administrator, including what may be stored unencrypted or shared with AI tools.",
+      "noWarrantyNotice": "Sanctum software is provided as-is without warranty. Use of this instance is subject to administrator policies."
     },
     "verify": {
       "verifying": "Verifying your link...",

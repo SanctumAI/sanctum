@@ -166,13 +166,12 @@ export function UserProfile() {
       saveUserProfile(profile)
 
       // Also save to backend
-      const sessionToken = localStorage.getItem(STORAGE_KEYS.SESSION_TOKEN)
       const response = await fetch(`${API_BASE}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {}),
         },
+        credentials: 'include',
         body: JSON.stringify({
           email: localStorage.getItem(STORAGE_KEYS.USER_EMAIL) || undefined,
           name: localStorage.getItem(STORAGE_KEYS.USER_NAME) || undefined,

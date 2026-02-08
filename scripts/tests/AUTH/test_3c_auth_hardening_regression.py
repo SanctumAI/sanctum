@@ -486,13 +486,25 @@ def test_query_session_ownership(api_base: str, secret_key: str, db_path: str) -
         print(f"  [FAIL] POST /query bootstrap request failed: {e}")
         return False
 
-    # Session is created before downstream LLM/vector work, so 200 or 500 both imply ownership state created.
-    if create_response.status_code not in {200, 500}:
-        print(f"  [FAIL] POST /query bootstrap: got {create_response.status_code}, expected 200/500")
+    if create_response.status_code == 200:
+        print(f"  [OK] POST /query bootstrap: {create_response.status_code}")
+    elif create_response.status_code == 500:
+        # Some backend paths can fail after session persistence; verify state exists before continuing.
+        session_rows = run_sqlite_json(
+            "SELECT COUNT(*) AS count FROM query_sessions "
+            f"WHERE session_id = '{sql_quote(session_id)}' AND user_id = {int(user_a['id'])};",
+            db_path,
+        )
+        session_count = int(session_rows[0]["count"]) if session_rows else 0
+        if session_count <= 0:
+            print("  [FAIL] POST /query bootstrap returned 500 and no persisted session row was found")
+            return False
+        print("  [WARN] POST /query bootstrap returned 500, but session row exists; continuing ownership checks")
+    else:
+        print(f"  [FAIL] POST /query bootstrap: got {create_response.status_code}, expected 200")
         if create_response.status_code == 401:
             print("         Hint: generated user bearer token may not match backend SECRET_KEY.")
         return False
-    print(f"  [OK] POST /query bootstrap: {create_response.status_code}")
 
     try:
         passed &= check_status(

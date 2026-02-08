@@ -32,9 +32,7 @@
       "searchLabel": "言語を検索",
       "noResults": "「{{query}}」に一致する言語が見つかりません",
       "continue": "続行",
-      "changeInSettings": "後で設定で変更できます。",
-      "privacyNoticeTitle": "デフォルトでプライベート",
-      "privacyNoticeBody": "Sanctum はパスワード不要のサインインと暗号化優先のプロフィール設定を使用しています。最終的なデータ取り扱いの選択は、このインスタンスの管理者が設定します。"
+      "changeInSettings": "後で設定で変更できます。"
     },
     "auth": {
       "signUp": "新規登録",

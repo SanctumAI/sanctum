@@ -31,9 +31,7 @@
       "searchLabel": "Buscar idiomas",
       "noResults": "No se encontraron idiomas para \"{{query}}\"",
       "continue": "Continuar",
-      "changeInSettings": "Puedes cambiarlo más tarde en la configuración.",
-      "privacyNoticeTitle": "Privacidad por defecto",
-      "privacyNoticeBody": "Sanctum usa inicio de sesión sin contraseña y ajustes de perfil con cifrado prioritario. Las decisiones finales sobre el tratamiento de datos las configura el administrador de esta instancia."
+      "changeInSettings": "Puedes cambiarlo más tarde en la configuración."
     },
     "auth": {
       "signUp": "Registrarse",

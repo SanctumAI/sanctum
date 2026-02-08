@@ -31,9 +31,7 @@
       "searchLabel": "Cerca lingue",
       "noResults": "Nessuna lingua trovata per \"{{query}}\"",
       "continue": "Continua",
-      "changeInSettings": "Potrai cambiarla più tardi nelle impostazioni.",
-      "privacyNoticeTitle": "Privato per impostazione predefinita",
-      "privacyNoticeBody": "Sanctum utilizza l'accesso senza password e impostazioni del profilo con crittografia predefinita. Le scelte finali sulla gestione dei dati sono configurate dall'amministratore di questa istanza."
+      "changeInSettings": "Potrai cambiarla più tardi nelle impostazioni."
     },
     "auth": {
       "signUp": "Registrati",

@@ -278,9 +278,7 @@
       "searchLabel": "搜索语言",
       "noResults": "未找到与「{{query}}」匹配的语言",
       "continue": "继续",
-      "changeInSettings": "你可以稍后在设置中更改。",
-      "privacyNoticeTitle": "默认私密",
-      "privacyNoticeBody": "Sanctum 使用无密码登录和加密优先的个人资料设置。最终的数据处理方式由此实例的管理员配置。"
+      "changeInSettings": "你可以稍后在设置中更改。"
     },
     "auth": {
       "signUp": "注册",

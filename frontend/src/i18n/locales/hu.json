@@ -32,9 +32,7 @@
       "searchLabel": "Nyelvek keresése",
       "noResults": "Nem található nyelv a(z) \"{{query}}\" keresésre",
       "continue": "Tovább",
-      "changeInSettings": "Ezt később a beállításokban módosíthatod.",
-      "privacyNoticeTitle": "Alapértelmezetten privát",
-      "privacyNoticeBody": "A Sanctum jelszó nélküli bejelentkezést és alapértelmezetten titkosított profilbeállításokat használ. A végleges adatkezelési beállításokat ennek a példánynak az adminisztrátora konfigurálja."
+      "changeInSettings": "Ezt később a beállításokban módosíthatod."
     },
     "auth": {
       "signUp": "Regisztráció",

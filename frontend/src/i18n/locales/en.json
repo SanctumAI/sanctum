@@ -369,9 +369,7 @@
       "continue": "Continue",
       "changeInSettings": "You can change this later in your settings.",
       "dataHandlingNoticeTitle": "Data handling is instance-configured",
-      "dataHandlingNoticeBody": "Sanctum supports passwordless sign-in and encryption-capable profile settings. Final data handling, retention, and AI-sharing behavior are configured by this instance administrator.",
-      "privacyNoticeTitle": "Private by default",
-      "privacyNoticeBody": "Sanctum uses passwordless sign-in and encryption-first profile settings. Final data-handling choices are configured by this instance administrator."
+      "dataHandlingNoticeBody": "Sanctum supports passwordless sign-in and encryption-capable profile settings. Final data handling, retention, and AI-sharing behavior are configured by this instance administrator."
     },
     "auth": {
       "signUp": "Sign Up",

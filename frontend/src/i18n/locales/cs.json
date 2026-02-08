@@ -31,9 +31,7 @@
       "searchLabel": "Hledat jazyky",
       "noResults": "Pro \"{{query}}\" nebyly nalezeny žádné jazyky",
       "continue": "Pokračovat",
-      "changeInSettings": "Později to můžete změnit v nastavení.",
-      "privacyNoticeTitle": "Soukromí jako standard",
-      "privacyNoticeBody": "Sanctum používá přihlášení bez hesla a nastavení profilu s prioritou šifrování. Konečné volby ohledně nakládání s daty konfiguruje správce této instance."
+      "changeInSettings": "Později to můžete změnit v nastavení."
     },
     "auth": {
       "signUp": "Zaregistrovat se",

@@ -31,9 +31,7 @@
       "searchLabel": "Pesquisar idiomas",
       "noResults": "Nenhum idioma encontrado para \"{{query}}\"",
       "continue": "Continuar",
-      "changeInSettings": "Você pode mudar isso mais tarde nas configurações.",
-      "privacyNoticeTitle": "Privado por padrão",
-      "privacyNoticeBody": "O Sanctum usa login sem senha e configurações de perfil com criptografia como padrão. As decisões finais de tratamento de dados são configuradas pelo administrador desta instância."
+      "changeInSettings": "Você pode mudar isso mais tarde nas configurações."
     },
     "auth": {
       "signUp": "Cadastre-se",

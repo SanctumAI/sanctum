@@ -31,9 +31,7 @@
       "searchLabel": "Sprachen suchen",
       "noResults": "Keine Sprachen für \"{{query}}\" gefunden",
       "continue": "Weiter",
-      "changeInSettings": "Du kannst das später in den Einstellungen ändern.",
-      "privacyNoticeTitle": "Standardmäßig privat",
-      "privacyNoticeBody": "Sanctum verwendet passwortlose Anmeldung und profilbezogene Einstellungen mit Verschlüsselung als Standard. Die endgültigen Entscheidungen zur Datenverarbeitung werden vom Administrator dieser Instanz festgelegt."
+      "changeInSettings": "Du kannst das später in den Einstellungen ändern."
     },
     "auth": {
       "signUp": "Registrieren",

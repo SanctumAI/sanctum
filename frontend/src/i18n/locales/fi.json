@@ -32,9 +32,7 @@
       "searchLabel": "Hae kieliä",
       "noResults": "Ei löytynyt kieliä haulle \"{{query}}\"",
       "continue": "Jatka",
-      "changeInSettings": "Voit muuttaa tämän myöhemmin asetuksissa.",
-      "privacyNoticeTitle": "Yksityinen oletuksena",
-      "privacyNoticeBody": "Sanctum käyttää salasanatonta kirjautumista ja salaus edellä -profiiliasetuksia. Lopulliset tietojen käsittelyvalinnat määrittää tämän instanssin ylläpitäjä."
+      "changeInSettings": "Voit muuttaa tämän myöhemmin asetuksissa."
     },
     "auth": {
       "signUp": "Rekisteröidy",

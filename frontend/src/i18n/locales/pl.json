@@ -32,9 +32,7 @@
       "searchLabel": "Wyszukaj języki",
       "noResults": "Nie znaleziono języków dla \"{{query}}\"",
       "continue": "Kontynuuj",
-      "changeInSettings": "Możesz to później zmienić w ustawieniach.",
-      "privacyNoticeTitle": "Prywatne domyślnie",
-      "privacyNoticeBody": "Sanctum wykorzystuje logowanie bez hasła i ustawienia profilu z priorytetem szyfrowania. Ostateczne decyzje dotyczące przetwarzania danych konfiguruje administrator tej instancji."
+      "changeInSettings": "Możesz to później zmienić w ustawieniach."
     },
     "auth": {
       "signUp": "Zarejestruj się",

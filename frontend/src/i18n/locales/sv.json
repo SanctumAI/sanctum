@@ -32,9 +32,7 @@
       "searchLabel": "Sök språk",
       "noResults": "Inga språk hittades för \"{{query}}\"",
       "continue": "Fortsätt",
-      "changeInSettings": "Du kan ändra detta senare i dina inställningar.",
-      "privacyNoticeTitle": "Privat som standard",
-      "privacyNoticeBody": "Sanctum använder lösenordsfri inloggning och kryptering som standard för profilinställningar. Slutgiltiga val för datahantering konfigureras av administratören för denna instans."
+      "changeInSettings": "Du kan ändra detta senare i dina inställningar."
     },
     "auth": {
       "signUp": "Registrera dig",

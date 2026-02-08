@@ -276,9 +276,7 @@
       "searchLabel": "Cari bahasa",
       "noResults": "Tidak ditemukan bahasa untuk \"{{query}}\"",
       "continue": "Lanjutkan",
-      "changeInSettings": "Anda dapat mengubahnya nanti di pengaturan.",
-      "privacyNoticeTitle": "Privat secara bawaan",
-      "privacyNoticeBody": "Sanctum menggunakan masuk tanpa kata sandi dan pengaturan profil yang mengutamakan enkripsi. Pilihan penanganan data akhir dikonfigurasi oleh administrator instance ini."
+      "changeInSettings": "Anda dapat mengubahnya nanti di pengaturan."
     },
     "auth": {
       "signUp": "Daftar",

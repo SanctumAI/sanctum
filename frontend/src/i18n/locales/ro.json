@@ -32,9 +32,7 @@
       "searchLabel": "Caută limbi",
       "noResults": "Nu s-au găsit limbi pentru \"{{query}}\"",
       "continue": "Continuă",
-      "changeInSettings": "Poți schimba asta mai târziu în setări.",
-      "privacyNoticeTitle": "Privat implicit",
-      "privacyNoticeBody": "Sanctum folosește autentificare fără parolă și setări de profil cu criptare implicită. Opțiunile finale de gestionare a datelor sunt configurate de administratorul acestei instanțe."
+      "changeInSettings": "Poți schimba asta mai târziu în setări."
     },
     "auth": {
       "signUp": "Înregistrează-te",

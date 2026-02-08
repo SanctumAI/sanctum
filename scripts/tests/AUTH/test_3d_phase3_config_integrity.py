@@ -332,6 +332,26 @@ def test_audit_chain_with_interleaved_tables(api_base: str, headers: dict[str, s
         print(f"  [FAIL] Could not read AI config temperature: {ai_current.status_code} {ai_current.text}")
         return False
 
+    try:
+        deployment_current = requests.get(
+            f"{api_base}/admin/deployment/config/{deployment_key}",
+            headers=headers,
+            timeout=20,
+        )
+    except requests.exceptions.RequestException as e:
+        print(f"  [FAIL] Read deployment config failed: {e}")
+        return False
+
+    if deployment_current.status_code != 200:
+        print(f"  [FAIL] Could not read deployment config {deployment_key}: {deployment_current.status_code} {deployment_current.text}")
+        return False
+
+    try:
+        original_smtp_host = str(deployment_current.json().get("value", ""))
+    except (ValueError, Exception):
+        print(f"  [FAIL] Could not parse deployment config response: {deployment_current.text}")
+        return False
+
     current_temp = str(ai_current.json().get("value", "0.1"))
     temp_override = "0.2" if current_temp != "0.2" else "0.3"
 
@@ -395,6 +415,15 @@ def test_audit_chain_with_interleaved_tables(api_base: str, headers: dict[str, s
                 f"{api_base}/admin/ai-config/temperature",
                 headers=headers,
                 json={"value": restore_temp},
+                timeout=20,
+            )
+        except Exception:
+            pass
+        try:
+            requests.put(
+                f"{api_base}/admin/deployment/config/{deployment_key}",
+                headers=headers,
+                json={"value": original_smtp_host},
                 timeout=20,
             )
         except Exception:

@@ -32,9 +32,7 @@
       "searchLabel": "Tìm kiếm ngôn ngữ",
       "noResults": "Không tìm thấy ngôn ngữ cho \"{{query}}\"",
       "continue": "Tiếp tục",
-      "changeInSettings": "Bạn có thể thay đổi sau trong phần cài đặt.",
-      "privacyNoticeTitle": "Riêng tư theo mặc định",
-      "privacyNoticeBody": "Sanctum sử dụng đăng nhập không mật khẩu và cài đặt hồ sơ ưu tiên mã hóa. Các lựa chọn xử lý dữ liệu cuối cùng do quản trị viên phiên bản này cấu hình."
+      "changeInSettings": "Bạn có thể thay đổi sau trong phần cài đặt."
     },
     "auth": {
       "signUp": "Đăng ký",

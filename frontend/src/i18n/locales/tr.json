@@ -32,9 +32,7 @@
       "searchLabel": "Dilleri ara",
       "noResults": "\"{{query}}\" için dil bulunamadı",
       "continue": "Devam et",
-      "changeInSettings": "Bunu daha sonra ayarlarda değiştirebilirsiniz.",
-      "privacyNoticeTitle": "Varsayılan olarak gizli",
-      "privacyNoticeBody": "Sanctum parolasız giriş ve varsayılan olarak şifreleme öncelikli profil ayarları kullanır. Nihai veri işleme tercihleri bu örneğin yöneticisi tarafından yapılandırılır."
+      "changeInSettings": "Bunu daha sonra ayarlarda değiştirebilirsiniz."
     },
     "auth": {
       "signUp": "Kayıt ol",

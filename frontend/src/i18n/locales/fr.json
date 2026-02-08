@@ -32,7 +32,9 @@
       "searchLabel": "Rechercher des langues",
       "noResults": "Aucune langue trouvée pour \"{{query}}\"",
       "continue": "Continuer",
-      "changeInSettings": "Vous pourrez le modifier plus tard dans vos paramètres."
+      "changeInSettings": "Vous pourrez le modifier plus tard dans vos paramètres.",
+      "privacyNoticeTitle": "Privé par défaut",
+      "privacyNoticeBody": "Sanctum utilise une connexion sans mot de passe et des paramètres de profil orientés chiffrement."
     },
     "auth": {
       "signUp": "S'inscrire",
@@ -56,7 +58,14 @@
       "clickLink": "Cliquez sur le lien dans l'e-mail pour vous connecter.",
       "checkSpam": "Vous ne le voyez pas ? Vérifiez votre dossier spam.",
       "simulateMagicLink": "Simuler le clic sur le lien magique",
-      "forTesting": "À des fins de test :"
+      "forTesting": "À des fins de test :",
+      "dataProtectionTitle": "Comment Sanctum protège vos données",
+      "noPasswordTitle": "Aucun mot de passe stocké",
+      "noPasswordBody": "Vous vous connectez avec un lien à usage unique, il n’y a donc pas de base de mots de passe à gérer.",
+      "expiringLinkTitle": "Liens de connexion à courte durée",
+      "expiringLinkBody": "Chaque lien magique est signé et expire après 15 minutes.",
+      "encryptionTitle": "Chiffrement par défaut",
+      "encryptionBody": "Les champs de profil sont chiffrés par défaut, et les administrateurs choisissent quelles données non sensibles peuvent servir à la personnalisation."
     },
     "verify": {
       "verifying": "Vérification de votre lien...",
@@ -387,7 +396,13 @@
     "welcomeAdmin": "Bienvenue, Administrateur !",
     "connectedAs": "Connecté en tant que",
     "redirecting": "Redirection vers le tableau de bord...",
-    "connectionFailed": "Échec de la connexion"
+    "connectionFailed": "Échec de la connexion",
+    "securityJourneyTitle": "Parcours sécurité rapide",
+    "securityJourneyIntro": "Après la connexion avec Nostr, suivez ce parcours simple :",
+    "securityJourneyStep1": "Sécurisez l’accès : définissez les URLs publiques, désactivez les modes simulation hors développement et choisissez les règles d’approbation des utilisateurs.",
+    "securityJourneyStep2": "Définissez les limites des données : collectez seulement les champs nécessaires, gardez les champs sensibles chiffrés et limitez les champs inclus dans le contexte chat.",
+    "securityJourneyStep3": "Validez et surveillez : lancez la validation de configuration, vérifiez l’état des services et contrôlez régulièrement les données stockées.",
+    "securityJourneyNote": "Cela vous donne une base solide pour la production."
   },
   "errors": {
     "requestFailed": "La requête a échoué",
@@ -464,7 +479,25 @@
     "upload": "Télécharger des documents",
     "uploadDesc": "Ajoutez des documents à votre base de connaissances",
     "database": "Explorateur de base de données",
-    "databaseDesc": "Parcourez et interrogez la base de données SQLite"
+    "databaseDesc": "Parcourez et interrogez la base de données SQLite",
+    "configureTitle": "Ce que vous pouvez configurer",
+    "configureSubtitle": "Ces sections contrôlent la marque, la collecte de données utilisateur, le comportement IA, la sécurité de déploiement et le contenu stocké.",
+    "securityBreadcrumbTitle": "Protégez votre instance en 3 étapes",
+    "securityStep1Label": "Étape 1",
+    "securityStep1Title": "Sécuriser l’accès",
+    "securityStep1Body": "Définissez les URLs publiques, désactivez les modes simulation hors développement et choisissez si les utilisateurs nécessitent une approbation.",
+    "securityStep1Primary": "Ouvrir les paramètres de déploiement",
+    "securityStep1Secondary": "Ouvrir les paramètres utilisateurs",
+    "securityStep2Label": "Étape 2",
+    "securityStep2Title": "Définir les limites des données",
+    "securityStep2Body": "Collectez uniquement les champs nécessaires, gardez les champs sensibles chiffrés et n’incluez en chat que des champs sûrs.",
+    "securityStep2Primary": "Configurer les champs utilisateur",
+    "securityStep2Secondary": "Vérifier les réglages IA par défaut",
+    "securityStep3Label": "Étape 3",
+    "securityStep3Title": "Valider et surveiller",
+    "securityStep3Body": "Validez la configuration, vérifiez l’état des services, sécurisez e-mail et HTTPS, et examinez régulièrement les enregistrements stockés.",
+    "securityStep3Primary": "Lancer la validation de configuration",
+    "securityStep3Secondary": "Examiner les données stockées"
   },
   "adminAI": {
     "title": "Configuration IA",

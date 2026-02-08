@@ -233,7 +233,13 @@
     "welcomeAdmin": "欢迎，管理员！",
     "connectedAs": "已连接为",
     "redirecting": "正在跳转到仪表板...",
-    "connectionFailed": "连接失败"
+    "connectionFailed": "连接失败",
+    "securityJourneyTitle": "安全快速路径",
+    "securityJourneyIntro": "完成 Nostr 连接后，请按以下简明步骤设置：",
+    "securityJourneyStep1": "保护访问：设置公开 URL，在非开发环境关闭模拟开关，并确定用户审批规则。",
+    "securityJourneyStep2": "定义数据边界：只收集必要字段，保持敏感字段加密，并限制可进入聊天上下文的字段。",
+    "securityJourneyStep3": "验证与监控：运行配置验证，检查服务健康，并定期审查已存储数据。",
+    "securityJourneyNote": "这能为生产环境提供稳健的安全基线。"
   },
   "onboarding": {
     "nostr": {
@@ -268,7 +274,9 @@
       "searchLabel": "搜索语言",
       "noResults": "未找到与「{{query}}」匹配的语言",
       "continue": "继续",
-      "changeInSettings": "你可以稍后在设置中更改。"
+      "changeInSettings": "你可以稍后在设置中更改。",
+      "privacyNoticeTitle": "默认私密",
+      "privacyNoticeBody": "Sanctum 使用无密码登录，并以加密优先的方式管理资料设置。"
     },
     "auth": {
       "signUp": "注册",
@@ -292,7 +300,14 @@
       "clickLink": "点击邮件中的链接即可登录。",
       "checkSpam": "没有看到？请检查垃圾邮件文件夹。",
       "simulateMagicLink": "模拟点击魔法链接",
-      "forTesting": "用于测试："
+      "forTesting": "用于测试：",
+      "dataProtectionTitle": "Sanctum 如何保护你的数据",
+      "noPasswordTitle": "不存储密码",
+      "noPasswordBody": "你通过一次性链接登录，因此无需管理密码数据库。",
+      "expiringLinkTitle": "短时效登录链接",
+      "expiringLinkBody": "每个魔法链接都经过签名，并在 15 分钟后失效。",
+      "encryptionTitle": "默认加密",
+      "encryptionBody": "资料字段默认加密，管理员只会选择非敏感信息用于个性化。"
     },
     "verify": {
       "verifying": "正在验证你的链接...",
@@ -438,7 +453,25 @@
     "upload": "文档上传",
     "uploadDesc": "将文档添加到你的知识库",
     "database": "数据库浏览器",
-    "databaseDesc": "浏览和查询 SQLite 数据库"
+    "databaseDesc": "浏览和查询 SQLite 数据库",
+    "configureTitle": "可配置内容",
+    "configureSubtitle": "这些模块用于管理品牌、用户数据收集、AI 行为、部署安全和已存储内容。",
+    "securityBreadcrumbTitle": "3 步保护你的实例",
+    "securityStep1Label": "第 1 步",
+    "securityStep1Title": "保护访问",
+    "securityStep1Body": "设置公开 URL，在非开发环境关闭模拟开关，并确定用户是否需要审批。",
+    "securityStep1Primary": "打开部署设置",
+    "securityStep1Secondary": "打开用户设置",
+    "securityStep2Label": "第 2 步",
+    "securityStep2Title": "定义数据边界",
+    "securityStep2Body": "只收集必要字段，保持敏感字段加密，并仅将安全字段加入聊天上下文。",
+    "securityStep2Primary": "配置用户字段",
+    "securityStep2Secondary": "查看 AI 默认值",
+    "securityStep3Label": "第 3 步",
+    "securityStep3Title": "验证与监控",
+    "securityStep3Body": "验证配置、检查服务健康、加固邮件与 HTTPS 设置，并定期审查已存储记录。",
+    "securityStep3Primary": "运行配置验证",
+    "securityStep3Secondary": "审查已存储数据"
   },
   "adminAI": {
     "title": "AI 配置",

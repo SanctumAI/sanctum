@@ -31,7 +31,9 @@
       "searchLabel": "Hledat jazyky",
       "noResults": "Pro \"{{query}}\" nebyly nalezeny žádné jazyky",
       "continue": "Pokračovat",
-      "changeInSettings": "Později to můžete změnit v nastavení."
+      "changeInSettings": "Později to můžete změnit v nastavení.",
+      "privacyNoticeTitle": "Soukromí jako standard",
+      "privacyNoticeBody": "Sanctum používá přihlášení bez hesla a nastavení profilu s prioritou šifrování."
     },
     "auth": {
       "signUp": "Zaregistrovat se",
@@ -55,7 +57,14 @@
       "clickLink": "Klikněte na odkaz v e-mailu a přihlaste se.",
       "checkSpam": "Nevidíte ho? Zkontrolujte složku spam.",
       "simulateMagicLink": "Simulovat kliknutí na magický odkaz",
-      "forTesting": "Pro testovací účely:"
+      "forTesting": "Pro testovací účely:",
+      "dataProtectionTitle": "Jak Sanctum chrání vaše data",
+      "noPasswordTitle": "Žádná uložená hesla",
+      "noPasswordBody": "Přihlašujete se jednorázovým odkazem, takže není třeba spravovat databázi hesel.",
+      "expiringLinkTitle": "Krátkodobé přihlašovací odkazy",
+      "expiringLinkBody": "Každý magický odkaz je podepsaný a vyprší po 15 minutách.",
+      "encryptionTitle": "Šifrování jako standard",
+      "encryptionBody": "Pole profilu jsou ve výchozím nastavení šifrována a správci volí, jaké necitlivé informace lze použít pro personalizaci."
     },
     "verify": {
       "verifying": "Ověřování odkazu...",
@@ -382,7 +391,13 @@
     "welcomeAdmin": "Vítejte, administrátore!",
     "connectedAs": "Připojeno jako",
     "redirecting": "Přesměrování na panel...",
-    "connectionFailed": "Připojení selhalo"
+    "connectionFailed": "Připojení selhalo",
+    "securityJourneyTitle": "Rychlý průvodce zabezpečením",
+    "securityJourneyIntro": "Po připojení k Nostr postupujte podle tohoto jednoduchého nastavení:",
+    "securityJourneyStep1": "Zabezpečte přístup: nastavte veřejné URL, vypněte simulační příznaky mimo vývoj a zvolte pravidla schvalování uživatelů.",
+    "securityJourneyStep2": "Stanovte datové hranice: sbírejte pouze potřebná pole, udržujte citlivá pole šifrovaná a omezte pole kontextu chatu.",
+    "securityJourneyStep3": "Ověřte a monitorujte: spusťte ověření konfigurace, zkontrolujte stav služeb a pravidelně kontrolujte uložená data.",
+    "securityJourneyNote": "Tím získáte silný základ pro produkční nasazení."
   },
   "errors": {
     "requestFailed": "Požadavek selhal",
@@ -429,7 +444,25 @@
     "upload": "Nahrání dokumentů",
     "uploadDesc": "Přidejte dokumenty do znalostní báze",
     "database": "Prohlížeč databáze",
-    "databaseDesc": "Procházejte a dotazujte SQLite databázi"
+    "databaseDesc": "Procházejte a dotazujte SQLite databázi",
+    "configureTitle": "Co můžete nastavit",
+    "configureSubtitle": "Tyto sekce řídí branding, sběr uživatelských dat, chování AI, zabezpečení nasazení a uložený obsah.",
+    "securityBreadcrumbTitle": "Chraňte svou instanci ve 3 krocích",
+    "securityStep1Label": "Krok 1",
+    "securityStep1Title": "Zabezpečte přístup",
+    "securityStep1Body": "Nastavte veřejné URL, vypněte simulační příznaky mimo vývoj a zvolte, zda uživatelé vyžadují schválení.",
+    "securityStep1Primary": "Otevřít nastavení nasazení",
+    "securityStep1Secondary": "Otevřít nastavení uživatelů",
+    "securityStep2Label": "Krok 2",
+    "securityStep2Title": "Stanovte datové hranice",
+    "securityStep2Body": "Sbírejte pouze nezbytná pole, udržujte citlivá pole šifrovaná a zahrňte do kontextu chatu pouze bezpečná pole.",
+    "securityStep2Primary": "Nastavit uživatelská pole",
+    "securityStep2Secondary": "Zkontrolovat výchozí AI",
+    "securityStep3Label": "Krok 3",
+    "securityStep3Title": "Ověřte a monitorujte",
+    "securityStep3Body": "Ověřte konfiguraci, zkontrolujte stav služeb, zabezpečte nastavení e-mailu a HTTPS a pravidelně kontrolujte uložené záznamy.",
+    "securityStep3Primary": "Spustit ověření konfigurace",
+    "securityStep3Secondary": "Zkontrolovat uložená data"
   },
   "adminAI": {
     "title": "Konfigurace AI",

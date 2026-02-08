@@ -1,7 +1,7 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Mail } from 'lucide-react'
+import { Mail, ShieldCheck, Lock, Timer } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { API_BASE, STORAGE_KEYS } from '../types/onboarding'
 import { useInstanceConfig } from '../context/InstanceConfigContext'
@@ -331,6 +331,41 @@ export function UserAuth() {
             <p className="text-xs text-text-muted text-center mt-4">
               {t('onboarding.auth.magicLinkHelp')}
             </p>
+
+            <div className="rounded-xl border border-border bg-surface-overlay p-4 mt-3">
+              <div className="flex items-center gap-2 mb-3">
+                <ShieldCheck className="w-4 h-4 text-accent shrink-0" />
+                <h3 className="text-sm font-semibold text-text">
+                  {t('onboarding.auth.dataProtectionTitle')}
+                </h3>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex gap-2.5">
+                  <Lock className="w-4 h-4 text-text-muted mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-xs font-medium text-text">{t('onboarding.auth.noPasswordTitle')}</p>
+                    <p className="text-xs text-text-muted">{t('onboarding.auth.noPasswordBody')}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2.5">
+                  <Timer className="w-4 h-4 text-text-muted mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-xs font-medium text-text">{t('onboarding.auth.expiringLinkTitle')}</p>
+                    <p className="text-xs text-text-muted">{t('onboarding.auth.expiringLinkBody')}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2.5">
+                  <ShieldCheck className="w-4 h-4 text-text-muted mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-xs font-medium text-text">{t('onboarding.auth.encryptionTitle')}</p>
+                    <p className="text-xs text-text-muted">{t('onboarding.auth.encryptionBody')}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </form>
         </>
       )}

@@ -231,7 +231,13 @@
     "welcomeAdmin": "Selamat datang, Admin!",
     "connectedAs": "Terhubung sebagai",
     "redirecting": "Mengalihkan ke dashboard...",
-    "connectionFailed": "Koneksi gagal"
+    "connectionFailed": "Koneksi gagal",
+    "securityJourneyTitle": "Jalur cepat keamanan",
+    "securityJourneyIntro": "Setelah terhubung dengan Nostr, ikuti jalur pengaturan sederhana ini:",
+    "securityJourneyStep1": "Amankan akses: atur URL publik, nonaktifkan flag simulasi di luar pengembangan, dan pilih aturan persetujuan pengguna.",
+    "securityJourneyStep2": "Tetapkan batasan data: kumpulkan hanya field yang diperlukan, jaga field sensitif tetap terenkripsi, dan batasi field konteks obrolan.",
+    "securityJourneyStep3": "Validasi dan pantau: jalankan validasi konfigurasi, periksa kesehatan layanan, dan tinjau data tersimpan secara berkala.",
+    "securityJourneyNote": "Ini memberikan fondasi yang kuat untuk produksi."
   },
   "onboarding": {
     "nostr": {
@@ -266,7 +272,9 @@
       "searchLabel": "Cari bahasa",
       "noResults": "Tidak ditemukan bahasa untuk \"{{query}}\"",
       "continue": "Lanjutkan",
-      "changeInSettings": "Anda dapat mengubahnya nanti di pengaturan."
+      "changeInSettings": "Anda dapat mengubahnya nanti di pengaturan.",
+      "privacyNoticeTitle": "Privat secara bawaan",
+      "privacyNoticeBody": "Sanctum menggunakan masuk tanpa kata sandi dan pengaturan profil yang mengutamakan enkripsi."
     },
     "auth": {
       "signUp": "Daftar",
@@ -290,7 +298,14 @@
       "clickLink": "Klik tautan di email untuk masuk.",
       "checkSpam": "Tidak terlihat? Periksa folder spam Anda.",
       "simulateMagicLink": "Simulasikan klik tautan ajaib",
-      "forTesting": "Untuk tujuan pengujian:"
+      "forTesting": "Untuk tujuan pengujian:",
+      "dataProtectionTitle": "Bagaimana Sanctum melindungi data Anda",
+      "noPasswordTitle": "Tanpa kata sandi tersimpan",
+      "noPasswordBody": "Anda masuk dengan tautan sekali pakai, sehingga tidak ada database kata sandi yang perlu dikelola.",
+      "expiringLinkTitle": "Tautan masuk berdurasi singkat",
+      "expiringLinkBody": "Setiap tautan ajaib ditandatangani dan kedaluwarsa setelah 15 menit.",
+      "encryptionTitle": "Enkripsi secara bawaan",
+      "encryptionBody": "Field profil dienkripsi secara bawaan, dan admin memilih informasi non-sensitif apa yang dapat digunakan untuk personalisasi."
     },
     "verify": {
       "verifying": "Memverifikasi tautan Anda...",
@@ -435,7 +450,25 @@
     "upload": "Unggah Dokumen",
     "uploadDesc": "Tambahkan dokumen ke basis pengetahuan Anda",
     "database": "Penjelajah Database",
-    "databaseDesc": "Jelajahi dan query database SQLite"
+    "databaseDesc": "Jelajahi dan query database SQLite",
+    "configureTitle": "Yang dapat Anda konfigurasi",
+    "configureSubtitle": "Bagian-bagian ini mengontrol branding, pengumpulan data pengguna, perilaku AI, keamanan deployment, dan konten tersimpan.",
+    "securityBreadcrumbTitle": "Lindungi instance Anda dalam 3 langkah",
+    "securityStep1Label": "Langkah 1",
+    "securityStep1Title": "Amankan akses",
+    "securityStep1Body": "Atur URL publik, nonaktifkan flag simulasi di luar pengembangan, dan pilih apakah pengguna memerlukan persetujuan.",
+    "securityStep1Primary": "Buka pengaturan Deployment",
+    "securityStep1Secondary": "Buka pengaturan Pengguna",
+    "securityStep2Label": "Langkah 2",
+    "securityStep2Title": "Tentukan batasan data",
+    "securityStep2Body": "Kumpulkan hanya field yang diperlukan, jaga field sensitif tetap terenkripsi, dan hanya sertakan field yang aman dalam konteks obrolan.",
+    "securityStep2Primary": "Konfigurasi field pengguna",
+    "securityStep2Secondary": "Tinjau default AI",
+    "securityStep3Label": "Langkah 3",
+    "securityStep3Title": "Validasi dan pantau",
+    "securityStep3Body": "Validasi konfigurasi, periksa kesehatan layanan, amankan pengaturan email dan HTTPS, dan tinjau catatan tersimpan secara berkala.",
+    "securityStep3Primary": "Jalankan validasi konfigurasi",
+    "securityStep3Secondary": "Tinjau data tersimpan"
   },
   "adminAI": {
     "title": "Konfigurasi AI",

@@ -31,7 +31,9 @@
       "searchLabel": "Sprachen suchen",
       "noResults": "Keine Sprachen für \"{{query}}\" gefunden",
       "continue": "Weiter",
-      "changeInSettings": "Du kannst das später in den Einstellungen ändern."
+      "changeInSettings": "Du kannst das später in den Einstellungen ändern.",
+      "privacyNoticeTitle": "Standardmäßig privat",
+      "privacyNoticeBody": "Sanctum nutzt passwortlose Anmeldung und profilspezifische Einstellungen mit Fokus auf Verschlüsselung."
     },
     "auth": {
       "signUp": "Registrieren",
@@ -55,7 +57,14 @@
       "clickLink": "Klicke auf den Link in der E-Mail, um dich anzumelden.",
       "checkSpam": "Nicht zu sehen? Prüfe deinen Spam-Ordner.",
       "simulateMagicLink": "Klick auf den Magic-Link simulieren",
-      "forTesting": "Zu Testzwecken:"
+      "forTesting": "Zu Testzwecken:",
+      "dataProtectionTitle": "So schützt Sanctum deine Daten",
+      "noPasswordTitle": "Keine gespeicherten Passwörter",
+      "noPasswordBody": "Du meldest dich mit einem Einmal-Link an, daher gibt es keine Passwortdatenbank, die verwaltet werden muss.",
+      "expiringLinkTitle": "Kurzlebige Anmeldelinks",
+      "expiringLinkBody": "Jeder Magic Link ist signiert und läuft nach 15 Minuten ab.",
+      "encryptionTitle": "Verschlüsselung als Standard",
+      "encryptionBody": "Profilfelder sind standardmäßig verschlüsselt, und Admins entscheiden, welche nicht sensiblen Daten zur Personalisierung genutzt werden dürfen."
     },
     "verify": {
       "verifying": "Link wird überprüft...",
@@ -385,7 +394,13 @@
     "welcomeAdmin": "Willkommen, Admin!",
     "connectedAs": "Verbunden als",
     "redirecting": "Weiterleitung zum Dashboard...",
-    "connectionFailed": "Verbindung fehlgeschlagen"
+    "connectionFailed": "Verbindung fehlgeschlagen",
+    "securityJourneyTitle": "Schneller Sicherheitsweg",
+    "securityJourneyIntro": "Nach der Nostr-Verbindung folgst du diesem einfachen Setup-Weg:",
+    "securityJourneyStep1": "Zugriff absichern: Öffentliche URLs setzen, Simulations-Flags außerhalb der Entwicklung deaktivieren und Freigaberegeln für Nutzer festlegen.",
+    "securityJourneyStep2": "Datengrenzen festlegen: Nur notwendige Felder erfassen, sensible Felder verschlüsseln und Chat-Kontextfelder begrenzen.",
+    "securityJourneyStep3": "Validieren und überwachen: Konfiguration validieren, Service-Status prüfen und gespeicherte Daten regelmäßig kontrollieren.",
+    "securityJourneyNote": "Das bietet eine starke Basis für Produktion."
   },
   "adminDashboard": {
     "title": "Admin-Dashboard",
@@ -399,7 +414,25 @@
     "upload": "Dokumente hochladen",
     "uploadDesc": "Füge Dokumente zu deiner Wissensbasis hinzu",
     "database": "Datenbank-Explorer",
-    "databaseDesc": "Durchsuche und frage die SQLite-Datenbank ab"
+    "databaseDesc": "Durchsuche und frage die SQLite-Datenbank ab",
+    "configureTitle": "Was du konfigurieren kannst",
+    "configureSubtitle": "Diese Bereiche steuern Branding, Erhebung von Nutzerdaten, KI-Verhalten, Deployment-Sicherheit und gespeicherte Inhalte.",
+    "securityBreadcrumbTitle": "Schütze deine Instanz in 3 Schritten",
+    "securityStep1Label": "Schritt 1",
+    "securityStep1Title": "Zugriff absichern",
+    "securityStep1Body": "Setze öffentliche URLs, deaktiviere Simulations-Flags außerhalb der Entwicklung und lege fest, ob Nutzerfreigabe erforderlich ist.",
+    "securityStep1Primary": "Deployment-Einstellungen öffnen",
+    "securityStep1Secondary": "Nutzer-Einstellungen öffnen",
+    "securityStep2Label": "Schritt 2",
+    "securityStep2Title": "Datengrenzen definieren",
+    "securityStep2Body": "Erfasse nur notwendige Felder, verschlüssele sensible Felder und verwende im Chat nur sichere Felder.",
+    "securityStep2Primary": "Nutzerfelder konfigurieren",
+    "securityStep2Secondary": "KI-Standards prüfen",
+    "securityStep3Label": "Schritt 3",
+    "securityStep3Title": "Validieren und überwachen",
+    "securityStep3Body": "Validiere die Konfiguration, prüfe den Service-Status, sichere E-Mail und HTTPS ab und kontrolliere gespeicherte Datensätze regelmäßig.",
+    "securityStep3Primary": "Konfigurationsvalidierung starten",
+    "securityStep3Secondary": "Gespeicherte Daten prüfen"
   },
   "adminAI": {
     "title": "KI-Konfiguration",

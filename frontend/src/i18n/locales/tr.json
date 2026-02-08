@@ -32,7 +32,9 @@
       "searchLabel": "Dilleri ara",
       "noResults": "\"{{query}}\" için dil bulunamadı",
       "continue": "Devam et",
-      "changeInSettings": "Bunu daha sonra ayarlarda değiştirebilirsiniz."
+      "changeInSettings": "Bunu daha sonra ayarlarda değiştirebilirsiniz.",
+      "privacyNoticeTitle": "Varsayılan olarak gizli",
+      "privacyNoticeBody": "Sanctum, parolasız oturum açma ve şifreleme öncelikli profil ayarları kullanır."
     },
     "auth": {
       "signUp": "Kayıt ol",
@@ -56,7 +58,14 @@
       "clickLink": "Giriş yapmak için e-postadaki bağlantıya tıklayın.",
       "checkSpam": "Görmüyor musunuz? Spam klasörünü kontrol edin.",
       "simulateMagicLink": "Sihirli bağlantı tıklamasını simüle et",
-      "forTesting": "Test amaçları için:"
+      "forTesting": "Test amaçları için:",
+      "dataProtectionTitle": "Sanctum verilerinizi nasıl korur",
+      "noPasswordTitle": "Saklanan parola yok",
+      "noPasswordBody": "Tek kullanımlık bir bağlantıyla giriş yaparsınız, bu yüzden yönetilecek parola veritabanı yoktur.",
+      "expiringLinkTitle": "Kısa ömürlü giriş bağlantıları",
+      "expiringLinkBody": "Her sihirli bağlantı imzalanır ve 15 dakika sonra süresi dolar.",
+      "encryptionTitle": "Varsayılan olarak şifreleme",
+      "encryptionBody": "Profil alanları varsayılan olarak şifrelenir ve yöneticiler kişiselleştirme için hangi hassas olmayan bilgilerin kullanılabileceğini seçer."
     },
     "verify": {
       "verifying": "Bağlantınız doğrulanıyor...",
@@ -388,7 +397,13 @@
     "welcomeAdmin": "Hoş geldiniz, Yönetici!",
     "connectedAs": "Bağlandı:",
     "redirecting": "Panele yönlendiriliyor...",
-    "connectionFailed": "Bağlantı başarısız"
+    "connectionFailed": "Bağlantı başarısız",
+    "securityJourneyTitle": "Hızlı güvenlik yolu",
+    "securityJourneyIntro": "Nostr ile bağlandıktan sonra bu basit kurulum yolunu izleyin:",
+    "securityJourneyStep1": "Erişimi güvence altına alın: genel URL'leri ayarlayın, geliştirme dışında simülasyon bayraklarını devre dışı bırakın ve kullanıcı onay kurallarını seçin.",
+    "securityJourneyStep2": "Veri sınırlarını belirleyin: yalnızca gerekli alanları toplayın, hassas alanları şifreli tutun ve sohbet bağlamı alanlarını sınırlayın.",
+    "securityJourneyStep3": "Doğrulayın ve izleyin: yapılandırma doğrulaması yapın, servis durumunu kontrol edin ve saklanan verileri düzenli olarak gözden geçirin.",
+    "securityJourneyNote": "Bu size üretim için güçlü bir temel sağlar."
   },
   "errors": {
     "requestFailed": "İstek başarısız oldu",
@@ -435,7 +450,25 @@
     "upload": "Belge Yükleme",
     "uploadDesc": "Bilgi tabanınıza belge ekleyin",
     "database": "Veritabanı Gezgini",
-    "databaseDesc": "SQLite veritabanına göz atın ve sorgulayın"
+    "databaseDesc": "SQLite veritabanına göz atın ve sorgulayın",
+    "configureTitle": "Yapılandırabilecekleriniz",
+    "configureSubtitle": "Bu bölümler marka, kullanıcı veri toplama, yapay zeka davranışı, dağıtım güvenliği ve saklanan içerikleri kontrol eder.",
+    "securityBreadcrumbTitle": "Örneğinizi 3 adımda koruyun",
+    "securityStep1Label": "Adım 1",
+    "securityStep1Title": "Erişimi güvence altına alın",
+    "securityStep1Body": "Genel URL'leri ayarlayın, geliştirme dışında simülasyon bayraklarını devre dışı bırakın ve kullanıcıların onay gerektirip gerektirmeyeceğini seçin.",
+    "securityStep1Primary": "Dağıtım ayarlarını aç",
+    "securityStep1Secondary": "Kullanıcı ayarlarını aç",
+    "securityStep2Label": "Adım 2",
+    "securityStep2Title": "Veri sınırlarını belirleyin",
+    "securityStep2Body": "Yalnızca gerekli alanları toplayın, hassas alanları şifreli tutun ve sohbet bağlamına yalnızca güvenli alanları dahil edin.",
+    "securityStep2Primary": "Kullanıcı alanlarını yapılandır",
+    "securityStep2Secondary": "Yapay zeka varsayılanlarını incele",
+    "securityStep3Label": "Adım 3",
+    "securityStep3Title": "Doğrulayın ve izleyin",
+    "securityStep3Body": "Yapılandırmayı doğrulayın, servis durumunu kontrol edin, e-posta ve HTTPS ayarlarını güvence altına alın ve saklanan kayıtları düzenli olarak gözden geçirin.",
+    "securityStep3Primary": "Yapılandırma doğrulamasını çalıştır",
+    "securityStep3Secondary": "Saklanan verileri incele"
   },
   "adminAI": {
     "title": "Yapay Zeka Yapılandırması",

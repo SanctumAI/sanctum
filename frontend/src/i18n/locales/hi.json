@@ -32,7 +32,9 @@
       "searchLabel": "भाषाएँ खोजें",
       "noResults": "\"{{query}}\" के लिए कोई भाषा नहीं मिली",
       "continue": "जारी रखें",
-      "changeInSettings": "आप इसे बाद में सेटिंग्स में बदल सकते हैं।"
+      "changeInSettings": "आप इसे बाद में सेटिंग्स में बदल सकते हैं।",
+      "privacyNoticeTitle": "डिफ़ॉल्ट रूप से निजी",
+      "privacyNoticeBody": "Sanctum पासवर्डलेस साइन-इन और एन्क्रिप्शन-प्रथम प्रोफ़ाइल सेटिंग्स का उपयोग करता है।"
     },
     "auth": {
       "signUp": "साइन अप करें",
@@ -56,7 +58,14 @@
       "clickLink": "लॉग इन करने के लिए ईमेल में दिए लिंक पर क्लिक करें।",
       "checkSpam": "नहीं दिख रहा? अपने स्पैम फ़ोल्डर की जाँच करें।",
       "simulateMagicLink": "मैजिक लिंक पर क्लिक का अनुकरण करें",
-      "forTesting": "परीक्षण उद्देश्यों के लिए:"
+      "forTesting": "परीक्षण उद्देश्यों के लिए:",
+      "dataProtectionTitle": "Sanctum आपके डेटा की सुरक्षा कैसे करता है",
+      "noPasswordTitle": "कोई पासवर्ड स्टोर नहीं",
+      "noPasswordBody": "आप एक बार इस्तेमाल होने वाले लिंक से साइन-इन करते हैं, इसलिए पासवर्ड डेटाबेस संभालने की जरूरत नहीं होती।",
+      "expiringLinkTitle": "कम समय के साइन-इन लिंक",
+      "expiringLinkBody": "हर मैजिक लिंक साइन किया हुआ होता है और 15 मिनट में समाप्त हो जाता है।",
+      "encryptionTitle": "डिफ़ॉल्ट रूप से एन्क्रिप्शन",
+      "encryptionBody": "प्रोफ़ाइल फ़ील्ड डिफ़ॉल्ट रूप से एन्क्रिप्टेड होते हैं, और एडमिन तय करते हैं कि निजीकरण के लिए कौन-सी गैर-संवेदनशील जानकारी उपयोग हो सकती है।"
     },
     "verify": {
       "verifying": "आपके लिंक की पुष्टि की जा रही है...",
@@ -390,7 +399,13 @@
     "welcomeAdmin": "स्वागत है, एडमिन!",
     "connectedAs": "के रूप में कनेक्टेड",
     "redirecting": "डैशबोर्ड पर रीडायरेक्ट हो रहा है...",
-    "connectionFailed": "कनेक्शन विफल"
+    "connectionFailed": "कनेक्शन विफल",
+    "securityJourneyTitle": "सुरक्षा का त्वरित रास्ता",
+    "securityJourneyIntro": "Nostr से कनेक्ट होने के बाद यह सरल सेटअप क्रम अपनाएं:",
+    "securityJourneyStep1": "एक्सेस सुरक्षित करें: सार्वजनिक URL सेट करें, डेवलपमेंट के बाहर simulation flags बंद करें, और user approval नियम तय करें।",
+    "securityJourneyStep2": "डेटा सीमाएं तय करें: केवल जरूरी फ़ील्ड लें, संवेदनशील फ़ील्ड एन्क्रिप्टेड रखें, और chat context फ़ील्ड सीमित करें।",
+    "securityJourneyStep3": "सत्यापित और मॉनिटर करें: config validation चलाएँ, service health देखें, और संग्रहीत डेटा की नियमित समीक्षा करें।",
+    "securityJourneyNote": "यह प्रोडक्शन के लिए मजबूत आधार देता है।"
   },
   "errors": {
     "requestFailed": "अनुरोध विफल",
@@ -437,7 +452,25 @@
     "upload": "दस्तावेज़ अपलोड",
     "uploadDesc": "अपने ज्ञान आधार में दस्तावेज़ जोड़ें",
     "database": "डेटाबेस एक्सप्लोरर",
-    "databaseDesc": "SQLite डेटाबेस ब्राउज़ और क्वेरी करें"
+    "databaseDesc": "SQLite डेटाबेस ब्राउज़ और क्वेरी करें",
+    "configureTitle": "आप क्या कॉन्फ़िगर कर सकते हैं",
+    "configureSubtitle": "इन सेक्शनों से ब्रांडिंग, उपयोगकर्ता डेटा संग्रह, AI व्यवहार, डिप्लॉयमेंट सुरक्षा और संग्रहीत सामग्री नियंत्रित होती है।",
+    "securityBreadcrumbTitle": "3 चरणों में अपनी instance सुरक्षित करें",
+    "securityStep1Label": "चरण 1",
+    "securityStep1Title": "एक्सेस सुरक्षित करें",
+    "securityStep1Body": "सार्वजनिक URL सेट करें, डेवलपमेंट के बाहर simulation flags बंद करें, और तय करें कि users को approval चाहिए या नहीं।",
+    "securityStep1Primary": "Deployment settings खोलें",
+    "securityStep1Secondary": "User settings खोलें",
+    "securityStep2Label": "चरण 2",
+    "securityStep2Title": "डेटा सीमाएं तय करें",
+    "securityStep2Body": "केवल जरूरी फ़ील्ड लें, संवेदनशील फ़ील्ड एन्क्रिप्टेड रखें, और chat context में सिर्फ सुरक्षित फ़ील्ड शामिल करें।",
+    "securityStep2Primary": "User fields कॉन्फ़िगर करें",
+    "securityStep2Secondary": "AI defaults देखें",
+    "securityStep3Label": "चरण 3",
+    "securityStep3Title": "सत्यापित और मॉनिटर करें",
+    "securityStep3Body": "कॉन्फ़िगरेशन सत्यापित करें, service health जांचें, email/HTTPS सुरक्षित करें और stored records की नियमित समीक्षा करें।",
+    "securityStep3Primary": "Config validation चलाएँ",
+    "securityStep3Secondary": "Stored data देखें"
   },
   "adminAI": {
     "title": "AI कॉन्फ़िगरेशन",

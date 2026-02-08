@@ -159,6 +159,17 @@ export function AdminOnboarding() {
             </>
           )}
 
+          <div className="rounded-xl border border-border bg-surface-overlay p-4">
+            <h3 className="text-sm font-semibold text-text mb-1">{t('adminOnboarding.securityJourneyTitle')}</h3>
+            <p className="text-xs text-text-muted mb-3">{t('adminOnboarding.securityJourneyIntro')}</p>
+            <ol className="space-y-1.5 text-xs text-text-muted list-decimal list-inside">
+              <li>{t('adminOnboarding.securityJourneyStep1')}</li>
+              <li>{t('adminOnboarding.securityJourneyStep2')}</li>
+              <li>{t('adminOnboarding.securityJourneyStep3')}</li>
+            </ol>
+            <p className="text-xs text-text-muted mt-3">{t('adminOnboarding.securityJourneyNote')}</p>
+          </div>
+
           <NostrInfo />
         </div>
       )}

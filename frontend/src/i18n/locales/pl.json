@@ -32,7 +32,9 @@
       "searchLabel": "Wyszukaj języki",
       "noResults": "Nie znaleziono języków dla \"{{query}}\"",
       "continue": "Kontynuuj",
-      "changeInSettings": "Możesz to później zmienić w ustawieniach."
+      "changeInSettings": "Możesz to później zmienić w ustawieniach.",
+      "privacyNoticeTitle": "Prywatne domyślnie",
+      "privacyNoticeBody": "Sanctum korzysta z logowania bez hasła i ustawień profilu z szyfrowaniem jako priorytetem."
     },
     "auth": {
       "signUp": "Zarejestruj się",
@@ -56,7 +58,14 @@
       "clickLink": "Kliknij link w e-mailu, aby się zalogować.",
       "checkSpam": "Nie widzisz? Sprawdź folder spam.",
       "simulateMagicLink": "Symuluj kliknięcie magicznego linku",
-      "forTesting": "Do celów testowych:"
+      "forTesting": "Do celów testowych:",
+      "dataProtectionTitle": "Jak Sanctum chroni Twoje dane",
+      "noPasswordTitle": "Brak przechowywanych haseł",
+      "noPasswordBody": "Logujesz się za pomocą jednorazowego linku, więc nie ma bazy danych haseł do zarządzania.",
+      "expiringLinkTitle": "Krótkotrwałe linki logowania",
+      "expiringLinkBody": "Każdy magiczny link jest podpisany i wygasa po 15 minutach.",
+      "encryptionTitle": "Szyfrowanie domyślnie",
+      "encryptionBody": "Pola profilu są domyślnie szyfrowane, a administratorzy wybierają, jakie niewrażliwe informacje mogą być wykorzystane do personalizacji."
     },
     "verify": {
       "verifying": "Weryfikujemy Twój link...",
@@ -398,7 +407,13 @@
     "welcomeAdmin": "Witaj, Administratorze!",
     "connectedAs": "Połączony jako",
     "redirecting": "Przekierowanie do panelu...",
-    "connectionFailed": "Połączenie nie powiodło się"
+    "connectionFailed": "Połączenie nie powiodło się",
+    "securityJourneyTitle": "Szybka ścieżka bezpieczeństwa",
+    "securityJourneyIntro": "Po połączeniu z Nostr wykonaj tę prostą ścieżkę konfiguracji:",
+    "securityJourneyStep1": "Zabezpiecz dostęp: ustaw publiczne adresy URL, wyłącz flagi symulacji poza środowiskiem deweloperskim i wybierz zasady zatwierdzania użytkowników.",
+    "securityJourneyStep2": "Ustaw granice danych: zbieraj tylko potrzebne pola, utrzymuj wrażliwe pola zaszyfrowane i ogranicz pola kontekstu czatu.",
+    "securityJourneyStep3": "Waliduj i monitoruj: uruchom walidację konfiguracji, sprawdź stan usług i regularnie przeglądaj przechowywane dane.",
+    "securityJourneyNote": "To daje solidną podstawę dla środowiska produkcyjnego."
   },
   "errors": {
     "requestFailed": "Żądanie nie powiodło się",
@@ -445,7 +460,25 @@
     "upload": "Przesyłanie dokumentów",
     "uploadDesc": "Dodaj dokumenty do bazy wiedzy",
     "database": "Eksplorator bazy danych",
-    "databaseDesc": "Przeglądaj i odpytuj bazę danych SQLite"
+    "databaseDesc": "Przeglądaj i odpytuj bazę danych SQLite",
+    "configureTitle": "Co możesz skonfigurować",
+    "configureSubtitle": "Te sekcje kontrolują branding, zbieranie danych użytkowników, zachowanie AI, bezpieczeństwo wdrożenia i przechowywaną zawartość.",
+    "securityBreadcrumbTitle": "Chroń swoją instancję w 3 krokach",
+    "securityStep1Label": "Krok 1",
+    "securityStep1Title": "Zabezpiecz dostęp",
+    "securityStep1Body": "Ustaw publiczne adresy URL, wyłącz flagi symulacji poza środowiskiem deweloperskim i wybierz, czy użytkownicy wymagają zatwierdzenia.",
+    "securityStep1Primary": "Otwórz ustawienia wdrożenia",
+    "securityStep1Secondary": "Otwórz ustawienia użytkowników",
+    "securityStep2Label": "Krok 2",
+    "securityStep2Title": "Zdefiniuj granice danych",
+    "securityStep2Body": "Zbieraj tylko niezbędne pola, utrzymuj wrażliwe pola zaszyfrowane i dołączaj tylko bezpieczne pola do kontekstu czatu.",
+    "securityStep2Primary": "Konfiguruj pola użytkowników",
+    "securityStep2Secondary": "Sprawdź domyślne ustawienia AI",
+    "securityStep3Label": "Krok 3",
+    "securityStep3Title": "Waliduj i monitoruj",
+    "securityStep3Body": "Zwaliduj konfigurację, sprawdź stan usług, zabezpiecz ustawienia e-mail i HTTPS, i regularnie przeglądaj przechowywane rekordy.",
+    "securityStep3Primary": "Uruchom walidację konfiguracji",
+    "securityStep3Secondary": "Sprawdź przechowywane dane"
   },
   "adminAI": {
     "title": "Konfiguracja AI",

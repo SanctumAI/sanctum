@@ -322,7 +322,13 @@
     "welcomeAdmin": "Welcome, Admin!",
     "connectedAs": "Connected as",
     "redirecting": "Redirecting to dashboard...",
-    "connectionFailed": "Connection failed"
+    "connectionFailed": "Connection failed",
+    "securityJourneyTitle": "Security quick path",
+    "securityJourneyIntro": "After connecting with Nostr, follow this simple setup path:",
+    "securityJourneyStep1": "Secure access: set public URLs, disable simulation flags outside development, and choose user approval rules.",
+    "securityJourneyStep2": "Set data boundaries: collect only needed fields, keep sensitive fields encrypted, and limit chat context fields.",
+    "securityJourneyStep3": "Validate and monitor: run config validation, check service health, and review stored data regularly.",
+    "securityJourneyNote": "This gives you a strong baseline for production."
   },
   "onboarding": {
     "nostr": {
@@ -357,7 +363,9 @@
       "searchLabel": "Search languages",
       "noResults": "No languages found for \"{{query}}\"",
       "continue": "Continue",
-      "changeInSettings": "You can change this later in your settings."
+      "changeInSettings": "You can change this later in your settings.",
+      "privacyNoticeTitle": "Private by default",
+      "privacyNoticeBody": "Sanctum uses passwordless sign-in and encryption-first profile settings."
     },
     "auth": {
       "signUp": "Sign Up",
@@ -381,7 +389,14 @@
       "clickLink": "Click the link in the email to sign in.",
       "checkSpam": "Don't see it? Check your spam folder.",
       "simulateMagicLink": "Simulate clicking magic link",
-      "forTesting": "For testing purposes:"
+      "forTesting": "For testing purposes:",
+      "dataProtectionTitle": "How Sanctum protects your data",
+      "noPasswordTitle": "No stored passwords",
+      "noPasswordBody": "You sign in with a one-time link, so there is no password database to manage.",
+      "expiringLinkTitle": "Short-lived sign-in links",
+      "expiringLinkBody": "Each magic link is signed and expires after 15 minutes.",
+      "encryptionTitle": "Encryption by default",
+      "encryptionBody": "Profile fields are encrypted by default, and admins choose what non-sensitive info can be used for personalization."
     },
     "verify": {
       "verifying": "Verifying your link...",
@@ -517,6 +532,24 @@
   "adminDashboard": {
     "title": "Admin Dashboard",
     "subtitle": "Manage your Sanctum instance configuration",
+    "configureTitle": "What you can configure",
+    "configureSubtitle": "These sections control branding, user data collection, AI behavior, deployment security, and stored content.",
+    "securityBreadcrumbTitle": "Protect your instance in 3 steps",
+    "securityStep1Label": "Step 1",
+    "securityStep1Title": "Secure access",
+    "securityStep1Body": "Set public URLs, disable simulation flags outside development, and choose whether users require approval.",
+    "securityStep1Primary": "Open Deployment settings",
+    "securityStep1Secondary": "Open User settings",
+    "securityStep2Label": "Step 2",
+    "securityStep2Title": "Define data boundaries",
+    "securityStep2Body": "Collect only necessary fields, keep sensitive fields encrypted, and only include safe fields in chat context.",
+    "securityStep2Primary": "Configure user fields",
+    "securityStep2Secondary": "Review AI defaults",
+    "securityStep3Label": "Step 3",
+    "securityStep3Title": "Validate and monitor",
+    "securityStep3Body": "Validate configuration, check service health, secure email and HTTPS settings, and review stored records regularly.",
+    "securityStep3Primary": "Run config validation",
+    "securityStep3Secondary": "Review stored data",
     "instance": "Instance Configuration",
     "instanceDesc": "Branding, chat style, and theme settings",
     "user": "User Configuration",

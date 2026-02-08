@@ -83,17 +83,35 @@ export function VerifyMagicLink() {
           if (storedEmail) {
             setEmail(storedEmail)
             setName(localStorage.getItem(STORAGE_KEYS.PENDING_NAME))
-            // For testing without real token, simulate full verification
-            localStorage.setItem(STORAGE_KEYS.USER_EMAIL, storedEmail)
-            const storedName = localStorage.getItem(STORAGE_KEYS.PENDING_NAME)
-            if (storedName) {
-              localStorage.setItem(STORAGE_KEYS.USER_NAME, storedName)
+            const storedName = localStorage.getItem(STORAGE_KEYS.PENDING_NAME) || ''
+            const devSessionResponse = await fetch(`${API_BASE}/auth/dev-session`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                email: storedEmail,
+                name: storedName,
+              }),
+            })
+
+            if (!devSessionResponse.ok) {
+              setState('error')
+              return
             }
-            // Set mock session token for simulated auth (must match backend's expected token)
-            localStorage.setItem(STORAGE_KEYS.SESSION_TOKEN, 'dev-mode-mock-token')
-            // Set approval to true for testing
-            localStorage.setItem(STORAGE_KEYS.USER_APPROVED, 'true')
-            setIsApproved(true)
+
+            const devSessionData = await devSessionResponse.json()
+            if (!devSessionData.user) {
+              console.error('Dev session response missing user object')
+              setState('error')
+              return
+            }
+            localStorage.setItem(STORAGE_KEYS.USER_EMAIL, devSessionData.user.email)
+            if (devSessionData.user.name) {
+              localStorage.setItem(STORAGE_KEYS.USER_NAME, devSessionData.user.name)
+            }
+            const approved = devSessionData.user.approved !== false
+            localStorage.setItem(STORAGE_KEYS.USER_APPROVED, String(approved))
+            setIsApproved(approved)
             await inferOnboardingNeeds()
             localStorage.removeItem(STORAGE_KEYS.PENDING_EMAIL)
             localStorage.removeItem(STORAGE_KEYS.PENDING_NAME)
@@ -109,7 +127,12 @@ export function VerifyMagicLink() {
 
       try {
         // Verify the token with the backend
-        const response = await fetch(`${API_BASE}/auth/verify?token=${encodeURIComponent(token)}`)
+        const response = await fetch(`${API_BASE}/auth/verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ token }),
+        })
 
         if (!response.ok) {
           let errorMessage = t('errors.verificationFailed')
@@ -157,8 +180,7 @@ export function VerifyMagicLink() {
           }
         }
 
-        // Store session token and user info
-        localStorage.setItem(STORAGE_KEYS.SESSION_TOKEN, data.session_token)
+        // Store user info (session is maintained in secure cookie)
         localStorage.setItem(STORAGE_KEYS.USER_EMAIL, data.user.email)
         if (data.user.name) {
           localStorage.setItem(STORAGE_KEYS.USER_NAME, data.user.name)

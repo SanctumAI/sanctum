@@ -1,6 +1,6 @@
 # Security and Data Protection Checklist
 
-Last updated: 2026-02-07
+Last updated: 2026-02-08
 Scope: Sanctum current repository state (code/config review)
 
 ## Purpose
@@ -9,6 +9,35 @@ Use this checklist to:
 - Track what security and data protection controls are currently implemented.
 - Identify production blockers and remediation priorities.
 - Validate protections from both the user and admin perspective.
+
+## How to use this document
+
+1. Treat Section 4 as release-blocking work for any internet-exposed deployment.
+2. Create one ticket/PR per unchecked blocker; link it in the tracker below.
+3. Attach objective evidence in each PR (test output, curl checks, screenshots, config diff).
+4. Re-run Section 8 sign-off criteria before deployment.
+5. Update `Last updated` and this document in the same PR as security changes.
+
+### Status legend
+
+- `todo`: not started
+- `in_progress`: being implemented
+- `blocked`: waiting on decision/dependency
+- `done`: merged and verified
+
+---
+
+## 0. Critical Remediation Tracker (Current Sprint)
+
+| ID | Blocker | Priority | Owner | Status | Tracking |
+|---|---|---|---|---|---|
+| S4-1 | Protect ingest endpoints with auth | P0 | - | in_progress | `backend/app/ingest.py` |
+| S4-2 | Restrict `/vector-search` and remove unsafe payload exposure | P0 | - | in_progress | `backend/app/main.py` |
+| S4-3 | Enforce query session ownership checks | P0 | - | in_progress | `backend/app/query.py` |
+| S4-4 | Replace wildcard CORS with explicit allowlist | P0 | - | in_progress | `backend/app/main.py` |
+| S4-5 | Move bearer tokens out of `localStorage` | P0 | - | in_progress | `frontend/src/utils/adminApi.ts`, `frontend/src/pages/VerifyMagicLink.tsx` |
+| S4-6 | Remove query-param token usage | P0 | - | in_progress | `backend/app/main.py`, `frontend/src/pages/VerifyMagicLink.tsx` |
+| S4-7 | Lock down published service ports | P0 | - | in_progress | `docker-compose.app.yml`, `docker-compose.infra.yml` |
 
 ---
 
@@ -32,25 +61,29 @@ Use this checklist to:
   Evidence: `backend/app/database.py`, `backend/app/deployment_config.py`
 - [x] Admin key migration includes signed authorization checks and transactional migration.
   Evidence: `backend/app/key_migration.py`
+- [x] Baseline security headers and API CSP are applied at middleware level.
+  Evidence: `backend/app/main.py`
+- [x] Cookie-authenticated unsafe requests enforce CSRF origin + token checks.
+  Evidence: `backend/app/main.py`, `frontend/src/utils/secureFetch.ts`
 
-### 1.2 Major gaps currently present
+### 1.2 Previously identified gaps (status)
 
-- [ ] Several ingest endpoints are unauthenticated, including destructive and data-exposing routes.
-  Evidence: `backend/app/ingest.py`
-- [ ] `/vector-search` is unauthenticated and can expose payload text from Qdrant.
-  Evidence: `backend/app/main.py`, `backend/app/store.py`
-- [ ] Query sessions are in-memory and not scoped to owner on get/delete endpoints.
+- [x] Ingest endpoints are auth-protected (admin or approved-user scoped by route).
+  Evidence: `backend/app/ingest.py`, `backend/app/auth.py`
+- [x] `/vector-search` is restricted to admin authentication.
+  Evidence: `backend/app/main.py`, `backend/app/auth.py`
+- [x] Query sessions are owner-scoped and enforce access checks on create/reuse/read/delete.
   Evidence: `backend/app/query.py`
-- [ ] Auth/session tokens are stored in `localStorage` (admin and user).
-  Evidence: `frontend/src/types/onboarding.ts`, `frontend/src/utils/adminApi.ts`
-- [ ] Some auth flows use query-string tokens (`/auth/verify`, `/auth/me`), increasing token leak risk.
-  Evidence: `backend/app/main.py`, `frontend/src/pages/VerifyMagicLink.tsx`
-- [ ] CORS is currently wildcard (`*`) in backend.
+- [x] Primary auth/session token usage moved to secure cookie flows (no active token-in-localStorage requirement).
+  Evidence: `frontend/src/utils/adminApi.ts`, `frontend/src/pages/VerifyMagicLink.tsx`, `frontend/src/pages/ChatPage.tsx`
+- [x] Active auth flows no longer use query-string tokens for verification/session checks.
+  Evidence: `backend/app/main.py`, `frontend/src/pages/VerifyMagicLink.tsx`, `frontend/src/pages/TestDashboard.tsx`
+- [x] CORS now uses explicit allowlist origins compatible with credentialed cookies.
   Evidence: `backend/app/main.py`
 - [ ] Uploaded files and chunk payload text are plaintext at rest.
   Evidence: `backend/app/ingest.py`, `backend/app/store.py`
-- [ ] Deployment secrets are stored plaintext in SQLite (masked at API layer only).
-  Evidence: `backend/app/database.py`
+- [x] Deployment secrets are now encrypted at rest in SQLite.
+  Evidence: `backend/app/database.py` (Section 3.3, Section 5.2)
 
 ---
 
@@ -72,17 +105,17 @@ Use this checklist to:
 
 - [x] User PII fields are encrypted before DB write after admin initialization.
 - [x] User document access in `/query` is filtered by allowed `job_id`s for user type.
-- [ ] Eliminate unauthenticated ingest/chunk/vector endpoints that bypass user document controls.
-- [ ] Prevent session data leakage across users (session ownership checks).
-- [ ] Move user auth tokens from `localStorage` to secure, httpOnly cookies.
-- [ ] Stop passing user session tokens in query strings.
+- [x] Eliminate unauthenticated ingest/chunk/vector endpoints that bypass user document controls.
+- [x] Prevent session data leakage across users (session ownership checks).
+- [x] Move user auth tokens from `localStorage` to secure, httpOnly cookies.
+- [x] Stop passing user session tokens in query strings.
 
 ### 2.3 Web application security
 
-- [ ] Implement CSRF tokens for state-changing operations.
+- [x] Implement CSRF tokens for state-changing operations.
 - [ ] Sanitize/escape user input to prevent XSS (reflected, stored, DOM-based).
-- [ ] Implement Content Security Policy (CSP) headers.
-- [ ] Add X-Frame-Options and X-Content-Type-Options headers.
+- [x] Implement Content Security Policy (CSP) headers.
+- [x] Add X-Frame-Options and X-Content-Type-Options headers.
 
 ### 2.4 User safety and transparency
 
@@ -99,43 +132,53 @@ Use this checklist to:
 - [x] Nostr event verification includes signature + freshness checks.
 - [x] Single-admin ownership model enforced.
 - [x] Admin session token exists and is validated server-side.
-- [ ] Move admin token storage from `localStorage` to secure cookie/session mechanism.
+- [x] Move admin token storage from `localStorage` to secure cookie/session mechanism.
 - [ ] Add explicit admin session revocation/logout invalidation strategy.
 
 ### 3.2 Admin data access and key management
 
 - [x] Admin can decrypt encrypted user fields client-side with NIP-07.
 - [x] Key migration flow validates signature and prevents partial migration.
-- [ ] Add formal backup and recovery runbook for admin private key loss.
-- [ ] Add key migration drills and recovery tests.
+- [x] Add formal backup and recovery runbook for admin private key loss.
+- [x] Add key migration drills and recovery tests.
 
 ### 3.3 Deployment and secret handling
 
 - [x] Secrets are masked in normal config reads.
 - [x] Secret reveal/export endpoints are admin-only.
-- [ ] Encrypt secrets at rest in `deployment_config` (not just masked in API output).
-- [ ] Restrict/monitor `.env` export usage and treat as high-risk operation.
-- [ ] Add immutable audit controls for privileged config changes.
+- [x] Encrypt secrets at rest in `deployment_config` (not just masked in API output).
+- [x] Restrict/monitor `.env` export usage and treat as high-risk operation.
+- [x] Add immutable audit controls for privileged config changes.
 
 ---
 
 ## 4. Critical Production Blockers (Must Fix Before Internet Exposure)
 
-- [ ] Protect ingest endpoints with auth:
+- [x] Protect ingest endpoints with auth:
   - `/ingest/wipe`
   - `/ingest/upload`
   - `/ingest/status/{job_id}`
   - `/ingest/pending`
   - `/ingest/chunk/{chunk_id}`
   - `/ingest/pipeline-stats`
-- [ ] Restrict `/vector-search` (admin-only or remove payload text and enforce doc scoping).
-- [ ] Enforce session ownership checks for:
+- [x] Restrict `/vector-search` (admin-only or remove payload text and enforce doc scoping).
+- [x] Enforce session ownership checks for:
   - `GET /query/session/{session_id}`
   - `DELETE /query/session/{session_id}`
-- [ ] Replace wildcard CORS with deployment-configured allowlist.
-- [ ] Move bearer tokens out of `localStorage`.
-- [ ] Remove query-param token usage for active auth/session APIs.
-- [ ] Lock down published service ports to least privilege.
+- [x] Replace wildcard CORS with deployment-configured allowlist.
+- [x] Move bearer tokens out of `localStorage`.
+- [x] Remove query-param token usage for active auth/session APIs.
+- [x] Lock down published service ports to least privilege.
+
+### 4.1 Post-implementation validation criteria (pending before Section 8 sign-off)
+
+- [ ] Auth-protected endpoint returns `401/403` without valid auth and succeeds with valid auth.
+- [ ] Access control behavior is covered by automated tests (or documented temporary manual test).
+- [ ] Frontend behavior remains functional after auth/token changes.
+- [ ] No wildcard network exposure remains in Docker/infra defaults.
+- [ ] Evidence is recorded in PR description and linked in Section 0 tracker.
+
+> **Note:** Until the automated tests required by these criteria are implemented, the manual verification commands in Section 7.1 serve as interim evidence. Completing Section 4.1 requires either passing automated tests or documented manual test results attached to the relevant PR.
 
 ---
 
@@ -156,7 +199,7 @@ Use this checklist to:
 - [x] PII fields in `users`/`user_field_values` are encrypted.
 - [ ] Uploaded files in `uploads/` encrypted at rest.
 - [ ] Qdrant payload text minimized or encrypted.
-- [ ] Deployment secrets encrypted at rest in SQLite.
+- [x] Deployment secrets encrypted at rest in SQLite.
 
 ### 5.3 In-transit controls
 
@@ -201,6 +244,39 @@ Use this checklist to:
   - destructive endpoint usage
 - [ ] Add periodic backup + restore test for SQLite and config.
 
+### 7.1 Minimum manual verification commands (interim evidence until Section 4.1 automated tests are implemented)
+
+Run from repo root with stack running:
+
+```bash
+# S4-1/S4-2/S4-3: Unauthenticated requests should fail on protected endpoints
+curl -i http://localhost:8000/ingest/pending
+curl -i -X POST http://localhost:8000/vector-search \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"test","top_k":1}'
+curl -i http://localhost:8000/query/session/test-session-id
+
+# S4-4: CORS should reject disallowed origins
+curl -i -X OPTIONS http://localhost:8000/health \
+  -H 'Origin: https://evil.example.com' \
+  -H 'Access-Control-Request-Method: GET'
+
+# S4-7: Verify only expected ports are published
+docker compose -f docker-compose.infra.yml -f docker-compose.app.yml ps --format 'table {{.Name}}\t{{.Ports}}'
+
+# Smoke checks expected to remain available
+curl -i http://localhost:8000/test
+curl -i http://localhost:8000/llm/test
+```
+
+Expected outcome:
+- Protected endpoints return `401` or `403` when unauthenticated.
+- CORS preflight for disallowed origins does not return `Access-Control-Allow-Origin`.
+- Published ports match least-privilege expectations (no `0.0.0.0` binds on internal services).
+- Health/smoke endpoints continue to return successful responses.
+
+**Note:** S4-5 (localStorage token removal) and S4-6 (query-param token removal) require browser DevTools inspection — verify that `localStorage` no longer stores session tokens and that auth flows do not pass tokens in URL query strings.
+
 ---
 
 ## 8. Sign-off Criteria
@@ -220,3 +296,16 @@ Mark release as security-ready only when all are true:
 
 - This checklist reflects a repository review, not a full external penetration test.
 - Re-run this checklist after major auth, ingest, or deployment config changes.
+- Keep product copy aligned with actual controls; avoid absolute claims like "fully private" or "breach-proof".
+- Where admin configuration can weaken privacy (for example disabling encryption or sharing data with external providers), surface this clearly in admin and user UI.
+
+---
+
+## 10. Messaging Guardrails (Docs + UI Copy)
+
+Use these guardrails while security fixes are in progress:
+
+- [ ] Avoid absolute language (`private by default`, `only you can view`, `protects against breaches`) unless technically guaranteed in all deployment modes.
+- [ ] State role boundaries explicitly: instance admins configure retention, encryption behavior, and external-provider usage.
+- [ ] Add user-facing notice where relevant: data handling is instance-configured and may include external processing if enabled.
+- [ ] Add admin-facing attestation before disabling encryption or enabling AI-sharing of sensitive fields.

@@ -14,9 +14,10 @@ import os
 import re
 import logging
 import uuid
+import hashlib
 from typing import Optional
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel
 
 import httpx
@@ -30,6 +31,7 @@ from store import (
 )
 from llm import get_provider
 from utils import sanitize_profile_value
+from rate_limit import RateLimiter
 
 logger = logging.getLogger("sanctum.query")
 
@@ -39,9 +41,34 @@ router = APIRouter(prefix="/query", tags=["query"])
 # Configuration
 TOP_K_VECTORS = int(os.getenv("RAG_TOP_K", "8"))  # More context for nuance
 GRAPH_HOPS = int(os.getenv("RAG_GRAPH_HOPS", "2"))
+QUERY_RATE_LIMIT_PER_MINUTE = int(os.getenv("RATE_LIMIT_QUERY_PER_MINUTE", "90"))
 
 # Simple in-memory session store (replace with Redis/DB for production)
 _sessions: dict[str, dict] = {}
+
+
+def _rate_limit_key(request: Request) -> str:
+    """Prefer auth identity for rate limiting; fallback to client IP."""
+    auth_header = request.headers.get("authorization", "")
+    if auth_header.startswith("Bearer "):
+        token = auth_header[7:]
+        digest = hashlib.sha256(token.encode("utf-8")).hexdigest()[:20]
+        return f"bearer:{digest}"
+
+    cookie_token = request.cookies.get(auth.ADMIN_SESSION_COOKIE_NAME) or request.cookies.get(auth.USER_SESSION_COOKIE_NAME)
+    if cookie_token:
+        digest = hashlib.sha256(cookie_token.encode("utf-8")).hexdigest()[:20]
+        return f"cookie:{digest}"
+
+    client_host = (request.client.host if request.client else None) or "unknown"
+    return f"ip:{client_host}"
+
+
+query_limiter = RateLimiter(
+    limit=QUERY_RATE_LIMIT_PER_MINUTE,
+    window_seconds=60,
+    key_func=_rate_limit_key,
+)
 
 
 class Message(BaseModel):
@@ -75,7 +102,11 @@ class QueryResponse(BaseModel):
 
 
 @router.post("", response_model=QueryResponse)
-async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_or_approved_user)):
+async def query(
+    request: QueryRequest,
+    user: dict = Depends(auth.require_admin_or_approved_user),
+    _: None = Depends(query_limiter),
+):
     """
     RAG query with session support.
     Requires authenticated admin OR approved user.
@@ -107,7 +138,7 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
     
     # Session management
     session_id = request.session_id or str(uuid.uuid4())
-    session = _get_or_create_session(session_id)
+    session = _get_or_create_session(session_id, user)
     
     # Add user context if provided
     if request.jurisdiction and not session.get("jurisdiction"):
@@ -276,11 +307,47 @@ async def query(request: QueryRequest, user: dict = Depends(auth.require_admin_o
         raise HTTPException(status_code=500, detail=str(e))
 
 
-def _get_or_create_session(session_id: str) -> dict:
-    """Get existing session or create new one."""
+def _session_owner_for_user(user: dict) -> tuple[str, str]:
+    """Build stable owner identity for session authorization."""
+    uid = user.get("id")
+    if uid is None:
+        raise ValueError("User dict missing required 'id' field")
+    if user.get("type") == "admin":
+        return "admin", str(uid)
+    return "user", str(uid)
+
+
+def _can_access_session(user: dict, session: dict) -> bool:
+    """
+    Check whether a caller can access a session.
+    Admins may access all sessions; users may only access their own.
+    """
+    if user.get("type") == "admin":
+        return True
+
+    owner_type, owner_id = _session_owner_for_user(user)
+    return (
+        session.get("owner_type") == owner_type
+        and session.get("owner_id") == owner_id
+    )
+
+
+def _get_or_create_session(session_id: str, user: dict) -> dict:
+    """Get existing authorized session or create a new owner-scoped session."""
+    owner_type, owner_id = _session_owner_for_user(user)
+
+    if session_id in _sessions:
+        session = _sessions[session_id]
+        if not _can_access_session(user, session):
+            raise HTTPException(status_code=403, detail="Session access denied")
+        return session
+
+    # New sessions are always owned by the caller creating them.
     if session_id not in _sessions:
         _sessions[session_id] = {
             "id": session_id,
+            "owner_type": owner_type,
+            "owner_id": owner_id,
             "created_at": datetime.utcnow().isoformat(),
             "messages": [],
             "jurisdiction": None,
@@ -595,12 +662,18 @@ async def get_session(session_id: str, user: dict = Depends(auth.require_admin_o
     """Get session history and state. Requires auth."""
     if session_id not in _sessions:
         raise HTTPException(status_code=404, detail="Session not found")
-    return _sessions[session_id]
+    session = _sessions[session_id]
+    if not _can_access_session(user, session):
+        raise HTTPException(status_code=403, detail="Session access denied")
+    return session
 
 
 @router.delete("/session/{session_id}")
 async def delete_session(session_id: str, user: dict = Depends(auth.require_admin_or_approved_user)):
     """Delete a session. Requires auth."""
     if session_id in _sessions:
+        session = _sessions[session_id]
+        if not _can_access_session(user, session):
+            raise HTTPException(status_code=403, detail="Session access denied")
         del _sessions[session_id]
     return {"status": "deleted"}

@@ -34,7 +34,7 @@
       "continue": "Fortsæt",
       "changeInSettings": "Du kan ændre dette senere i dine indstillinger.",
       "privacyNoticeTitle": "Privat som standard",
-      "privacyNoticeBody": "Sanctum bruger adgangskodeløst login og kryptering-først profilindstillinger."
+      "privacyNoticeBody": "Sanctum bruger adgangskodeløst login og kryptering-først profilindstillinger. De endelige valg for datahåndtering konfigureres af denne instans' administrator."
     },
     "auth": {
       "signUp": "Opret konto",
@@ -65,7 +65,9 @@
       "expiringLinkTitle": "Kortlivede login-links",
       "expiringLinkBody": "Hvert magisk link er signeret og udløber efter 15 minutter.",
       "encryptionTitle": "Kryptering som standard",
-      "encryptionBody": "Profilfelter er krypteret som standard, og administratorer vælger hvilke ikke-følsomme oplysninger der kan bruges til personalisering."
+      "encryptionBody": "Profilfelter er krypteret som standard, men denne instans' administrator styrer indstillinger på feltniveau og kan tillade, at udvalgte data gemmes eller deles anderledes.",
+      "adminControlNotice": "Datahåndtering konfigureres af denne instans' administrator, herunder hvad der kan gemmes ukrypteret eller deles med AI-værktøjer.",
+      "noWarrantyNotice": "Sanctum-software leveres som den er uden garanti. Brug af denne instans er underlagt administratorens politikker."
     },
     "verify": {
       "verifying": "Bekræfter dit link...",
@@ -320,7 +322,7 @@
       "encryptDisabled": "Gem som klartekst",
       "encryptedHint": "Feltværdier krypteres med NIP-04 (anbefalet)",
       "plaintextHint": "Feltværdier gemmes som klartekst (anbefales ikke til følsomme data)",
-      "encryptedSummary": "Dette felt er krypteret. Kun du kan se dataene, når du er logget ind.",
+      "encryptedSummary": "Dette felt er krypteret. Kun en administrator med den tilsvarende private Nostr-nøgle kan dekryptere og se dataene.",
       "encryptedNoAI": "AI-personalisering er ikke tilgængelig for krypterede felter.",
       "securityWarning": "Sikkerhedsadvarsel",
       "securityWarningBody": "Deaktivering af kryptering gemmer brugerdata som klartekst. Deaktivér kun for ikke-følsomme felter som præferencer eller offentlige oplysninger.",
@@ -335,7 +337,7 @@
       "encryptionHelpWhenEnabled": "Når kryptering er aktiveret:",
       "encryptionHelpPoint1": "Data krypteres med administratorens Nostr-nøgle (NIP-04)",
       "encryptionHelpPoint2": "Kun administratoren kan dekryptere og se dataene",
-      "encryptionHelpPoint3": "Beskytter mod databasebrud",
+      "encryptionHelpPoint3": "Reducerer eksponering i visse databasebrud-scenarier, men eliminerer ikke risikoen",
       "encryptionHelpPoint4": "Kan ikke deles med AI-assistenten",
       "encryptionHelpWhenDisabled": "Når kryptering er deaktiveret:",
       "encryptionHelpDisabledPoint1": "Data gemmes som læsbar klartekst",
@@ -344,7 +346,10 @@
       "encryptionHelpRecommendation": "Anbefaling: Behold kryptering aktiveret for alle personligt identificerbare oplysninger (navne, e-mails, telefonnumre, adresser).",
       "encryptedBadge": "Krypteret",
       "plaintextBadge": "Klartekst",
-      "inChatBadge": "I chat"
+      "inChatBadge": "I chat",
+      "complianceAcknowledgeLabel": "Jeg bekræfter, at dette felt kan gemmes som klartekst og/eller deles med AI i henhold til vores gældende juridiske krav.",
+      "complianceAcknowledgeHint": "Aktiver kun dette efter opdatering af dine brugermeddelelser, samtykkeflows (hvis påkrævet) og interne datahåndteringspolitikker.",
+      "complianceAcknowledgeRequired": "Du skal bekræfte juridisk/compliance-ansvar, før du gemmer denne feltkonfiguration."
     },
     "fieldTypes": {
       "text": "Tekst",
@@ -403,7 +408,8 @@
     "securityJourneyStep1": "Sikr adgang: angiv offentlige URL'er, deaktiver simuleringsflags uden for udvikling, og vælg regler for brugergodkendelse.",
     "securityJourneyStep2": "Sæt datagrænser: indsaml kun nødvendige felter, hold følsomme felter krypteret, og begræns chatkontekstfelter.",
     "securityJourneyStep3": "Valider og overvåg: kør konfigurationsvalidering, tjek servicestatus, og gennemgå lagrede data regelmæssigt.",
-    "securityJourneyNote": "Dette giver dig et stærkt fundament til produktion."
+    "securityJourneyNote": "Dette giver dig et stærkt fundament til produktion.",
+    "legalResponsibilityNotice": "Du er ansvarlig for lovlig konfiguration, brugeroplysninger og datahåndteringspolitikker for denne instans."
   },
   "errors": {
     "requestFailed": "Anmodning mislykkedes",

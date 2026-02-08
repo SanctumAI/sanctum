@@ -366,6 +366,15 @@ export function UserAuth() {
                 </div>
               </div>
             </div>
+
+            <div className="rounded-lg border border-border bg-surface p-3">
+              <p className="text-xs text-text-muted leading-relaxed">
+                {t('onboarding.auth.adminControlNotice')}
+              </p>
+              <p className="text-xs text-text-muted leading-relaxed mt-2">
+                {t('onboarding.auth.noWarrantyNotice')}
+              </p>
+            </div>
           </form>
         </>
       )}

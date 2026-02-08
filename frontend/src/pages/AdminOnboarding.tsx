@@ -60,7 +60,6 @@ export function AdminOnboarding() {
 
       setPubkey(result.admin.pubkey)
       localStorage.setItem(STORAGE_KEYS.ADMIN_PUBKEY, result.admin.pubkey)
-      localStorage.setItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN, result.session_token)
 
       // Track if this is a new admin (first time setup)
       if (result.is_new) {
@@ -197,6 +196,9 @@ export function AdminOnboarding() {
               <p className="text-xs text-text-muted leading-relaxed flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-accent shrink-0" />
                 {t('adminOnboarding.securityJourneyNote')}
+              </p>
+              <p className="text-xs text-text-muted leading-relaxed mt-2">
+                {t('adminOnboarding.legalResponsibilityNotice')}
               </p>
             </div>
           </div>

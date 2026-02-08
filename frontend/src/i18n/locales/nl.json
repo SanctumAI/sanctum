@@ -154,7 +154,7 @@
       "encryptDisabled": "Opslaan als platte tekst",
       "encryptedHint": "Veldwaarden worden versleuteld met NIP-04 (aanbevolen)",
       "plaintextHint": "Veldwaarden worden opgeslagen als platte tekst (niet aanbevolen voor gevoelige gegevens)",
-      "encryptedSummary": "Dit veld is versleuteld. Alleen jij kunt de gegevens bekijken wanneer je bent ingelogd.",
+      "encryptedSummary": "Dit veld is versleuteld. Alleen een beheerder met de bijbehorende Nostr-privésleutel kan de gegevens ontsleutelen en bekijken.",
       "encryptedNoAI": "AI-personalisatie is niet beschikbaar voor versleutelde velden.",
       "securityWarning": "Beveiligingswaarschuwing",
       "securityWarningBody": "Het uitschakelen van versleuteling slaat gebruikersgegevens op als platte tekst. Schakel alleen uit voor niet-gevoelige velden zoals voorkeuren of openbare informatie.",
@@ -169,7 +169,7 @@
       "encryptionHelpWhenEnabled": "Wanneer versleuteling is ingeschakeld:",
       "encryptionHelpPoint1": "Gegevens worden versleuteld met de Nostr-sleutel van de beheerder (NIP-04)",
       "encryptionHelpPoint2": "Alleen de beheerder kan de gegevens ontsleutelen en bekijken",
-      "encryptionHelpPoint3": "Beschermt tegen databaselekken",
+      "encryptionHelpPoint3": "Vermindert de blootstelling bij sommige databaselekken, maar elimineert het risico niet",
       "encryptionHelpPoint4": "Kan niet worden gedeeld met de AI-assistent",
       "encryptionHelpWhenDisabled": "Wanneer versleuteling is uitgeschakeld:",
       "encryptionHelpDisabledPoint1": "Gegevens worden opgeslagen als leesbare platte tekst",
@@ -178,7 +178,10 @@
       "encryptionHelpRecommendation": "Aanbeveling: Houd versleuteling ingeschakeld voor alle persoonlijk identificeerbare informatie (namen, e-mails, telefoonnummers, adressen).",
       "encryptedBadge": "Versleuteld",
       "plaintextBadge": "Platte tekst",
-      "inChatBadge": "In chat"
+      "inChatBadge": "In chat",
+      "complianceAcknowledgeLabel": "Ik bevestig dat dit veld als platte tekst kan worden opgeslagen en/of gedeeld met AI onder onze toepasselijke wettelijke vereisten.",
+      "complianceAcknowledgeHint": "Schakel dit pas in nadat u uw gebruikersmededelingen, toestemmingsprocessen (indien vereist) en intern gegevensverwerkingsbeleid hebt bijgewerkt.",
+      "complianceAcknowledgeRequired": "U moet de wettelijke/nalevingsverantwoordelijkheid bevestigen voordat u deze veldconfiguratie opslaat."
     },
     "fieldTypes": {
       "text": "Tekst",
@@ -237,7 +240,8 @@
     "securityJourneyStep1": "Beveilig toegang: stel publieke URL’s in, schakel simulatievlaggen buiten ontwikkeling uit en kies goedkeuringsregels voor gebruikers.",
     "securityJourneyStep2": "Bepaal datagrenzen: verzamel alleen noodzakelijke velden, houd gevoelige velden versleuteld en beperk chat-contextvelden.",
     "securityJourneyStep3": "Valideer en bewaak: voer configuratievalidatie uit, controleer servicegezondheid en beoordeel opgeslagen gegevens regelmatig.",
-    "securityJourneyNote": "Dit geeft je een sterke basis voor productie."
+    "securityJourneyNote": "Dit geeft je een sterke basis voor productie.",
+    "legalResponsibilityNotice": "U bent verantwoordelijk voor een rechtmatige configuratie, gebruikersmededelingen en gegevensverwerkingsbeleid voor deze instantie."
   },
   "onboarding": {
     "nostr": {
@@ -274,7 +278,7 @@
       "continue": "Doorgaan",
       "changeInSettings": "Je kunt dit later wijzigen in je instellingen.",
       "privacyNoticeTitle": "Standaard privé",
-      "privacyNoticeBody": "Sanctum gebruikt wachtwoordloos inloggen en profielinstellingen met versleuteling als uitgangspunt."
+      "privacyNoticeBody": "Sanctum gebruikt wachtwoordloze aanmelding en versleuteling-eerst profielinstellingen. De uiteindelijke keuzes voor gegevensverwerking worden geconfigureerd door de beheerder van deze instantie."
     },
     "auth": {
       "signUp": "Registreren",
@@ -305,7 +309,9 @@
       "expiringLinkTitle": "Kortdurende inloglinks",
       "expiringLinkBody": "Elke magic link is ondertekend en verloopt na 15 minuten.",
       "encryptionTitle": "Standaard versleuteld",
-      "encryptionBody": "Profielvelden zijn standaard versleuteld en beheerders kiezen welke niet-gevoelige gegevens voor personalisatie mogen worden gebruikt."
+      "encryptionBody": "Profielvelden worden standaard versleuteld, maar de beheerder van deze instantie beheert instellingen op veldniveau en kan toestaan dat geselecteerde gegevens anders worden opgeslagen of gedeeld.",
+      "adminControlNotice": "Gegevensverwerking wordt geconfigureerd door de beheerder van deze instantie, inclusief wat onversleuteld mag worden opgeslagen of gedeeld met AI-tools.",
+      "noWarrantyNotice": "Sanctum-software wordt geleverd zonder garantie. Het gebruik van deze instantie is onderworpen aan het beleid van de beheerder."
     },
     "verify": {
       "verifying": "Je link wordt geverifieerd...",

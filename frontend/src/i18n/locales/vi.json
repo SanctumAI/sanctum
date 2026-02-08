@@ -34,7 +34,7 @@
       "continue": "Tiếp tục",
       "changeInSettings": "Bạn có thể thay đổi sau trong phần cài đặt.",
       "privacyNoticeTitle": "Riêng tư theo mặc định",
-      "privacyNoticeBody": "Sanctum sử dụng đăng nhập không cần mật khẩu và cài đặt hồ sơ ưu tiên mã hóa."
+      "privacyNoticeBody": "Sanctum sử dụng đăng nhập không mật khẩu và cài đặt hồ sơ ưu tiên mã hóa. Các lựa chọn xử lý dữ liệu cuối cùng do quản trị viên phiên bản này cấu hình."
     },
     "auth": {
       "signUp": "Đăng ký",
@@ -65,7 +65,9 @@
       "expiringLinkTitle": "Liên kết đăng nhập ngắn hạn",
       "expiringLinkBody": "Mỗi liên kết ma thuật được ký và hết hạn sau 15 phút.",
       "encryptionTitle": "Mã hóa theo mặc định",
-      "encryptionBody": "Các trường hồ sơ được mã hóa theo mặc định, và quản trị viên chọn thông tin không nhạy cảm nào có thể được sử dụng để cá nhân hóa."
+      "encryptionBody": "Các trường hồ sơ được mã hóa theo mặc định, nhưng quản trị viên phiên bản này kiểm soát cài đặt ở cấp trường và có thể cho phép dữ liệu được chọn được lưu trữ hoặc chia sẻ theo cách khác.",
+      "adminControlNotice": "Việc xử lý dữ liệu do quản trị viên phiên bản này cấu hình, bao gồm những gì có thể được lưu trữ không mã hóa hoặc chia sẻ với các công cụ AI.",
+      "noWarrantyNotice": "Phần mềm Sanctum được cung cấp nguyên trạng mà không có bảo hành. Việc sử dụng phiên bản này tuân theo các chính sách của quản trị viên."
     },
     "verify": {
       "verifying": "Đang xác minh liên kết của bạn...",
@@ -322,7 +324,7 @@
       "encryptDisabled": "Lưu dưới dạng văn bản thuần",
       "encryptedHint": "Giá trị trường sẽ được mã hóa bằng NIP-04 (khuyến nghị)",
       "plaintextHint": "Giá trị trường sẽ được lưu dưới dạng văn bản thuần (không khuyến nghị cho dữ liệu nhạy cảm)",
-      "encryptedSummary": "Trường này đã được mã hóa. Chỉ bạn mới có thể xem dữ liệu khi đăng nhập.",
+      "encryptedSummary": "Trường này được mã hóa. Chỉ quản trị viên có khóa riêng tư Nostr tương ứng mới có thể giải mã và xem dữ liệu.",
       "encryptedNoAI": "Cá nhân hóa AI không khả dụng cho các trường được mã hóa.",
       "securityWarning": "Cảnh báo bảo mật",
       "securityWarningBody": "Tắt mã hóa sẽ lưu dữ liệu người dùng dưới dạng văn bản thuần. Chỉ tắt cho các trường không nhạy cảm như tùy chọn hoặc thông tin công khai.",
@@ -337,7 +339,7 @@
       "encryptionHelpWhenEnabled": "Khi bật mã hóa:",
       "encryptionHelpPoint1": "Dữ liệu được mã hóa bằng khóa Nostr của quản trị viên (NIP-04)",
       "encryptionHelpPoint2": "Chỉ quản trị viên mới có thể giải mã và xem dữ liệu",
-      "encryptionHelpPoint3": "Bảo vệ chống lại vi phạm cơ sở dữ liệu",
+      "encryptionHelpPoint3": "Giảm mức độ lộ lọt trong một số tình huống vi phạm cơ sở dữ liệu, nhưng không loại bỏ hoàn toàn rủi ro",
       "encryptionHelpPoint4": "Không thể chia sẻ với trợ lý AI",
       "encryptionHelpWhenDisabled": "Khi tắt mã hóa:",
       "encryptionHelpDisabledPoint1": "Dữ liệu được lưu dưới dạng văn bản thuần có thể đọc được",
@@ -346,7 +348,10 @@
       "encryptionHelpRecommendation": "Khuyến nghị: Giữ bật mã hóa cho mọi thông tin nhận dạng cá nhân (tên, email, số điện thoại, địa chỉ).",
       "encryptedBadge": "Đã mã hóa",
       "plaintextBadge": "Văn bản thuần",
-      "inChatBadge": "Trong trò chuyện"
+      "inChatBadge": "Trong trò chuyện",
+      "complianceAcknowledgeLabel": "Tôi xác nhận trường này có thể được lưu trữ dưới dạng văn bản thuần và/hoặc chia sẻ với AI theo các yêu cầu pháp lý hiện hành của chúng tôi.",
+      "complianceAcknowledgeHint": "Chỉ bật tùy chọn này sau khi đã cập nhật thông báo người dùng, quy trình đồng ý (nếu cần) và các chính sách xử lý dữ liệu nội bộ.",
+      "complianceAcknowledgeRequired": "Bạn phải xác nhận trách nhiệm pháp lý/tuân thủ trước khi lưu cấu hình trường này."
     },
     "fieldTypes": {
       "text": "Văn bản",
@@ -405,7 +410,8 @@
     "securityJourneyStep1": "Bảo mật truy cập: đặt URL công khai, tắt cờ mô phỏng ngoài môi trường phát triển và chọn quy tắc phê duyệt người dùng.",
     "securityJourneyStep2": "Đặt ranh giới dữ liệu: chỉ thu thập trường cần thiết, giữ các trường nhạy cảm được mã hóa và giới hạn trường ngữ cảnh trò chuyện.",
     "securityJourneyStep3": "Xác thực và giám sát: chạy xác thực cấu hình, kiểm tra tình trạng dịch vụ và xem xét dữ liệu lưu trữ thường xuyên.",
-    "securityJourneyNote": "Điều này mang lại cho bạn nền tảng vững chắc cho môi trường sản xuất."
+    "securityJourneyNote": "Điều này mang lại cho bạn nền tảng vững chắc cho môi trường sản xuất.",
+    "legalResponsibilityNotice": "Bạn chịu trách nhiệm về cấu hình hợp pháp, thông báo cho người dùng và các chính sách xử lý dữ liệu cho phiên bản này."
   },
   "errors": {
     "requestFailed": "Yêu cầu thất bại",

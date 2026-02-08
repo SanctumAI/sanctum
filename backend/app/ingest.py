@@ -18,12 +18,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks, Depends
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks, Depends, Request
 from pydantic import BaseModel
 
 import auth
 import database
 import ingest_db
+from rate_limit import RateLimiter
 from models import (
     DocumentDefaultItem,
     DocumentDefaultsResponse,
@@ -46,6 +47,7 @@ router = APIRouter(prefix="/ingest", tags=["ingest"])
 
 # Processing configuration
 MAX_CONCURRENT_CHUNKS = int(os.getenv("MAX_CONCURRENT_CHUNKS", "3"))
+UPLOAD_RATE_LIMIT_PER_MINUTE = int(os.getenv("RATE_LIMIT_UPLOAD_PER_MINUTE", "20"))
 
 # Valid ontology IDs for document extraction
 VALID_ONTOLOGIES = {"general", "bitcoin"}
@@ -64,6 +66,30 @@ PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 # Jobs are persisted to SQLite; CHUNKS remain in-memory during processing
 JOBS: dict = {}  # Loaded from SQLite on startup
 CHUNKS: dict = {}  # In-memory only (not persisted for now)
+
+
+def _rate_limit_key(request: Request) -> str:
+    """Prefer auth identity for rate limiting; fallback to client IP."""
+    auth_header = request.headers.get("authorization", "")
+    if auth_header.startswith("Bearer "):
+        token = auth_header[7:]
+        digest = hashlib.sha256(token.encode("utf-8")).hexdigest()[:20]
+        return f"bearer:{digest}"
+
+    cookie_token = request.cookies.get(auth.ADMIN_SESSION_COOKIE_NAME) or request.cookies.get(auth.USER_SESSION_COOKIE_NAME)
+    if cookie_token:
+        digest = hashlib.sha256(cookie_token.encode("utf-8")).hexdigest()[:20]
+        return f"cookie:{digest}"
+
+    client_host = request.client.host if request.client else "unknown"
+    return f"ip:{client_host}"
+
+
+upload_limiter = RateLimiter(
+    limit=UPLOAD_RATE_LIMIT_PER_MINUTE,
+    window_seconds=60,
+    key_func=_rate_limit_key,
+)
 
 
 def _load_jobs_from_db() -> dict:
@@ -453,7 +479,7 @@ def _extract_pdf_docling(file_path: Path) -> str:
 # =============================================================================
 
 @router.post("/wipe")
-async def wipe_datastores():
+async def wipe_datastores(admin: dict = Depends(auth.require_admin)):
     """
     Wipe all entries in Qdrant collections.
     This is destructive and intended for local development resets.
@@ -483,7 +509,7 @@ async def wipe_datastores():
 
 
 @router.get("/stats")
-async def get_datastore_stats():
+async def get_datastore_stats(admin: dict = Depends(auth.require_admin)):
     """
     Get quick stats for Qdrant.
     """
@@ -529,6 +555,8 @@ async def upload_document(
     file: UploadFile = File(...),
     ontology_id: str = Form(default="general"),
     sample_percent: float = Form(default=100.0),
+    admin: dict = Depends(auth.require_admin),
+    _: None = Depends(upload_limiter),
 ):
     """
     Upload a document for processing.
@@ -599,7 +627,7 @@ async def upload_document(
 
 
 @router.get("/status/{job_id}", response_model=JobStatus)
-async def get_job_status(job_id: str):
+async def get_job_status(job_id: str, admin: dict = Depends(auth.require_admin)):
     """Get the status of an ingest job"""
     if job_id not in JOBS:
         raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
@@ -767,7 +795,7 @@ async def delete_document(job_id: str, admin: dict = Depends(auth.require_admin)
 
 
 @router.get("/pending", response_model=ChunkListResponse)
-async def list_pending_chunks(job_id: Optional[str] = None):
+async def list_pending_chunks(job_id: Optional[str] = None, admin: dict = Depends(auth.require_admin)):
     """
     List chunks and their storage status.
     Optionally filter by job_id.
@@ -801,7 +829,7 @@ async def list_pending_chunks(job_id: Optional[str] = None):
 
 
 @router.get("/chunk/{chunk_id}")
-async def get_chunk(chunk_id: str):
+async def get_chunk(chunk_id: str, admin: dict = Depends(auth.require_admin)):
     """
     Get a specific chunk details.
     """
@@ -822,7 +850,7 @@ async def get_chunk(chunk_id: str):
 
 
 @router.get("/pipeline-stats")
-async def get_ingest_pipeline_stats():
+async def get_ingest_pipeline_stats(admin: dict = Depends(auth.require_admin)):
     """Get overall ingest pipeline statistics"""
     total_jobs = len(JOBS)
     total_chunks = len(CHUNKS)

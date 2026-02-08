@@ -10,10 +10,12 @@ This document describes the integration test suite located in `scripts/tests/`.
 scripts/tests/
 ├── run_all_be_tests.py     # Master test runner (with integrated harness)
 ├── backups/                # Database backups (auto-created)
-├── AUTH/                   # Admin key migration tests (2x)
+├── AUTH/                   # Auth + admin key migration tests (4x)
 │   ├── test-config.json    # Test fixtures and constants
 │   ├── test_3a_key_migration_prepare.py
-│   └── test_3b_key_migration_execute.py
+│   ├── test_3b_key_migration_execute.py
+│   ├── test_3c_auth_hardening_regression.py
+│   └── test_3d_phase3_config_integrity.py
 ├── CRM/                    # User data encryption tests (1x)
 │   ├── test-config.json    # Test fixtures and constants
 │   ├── test_1a_verify_encryption.py
@@ -59,6 +61,8 @@ test_{number}{letter}_{description}.py
 | 2B | (planned) | RAG | RAG query retrieval accuracy |
 | 3A | `test_3a_key_migration_prepare.py` | AUTH | Prepare admin key migration payload |
 | 3B | `test_3b_key_migration_execute.py` | AUTH | Execute migration and verify re-encryption |
+| 3C | `test_3c_auth_hardening_regression.py` | AUTH | Validate ingest/vector auth, session ownership, and CSRF behavior |
+| 3D | `test_3d_phase3_config_integrity.py` | AUTH | Validate secret-at-rest encryption and audit hash-chain verification |
 
 ---
 
@@ -127,7 +131,7 @@ The AUTH tests use deterministic admin keypairs for migration. The `test_user` v
 ### Prerequisites
 
 ```bash
-pip install requests reportlab coincurve pycryptodome
+pip install requests reportlab coincurve pycryptodome itsdangerous
 ```
 
 Ensure backend is running:
@@ -182,7 +186,7 @@ python run_all_be_tests.py --verbose
 # Run all CRM tests (1x)
 python run_all_be_tests.py --pattern "test_1*"
 
-# Run all AUTH tests (2x)
+# Run all AUTH tests (4x)
 python run_all_be_tests.py --pattern "test_3*"
 
 # Run specific test (2A)
@@ -207,6 +211,14 @@ python test_3a_key_migration_prepare.py --api-base http://localhost:8000
 # AUTH key migration execute (3B)
 cd scripts/tests/AUTH
 python test_3b_key_migration_execute.py --api-base http://localhost:8000
+
+# AUTH hardening regression suite (3C)
+cd scripts/tests/AUTH
+python test_3c_auth_hardening_regression.py --api-base http://localhost:8000
+
+# Phase 3 config integrity regression (3D)
+cd scripts/tests/AUTH
+python test_3d_phase3_config_integrity.py --api-base http://localhost:8000
 ```
 
 ---
@@ -235,6 +247,22 @@ python test_3b_key_migration_execute.py --api-base http://localhost:8000
 - `/admin/key-migration/prepare` returns encrypted payload for the current admin
 - `/admin/key-migration/execute` re-encrypts PII to the new admin pubkey
 - Post-migration decrypt verifies data fidelity for the new admin key
+
+### Test 3C: Auth Hardening Regression
+
+✅ **PASS** when:
+- Unauthenticated requests are rejected on protected ingest/vector endpoints
+- Authenticated requests pass auth gates for protected ingest/vector endpoints
+- Query session ownership blocks cross-user `GET`, `POST` (session reuse), and `DELETE`
+- Cookie-authenticated unsafe requests enforce origin + CSRF token checks
+- Bearer-authenticated unsafe requests are not incorrectly CSRF-blocked
+
+### Test 3D: Phase 3 Config Security
+
+✅ **PASS** when:
+- Secret deployment config values are stored encrypted at rest in SQLite
+- Secret reveal endpoint returns decrypted values correctly for authenticated admin
+- Audit hash-chain verification remains valid with interleaved audit events across tables
 
 ---
 

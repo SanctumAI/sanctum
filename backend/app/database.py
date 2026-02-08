@@ -7,8 +7,11 @@ import json
 import os
 import sqlite3
 import logging
+import hashlib
 from contextlib import contextmanager
+from base64 import b64encode, b64decode
 from datetime import datetime
+from Crypto.Cipher import AES
 
 # Configure logging
 logger = logging.getLogger("sanctum.database")
@@ -18,6 +21,12 @@ SQLITE_PATH = os.getenv("SQLITE_PATH", "/data/sanctum.db")
 
 # Lazy-loaded connection
 _connection = None
+_deployment_secret_key = None
+
+# Deployment secret encryption format:
+# enc::v1::<base64_nonce>:<base64_tag>:<base64_ciphertext>
+DEPLOYMENT_SECRET_PREFIX = "enc::v1::"
+DEPLOYMENT_SECRET_NONCE_BYTES = 12
 
 
 def get_connection():
@@ -51,6 +60,81 @@ def get_cursor():
         raise e
     finally:
         cursor.close()
+
+
+@contextmanager
+def get_write_cursor():
+    """Context manager that acquires a write lock via BEGIN IMMEDIATE.
+
+    Use this instead of get_cursor() when the transaction includes
+    _insert_config_audit_log, which requires serialized access to the
+    hash chain to prevent concurrent writers from forking it.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("BEGIN IMMEDIATE")
+        yield cursor
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        cursor.close()
+
+
+def _get_deployment_secret_key() -> bytes:
+    """
+    Derive a stable symmetric key for deployment secret encryption.
+    Uses the same SECRET_KEY root as auth/session signing.
+    """
+    global _deployment_secret_key
+    if _deployment_secret_key is None:
+        from auth import SECRET_KEY
+        _deployment_secret_key = hashlib.sha256(
+            f"sanctum-deployment-config:{SECRET_KEY}".encode("utf-8")
+        ).digest()
+    return _deployment_secret_key
+
+
+def _is_deployment_secret_encrypted(value: str | None) -> bool:
+    """Check if a deployment secret value is already encrypted."""
+    return bool(value) and isinstance(value, str) and value.startswith(DEPLOYMENT_SECRET_PREFIX)
+
+
+def _encrypt_deployment_secret_value(value: str) -> str:
+    """Encrypt deployment secret value using AES-256-GCM."""
+    if _is_deployment_secret_encrypted(value):
+        return value
+
+    nonce = os.urandom(DEPLOYMENT_SECRET_NONCE_BYTES)
+    cipher = AES.new(_get_deployment_secret_key(), AES.MODE_GCM, nonce=nonce)
+    ciphertext, tag = cipher.encrypt_and_digest(value.encode("utf-8"))
+    return (
+        f"{DEPLOYMENT_SECRET_PREFIX}"
+        f"{b64encode(nonce).decode('ascii')}:"
+        f"{b64encode(tag).decode('ascii')}:"
+        f"{b64encode(ciphertext).decode('ascii')}"
+    )
+
+
+def _decrypt_deployment_secret_value(value: str) -> str:
+    """Decrypt deployment secret value (returns input unchanged if plaintext)."""
+    if not _is_deployment_secret_encrypted(value):
+        return value
+
+    encoded = value[len(DEPLOYMENT_SECRET_PREFIX):]
+    parts = encoded.split(":", 2)
+    if len(parts) != 3:
+        raise ValueError("Invalid encrypted deployment secret format")
+
+    nonce = b64decode(parts[0].encode("ascii"))
+    tag = b64decode(parts[1].encode("ascii"))
+    ciphertext = b64decode(parts[2].encode("ascii"))
+
+    cipher = AES.new(_get_deployment_secret_key(), AES.MODE_GCM, nonce=nonce)
+    plaintext = cipher.decrypt_and_verify(ciphertext, tag)
+    return plaintext.decode("utf-8")
 
 
 def init_schema():
@@ -235,7 +319,9 @@ def init_schema():
             old_value TEXT,
             new_value TEXT,
             changed_by TEXT NOT NULL,
-            changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            prev_hash TEXT,
+            entry_hash TEXT
         )
     """)
 
@@ -283,6 +369,8 @@ def init_schema():
     _migrate_add_encryption_enabled_column()  # Add encryption_enabled column for optional field encryption
     _migrate_add_include_in_chat_column()  # Add include_in_chat column for AI chat context
     _migrate_add_user_type_icon_column()  # Add icon column to user_types table
+    _migrate_encrypt_deployment_config_secrets()  # Encrypt plaintext deployment secrets at rest
+    _migrate_add_config_audit_hash_columns()  # Add tamper-evident hash chain to config audit log
 
     # Initialize ingest job tables
     from ingest_db import init_ingest_schema
@@ -441,6 +529,190 @@ def _migrate_add_user_type_icon_column() -> None:
     if 'icon' not in columns:
         cursor.execute("ALTER TABLE user_types ADD COLUMN icon TEXT")
         logger.info("Migration: Added 'icon' column to user_types table")
+
+    conn.commit()
+    cursor.close()
+
+
+def _migrate_encrypt_deployment_config_secrets() -> None:
+    """Encrypt existing plaintext deployment_config secrets in place."""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id, key, value
+        FROM deployment_config
+        WHERE is_secret = 1
+          AND value IS NOT NULL
+          AND value != ''
+    """)
+    rows = cursor.fetchall()
+
+    migrated = 0
+    failed = 0
+    for row in rows:
+        raw_value = row["value"]
+        if _is_deployment_secret_encrypted(raw_value):
+            continue
+
+        try:
+            encrypted_value = _encrypt_deployment_secret_value(raw_value)
+        except Exception as exc:
+            failed += 1
+            logger.error(
+                "Migration: Failed to encrypt deployment_config secret key='%s' id=%s: %s",
+                row["key"],
+                row["id"],
+                exc,
+            )
+            break
+        cursor.execute(
+            """
+            UPDATE deployment_config
+            SET value = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            """,
+            (encrypted_value, row["id"]),
+        )
+        migrated += cursor.rowcount
+
+    if failed > 0:
+        conn.rollback()
+        cursor.close()
+        raise RuntimeError(
+            f"Migration aborted: {failed} deployment_config secret(s) failed to encrypt. "
+            "No changes committed — all secrets remain in their prior state."
+        )
+
+    conn.commit()
+    cursor.close()
+
+    if migrated > 0:
+        logger.info(f"Migration: Encrypted {migrated} deployment_config secret value(s) at rest")
+
+
+def _audit_hash_payload(
+    prev_hash: str,
+    table_name: str,
+    config_key: str,
+    old_value: str | None,
+    new_value: str | None,
+    changed_by: str,
+    changed_at: str,
+) -> str:
+    """Build deterministic payload for audit hash chain."""
+    parts = [
+        prev_hash,
+        table_name,
+        config_key,
+        old_value or "",
+        new_value or "",
+        changed_by,
+        changed_at,
+    ]
+    return "|".join(parts)
+
+
+def _insert_config_audit_log(
+    cursor: sqlite3.Cursor,
+    table_name: str,
+    config_key: str,
+    old_value: str | None,
+    new_value: str | None,
+    changed_by: str,
+) -> None:
+    """
+    Insert tamper-evident audit event with hash-chain linkage.
+
+    Callers must ensure the cursor is inside a serialized transaction
+    (e.g. BEGIN IMMEDIATE) so that the SELECT for prev_hash and the
+    subsequent INSERT execute atomically.  Without this, concurrent
+    writers could read the same prev_hash and fork the chain.
+    """
+    changed_at = datetime.utcnow().isoformat()
+
+    cursor.execute("SELECT entry_hash FROM config_audit_log ORDER BY id DESC LIMIT 1")
+    prev_row = cursor.fetchone()
+    prev_hash = prev_row["entry_hash"] if prev_row and prev_row["entry_hash"] else ""
+
+    payload = _audit_hash_payload(prev_hash, table_name, config_key, old_value, new_value, changed_by, changed_at)
+    entry_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+    cursor.execute(
+        """
+        INSERT INTO config_audit_log (
+            table_name, config_key, old_value, new_value, changed_by, changed_at, prev_hash, entry_hash
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (table_name, config_key, old_value, new_value, changed_by, changed_at, prev_hash, entry_hash),
+    )
+
+
+def log_config_audit_event(
+    table_name: str,
+    config_key: str,
+    old_value: str | None,
+    new_value: str | None,
+    changed_by: str,
+) -> None:
+    """
+    Public helper for writing tamper-evident config audit events.
+
+    Uses get_write_cursor() (BEGIN IMMEDIATE) to acquire a write lock
+    before reading the previous hash, preventing concurrent inserts
+    from forking the hash chain.
+    """
+    with get_write_cursor() as cursor:
+        _insert_config_audit_log(cursor, table_name, config_key, old_value, new_value, changed_by)
+
+
+def _migrate_add_config_audit_hash_columns() -> None:
+    """Add hash-chain columns to config_audit_log and backfill existing rows."""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("PRAGMA table_info(config_audit_log)")
+    columns = [row[1] for row in cursor.fetchall()]
+
+    if "prev_hash" not in columns:
+        cursor.execute("ALTER TABLE config_audit_log ADD COLUMN prev_hash TEXT")
+        logger.info("Migration: Added 'prev_hash' column to config_audit_log")
+
+    if "entry_hash" not in columns:
+        cursor.execute("ALTER TABLE config_audit_log ADD COLUMN entry_hash TEXT")
+        logger.info("Migration: Added 'entry_hash' column to config_audit_log")
+
+    # Backfill/repair hash chain deterministically across full history.
+    cursor.execute("""
+        SELECT id, table_name, config_key, old_value, new_value, changed_by, changed_at
+        FROM config_audit_log
+        ORDER BY id
+    """)
+    rows = cursor.fetchall()
+
+    prev_hash = ""
+    for row in rows:
+        changed_at = row["changed_at"] or datetime.utcnow().isoformat()
+        payload = _audit_hash_payload(
+            prev_hash=prev_hash,
+            table_name=row["table_name"],
+            config_key=row["config_key"],
+            old_value=row["old_value"],
+            new_value=row["new_value"],
+            changed_by=row["changed_by"],
+            changed_at=changed_at,
+        )
+        entry_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        cursor.execute(
+            """
+            UPDATE config_audit_log
+            SET changed_at = ?, prev_hash = ?, entry_hash = ?
+            WHERE id = ?
+            """,
+            (changed_at, prev_hash, entry_hash, row["id"]),
+        )
+        prev_hash = entry_hash
 
     conn.commit()
     cursor.close()
@@ -1408,7 +1680,7 @@ def get_ai_config_by_category(category: str) -> list[dict]:
 
 def update_ai_config(key: str, value: str, changed_by: str) -> bool:
     """Update an AI config value with audit logging"""
-    with get_cursor() as cursor:
+    with get_write_cursor() as cursor:
         # Get old value inside transaction to avoid TOCTOU race
         cursor.execute("SELECT value FROM ai_config WHERE key = ?", (key,))
         row = cursor.fetchone()
@@ -1421,10 +1693,7 @@ def update_ai_config(key: str, value: str, changed_by: str) -> bool:
 
         if cursor.rowcount > 0:
             # Log the change
-            cursor.execute("""
-                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
-                VALUES (?, ?, ?, ?, ?)
-            """, ("ai_config", key, old_value, value, changed_by))
+            _insert_config_audit_log(cursor, "ai_config", key, old_value, value, changed_by)
             return True
         return False
 
@@ -1455,7 +1724,7 @@ def get_ai_config_overrides_by_type(user_type_id: int) -> list[dict]:
 
 def upsert_ai_config_override(key: str, user_type_id: int, value: str, changed_by: str) -> bool:
     """Create or update an AI config override for a user type"""
-    with get_cursor() as cursor:
+    with get_write_cursor() as cursor:
         # Get old value for audit log
         cursor.execute("""
             SELECT value FROM ai_config_user_type_overrides
@@ -1474,17 +1743,21 @@ def upsert_ai_config_override(key: str, user_type_id: int, value: str, changed_b
 
         # Log the change (only if changed_by is provided)
         if changed_by:
-            cursor.execute("""
-                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
-                VALUES (?, ?, ?, ?, ?)
-            """, ("ai_config_user_type_overrides", f"{key}:type_{user_type_id}", old_value, value, changed_by))
+            _insert_config_audit_log(
+                cursor,
+                "ai_config_user_type_overrides",
+                f"{key}:type_{user_type_id}",
+                old_value,
+                value,
+                changed_by,
+            )
 
         return True
 
 
 def delete_ai_config_override(key: str, user_type_id: int, changed_by: str = "") -> bool:
     """Delete an AI config override (revert to global). Returns True if deleted."""
-    with get_cursor() as cursor:
+    with get_write_cursor() as cursor:
         # Get old value for audit log
         cursor.execute("""
             SELECT value FROM ai_config_user_type_overrides
@@ -1502,10 +1775,14 @@ def delete_ai_config_override(key: str, user_type_id: int, changed_by: str = "")
 
         # Log the change if something was deleted
         if deleted and changed_by:
-            cursor.execute("""
-                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
-                VALUES (?, ?, ?, ?, ?)
-            """, ("ai_config_user_type_overrides", f"{key}:type_{user_type_id}", old_value, "(reverted to global)", changed_by))
+            _insert_config_audit_log(
+                cursor,
+                "ai_config_user_type_overrides",
+                f"{key}:type_{user_type_id}",
+                old_value,
+                "(reverted to global)",
+                changed_by,
+            )
 
         return deleted
 
@@ -1578,7 +1855,7 @@ def upsert_document_defaults(
     changed_by: str = ""
 ) -> bool:
     """Create or update document defaults"""
-    with get_cursor() as cursor:
+    with get_write_cursor() as cursor:
         # Get old value inside transaction to avoid TOCTOU race
         cursor.execute("SELECT is_available, is_default_active FROM document_defaults WHERE job_id = ?", (job_id,))
         old_row = cursor.fetchone()
@@ -1597,10 +1874,7 @@ def upsert_document_defaults(
         # Log the change
         new_value = json.dumps({"is_available": is_available, "is_default_active": is_default_active})
         if changed_by:
-            cursor.execute("""
-                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
-                VALUES (?, ?, ?, ?, ?)
-            """, ("document_defaults", job_id, old_value, new_value, changed_by))
+            _insert_config_audit_log(cursor, "document_defaults", job_id, old_value, new_value, changed_by)
 
         return True
 
@@ -1659,7 +1933,7 @@ def upsert_document_defaults_override(
     changed_by: str = ""
 ) -> bool:
     """Create or update document defaults override for a user type"""
-    with get_cursor() as cursor:
+    with get_write_cursor() as cursor:
         # Get old value for audit log
         cursor.execute("""
             SELECT is_available, is_default_active FROM document_defaults_user_type_overrides
@@ -1701,17 +1975,21 @@ def upsert_document_defaults_override(
         # Log the change
         new_value = json.dumps({"is_available": final_available, "is_default_active": final_active})
         if changed_by:
-            cursor.execute("""
-                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
-                VALUES (?, ?, ?, ?, ?)
-            """, ("document_defaults_user_type_overrides", f"{job_id}:type_{user_type_id}", old_value, new_value, changed_by))
+            _insert_config_audit_log(
+                cursor,
+                "document_defaults_user_type_overrides",
+                f"{job_id}:type_{user_type_id}",
+                old_value,
+                new_value,
+                changed_by,
+            )
 
         return True
 
 
 def delete_document_defaults_override(job_id: str, user_type_id: int, changed_by: str = "") -> bool:
     """Delete document defaults override (revert to global). Returns True if deleted."""
-    with get_cursor() as cursor:
+    with get_write_cursor() as cursor:
         # Get old value for audit log
         cursor.execute("""
             SELECT is_available, is_default_active FROM document_defaults_user_type_overrides
@@ -1731,10 +2009,14 @@ def delete_document_defaults_override(job_id: str, user_type_id: int, changed_by
         deleted = cursor.rowcount > 0
 
         if deleted and changed_by:
-            cursor.execute("""
-                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
-                VALUES (?, ?, ?, ?, ?)
-            """, ("document_defaults_user_type_overrides", f"{job_id}:type_{user_type_id}", old_value, "(reverted to global)", changed_by))
+            _insert_config_audit_log(
+                cursor,
+                "document_defaults_user_type_overrides",
+                f"{job_id}:type_{user_type_id}",
+                old_value,
+                "(reverted to global)",
+                changed_by,
+            )
 
         return deleted
 
@@ -1883,25 +2165,30 @@ def get_deployment_config_by_category(category: str) -> list[dict]:
 def update_deployment_config(key: str, value: str, changed_by: str) -> bool:
     """Update a deployment config value with audit logging"""
     # Get old value for audit log
-    with get_cursor() as cursor:
+    with get_write_cursor() as cursor:
         cursor.execute("SELECT value, is_secret FROM deployment_config WHERE key = ?", (key,))
         row = cursor.fetchone()
         if not row:
             return False
         old_value = "********" if row["is_secret"] else row["value"]
+        value_to_store = _encrypt_deployment_secret_value(value) if row["is_secret"] and value else value
 
         cursor.execute("""
             UPDATE deployment_config SET value = ?, updated_at = CURRENT_TIMESTAMP
             WHERE key = ?
-        """, (value, key))
+        """, (value_to_store, key))
 
         if cursor.rowcount > 0:
             # Log the change (mask secrets in log too)
             new_value_logged = "********" if row["is_secret"] else value
-            cursor.execute("""
-                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
-                VALUES (?, ?, ?, ?, ?)
-            """, ("deployment_config", key, old_value, new_value_logged, changed_by))
+            _insert_config_audit_log(
+                cursor,
+                "deployment_config",
+                key,
+                old_value,
+                new_value_logged,
+                changed_by,
+            )
             return True
         return False
 
@@ -1916,11 +2203,12 @@ def upsert_deployment_config(
     changed_by: str = ""
 ) -> bool:
     """Create or update deployment config"""
-    with get_cursor() as cursor:
+    with get_write_cursor() as cursor:
         # Get old value inside transaction to avoid TOCTOU race
         cursor.execute("SELECT value, is_secret FROM deployment_config WHERE key = ?", (key,))
         old_row = cursor.fetchone()
         old_value = "********" if (old_row and old_row["is_secret"]) else (old_row["value"] if old_row else None)
+        value_to_store = _encrypt_deployment_secret_value(value) if is_secret and value else value
 
         cursor.execute("""
             INSERT INTO deployment_config (key, value, is_secret, requires_restart, category, description)
@@ -1932,15 +2220,19 @@ def upsert_deployment_config(
                 category = excluded.category,
                 description = excluded.description,
                 updated_at = CURRENT_TIMESTAMP
-        """, (key, value, int(is_secret), int(requires_restart), category, description))
+        """, (key, value_to_store, int(is_secret), int(requires_restart), category, description))
 
         # Log the change
         if changed_by:
             new_value_logged = "********" if is_secret else value
-            cursor.execute("""
-                INSERT INTO config_audit_log (table_name, config_key, old_value, new_value, changed_by)
-                VALUES (?, ?, ?, ?, ?)
-            """, ("deployment_config", key, old_value, new_value_logged, changed_by))
+            _insert_config_audit_log(
+                cursor,
+                "deployment_config",
+                key,
+                old_value,
+                new_value_logged,
+                changed_by,
+            )
 
         return True
 
@@ -1958,9 +2250,20 @@ def get_deployment_config_value(key: str) -> str | None:
     WARNING: This returns unmasked secret values. Do not expose via API.
     """
     with get_cursor() as cursor:
-        cursor.execute("SELECT value FROM deployment_config WHERE key = ?", (key,))
+        cursor.execute("SELECT value, is_secret FROM deployment_config WHERE key = ?", (key,))
         row = cursor.fetchone()
-        return row["value"] if row else None
+        if not row:
+            return None
+
+        value = row["value"]
+        if row["is_secret"] and value:
+            try:
+                return _decrypt_deployment_secret_value(value)
+            except Exception as exc:
+                logger.error(f"Failed to decrypt deployment secret for key '{key}': {exc}")
+                return None
+
+        return value
 
 
 # --- Audit Log Operations ---
@@ -1980,3 +2283,74 @@ def get_config_audit_log(limit: int = 100, table_name: str | None = None) -> lis
                 ORDER BY changed_at DESC LIMIT ?
             """, (limit,))
         return [dict(row) for row in cursor.fetchall()]
+
+
+def verify_config_audit_log_chain(table_name: str | None = None) -> dict:
+    """
+    Verify tamper-evident hash chain for config audit log.
+    Integrity is validated across the full global chain. If `table_name` is set,
+    `checked_entries` is scoped to that table while `total_entries` reflects the
+    full chain size that was validated.
+
+    Returns:
+        {
+          "valid": bool,
+          "checked_entries": int,
+          "first_invalid_id": int | None,
+          "reason": str | None
+        }
+    """
+    with get_cursor() as cursor:
+        cursor.execute("""
+            SELECT id, table_name, config_key, old_value, new_value, changed_by, changed_at, prev_hash, entry_hash
+            FROM config_audit_log
+            ORDER BY id
+        """)
+        rows = cursor.fetchall()
+
+    prev_hash = ""
+    scoped_entries = 0
+    for row in rows:
+        in_scope = table_name is None or row["table_name"] == table_name
+        if in_scope:
+            scoped_entries += 1
+
+        changed_at = row["changed_at"] or ""
+        payload = _audit_hash_payload(
+            prev_hash=prev_hash,
+            table_name=row["table_name"],
+            config_key=row["config_key"],
+            old_value=row["old_value"],
+            new_value=row["new_value"],
+            changed_by=row["changed_by"],
+            changed_at=changed_at,
+        )
+        expected_entry_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+        if row["prev_hash"] != prev_hash:
+            return {
+                "valid": False,
+                "checked_entries": scoped_entries if table_name is not None else len(rows),
+                "total_entries": len(rows),
+                "first_invalid_id": row["id"],
+                "reason": "prev_hash mismatch",
+            }
+
+        if row["entry_hash"] != expected_entry_hash:
+            return {
+                "valid": False,
+                "checked_entries": scoped_entries if table_name is not None else len(rows),
+                "total_entries": len(rows),
+                "first_invalid_id": row["id"],
+                "reason": "entry_hash mismatch",
+            }
+
+        prev_hash = row["entry_hash"] or ""
+
+    return {
+        "valid": True,
+        "checked_entries": scoped_entries if table_name is not None else len(rows),
+        "total_entries": len(rows),
+        "first_invalid_id": None,
+        "reason": None,
+    }

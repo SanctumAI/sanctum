@@ -33,7 +33,7 @@
       "continue": "Continuar",
       "changeInSettings": "Você pode mudar isso mais tarde nas configurações.",
       "privacyNoticeTitle": "Privado por padrão",
-      "privacyNoticeBody": "O Sanctum usa login sem senha e configurações de perfil com foco em criptografia."
+      "privacyNoticeBody": "O Sanctum usa login sem senha e configurações de perfil com criptografia como padrão. As decisões finais de tratamento de dados são configuradas pelo administrador desta instância."
     },
     "auth": {
       "signUp": "Cadastre-se",
@@ -64,7 +64,9 @@
       "expiringLinkTitle": "Links de acesso de curta duração",
       "expiringLinkBody": "Cada link mágico é assinado e expira em 15 minutos.",
       "encryptionTitle": "Criptografia por padrão",
-      "encryptionBody": "Os campos de perfil são criptografados por padrão, e os administradores escolhem quais dados não sensíveis podem ser usados para personalização."
+      "encryptionBody": "Os campos de perfil são criptografados por padrão, mas o administrador desta instância controla as configurações por campo e pode permitir que determinados dados sejam armazenados ou compartilhados de forma diferente.",
+      "adminControlNotice": "O tratamento de dados é configurado pelo administrador desta instância, incluindo o que pode ser armazenado sem criptografia ou compartilhado com ferramentas de IA.",
+      "noWarrantyNotice": "O software Sanctum é fornecido no estado em que se encontra, sem garantia. O uso desta instância está sujeito às políticas do administrador."
     },
     "verify": {
       "verifying": "Verificando seu link...",
@@ -327,7 +329,7 @@
       "encryptDisabled": "Armazenar como texto simples",
       "encryptedHint": "Os valores do campo serão criptografados com NIP-04 (recomendado)",
       "plaintextHint": "Os valores do campo serão armazenados como texto simples (não recomendado para dados sensíveis)",
-      "encryptedSummary": "Este campo está criptografado. Apenas você pode visualizar os dados quando conectado.",
+      "encryptedSummary": "Este campo é criptografado. Somente um administrador com a chave privada Nostr correspondente pode descriptografar e visualizar os dados.",
       "encryptedNoAI": "A personalização de IA não está disponível para campos criptografados.",
       "securityWarning": "Aviso de segurança",
       "securityWarningBody": "Desativar a criptografia armazenará os dados do usuário como texto simples. Desative apenas para campos não sensíveis como preferências ou informações públicas.",
@@ -342,7 +344,7 @@
       "encryptionHelpWhenEnabled": "Quando a criptografia está ativada:",
       "encryptionHelpPoint1": "Os dados são criptografados usando a chave Nostr do administrador (NIP-04)",
       "encryptionHelpPoint2": "Apenas o administrador pode descriptografar e visualizar os dados",
-      "encryptionHelpPoint3": "Protege contra violações de banco de dados",
+      "encryptionHelpPoint3": "Reduz a exposição em alguns cenários de violação de banco de dados, mas não elimina o risco",
       "encryptionHelpPoint4": "Não pode ser compartilhado com o assistente de IA",
       "encryptionHelpWhenDisabled": "Quando a criptografia está desativada:",
       "encryptionHelpDisabledPoint1": "Os dados são armazenados como texto simples legível",
@@ -351,7 +353,10 @@
       "encryptionHelpRecommendation": "Recomendação: Mantenha a criptografia ativada para qualquer informação de identificação pessoal (nomes, emails, números de telefone, endereços).",
       "encryptedBadge": "Criptografado",
       "plaintextBadge": "Texto simples",
-      "inChatBadge": "No chat"
+      "inChatBadge": "No chat",
+      "complianceAcknowledgeLabel": "Confirmo que este campo pode ser armazenado em texto simples e/ou compartilhado com IA de acordo com nossos requisitos legais aplicáveis.",
+      "complianceAcknowledgeHint": "Ative isso somente após atualizar seus avisos aos usuários, fluxos de consentimento (quando aplicável) e políticas internas de tratamento de dados.",
+      "complianceAcknowledgeRequired": "Você deve confirmar a responsabilidade legal/de conformidade antes de salvar esta configuração de campo."
     },
     "fieldTypes": {
       "text": "Texto",
@@ -398,7 +403,8 @@
     "securityJourneyStep1": "Proteja o acesso: defina URLs públicas, desative flags de simulação fora de desenvolvimento e escolha regras de aprovação de usuários.",
     "securityJourneyStep2": "Defina limites de dados: colete apenas os campos necessários, mantenha campos sensíveis criptografados e limite os campos no contexto do chat.",
     "securityJourneyStep3": "Valide e monitore: execute validação de configuração, confira a saúde dos serviços e revise os dados armazenados regularmente.",
-    "securityJourneyNote": "Isso fornece uma base forte para produção."
+    "securityJourneyNote": "Isso fornece uma base forte para produção.",
+    "legalResponsibilityNotice": "Você é responsável por uma configuração em conformidade com a lei, pelas divulgações aos usuários e pelas políticas de tratamento de dados desta instância."
   },
   "adminDashboard": {
     "title": "Painel de Administração",

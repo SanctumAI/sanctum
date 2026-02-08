@@ -1,6 +1,7 @@
 /**
  * Admin API utilities
  * Provides authenticated fetch helper for admin endpoints.
+ * Auth uses secure session cookies.
  */
 
 import { STORAGE_KEYS, API_BASE } from '../types/onboarding'
@@ -9,21 +10,14 @@ export type AdminSessionValidationState = 'authenticated' | 'unauthenticated' | 
 
 /**
  * Make an authenticated admin API request.
- * Automatically adds Authorization header with admin session token.
+ * Uses secure session cookies.
  * Redirects to /admin on 401 (session expired).
  */
 export async function adminFetch(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<Response> {
-  const token = localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN)
-
-  if (!token) {
-    throw new Error('errors.notAuthenticatedAsAdmin')
-  }
-
   const headers = new Headers(options.headers)
-  headers.set('Authorization', `Bearer ${token}`)
 
   if (
     options.body &&
@@ -36,12 +30,12 @@ export async function adminFetch(
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
     headers,
+    credentials: 'include',
   })
 
   // Handle 401 - redirect to admin login
   if (response.status === 401) {
-    localStorage.removeItem(STORAGE_KEYS.ADMIN_PUBKEY)
-    localStorage.removeItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN)
+    clearAdminAuth()
     window.location.href = '/admin'
     throw new Error('errors.adminSessionExpired')
   }
@@ -53,7 +47,7 @@ export async function adminFetch(
  * Check if current session has valid admin authentication.
  */
 export function isAdminAuthenticated(): boolean {
-  return !!localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN)
+  return !!localStorage.getItem(STORAGE_KEYS.ADMIN_PUBKEY)
 }
 
 /**
@@ -65,24 +59,35 @@ export function clearAdminAuth(): void {
 }
 
 /**
- * Validate admin session token against the backend.
+ * Clear server-side admin/user session cookies and local admin markers.
+ */
+export async function clearAdminAuthWithServerLogout(): Promise<void> {
+  try {
+    await fetch(`${API_BASE}/admin/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    })
+  } catch {
+    // Best-effort cleanup
+  }
+  clearAdminAuth()
+}
+
+/**
+ * Validate current admin cookie session against the backend.
  * Returns:
- * - authenticated: token accepted by backend
- * - unauthenticated: token missing/expired/invalid (401)
+ * - authenticated: session accepted by backend
+ * - unauthenticated: session missing/expired/invalid (401)
  * - unavailable: backend error/unreachable (5xx/network)
  */
 export async function validateAdminSession(): Promise<AdminSessionValidationState> {
-  const token = localStorage.getItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN)
-
-  if (!token) {
+  if (!isAdminAuthenticated()) {
     return 'unauthenticated'
   }
 
   try {
     const response = await fetch(`${API_BASE}/admin/session`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: 'include',
     })
 
     if (response.status === 401) {

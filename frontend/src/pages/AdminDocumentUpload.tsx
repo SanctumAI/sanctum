@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Upload, FileText, X, CloudUpload, Loader2, Clock, ArrowLeft, HelpCircle, ChevronLeft, ChevronRight, CheckCircle2, Trash2, AlertTriangle, Layers } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
-import { STORAGE_KEYS } from '../types/onboarding'
 import {
   UploadResponse,
   JobStatus,
@@ -12,9 +11,6 @@ import {
   getAllowedExtensionsDisplay,
 } from '../types/ingest'
 import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
-
-// TODO: Replace localStorage check with proper auth token validation
-// Current implementation only checks for admin pubkey in localStorage
 
 export function AdminDocumentUpload() {
   const { t } = useTranslation()
@@ -65,8 +61,6 @@ export function AdminDocumentUpload() {
   // Check if admin is logged in
   useEffect(() => {
     if (!isAdminAuthenticated()) {
-      localStorage.removeItem(STORAGE_KEYS.ADMIN_PUBKEY)
-      localStorage.removeItem(STORAGE_KEYS.ADMIN_SESSION_TOKEN)
       navigate('/admin')
     }
   }, [navigate])

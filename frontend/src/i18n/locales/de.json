@@ -230,7 +230,8 @@
       "addFieldFailed": "Feld konnte nicht hinzugefügt werden",
       "updateFieldFailed": "Feld konnte nicht aktualisiert werden",
       "removeFieldFailed": "Feld konnte nicht entfernt werden",
-      "reorderFailed": "Feld konnte nicht neu geordnet werden"
+      "reorderFailed": "Feld konnte nicht neu geordnet werden",
+      "loadUsersFailed": "Benutzer konnten nicht geladen werden"
     },
     "setup": {
       "backToChat": "Zurück zum Chat",
@@ -380,6 +381,36 @@
       "searchPlaceholder": "Symbole suchen...",
       "noMatch": "Keine Symbole entsprechen \"{{search}}\"",
       "selected": "Ausgewählt:"
+    },
+    "userMigration": {
+      "title": "Benutzertyp-Migration",
+      "subtitle": "Verschiebe Benutzer zwischen Typen und lasse fehlende Pflichtfelder beim nächsten Onboarding-Schritt vervollständigen.",
+      "sourceFilter": "Benutzer nach aktuellem Typ filtern",
+      "filterAll": "Alle Benutzer",
+      "filterUntyped": "Kein Typ ausgewählt",
+      "targetType": "Zieltyp",
+      "noTypes": "Keine Benutzertypen verfügbar",
+      "allowIncomplete": "Unvollständige Migration erlauben",
+      "clearVisible": "Sichtbare Auswahl aufheben",
+      "selectVisible": "Sichtbare auswählen",
+      "migrateSelected": "Ausgewählte migrieren ({{count}})",
+      "visibleSelected": "{{selected}} im aktuellen Filter ausgewählt ({{visible}} sichtbare Benutzer).",
+      "loadingUsers": "Benutzer werden geladen...",
+      "noUsers": "Keine Benutzer für den ausgewählten Filter gefunden.",
+      "userLabel": "Benutzer #{{id}}",
+      "approved": "Genehmigt",
+      "pendingApproval": "Genehmigung ausstehend",
+      "rowResultSuccess": "Migriert. Fehlende Pflichtfelder: {{count}}.",
+      "rowResultFailed": "Letzte Migration fehlgeschlagen.",
+      "alreadyTarget": "Benutzer ist bereits im Zieltyp",
+      "migrateUser": "Benutzer migrieren",
+      "migrateOne": "Migrieren",
+      "targetRequired": "Wähle einen Zieltyp, bevor du Benutzer migrierst.",
+      "singleFailed": "Benutzer konnte nicht migriert werden.",
+      "singleSummary": "Benutzer #{{userId}} migriert. Fehlende Pflichtfelder: {{count}}.",
+      "selectUsers": "Wähle mindestens einen Benutzer zum Migrieren aus.",
+      "batchFailed": "Ausgewählte Benutzer konnten nicht migriert werden.",
+      "batchSummary": "Migration abgeschlossen. Migriert: {{migrated}}. Fehlgeschlagen: {{failed}}."
     }
   },
   "adminOnboarding": {

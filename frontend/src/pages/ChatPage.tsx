@@ -9,7 +9,7 @@ import { DocumentScope, DocumentSource } from '../components/chat/DocumentScope'
 import { ExportButton } from '../components/chat/ExportButton'
 import { AppHeader } from '../components/shared/AppHeader'
 import { Message } from '../components/chat/ChatMessage'
-import { API_BASE, STORAGE_KEYS, getSelectedUserTypeId } from '../types/onboarding'
+import { API_BASE, STORAGE_KEYS, getSelectedUserTypeId, saveSelectedUserTypeId } from '../types/onboarding'
 import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
 import { decryptField, hasNip04Support } from '../utils/encryption'
 
@@ -176,6 +176,7 @@ export function ChatPage() {
 
   // Check auth and approval status on mount
   useEffect(() => {
+    let isCancelled = false
     const isAdmin = isAdminAuthenticated()
     const userEmail = localStorage.getItem(STORAGE_KEYS.USER_EMAIL)
 
@@ -189,6 +190,53 @@ export function ChatPage() {
     const approved = localStorage.getItem(STORAGE_KEYS.USER_APPROVED)
     if (!isAdmin && approved === 'false') {
       navigate('/pending')
+      return
+    }
+
+    // Keep onboarding enforcement server-authoritative for returning users.
+    if (!isAdmin) {
+      const checkOnboardingStatus = async () => {
+        try {
+          const response = await fetch(`${API_BASE}/users/me/onboarding-status`, {
+            credentials: 'include',
+          })
+
+          if (isCancelled) return
+
+          if (response.status === 401) {
+            navigate('/login')
+            return
+          }
+
+          if (!response.ok) {
+            return
+          }
+
+          const status = await response.json()
+
+          if (isCancelled) return
+
+          const effectiveTypeId = status.effective_user_type_id ?? null
+          saveSelectedUserTypeId(effectiveTypeId)
+
+          if (status.needs_user_type) {
+            navigate('/user-type')
+            return
+          }
+
+          if (status.needs_onboarding) {
+            navigate('/profile')
+          }
+        } catch (err) {
+          console.error('Failed to fetch onboarding status:', err)
+        }
+      }
+
+      checkOnboardingStatus()
+    }
+
+    return () => {
+      isCancelled = true
     }
   }, [navigate])
 

@@ -37,6 +37,8 @@ from models import (
     FieldDefinitionCreate, FieldDefinitionUpdate, FieldDefinitionResponse, FieldDefinitionListResponse,
     FieldEncryptionRequest, FieldEncryptionResponse,
     UserCreate, UserUpdate, UserResponse, UserListResponse,
+    UserTypeMigrationRequest, UserTypeMigrationResponse,
+    UserTypeMigrationBatchRequest, UserTypeMigrationBatchResponse, UserTypeMigrationBatchResult,
     SuccessResponse,
     # Database Explorer models
     ColumnInfo, TableInfo, TablesListResponse,
@@ -45,6 +47,7 @@ from models import (
     # Magic Link Auth models
     MagicLinkRequest, MagicLinkResponse, VerifyTokenRequest,
     VerifyTokenResponse, AuthUserResponse, SessionUserResponse,
+    OnboardingStatusResponse,
     # Session defaults
     SessionDefaultsResponse,
     # Test email
@@ -881,58 +884,172 @@ async def send_magic_link(
 
 def _compute_onboarding_flags(user: dict) -> tuple[bool, bool]:
     """Return (needs_onboarding, needs_user_type) for the given user."""
-    if not user:
-        return False, False
+    status = _build_onboarding_status(user)
+    return status["needs_onboarding"], status["needs_user_type"]
 
-    user_type_id = user.get("user_type_id")
+
+def _resolve_effective_field_definitions(user_type_id: int | None) -> tuple[int | None, bool, list[dict]]:
+    """
+    Resolve effective field definitions for onboarding completeness checks.
+
+    Returns:
+        (effective_user_type_id, needs_user_type, effective_fields)
+    """
     user_types = database.list_user_types()
-
     needs_user_type = len(user_types) > 1 and not user_type_id
     if needs_user_type:
-        return True, True
+        return None, True, []
 
-    # If only one type exists, treat it as the effective type even if not yet stored
+    # If only one type exists, treat it as effective even if not persisted on user yet.
     effective_type_id = user_type_id
     if effective_type_id is None and len(user_types) == 1:
         effective_type_id = user_types[0]["id"]
 
     if effective_type_id is None:
-        # Only global fields apply when no type is selected
-        field_defs = [
-            f for f in database.get_field_definitions()
-            if f.get("user_type_id") is None
+        raw_fields = [
+            field for field in database.get_field_definitions()
+            if field.get("user_type_id") is None
         ]
     else:
-        field_defs = database.get_field_definitions(
+        raw_fields = database.get_field_definitions(
             user_type_id=effective_type_id,
             include_global=True
         )
 
-    if not field_defs:
-        return False, False
+    # Collapse global + type-specific duplicates by field_name with type-specific precedence.
+    effective_by_name: dict[str, dict] = {}
+    for field in raw_fields:
+        field_name = field.get("field_name")
+        if not field_name:
+            continue
+        existing = effective_by_name.get(field_name)
+        if existing is None:
+            effective_by_name[field_name] = field
+            continue
+
+        # Prefer type-specific over global when both exist for the same field_name.
+        existing_type_id = existing.get("user_type_id")
+        incoming_type_id = field.get("user_type_id")
+        if existing_type_id is None and incoming_type_id is not None:
+            effective_by_name[field_name] = field
+
+    effective_fields = sorted(
+        effective_by_name.values(),
+        key=lambda item: (item.get("display_order", 0), item.get("id", 0))
+    )
+    return effective_type_id, False, effective_fields
+
+
+def _is_field_completed_for_user(field_def: dict, user: dict) -> bool:
+    """Determine whether the user has a non-empty answer for a field definition."""
+    field_name = field_def.get("field_name")
+    if not field_name:
+        return False
 
     fields = user.get("fields") or {}
     fields_encrypted = user.get("fields_encrypted") or {}
-    user_fields = set(fields.keys()) | set(fields_encrypted.keys())
 
-    # If there are fields configured but none stored, onboarding hasn't been completed yet
-    if not user_fields:
-        return True, False
+    # Encrypted presence indicates a stored answer.
+    if field_name in fields_encrypted:
+        return True
 
-    required_fields = [f["field_name"] for f in field_defs if f.get("required")]
-    if not required_fields:
-        return False, False
+    # Missing key means unanswered.
+    if field_name not in fields:
+        return False
 
-    for field_name in required_fields:
-        if field_name in fields_encrypted:
-            continue
-        value = fields.get(field_name)
-        if value is None:
-            return True, False
-        if isinstance(value, str) and not value.strip():
-            return True, False
+    value = fields.get(field_name)
 
-    return False, False
+    # Required checkbox semantics: explicit false is still a valid answer.
+    if field_def.get("field_type") == "checkbox":
+        return value is not None
+
+    if value is None:
+        return False
+    if isinstance(value, str):
+        return bool(value.strip())
+    return True
+
+
+def _build_onboarding_status(user: dict | None) -> dict:
+    """Build canonical onboarding completeness status for a user."""
+    if not user:
+        return {
+            "user_id": -1,
+            "user_type_id": None,
+            "effective_user_type_id": None,
+            "needs_user_type": False,
+            "needs_onboarding": False,
+            "total_fields": 0,
+            "required_fields": 0,
+            "completed_required_fields": 0,
+            "missing_required_fields": [],
+            "missing_optional_fields": [],
+        }
+
+    user_type_id = user.get("user_type_id")
+    effective_type_id, needs_user_type, effective_fields = _resolve_effective_field_definitions(user_type_id)
+
+    if needs_user_type:
+        return {
+            "user_id": int(user.get("id", -1)),
+            "user_type_id": user_type_id,
+            "effective_user_type_id": None,
+            "needs_user_type": True,
+            "needs_onboarding": True,
+            "total_fields": 0,
+            "required_fields": 0,
+            "completed_required_fields": 0,
+            "missing_required_fields": [],
+            "missing_optional_fields": [],
+        }
+
+    missing_required: list[dict] = []
+    missing_optional: list[dict] = []
+    completed_required = 0
+    any_completed = False
+
+    for field in effective_fields:
+        completed = _is_field_completed_for_user(field, user)
+        any_completed = any_completed or completed
+        if field.get("required"):
+            if completed:
+                completed_required += 1
+            else:
+                missing_required.append(field)
+        elif not completed:
+            missing_optional.append(field)
+
+    has_fields = len(effective_fields) > 0
+    # Preserve existing onboarding behavior for optional-only schemas:
+    # if fields exist and user has never answered anything, onboarding is needed.
+    needs_onboarding = bool(missing_required) or (has_fields and not any_completed)
+
+    return {
+        "user_id": int(user.get("id", -1)),
+        "user_type_id": user_type_id,
+        "effective_user_type_id": effective_type_id,
+        "needs_user_type": False,
+        "needs_onboarding": needs_onboarding,
+        "total_fields": len(effective_fields),
+        "required_fields": sum(1 for field in effective_fields if field.get("required")),
+        "completed_required_fields": completed_required,
+        "missing_required_fields": missing_required,
+        "missing_optional_fields": missing_optional,
+    }
+
+
+def _missing_required_field_names_for_type(user: dict, target_user_type_id: int) -> list[str]:
+    """Compute missing required field names if the user were assigned target_user_type_id."""
+    simulated_user = dict(user)
+    simulated_user["user_type_id"] = target_user_type_id
+    simulated_status = _build_onboarding_status(simulated_user)
+
+    names: list[str] = []
+    for field in simulated_status.get("missing_required_fields", []):
+        field_name = field.get("field_name")
+        if field_name:
+            names.append(field_name)
+    return names
 
 
 async def _verify_magic_link_and_create_session(token: str, response: Response) -> VerifyTokenResponse:
@@ -1798,6 +1915,132 @@ async def list_users(admin: dict = Depends(auth.require_admin)):
     return UserListResponse(users=[UserResponse(**u) for u in users])
 
 
+@app.post("/admin/users/{user_id}/migrate-type", response_model=UserTypeMigrationResponse)
+async def migrate_user_type(
+    user_id: int,
+    migration: UserTypeMigrationRequest,
+    admin: dict = Depends(auth.require_admin)
+):
+    """Migrate a user to a target user type (admin only)."""
+    target_type = database.get_user_type(migration.target_user_type_id)
+    if not target_type:
+        raise HTTPException(status_code=400, detail="Target user type not found")
+
+    user = database.get_user(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    previous_user_type_id = user.get("user_type_id")
+    missing_required_fields = _missing_required_field_names_for_type(user, migration.target_user_type_id)
+
+    if missing_required_fields and not migration.allow_incomplete:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Migration would leave missing required fields: {', '.join(missing_required_fields)}"
+        )
+
+    if previous_user_type_id != migration.target_user_type_id:
+        updated = database.update_user_type_id(user_id, migration.target_user_type_id)
+        if not updated:
+            raise HTTPException(status_code=500, detail="Failed to update user type")
+
+    return UserTypeMigrationResponse(
+        success=True,
+        user_id=user_id,
+        previous_user_type_id=previous_user_type_id,
+        target_user_type_id=migration.target_user_type_id,
+        missing_required_count=len(missing_required_fields),
+        missing_required_fields=missing_required_fields,
+    )
+
+
+@app.post("/admin/users/migrate-type/batch", response_model=UserTypeMigrationBatchResponse)
+async def migrate_user_type_batch(
+    migration: UserTypeMigrationBatchRequest,
+    admin: dict = Depends(auth.require_admin)
+):
+    """Bulk migrate users to a target user type (admin only)."""
+    target_type = database.get_user_type(migration.target_user_type_id)
+    if not target_type:
+        raise HTTPException(status_code=400, detail="Target user type not found")
+
+    if not migration.user_ids:
+        raise HTTPException(status_code=400, detail="user_ids must contain at least one user id")
+
+    migrated = 0
+    failed = 0
+    results: list[UserTypeMigrationBatchResult] = []
+
+    # Deduplicate while preserving incoming order.
+    seen_user_ids: set[int] = set()
+    ordered_user_ids: list[int] = []
+    for user_id in migration.user_ids:
+        if user_id in seen_user_ids:
+            continue
+        seen_user_ids.add(user_id)
+        ordered_user_ids.append(user_id)
+
+    for user_id in ordered_user_ids:
+        user = database.get_user(user_id)
+        if not user:
+            failed += 1
+            results.append(UserTypeMigrationBatchResult(
+                user_id=user_id,
+                success=False,
+                error="User not found",
+            ))
+            continue
+
+        previous_user_type_id = user.get("user_type_id")
+        missing_required_fields = _missing_required_field_names_for_type(user, migration.target_user_type_id)
+
+        if missing_required_fields and not migration.allow_incomplete:
+            failed += 1
+            results.append(UserTypeMigrationBatchResult(
+                user_id=user_id,
+                success=False,
+                previous_user_type_id=previous_user_type_id,
+                target_user_type_id=migration.target_user_type_id,
+                missing_required_count=len(missing_required_fields),
+                missing_required_fields=missing_required_fields,
+                error=f"Missing required fields after migration: {', '.join(missing_required_fields)}",
+            ))
+            continue
+
+        try:
+            if previous_user_type_id != migration.target_user_type_id:
+                updated = database.update_user_type_id(user_id, migration.target_user_type_id)
+                if not updated:
+                    raise ValueError("Failed to update user type")
+            migrated += 1
+            results.append(UserTypeMigrationBatchResult(
+                user_id=user_id,
+                success=True,
+                previous_user_type_id=previous_user_type_id,
+                target_user_type_id=migration.target_user_type_id,
+                missing_required_count=len(missing_required_fields),
+                missing_required_fields=missing_required_fields,
+            ))
+        except Exception as e:
+            failed += 1
+            results.append(UserTypeMigrationBatchResult(
+                user_id=user_id,
+                success=False,
+                previous_user_type_id=previous_user_type_id,
+                target_user_type_id=migration.target_user_type_id,
+                missing_required_count=len(missing_required_fields),
+                missing_required_fields=missing_required_fields,
+                error=str(e),
+            ))
+
+    return UserTypeMigrationBatchResponse(
+        success=failed == 0,
+        migrated=migrated,
+        failed=failed,
+        results=results,
+    )
+
+
 def _is_admin_actor(actor: dict) -> bool:
     """Return True when auth context represents an admin."""
     return actor.get("type") == "admin"
@@ -1810,6 +2053,35 @@ def _require_self_or_admin(target_user_id: int, actor: dict) -> None:
 
     if actor.get("id") != target_user_id:
         raise HTTPException(status_code=403, detail="Forbidden: cannot access another user")
+
+
+@app.get("/users/me/onboarding-status", response_model=OnboardingStatusResponse)
+async def get_my_onboarding_status(
+    requester: dict = Depends(auth.require_admin_or_user)
+):
+    """
+    Get canonical onboarding completeness status for the authenticated user.
+
+    Returns missing required/optional fields for the user's effective type,
+    plus flags for whether user-type selection or onboarding is still needed.
+    """
+    if requester.get("type") == "admin":
+        raise HTTPException(status_code=403, detail="Admins do not have user onboarding status")
+
+    # Dev-mode sessions are not linked to persisted users.
+    if requester.get("dev_mode"):
+        return OnboardingStatusResponse(user_id=-1)
+
+    requester_id = requester.get("id")
+    if requester_id is None:
+        raise HTTPException(status_code=401, detail="Invalid user session")
+
+    user = database.get_user(requester_id)
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+
+    status = _build_onboarding_status(user)
+    return OnboardingStatusResponse(**status)
 
 
 @app.post("/users", response_model=UserResponse)

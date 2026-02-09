@@ -232,7 +232,8 @@
       "addFieldFailed": "Échec de l'ajout du champ",
       "updateFieldFailed": "Échec de la mise à jour du champ",
       "removeFieldFailed": "Échec de la suppression du champ",
-      "reorderFailed": "Échec de la réorganisation du champ"
+      "reorderFailed": "Échec de la réorganisation du champ",
+      "loadUsersFailed": "Échec du chargement des utilisateurs"
     },
     "setup": {
       "backToChat": "Retour au chat",
@@ -382,6 +383,36 @@
       "searchPlaceholder": "Rechercher des icônes...",
       "noMatch": "Aucune icône ne correspond à \"{{search}}\"",
       "selected": "Sélectionné :"
+    },
+    "userMigration": {
+      "title": "Migration de type d'utilisateur",
+      "subtitle": "Déplacez les utilisateurs entre les types et laissez les champs obligatoires manquants être complétés lors de la prochaine étape d'intégration.",
+      "sourceFilter": "Filtrer les utilisateurs par type actuel",
+      "filterAll": "Tous les utilisateurs",
+      "filterUntyped": "Aucun type sélectionné",
+      "targetType": "Type cible",
+      "noTypes": "Aucun type d'utilisateur disponible",
+      "allowIncomplete": "Autoriser la migration incomplète",
+      "clearVisible": "Effacer la sélection visible",
+      "selectVisible": "Sélectionner les visibles",
+      "migrateSelected": "Migrer la sélection ({{count}})",
+      "visibleSelected": "{{selected}} sélectionné(s) dans le filtre actuel ({{visible}} utilisateurs visibles).",
+      "loadingUsers": "Chargement des utilisateurs...",
+      "noUsers": "Aucun utilisateur trouvé pour le filtre sélectionné.",
+      "userLabel": "Utilisateur #{{id}}",
+      "approved": "Approuvé",
+      "pendingApproval": "En attente d'approbation",
+      "rowResultSuccess": "Migré. Champs obligatoires manquants : {{count}}.",
+      "rowResultFailed": "Dernière migration échouée.",
+      "alreadyTarget": "L'utilisateur est déjà dans le type cible",
+      "migrateUser": "Migrer l'utilisateur",
+      "migrateOne": "Migrer",
+      "targetRequired": "Sélectionnez un type cible avant de migrer les utilisateurs.",
+      "singleFailed": "Échec de la migration de l'utilisateur.",
+      "singleSummary": "Utilisateur #{{userId}} migré. Champs obligatoires manquants : {{count}}.",
+      "selectUsers": "Sélectionnez au moins un utilisateur à migrer.",
+      "batchFailed": "Échec de la migration des utilisateurs sélectionnés.",
+      "batchSummary": "Migration terminée. Migrés : {{migrated}}. Échoués : {{failed}}."
     }
   },
   "adminOnboarding": {

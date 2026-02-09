@@ -487,6 +487,16 @@ Update encryption settings for a field definition.
 #### `GET /admin/users`
 List all users with their field values.
 
+#### `POST /admin/users/{user_id}/migrate-type`
+Migrate a user to a target user type (admin only).
+
+See `docs/user-type-migration.md` for behavior, examples, and caveats.
+
+#### `POST /admin/users/migrate-type/batch`
+Bulk migrate users to a target user type (admin only).
+
+See `docs/user-type-migration.md` for behavior, examples, and caveats.
+
 #### `POST /users`
 Create/onboard a new user.
 
@@ -760,6 +770,13 @@ The frontend uses localStorage for temporary state during onboarding:
 - Create new user types with name and description
 - Delete user types (cascades to associated field definitions)
 - View all configured types
+
+### User Type Migration Section
+- Filter users by current type (including users with no selected type)
+- Migrate a single user or batch migrate selected users to a target type
+- Optionally allow migration even when required onboarding fields would be missing (users will complete them at next visit)
+
+See `docs/user-type-migration.md` for operational guidance and API contracts.
 
 ### User Fields Section
 - Add fields with type, name, required flag

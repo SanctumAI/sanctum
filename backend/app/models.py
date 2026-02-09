@@ -653,6 +653,19 @@ class TestEmailResponse(BaseModel):
     error: Optional[str] = None
 
 
+# --- Reachout Models ---
+
+class ReachoutRequest(BaseModel):
+    """Authenticated user reachout request"""
+    message: str = Field(..., min_length=1, max_length=5000)
+
+
+class ReachoutResponse(BaseModel):
+    """Response model for reachout submissions"""
+    success: bool
+    message: str
+
+
 # --- Public Configuration Models ---
 
 class PublicConfigResponse(BaseModel):

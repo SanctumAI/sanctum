@@ -2,6 +2,9 @@
 
 This plan enables admins to migrate users between user types while safely handling missing onboarding answers over time.
 
+If you are looking for the current, operator-focused documentation (UI + API usage, caveats, and strategy), see:
+- `docs/user-type-migration.md`
+
 ## Goals
 
 - Allow admin-triggered user type migration without forcing immediate answer collection.

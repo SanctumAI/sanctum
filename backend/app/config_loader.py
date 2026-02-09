@@ -75,13 +75,25 @@ def _refresh_cache_if_needed():
 
         # Build cache from database using raw values (not masked)
         with database.get_cursor() as cursor:
-            cursor.execute("SELECT key, value FROM deployment_config")
+            cursor.execute("SELECT key, value, is_secret FROM deployment_config")
             rows = cursor.fetchall()
 
         new_cache = {}
         for row in rows:
-            if row["value"] is not None:
-                new_cache[row["key"]] = row["value"]
+            value = row["value"]
+            if value is None:
+                continue
+
+            # Secrets are encrypted at rest in SQLite; decrypt before caching so runtime code
+            # always sees the real value (env values remain plaintext).
+            if row["is_secret"] and value:
+                try:
+                    value = database._decrypt_deployment_secret_value(value)  # internal helper
+                except Exception as e:
+                    logger.warning(f"Failed to decrypt deployment_config secret for key={row['key']!r}: {e}")
+                    continue
+
+            new_cache[row["key"]] = value
 
         # Re-acquire lock to update cache atomically
         with _cache_lock:
@@ -128,7 +140,9 @@ def get_config(key: str, default: Any = None) -> Any:
     with _cache_lock:
         if key in _config_cache:
             value = _config_cache[key]
-            if value is not None:
+            # Treat empty strings as "unset" so env/default can still apply.
+            # This makes it possible to "remove" a DB override without deleting rows.
+            if value is not None and not (isinstance(value, str) and value.strip() == "") and value != MASKED_VALUE_PLACEHOLDER:
                 return value
 
     # Try key translation for provider-specific keys
@@ -142,7 +156,7 @@ def get_config(key: str, default: Any = None) -> Any:
         with _cache_lock:
             if translated_key in _config_cache:
                 value = _config_cache[translated_key]
-                if value is not None:
+                if value is not None and not (isinstance(value, str) and value.strip() == "") and value != MASKED_VALUE_PLACEHOLDER:
                     return value
         # Fall back to env var with translated key
         env_value = os.getenv(translated_key)
@@ -155,7 +169,7 @@ def get_config(key: str, default: Any = None) -> Any:
         with _cache_lock:
             if translated_key in _config_cache:
                 value = _config_cache[translated_key]
-                if value is not None:
+                if value is not None and not (isinstance(value, str) and value.strip() == "") and value != MASKED_VALUE_PLACEHOLDER:
                     return value
         env_value = os.getenv(translated_key)
         if env_value is not None:
@@ -192,6 +206,24 @@ def _safe_int(value: Any, default: int) -> int:
         return default
 
 
+def _unwrap_wrapping_quotes(value: str) -> str:
+    """
+    Remove a single pair of wrapping quotes: '"foo"' -> 'foo', "'foo'" -> "foo".
+    Common when users set values in `.env` with quotes (Compose treats quotes literally).
+    """
+    s = value.strip()
+    if len(s) >= 2 and s[0] == s[-1] and s[0] in ("'", '"'):
+        return s[1:-1].strip()
+    return s
+
+
+def _normalize_nonsecret_str(value: Any) -> str:
+    """Normalize strings from env/DB for non-secret config values."""
+    if value is None:
+        return ""
+    return _unwrap_wrapping_quotes(str(value))
+
+
 def get_smtp_config() -> dict:
     """
     Get SMTP configuration with lazy loading.
@@ -200,11 +232,12 @@ def get_smtp_config() -> dict:
     mock_mode = get_config("MOCK_EMAIL", get_config("MOCK_SMTP", "false"))
 
     return {
-        "host": get_config("SMTP_HOST", ""),
+        "host": _normalize_nonsecret_str(get_config("SMTP_HOST", "")),
         "port": _safe_int(get_config("SMTP_PORT", "587"), 587),
-        "user": get_config("SMTP_USER", ""),
-        "password": get_config("SMTP_PASS", ""),
-        "from_address": get_config("SMTP_FROM", "Sanctum <noreply@localhost>"),
+        "user": _normalize_nonsecret_str(get_config("SMTP_USER", "")),
+        # Passwords can legitimately contain leading/trailing whitespace; don't strip.
+        "password": str(get_config("SMTP_PASS", "") or ""),
+        "from_address": _normalize_nonsecret_str(get_config("SMTP_FROM", "Sanctum <noreply@localhost>")),
         "timeout": _safe_int(get_config("SMTP_TIMEOUT", "10"), 10),
         "mock_mode": mock_mode.lower() == "true" if isinstance(mock_mode, str) else bool(mock_mode),
     }

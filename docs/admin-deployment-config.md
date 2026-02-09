@@ -95,6 +95,7 @@ curl -X PUT http://localhost:8000/admin/deployment/config/LLM_MODEL \
 
 Set `SMTP_*` values, then use the test email endpoint to verify delivery.
 `MOCK_SMTP` is the deployment UI alias for `MOCK_EMAIL` (if both are set, `MOCK_EMAIL` wins).
+SMTP is used by magic-link sign-in and any email-based instance features (for example: authenticated User Reachout; see `docs/user-reachout.md`).
 
 ```bash
 curl -X PUT http://localhost:8000/admin/deployment/config/SMTP_HOST \

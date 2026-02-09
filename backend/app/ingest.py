@@ -25,6 +25,7 @@ import auth
 import database
 import ingest_db
 from rate_limit import RateLimiter
+from rate_limit_key import rate_limit_key as _stable_rate_limit_key
 from models import (
     DocumentDefaultItem,
     DocumentDefaultsResponse,
@@ -70,19 +71,7 @@ CHUNKS: dict = {}  # In-memory only (not persisted for now)
 
 def _rate_limit_key(request: Request) -> str:
     """Prefer auth identity for rate limiting; fallback to client IP."""
-    auth_header = request.headers.get("authorization", "")
-    if auth_header.startswith("Bearer "):
-        token = auth_header[7:]
-        digest = hashlib.sha256(token.encode("utf-8")).hexdigest()[:20]
-        return f"bearer:{digest}"
-
-    cookie_token = request.cookies.get(auth.ADMIN_SESSION_COOKIE_NAME) or request.cookies.get(auth.USER_SESSION_COOKIE_NAME)
-    if cookie_token:
-        digest = hashlib.sha256(cookie_token.encode("utf-8")).hexdigest()[:20]
-        return f"cookie:{digest}"
-
-    client_host = request.client.host if request.client else "unknown"
-    return f"ip:{client_host}"
+    return _stable_rate_limit_key(request)
 
 
 upload_limiter = RateLimiter(

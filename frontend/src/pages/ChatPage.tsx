@@ -9,6 +9,7 @@ import { DocumentScope, DocumentSource } from '../components/chat/DocumentScope'
 import { ExportButton } from '../components/chat/ExportButton'
 import { AppHeader } from '../components/shared/AppHeader'
 import { Message } from '../components/chat/ChatMessage'
+import { ReachoutModal, type ReachoutMode } from '../components/reachout/ReachoutModal'
 import { API_BASE, STORAGE_KEYS, getSelectedUserTypeId, saveSelectedUserTypeId } from '../types/onboarding'
 import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
 import { decryptField, hasNip04Support } from '../utils/encryption'
@@ -142,6 +143,16 @@ export function ChatPage() {
   const [sessionDefaultsLoaded, setSessionDefaultsLoaded] = useState(false)
   const [pendingDefaultDocs, setPendingDefaultDocs] = useState<string[]>([])
 
+  const [reachoutOpen, setReachoutOpen] = useState(false)
+  const [reachoutEnabled, setReachoutEnabled] = useState(false)
+  const [reachoutMode, setReachoutMode] = useState<ReachoutMode>('support')
+  const [reachoutOverrides, setReachoutOverrides] = useState<{
+    title?: string
+    description?: string
+    buttonLabel?: string
+    successMessage?: string
+  }>({})
+
   // Build available tools list - db-query only visible to admins
   const availableTools = useMemo<Tool[]>(() => {
     const tools: Tool[] = [
@@ -173,6 +184,45 @@ export function ChatPage() {
 
     return tools
   }, [t])
+
+  // Reachout settings (public)
+  useEffect(() => {
+    let isCancelled = false
+
+    async function fetchReachout() {
+      try {
+        const res = await fetch(`${API_BASE}/settings/public`)
+        if (!res.ok) return
+        const data = await res.json()
+        const s = (data?.settings ?? {}) as Record<string, string>
+
+        if (isCancelled) return
+
+        setReachoutEnabled(String(s.reachout_enabled ?? 'false').toLowerCase() === 'true')
+        const mode = String(s.reachout_mode ?? 'support').toLowerCase()
+        if (mode === 'feedback' || mode === 'help' || mode === 'support') {
+          setReachoutMode(mode)
+        } else {
+          setReachoutMode('support')
+        }
+
+        setReachoutOverrides({
+          title: typeof s.reachout_title === 'string' ? s.reachout_title : undefined,
+          description: typeof s.reachout_description === 'string' ? s.reachout_description : undefined,
+          buttonLabel: typeof s.reachout_button_label === 'string' ? s.reachout_button_label : undefined,
+          successMessage: typeof s.reachout_success_message === 'string' ? s.reachout_success_message : undefined,
+        })
+      } catch {
+        // Best-effort: feature remains hidden if fetch fails.
+      }
+    }
+
+    fetchReachout()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [])
 
   // Check auth and approval status on mount
   useEffect(() => {
@@ -559,6 +609,25 @@ IMPORTANT: Return a CONDENSED response:
 
   const rightActions = (
     <>
+      {reachoutEnabled && (
+        <button
+          onClick={() => setReachoutOpen(true)}
+          className="btn-ghost p-2 rounded-lg transition-all"
+          title={t(
+            `reachout.mode.${reachoutMode}.openButton`,
+            reachoutMode === 'feedback' ? 'Send feedback' : reachoutMode === 'help' ? 'Get help' : 'Contact support'
+          )}
+          aria-label={t(
+            `reachout.mode.${reachoutMode}.openButton`,
+            reachoutMode === 'feedback' ? 'Send feedback' : reachoutMode === 'help' ? 'Get help' : 'Contact support'
+          )}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25H4.5A2.25 2.25 0 012.25 17.25V6.75A2.25 2.25 0 014.5 4.5h15A2.25 2.25 0 0121.75 6.75z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 7.5l-8.91 5.94a2.25 2.25 0 01-2.48 0L2.25 7.5" />
+          </svg>
+        </button>
+      )}
       <button
         onClick={handleNewChat}
         className="btn-ghost p-2 rounded-lg transition-all"
@@ -584,6 +653,13 @@ IMPORTANT: Return a CONDENSED response:
 
   return (
     <ChatContainer header={header}>
+      <ReachoutModal
+        open={reachoutOpen}
+        mode={reachoutMode}
+        overrides={reachoutOverrides}
+        onClose={() => setReachoutOpen(false)}
+      />
+
       <MessageList
         messages={messages}
         isLoading={isLoading}

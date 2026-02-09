@@ -398,9 +398,7 @@
       "searchLabel": "Talen zoeken",
       "noResults": "Geen talen gevonden voor \"{{query}}\"",
       "continue": "Doorgaan",
-      "changeInSettings": "Je kunt dit later wijzigen in je instellingen.",
-      "dataHandlingNoticeTitle": "Gegevensverwerking wordt per instantie geconfigureerd",
-      "dataHandlingNoticeBody": "Sanctum ondersteunt wachtwoordloze aanmelding en versleuteling-compatibele profielinstellingen. De uiteindelijke gegevensverwerking, bewaring en AI-deelgedrag worden geconfigureerd door de beheerder van deze instantie."
+      "changeInSettings": "Je kunt dit later wijzigen in je instellingen."
     },
     "auth": {
       "signUp": "Registreren",

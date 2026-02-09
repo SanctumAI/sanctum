@@ -72,12 +72,15 @@ Sanctum requires a NIP-07 admin login before user signups are enabled. Open the 
 
 After the first admin login, additional configuration is available in the admin UI:
 - `/admin/instance` - branding and instance settings
-- `/admin/users` - user types and onboarding fields
+- `/admin/users` - user types, user type migration, and onboarding fields
 - `/admin/ai` - prompt and LLM parameters
 - `/admin/deployment` - deployment config (LLM, SMTP, domains, SSL)
 
 See `docs/admin-deployment-config.md` for deployment config details.
+See `docs/user-reachout.md` for configuring the optional authenticated user reachout email flow.
 See `docs/data-protection-notice-template.md` for instance-level data protection notice language you can adapt for users.
+See `docs/sessions.md` for cookie/bearer session behavior and `/query` conversation `session_id`s.
+See `docs/security.md` and `docs/security-data-protection-checklist.md` for production hardening.
 
 ### Available Endpoints
 

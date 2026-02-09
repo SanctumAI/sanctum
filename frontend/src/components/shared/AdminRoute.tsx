@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
 import { isAdminAuthenticated, validateAdminSession, type AdminSessionValidationState } from '../../utils/adminApi'
+import { AdminConfigAssistant } from '../admin/AdminConfigAssistant'
 
 interface AdminRouteProps {
   children: ReactNode
@@ -82,5 +83,10 @@ export function AdminRoute({ children }: AdminRouteProps) {
     )
   }
 
-  return <>{children}</>
+  return (
+    <>
+      {children}
+      <AdminConfigAssistant />
+    </>
+  )
 }

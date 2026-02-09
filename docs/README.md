@@ -13,6 +13,7 @@ This folder contains longer-form documentation for Sanctum.
 ## Admin / Ops
 
 - [admin-deployment-config.md](admin-deployment-config.md) - Admin deployment config UI and API.
+- [admin-config-assistant.md](admin-config-assistant.md) - Admin configuration assistant (chat bubble), secret gating, and apply-changes flow.
 - [admin-key-recovery-runbook.md](admin-key-recovery-runbook.md) - Admin key loss recovery.
 - [sqlite-encryption.md](sqlite-encryption.md) - SQLite encryption model and key migration details.
 

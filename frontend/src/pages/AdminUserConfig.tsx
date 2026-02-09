@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { FileText, ChevronUp, ChevronDown, Pencil, Trash2, FilePlus, Plus, Users, Loader2, ArrowLeft, HelpCircle, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { FileText, ChevronUp, ChevronDown, Pencil, Trash2, FilePlus, Plus, Users, Loader2, ArrowLeft, HelpCircle, X, ChevronLeft, ChevronRight, RefreshCw, UserCog } from 'lucide-react'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { FieldEditor } from '../components/onboarding/FieldEditor'
 import { IconPicker } from '../components/onboarding/IconPicker'
@@ -10,6 +10,41 @@ import { CustomField, UserType, FieldType } from '../types/onboarding'
 import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
 
 const FIELD_TYPE_VALUES: FieldType[] = ['text', 'email', 'number', 'textarea', 'select', 'checkbox', 'date', 'url']
+type SourceTypeFilter = 'all' | 'untyped' | number
+
+interface AdminUserSummary {
+  id: number
+  user_type_id: number | null
+  user_type?: UserType | null
+  approved: boolean
+  created_at?: string | null
+}
+
+interface SingleMigrationResponse {
+  success: boolean
+  user_id: number
+  previous_user_type_id: number | null
+  target_user_type_id: number
+  missing_required_count: number
+  missing_required_fields: string[]
+}
+
+interface BatchMigrationResult {
+  user_id: number
+  success: boolean
+  previous_user_type_id?: number | null
+  target_user_type_id?: number | null
+  missing_required_count?: number
+  missing_required_fields?: string[]
+  error?: string
+}
+
+interface BatchMigrationResponse {
+  success: boolean
+  migrated: number
+  failed: number
+  results: BatchMigrationResult[]
+}
 
 export function AdminUserConfig() {
   const { t } = useTranslation()
@@ -20,6 +55,18 @@ export function AdminUserConfig() {
   )
   const [fields, setFields] = useState<CustomField[]>([])
   const [userTypes, setUserTypes] = useState<UserType[]>([])
+  const [users, setUsers] = useState<AdminUserSummary[]>([])
+  const [usersLoading, setUsersLoading] = useState(false)
+  const [usersError, setUsersError] = useState<string | null>(null)
+  const [migrationError, setMigrationError] = useState<string | null>(null)
+  const [migrationSummary, setMigrationSummary] = useState<string | null>(null)
+  const [sourceTypeFilter, setSourceTypeFilter] = useState<SourceTypeFilter>('all')
+  const [targetMigrationTypeId, setTargetMigrationTypeId] = useState<number | null>(null)
+  const [allowIncompleteMigration, setAllowIncompleteMigration] = useState(true)
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<number>>(new Set())
+  const [migratingUserIds, setMigratingUserIds] = useState<Set<number>>(new Set())
+  const [isBatchMigrating, setIsBatchMigrating] = useState(false)
+  const [recentMigrationResults, setRecentMigrationResults] = useState<BatchMigrationResult[]>([])
   const [isEditing, setIsEditing] = useState(false)
   const [editingField, setEditingField] = useState<CustomField | undefined>()
   const [isLoading, setIsLoading] = useState(true)
@@ -73,9 +120,10 @@ export function AdminUserConfig() {
       const errors: string[] = []
 
       try {
-        const [typesRes, fieldsRes] = await Promise.all([
+        const [typesRes, fieldsRes, usersRes] = await Promise.all([
           adminFetch('/admin/user-types', { signal: abortController.signal }),
           adminFetch('/admin/user-fields', { signal: abortController.signal }),
+          adminFetch('/admin/users', { signal: abortController.signal }),
         ])
 
         if (typesRes.ok) {
@@ -102,6 +150,16 @@ export function AdminUserConfig() {
           setFields(fetchedFields)
         } else {
           errors.push(t('admin.errors.loadFieldsFailed', 'Failed to load user fields'))
+        }
+
+        if (usersRes.ok) {
+          const usersData = await usersRes.json()
+          setUsers((usersData.users || []) as AdminUserSummary[])
+          setUsersError(null)
+        } else {
+          const message = t('admin.errors.loadUsersFailed')
+          errors.push(message)
+          setUsersError(message)
         }
 
         // Set accumulated errors if any
@@ -511,6 +569,205 @@ export function AdminUserConfig() {
     setFieldError(null)
   }
 
+  const parseErrorMessage = async (response: Response, fallback: string): Promise<string> => {
+    try {
+      const contentType = response.headers.get('content-type') || ''
+      if (contentType.includes('application/json')) {
+        const payload = await response.json()
+        if (typeof payload?.detail === 'string' && payload.detail.trim()) return payload.detail
+        if (typeof payload?.message === 'string' && payload.message.trim()) return payload.message
+      } else {
+        const text = await response.text()
+        if (text.trim()) return text
+      }
+    } catch {
+      // Fall back to provided string below.
+    }
+    return fallback
+  }
+
+  const fetchUsers = async () => {
+    setUsersLoading(true)
+    setUsersError(null)
+
+    try {
+      const response = await adminFetch('/admin/users')
+      if (!response.ok) {
+        setUsersError(await parseErrorMessage(response, t('admin.errors.loadUsersFailed')))
+        return
+      }
+      const data = await response.json()
+      setUsers((data.users || []) as AdminUserSummary[])
+    } catch (err) {
+      setUsersError(err instanceof Error ? err.message : t('admin.errors.loadUsersFailed'))
+    } finally {
+      setUsersLoading(false)
+    }
+  }
+
+  const handleToggleUserSelection = (userId: number) => {
+    setSelectedUserIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(userId)) {
+        next.delete(userId)
+      } else {
+        next.add(userId)
+      }
+      return next
+    })
+  }
+
+  const handleToggleSelectAllFilteredUsers = () => {
+    if (filteredUsers.length === 0) return
+
+    const allSelected = filteredUsers.every((user) => selectedUserIds.has(user.id))
+    setSelectedUserIds((prev) => {
+      const next = new Set(prev)
+      if (allSelected) {
+        filteredUsers.forEach((user) => next.delete(user.id))
+      } else {
+        filteredUsers.forEach((user) => next.add(user.id))
+      }
+      return next
+    })
+  }
+
+  const handleMigrateSingleUser = async (userId: number) => {
+    if (!targetMigrationTypeId) {
+      setMigrationError(t('admin.userMigration.targetRequired'))
+      return
+    }
+
+    setMigrationError(null)
+    setMigrationSummary(null)
+    setMigratingUserIds((prev) => {
+      const next = new Set(prev)
+      next.add(userId)
+      return next
+    })
+
+    try {
+      const response = await adminFetch(`/admin/users/${userId}/migrate-type`, {
+        method: 'POST',
+        body: JSON.stringify({
+          target_user_type_id: targetMigrationTypeId,
+          allow_incomplete: allowIncompleteMigration,
+        }),
+      })
+
+      if (!response.ok) {
+        setMigrationError(await parseErrorMessage(response, t('admin.userMigration.singleFailed')))
+        return
+      }
+
+      const result = await response.json() as SingleMigrationResponse
+      setRecentMigrationResults((prev) => [
+        {
+          user_id: result.user_id,
+          success: result.success,
+          previous_user_type_id: result.previous_user_type_id,
+          target_user_type_id: result.target_user_type_id,
+          missing_required_count: result.missing_required_count,
+          missing_required_fields: result.missing_required_fields,
+        },
+        ...prev.filter((item) => item.user_id !== result.user_id),
+      ].slice(0, 20))
+
+      setMigrationSummary(
+        t('admin.userMigration.singleSummary', {
+          userId: result.user_id,
+          count: result.missing_required_count,
+        })
+      )
+
+      await fetchUsers()
+    } catch (err) {
+      setMigrationError(err instanceof Error ? err.message : t('admin.userMigration.singleFailed'))
+    } finally {
+      setMigratingUserIds((prev) => {
+        const next = new Set(prev)
+        next.delete(userId)
+        return next
+      })
+    }
+  }
+
+  const handleMigrateSelectedUsers = async () => {
+    if (!targetMigrationTypeId) {
+      setMigrationError(t('admin.userMigration.targetRequired'))
+      return
+    }
+
+    const userIds = [...selectedUserIds]
+    if (userIds.length === 0) {
+      setMigrationError(t('admin.userMigration.selectUsers'))
+      return
+    }
+
+    setMigrationError(null)
+    setMigrationSummary(null)
+    setIsBatchMigrating(true)
+
+    try {
+      const response = await adminFetch('/admin/users/migrate-type/batch', {
+        method: 'POST',
+        body: JSON.stringify({
+          user_ids: userIds,
+          target_user_type_id: targetMigrationTypeId,
+          allow_incomplete: allowIncompleteMigration,
+        }),
+      })
+
+      if (!response.ok) {
+        setMigrationError(await parseErrorMessage(response, t('admin.userMigration.batchFailed')))
+        return
+      }
+
+      const result = await response.json() as BatchMigrationResponse
+      const latestResults = result.results || []
+      setRecentMigrationResults((prev) => [...latestResults, ...prev].slice(0, 20))
+
+      const failedIds = latestResults.filter((entry) => !entry.success).map((entry) => entry.user_id)
+      setSelectedUserIds(new Set(failedIds))
+
+      setMigrationSummary(
+        t('admin.userMigration.batchSummary', {
+          migrated: result.migrated,
+          failed: result.failed,
+        })
+      )
+
+      await fetchUsers()
+    } catch (err) {
+      setMigrationError(err instanceof Error ? err.message : t('admin.userMigration.batchFailed'))
+    } finally {
+      setIsBatchMigrating(false)
+    }
+  }
+
+  useEffect(() => {
+    if (userTypes.length === 0) {
+      setTargetMigrationTypeId(null)
+      return
+    }
+
+    const targetExists = targetMigrationTypeId !== null && userTypes.some((type) => type.id === targetMigrationTypeId)
+    if (!targetExists) {
+      setTargetMigrationTypeId(userTypes[0].id)
+    }
+  }, [userTypes, targetMigrationTypeId])
+
+  useEffect(() => {
+    setSelectedUserIds((prev) => {
+      const userIds = new Set(users.map((user) => user.id))
+      const next = new Set<number>()
+      prev.forEach((id) => {
+        if (userIds.has(id)) next.add(id)
+      })
+      return next
+    })
+  }, [users])
+
   // Close user help modal
   const handleCloseUserHelpModal = () => {
     setShowUserHelpModal(false)
@@ -589,6 +846,34 @@ export function AdminUserConfig() {
     const userType = userTypes.find((ut) => ut.id === typeId)
     return userType?.name || t('common.unknown', 'Unknown')
   }
+
+  const filteredUsers = useMemo(() => {
+    if (sourceTypeFilter === 'all') return users
+    if (sourceTypeFilter === 'untyped') {
+      return users.filter((user) => user.user_type_id === null || user.user_type_id === undefined)
+    }
+    return users.filter((user) => user.user_type_id === sourceTypeFilter)
+  }, [users, sourceTypeFilter])
+
+  const selectedVisibleCount = useMemo(
+    () => filteredUsers.filter((user) => selectedUserIds.has(user.id)).length,
+    [filteredUsers, selectedUserIds]
+  )
+
+  const allFilteredSelected = useMemo(
+    () => filteredUsers.length > 0 && filteredUsers.every((user) => selectedUserIds.has(user.id)),
+    [filteredUsers, selectedUserIds]
+  )
+
+  const latestResultByUser = useMemo(() => {
+    const byUser: Record<number, BatchMigrationResult> = {}
+    for (const result of recentMigrationResults) {
+      if (byUser[result.user_id] === undefined) {
+        byUser[result.user_id] = result
+      }
+    }
+    return byUser
+  }, [recentMigrationResults])
 
   const footer = (
     <Link to="/admin/setup" className="text-text-muted hover:text-text transition-colors">
@@ -837,6 +1122,222 @@ export function AdminUserConfig() {
                 <Plus className="w-4 h-4" />
                 {t('admin.setup.addUserType')}
               </button>
+            )}
+          </div>
+
+          {/* User Migration Section */}
+          <div className="card card-sm p-5! bg-surface-overlay!">
+            <h3 className="heading-sm mb-4 flex items-center gap-2">
+              <UserCog className="w-4 h-4 text-text-muted" />
+              {t('admin.userMigration.title')}
+            </h3>
+            <p className="text-xs text-text-muted mb-4">
+              {t('admin.userMigration.subtitle')}
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+              <div>
+                <label className="text-xs font-medium text-text mb-1 block">
+                  {t('admin.userMigration.sourceFilter')}
+                </label>
+                <select
+                  value={typeof sourceTypeFilter === 'number' ? String(sourceTypeFilter) : sourceTypeFilter}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    if (value === 'all' || value === 'untyped') {
+                      setSourceTypeFilter(value)
+                      return
+                    }
+                    const parsed = Number(value)
+                    setSourceTypeFilter(Number.isNaN(parsed) ? 'all' : parsed)
+                  }}
+                  className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                >
+                  <option value="all">{t('admin.userMigration.filterAll')}</option>
+                  <option value="untyped">{t('admin.userMigration.filterUntyped')}</option>
+                  {userTypes.map((type) => (
+                    <option key={type.id} value={String(type.id)}>
+                      {type.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-text mb-1 block">
+                  {t('admin.userMigration.targetType')}
+                </label>
+                <select
+                  value={targetMigrationTypeId ?? ''}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    if (value === '') {
+                      setTargetMigrationTypeId(null)
+                      return
+                    }
+                    const parsed = Number(value)
+                    setTargetMigrationTypeId(Number.isNaN(parsed) ? null : parsed)
+                  }}
+                  disabled={userTypes.length === 0}
+                  className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text text-sm disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                >
+                  {userTypes.length === 0 ? (
+                    <option value="">{t('admin.userMigration.noTypes')}</option>
+                  ) : (
+                    userTypes.map((type) => (
+                      <option key={type.id} value={type.id}>
+                        {type.name}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+
+              <label className="flex items-center gap-2 mt-6 md:mt-0 md:self-end text-sm text-text">
+                <input
+                  type="checkbox"
+                  checked={allowIncompleteMigration}
+                  onChange={(e) => setAllowIncompleteMigration(e.target.checked)}
+                  className="rounded border-border text-accent focus:ring-accent/30"
+                />
+                {t('admin.userMigration.allowIncomplete')}
+              </label>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <button
+                onClick={fetchUsers}
+                disabled={usersLoading || isBatchMigrating}
+                className="inline-flex items-center gap-2 border border-border text-text rounded-lg px-3 py-2 text-sm hover:bg-surface transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <RefreshCw className={`w-4 h-4 ${usersLoading ? 'animate-spin' : ''}`} />
+                {t('common.refresh', 'Refresh')}
+              </button>
+
+              <button
+                onClick={handleToggleSelectAllFilteredUsers}
+                disabled={filteredUsers.length === 0 || isBatchMigrating}
+                className="inline-flex items-center gap-2 border border-border text-text rounded-lg px-3 py-2 text-sm hover:bg-surface transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {allFilteredSelected
+                  ? t('admin.userMigration.clearVisible')
+                  : t('admin.userMigration.selectVisible')}
+              </button>
+
+              <button
+                onClick={handleMigrateSelectedUsers}
+                disabled={isBatchMigrating || selectedUserIds.size === 0 || !targetMigrationTypeId}
+                className="inline-flex items-center gap-2 bg-accent text-accent-text rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isBatchMigrating && <Loader2 className="w-4 h-4 animate-spin" />}
+                {t('admin.userMigration.migrateSelected', {
+                  count: selectedUserIds.size,
+                })}
+              </button>
+            </div>
+
+            <p className="text-xs text-text-muted mb-3">
+              {t('admin.userMigration.visibleSelected', {
+                selected: selectedVisibleCount,
+                visible: filteredUsers.length,
+              })}
+            </p>
+
+            {usersError && (
+              <div className="bg-error/10 border border-error/20 rounded-lg p-3 mb-3">
+                <p className="text-xs text-error">{usersError}</p>
+              </div>
+            )}
+
+            {migrationError && (
+              <div className="bg-error/10 border border-error/20 rounded-lg p-3 mb-3">
+                <p className="text-xs text-error">{migrationError}</p>
+              </div>
+            )}
+
+            {migrationSummary && (
+              <div className="bg-accent/10 border border-accent/20 rounded-lg p-3 mb-3">
+                <p className="text-xs text-accent">{migrationSummary}</p>
+              </div>
+            )}
+
+            {usersLoading ? (
+              <div className="py-6 flex items-center justify-center text-text-muted text-sm">
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                {t('admin.userMigration.loadingUsers')}
+              </div>
+            ) : filteredUsers.length === 0 ? (
+              <div className="text-center py-6 bg-surface border border-border border-dashed rounded-lg">
+                <p className="text-xs text-text-muted">{t('admin.userMigration.noUsers')}</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
+                {filteredUsers.map((user) => {
+                  const isMigratingUser = migratingUserIds.has(user.id)
+                  const currentTypeId = user.user_type_id
+                  const currentTypeName = user.user_type?.name || getUserTypeName(currentTypeId)
+                  const migrationResult = latestResultByUser[user.id]
+                  const selected = selectedUserIds.has(user.id)
+                  const alreadyTarget = targetMigrationTypeId !== null && currentTypeId === targetMigrationTypeId
+
+                  return (
+                    <div
+                      key={user.id}
+                      className="bg-surface border border-border rounded-lg p-3"
+                    >
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          checked={selected}
+                          onChange={() => handleToggleUserSelection(user.id)}
+                          className="mt-1 rounded border-border text-accent focus:ring-accent/30"
+                        />
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <p className="text-sm font-medium text-text">
+                              {t('admin.userMigration.userLabel', { id: user.id })}
+                            </p>
+                            <span className="text-[10px] px-2 py-0.5 rounded-md border bg-surface-overlay text-text-muted border-border">
+                              {currentTypeName}
+                            </span>
+                          </div>
+
+                          <p className="text-xs text-text-muted mt-1">
+                              {user.approved
+                              ? t('admin.userMigration.approved')
+                              : t('admin.userMigration.pendingApproval')}
+                            {user.created_at ? ` • ${new Date(user.created_at).toLocaleDateString()}` : ''}
+                          </p>
+
+                          {migrationResult && (
+                            <p className={`text-xs mt-1 ${migrationResult.success ? 'text-accent' : 'text-error'}`}>
+                              {migrationResult.success
+                                ? t('admin.userMigration.rowResultSuccess', {
+                                    count: migrationResult.missing_required_count ?? 0,
+                                  })
+                                : migrationResult.error || t('admin.userMigration.rowResultFailed')}
+                              {!!migrationResult.missing_required_fields?.length && (
+                                ` (${migrationResult.missing_required_fields.join(', ')})`
+                              )}
+                            </p>
+                          )}
+                        </div>
+
+                        <button
+                          onClick={() => handleMigrateSingleUser(user.id)}
+                          disabled={isMigratingUser || isBatchMigrating || !targetMigrationTypeId || alreadyTarget}
+                          className="inline-flex items-center gap-2 border border-border text-text rounded-lg px-2.5 py-1.5 text-xs hover:bg-surface-overlay transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          title={alreadyTarget ? t('admin.userMigration.alreadyTarget') : t('admin.userMigration.migrateUser')}
+                        >
+                          {isMigratingUser && <Loader2 className="w-3 h-3 animate-spin" />}
+                          {t('admin.userMigration.migrateOne')}
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             )}
           </div>
 

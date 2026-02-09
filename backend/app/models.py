@@ -282,6 +282,68 @@ class SessionUserResponse(BaseModel):
     authenticated: bool
 
 
+# --- Onboarding Status Models ---
+
+class OnboardingStatusResponse(BaseModel):
+    """Canonical onboarding completeness state for the authenticated user."""
+    user_id: int
+    user_type_id: Optional[int] = None
+    effective_user_type_id: Optional[int] = None
+    needs_user_type: bool = False
+    needs_onboarding: bool = False
+    total_fields: int = 0
+    required_fields: int = 0
+    completed_required_fields: int = 0
+    missing_required_fields: list[FieldDefinitionResponse] = []
+    missing_optional_fields: list[FieldDefinitionResponse] = []
+
+
+# --- User Type Migration Models ---
+
+class UserTypeMigrationRequest(BaseModel):
+    """Request model for migrating a user to a new user type."""
+    target_user_type_id: int
+    allow_incomplete: bool = True
+    reason: Optional[str] = None
+
+
+class UserTypeMigrationResponse(BaseModel):
+    """Response model for single-user type migration."""
+    success: bool
+    user_id: int
+    previous_user_type_id: Optional[int] = None
+    target_user_type_id: int
+    missing_required_count: int = 0
+    missing_required_fields: list[str] = Field(default_factory=list)
+
+
+class UserTypeMigrationBatchRequest(BaseModel):
+    """Request model for bulk user-type migration."""
+    user_ids: list[int] = Field(default_factory=list)
+    target_user_type_id: int
+    allow_incomplete: bool = True
+    reason: Optional[str] = None
+
+
+class UserTypeMigrationBatchResult(BaseModel):
+    """Per-user result for bulk migration operations."""
+    user_id: int
+    success: bool
+    previous_user_type_id: Optional[int] = None
+    target_user_type_id: Optional[int] = None
+    missing_required_count: int = 0
+    missing_required_fields: list[str] = Field(default_factory=list)
+    error: Optional[str] = None
+
+
+class UserTypeMigrationBatchResponse(BaseModel):
+    """Response model for bulk user-type migration."""
+    success: bool
+    migrated: int = 0
+    failed: int = 0
+    results: list[UserTypeMigrationBatchResult] = Field(default_factory=list)
+
+
 # --- Generic Response Models ---
 
 class SuccessResponse(BaseModel):

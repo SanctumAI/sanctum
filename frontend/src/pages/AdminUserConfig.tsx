@@ -294,6 +294,12 @@ export function AdminUserConfig() {
         setReachoutSaveError(t('admin.reachout.errors.invalidRateLimits', 'Rate limits must be positive numbers.'))
         return
       }
+      if (hour > day) {
+        setReachoutSaveError(
+          t('admin.reachout.errors.hourExceedsDay', 'Hourly rate limit cannot exceed daily rate limit.'),
+        )
+        return
+      }
     }
 
     setReachoutSaving(true)
@@ -1530,67 +1536,198 @@ export function AdminUserConfig() {
               </div>
 
               <div className="border-t border-border/60 pt-4">
-                <p className="text-xs text-text-muted mb-3">
-                  {t('admin.reachout.copyHint', 'Optional copy overrides. If blank, the UI uses translated defaults based on the selected framing. Overrides apply to all languages.')}
-                </p>
+                {(() => {
+                  const defaultOpenButton = t(
+                    `reachout.mode.${reachoutMode}.openButton`,
+                    reachoutMode === 'feedback' ? 'Send feedback' : reachoutMode === 'help' ? 'Get help' : 'Contact support',
+                  )
+                  const defaultTitle = t(
+                    `reachout.mode.${reachoutMode}.title`,
+                    reachoutMode === 'feedback' ? 'Feedback' : reachoutMode === 'help' ? 'Help' : 'Support',
+                  )
+                  const defaultDescription = t(
+                    `reachout.mode.${reachoutMode}.description`,
+                    reachoutMode === 'feedback'
+                      ? 'Send feedback or suggestions to the team.'
+                      : reachoutMode === 'help'
+                        ? 'Ask for help using this instance.'
+                        : 'Contact support about an issue or request.',
+                  )
+                  const defaultSend = t('reachout.form.send', 'Send')
+                  const defaultSuccess = t('reachout.status.success', 'Thanks. Your message was sent.')
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor="reachout-title" className="text-sm font-medium text-text mb-1.5 block">
-                      {t('admin.reachout.overrideTitleLabel', 'Title Override')}
-                    </label>
-                    <input
-                      id="reachout-title"
-                      type="text"
-                      value={reachoutTitle}
-                      onChange={(e) => setReachoutTitle(e.target.value)}
-                      placeholder={t('admin.reachout.overrideTitlePlaceholder', 'Contact support')}
-                      className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="reachout-button-label" className="text-sm font-medium text-text mb-1.5 block">
-                      {t('admin.reachout.overrideButtonLabel', 'Button Label Override')}
-                    </label>
-                    <input
-                      id="reachout-button-label"
-                      type="text"
-                      value={reachoutButtonLabel}
-                      onChange={(e) => setReachoutButtonLabel(e.target.value)}
-                      placeholder={t('admin.reachout.overrideButtonPlaceholder', 'Send message')}
-                      className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                    />
-                  </div>
-                </div>
+                  const titleOverride = reachoutTitle.trim()
+                  const descriptionOverride = reachoutDescription.trim()
+                  const buttonOverride = reachoutButtonLabel.trim()
+                  const successOverride = reachoutSuccessMessage.trim()
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-                  <div>
-                    <label htmlFor="reachout-description" className="text-sm font-medium text-text mb-1.5 block">
-                      {t('admin.reachout.overrideDescriptionLabel', 'Description Override')}
-                    </label>
-                    <input
-                      id="reachout-description"
-                      type="text"
-                      value={reachoutDescription}
-                      onChange={(e) => setReachoutDescription(e.target.value)}
-                      placeholder={t('admin.reachout.overrideDescriptionPlaceholder', 'Tell us what you need and we will reply by email.')}
-                      className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="reachout-success" className="text-sm font-medium text-text mb-1.5 block">
-                      {t('admin.reachout.overrideSuccessLabel', 'Success Message Override')}
-                    </label>
-                    <input
-                      id="reachout-success"
-                      type="text"
-                      value={reachoutSuccessMessage}
-                      onChange={(e) => setReachoutSuccessMessage(e.target.value)}
-                      placeholder={t('admin.reachout.overrideSuccessPlaceholder', 'Thanks. Your message was sent.')}
-                      className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                    />
-                  </div>
-                </div>
+                  const effectiveTitle = titleOverride || defaultTitle
+                  const effectiveDescription = descriptionOverride || defaultDescription
+                  const effectiveSend = buttonOverride || defaultSend
+                  const effectiveSuccess = successOverride || defaultSuccess
+
+                  const overrideBadge = (hasOverride: boolean) => (
+                    <span
+                      className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                        hasOverride ? 'bg-accent/10 text-accent' : 'bg-surface-overlay text-text-muted'
+                      }`}
+                    >
+                      {hasOverride ? t('admin.reachout.badgeOverride', 'Override') : t('admin.reachout.badgeDefault', 'Default')}
+                    </span>
+                  )
+
+                  const copyPlaceholder = t('admin.reachout.leaveBlankPlaceholder', 'Leave blank to use the default')
+
+                  return (
+                    <>
+                      <div className="bg-surface-overlay border border-border rounded-xl p-3 mb-3">
+                        <p className="text-xs text-text-muted">
+                          {t(
+                            'admin.reachout.copyHint',
+                            'Optional copy overrides. If blank, the UI uses translated defaults based on the selected framing. Overrides apply to all languages.',
+                          )}
+                        </p>
+                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="bg-surface border border-border rounded-lg p-3">
+                            <p className="text-[11px] font-medium text-text-muted mb-1">
+                              {t('admin.reachout.previewTitle', 'What users will see')}
+                            </p>
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-xs text-text-muted">{t('admin.reachout.previewChatButton', 'Chat button')}</p>
+                                <p className="text-xs text-text">{defaultOpenButton}</p>
+                              </div>
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-xs text-text-muted">{t('admin.reachout.previewTitleLabel', 'Title')}</p>
+                                <p className="text-xs text-text">{effectiveTitle}</p>
+                              </div>
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-xs text-text-muted">{t('admin.reachout.previewDescription', 'Description')}</p>
+                                <p className="text-xs text-text text-right">{effectiveDescription}</p>
+                              </div>
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-xs text-text-muted">{t('admin.reachout.previewSendButton', 'Send button')}</p>
+                                <p className="text-xs text-text">{effectiveSend}</p>
+                              </div>
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-xs text-text-muted">{t('admin.reachout.previewSuccess', 'Success message')}</p>
+                                <p className="text-xs text-text text-right">{effectiveSuccess}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="bg-surface border border-border rounded-lg p-3">
+                            <p className="text-[11px] font-medium text-text-muted mb-1">
+                              {t('admin.reachout.previewDefaultsTitle', 'Current defaults (no overrides)')}
+                            </p>
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-xs text-text-muted">{t('admin.reachout.previewTitleLabel', 'Title')}</p>
+                                <p className="text-xs text-text">{defaultTitle}</p>
+                              </div>
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-xs text-text-muted">{t('admin.reachout.previewDescription', 'Description')}</p>
+                                <p className="text-xs text-text text-right">{defaultDescription}</p>
+                              </div>
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-xs text-text-muted">{t('admin.reachout.previewSendButton', 'Send button')}</p>
+                                <p className="text-xs text-text">{defaultSend}</p>
+                              </div>
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-xs text-text-muted">{t('admin.reachout.previewSuccess', 'Success message')}</p>
+                                <p className="text-xs text-text text-right">{defaultSuccess}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <div className="flex items-center justify-between gap-3 mb-1.5">
+                            <label htmlFor="reachout-title" className="text-sm font-medium text-text block">
+                              {t('admin.reachout.overrideTitleLabel', 'Title Override')}
+                            </label>
+                            {overrideBadge(Boolean(titleOverride))}
+                          </div>
+                          <input
+                            id="reachout-title"
+                            type="text"
+                            value={reachoutTitle}
+                            onChange={(e) => setReachoutTitle(e.target.value)}
+                            placeholder={copyPlaceholder}
+                            className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted/70 placeholder:italic text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                          />
+                          <p className="text-xs text-text-muted mt-1.5">
+                            <span className="font-medium">{t('admin.reachout.defaultValueLabel', 'Default:')}</span> {defaultTitle}
+                          </p>
+                        </div>
+
+                        <div>
+                          <div className="flex items-center justify-between gap-3 mb-1.5">
+                            <label htmlFor="reachout-button-label" className="text-sm font-medium text-text block">
+                              {t('admin.reachout.overrideButtonLabel', 'Button Label Override')}
+                            </label>
+                            {overrideBadge(Boolean(buttonOverride))}
+                          </div>
+                          <input
+                            id="reachout-button-label"
+                            type="text"
+                            value={reachoutButtonLabel}
+                            onChange={(e) => setReachoutButtonLabel(e.target.value)}
+                            placeholder={copyPlaceholder}
+                            className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted/70 placeholder:italic text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                          />
+                          <p className="text-xs text-text-muted mt-1.5">
+                            <span className="font-medium">{t('admin.reachout.defaultValueLabel', 'Default:')}</span> {defaultSend}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                        <div>
+                          <div className="flex items-center justify-between gap-3 mb-1.5">
+                            <label htmlFor="reachout-description" className="text-sm font-medium text-text block">
+                              {t('admin.reachout.overrideDescriptionLabel', 'Description Override')}
+                            </label>
+                            {overrideBadge(Boolean(descriptionOverride))}
+                          </div>
+                          <input
+                            id="reachout-description"
+                            type="text"
+                            value={reachoutDescription}
+                            onChange={(e) => setReachoutDescription(e.target.value)}
+                            placeholder={copyPlaceholder}
+                            className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted/70 placeholder:italic text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                          />
+                          <p className="text-xs text-text-muted mt-1.5">
+                            <span className="font-medium">{t('admin.reachout.defaultValueLabel', 'Default:')}</span> {defaultDescription}
+                          </p>
+                        </div>
+
+                        <div>
+                          <div className="flex items-center justify-between gap-3 mb-1.5">
+                            <label htmlFor="reachout-success" className="text-sm font-medium text-text block">
+                              {t('admin.reachout.overrideSuccessLabel', 'Success Message Override')}
+                            </label>
+                            {overrideBadge(Boolean(successOverride))}
+                          </div>
+                          <input
+                            id="reachout-success"
+                            type="text"
+                            value={reachoutSuccessMessage}
+                            onChange={(e) => setReachoutSuccessMessage(e.target.value)}
+                            placeholder={copyPlaceholder}
+                            className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted/70 placeholder:italic text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                          />
+                          <p className="text-xs text-text-muted mt-1.5">
+                            <span className="font-medium">{t('admin.reachout.defaultValueLabel', 'Default:')}</span> {defaultSuccess}
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  )
+                })()}
               </div>
 
               {reachoutSaveError && (

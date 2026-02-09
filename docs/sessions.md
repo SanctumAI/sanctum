@@ -117,7 +117,7 @@ The `/query` API supports a `session_id` field used for conversation continuity:
 
 - It is not an authentication token.
 - It is not stored as a cookie by default.
-- It links multiple `/query` calls together (chat history, extracted facts, jurisdiction, etc).
+- It links multiple `/query` calls together (chat history, extracted facts, jurisdiction, etc.).
 
 The backend currently stores RAG sessions in an in-memory dictionary (per backend process). This means:
 

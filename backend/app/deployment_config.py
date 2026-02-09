@@ -387,6 +387,29 @@ async def update_deployment_config_value(
         except ValueError:
             raise HTTPException(status_code=400, detail="Port must be between 1 and 65535")
 
+    # Normalize and validate SMTP hostname-ish fields.
+    # Users often paste `"smtp.example.com"` (quotes become literal in some env loaders)
+    # or `smtp.example.com:587` (port belongs in SMTP_PORT).
+    if key in ("SMTP_HOST", "SMTP_USER", "SMTP_FROM") and isinstance(value_to_save, str):
+        value_to_save = value_to_save.strip()
+        if len(value_to_save) >= 2 and value_to_save[0] == value_to_save[-1] and value_to_save[0] in ("'", '"'):
+            value_to_save = value_to_save[1:-1].strip()
+
+    if key == "SMTP_HOST" and value_to_save:
+        if "://" in value_to_save or "/" in value_to_save:
+            raise HTTPException(
+                status_code=400,
+                detail="SMTP_HOST must be a hostname only (e.g., smtp.example.com) without protocol or path",
+            )
+        # Detect common host:port paste (allow IPv6 which contains multiple colons).
+        if isinstance(value_to_save, str) and value_to_save.count(":") == 1:
+            host_part, port_part = value_to_save.rsplit(":", 1)
+            if host_part and port_part.isdigit():
+                raise HTTPException(
+                    status_code=400,
+                    detail="SMTP_HOST should not include a port. Put the port in SMTP_PORT instead.",
+                )
+
     if key == "RAG_TOP_K" and value_to_save:
         try:
             top_k = int(value_to_save)

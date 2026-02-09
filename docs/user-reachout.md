@@ -120,7 +120,7 @@ Implementation:
   - Note: this means a setting read happens per request; if that becomes a hot path, add caching.
 - Keying:
   - Uses the same approach as `_rate_limit_key()` in `backend/app/main.py`:
-    - Prefer a stable digest of Bearer token, else cookie token digest, else client IP
+    - Prefer a stable authenticated identity (admin/user id) when available, falling back to bearer token digest, cookie token digest, then client IP
 
 **Deployment constraint:**
 

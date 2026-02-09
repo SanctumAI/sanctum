@@ -13,7 +13,6 @@ import re
 import math
 import tempfile
 import sqlite3
-import hashlib
 import secrets
 import html
 from urllib.parse import urlparse
@@ -59,6 +58,7 @@ from models import (
 from nostr import verify_auth_event, get_pubkey_from_event
 import auth
 from rate_limit import RateLimiter
+from rate_limit_key import rate_limit_key as _stable_rate_limit_key
 
 # Embedding model config
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "intfloat/multilingual-e5-base")
@@ -268,19 +268,7 @@ def _rate_limit_key(request: Request) -> str:
     Stable key for API rate limiting.
     Prefer auth identity (bearer/cookie), fallback to client IP.
     """
-    auth_header = request.headers.get("authorization", "")
-    if auth_header.startswith("Bearer "):
-        token = auth_header[7:]
-        digest = hashlib.sha256(token.encode("utf-8")).hexdigest()[:20]
-        return f"bearer:{digest}"
-
-    cookie_token = request.cookies.get(auth.ADMIN_SESSION_COOKIE_NAME) or request.cookies.get(auth.USER_SESSION_COOKIE_NAME)
-    if cookie_token:
-        digest = hashlib.sha256(cookie_token.encode("utf-8")).hexdigest()[:20]
-        return f"cookie:{digest}"
-
-    client_host = request.client.host if request.client else "unknown"
-    return f"ip:{client_host}"
+    return _stable_rate_limit_key(request)
 
 
 def _safe_int_env(key: str, default: int) -> int:
@@ -1395,8 +1383,8 @@ async def submit_reachout(
         await asyncio.to_thread(_send_html_email_smtp, smtp, to_email, subject, html_body, reply_to)
         return ReachoutResponse(success=True, message="Message sent")
     except Exception as e:
-        logger.error("Failed to send reachout email: %s", e)
-        raise HTTPException(status_code=503, detail="Failed to send message")
+        logger.exception("Failed to send reachout email (to=%s user_id=%s)", to_email, user_id)
+        raise HTTPException(status_code=503, detail="Failed to send message") from e
 
 
 @app.post("/auth/test-email", response_model=TestEmailResponse)
@@ -1409,6 +1397,7 @@ async def send_test_email(
     Requires admin authentication.
     """
     import smtplib
+    import socket
 
     email = body.email.strip().lower()
     if not email:
@@ -1509,6 +1498,14 @@ async def send_test_email(
             success=False,
             message="SMTP connection timed out",
             error=f"Connection timed out after {smtp['timeout']} seconds"
+        )
+    except socket.gaierror as e:
+        # DNS / hostname resolution failure
+        logger.error("SMTP hostname resolution failed for host=%r: %s", smtp.get("host"), e)
+        return TestEmailResponse(
+            success=False,
+            message="Could not resolve SMTP host",
+            error=f"DNS lookup failed for SMTP_HOST={smtp.get('host')!r}: {e}",
         )
     except Exception as e:
         logger.error(f"Failed to send test email: {e}")

@@ -45,6 +45,7 @@ Settings keys:
 | `reachout_subject_prefix` | admin-only | string | `""` | Optional prefix prepended to subject |
 | `reachout_rate_limit_per_hour` | admin-only | int string | `"3"` | Defaults are enforced by seed + backend fallback |
 | `reachout_rate_limit_per_day` | admin-only | int string | `"10"` | Defaults are enforced by seed + backend fallback |
+| `reachout_include_ip` | admin-only | string boolean | `"false"` | Include masked client IP in emails (GDPR: see note below) |
 
 Validation rules:
 
@@ -90,7 +91,8 @@ Behavior:
       - **Privacy note:** The user's email is included without explicit per-message consent. The modal description copy should inform users that replies go to their email.
   - Body includes:
     - Escaped message content
-    - Minimal metadata for triage: instance name, user id, IP, user-agent (truncated)
+    - Minimal metadata for triage: instance name, user id, user-agent (truncated)
+    - Client IP is **omitted by default**. When `reachout_include_ip` is `"true"`, a masked IP (IPv4 /24, IPv6 /64) is included. See **IP Addresses & GDPR** below.
   - Logging:
     - Avoid logging the reachout message
     - Mock mode may log To/Subject/User ID, but MUST NOT include message content (PII protection).
@@ -157,7 +159,7 @@ Auth/CSRF:
 
 Theme considerations:
 
-- Modal styles must use theme tokens (`bg-surface`, `border-border`, `text-text`, etc) so it renders correctly across:
+- Modal styles must use theme tokens (`bg-surface`, `border-border`, `text-text`, etc.) so it renders correctly across:
   - `surface_style` presets
   - `typography_preset` presets
   - light/dark variants (if/when added)
@@ -232,12 +234,22 @@ CSRF sanity check (browser/cookie clients):
 
 - If you remove the `X-CSRF-Token` header on a cookie-authenticated `POST`, the backend should return `403` from the CSRF middleware.
 
+## IP Addresses & GDPR
+
+IP addresses are personal data under GDPR (and similar regulations). Reachout emails **omit the client IP by default**.
+
+Admins who need the IP for abuse triage can enable it via the `reachout_include_ip` instance setting (or `REACHOUT_INCLUDE_IP` env var). When enabled:
+
+- IPv4 addresses are masked to /24 (e.g. `1.2.3.0`)
+- IPv6 addresses are masked to /64 (e.g. `2001:db8::/64`)
+
+Admins enabling this setting should ensure their data-processing records account for the collection, and that any applicable privacy notice covers IP processing for abuse prevention / triage.
+
 ## Known Issues / Follow-Ups
 
 ### Rate Limiting (Scaling)
 
 - Replace in-memory limiter with Redis-backed storage.
-- Consider keying on stable user identity (`user_id`) rather than token digest where possible.
 
 ### Email Validation (Pre-GA)
 
@@ -267,10 +279,11 @@ Backend:
   - Rate limits: `reachout_hour_limiter` and `reachout_day_limiter` (settings-backed)
   - Email: SMTP send via `auth._get_smtp_config()` (same stack as magic links / test email)
 - Dynamic limiter support: `backend/app/rate_limit.py` accepts a callable `limit` so instance-setting changes apply without restart.
+- Rate limit keying: Uses `rate_limit_key()` from `backend/app/rate_limit_key.py`, which prefers stable user/admin identity (`user_id:<id>` or `admin_id:<id>`) from verified tokens before falling back to token digests or client IP. This ensures rate limits persist across token rotation.
 
 Frontend:
 
 - Chat entry point: `frontend/src/pages/ChatPage.tsx` shows an envelope header button when `reachout_enabled=true` from `/settings/public`.
 - Modal: `frontend/src/components/reachout/ReachoutModal.tsx` posts to `/reachout`, uses theme tokens (`bg-surface`, `border-border`, `text-text`), and relies on the global CSRF injection wrapper.
 - Admin UI: `frontend/src/pages/AdminUserConfig.tsx` includes controls for:
-  - enable toggle, mode, destination email, subject prefix, hour/day limits, and copy overrides.
+  - enable toggle, mode, destination email, subject prefix, hour/day limits, include-IP toggle, and copy overrides.

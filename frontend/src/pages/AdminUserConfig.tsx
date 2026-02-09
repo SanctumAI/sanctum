@@ -130,6 +130,7 @@ export function AdminUserConfig() {
   const [reachoutDescription, setReachoutDescription] = useState('')
   const [reachoutButtonLabel, setReachoutButtonLabel] = useState('')
   const [reachoutSuccessMessage, setReachoutSuccessMessage] = useState('')
+  const [reachoutIncludeIp, setReachoutIncludeIp] = useState(false)
   const [reachoutSaving, setReachoutSaving] = useState(false)
   const [reachoutSaveError, setReachoutSaveError] = useState<string | null>(null)
   const [reachoutSaveSuccess, setReachoutSaveSuccess] = useState<string | null>(null)
@@ -262,6 +263,7 @@ export function AdminUserConfig() {
         setReachoutDescription(String(s.reachout_description ?? ''))
         setReachoutButtonLabel(String(s.reachout_button_label ?? ''))
         setReachoutSuccessMessage(String(s.reachout_success_message ?? ''))
+        setReachoutIncludeIp(String(s.reachout_include_ip ?? 'false').toLowerCase() === 'true')
         setReachoutLoaded(true)
       } catch (err) {
         console.warn('Failed to fetch reachout settings:', err)
@@ -317,6 +319,7 @@ export function AdminUserConfig() {
           reachout_description: reachoutDescription.trim(),
           reachout_button_label: reachoutButtonLabel.trim(),
           reachout_success_message: reachoutSuccessMessage.trim(),
+          reachout_include_ip: String(reachoutIncludeIp),
         }),
       })
 
@@ -1533,6 +1536,22 @@ export function AdminUserConfig() {
                     className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                   />
                 </div>
+              </div>
+
+              <div className="flex items-start gap-3 mt-3 p-3 border border-border/60 rounded-lg bg-surface-overlay/50">
+                <input
+                  id="reachout-include-ip"
+                  type="checkbox"
+                  checked={reachoutIncludeIp}
+                  onChange={(e) => setReachoutIncludeIp(e.target.checked)}
+                  className="mt-0.5 accent-accent"
+                />
+                <label htmlFor="reachout-include-ip" className="text-sm text-text leading-snug">
+                  <span className="font-medium">{t('admin.reachout.includeIpLabel', 'Include masked client IP in reachout emails')}</span>
+                  <span className="block text-xs text-text-muted mt-0.5">
+                    {t('admin.reachout.includeIpHint', 'Disabled by default. IP addresses are personal data under GDPR. When enabled, IPs are masked (e.g. 1.2.3.0) before inclusion.')}
+                  </span>
+                </label>
               </div>
 
               <div className="border-t border-border/60 pt-4">

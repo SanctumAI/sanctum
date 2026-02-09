@@ -792,6 +792,7 @@ def seed_default_settings():
         "reachout_subject_prefix": "",
         "reachout_rate_limit_per_hour": "3",
         "reachout_rate_limit_per_day": "10",
+        "reachout_include_ip": "false",  # Include masked client IP in reachout emails (GDPR: IP is personal data)
     }
 
     with get_cursor() as cursor:

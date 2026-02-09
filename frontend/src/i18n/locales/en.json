@@ -255,6 +255,8 @@
       "overrideDescriptionPlaceholder": "Tell us what you need and we will reply by email.",
       "overrideSuccessLabel": "Success Message Override",
       "overrideSuccessPlaceholder": "Thanks. Your message was sent.",
+      "includeIpLabel": "Include masked client IP in reachout emails",
+      "includeIpHint": "Disabled by default. IP addresses are personal data under GDPR. When enabled, IPs are masked (e.g. 1.2.3.0) before inclusion.",
       "errors": {
         "toEmailRequired": "Destination email is required when reachout is enabled.",
         "invalidRateLimits": "Rate limits must be positive numbers.",

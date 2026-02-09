@@ -15,6 +15,7 @@ import tempfile
 import sqlite3
 import secrets
 import html
+import ipaddress
 from urllib.parse import urlparse
 from fastapi import FastAPI, HTTPException, Query, Depends, Request, BackgroundTasks, Response, Header, Cookie
 from fastapi.responses import FileResponse, JSONResponse
@@ -1349,6 +1350,38 @@ async def submit_reachout(
     user_id = user.get("id")
     client_ip = request.client.host if request.client else "unknown"
 
+    def _truthy(value: str | None) -> bool:
+        if value is None:
+            return False
+        return value.strip().lower() in ("true", "1", "yes", "on")
+
+    def _mask_client_ip(value: str) -> str:
+        """
+        Return a privacy-preserving representation.
+        - IPv4: mask to /24 (x.y.z.0)
+        - IPv6: mask to /64 (network/64)
+        """
+        raw = (value or "").strip()
+        if not raw or raw == "unknown":
+            return "unknown"
+        try:
+            addr = ipaddress.ip_address(raw)
+        except ValueError:
+            return "unknown"
+
+        if isinstance(addr, ipaddress.IPv4Address):
+            net = ipaddress.IPv4Network(f"{addr}/24", strict=False)
+            return str(net.network_address)
+
+        net = ipaddress.IPv6Network(f"{addr}/64", strict=False)
+        return str(net.network_address)
+
+    include_ip = _truthy(database.get_setting("reachout_include_ip")) or _truthy(os.getenv("REACHOUT_INCLUDE_IP"))
+    ip_line = ""
+    if include_ip:
+        masked_client_ip = _mask_client_ip(client_ip)
+        ip_line = f"<div><strong>IP (masked):</strong> {html.escape(masked_client_ip)}</div>"
+
     html_body = f"""
     <!DOCTYPE html>
     <html>
@@ -1364,7 +1397,7 @@ async def submit_reachout(
         <div style="margin-top: 14px; font-size: 12px; color: #6b7280;">
           <div><strong>Instance:</strong> {html.escape(instance_name)}</div>
           <div><strong>User ID:</strong> {html.escape(str(user_id))}</div>
-          <div><strong>IP:</strong> {html.escape(str(client_ip))}</div>
+          {ip_line}
           <div><strong>User-Agent:</strong> {html.escape(ua[:300])}</div>
         </div>
       </div>

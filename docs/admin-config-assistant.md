@@ -93,6 +93,7 @@ Additional safety rules:
 - Certain high-risk endpoints are always blocked (even if they match a prefix), including:
   - `/admin/deployment/config/*/reveal`
   - `/admin/deployment/config/export`
+  - `/prompts/preview`
   - `/admin/tools/execute`
 
 Allowed mutation targets include:
@@ -106,6 +107,8 @@ Allowed mutation targets include:
 
 Explicitly blocked:
 - Secret reveal endpoints (`/reveal`)
+- Config export endpoints (`/export`)
+- Prompt preview endpoints (`/prompts/preview`)
 - Generic tool execution (`/admin/tools/execute`)
 
 ## Operational Notes

@@ -21,7 +21,7 @@ For a more exhaustive engineering checklist, see `docs/security-data-protection-
 - Baseline web protections:
   - Explicit CORS allowlist suitable for credentialed cookies.
   - CSRF enforcement for cookie-authenticated unsafe requests.
-  - Security headers (CSP for API responses, HSTS when HTTPS is detected, X-Frame-Options, etc).
+  - Security headers (CSP for API responses, HSTS when HTTPS is detected, X-Frame-Options, etc.).
 
 ## Production Hardening (Minimum)
 

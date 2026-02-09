@@ -657,7 +657,7 @@ class TestEmailResponse(BaseModel):
 
 class ReachoutRequest(BaseModel):
     """Authenticated user reachout request"""
-    message: str
+    message: str = Field(..., min_length=1, max_length=5000)
 
 
 class ReachoutResponse(BaseModel):

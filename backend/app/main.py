@@ -15,6 +15,7 @@ import tempfile
 import sqlite3
 import hashlib
 import secrets
+import html
 from urllib.parse import urlparse
 from fastapi import FastAPI, HTTPException, Query, Depends, Request, BackgroundTasks, Response, Header, Cookie
 from fastapi.responses import FileResponse, JSONResponse
@@ -52,6 +53,8 @@ from models import (
     SessionDefaultsResponse,
     # Test email
     TestEmailRequest, TestEmailResponse,
+    # Reachout
+    ReachoutRequest, ReachoutResponse,
 )
 from nostr import verify_auth_event, get_pubkey_from_event
 import auth
@@ -301,6 +304,77 @@ chat_limiter = RateLimiter(
 vector_search_limiter = RateLimiter(
     limit=_safe_int_env("RATE_LIMIT_VECTOR_SEARCH_PER_MINUTE", 30),
     window_seconds=60,
+    key_func=_rate_limit_key,
+)
+
+def _safe_int_setting(key: str, default: int) -> int:
+    """Read an instance setting as int, falling back to default."""
+    raw = database.get_setting(key)
+    if raw is None:
+        return default
+    try:
+        return int(str(raw).strip())
+    except (ValueError, TypeError):
+        return default
+
+
+def _send_html_email_smtp(
+    smtp: dict,
+    to_email: str,
+    subject: str,
+    html_body: str,
+    reply_to: str | None = None,
+) -> None:
+    """
+    Send a single HTML email using the configured SMTP dict.
+
+    This is intentionally synchronous (smtplib is blocking); call it via asyncio.to_thread
+    from async endpoints to avoid blocking the event loop.
+    """
+    import smtplib
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+
+    msg_obj = MIMEMultipart("alternative")
+    msg_obj["Subject"] = subject
+    msg_obj["From"] = smtp["from_address"]
+    msg_obj["To"] = to_email
+    if reply_to:
+        msg_obj["Reply-To"] = reply_to
+    msg_obj.attach(MIMEText(html_body, "html"))
+
+    if smtp["port"] == 465:
+        with smtplib.SMTP_SSL(smtp["host"], smtp["port"], timeout=smtp["timeout"]) as server:
+            server.login(smtp["user"], smtp["password"])
+            server.sendmail(smtp["from_address"], [to_email], msg_obj.as_string())
+        return
+
+    with smtplib.SMTP(smtp["host"], smtp["port"], timeout=smtp["timeout"]) as server:
+        server.ehlo()
+        if server.has_extn("starttls"):
+            server.starttls()
+            server.ehlo()
+        server.login(smtp["user"], smtp["password"])
+        server.sendmail(smtp["from_address"], [to_email], msg_obj.as_string())
+
+
+def _reachout_limit_per_hour() -> int:
+    return _safe_int_setting("reachout_rate_limit_per_hour", 3)
+
+
+def _reachout_limit_per_day() -> int:
+    return _safe_int_setting("reachout_rate_limit_per_day", 10)
+
+
+reachout_hour_limiter = RateLimiter(
+    limit=_reachout_limit_per_hour,
+    window_seconds=3600,
+    key_func=_rate_limit_key,
+)
+
+reachout_day_limiter = RateLimiter(
+    limit=_reachout_limit_per_day,
+    window_seconds=86400,
     key_func=_rate_limit_key,
 )
 
@@ -871,7 +945,7 @@ async def send_magic_link(
     token = auth.create_magic_link_token(email, name)
 
     # Send email (or log in mock mode)
-    success = auth.send_magic_link_email(email, token)
+    success = await asyncio.to_thread(auth.send_magic_link_email, email, token)
 
     if not success:
         raise HTTPException(status_code=500, detail="Failed to send magic link email")
@@ -1223,6 +1297,108 @@ async def logout_user(response: Response):
     return SuccessResponse(success=True, message="Logged out")
 
 
+@app.post("/reachout", response_model=ReachoutResponse)
+async def submit_reachout(
+    body: ReachoutRequest,
+    request: Request,
+    user: dict = Depends(auth.get_current_user),
+    _: None = Depends(reachout_hour_limiter),
+    __: None = Depends(reachout_day_limiter),
+):
+    """
+    Authenticated-only user reachout submission.
+
+    Sends an email to the admin-configured destination using existing SMTP settings.
+    Rate-limited per session (cookie/bearer digest), with IP fallback.
+    """
+    enabled = (database.get_setting("reachout_enabled") or "").strip().lower() == "true"
+    if not enabled:
+        # Hide feature existence when disabled.
+        raise HTTPException(status_code=404, detail="Not found")
+
+    msg = (body.message or "").strip()
+    if not msg:
+        raise HTTPException(status_code=400, detail="Message is required")
+    if len(msg) > 5000:
+        raise HTTPException(status_code=400, detail="Message is too long")
+
+    to_email = (database.get_setting("reachout_to_email") or "").strip()
+    if not to_email:
+        raise HTTPException(status_code=503, detail="Reachout is not configured")
+
+    mode = (database.get_setting("reachout_mode") or "support").strip().lower()
+    if mode not in {"feedback", "help", "support"}:
+        mode = "support"
+
+    instance_name = (database.get_setting("instance_name") or "Sanctum").strip() or "Sanctum"
+    subject_prefix = (database.get_setting("reachout_subject_prefix") or "").strip()
+
+    subject = f"[{instance_name}] {mode.title()}: user reachout"
+    if subject_prefix:
+        subject = f"{subject_prefix} {subject}"
+
+    # Best-effort reply-to: extract email from session token payload.
+    reply_to = None
+    try:
+        token = auth._resolve_auth_token(
+            request.headers.get("authorization"),
+            request.cookies.get(auth.USER_SESSION_COOKIE_NAME),
+        )
+        token_data = auth.verify_session_token(token) if token else None
+        email = (token_data or {}).get("email")
+        if isinstance(email, str) and "@" in email and len(email) <= 254:
+            reply_to = email.strip()
+    except Exception:
+        reply_to = None
+
+    smtp = auth._get_smtp_config()
+    if not smtp.get("host") and not smtp.get("mock_mode"):
+        raise HTTPException(status_code=503, detail="Email service is not configured")
+
+    # Build email (HTML, with plaintext-ish formatting via pre-wrap)
+    safe_msg = html.escape(msg)
+    ua = request.headers.get("user-agent", "")
+    user_id = user.get("id")
+    client_ip = request.client.host if request.client else "unknown"
+
+    html_body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; color: #111;">
+      <div style="max-width: 680px; margin: 0 auto;">
+        <h2 style="margin: 0 0 16px 0;">User reachout ({mode})</h2>
+        <div style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; background: #fafafa;">
+          <div style="white-space: pre-wrap; line-height: 1.45;">{safe_msg}</div>
+        </div>
+        <div style="margin-top: 14px; font-size: 12px; color: #6b7280;">
+          <div><strong>Instance:</strong> {html.escape(instance_name)}</div>
+          <div><strong>User ID:</strong> {html.escape(str(user_id))}</div>
+          <div><strong>IP:</strong> {html.escape(str(client_ip))}</div>
+          <div><strong>User-Agent:</strong> {html.escape(ua[:300])}</div>
+        </div>
+      </div>
+    </body>
+    </html>
+    """
+
+    if smtp.get("mock_mode"):
+        logger.info("[REACHOUT - Mock Mode] Would send reachout email")
+        logger.info("To: %s", to_email)
+        logger.info("Subject: %s", subject)
+        logger.info("User ID: %s", user_id)
+        return ReachoutResponse(success=True, message="Message sent")
+
+    try:
+        await asyncio.to_thread(_send_html_email_smtp, smtp, to_email, subject, html_body, reply_to)
+        return ReachoutResponse(success=True, message="Message sent")
+    except Exception as e:
+        logger.error("Failed to send reachout email: %s", e)
+        raise HTTPException(status_code=503, detail="Failed to send message")
+
+
 @app.post("/auth/test-email", response_model=TestEmailResponse)
 async def send_test_email(
     body: TestEmailRequest,
@@ -1233,8 +1409,6 @@ async def send_test_email(
     Requires admin authentication.
     """
     import smtplib
-    from email.mime.text import MIMEText
-    from email.mime.multipart import MIMEMultipart
 
     email = body.email.strip().lower()
     if not email:
@@ -1259,12 +1433,6 @@ async def send_test_email(
             message=f"Mock mode enabled. Test email would be sent to {email}."
         )
 
-    # Build test email
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = "Sanctum Test Email"
-    msg["From"] = smtp["from_address"]
-    msg["To"] = email
-
     html = """
     <!DOCTYPE html>
     <html>
@@ -1285,21 +1453,10 @@ async def send_test_email(
     </body>
     </html>
     """
-    msg.attach(MIMEText(html, "html"))
+    subject = "Sanctum Test Email"
 
     try:
-        if smtp["port"] == 465:
-            with smtplib.SMTP_SSL(smtp["host"], smtp["port"], timeout=smtp["timeout"]) as server:
-                server.login(smtp["user"], smtp["password"])
-                server.sendmail(smtp["from_address"], [email], msg.as_string())
-        else:
-            with smtplib.SMTP(smtp["host"], smtp["port"], timeout=smtp["timeout"]) as server:
-                server.ehlo()
-                if server.has_extn('starttls'):
-                    server.starttls()
-                    server.ehlo()  # Re-identify after TLS upgrade
-                server.login(smtp["user"], smtp["password"])
-                server.sendmail(smtp["from_address"], [email], msg.as_string())
+        await asyncio.to_thread(_send_html_email_smtp, smtp, email, subject, html)
 
         logger.info("Test email sent successfully")
 
@@ -1531,6 +1688,14 @@ SAFE_PUBLIC_SETTINGS = {
     "surface_style",
     "status_icon_set",
     "typography_preset",
+
+    # User reachout (public UI controls only)
+    "reachout_enabled",
+    "reachout_mode",
+    "reachout_title",
+    "reachout_description",
+    "reachout_button_label",
+    "reachout_success_message",
 }
 
 

@@ -5,7 +5,7 @@ Uses Depends() pattern - no middleware, no external dependencies.
 
 from datetime import datetime, timedelta
 from collections import defaultdict
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 from fastapi import Request, HTTPException
 
 
@@ -23,15 +23,23 @@ class RateLimiter:
 
     def __init__(
         self,
-        limit: int,
+        limit: Union[int, Callable[[], int]],
         window_seconds: int,
         key_func: Optional[Callable[[Request], str]] = None
     ):
-        self.limit = limit
+        self._limit = limit
         self.window = timedelta(seconds=window_seconds)
-        self.key_func = key_func or (lambda r: r.client.host or "unknown")
+        self.key_func = key_func or (lambda r: r.client.host if r.client else "unknown")
         self.requests: dict[str, list[datetime]] = defaultdict(list)
         self._last_cleanup = datetime.utcnow()
+
+    def _current_limit(self) -> int:
+        raw = self._limit() if callable(self._limit) else self._limit
+        try:
+            value = int(raw)
+        except (ValueError, TypeError):
+            value = 0
+        return max(0, value)
 
     def _cleanup_if_needed(self) -> None:
         """Remove expired entries periodically (every 60 seconds)."""
@@ -60,11 +68,18 @@ class RateLimiter:
         key = self.key_func(request)
         now = datetime.utcnow()
         cutoff = now - self.window
+        limit = self._current_limit()
 
         # Filter to recent requests only
         self.requests[key] = [t for t in self.requests[key] if t > cutoff]
 
-        if len(self.requests[key]) >= self.limit:
+        if limit <= 0:
+            raise HTTPException(
+                status_code=429,
+                detail="Rate limit exceeded. Try again later."
+            )
+
+        if len(self.requests[key]) >= limit:
             raise HTTPException(
                 status_code=429,
                 detail=f"Rate limit exceeded. Try again in {self.window.seconds} seconds."

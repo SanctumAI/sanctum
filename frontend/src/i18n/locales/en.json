@@ -4,6 +4,8 @@
     "cancel": "Cancel",
     "save": "Save",
     "saving": "Saving...",
+    "saved": "Saved",
+    "sending": "Sending...",
     "saveChanges": "Save Changes",
     "edit": "Edit",
     "delete": "Delete",
@@ -29,6 +31,40 @@
     "enabled": "Enabled",
     "disabled": "Disabled",
     "gotIt": "Got it"
+  },
+  "reachout": {
+    "mode": {
+      "feedback": {
+        "openButton": "Send feedback",
+        "title": "Feedback",
+        "description": "Send feedback or suggestions to the team."
+      },
+      "help": {
+        "openButton": "Get help",
+        "title": "Help",
+        "description": "Ask for help using this instance."
+      },
+      "support": {
+        "openButton": "Contact support",
+        "title": "Support",
+        "description": "Contact support about an issue or request."
+      }
+    },
+    "form": {
+      "messageLabel": "Message",
+      "placeholder": "Write your message...",
+      "send": "Send"
+    },
+    "status": {
+      "success": "Thanks. Your message was sent."
+    },
+    "errors": {
+      "required": "Message is required.",
+      "rateLimited": "Too many messages. Please try again later.",
+      "unavailable": "Reachout is unavailable.",
+      "notConfigured": "This feature is not configured.",
+      "failed": "Failed to send message. Please try again."
+    }
   },
   "settings": {
     "title": "Settings",
@@ -171,6 +207,48 @@
       "typographyHumanist": "Humanist",
       "typographyHumanistDesc": "Warm, readable typography with clarity."
     },
+    "reachout": {
+      "title": "User Reachout",
+      "subtitle": "Optionally let authenticated users send a message to your team via email.",
+      "enableLabel": "Enable reachout button in chat",
+      "loadingHint": "Loading...",
+      "modeLabel": "Framing",
+      "mode": {
+        "feedback": {
+          "title": "Feedback",
+          "desc": "Invite product feedback and suggestions."
+        },
+        "help": {
+          "title": "Help",
+          "desc": "Offer help with using the instance."
+        },
+        "support": {
+          "title": "Support",
+          "desc": "Offer support for issues and requests."
+        }
+      },
+      "toEmailLabel": "Destination Email",
+      "toEmailPlaceholder": "support@example.com",
+      "toEmailHint": "Emails will be sent using your configured SMTP settings.",
+      "subjectPrefixLabel": "Subject Prefix",
+      "subjectPrefixPlaceholder": "[Support]",
+      "subjectPrefixHint": "Optional. Prepended to the email subject line.",
+      "limitHourLabel": "Rate Limit (per hour)",
+      "limitDayLabel": "Rate Limit (per day)",
+      "copyHint": "Optional copy overrides. If blank, the UI uses translated defaults based on the selected framing. Overrides apply to all languages.",
+      "overrideTitleLabel": "Title Override",
+      "overrideTitlePlaceholder": "Contact support",
+      "overrideButtonLabel": "Button Label Override",
+      "overrideButtonPlaceholder": "Send message",
+      "overrideDescriptionLabel": "Description Override",
+      "overrideDescriptionPlaceholder": "Tell us what you need and we will reply by email.",
+      "overrideSuccessLabel": "Success Message Override",
+      "overrideSuccessPlaceholder": "Thanks. Your message was sent.",
+      "errors": {
+        "toEmailRequired": "Destination email is required when reachout is enabled.",
+        "invalidRateLimits": "Rate limits must be positive numbers."
+      }
+    },
     "userConfig": {
       "title": "User Configuration",
       "subtitle": "Configure user types and the questions users answer during onboarding.",
@@ -193,9 +271,13 @@
       "visibleSelected": "{{selected}} selected in current filter ({{visible}} visible users).",
       "loadingUsers": "Loading users...",
       "noUsers": "No users found for the selected filter.",
+      "noUsersHint": "Try changing the filter above or refreshing.",
       "userLabel": "User #{{id}}",
       "approved": "Approved",
-      "pendingApproval": "Pending approval",
+      "pendingApproval": "Pending",
+      "pubkeyPresent": "Nostr pubkey present",
+      "emailEncryptedHint": "Email (encrypted)",
+      "nameEncryptedHint": "Name (encrypted)",
       "rowResultSuccess": "Migrated. Missing required fields: {{count}}.",
       "rowResultFailed": "Last migration failed.",
       "alreadyTarget": "User is already in the target type",
@@ -398,9 +480,7 @@
       "searchLabel": "Search languages",
       "noResults": "No languages found for \"{{query}}\"",
       "continue": "Continue",
-      "changeInSettings": "You can change this later in your settings.",
-      "dataHandlingNoticeTitle": "Data handling is instance-configured",
-      "dataHandlingNoticeBody": "Sanctum supports passwordless sign-in and encryption-capable profile settings. Final data handling, retention, and AI-sharing behavior are configured by this instance administrator."
+      "changeInSettings": "You can change this later in your settings."
     },
     "auth": {
       "signUp": "Sign Up",

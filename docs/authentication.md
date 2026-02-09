@@ -4,6 +4,8 @@ This document describes the two authentication systems in Sanctum:
 - **Admin Authentication** - Nostr NIP-07 signed events
 - **User Authentication** - Magic link email
 
+For how sessions are stored and secured (cookies, bearer tokens, CSRF), see `docs/sessions.md`.
+
 ## Overview
 
 Sanctum uses a two-tier authentication model:
@@ -197,10 +199,13 @@ Users authenticate via email magic links - no password required.
        │  5. Click link in email                 │
        │ ──────────────────────────────────────> │
        │                    │                    │
-       │  6. GET /auth/verify?token=xxx          │
+       │  6. Load frontend /verify?token=xxx     │
+       │ ──────────────────────────────────────> │
+       │                    │                    │
+       │  7. Frontend POST /auth/verify {token}  │
        │ ─────────────────> │                    │
        │                    │                    │
-       │  7. Verify token, create user, return session
+       │  8. Verify token, create user, set session cookie
        │ <───────────────── │                    │
 ```
 
@@ -223,6 +228,8 @@ After verification, the user receives a session token:
 - **Payload**: `{"user_id": 123, "email": "..."}`
 - **Salt**: `"session"`
 - **Expiration**: 7 days
+
+In browser flows, the backend sets this as an `httpOnly` cookie (the token is not readable by frontend JavaScript). The token is also returned in the JSON response for non-browser clients.
 
 ### API Endpoints
 
@@ -255,13 +262,20 @@ curl -X POST http://localhost:8000/auth/magic-link \
 
 ---
 
-#### `GET /auth/verify`
+#### Frontend route: `/verify?token=...`
 
-Verify a magic link token and create a session.
+Magic link emails point to the frontend route `/verify?token=...`.
+The frontend extracts the token from the URL and calls the backend verify endpoint below.
+
+#### `POST /auth/verify`
+
+Verify a magic link token and create a session (sets auth cookies).
 
 **Request:**
 ```bash
-curl "http://localhost:8000/auth/verify?token=eyJlbWFpbCI6..."
+curl -X POST http://localhost:8000/auth/verify \
+  -H "Content-Type: application/json" \
+  -d '{"token":"eyJlbWFpbCI6..."}'
 ```
 
 **Response:**
@@ -291,9 +305,14 @@ curl "http://localhost:8000/auth/verify?token=eyJlbWFpbCI6..."
 
 Get the current authenticated user.
 
-**Request:**
+Authentication sources:
+- Cookie session (browser default), or
+- `Authorization: Bearer <session_token>` (CLI clients)
+
+**Request (Bearer):**
 ```bash
-curl "http://localhost:8000/auth/me?token=eyJ1c2VyX2lkIjox..."
+curl http://localhost:8000/auth/me \
+  -H "Authorization: Bearer <session_token>"
 ```
 
 **Response (authenticated):**
@@ -368,7 +387,7 @@ If `MOCK_EMAIL=true` (or `MOCK_SMTP=true` via deployment config), the response n
 |----------|---------|-------------|
 | `SECRET_KEY` | (auto-generated) | Key for signing tokens. If not set, auto-generates and persists to `/data/.secret_key` |
 | `FRONTEND_URL` | `http://localhost:5173` | Base URL for magic link emails |
-| `MOCK_EMAIL` | `true` | Log magic links instead of sending emails |
+| `MOCK_EMAIL` | `false` | Log magic links instead of sending emails (note: `.env.example` sets this to `true` for local dev) |
 | `MOCK_SMTP` | (alias) | Deployment-config alias for `MOCK_EMAIL` |
 | `SMTP_HOST` | (empty) | SMTP server hostname |
 | `SMTP_PORT` | `587` | SMTP server port |
@@ -378,7 +397,7 @@ If `MOCK_EMAIL=true` (or `MOCK_SMTP=true` via deployment config), the response n
 
 ### Development Mode (Mock Email)
 
-With `MOCK_EMAIL=true` (default), or `MOCK_SMTP=true` via deployment config, magic links are logged to the console instead of being sent via email:
+With `MOCK_EMAIL=true` (commonly enabled in local dev via `.env.example`), or `MOCK_SMTP=true` via deployment config, magic links are logged to the console instead of being sent via email:
 
 ```
 ============================================================
@@ -416,13 +435,13 @@ FRONTEND_URL=https://yourdomain.com
 
 ## Frontend Storage Keys
 
-The frontend stores auth state in localStorage:
+The frontend stores non-secret auth markers and onboarding state in localStorage.
+
+Auth secrets should not be stored in localStorage. Browser authentication is cookie-based (see `docs/sessions.md`).
 
 | Key | Description |
 |-----|-------------|
 | `sanctum_admin_pubkey` | Admin Nostr pubkey (after NIP-07 auth) |
-| `sanctum_admin_session_token` | Admin session token (after NIP-07 auth) |
-| `sanctum_session_token` | User session token (after magic link verify) |
 | `sanctum_user_email` | Verified user email |
 | `sanctum_user_name` | User display name |
 | `sanctum_user_type_id` | Selected user type during onboarding |
@@ -431,6 +450,13 @@ The frontend stores auth state in localStorage:
 | `sanctum_custom_fields` | Cached custom field definitions (JSON) |
 | `sanctum_pending_email` | Email awaiting magic link verification |
 | `sanctum_pending_name` | Name awaiting verification |
+
+Legacy keys:
+
+Some older builds used localStorage for tokens. If you see these keys, clear them:
+
+- `sanctum_admin_session_token`
+- `sanctum_session_token`
 
 ---
 
@@ -508,7 +534,8 @@ See "Production Hardening" below for complete production deployment guidance.
 ### Session Tokens
 - **7 day expiration** - Balance between convenience and security
 - **HMAC-signed** - Cannot be forged without SECRET_KEY
-- **No server-side storage** - Stateless validation
+- **User sessions are stateless** - No server-side per-token storage; validity is based on signature + expiry
+- **Admin sessions support server-side revocation** - Admin tokens include a `session_nonce` checked against the DB (rotated on logout)
 
 ### Admin Events
 - **5 minute window** - Prevents replay attacks

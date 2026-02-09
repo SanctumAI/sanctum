@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { FileText, ChevronUp, ChevronDown, Pencil, Trash2, FilePlus, Plus, Users, Loader2, ArrowLeft, HelpCircle, X, ChevronLeft, ChevronRight, RefreshCw, UserCog } from 'lucide-react'
+import { FileText, ChevronUp, ChevronDown, Pencil, Trash2, FilePlus, Plus, Users, Loader2, ArrowLeft, HelpCircle, X, ChevronLeft, ChevronRight, RefreshCw, UserCog, Mail, Shield, ShieldCheck, Key, Lock, User } from 'lucide-react'
+import * as nip19 from 'nostr-tools/nip19'
 import { OnboardingCard } from '../components/onboarding/OnboardingCard'
 import { FieldEditor } from '../components/onboarding/FieldEditor'
 import { IconPicker } from '../components/onboarding/IconPicker'
@@ -12,8 +13,35 @@ import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
 const FIELD_TYPE_VALUES: FieldType[] = ['text', 'email', 'number', 'textarea', 'select', 'checkbox', 'date', 'url']
 type SourceTypeFilter = 'all' | 'untyped' | number
 
+const USER_AVATAR_COLORS = [
+  { bg: 'bg-blue-100 dark:bg-blue-900/40', text: 'text-blue-600 dark:text-blue-400' },
+  { bg: 'bg-emerald-100 dark:bg-emerald-900/40', text: 'text-emerald-600 dark:text-emerald-400' },
+  { bg: 'bg-violet-100 dark:bg-violet-900/40', text: 'text-violet-600 dark:text-violet-400' },
+  { bg: 'bg-amber-100 dark:bg-amber-900/40', text: 'text-amber-600 dark:text-amber-400' },
+  { bg: 'bg-rose-100 dark:bg-rose-900/40', text: 'text-rose-600 dark:text-rose-400' },
+  { bg: 'bg-cyan-100 dark:bg-cyan-900/40', text: 'text-cyan-600 dark:text-cyan-400' },
+  { bg: 'bg-orange-100 dark:bg-orange-900/40', text: 'text-orange-600 dark:text-orange-400' },
+  { bg: 'bg-indigo-100 dark:bg-indigo-900/40', text: 'text-indigo-600 dark:text-indigo-400' },
+] as const
+
+function getUserAvatarColor(userId: number) {
+  return USER_AVATAR_COLORS[userId % USER_AVATAR_COLORS.length]
+}
+
+function formatPubkeyShort(hexPubkey: string): string {
+  try {
+    const npub = nip19.npubEncode(hexPubkey)
+    return npub.slice(0, 9) + '...' + npub.slice(-4)
+  } catch {
+    return hexPubkey.slice(0, 8) + '...'
+  }
+}
+
 interface AdminUserSummary {
   id: number
+  pubkey?: string | null
+  email_encrypted?: { ciphertext: string; ephemeral_pubkey: string } | null
+  name_encrypted?: { ciphertext: string; ephemeral_pubkey: string } | null
   user_type_id: number | null
   user_type?: UserType | null
   approved: boolean
@@ -90,12 +118,35 @@ export function AdminUserConfig() {
   const [isReordering, setIsReordering] = useState(false)
   const [reorderError, setReorderError] = useState<string | null>(null)
 
+  // Reachout settings (stored in instance_settings; only reachout_* public keys are exposed via /settings/public)
+  const [reachoutLoaded, setReachoutLoaded] = useState(false)
+  const [reachoutEnabled, setReachoutEnabled] = useState(false)
+  const [reachoutMode, setReachoutMode] = useState<'feedback' | 'help' | 'support'>('support')
+  const [reachoutToEmail, setReachoutToEmail] = useState('')
+  const [reachoutSubjectPrefix, setReachoutSubjectPrefix] = useState('')
+  const [reachoutRateLimitPerHour, setReachoutRateLimitPerHour] = useState('3')
+  const [reachoutRateLimitPerDay, setReachoutRateLimitPerDay] = useState('10')
+  const [reachoutTitle, setReachoutTitle] = useState('')
+  const [reachoutDescription, setReachoutDescription] = useState('')
+  const [reachoutButtonLabel, setReachoutButtonLabel] = useState('')
+  const [reachoutSuccessMessage, setReachoutSuccessMessage] = useState('')
+  const [reachoutSaving, setReachoutSaving] = useState(false)
+  const [reachoutSaveError, setReachoutSaveError] = useState<string | null>(null)
+  const [reachoutSaveSuccess, setReachoutSaveSuccess] = useState<string | null>(null)
+
   // User types & fields help modal state
   const [showUserHelpModal, setShowUserHelpModal] = useState(false)
   const [userHelpPage, setUserHelpPage] = useState(0)
   const userHelpModalRef = useRef<HTMLDivElement>(null)
   const helpButtonRef = useRef<HTMLButtonElement>(null)
   const deletingTypeIdsRef = useRef<Set<number>>(new Set())
+
+  const optionButtonClass = (active: boolean) =>
+    `w-full text-left border rounded-lg px-3 py-2 text-sm transition-all ${
+      active
+        ? 'border-accent bg-accent/10 text-text'
+        : 'border-border bg-surface hover:border-accent/40 text-text-muted hover:text-text'
+    }`
 
   // Check if admin is logged in
   useEffect(() => {
@@ -179,6 +230,104 @@ export function AdminUserConfig() {
     fetchData()
     return () => abortController.abort()
   }, [t])
+
+  // Load reachout settings from admin-only settings endpoint
+  useEffect(() => {
+    let isCancelled = false
+
+    async function fetchReachoutSettings() {
+      try {
+        const res = await adminFetch('/admin/settings')
+        if (!res.ok) {
+          if (!isCancelled) setReachoutLoaded(true)
+          return
+        }
+        const data = await res.json()
+        const s = (data?.settings ?? {}) as Record<string, string>
+
+        if (isCancelled) return
+
+        setReachoutEnabled(String(s.reachout_enabled ?? 'false').toLowerCase() === 'true')
+        const mode = String(s.reachout_mode ?? 'support').toLowerCase()
+        if (mode === 'feedback' || mode === 'help' || mode === 'support') {
+          setReachoutMode(mode)
+        } else {
+          setReachoutMode('support')
+        }
+        setReachoutToEmail(String(s.reachout_to_email ?? ''))
+        setReachoutSubjectPrefix(String(s.reachout_subject_prefix ?? ''))
+        setReachoutRateLimitPerHour(String(s.reachout_rate_limit_per_hour ?? '3'))
+        setReachoutRateLimitPerDay(String(s.reachout_rate_limit_per_day ?? '10'))
+        setReachoutTitle(String(s.reachout_title ?? ''))
+        setReachoutDescription(String(s.reachout_description ?? ''))
+        setReachoutButtonLabel(String(s.reachout_button_label ?? ''))
+        setReachoutSuccessMessage(String(s.reachout_success_message ?? ''))
+        setReachoutLoaded(true)
+      } catch (err) {
+        console.warn('Failed to fetch reachout settings:', err)
+        if (!isCancelled) setReachoutLoaded(true)
+      }
+    }
+
+    if (isAdminAuthenticated()) {
+      fetchReachoutSettings()
+    }
+
+    return () => {
+      isCancelled = true
+    }
+  }, [])
+
+  const handleSaveReachout = async () => {
+    setReachoutSaveError(null)
+    setReachoutSaveSuccess(null)
+
+    if (reachoutEnabled) {
+      const to = reachoutToEmail.trim()
+      if (!to) {
+        setReachoutSaveError(t('admin.reachout.errors.toEmailRequired', 'Destination email is required when reachout is enabled.'))
+        return
+      }
+      const hour = Number.parseInt(reachoutRateLimitPerHour.trim(), 10)
+      const day = Number.parseInt(reachoutRateLimitPerDay.trim(), 10)
+      if (!Number.isFinite(hour) || hour < 1 || !Number.isFinite(day) || day < 1) {
+        setReachoutSaveError(t('admin.reachout.errors.invalidRateLimits', 'Rate limits must be positive numbers.'))
+        return
+      }
+    }
+
+    setReachoutSaving(true)
+    try {
+      const res = await adminFetch('/admin/settings', {
+        method: 'PUT',
+        body: JSON.stringify({
+          reachout_enabled: String(reachoutEnabled),
+          reachout_mode: reachoutMode,
+          reachout_to_email: reachoutToEmail.trim(),
+          reachout_subject_prefix: reachoutSubjectPrefix.trim(),
+          reachout_rate_limit_per_hour: reachoutRateLimitPerHour.trim(),
+          reachout_rate_limit_per_day: reachoutRateLimitPerDay.trim(),
+          reachout_title: reachoutTitle.trim(),
+          reachout_description: reachoutDescription.trim(),
+          reachout_button_label: reachoutButtonLabel.trim(),
+          reachout_success_message: reachoutSuccessMessage.trim(),
+        }),
+      })
+
+      if (!res.ok) {
+        setReachoutSaveError(t('admin.errors.saveFailed', 'Failed to save settings. Please try again.'))
+        return
+      }
+
+      setReachoutSaveSuccess(t('common.saved', 'Saved'))
+      // Keep a short-lived success indicator without introducing new i18n keys.
+      setTimeout(() => setReachoutSaveSuccess(null), 2000)
+    } catch (err) {
+      setReachoutSaveError(err instanceof Error ? err.message : t('admin.errors.saveFailed', 'Failed to save settings. Please try again.'))
+    } finally {
+      setReachoutSaving(false)
+    }
+  }
 
   // User Type handlers
   const handleAddUserType = async () => {
@@ -1125,14 +1274,362 @@ export function AdminUserConfig() {
             )}
           </div>
 
+          {/* User Fields Section */}
+          <div className="card card-sm p-5! bg-surface-overlay!">
+            <h3 className="heading-sm mb-4 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-text-muted" />
+              {t('admin.setup.onboardingFields')}
+            </h3>
+            <p className="text-xs text-text-muted mb-4">
+              {t('admin.setup.onboardingFieldsHint', 'Create the questions users answer during onboarding.')}
+            </p>
+
+            {/* Field error display for deletion failures */}
+            {fieldError && !isEditing && (
+              <div className="bg-error/10 border border-error/20 rounded-lg p-3 mb-3">
+                <p className="text-xs text-error">{fieldError}</p>
+              </div>
+            )}
+
+            {/* Reorder error display */}
+            {reorderError && (
+              <div className="bg-error/10 border border-error/20 rounded-lg p-3 mb-3">
+                <p className="text-xs text-error">{reorderError}</p>
+              </div>
+            )}
+
+            {/* Fields List */}
+            {fields.length > 0 ? (
+              <div className="space-y-2 mb-4">
+                {fields.map((field, index) => (
+                  <div
+                    key={field.id}
+                    className="bg-surface border border-border rounded-xl p-3.5 animate-fade-in hover:border-border-strong hover:shadow-sm transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        {/* Field name and required tag */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-sm font-medium text-text">{field.name}</p>
+                          {field.required && (
+                            <span className="inline-flex items-center text-[10px] font-medium bg-accent/15 text-accent px-2 py-0.5 rounded-md border border-accent/30">
+                              {t('common.required')}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Type information */}
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span className="text-xs text-text-muted">
+                            {FIELD_TYPE_LABELS[field.type] || field.type}
+                          </span>
+                          {field.type === 'select' && field.options && (
+                            <span className="text-xs text-text-muted">
+                              • {t('admin.setup.optionsCount', { count: field.options.length })}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Tags container */}
+                        <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                          <span className={`inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-md border ${
+                            field.encryption_enabled !== false
+                              ? 'bg-accent/10 text-accent border-accent/20'
+                              : 'bg-warning/10 text-warning border-warning/20'
+                          }`}>
+                            {field.encryption_enabled !== false ? `🔒 ${t('admin.fields.encryptedBadge')}` : `🔓 ${t('admin.fields.plaintextBadge')}`}
+                          </span>
+                          {field.include_in_chat && field.encryption_enabled === false && (
+                            <span className="inline-flex items-center text-[10px] font-medium bg-accent/10 text-accent px-2 py-0.5 rounded-md border border-accent/20">
+                              💬 {t('admin.fields.inChatBadge')}
+                            </span>
+                          )}
+                          <span className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-md border bg-surface-overlay/50 text-text border-border">
+                            {getUserTypeName(field.user_type_id)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-0.5">
+                        {/* Move Up */}
+                        <button
+                          onClick={() => handleMoveField(index, 'up')}
+                          disabled={isReordering || index === 0}
+                          className="p-1 text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                          title={t('common.moveUp')}
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </button>
+                        {/* Move Down */}
+                        <button
+                          onClick={() => handleMoveField(index, 'down')}
+                          disabled={isReordering || index === fields.length - 1}
+                          className="p-1 text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                          title={t('common.moveDown')}
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                        {/* Edit */}
+                        <button
+                          onClick={() => handleEditField(field)}
+                          className="p-1 text-text-muted hover:text-accent transition-colors"
+                          title={t('common.edit')}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        {/* Remove */}
+                        <button
+                          onClick={() => handleRemoveField(field.id)}
+                          className="p-1 text-text-muted hover:text-error transition-colors"
+                          title={t('common.remove')}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6 bg-surface border border-border border-dashed rounded-lg mb-4">
+                <FilePlus className="w-8 h-8 text-text-muted mx-auto mb-2" strokeWidth={1.5} />
+                <p className="text-xs text-text-muted">{t('admin.setup.noFields')}</p>
+              </div>
+            )}
+
+            {/* Add Field Button */}
+            <button
+              onClick={() => { setFieldError(null); setIsEditing(true) }}
+              className="w-full flex items-center justify-center gap-2 border border-dashed border-border hover:border-accent text-text-muted hover:text-accent rounded-lg px-3 py-2 text-sm transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              {t('admin.setup.addField')}
+            </button>
+          </div>
+
+          {/* Reachout Section */}
+          <div className="card card-sm p-5! bg-surface-overlay!">
+            <h3 className="heading-sm mb-2 flex items-center gap-2">
+              <Mail className="w-4 h-4 text-text-muted" />
+              {t('admin.reachout.title', 'User Reachout')}
+            </h3>
+            <p className="text-xs text-text-muted mb-4">
+              {t('admin.reachout.subtitle', 'Optionally let authenticated users send a message to your team via email.')}
+            </p>
+
+            <div className="space-y-4">
+              <label className="flex items-center gap-2 text-sm text-text">
+                <input
+                  type="checkbox"
+                  checked={reachoutEnabled}
+                  onChange={(e) => { setReachoutEnabled(e.target.checked) }}
+                  className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
+                />
+                {t('admin.reachout.enableLabel', 'Enable reachout button in chat')}
+                {!reachoutLoaded && (
+                  <span className="text-xs text-text-muted">
+                    {t('admin.reachout.loadingHint', 'Loading...')}
+                  </span>
+                )}
+              </label>
+
+              <div>
+                <span className="text-sm font-medium text-text mb-2 block">
+                  {t('admin.reachout.modeLabel', 'Framing')}
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {(['feedback', 'help', 'support'] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => setReachoutMode(mode)}
+                      className={optionButtonClass(reachoutMode === mode)}
+                      aria-pressed={reachoutMode === mode}
+                    >
+                      <p className="text-sm font-medium text-text">
+                        {t(`admin.reachout.mode.${mode}.title`, mode === 'feedback' ? 'Feedback' : mode === 'help' ? 'Help' : 'Support')}
+                      </p>
+                      <p className="text-xs text-text-muted mt-1">
+                        {t(
+                          `admin.reachout.mode.${mode}.desc`,
+                          mode === 'feedback'
+                            ? 'Invite product feedback and suggestions.'
+                            : mode === 'help'
+                              ? 'Offer help with using the instance.'
+                              : 'Offer support for issues and requests.'
+                        )}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="reachout-to-email" className="text-sm font-medium text-text mb-1.5 block">
+                    {t('admin.reachout.toEmailLabel', 'Destination Email')}
+                  </label>
+                  <input
+                    id="reachout-to-email"
+                    type="email"
+                    value={reachoutToEmail}
+                    onChange={(e) => setReachoutToEmail(e.target.value)}
+                    placeholder={t('admin.reachout.toEmailPlaceholder', 'support@example.com')}
+                    className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  />
+                  <p className="text-xs text-text-muted mt-1.5">
+                    {t('admin.reachout.toEmailHint', 'Emails will be sent using your configured SMTP settings.')}
+                  </p>
+                </div>
+
+                <div>
+                  <label htmlFor="reachout-subject-prefix" className="text-sm font-medium text-text mb-1.5 block">
+                    {t('admin.reachout.subjectPrefixLabel', 'Subject Prefix')}
+                  </label>
+                  <input
+                    id="reachout-subject-prefix"
+                    type="text"
+                    value={reachoutSubjectPrefix}
+                    onChange={(e) => setReachoutSubjectPrefix(e.target.value)}
+                    placeholder={t('admin.reachout.subjectPrefixPlaceholder', '[Support]')}
+                    className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  />
+                  <p className="text-xs text-text-muted mt-1.5">
+                    {t('admin.reachout.subjectPrefixHint', 'Optional. Prepended to the email subject line.')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="reachout-limit-hour" className="text-sm font-medium text-text mb-1.5 block">
+                    {t('admin.reachout.limitHourLabel', 'Rate Limit (per hour)')}
+                  </label>
+                  <input
+                    id="reachout-limit-hour"
+                    type="number"
+                    min={1}
+                    value={reachoutRateLimitPerHour}
+                    onChange={(e) => setReachoutRateLimitPerHour(e.target.value)}
+                    className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="reachout-limit-day" className="text-sm font-medium text-text mb-1.5 block">
+                    {t('admin.reachout.limitDayLabel', 'Rate Limit (per day)')}
+                  </label>
+                  <input
+                    id="reachout-limit-day"
+                    type="number"
+                    min={1}
+                    value={reachoutRateLimitPerDay}
+                    onChange={(e) => setReachoutRateLimitPerDay(e.target.value)}
+                    className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  />
+                </div>
+              </div>
+
+              <div className="border-t border-border/60 pt-4">
+                <p className="text-xs text-text-muted mb-3">
+                  {t('admin.reachout.copyHint', 'Optional copy overrides. If blank, the UI uses translated defaults based on the selected framing. Overrides apply to all languages.')}
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="reachout-title" className="text-sm font-medium text-text mb-1.5 block">
+                      {t('admin.reachout.overrideTitleLabel', 'Title Override')}
+                    </label>
+                    <input
+                      id="reachout-title"
+                      type="text"
+                      value={reachoutTitle}
+                      onChange={(e) => setReachoutTitle(e.target.value)}
+                      placeholder={t('admin.reachout.overrideTitlePlaceholder', 'Contact support')}
+                      className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="reachout-button-label" className="text-sm font-medium text-text mb-1.5 block">
+                      {t('admin.reachout.overrideButtonLabel', 'Button Label Override')}
+                    </label>
+                    <input
+                      id="reachout-button-label"
+                      type="text"
+                      value={reachoutButtonLabel}
+                      onChange={(e) => setReachoutButtonLabel(e.target.value)}
+                      placeholder={t('admin.reachout.overrideButtonPlaceholder', 'Send message')}
+                      className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                  <div>
+                    <label htmlFor="reachout-description" className="text-sm font-medium text-text mb-1.5 block">
+                      {t('admin.reachout.overrideDescriptionLabel', 'Description Override')}
+                    </label>
+                    <input
+                      id="reachout-description"
+                      type="text"
+                      value={reachoutDescription}
+                      onChange={(e) => setReachoutDescription(e.target.value)}
+                      placeholder={t('admin.reachout.overrideDescriptionPlaceholder', 'Tell us what you need and we will reply by email.')}
+                      className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="reachout-success" className="text-sm font-medium text-text mb-1.5 block">
+                      {t('admin.reachout.overrideSuccessLabel', 'Success Message Override')}
+                    </label>
+                    <input
+                      id="reachout-success"
+                      type="text"
+                      value={reachoutSuccessMessage}
+                      onChange={(e) => setReachoutSuccessMessage(e.target.value)}
+                      placeholder={t('admin.reachout.overrideSuccessPlaceholder', 'Thanks. Your message was sent.')}
+                      className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {reachoutSaveError && (
+                <div className="bg-error/10 border border-error/20 rounded-lg p-3">
+                  <p className="text-xs text-error">{reachoutSaveError}</p>
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-3">
+                {reachoutSaveSuccess && (
+                  <p className="text-xs text-accent">{reachoutSaveSuccess}</p>
+                )}
+                <button
+                  type="button"
+                  onClick={handleSaveReachout}
+                  disabled={reachoutSaving}
+                  className="inline-flex items-center gap-2 bg-accent text-accent-text rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {reachoutSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {reachoutSaving ? t('common.saving', 'Saving...') : t('common.save', 'Save')}
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* User Migration Section */}
           <div className="card card-sm p-5! bg-surface-overlay!">
             <h3 className="heading-sm mb-4 flex items-center gap-2">
               <UserCog className="w-4 h-4 text-text-muted" />
               {t('admin.userMigration.title')}
             </h3>
-            <p className="text-xs text-text-muted mb-4">
+            <p className="text-xs text-text-muted mb-2">
               {t('admin.userMigration.subtitle')}
+            </p>
+            <p className="text-[11px] text-text-muted mb-4">
+              {t(
+                'admin.userMigration.anonymizedHint',
+                'Users are shown anonymously here. Names/emails are encrypted and intentionally hidden in this list.'
+              )}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
@@ -1267,8 +1764,10 @@ export function AdminUserConfig() {
                 {t('admin.userMigration.loadingUsers')}
               </div>
             ) : filteredUsers.length === 0 ? (
-              <div className="text-center py-6 bg-surface border border-border border-dashed rounded-lg">
+              <div className="text-center py-8 bg-surface border border-border border-dashed rounded-lg">
+                <Users className="w-6 h-6 text-text-muted mx-auto mb-2" />
                 <p className="text-xs text-text-muted">{t('admin.userMigration.noUsers')}</p>
+                <p className="text-[11px] text-text-muted mt-1">{t('admin.userMigration.noUsersHint')}</p>
               </div>
             ) : (
               <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
@@ -1279,199 +1778,118 @@ export function AdminUserConfig() {
                   const migrationResult = latestResultByUser[user.id]
                   const selected = selectedUserIds.has(user.id)
                   const alreadyTarget = targetMigrationTypeId !== null && currentTypeId === targetMigrationTypeId
+                  const avatarColor = getUserAvatarColor(user.id)
+                  const primaryLabel = user.pubkey
+                    ? formatPubkeyShort(user.pubkey)
+                    : t('admin.userMigration.userLabel', { id: user.id })
 
                   return (
-                    <div
-                      key={user.id}
-                      className="bg-surface border border-border rounded-lg p-3"
-                    >
-                      <div className="flex items-start gap-3">
-                        <input
-                          type="checkbox"
-                          checked={selected}
-                          onChange={() => handleToggleUserSelection(user.id)}
-                          className="mt-1 rounded border-border text-accent focus:ring-accent/30"
-                        />
+                      <div
+                        key={user.id}
+                        className={`bg-surface border rounded-lg p-3 transition-all ${
+                          selected
+                            ? 'border-accent/40 bg-accent/5 shadow-sm'
+                            : 'border-border hover:border-border-strong hover:shadow-xs'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <input
+                            type="checkbox"
+                            checked={selected}
+                            onChange={() => handleToggleUserSelection(user.id)}
+                            className="mt-1 rounded border-border text-accent focus:ring-accent/30"
+                          />
 
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <p className="text-sm font-medium text-text">
-                              {t('admin.userMigration.userLabel', { id: user.id })}
-                            </p>
-                            <span className="text-[10px] px-2 py-0.5 rounded-md border bg-surface-overlay text-text-muted border-border">
-                              {currentTypeName}
-                            </span>
+                          {/* Avatar */}
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${avatarColor.bg}`}>
+                            <User className={`w-4 h-4 ${avatarColor.text}`} />
                           </div>
 
-                          <p className="text-xs text-text-muted mt-1">
-                              {user.approved
-                              ? t('admin.userMigration.approved')
-                              : t('admin.userMigration.pendingApproval')}
-                            {user.created_at ? ` • ${new Date(user.created_at).toLocaleDateString()}` : ''}
-                          </p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className={`text-sm font-medium text-text ${user.pubkey ? 'font-mono' : ''}`}>
+                                {primaryLabel}
+                              </p>
+                              <span className="text-[10px] text-text-muted font-mono">#{user.id}</span>
 
-                          {migrationResult && (
-                            <p className={`text-xs mt-1 ${migrationResult.success ? 'text-accent' : 'text-error'}`}>
-                              {migrationResult.success
-                                ? t('admin.userMigration.rowResultSuccess', {
-                                    count: migrationResult.missing_required_count ?? 0,
-                                  })
-                                : migrationResult.error || t('admin.userMigration.rowResultFailed')}
-                              {!!migrationResult.missing_required_fields?.length && (
-                                ` (${migrationResult.missing_required_fields.join(', ')})`
+                              {/* Type badge with icon */}
+                              <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md border bg-surface-overlay text-text-muted border-border">
+                                {user.user_type?.icon && (
+                                  <DynamicIcon name={user.user_type.icon} className="w-3 h-3" />
+                                )}
+                                {currentTypeName}
+                              </span>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-2 mt-1">
+                              {/* Approval status */}
+                              {user.approved ? (
+                                <span className="inline-flex items-center gap-1 text-xs text-success">
+                                  <ShieldCheck className="w-3 h-3" />
+                                  {t('admin.userMigration.approved')}
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-xs text-warning">
+                                  <Shield className="w-3 h-3" />
+                                  {t('admin.userMigration.pendingApproval')}
+                                </span>
                               )}
-                            </p>
-                          )}
-                        </div>
 
-                        <button
-                          onClick={() => handleMigrateSingleUser(user.id)}
-                          disabled={isMigratingUser || isBatchMigrating || !targetMigrationTypeId || alreadyTarget}
-                          className="inline-flex items-center gap-2 border border-border text-text rounded-lg px-2.5 py-1.5 text-xs hover:bg-surface-overlay transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                          title={alreadyTarget ? t('admin.userMigration.alreadyTarget') : t('admin.userMigration.migrateUser')}
-                        >
-                          {isMigratingUser && <Loader2 className="w-3 h-3 animate-spin" />}
-                          {t('admin.userMigration.migrateOne')}
-                        </button>
+                              {user.created_at && (
+                                <span className="text-[11px] text-text-muted">
+                                  {new Date(user.created_at).toLocaleDateString()}
+                                </span>
+                              )}
+
+                              {/* Compact encrypted data indicators */}
+                              <div className="flex items-center gap-1.5">
+                                {user.pubkey && (
+                                  <span title={t('admin.userMigration.pubkeyPresent')}>
+                                    <Key className="w-3 h-3 text-text-muted" />
+                                  </span>
+                                )}
+                                {user.email_encrypted?.ciphertext && (
+                                  <span title={t('admin.userMigration.emailEncryptedHint')}>
+                                    <Mail className="w-3 h-3 text-text-muted" />
+                                  </span>
+                                )}
+                                {user.name_encrypted?.ciphertext && (
+                                  <span title={t('admin.userMigration.nameEncryptedHint')}>
+                                    <Lock className="w-3 h-3 text-text-muted" />
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {migrationResult && (
+                              <p className={`text-xs mt-1 ${migrationResult.success ? 'text-accent' : 'text-error'}`}>
+                                {migrationResult.success
+                                  ? t('admin.userMigration.rowResultSuccess', {
+                                      count: migrationResult.missing_required_count ?? 0,
+                                    })
+                                  : migrationResult.error || t('admin.userMigration.rowResultFailed')}
+                                {!!migrationResult.missing_required_fields?.length && (
+                                  ` (${migrationResult.missing_required_fields.join(', ')})`
+                                )}
+                              </p>
+                            )}
+                          </div>
+
+                          <button
+                            onClick={() => handleMigrateSingleUser(user.id)}
+                            disabled={isMigratingUser || isBatchMigrating || !targetMigrationTypeId || alreadyTarget}
+                            className="inline-flex items-center gap-2 border border-border text-text rounded-lg px-2.5 py-1.5 text-xs hover:bg-surface-overlay transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            title={alreadyTarget ? t('admin.userMigration.alreadyTarget') : t('admin.userMigration.migrateUser')}
+                          >
+                            {isMigratingUser && <Loader2 className="w-3 h-3 animate-spin" />}
+                            {t('admin.userMigration.migrateOne')}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  )
+                    )
                 })}
               </div>
             )}
-          </div>
-
-          {/* User Fields Section */}
-          <div className="card card-sm p-5! bg-surface-overlay!">
-            <h3 className="heading-sm mb-4 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-text-muted" />
-              {t('admin.setup.onboardingFields')}
-            </h3>
-            <p className="text-xs text-text-muted mb-4">
-              {t('admin.setup.onboardingFieldsHint', 'Create the questions users answer during onboarding.')}
-            </p>
-
-            {/* Field error display for deletion failures */}
-            {fieldError && !isEditing && (
-              <div className="bg-error/10 border border-error/20 rounded-lg p-3 mb-3">
-                <p className="text-xs text-error">{fieldError}</p>
-              </div>
-            )}
-
-            {/* Reorder error display */}
-            {reorderError && (
-              <div className="bg-error/10 border border-error/20 rounded-lg p-3 mb-3">
-                <p className="text-xs text-error">{reorderError}</p>
-              </div>
-            )}
-
-            {/* Fields List */}
-            {fields.length > 0 ? (
-              <div className="space-y-2 mb-4">
-                {fields.map((field, index) => (
-                  <div
-                    key={field.id}
-                    className="bg-surface border border-border rounded-xl p-3.5 animate-fade-in hover:border-border-strong hover:shadow-sm transition-all"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        {/* Field name and required tag */}
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-sm font-medium text-text">{field.name}</p>
-                          {field.required && (
-                            <span className="inline-flex items-center text-[10px] font-medium bg-accent/15 text-accent px-2 py-0.5 rounded-md border border-accent/30">
-                              {t('common.required')}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Type information */}
-                        <div className="flex items-center gap-2 mt-1.5">
-                          <span className="text-xs text-text-muted">
-                            {FIELD_TYPE_LABELS[field.type] || field.type}
-                          </span>
-                          {field.type === 'select' && field.options && (
-                            <span className="text-xs text-text-muted">
-                              • {t('admin.setup.optionsCount', { count: field.options.length })}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Tags container */}
-                        <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                          <span className={`inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-md border ${
-                            field.encryption_enabled !== false
-                              ? 'bg-accent/10 text-accent border-accent/20'
-                              : 'bg-warning/10 text-warning border-warning/20'
-                          }`}>
-                            {field.encryption_enabled !== false ? `🔒 ${t('admin.fields.encryptedBadge')}` : `🔓 ${t('admin.fields.plaintextBadge')}`}
-                          </span>
-                          {field.include_in_chat && field.encryption_enabled === false && (
-                            <span className="inline-flex items-center text-[10px] font-medium bg-accent/10 text-accent px-2 py-0.5 rounded-md border border-accent/20">
-                              💬 {t('admin.fields.inChatBadge')}
-                            </span>
-                          )}
-                          <span className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-md border bg-surface-overlay/50 text-text border-border">
-                            {getUserTypeName(field.user_type_id)}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-0.5">
-                        {/* Move Up */}
-                        <button
-                          onClick={() => handleMoveField(index, 'up')}
-                          disabled={isReordering || index === 0}
-                          className="p-1 text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                          title={t('common.moveUp')}
-                        >
-                          <ChevronUp className="w-4 h-4" />
-                        </button>
-                        {/* Move Down */}
-                        <button
-                          onClick={() => handleMoveField(index, 'down')}
-                          disabled={isReordering || index === fields.length - 1}
-                          className="p-1 text-text-muted hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                          title={t('common.moveDown')}
-                        >
-                          <ChevronDown className="w-4 h-4" />
-                        </button>
-                        {/* Edit */}
-                        <button
-                          onClick={() => handleEditField(field)}
-                          className="p-1 text-text-muted hover:text-accent transition-colors"
-                          title={t('common.edit')}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                        {/* Remove */}
-                        <button
-                          onClick={() => handleRemoveField(field.id)}
-                          className="p-1 text-text-muted hover:text-error transition-colors"
-                          title={t('common.remove')}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-6 bg-surface border border-border border-dashed rounded-lg mb-4">
-                <FilePlus className="w-8 h-8 text-text-muted mx-auto mb-2" strokeWidth={1.5} />
-                <p className="text-xs text-text-muted">{t('admin.setup.noFields')}</p>
-              </div>
-            )}
-
-            {/* Add Field Button */}
-            <button
-              onClick={() => { setFieldError(null); setIsEditing(true) }}
-              className="w-full flex items-center justify-center gap-2 border border-dashed border-border hover:border-accent text-text-muted hover:text-accent rounded-lg px-3 py-2 text-sm transition-all"
-            >
-              <Plus className="w-4 h-4" />
-              {t('admin.setup.addField')}
-            </button>
           </div>
 
           {/* Navigation */}

@@ -779,6 +779,19 @@ def seed_default_settings():
         "status_icon_set": "classic",
         "typography_preset": "modern",
         "auto_approve_users": "true",  # true = auto-approve, false = require manual approval
+
+        # User reachout (user-facing email submission; disabled by default)
+        "reachout_enabled": "false",
+        "reachout_mode": "support",  # feedback | help | support
+        "reachout_title": "",
+        "reachout_description": "",
+        "reachout_button_label": "",
+        "reachout_success_message": "",
+        # Admin-only settings (still stored in instance_settings, but not exposed publicly)
+        "reachout_to_email": "",
+        "reachout_subject_prefix": "",
+        "reachout_rate_limit_per_hour": "3",
+        "reachout_rate_limit_per_day": "10",
     }
 
     with get_cursor() as cursor:

@@ -7,9 +7,10 @@ interface OnboardingCardProps {
   title?: string
   subtitle?: string
   size?: 'md' | 'lg' | 'xl'
+  topRight?: ReactNode
 }
 
-export function OnboardingCard({ children, footer, title, subtitle, size }: OnboardingCardProps) {
+export function OnboardingCard({ children, footer, title, subtitle, size, topRight }: OnboardingCardProps) {
   const maxWidthClass = {
     md: 'max-w-2xl',
     lg: 'max-w-4xl',
@@ -17,7 +18,13 @@ export function OnboardingCard({ children, footer, title, subtitle, size }: Onbo
   }[size ?? 'md']
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-surface via-surface to-surface-raised/30 flex flex-col items-center justify-center p-4">
+    <div className="relative min-h-screen bg-gradient-to-br from-surface via-surface to-surface-raised/30 flex flex-col items-center justify-center p-4">
+      {topRight && (
+        <div className="absolute top-4 right-4">
+          {topRight}
+        </div>
+      )}
+
       <div className={`w-full ${maxWidthClass}`}>
         <InstanceLogo />
 
@@ -25,7 +32,7 @@ export function OnboardingCard({ children, footer, title, subtitle, size }: Onbo
           {(title || subtitle) && (
             <div className="text-center mb-8">
               {title && <h1 className="heading-xl">{title}</h1>}
-              {subtitle && <p className="text-sm text-text-muted mt-2">{subtitle}</p>}
+              {subtitle && <p className="text-sm text-text-muted mt-2 max-w-md mx-auto">{subtitle}</p>}
             </div>
           )}
           {children}

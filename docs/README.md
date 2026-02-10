@@ -5,6 +5,7 @@ This folder contains longer-form documentation for Sanctum.
 ## Core
 
 - [authentication.md](authentication.md) - Admin (Nostr) and user (magic link) authentication flows.
+- [instance-initiation.md](instance-initiation.md) - Admin-first "initiation" gating (instance status, root redirects, and guarded public routes).
 - [sessions.md](sessions.md) - Auth sessions (cookies/bearer tokens), CSRF, and RAG conversation sessions (`session_id`).
 - [security.md](security.md) - Security overview and production hardening checklist.
 - [user-reachout.md](user-reachout.md) - Authenticated user email reachout feature (spec + implementation notes).

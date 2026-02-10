@@ -17,6 +17,7 @@ import { UserProfile } from './pages/UserProfile'
 import { VerifyMagicLink } from './pages/VerifyMagicLink'
 import { PendingApproval } from './pages/PendingApproval'
 import { AdminRoute } from './components/shared/AdminRoute'
+import { InitiationGate } from './components/shared/InitiationGate'
 
 function App() {
   return (
@@ -33,12 +34,12 @@ function App() {
         <Route path="/admin/deployment" element={<AdminRoute><AdminDeploymentConfig /></AdminRoute>} />
         <Route path="/admin/upload" element={<AdminRoute><AdminDocumentUpload /></AdminRoute>} />
         <Route path="/admin/database" element={<AdminRoute><AdminDatabaseExplorer /></AdminRoute>} />
-        <Route path="/login" element={<UserOnboarding />} />
-        <Route path="/auth" element={<UserAuth />} />
-        <Route path="/user-type" element={<UserTypeSelection />} />
-        <Route path="/profile" element={<UserProfile />} />
-        <Route path="/verify" element={<VerifyMagicLink />} />
-        <Route path="/pending" element={<PendingApproval />} />
+        <Route path="/login" element={<InitiationGate><UserOnboarding /></InitiationGate>} />
+        <Route path="/auth" element={<InitiationGate><UserAuth /></InitiationGate>} />
+        <Route path="/user-type" element={<InitiationGate><UserTypeSelection /></InitiationGate>} />
+        <Route path="/profile" element={<InitiationGate><UserProfile /></InitiationGate>} />
+        <Route path="/verify" element={<InitiationGate><VerifyMagicLink /></InitiationGate>} />
+        <Route path="/pending" element={<InitiationGate><PendingApproval /></InitiationGate>} />
       </Routes>
     </Router>
   )

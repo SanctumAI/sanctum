@@ -682,7 +682,7 @@
     "LLM_MODEL": {
       "label": "Nama Model",
       "description": "Nama/pengenal model",
-      "hint": "Pengenal model yang akan digunakan (misalnya \"kimi-k2-thinking\"). Periksa dokumentasi penyedia untuk model yang tersedia."
+      "hint": "Pengenal model yang akan digunakan (misalnya \"kimi-k2-5\"). Periksa dokumentasi penyedia untuk model yang tersedia."
     },
     "LLM_API_URL": {
       "label": "Endpoint API",

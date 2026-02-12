@@ -50,16 +50,10 @@ def wait_for_qdrant(client, max_retries=30, delay=2):
 def seed_qdrant(client):
     """Seed Qdrant with the claim embedding"""
     print("\nSeeding Qdrant...")
-    
-    # Determine vector dimension based on provider
-    provider = os.getenv("EMBEDDING_PROVIDER", "local")
-    print(f"  Embedding provider: {provider}")
-    
-    if provider == "openai":
-        vector_dim = int(os.getenv("EMBEDDING_DIMENSIONS", "1536"))
-    else:
-        model = get_embedding_model()
-        vector_dim = model.get_sentence_embedding_dimension()
+
+    model = get_embedding_model()
+    vector_dim = model.get_sentence_embedding_dimension()
+    print(f"  Embedding model: {os.getenv('EMBEDDING_MODEL', 'intfloat/multilingual-e5-base')}")
     print(f"  Vector dimension: {vector_dim}")
     
     # Create collection if it doesn't exist

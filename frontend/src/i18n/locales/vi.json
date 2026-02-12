@@ -684,7 +684,7 @@
     "LLM_MODEL": {
       "label": "Tên mô hình",
       "description": "Tên/mã định danh mô hình",
-      "hint": "Mã định danh mô hình cần sử dụng (ví dụ: \"kimi-k2-thinking\"). Xem tài liệu của nhà cung cấp để biết các mô hình có sẵn."
+      "hint": "Mã định danh mô hình cần sử dụng (ví dụ: \"kimi-k2-5\"). Xem tài liệu của nhà cung cấp để biết các mô hình có sẵn."
     },
     "LLM_API_URL": {
       "label": "Điểm cuối API",

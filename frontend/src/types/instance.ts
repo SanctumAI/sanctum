@@ -215,14 +215,102 @@ export function saveInstanceConfig(config: InstanceConfig): void {
   localStorage.setItem(INSTANCE_CONFIG_KEY, JSON.stringify(config))
 }
 
+const CUSTOM_ACCENT_CSS_VARS = [
+  '--color-accent',
+  '--color-accent-hover',
+  '--color-accent-subtle',
+  '--color-accent-text',
+] as const
+
+function normalizeHexColor(value: string): string | null {
+  const v = value.trim().toLowerCase()
+  if (!v) return null
+  const m6 = /^#([0-9a-f]{6})$/.exec(v)
+  if (m6) return `#${m6[1]}`
+  const m3 = /^#([0-9a-f]{3})$/.exec(v)
+  if (m3) {
+    const [r, g, b] = m3[1].split('')
+    return `#${r}${r}${g}${g}${b}${b}`
+  }
+  return null
+}
+
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const h = hex.replace('#', '')
+  const r = parseInt(h.slice(0, 2), 16)
+  const g = parseInt(h.slice(2, 4), 16)
+  const b = parseInt(h.slice(4, 6), 16)
+  return { r, g, b }
+}
+
+function clamp01(x: number): number {
+  return Math.max(0, Math.min(1, x))
+}
+
+function mixRgb(a: { r: number; g: number; b: number }, b: { r: number; g: number; b: number }, t: number) {
+  const tt = clamp01(t)
+  return {
+    r: Math.round(a.r * (1 - tt) + b.r * tt),
+    g: Math.round(a.g * (1 - tt) + b.g * tt),
+    b: Math.round(a.b * (1 - tt) + b.b * tt),
+  }
+}
+
+function rgbToHex(rgb: { r: number; g: number; b: number }): string {
+  const to2 = (n: number) => n.toString(16).padStart(2, '0')
+  return `#${to2(rgb.r)}${to2(rgb.g)}${to2(rgb.b)}`
+}
+
+function pickReadableTextColor(bg: { r: number; g: number; b: number }): string {
+  // Rough perceived luminance; good enough for deciding white vs dark text.
+  const lum = (0.2126 * bg.r + 0.7152 * bg.g + 0.0722 * bg.b) / 255
+  return lum > 0.62 ? '#1a1815' : '#ffffff'
+}
+
 export function applyAccentColor(color: AccentColor): void {
   const root = document.documentElement
+  // If a custom accent was previously applied via CSS vars, clear it so the class-based
+  // theme takes effect again.
+  for (const v of CUSTOM_ACCENT_CSS_VARS) root.style.removeProperty(v)
   // Remove all accent classes
   Object.keys(ACCENT_COLORS).forEach((c) => {
     root.classList.remove(`accent-${c}`)
   })
   // Add the new one
   root.classList.add(`accent-${color}`)
+}
+
+/**
+ * Apply a custom accent directly from a hex color value.
+ * This bypasses the limited preset accent-* classes and allows the admin assistant
+ * to set `primary_color` to any valid hex string.
+ */
+export function applyCustomAccentColor(hex: string): boolean {
+  const normalized = normalizeHexColor(hex)
+  if (!normalized) return false
+
+  const root = document.documentElement
+  // Remove preset accent classes so they don't fight the inline CSS vars.
+  Object.keys(ACCENT_COLORS).forEach((c) => {
+    root.classList.remove(`accent-${c}`)
+  })
+
+  const base = hexToRgb(normalized)
+  const white = { r: 255, g: 255, b: 255 }
+  const black = { r: 0, g: 0, b: 0 }
+
+  // Keep this simple and deterministic:
+  // - hover: slightly darker than base
+  // - subtle: very light tint for chips/selected backgrounds
+  const hover = mixRgb(base, black, 0.18)
+  const subtle = mixRgb(base, white, 0.84)
+
+  root.style.setProperty('--color-accent', normalized)
+  root.style.setProperty('--color-accent-hover', rgbToHex(hover))
+  root.style.setProperty('--color-accent-subtle', rgbToHex(subtle))
+  root.style.setProperty('--color-accent-text', pickReadableTextColor(base))
+
+  return true
 }
 
 function upsertLinkTag(rel: string, href: string): void {

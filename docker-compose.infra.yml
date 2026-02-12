@@ -2,6 +2,7 @@ services:
   maple-proxy:
     image: ghcr.io/opensecretcloud/maple-proxy:latest
     container_name: sanctum-maple-proxy
+    restart: unless-stopped
     environment:
       - MAPLE_BACKEND_URL=https://enclave.trymaple.ai
       - MAPLE_API_KEY=${MAPLE_API_KEY}

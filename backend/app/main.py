@@ -410,6 +410,9 @@ class ChatRequest(BaseModel):
     message: str
     tools: List[str] = []
     tool_context: Optional[str] = None
+    # Optional explicit list of tools already executed client-side and embedded in tool_context.
+    # `None` keeps legacy behavior for older clients that only send tool_context.
+    client_executed_tools: Optional[List[str]] = None
 
 
 class ChatResponse(BaseModel):
@@ -708,11 +711,21 @@ async def chat(
 
             tool_context_parts.append(request.tool_context)
 
-            # Build tools_used from provided tool IDs (client-side tool execution)
+            # Determine which tools were executed client-side.
+            # Legacy fallback: older clients implied db-query was already executed whenever
+            # tool_context was present.
+            client_executed_tools = request.client_executed_tools
+            if client_executed_tools is None:
+                client_executed_tools = ["db-query"] if "db-query" in request.tools else []
+
+            client_executed_set = set()
             tools_used = []
-            for tool_id in request.tools:
+            for tool_id in client_executed_tools:
+                if tool_id not in request.tools:
+                    continue
                 tool = _tool_registry.get(tool_id)
                 if tool:
+                    client_executed_set.add(tool_id)
                     key = (tool_id, request.message)
                     if key not in seen_tool_keys:
                         seen_tool_keys.add(key)
@@ -722,9 +735,9 @@ async def chat(
                             query=request.message
                         ))
 
-            # Allow other tools to run server-side (excluding db-query to avoid duplicate encrypted context)
+            # Allow remaining tools to run server-side.
             allowed_tools = filter_tools_for_user(request.tools, user)
-            allowed_tools = [tool_id for tool_id in allowed_tools if tool_id != "db-query"]
+            allowed_tools = [tool_id for tool_id in allowed_tools if tool_id not in client_executed_set]
 
             if allowed_tools:
                 orchestrator = get_tool_orchestrator()
@@ -787,7 +800,40 @@ async def chat(
         )
 
         provider = get_provider()
-        result = provider.complete(prompt, temperature=temperature)
+        # Convert low-level provider connection failures into a user-friendly 503.
+        # This is especially common in local dev if the LLM container is restarting.
+        try:
+            if not provider.health_check():
+                raise HTTPException(
+                    status_code=503,
+                    detail=f"LLM provider '{provider.name}' is unavailable (health check failed).",
+                )
+            result = provider.complete(prompt, temperature=temperature)
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.exception("LLM provider error (%s): %s", provider.name, e)
+            connection_error_types: tuple[type[BaseException], ...] = ()
+            try:
+                import httpx
+                connection_error_types += (
+                    httpx.ConnectError,
+                    httpx.TimeoutException,
+                    httpx.NetworkError,
+                )
+            except ImportError:
+                pass
+            try:
+                from openai import APIConnectionError, APITimeoutError
+                connection_error_types += (APIConnectionError, APITimeoutError)
+            except ImportError:
+                pass
+            if connection_error_types and isinstance(e, connection_error_types):
+                raise HTTPException(
+                    status_code=503,
+                    detail=f"LLM provider '{provider.name}' is unavailable (connection error).",
+                )
+            raise
         return ChatResponse(
             message=result.content,
             model=result.model,

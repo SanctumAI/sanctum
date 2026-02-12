@@ -681,7 +681,7 @@
     "LLM_MODEL": {
       "label": "模型名稱",
       "description": "模型名稱/識別碼",
-      "hint": "要使用的模型識別碼（例如 \"kimi-k2-thinking\"）。請查看提供者的文件了解可用模型。"
+      "hint": "要使用的模型識別碼（例如 \"kimi-k2-5\"）。請查看提供者的文件了解可用模型。"
     },
     "LLM_API_URL": {
       "label": "API 端點",

@@ -697,7 +697,7 @@
     "LLM_MODEL": {
       "label": "Numele modelului",
       "description": "Numele/identificatorul modelului",
-      "hint": "Identificatorul modelului de utilizat (de ex. \"kimi-k2-thinking\"). Verificați documentația furnizorului pentru modelele disponibile."
+      "hint": "Identificatorul modelului de utilizat (de ex. \"kimi-k2-5\"). Verificați documentația furnizorului pentru modelele disponibile."
     },
     "LLM_API_URL": {
       "label": "Punct final API",

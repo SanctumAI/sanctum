@@ -26,7 +26,7 @@ class OllamaProvider(LLMProvider):
 
         # Use config_loader for runtime config, with env fallback
         try:
-            from ..config_loader import get_config
+            from config_loader import get_config
             self.base_url = get_config("LLM_API_URL") or get_config("OLLAMA_BASE_URL") or "http://ollama:11434/v1"
             self.default_model = get_config("LLM_MODEL") or get_config("OLLAMA_MODEL") or "llama3.2"
         except ImportError:
@@ -49,7 +49,7 @@ class OllamaProvider(LLMProvider):
         """Refresh config from config_loader if available"""
         with self._lock:
             try:
-                from ..config_loader import get_config
+                from config_loader import get_config
                 new_base_url = get_config("LLM_API_URL") or get_config("OLLAMA_BASE_URL") or self.base_url
                 new_model = get_config("LLM_MODEL") or get_config("OLLAMA_MODEL") or self.default_model
 

@@ -11,6 +11,7 @@ import {
   getInstanceConfig,
   saveInstanceConfig,
   applyAccentColor,
+  applyCustomAccentColor,
   applyDocumentTitle,
   applyFavicon,
   applyAppleTouchIcon,
@@ -70,6 +71,23 @@ function hexToAccentColor(value: string | undefined): AccentColor | undefined {
   }
 
   return undefined
+}
+
+function applyPrimaryColorFromSetting(primaryColor: string | undefined, fallback: AccentColor) {
+  // If it's a preset name, keep using the class-based themes.
+  const preset = hexToAccentColor(primaryColor)
+  if (preset) {
+    applyAccentColor(preset)
+    return
+  }
+
+  // If it's a custom hex color, apply it directly.
+  if (typeof primaryColor === 'string' && applyCustomAccentColor(primaryColor)) {
+    return
+  }
+
+  // Fallback to a known preset.
+  applyAccentColor(fallback)
 }
 
 /**
@@ -215,7 +233,7 @@ export function InstanceConfigProvider({ children }: { children: ReactNode }) {
           
           setConfigState(newConfig)
           saveInstanceConfig(newConfig)
-          applyAccentColor(newConfig.accentColor)
+          applyPrimaryColorFromSetting(settings.primary_color, newConfig.accentColor)
           applySurfaceStyle(newConfig.surfaceStyle)
           applyTypographyPreset(newConfig.typographyPreset)
           applyDocumentTitle(newConfig.name)

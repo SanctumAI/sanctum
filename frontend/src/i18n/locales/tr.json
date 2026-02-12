@@ -682,7 +682,7 @@
     "LLM_MODEL": {
       "label": "Model Adı",
       "description": "Model adı/tanımlayıcısı",
-      "hint": "Kullanılacak model tanımlayıcısı (ör. \"kimi-k2-thinking\"). Mevcut modeller için sağlayıcınızın belgelerini kontrol edin."
+      "hint": "Kullanılacak model tanımlayıcısı (ör. \"kimi-k2-5\"). Mevcut modeller için sağlayıcınızın belgelerini kontrol edin."
     },
     "LLM_API_URL": {
       "label": "API Uç Noktası",

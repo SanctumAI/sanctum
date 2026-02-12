@@ -8,6 +8,7 @@ Sanctum supports tool calling for the AI chat, allowing the LLM to access extern
 |---------|------|-------------|--------|
 | `web-search` | Web Search | Search the web via self-hosted SearXNG | All users |
 | `db-query` | Database | Execute read-only SQL queries | Admin only |
+| `admin-config` | Config | Inject admin configuration snapshot and enable config change-set apply flow | Admin only (UI meta-tool) |
 
 ## Architecture
 
@@ -45,9 +46,26 @@ In the chat interface, click the **"Web"** button in the toolbar to enable web s
 - **Alone**: Pure LLM chat with web search context
 - **With RAG**: Combined with knowledge base documents
 
+Admins have two UI entry points that now share the same chat tool runtime:
+- Full chat page (`/chat`)
+- Admin configuration assistant bubble (mounted on admin routes)
+
+Current frontend behavior:
+- Admin `/chat` uses `/llm/chat` for assistant turns (same as admin bubble).
+- Admin configuration snapshot context + config apply flow are enabled when the `admin-config` tool toggle is on.
+- Non-admin `/chat` may use `/query` when document scope is selected.
+
 ### API
 
 `/llm/chat` executes tools server-side. `/query` accepts `tools` only to enable auto-search hints (no tool execution).
+
+When an admin sends `tool_context`, the backend also accepts:
+- `client_executed_tools`: optional list of tool IDs already executed client-side and represented inside `tool_context`.
+
+Behavior:
+- Tools in `client_executed_tools` are not re-executed server-side.
+- Remaining selected tools still execute server-side.
+- Non-admin users cannot use `tool_context` (the server returns HTTP 403 with `"Tool context override is admin-only"`).
 
 ```bash
 # Pure LLM chat with web search (server-side tool execution)
@@ -128,7 +146,7 @@ Responses include a `tools_used` array showing which tools were executed:
 ```json
 {
   "message": "Based on current search results...",
-  "model": "kimi-k2-thinking",
+  "model": "kimi-k2-5",
   "provider": "maple",
   "tools_used": [
     {
@@ -256,14 +274,17 @@ This tool is **read-only** with multiple layers of protection:
 
 Admins with a NIP-07 extension can decrypt query results client-side and pass decrypted context to the chat endpoint.
 This keeps private key usage in the browser while allowing the LLM to see plaintext for that request.
-If other tools are selected (e.g., web-search), the backend will still execute them and merge their context; `db-query` is skipped server-side to avoid duplicate encrypted output.
+If other tools are selected (e.g., web-search), the backend still executes those tools and merges their context.
+`db-query` is skipped server-side only when the request includes `client_executed_tools: ["db-query"]`.
 
 > **What is NIP-07?** NIP-07 is a Nostr protocol specification that allows web applications to request cryptographic operations (signing, encryption, decryption) from a browser extension without exposing the user's private key. Extensions like nos2x and Alby implement NIP-07. See [NIP-07 spec](https://github.com/nostr-protocol/nips/blob/master/07.md) for details.
 
 Flow:
 1. Call `/admin/tools/execute` with `tool_id: "db-query"` and the natural-language question.
 2. Decrypt `encrypted_*` values with `window.nostr.nip04.decrypt(ephemeral_pubkey, ciphertext)`.
-3. Send the decrypted tool context to `/llm/chat` using the `tool_context` field.
+3. Send the decrypted tool context to `/llm/chat` using:
+   - `tool_context`: formatted decrypted context text
+   - `client_executed_tools: ["db-query"]`
 
 If no fields can be decrypted (e.g., admin lacks the correct private key), the frontend falls back to the standard encrypted tool path so ciphertext is still available.
 `tool_context` is admin-only and will be rejected for non-admin users.
@@ -351,8 +372,38 @@ curl -X POST http://localhost:8000/llm/chat \
   -d '{
     "message": "Summarize the most recent users",
     "tools": ["db-query"],
-    "tool_context": "Executed SQL: ...\\nDatabase query results (3 rows):\\nname | email | created_at\\n..."
+    "tool_context": "Executed SQL: ...\nDatabase query results (3 rows):\nname | email | created_at\n...",
+    "client_executed_tools": ["db-query"]
   }'
+```
+
+If `tool_context` is used for non-tool snapshot context (for example, admin configuration snapshot) and no tool was pre-executed client-side, send:
+
+```json
+{
+  "message": "Help me tune onboarding config",
+  "tools": ["web-search", "db-query"],
+  "tool_context": "ADMIN CONFIG SNAPSHOT ...",
+  "client_executed_tools": []
+}
+```
+
+This keeps server-side tool execution enabled for the selected tools.
+
+## Parity Check Script
+
+Use this quick integration script to verify `tools_used` parity between:
+- full-chat payload shape, and
+- admin-bubble payload shape (`tool_context` + `client_executed_tools: []`)
+
+```
+python scripts/tests/TOOLS/test_4a_unified_chat_tools_parity.py --admin-token <ADMIN_TOKEN>
+```
+
+Optional cookie-based auth:
+
+```
+python scripts/tests/TOOLS/test_4a_unified_chat_tools_parity.py --cookie-header "admin_session_cookie=..."
 ```
 
 ## Adding New Tools

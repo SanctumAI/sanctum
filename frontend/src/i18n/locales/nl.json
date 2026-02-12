@@ -818,7 +818,7 @@
     "LLM_MODEL": {
       "label": "Modelnaam",
       "description": "Modelnaam/identificatie",
-      "hint": "De modelidentificatie om te gebruiken (bijv. \"kimi-k2-thinking\"). Raadpleeg de documentatie van uw provider voor beschikbare modellen."
+      "hint": "De modelidentificatie om te gebruiken (bijv. \"kimi-k2-5\"). Raadpleeg de documentatie van uw provider voor beschikbare modellen."
     },
     "LLM_API_URL": {
       "label": "API-eindpunt",

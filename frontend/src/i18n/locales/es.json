@@ -681,7 +681,7 @@
     "LLM_MODEL": {
       "label": "Nombre del modelo",
       "description": "Nombre/identificador del modelo",
-      "hint": "El identificador del modelo a usar (ej: \"kimi-k2-thinking\"). Consulta la documentación de tu proveedor para modelos disponibles."
+      "hint": "El identificador del modelo a usar (ej: \"kimi-k2-5\"). Consulta la documentación de tu proveedor para modelos disponibles."
     },
     "LLM_API_URL": {
       "label": "Endpoint de API",

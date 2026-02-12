@@ -23,7 +23,7 @@ However, during this hackathon, we face a hard constraint: **time**.
 | Component | Provider | Location | Speed |
 |-----------|----------|----------|-------|
 | PDF Extraction | PyMuPDF | Local | ~1 sec total |
-| Embeddings | **OpenAI API** | ⚠️ External | ~0.2 sec/batch |
+| Embeddings | SentenceTransformer | Local CPU | ~2-13 sec/chunk |
 | LLM Extraction | Maple Proxy | HRF-hosted | ~10-20 sec/chunk |
 | Vector Store | Qdrant | Local container | Fast |
 | Database | SQLite | Local container | Fast |
@@ -33,12 +33,7 @@ However, during this hackathon, we face a hard constraint: **time**.
 ## What Data Leaves the Environment?
 
 ### In Hackathon Mode:
-1. **OpenAI Embeddings API** receives:
-   - Chunk text (sanitized, no PII in test docs)
-   - Fact statements extracted by LLM
-   - ⚠️ This is the privacy trade-off
-
-2. **Maple Proxy** (HRF-controlled) receives:
+1. **Maple Proxy** (HRF-controlled) receives:
    - Chunk text for entity/relationship extraction
    - ✅ This stays within HRF infrastructure
 
@@ -51,9 +46,9 @@ However, during this hackathon, we face a hard constraint: **time**.
 
 1. **Test Data Only**: We're using public documents (guides, whitepapers) - no sensitive data
 2. **One-Time Ingestion**: This is a build/demo phase, not production use
-3. **Reversible**: Switching back to local embeddings is a single env var change:
+3. **Reversible**: Switching embedding models is a single env var change:
    ```
-   EMBEDDING_PROVIDER=local  # Instead of 'openai'
+   EMBEDDING_MODEL=intfloat/multilingual-e5-base
    ```
 4. **Architecture Unchanged**: The sovereignty-first design remains intact; we're just swapping providers
 
@@ -62,16 +57,13 @@ However, during this hackathon, we face a hard constraint: **time**.
 ```bash
 # .env file
 
-# HACKATHON MODE (fast, uses external API)
-EMBEDDING_PROVIDER=openai
-OPENAI_API_KEY=sk-...
-EMBEDDING_MODEL=text-embedding-3-small
-EMBEDDING_DIMENSIONS=768
+# HACKATHON MODE (current default) — smaller model, faster PDF parsing
+EMBEDDING_MODEL=intfloat/multilingual-e5-base
 PDF_EXTRACT_MODE=fast
 
-# PRODUCTION MODE (slow, full sovereignty)
-# EMBEDDING_PROVIDER=local
-# EMBEDDING_MODEL=intfloat/multilingual-e5-base
+# PRODUCTION MODE — larger model for better accuracy, quality PDF parsing
+# Both modes use local SentenceTransformer; the trade-off is speed vs. accuracy.
+# EMBEDDING_MODEL=intfloat/multilingual-e5-large
 # PDF_EXTRACT_MODE=quality
 ```
 
@@ -79,9 +71,9 @@ PDF_EXTRACT_MODE=fast
 
 To return to full privacy mode:
 
-1. Set `EMBEDDING_PROVIDER=local` in `.env`
+1. Switch to the larger embedding model for better accuracy: `EMBEDDING_MODEL=intfloat/multilingual-e5-large`
 2. Set `PDF_EXTRACT_MODE=quality` for better document parsing
-3. Remove or don't set `OPENAI_API_KEY`
+3. Configure a local or self-hosted LLM (remove reliance on the HRF Maple proxy)
 4. Consider GPU acceleration for acceptable local performance
 
 ## The Bottom Line

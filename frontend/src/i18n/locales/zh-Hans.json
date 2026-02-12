@@ -685,7 +685,7 @@
     "LLM_MODEL": {
       "label": "模型名称",
       "description": "模型名称/标识符",
-      "hint": "要使用的模型标识符（例如 \"kimi-k2-thinking\"）。请查看提供商的文档了解可用模型。"
+      "hint": "要使用的模型标识符（例如 \"kimi-k2-5\"）。请查看提供商的文档了解可用模型。"
     },
     "LLM_API_URL": {
       "label": "API 端点",

@@ -914,7 +914,7 @@
     "LLM_MODEL": {
       "label": "Model Name",
       "description": "Model name/identifier",
-      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+      "hint": "The model identifier to use (e.g., \"kimi-k2-5\"). Check your provider's documentation for available models."
     },
     "LLM_API_URL": {
       "label": "API Endpoint",

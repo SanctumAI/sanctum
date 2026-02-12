@@ -681,7 +681,7 @@
     "LLM_MODEL": {
       "label": "Modellnavn",
       "description": "Modellnavn/identifikator",
-      "hint": "Modellidentifikatoren som skal brukes (f.eks. \"kimi-k2-thinking\"). Sjekk leverandørens dokumentasjon for tilgjengelige modeller."
+      "hint": "Modellidentifikatoren som skal brukes (f.eks. \"kimi-k2-5\"). Sjekk leverandørens dokumentasjon for tilgjengelige modeller."
     },
     "LLM_API_URL": {
       "label": "API-endepunkt",

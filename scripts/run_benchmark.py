@@ -81,7 +81,7 @@ load_dotenv()
 CONFIG = load_config()
 SESSIONS = load_sessions()
 BACKEND_URL = os.getenv("BACKEND_URL", CONFIG.get("backend_url", "http://localhost:8000"))
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+BENCHMARK_GRADING_API_KEY = os.getenv("BENCHMARK_GRADING_API_KEY")
 DEV_TOKEN = "dev-mode-mock-token"
 
 
@@ -131,7 +131,7 @@ def get_metadata() -> dict:
         "backend_url": BACKEND_URL,
         "web_search_enabled": CONFIG.get("enable_web_search", False),
         "auto_search_followup": CONFIG.get("enable_auto_search_followup", False),
-        "grading_enabled": bool(OPENAI_API_KEY) and CONFIG.get("grading", {}).get("enabled", True),
+        "grading_enabled": bool(BENCHMARK_GRADING_API_KEY) and CONFIG.get("grading", {}).get("enabled", True),
         "git": get_git_info(),
         "config": get_backend_config(),
     }
@@ -182,7 +182,7 @@ IMPORTANT: Return a CONDENSED response:
 
 def grade_response(turn_num: int, user_msg: str, actual: str, expected: str, history: list, search_results: str = None) -> dict:
     """Grade response with GPT-4o."""
-    if not OPENAI_API_KEY or not CONFIG.get("grading", {}).get("enabled", True):
+    if not BENCHMARK_GRADING_API_KEY or not CONFIG.get("grading", {}).get("enabled", True):
         return {"score": -1, "reasoning": "Grading disabled"}
     
     history_str = "\n".join([
@@ -219,7 +219,7 @@ JSON only:
                 "temperature": 0.1,
                 "response_format": {"type": "json_object"}
             },
-            headers={"Authorization": f"Bearer {OPENAI_API_KEY}"},
+            headers={"Authorization": f"Bearer {BENCHMARK_GRADING_API_KEY}"},
             timeout=60.0
         )
         if response.status_code == 200:
@@ -339,7 +339,7 @@ def main():
     print(f"  Backend: {BACKEND_URL}")
     print(f"  Web Search: {'ON' if CONFIG.get('enable_web_search') else 'OFF'}")
     print(f"  Auto-Search: {'ON' if CONFIG.get('enable_auto_search_followup') else 'OFF'}")
-    print(f"  Grading: {'ON' if OPENAI_API_KEY else 'OFF'}")
+    print(f"  Grading: {'ON' if metadata.get('grading_enabled') else 'OFF'}")
     print(f"  Sessions: {session_keys}")
     
     # Health check

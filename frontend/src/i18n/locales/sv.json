@@ -682,7 +682,7 @@
     "LLM_MODEL": {
       "label": "Modellnamn",
       "description": "Modellnamn/identifierare",
-      "hint": "Modellidentifieraren att använda (t.ex. \"kimi-k2-thinking\"). Se din leverantörs dokumentation för tillgängliga modeller."
+      "hint": "Modellidentifieraren att använda (t.ex. \"kimi-k2-5\"). Se din leverantörs dokumentation för tillgängliga modeller."
     },
     "LLM_API_URL": {
       "label": "API-slutpunkt",

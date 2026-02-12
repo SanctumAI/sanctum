@@ -682,7 +682,7 @@
     "LLM_MODEL": {
       "label": "Mallin nimi",
       "description": "Mallin nimi/tunniste",
-      "hint": "Käytettävä mallitunniste (esim. \"kimi-k2-thinking\"). Tarkista tarjoajasi dokumentaatiosta saatavilla olevat mallit."
+      "hint": "Käytettävä mallitunniste (esim. \"kimi-k2-5\"). Tarkista tarjoajasi dokumentaatiosta saatavilla olevat mallit."
     },
     "LLM_API_URL": {
       "label": "API-päätepiste",

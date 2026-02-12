@@ -932,10 +932,25 @@ def update_setting(key: str, value: str):
         """, (key, value))
 
 
-def update_settings(settings: dict):
+def update_settings(settings: dict[str, object]):
     """Update multiple settings at once"""
+    def _coerce_setting_value(value: object) -> str:
+        # Instance settings are persisted as TEXT. Keep a consistent representation.
+        if isinstance(value, bool):
+            return "true" if value else "false"
+        if isinstance(value, (int, float)):
+            return str(value)
+        if isinstance(value, (dict, list)):
+            try:
+                return json.dumps(value)
+            except Exception:
+                return str(value)
+        return str(value)
+
     for key, value in settings.items():
-        update_setting(key, value)
+        if value is None:
+            continue
+        update_setting(key, _coerce_setting_value(value))
 
 
 def get_auto_approve_users() -> bool:
@@ -1079,6 +1094,22 @@ def delete_user_type(type_id: int) -> bool:
 
 # --- User Field Definition Operations ---
 
+def _parse_field_definition_row(row: sqlite3.Row | None) -> dict | None:
+    """Convert a DB row to a field-definition dict with parsed JSON metadata."""
+    if row is None:
+        return None
+
+    field = dict(row)
+    raw_options = field.get("options")
+    if raw_options:
+        try:
+            parsed = json.loads(raw_options)
+            field["options"] = parsed if isinstance(parsed, list) else None
+        except (TypeError, json.JSONDecodeError):
+            field["options"] = None
+    return field
+
+
 def create_field_definition(
     field_name: str,
     field_type: str,
@@ -1141,14 +1172,9 @@ def get_field_definitions(user_type_id: int | None = None, include_global: bool 
 
         results = []
         for row in cursor.fetchall():
-            field = dict(row)
-            # Parse options JSON if present
-            if field.get("options"):
-                try:
-                    field["options"] = json.loads(field["options"])
-                except json.JSONDecodeError:
-                    field["options"] = None
-            results.append(field)
+            parsed = _parse_field_definition_row(row)
+            if parsed:
+                results.append(parsed)
         return results
 
 
@@ -1169,16 +1195,14 @@ def get_field_definition_by_name(field_name: str, user_type_id: int | None = Non
                    ORDER BY user_type_id DESC NULLS LAST LIMIT 1""",
                 (field_name, user_type_id)
             )
-        row = cursor.fetchone()
-        return dict(row) if row else None
+        return _parse_field_definition_row(cursor.fetchone())
 
 
 def get_field_definition_by_id(field_id: int) -> dict | None:
     """Get a field definition by id"""
     with get_cursor() as cursor:
         cursor.execute("SELECT * FROM user_field_definitions WHERE id = ?", (field_id,))
-        row = cursor.fetchone()
-        return dict(row) if row else None
+        return _parse_field_definition_row(cursor.fetchone())
 
 
 def update_field_definition(

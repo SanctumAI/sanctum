@@ -682,7 +682,7 @@
     "LLM_MODEL": {
       "label": "Modell neve",
       "description": "Modell név/azonosító",
-      "hint": "A használandó modell azonosító (pl. \"kimi-k2-thinking\"). Ellenőrizd a szolgáltatód dokumentációját az elérhető modellekért."
+      "hint": "A használandó modell azonosító (pl. \"kimi-k2-5\"). Ellenőrizd a szolgáltatód dokumentációját az elérhető modellekért."
     },
     "LLM_API_URL": {
       "label": "API végpont",

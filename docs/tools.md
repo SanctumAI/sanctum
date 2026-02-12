@@ -396,13 +396,13 @@ Use this quick integration script to verify `tools_used` parity between:
 - full-chat payload shape, and
 - admin-bubble payload shape (`tool_context` + `client_executed_tools: []`)
 
-```
+```bash
 python scripts/tests/TOOLS/test_4a_unified_chat_tools_parity.py --admin-token <ADMIN_TOKEN>
 ```
 
 Optional cookie-based auth:
 
-```
+```bash
 python scripts/tests/TOOLS/test_4a_unified_chat_tools_parity.py --cookie-header "admin_session_cookie=..."
 ```
 

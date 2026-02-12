@@ -226,6 +226,6 @@ If a retry fails with duplicate field name after an earlier failure:
 
 Run the parity script to confirm full-chat and bubble payloads produce matching `tools_used` behavior:
 
-```
+```bash
 python scripts/tests/TOOLS/test_4a_unified_chat_tools_parity.py --admin-token <ADMIN_TOKEN>
 ```

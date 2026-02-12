@@ -282,7 +282,7 @@ export function getConfigCategories(t: TFunction): Record<ConfigCategory, Config
     llm: {
       label: t('configCategories.llm.label', 'AI Provider'),
       description: t('configCategories.llm.description', 'Connect to your AI service'),
-      hint: t('configCategories.llm.hint', "Configure which AI service powers your assistant. Use Maple (API key required) or Ollama (self-hosted, no key). Changes require a service restart to take effect."),
+      hint: t('configCategories.llm.hint', 'Configure which AI service powers your assistant. Use Maple (API key required) or Ollama (self-hosted, no key). Changes require a service restart to take effect.'),
     },
     embedding: {
       label: t('configCategories.embedding.label', 'Text Processing'),

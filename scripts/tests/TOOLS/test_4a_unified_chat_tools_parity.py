@@ -28,6 +28,7 @@ from dataclasses import dataclass
 from typing import Any
 from urllib import error as urlerror
 from urllib import request as urlrequest
+from urllib.parse import urlparse
 
 
 DEFAULT_MESSAGE = "How many users are in the system?"
@@ -68,6 +69,14 @@ def _post_chat(api_base: str, headers: dict[str, str], payload: dict[str, Any], 
     try:
         data = json.loads(raw)
     except json.JSONDecodeError:
+        if status_code == 200:
+            return CaseResult(
+                name=name,
+                ok=False,
+                status_code=status_code,
+                tool_ids=[],
+                error=f"Invalid JSON in 200 response: {raw}",
+            )
         data = {"detail": raw}
 
     if status_code != 200:
@@ -107,6 +116,11 @@ def main() -> int:
 
     if not args.admin_token and not args.cookie_header:
         print("[ERROR] Provide either --admin-token or --cookie-header")
+        return 2
+
+    parsed = urlparse(args.api_base)
+    if parsed.scheme not in ("http", "https"):
+        print(f"[ERROR] api_base must use http or https scheme, got: {args.api_base}")
         return 2
 
     headers = {"Content-Type": "application/json"}

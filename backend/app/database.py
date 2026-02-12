@@ -932,7 +932,7 @@ def update_setting(key: str, value: str):
         """, (key, value))
 
 
-def update_settings(settings: dict[str, object]):
+def update_settings(settings: dict[str, object]) -> None:
     """Update multiple settings at once"""
     def _coerce_setting_value(value: object) -> str:
         # Instance settings are persisted as TEXT. Keep a consistent representation.
@@ -943,7 +943,7 @@ def update_settings(settings: dict[str, object]):
         if isinstance(value, (dict, list)):
             try:
                 return json.dumps(value)
-            except Exception:
+            except (TypeError, ValueError):
                 return str(value)
         return str(value)
 
@@ -1101,7 +1101,9 @@ def _parse_field_definition_row(row: sqlite3.Row | None) -> dict | None:
 
     field = dict(row)
     raw_options = field.get("options")
-    if raw_options:
+    if raw_options is None or (isinstance(raw_options, str) and not raw_options.strip()):
+        field["options"] = None
+    else:
         try:
             parsed = json.loads(raw_options)
             field["options"] = parsed if isinstance(parsed, list) else None

@@ -47,7 +47,7 @@ However, during this hackathon, we face a hard constraint: **time**.
 1. **Test Data Only**: We're using public documents (guides, whitepapers) - no sensitive data
 2. **One-Time Ingestion**: This is a build/demo phase, not production use
 3. **Reversible**: Switching embedding models is a single env var change:
-   ```
+   ```bash
    EMBEDDING_MODEL=intfloat/multilingual-e5-base
    ```
 4. **Architecture Unchanged**: The sovereignty-first design remains intact; we're just swapping providers

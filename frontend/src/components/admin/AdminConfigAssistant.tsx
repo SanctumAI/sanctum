@@ -319,6 +319,9 @@ export function AdminConfigAssistant() {
     if (toolId === CONFIG_TOOL_ID && selectedTools.includes(CONFIG_TOOL_ID)) {
       setApplyState({ state: 'idle' })
       setSnapshotInfo(null)
+      setShareSecrets(false)
+      secretsForRedactionRef.current = []
+      deploymentSecretKeysRef.current = new Set()
     }
     setSelectedTools((prev) =>
       prev.includes(toolId) ? prev.filter((id) => id !== toolId) : [...prev, toolId]

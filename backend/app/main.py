@@ -581,7 +581,7 @@ async def smoke_test():
 
         if collection_exists:
             # Retrieve the seeded point using UUID derived from claim ID
-            claim_id = "claim_udhr_1948"
+            claim_id = "claim_knowledge_sharing"
             point_uuid = str(uuid.uuid5(uuid.NAMESPACE_DNS, claim_id))
             points = client.retrieve(
                 collection_name=COLLECTION_NAME,

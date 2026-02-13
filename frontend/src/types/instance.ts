@@ -17,6 +17,8 @@ export type TypographyPreset = 'modern' | 'grotesk' | 'humanist'
 export interface InstanceConfig {
   name: string
   accentColor: AccentColor
+  /** Raw primary_color from backend. When a custom hex, overrides accentColor for styling. */
+  primaryColor?: string
   icon: string
   logoUrl: string
   faviconUrl: string
@@ -187,6 +189,7 @@ export function getInstanceConfig(): InstanceConfig {
     return {
       name: parsed.name || DEFAULT_INSTANCE_CONFIG.name,
       accentColor: parsed.accentColor || DEFAULT_INSTANCE_CONFIG.accentColor,
+      primaryColor: typeof parsed.primaryColor === 'string' ? parsed.primaryColor : undefined,
       icon: parsed.icon || DEFAULT_INSTANCE_CONFIG.icon,
       logoUrl: typeof parsed.logoUrl === 'string' ? parsed.logoUrl : DEFAULT_INSTANCE_CONFIG.logoUrl,
       faviconUrl: typeof parsed.faviconUrl === 'string' ? parsed.faviconUrl : DEFAULT_INSTANCE_CONFIG.faviconUrl,

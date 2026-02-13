@@ -61,7 +61,7 @@ function _readUserTypeId(value: unknown): number | string | undefined {
   if (/^@type:[a-z0-9_]+$/.test(trimmed)) return trimmed
   if (/^\d+$/.test(trimmed)) {
     const parsed = Number.parseInt(trimmed, 10)
-    if (Number.isFinite(parsed)) return parsed
+    if (Number.isFinite(parsed) && parsed > 0) return parsed
   }
   return undefined
 }

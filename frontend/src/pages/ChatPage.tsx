@@ -691,7 +691,9 @@ export function ChatPage() {
 
       const okCount = results.filter((r) => r.ok).length
       const failCount = results.length - okCount
-      const baseSummary = `Applied ${okCount}/${results.length} change(s)${failCount ? `, ${failCount} failed` : ''}.`
+      const baseSummary = failCount
+        ? t('admin.configAssistant.applySummary.appliedCountsWithFailures', { ok: okCount, total: results.length, failed: failCount })
+        : t('admin.configAssistant.applySummary.appliedCounts', { ok: okCount, total: results.length })
 
       const failedDetails = results
         .filter((r) => !r.ok)
@@ -707,16 +709,20 @@ export function ChatPage() {
           const v = await validationRes.json() as { valid: boolean; errors?: string[]; warnings?: string[] }
           if (v.valid) {
             const warnings = (v.warnings || []).filter(Boolean)
-            postApplyNotes.push(warnings.length ? `Config validation: valid (warnings: ${warnings.length}).` : 'Config validation: valid.')
+            postApplyNotes.push(
+              warnings.length
+                ? t('admin.configAssistant.applySummary.configValidationValidWarnings', { count: warnings.length })
+                : t('admin.configAssistant.applySummary.configValidationValid')
+            )
           } else {
             const errors = (v.errors || []).filter(Boolean)
-            postApplyNotes.push(`Config validation: INVALID (errors: ${errors.length}).`)
+            postApplyNotes.push(t('admin.configAssistant.applySummary.configValidationInvalidErrors', { count: errors.length }))
           }
         } else {
-          postApplyNotes.push(`Config validation: failed (HTTP ${validationRes.status}).`)
+          postApplyNotes.push(t('admin.configAssistant.applySummary.configValidationFailedHttp', { status: validationRes.status }))
         }
       } catch {
-        postApplyNotes.push('Config validation: failed (network error).')
+        postApplyNotes.push(t('admin.configAssistant.applySummary.configValidationFailedNetwork'))
       }
 
       try {
@@ -725,15 +731,15 @@ export function ChatPage() {
           const data = await rr.json() as { restart_required: boolean; changed_keys?: Array<{ key: string }> }
           const keys = (data.changed_keys || []).map((k) => k.key).filter(Boolean)
           if (data.restart_required && keys.length) {
-            postApplyNotes.push(`Restart required for: ${keys.join(', ')}.`)
+            postApplyNotes.push(t('admin.configAssistant.applySummary.restartRequiredFor', { keys: keys.join(', ') }))
           } else {
-            postApplyNotes.push('Restart required: no.')
+            postApplyNotes.push(t('admin.configAssistant.applySummary.restartRequiredNo'))
           }
         } else {
-          postApplyNotes.push(`Restart required check: failed (HTTP ${rr.status}).`)
+          postApplyNotes.push(t('admin.configAssistant.applySummary.restartCheckFailedHttp', { status: rr.status }))
         }
       } catch {
-        postApplyNotes.push('Restart required check: failed (network error).')
+        postApplyNotes.push(t('admin.configAssistant.applySummary.restartCheckFailedNetwork'))
       }
 
       const summary = [baseSummary, ...postApplyNotes].join(' ') + failureSummary
@@ -751,7 +757,7 @@ export function ChatPage() {
     } catch (e) {
       setAdminApplyState({ state: 'error', message: e instanceof Error ? e.message : String(e) })
     }
-  }, [fetchJson])
+  }, [fetchJson, t])
 
   const adminApplyPreview = useMemo(() => {
     if (adminApplyState.state !== 'review' && adminApplyState.state !== 'applying') return null
@@ -904,6 +910,9 @@ IMPORTANT: Return a CONDENSED response:
 
   const header = <AppHeader rightActions={rightActions} />
 
+  // Admin chat intentionally excludes DocumentScope: admin workflows use CONFIG_TOOL_ID
+  // and /admin configuration paths, and RAG is intentionally disabled for admins
+  // (see useRag = !isAdmin && selectedDocuments.length > 0 && !wantsDbQuery).
   const inputToolbar = isAdmin
     ? <ToolSelector tools={availableTools} selectedTools={selectedTools} onToggle={handleToolToggle} />
     : (
@@ -954,7 +963,9 @@ IMPORTANT: Return a CONDENSED response:
       {isAdmin && selectedTools.includes(CONFIG_TOOL_ID) && adminSnapshotInfo && (
         <div className="px-3 sm:px-4 pb-2">
           <div className="max-w-3xl mx-auto text-xs text-text-muted">
-            Admin config context refreshed: {new Date(adminSnapshotInfo.generatedAtIso).toLocaleString()}
+            {t('admin.configAssistant.contextRefreshed', {
+              timestamp: new Date(adminSnapshotInfo.generatedAtIso).toLocaleString(),
+            })}
           </div>
         </div>
       )}
@@ -974,25 +985,27 @@ IMPORTANT: Return a CONDENSED response:
           <div className="max-w-3xl mx-auto border border-border rounded-2xl bg-surface-raised overflow-hidden">
             <div className="px-4 py-3 border-b border-border flex items-center justify-between gap-3">
               <div className="text-sm font-medium text-text truncate">
-                Pending changes {adminApplyPreview.summary ? `: ${adminApplyPreview.summary}` : ''}
+                {adminApplyPreview.summary
+                  ? t('admin.configAssistant.pendingChangesWithSummary', { summary: adminApplyPreview.summary })
+                  : t('admin.configAssistant.pendingChanges')}
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => setAdminApplyState({ state: 'idle' })}
                   className="px-3 py-1.5 rounded-lg text-xs font-medium text-text-secondary hover:text-text hover:bg-surface-overlay transition-colors"
                 >
-                  Dismiss
+                  {t('admin.configAssistant.dismiss')}
                 </button>
                 <button
                   onClick={() => handleAdminApply(adminApplyState.changeSet)}
                   className="px-3 py-1.5 rounded-lg text-xs font-medium bg-accent text-accent-text hover:bg-accent-hover transition-colors"
                 >
-                  Apply
+                  {t('admin.configAssistant.apply')}
                 </button>
               </div>
             </div>
             <div className="px-4 py-2 text-xs text-text-muted border-b border-border">
-              Review: values for secret deployment keys are masked here.
+              {t('admin.configAssistant.reviewMaskedSecrets')}
             </div>
             <div className="px-4 py-3 space-y-2 max-h-64 overflow-y-auto">
               {adminApplyPreview.requests.map((r) => (
@@ -1011,7 +1024,7 @@ IMPORTANT: Return a CONDENSED response:
       {isAdmin && selectedTools.includes(CONFIG_TOOL_ID) && adminApplyState.state === 'applying' && (
         <div className="px-3 sm:px-4 pb-2">
           <div className="max-w-3xl mx-auto text-sm text-text-muted border border-border rounded-xl px-4 py-3 bg-surface-raised">
-            Applying admin configuration changes...
+            {t('admin.configAssistant.applyingAdminChanges')}
           </div>
         </div>
       )}

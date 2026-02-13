@@ -389,7 +389,7 @@ export function AdminConfigAssistant() {
         else if (raw.includes('```json') && raw.includes('"requests"')) setApplyState({ state: 'error', message: extracted.error })
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to send message')
+      setError(e instanceof Error ? e.message : t('errors.failedToSendMessage'))
     } finally {
       setIsLoading(false)
     }
@@ -487,7 +487,9 @@ export function AdminConfigAssistant() {
 
       const okCount = results.filter((r) => r.ok).length
       const failCount = results.length - okCount
-      const baseSummary = `Applied ${okCount}/${results.length} change(s)${failCount ? `, ${failCount} failed` : ''}.`
+      const baseSummary = failCount
+        ? t('admin.configAssistant.applySummary.appliedCountsWithFailures', { ok: okCount, total: results.length, failed: failCount })
+        : t('admin.configAssistant.applySummary.appliedCounts', { ok: okCount, total: results.length })
 
       const failedDetails = results
         .filter((r) => !r.ok)
@@ -504,16 +506,20 @@ export function AdminConfigAssistant() {
           const v = await validationRes.json() as { valid: boolean; errors?: string[]; warnings?: string[] }
           if (v.valid) {
             const warnings = (v.warnings || []).filter(Boolean)
-            postApplyNotes.push(warnings.length ? `Config validation: valid (warnings: ${warnings.length}).` : 'Config validation: valid.')
+            postApplyNotes.push(
+              warnings.length
+                ? t('admin.configAssistant.applySummary.configValidationValidWarnings', { count: warnings.length })
+                : t('admin.configAssistant.applySummary.configValidationValid')
+            )
           } else {
             const errors = (v.errors || []).filter(Boolean)
-            postApplyNotes.push(`Config validation: INVALID (errors: ${errors.length}).`)
+            postApplyNotes.push(t('admin.configAssistant.applySummary.configValidationInvalidErrors', { count: errors.length }))
           }
         } else {
-          postApplyNotes.push(`Config validation: failed (HTTP ${validationRes.status}).`)
+          postApplyNotes.push(t('admin.configAssistant.applySummary.configValidationFailedHttp', { status: validationRes.status }))
         }
       } catch {
-        postApplyNotes.push('Config validation: failed (network error).')
+        postApplyNotes.push(t('admin.configAssistant.applySummary.configValidationFailedNetwork'))
       }
 
       try {
@@ -522,15 +528,15 @@ export function AdminConfigAssistant() {
           const data = await rr.json() as { restart_required: boolean; changed_keys?: Array<{ key: string }> }
           const keys = (data.changed_keys || []).map((k) => k.key).filter(Boolean)
           if (data.restart_required && keys.length) {
-            postApplyNotes.push(`Restart required for: ${keys.join(', ')}.`)
+            postApplyNotes.push(t('admin.configAssistant.applySummary.restartRequiredFor', { keys: keys.join(', ') }))
           } else {
-            postApplyNotes.push('Restart required: no.')
+            postApplyNotes.push(t('admin.configAssistant.applySummary.restartRequiredNo'))
           }
         } else {
-          postApplyNotes.push(`Restart required check: failed (HTTP ${rr.status}).`)
+          postApplyNotes.push(t('admin.configAssistant.applySummary.restartCheckFailedHttp', { status: rr.status }))
         }
       } catch {
-        postApplyNotes.push('Restart required check: failed (network error).')
+        postApplyNotes.push(t('admin.configAssistant.applySummary.restartCheckFailedNetwork'))
       }
 
       const summary = [baseSummary, ...postApplyNotes].join(' ') + failureSummary
@@ -548,7 +554,7 @@ export function AdminConfigAssistant() {
     } catch (e) {
       setApplyState({ state: 'error', message: e instanceof Error ? e.message : String(e) })
     }
-  }, [fetchJson])
+  }, [fetchJson, t])
 
   const applyPreview = useMemo(() => {
     if (applyState.state !== 'review' && applyState.state !== 'applying') return null
@@ -632,8 +638,8 @@ export function AdminConfigAssistant() {
         <button
           onClick={() => setOpen(true)}
           className="fixed bottom-5 right-5 z-50 w-12 h-12 rounded-2xl bg-gradient-to-br from-accent to-accent-hover shadow-lg ring-1 ring-white/10 hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-95 flex items-center justify-center"
-          aria-label="Open admin assistant"
-          title="Admin assistant"
+          aria-label={t('admin.configAssistant.openAria')}
+          title={t('admin.configAssistant.openTitle')}
         >
           <MessageCircle className="w-5 h-5 text-white" />
         </button>
@@ -646,14 +652,14 @@ export function AdminConfigAssistant() {
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-4 h-4 text-accent" />
-                <div className="font-semibold text-text truncate">Admin Configuration Assistant</div>
+                <div className="font-semibold text-text truncate">{t('admin.configAssistant.title')}</div>
               </div>
               <div className="text-xs text-text-muted mt-0.5">
                 {!hasConfigTool
-                  ? 'Context tool is off'
+                  ? t('admin.configAssistant.contextToolOff')
                   : snapshotInfo?.generatedAtIso
-                    ? `Context: ${new Date(snapshotInfo.generatedAtIso).toLocaleString()}`
-                    : 'Context: not loaded yet'}
+                    ? t('admin.configAssistant.contextReady', { timestamp: new Date(snapshotInfo.generatedAtIso).toLocaleString() })
+                    : t('admin.configAssistant.contextNotLoaded')}
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
@@ -668,14 +674,14 @@ export function AdminConfigAssistant() {
                     secretsForRedactionRef.current = snap.secretValues
                     deploymentSecretKeysRef.current = snap.deploymentSecretKeys
                   } catch (e) {
-                    setError(e instanceof Error ? e.message : 'Failed to refresh context')
+                    setError(e instanceof Error ? e.message : t('admin.configAssistant.refreshFailed'))
                   } finally {
                     setIsLoading(false)
                   }
                 }}
                 className="p-2 rounded-xl hover:bg-surface-overlay text-text-muted hover:text-text transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Refresh context"
-                aria-label="Refresh context"
+                title={t('admin.configAssistant.refreshContext')}
+                aria-label={t('admin.configAssistant.refreshContext')}
                 disabled={!hasConfigTool}
               >
                 <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -683,17 +689,17 @@ export function AdminConfigAssistant() {
               <button
                 onClick={() => setIsExpanded((prev) => !prev)}
                 className="px-2.5 py-2 rounded-xl hover:bg-surface-overlay text-text-muted hover:text-text transition-colors flex items-center gap-1.5"
-                title={isExpanded ? 'Switch to compact size' : 'Switch to expanded size'}
-                aria-label={isExpanded ? 'Switch to compact size' : 'Switch to expanded size'}
+                title={isExpanded ? t('admin.configAssistant.switchToCompact') : t('admin.configAssistant.switchToExpanded')}
+                aria-label={isExpanded ? t('admin.configAssistant.switchToCompact') : t('admin.configAssistant.switchToExpanded')}
               >
                 {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-                <span className="text-xs font-medium">{isExpanded ? 'Compact' : 'Expand'}</span>
+                <span className="text-xs font-medium">{isExpanded ? t('admin.configAssistant.compact') : t('admin.configAssistant.expand')}</span>
               </button>
               <button
                 onClick={closePanel}
                 className="p-2 rounded-xl hover:bg-surface-overlay text-text-muted hover:text-text transition-colors"
-                title="Close"
-                aria-label="Close"
+                title={t('common.close')}
+                aria-label={t('common.close')}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -717,16 +723,16 @@ export function AdminConfigAssistant() {
                 className="mt-1 disabled:cursor-not-allowed"
               />
               <div>
-                <div className="text-sm font-medium text-text">Share secret env vars</div>
+                <div className="text-sm font-medium text-text">{t('admin.configAssistant.shareSecretsTitle')}</div>
                 <div className="text-xs text-text-muted">
-                  Off by default. Enable Config tool first. When enabled, secret deployment config values are revealed client-side and sent to your LLM provider.
+                  {t('admin.configAssistant.shareSecretsHint')}
                 </div>
               </div>
             </label>
             {hasConfigTool && shareSecrets && (
               <div className="flex items-center gap-2 text-xs text-warning shrink-0">
                 <ShieldAlert className="w-4 h-4" />
-                <span className="hidden sm:inline">Sensitive</span>
+                <span className="hidden sm:inline">{t('admin.configAssistant.sensitive')}</span>
               </div>
             )}
           </div>
@@ -735,7 +741,7 @@ export function AdminConfigAssistant() {
             <div className="space-y-4">
               {messages.length === 0 ? (
                 <div className="text-sm text-text-muted">
-                  Ask questions about any admin configuration. If you want the assistant to propose and apply changes, ask it to include a JSON change set.
+                  {t('admin.configAssistant.emptyPrompt')}
                 </div>
               ) : (
                 messages.map((m) => (
@@ -755,7 +761,7 @@ export function AdminConfigAssistant() {
                         <span className="w-2 h-2 bg-accent/60 rounded-full typing-dot" />
                         <span className="w-2 h-2 bg-accent/60 rounded-full typing-dot" />
                       </div>
-                      <span className="text-sm text-text-secondary animate-pulse-subtle">Thinking...</span>
+                      <span className="text-sm text-text-secondary animate-pulse-subtle">{t('chat.typing')}</span>
                     </div>
                   </div>
                 </div>
@@ -777,14 +783,16 @@ export function AdminConfigAssistant() {
                 <div className="border border-border rounded-2xl bg-surface-raised overflow-hidden">
                   <div className="px-3 py-2 border-b border-border flex items-center justify-between gap-2">
                     <div className="text-sm font-medium text-text truncate">
-                      Pending changes {applyPreview.summary ? `: ${applyPreview.summary}` : ''}
+                      {applyPreview.summary
+                        ? t('admin.configAssistant.pendingChangesWithSummary', { summary: applyPreview.summary })
+                        : t('admin.configAssistant.pendingChanges')}
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setApplyState({ state: 'idle' })}
                         className="p-2 rounded-xl hover:bg-surface-overlay text-text-muted hover:text-text transition-colors"
-                        title="Dismiss"
-                        aria-label="Dismiss"
+                        title={t('admin.configAssistant.dismiss')}
+                        aria-label={t('admin.configAssistant.dismiss')}
                       >
                         <EyeOff className="w-4 h-4" />
                       </button>
@@ -793,12 +801,12 @@ export function AdminConfigAssistant() {
                         className="flex items-center gap-2 px-3 py-2 rounded-xl bg-accent text-accent-text hover:bg-accent-hover transition-colors text-sm font-medium"
                       >
                         <Play className="w-4 h-4" />
-                        Apply
+                        {t('admin.configAssistant.apply')}
                       </button>
                     </div>
                   </div>
                   <div className="px-3 py-2 text-xs text-text-muted">
-                    Review: values for secret deployment keys are masked here.
+                    {t('admin.configAssistant.reviewMaskedSecrets')}
                   </div>
                   <div className="px-3 pb-3 space-y-2">
                     {applyPreview.requests.map((r) => (
@@ -815,7 +823,7 @@ export function AdminConfigAssistant() {
 
               {hasConfigTool && applyState.state === 'applying' && (
                 <div className="text-sm text-text-muted border border-border rounded-xl px-3 py-2 bg-surface-raised">
-                  Applying changes...
+                  {t('admin.configAssistant.applyingChanges')}
                 </div>
               )}
             </div>
@@ -824,7 +832,7 @@ export function AdminConfigAssistant() {
           <ChatInput
             onSend={(msg) => void handleSend(msg)}
             disabled={isLoading}
-            placeholder="Ask about admin configuration..."
+            placeholder={t('admin.configAssistant.inputPlaceholder')}
             toolbar={inputToolbar}
           />
         </div>

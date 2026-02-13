@@ -6,10 +6,12 @@ This folder contains longer-form documentation for Sanctum.
 
 - [authentication.md](authentication.md) - Admin (Nostr) and user (magic link) authentication flows.
 - [instance-initiation.md](instance-initiation.md) - Admin-first "initiation" gating (instance status, root redirects, and guarded public routes).
+- [tools.md](tools.md) - AI tool system (`web-search`, `db-query`), `/llm/chat` tool execution semantics, and admin decrypted tool-context flow.
 - [sessions.md](sessions.md) - Auth sessions (cookies/bearer tokens), CSRF, and RAG conversation sessions (`session_id`).
 - [security.md](security.md) - Security overview and production hardening checklist.
 - [user-reachout.md](user-reachout.md) - Authenticated user email reachout feature (spec + implementation notes).
 - [security-data-protection-checklist.md](security-data-protection-checklist.md) - Detailed security/data protection checklist (engineering-facing).
+- [integration-tests.md](integration-tests.md) - Backend integration tests and quick parity checks (including chat tool parity script).
 
 ## Admin / Ops
 

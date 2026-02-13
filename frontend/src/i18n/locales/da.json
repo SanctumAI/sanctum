@@ -414,6 +414,46 @@
       "selectUsers": "Vælg mindst en bruger at migrere.",
       "batchFailed": "Kunne ikke migrere valgte brugere.",
       "batchSummary": "Migrering færdig. Migrerede: {{migrated}}. Mislykkede: {{failed}}."
+    },
+    "configAssistant": {
+      "openAria": "Åbn adminassistent",
+      "openTitle": "Adminassistent",
+      "title": "Admin-konfigurationsassistent",
+      "contextToolOff": "Kontekstværktøjet er slået fra",
+      "contextReady": "Kontekst: {{timestamp}}",
+      "contextNotLoaded": "Kontekst: ikke indlæst endnu",
+      "contextRefreshed": "Admin-konfigurationskontekst opdateret: {{timestamp}}",
+      "refreshContext": "Opdater kontekst",
+      "refreshFailed": "Kunne ikke opdatere kontekst",
+      "switchToCompact": "Skift til kompakt størrelse",
+      "switchToExpanded": "Skift til udvidet størrelse",
+      "compact": "Kompakt",
+      "expand": "Udvid",
+      "shareSecretsTitle": "Del hemmelige miljøvariabler",
+      "shareSecretsHint": "Slået fra som standard. Aktivér først Config-værktøjet. Når det er aktiveret, vises hemmelige deploy-konfigurationsværdier på klientsiden og sendes til din LLM-udbyder.",
+      "sensitive": "Følsom",
+      "emptyPrompt": "Stil spørgsmål om enhver admin-konfiguration. Hvis du vil have assistenten til at foreslå og anvende ændringer, så bed den om at inkludere et JSON change set.",
+      "pendingChanges": "Afventende ændringer",
+      "pendingChangesWithSummary": "Afventende ændringer: {{summary}}",
+      "dismiss": "Luk",
+      "apply": "Anvend",
+      "reviewMaskedSecrets": "Gennemgang: værdier for hemmelige deploy-nøgler er maskeret her.",
+      "applyingChanges": "Anvender ændringer...",
+      "applyingAdminChanges": "Anvender ændringer i admin-konfiguration...",
+      "inputPlaceholder": "Spørg om admin-konfiguration...",
+      "applySummary": {
+        "appliedCounts": "Anvendte {{ok}}/{{total}} ændring(er).",
+        "appliedCountsWithFailures": "Anvendte {{ok}}/{{total}} ændring(er), {{failed}} mislykkedes.",
+        "configValidationValid": "Konfigurationsvalidering: gyldig.",
+        "configValidationValidWarnings": "Konfigurationsvalidering: gyldig (advarsler: {{count}}).",
+        "configValidationInvalidErrors": "Konfigurationsvalidering: UGYLDIG (fejl: {{count}}).",
+        "configValidationFailedHttp": "Konfigurationsvalidering mislykkedes (HTTP {{status}}).",
+        "configValidationFailedNetwork": "Konfigurationsvalidering mislykkedes (netværksfejl).",
+        "restartRequiredFor": "Genstart kræves for: {{keys}}.",
+        "restartRequiredNo": "Genstart kræves: nej.",
+        "restartCheckFailedHttp": "Kontrol af genstartskrav mislykkedes (HTTP {{status}}).",
+        "restartCheckFailedNetwork": "Kontrol af genstartskrav mislykkedes (netværksfejl)."
+      }
     }
   },
   "adminOnboarding": {
@@ -682,7 +722,7 @@
     "LLM_MODEL": {
       "label": "Modelnavn",
       "description": "Modelnavn/identifikator",
-      "hint": "Model-identifikatoren der skal bruges (f.eks. \"kimi-k2-thinking\"). Tjek din udbyders dokumentation for tilgængelige modeller."
+      "hint": "Model-identifikatoren der skal bruges (f.eks. \"kimi-k2-5\"). Tjek din udbyders dokumentation for tilgængelige modeller."
     },
     "LLM_API_URL": {
       "label": "API-endepunkt",

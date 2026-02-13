@@ -408,6 +408,46 @@
       "searchPlaceholder": "Buscar iconos...",
       "noMatch": "Ningún icono coincide con \"{{search}}\"",
       "selected": "Seleccionado:"
+    },
+    "configAssistant": {
+      "openAria": "Abrir asistente de administración",
+      "openTitle": "Asistente de administración",
+      "title": "Asistente de configuración de administración",
+      "contextToolOff": "La herramienta de contexto está desactivada",
+      "contextReady": "Contexto: {{timestamp}}",
+      "contextNotLoaded": "Contexto: aún no cargado",
+      "contextRefreshed": "Contexto de configuración de administración actualizado: {{timestamp}}",
+      "refreshContext": "Actualizar contexto",
+      "refreshFailed": "No se pudo actualizar el contexto",
+      "switchToCompact": "Cambiar a tamaño compacto",
+      "switchToExpanded": "Cambiar a tamaño ampliado",
+      "compact": "Compacto",
+      "expand": "Ampliar",
+      "shareSecretsTitle": "Compartir variables de entorno secretas",
+      "shareSecretsHint": "Desactivado por defecto. Activa primero la herramienta Config. Al activarla, los valores secretos de configuración de despliegue se revelan en el cliente y se envían a tu proveedor de LLM.",
+      "sensitive": "Sensible",
+      "emptyPrompt": "Haz preguntas sobre cualquier configuración de administración. Si quieres que el asistente proponga y aplique cambios, pídele que incluya un conjunto de cambios JSON.",
+      "pendingChanges": "Cambios pendientes",
+      "pendingChangesWithSummary": "Cambios pendientes: {{summary}}",
+      "dismiss": "Descartar",
+      "apply": "Aplicar",
+      "reviewMaskedSecrets": "Revisión: los valores de las claves secretas de despliegue se muestran enmascarados aquí.",
+      "applyingChanges": "Aplicando cambios...",
+      "applyingAdminChanges": "Aplicando cambios de configuración de administración...",
+      "inputPlaceholder": "Pregunta sobre la configuración de administración...",
+      "applySummary": {
+        "appliedCounts": "Se aplicaron {{ok}}/{{total}} cambio(s).",
+        "appliedCountsWithFailures": "Se aplicaron {{ok}}/{{total}} cambio(s), {{failed}} fallaron.",
+        "configValidationValid": "Validación de configuración: válida.",
+        "configValidationValidWarnings": "Validación de configuración: válida (advertencias: {{count}}).",
+        "configValidationInvalidErrors": "Validación de configuración: INVÁLIDA (errores: {{count}}).",
+        "configValidationFailedHttp": "La validación de configuración falló (HTTP {{status}}).",
+        "configValidationFailedNetwork": "La validación de configuración falló (error de red).",
+        "restartRequiredFor": "Reinicio requerido para: {{keys}}.",
+        "restartRequiredNo": "Reinicio requerido: no.",
+        "restartCheckFailedHttp": "La comprobación de reinicio requerido falló (HTTP {{status}}).",
+        "restartCheckFailedNetwork": "La comprobación de reinicio requerido falló (error de red)."
+      }
     }
   },
   "adminOnboarding": {
@@ -681,7 +721,7 @@
     "LLM_MODEL": {
       "label": "Nombre del modelo",
       "description": "Nombre/identificador del modelo",
-      "hint": "El identificador del modelo a usar (ej: \"kimi-k2-thinking\"). Consulta la documentación de tu proveedor para modelos disponibles."
+      "hint": "El identificador del modelo a usar (ej: \"kimi-k2-5\"). Consulta la documentación de tu proveedor para modelos disponibles."
     },
     "LLM_API_URL": {
       "label": "Endpoint de API",

@@ -15,7 +15,7 @@ from qdrant_client.models import Distance, VectorParams, PointStruct
 import database
 
 # Use unified embedding from store.py
-from store import get_embedding_model, embed_texts
+from store import get_embedding_model, embed_texts, EMBEDDING_MODEL
 
 # Configuration
 QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
@@ -50,18 +50,31 @@ def wait_for_qdrant(client, max_retries=30, delay=2):
 def seed_qdrant(client):
     """Seed Qdrant with the claim embedding"""
     print("\nSeeding Qdrant...")
-    
-    # Determine vector dimension based on provider
-    provider = os.getenv("EMBEDDING_PROVIDER", "local")
-    print(f"  Embedding provider: {provider}")
-    
-    if provider == "openai":
-        vector_dim = int(os.getenv("EMBEDDING_DIMENSIONS", "1536"))
-    else:
-        model = get_embedding_model()
-        vector_dim = model.get_sentence_embedding_dimension()
+
+    model = get_embedding_model()
+    vector_dim = model.get_sentence_embedding_dimension()
+    print(f"  Embedding model: {EMBEDDING_MODEL}")
     print(f"  Vector dimension: {vector_dim}")
-    
+
+    if not isinstance(vector_dim, int) or vector_dim <= 0:
+        raise RuntimeError(
+            "Invalid embedding dimension from model "
+            f"(EMBEDDING_MODEL='{EMBEDDING_MODEL}', vector_dim={vector_dim}). "
+            "Aborting seed."
+        )
+
+    # Validate the actual encoded embedding shape before touching collections.
+    print(f"  Generating embedding for: '{SEED_CLAIM['text']}'")
+    embedding = embed_texts([f"passage: {SEED_CLAIM['text']}"])[0]
+    actual_vector_dim = len(embedding)
+    if actual_vector_dim != vector_dim:
+        raise RuntimeError(
+            "Embedding dimension mismatch for "
+            f"EMBEDDING_MODEL='{EMBEDDING_MODEL}': "
+            f"model reported {vector_dim}, encoded vector has {actual_vector_dim}. "
+            "Aborting seed before collection creation."
+        )
+
     # Create collection if it doesn't exist
     collections = client.get_collections().collections
     collection_exists = any(c.name == COLLECTION_NAME for c in collections)
@@ -78,10 +91,6 @@ def seed_qdrant(client):
             distance=Distance.COSINE
         )
     )
-    
-    # Generate embedding using unified embed_texts
-    print(f"  Generating embedding for: '{SEED_CLAIM['text']}'")
-    embedding = embed_texts([f"passage: {SEED_CLAIM['text']}"])[0]
     
     # Insert into Qdrant - use UUID derived from claim ID
     point_uuid = str(uuid.uuid5(uuid.NAMESPACE_DNS, SEED_CLAIM["id"]))

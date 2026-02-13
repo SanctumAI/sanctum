@@ -56,6 +56,7 @@ ENV_CONFIG_MAP = {
     "LLM_PROVIDER": {"category": "llm", "description": "LLM provider (maple, ollama)", "requires_restart": True, "default": "maple"},
     "LLM_MODEL": {"category": "llm", "description": "Model name/identifier", "requires_restart": False},  # Provider-translated
     "LLM_API_URL": {"category": "llm", "description": "LLM API base URL", "requires_restart": True},  # Provider-translated
+    "LLM_API_KEY": {"category": "llm", "description": "LLM provider API key", "requires_restart": False, "is_secret": True},  # Provider-translated
     # Embedding Settings
     "EMBEDDING_MODEL": {"category": "embedding", "description": "Sentence transformer model", "requires_restart": True, "default": "intfloat/multilingual-e5-base"},
     # Email Settings (no defaults - optional, user must configure)
@@ -143,22 +144,26 @@ def _sync_env_to_db() -> None:
             continue
 
         existing = database.get_deployment_config(key)
+        # Keep provider API keys env-driven unless explicitly overridden in admin UI.
+        # This preserves expected `.env` behavior while still exposing the key in admin config.
+        preserve_env_fallback = key == "LLM_API_KEY"
 
         # Try to get value from env, with key translation
         value = None
 
-        # 1. Try the original key
-        value = os.getenv(key)
+        if not preserve_env_fallback:
+            # 1. Try the original key
+            value = os.getenv(key)
 
-        # 2. If not found, try provider-translated key
-        if value is None and key in translation_map:
-            translated_key = translation_map[key]
-            value = os.getenv(translated_key)
+            # 2. If not found, try provider-translated key
+            if value is None and key in translation_map:
+                translated_key = translation_map[key]
+                value = os.getenv(translated_key)
 
-        # 3. If not found, try email key translation
-        if value is None and key in EMAIL_KEY_TRANSLATION:
-            translated_key = EMAIL_KEY_TRANSLATION[key]
-            value = os.getenv(translated_key)
+            # 3. If not found, try email key translation
+            if value is None and key in EMAIL_KEY_TRANSLATION:
+                translated_key = EMAIL_KEY_TRANSLATION[key]
+                value = os.getenv(translated_key)
 
         # 4. Fall back to default from config map
         if value is None:
@@ -167,7 +172,11 @@ def _sync_env_to_db() -> None:
         if existing:
             # Backfill empty values with defaults/env values
             existing_value = existing.get("value")
-            should_backfill_value = (existing_value is None or existing_value == "") and value not in (None, "")
+            should_backfill_value = (
+                not preserve_env_fallback
+                and (existing_value is None or existing_value == "")
+                and value not in (None, "")
+            )
             # Keep metadata in sync for known one-off category corrections.
             should_sync_metadata = (
                 key == "MONITORING_URL" and existing.get("category") != meta["category"]
@@ -370,13 +379,17 @@ async def update_deployment_config_value(
     meta = ENV_CONFIG_MAP[key]
     value_to_save = update.value
 
-    # For secret keys, preserve existing value if new value is empty/whitespace
-    # This prevents accidentally clearing secrets when the masked value is submitted
+    # For secret keys, preserve existing value if new value is empty/whitespace.
+    # Exception: LLM_API_KEY allows clearing so runtime can fall back to .env MAPLE_API_KEY.
     if meta.get("is_secret") and (not value_to_save or not value_to_save.strip()):
-        existing_value = database.get_deployment_config_value(key)
-        if existing_value:
-            value_to_save = existing_value
-            logger.debug(f"Preserving existing secret value for {key} (empty value submitted)")
+        if key == "LLM_API_KEY":
+            value_to_save = ""
+            logger.info("Clearing LLM_API_KEY override (empty value submitted); runtime will use env fallback")
+        else:
+            existing_value = database.get_deployment_config_value(key)
+            if existing_value:
+                value_to_save = existing_value
+                logger.debug(f"Preserving existing secret value for {key} (empty value submitted)")
 
     # Validate specific keys (only if we have a real value to validate)
     if key in ("SMTP_PORT", "QDRANT_PORT") and value_to_save:

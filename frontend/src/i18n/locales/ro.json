@@ -429,6 +429,46 @@
       "batchSummary_failed_few": "Eșuați",
       "batchSummary_failed_other": "Eșuați",
       "batchSummary": "Migrare completă. Migrați: {{migrated}}. Eșuați: {{failed}}."
+    },
+    "configAssistant": {
+      "openAria": "Deschide asistentul admin",
+      "openTitle": "Asistent admin",
+      "title": "Asistent configurare admin",
+      "contextToolOff": "Instrumentul de context este dezactivat",
+      "contextReady": "Context: {{timestamp}}",
+      "contextNotLoaded": "Context: încă nu este încărcat",
+      "contextRefreshed": "Contextul de configurare admin a fost actualizat: {{timestamp}}",
+      "refreshContext": "Actualizează contextul",
+      "refreshFailed": "Actualizarea contextului a eșuat",
+      "switchToCompact": "Comută la dimensiune compactă",
+      "switchToExpanded": "Comută la dimensiune extinsă",
+      "compact": "Compact",
+      "expand": "Extinde",
+      "shareSecretsTitle": "Partajează variabile de mediu secrete",
+      "shareSecretsHint": "Dezactivat implicit. Activează mai întâi instrumentul Config. Când este activat, valorile secrete de configurare deployment sunt dezvăluite client-side și trimise furnizorului tău LLM.",
+      "sensitive": "Sensibil",
+      "emptyPrompt": "Pune întrebări despre orice configurare admin. Dacă vrei ca asistentul să propună și să aplice schimbări, cere-i să includă un set de schimbări JSON.",
+      "pendingChanges": "Schimbări în așteptare",
+      "pendingChangesWithSummary": "Schimbări în așteptare: {{summary}}",
+      "dismiss": "Închide",
+      "apply": "Aplică",
+      "reviewMaskedSecrets": "Revizuire: valorile pentru cheile secrete de deployment sunt mascate aici.",
+      "applyingChanges": "Se aplică schimbările...",
+      "applyingAdminChanges": "Se aplică schimbările de configurare admin...",
+      "inputPlaceholder": "Întreabă despre configurarea admin...",
+      "applySummary": {
+        "appliedCounts": "Au fost aplicate {{ok}}/{{total}} schimbări.",
+        "appliedCountsWithFailures": "Au fost aplicate {{ok}}/{{total}} schimbări, {{failed}} au eșuat.",
+        "configValidationValid": "Validare configurare: validă.",
+        "configValidationValidWarnings": "Validare configurare: validă (avertismente: {{count}}).",
+        "configValidationInvalidErrors": "Validare configurare: INVALIDĂ (erori: {{count}}).",
+        "configValidationFailedHttp": "Validarea configurării a eșuat (HTTP {{status}}).",
+        "configValidationFailedNetwork": "Validarea configurării a eșuat (eroare de rețea).",
+        "restartRequiredFor": "Restart necesar pentru: {{keys}}.",
+        "restartRequiredNo": "Restart necesar: nu.",
+        "restartCheckFailedHttp": "Verificarea necesității restartului a eșuat (HTTP {{status}}).",
+        "restartCheckFailedNetwork": "Verificarea necesității restartului a eșuat (eroare de rețea)."
+      }
     }
   },
   "adminOnboarding": {
@@ -697,7 +737,7 @@
     "LLM_MODEL": {
       "label": "Numele modelului",
       "description": "Numele/identificatorul modelului",
-      "hint": "Identificatorul modelului de utilizat (de ex. \"kimi-k2-thinking\"). Verificați documentația furnizorului pentru modelele disponibile."
+      "hint": "Identificatorul modelului de utilizat (de ex. \"kimi-k2-5\"). Verificați documentația furnizorului pentru modelele disponibile."
     },
     "LLM_API_URL": {
       "label": "Punct final API",

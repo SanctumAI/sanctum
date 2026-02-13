@@ -83,7 +83,7 @@ Key-value store for instance configuration.
 
 **Default settings:**
 - `instance_name`: "Sanctum"
-- `primary_color`: "#3B82F6"
+- `primary_color`: "#3B82F6" (supports preset names like `blue` or custom hex values like `#F7931A`)
 - `description`: "A privacy-first RAG knowledge base"
 - `icon`: "Sparkles"
 - `logo_url`: "" (optional image logo)
@@ -96,11 +96,13 @@ Key-value store for instance configuration.
 - `header_layout`: "icon_name"
 - `header_tagline`: ""
 - `chat_bubble_style`: "soft"
-- `chat_bubble_shadow`: "true"
+- `chat_bubble_shadow`: "true" (also accepts boolean `true`/`false` in API payloads)
 - `surface_style`: "plain"
 - `status_icon_set`: "classic"
 - `typography_preset`: "modern"
 - `auto_approve_users`: "true" - When "true", new users are automatically approved; when "false", users wait at `/pending` for admin approval
+
+**Type handling note:** `instance_settings.value` is persisted as TEXT in SQLite. Admin API write paths coerce booleans to `"true"`/`"false"`, numbers to string form, and JSON-compatible objects/arrays to JSON strings.
 
 #### `instance_state`
 Tracks setup status flags used to gate user onboarding.
@@ -465,6 +467,12 @@ curl -X POST http://localhost:8000/admin/user-fields \
 - `encryption_enabled`: Defaults to `true` (encrypt values at rest)
 - `include_in_chat`: Defaults to `false`; only allowed when `encryption_enabled = false`
 
+**`options` format note:**
+- Send `options` as a JSON array value, not a stringified array.
+- Valid: `"options": ["Fresh snow", "Packed powder"]`
+- Invalid: `"options": "[\"Fresh snow\", \"Packed powder\"]"`
+- API responses for field definitions return `options` as an array (or `null`), not a JSON string.
+
 #### `PUT /admin/user-fields/{field_id}`
 Update a field definition.
 
@@ -603,7 +611,7 @@ curl -X POST http://localhost:8000/admin/db/query \
   -d '{"sql": "SELECT * FROM users WHERE user_type_id = 1"}'
 ```
 
-**Encryption note:** This endpoint returns encrypted columns (`encrypted_*`) and their matching `ephemeral_pubkey_*` values. Decryption happens client-side in admin UIs via NIP-07. For the admin chat tool (`db-query`), see `docs/tools.md` for the `/admin/tools/execute` + `tool_context` flow.
+**Encryption note:** This endpoint returns encrypted columns (`encrypted_*`) and their matching `ephemeral_pubkey_*` values. Decryption happens client-side in admin UIs via NIP-07. For the admin chat tool (`db-query`), see `docs/tools.md` for the `/admin/tools/execute` + `/llm/chat` flow using `tool_context` and `client_executed_tools`.
 
 #### CRUD Endpoints
 - `POST /admin/db/tables/{table_name}/rows` - Insert row
@@ -852,3 +860,20 @@ If you see CORS errors like "CORS request did not succeed" with `Status code: (n
 3. Check backend logs for errors: `docker compose -f docker-compose.infra.yml -f docker-compose.app.yml logs backend`
 
 The backend CORS middleware is configured to allow all origins (`allow_origins=["*"]`). If the backend is running, CORS should work.
+
+### User Field Validation + Retry Confusion
+
+**Error 1:** `options Input should be a valid list [type=list_type, input_type=str]`
+
+**Cause:** `options` was sent as a string instead of a JSON array.
+
+**Fix:** Send `options` as a native JSON array (see `options` format note in the User Field Definitions section).
+
+**Error 2:** `Field name already exists for this type` immediately after retry
+
+**Cause:** The prior create may already have succeeded server-side; retrying the same `(field_name, user_type_id)` pair then hits the uniqueness constraint.
+
+**Fix:**
+1. List fields with `GET /admin/user-fields` (or `GET /admin/user-fields?user_type_id={id}`).
+2. Find the existing field row.
+3. Use `PUT /admin/user-fields/{field_id}` to adjust `placeholder`, `options`, or other metadata.

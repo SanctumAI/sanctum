@@ -4,7 +4,7 @@ This document contains benchmark question-and-answer sessions demonstrating Sanc
 
 **Source Material:** Pathway to Freedom Handbook (World Liberty Congress)  
 **Temperature:** 0.1  
-**Embedding Provider:** OpenAI text-embedding-3-small (768 dimensions)
+**Embedding Model:** intfloat/multilingual-e5-base (768 dimensions)
 
 ---
 

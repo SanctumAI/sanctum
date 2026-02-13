@@ -21,7 +21,7 @@ Deployment config values are stored in SQLite (`deployment_config` table) and ta
 
 - **Secret values are masked** in list views.
 - **Reveal secrets** via `GET /admin/deployment/config/{key}/reveal`.
-- **Empty secret updates are ignored** to avoid accidental credential wipe.
+- **Empty secret updates are ignored** to avoid accidental credential wipe (exception: `LLM_API_KEY` can be cleared to fall back to `.env`).
 - **Config changes are audited** in `config_audit_log`.
 - Some keys **require restart** to take effect (see `requires_restart`).
 
@@ -70,6 +70,7 @@ Use provider‑agnostic keys where possible:
 - `LLM_PROVIDER` (`maple` or `ollama`)
 - `LLM_API_URL`
 - `LLM_MODEL`
+- `LLM_API_KEY` (secret; for Maple this maps to `MAPLE_API_KEY`)
 
 Provider‑specific keys (`MAPLE_BASE_URL`, `MAPLE_MODEL`, `OLLAMA_BASE_URL`, `OLLAMA_MODEL`) are also supported and mapped internally.
 
@@ -80,6 +81,11 @@ curl -X PUT http://localhost:8000/admin/deployment/config/LLM_PROVIDER \
   -H "Content-Type: application/json" \
   -d '{"value":"maple"}'
 
+curl -X PUT http://localhost:8000/admin/deployment/config/LLM_API_KEY \
+  -H "Authorization: Bearer <admin-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"value":"your-api-key-from-trymaple.ai"}'
+
 curl -X PUT http://localhost:8000/admin/deployment/config/LLM_API_URL \
   -H "Authorization: Bearer <admin-token>" \
   -H "Content-Type: application/json" \
@@ -88,8 +94,11 @@ curl -X PUT http://localhost:8000/admin/deployment/config/LLM_API_URL \
 curl -X PUT http://localhost:8000/admin/deployment/config/LLM_MODEL \
   -H "Authorization: Bearer <admin-token>" \
   -H "Content-Type: application/json" \
-  -d '{"value":"kimi-k2-thinking"}'
+  -d '{"value":"kimi-k2-5"}'
 ```
+
+If `LLM_API_KEY` is not set in deployment config, Sanctum still falls back to `.env` provider keys (for Maple: `MAPLE_API_KEY`).
+In the admin UI, saving `LLM_API_KEY` as empty clears the override and re-enables this fallback.
 
 ### Email + SMTP
 

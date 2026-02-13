@@ -416,6 +416,46 @@
       "selectUsers": "माइग्रेट करने के लिए कम से कम एक उपयोगकर्ता चुनें।",
       "batchFailed": "चयनित उपयोगकर्ताओं को माइग्रेट करने में विफल।",
       "batchSummary": "माइग्रेशन पूर्ण। माइग्रेट किए गए: {{migrated}}। विफल: {{failed}}।"
+    },
+    "configAssistant": {
+      "openAria": "एडमिन सहायक खोलें",
+      "openTitle": "एडमिन सहायक",
+      "title": "एडमिन कॉन्फ़िगरेशन सहायक",
+      "contextToolOff": "कॉन्टेक्स्ट टूल बंद है",
+      "contextReady": "कॉन्टेक्स्ट: {{timestamp}}",
+      "contextNotLoaded": "कॉन्टेक्स्ट: अभी लोड नहीं हुआ",
+      "contextRefreshed": "एडमिन कॉन्फ़िग कॉन्टेक्स्ट रीफ़्रेश हुआ: {{timestamp}}",
+      "refreshContext": "कॉन्टेक्स्ट रीफ़्रेश करें",
+      "refreshFailed": "कॉन्टेक्स्ट रीफ़्रेश नहीं हो सका",
+      "switchToCompact": "कॉम्पैक्ट आकार पर स्विच करें",
+      "switchToExpanded": "विस्तृत आकार पर स्विच करें",
+      "compact": "कॉम्पैक्ट",
+      "expand": "विस्तार करें",
+      "shareSecretsTitle": "गुप्त पर्यावरण वेरिएबल साझा करें",
+      "shareSecretsHint": "डिफ़ॉल्ट रूप से बंद। पहले Config टूल सक्षम करें। सक्षम होने पर, डिप्लॉयमेंट कॉन्फ़िग के गुप्त मान क्लाइंट-साइड पर प्रकट होकर आपके LLM प्रदाता को भेजे जाते हैं।",
+      "sensitive": "संवेदनशील",
+      "emptyPrompt": "किसी भी एडमिन कॉन्फ़िगरेशन के बारे में प्रश्न पूछें। यदि आप चाहते हैं कि सहायक बदलाव सुझाए और लागू करे, तो उसे JSON change set शामिल करने के लिए कहें।",
+      "pendingChanges": "लंबित परिवर्तन",
+      "pendingChangesWithSummary": "लंबित परिवर्तन: {{summary}}",
+      "dismiss": "खारिज करें",
+      "apply": "लागू करें",
+      "reviewMaskedSecrets": "समीक्षा: गुप्त डिप्लॉयमेंट कुंजियों के मान यहाँ मास्क किए गए हैं।",
+      "applyingChanges": "परिवर्तन लागू किए जा रहे हैं...",
+      "applyingAdminChanges": "एडमिन कॉन्फ़िगरेशन परिवर्तन लागू किए जा रहे हैं...",
+      "inputPlaceholder": "एडमिन कॉन्फ़िगरेशन के बारे में पूछें...",
+      "applySummary": {
+        "appliedCounts": "{{ok}}/{{total}} परिवर्तन लागू किए गए।",
+        "appliedCountsWithFailures": "{{ok}}/{{total}} परिवर्तन लागू किए गए, {{failed}} असफल रहे।",
+        "configValidationValid": "कॉन्फ़िग सत्यापन: मान्य।",
+        "configValidationValidWarnings": "कॉन्फ़िग सत्यापन: मान्य (चेतावनियाँ: {{count}})।",
+        "configValidationInvalidErrors": "कॉन्फ़िग सत्यापन: अमान्य (त्रुटियाँ: {{count}})।",
+        "configValidationFailedHttp": "कॉन्फ़िग सत्यापन विफल (HTTP {{status}})।",
+        "configValidationFailedNetwork": "कॉन्फ़िग सत्यापन विफल (नेटवर्क त्रुटि)।",
+        "restartRequiredFor": "इनके लिए रीस्टार्ट आवश्यक: {{keys}}।",
+        "restartRequiredNo": "रीस्टार्ट आवश्यक: नहीं।",
+        "restartCheckFailedHttp": "रीस्टार्ट आवश्यक जाँच विफल (HTTP {{status}})।",
+        "restartCheckFailedNetwork": "रीस्टार्ट आवश्यक जाँच विफल (नेटवर्क त्रुटि)।"
+      }
     }
   },
   "adminOnboarding": {
@@ -684,7 +724,7 @@
     "LLM_MODEL": {
       "label": "मॉडल का नाम",
       "description": "मॉडल का नाम/पहचानकर्ता",
-      "hint": "उपयोग करने के लिए मॉडल पहचानकर्ता (जैसे, \"kimi-k2-thinking\")। उपलब्ध मॉडलों के लिए अपने प्रदाता का दस्तावेज़ देखें।"
+      "hint": "उपयोग करने के लिए मॉडल पहचानकर्ता (जैसे, \"kimi-k2-5\")। उपलब्ध मॉडलों के लिए अपने प्रदाता का दस्तावेज़ देखें।"
     },
     "LLM_API_URL": {
       "label": "API एंडपॉइंट",

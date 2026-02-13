@@ -339,6 +339,46 @@
       "selectUsers": "Selecteer ten minste een gebruiker om te migreren.",
       "batchFailed": "Migratie van geselecteerde gebruikers mislukt.",
       "batchSummary": "Migratie voltooid. Gemigreerd: {{migrated}}. Mislukt: {{failed}}."
+    },
+    "configAssistant": {
+      "openAria": "Admin-assistent openen",
+      "openTitle": "Admin-assistent",
+      "title": "Admin configuratie-assistent",
+      "contextToolOff": "Contexttool staat uit",
+      "contextReady": "Context: {{timestamp}}",
+      "contextNotLoaded": "Context: nog niet geladen",
+      "contextRefreshed": "Admin-configuratiecontext vernieuwd: {{timestamp}}",
+      "refreshContext": "Context vernieuwen",
+      "refreshFailed": "Vernieuwen van context mislukt",
+      "switchToCompact": "Overschakelen naar compact formaat",
+      "switchToExpanded": "Overschakelen naar uitgebreid formaat",
+      "compact": "Compact",
+      "expand": "Uitbreiden",
+      "shareSecretsTitle": "Geheime omgevingsvariabelen delen",
+      "shareSecretsHint": "Standaard uitgeschakeld. Schakel eerst de Config-tool in. Wanneer ingeschakeld worden geheime deployment-configuratiewaarden client-side zichtbaar en naar je LLM-provider gestuurd.",
+      "sensitive": "Gevoelig",
+      "emptyPrompt": "Stel vragen over elke beheerconfiguratie. Wil je dat de assistent wijzigingen voorstelt en toepast, vraag dan om een JSON change set op te nemen.",
+      "pendingChanges": "Openstaande wijzigingen",
+      "pendingChangesWithSummary": "Openstaande wijzigingen: {{summary}}",
+      "dismiss": "Sluiten",
+      "apply": "Toepassen",
+      "reviewMaskedSecrets": "Controle: waarden van geheime deployment-sleutels zijn hier gemaskeerd.",
+      "applyingChanges": "Wijzigingen toepassen...",
+      "applyingAdminChanges": "Beheerconfiguratiewijzigingen toepassen...",
+      "inputPlaceholder": "Vraag naar beheerconfiguratie...",
+      "applySummary": {
+        "appliedCounts": "{{ok}}/{{total}} wijziging(en) toegepast.",
+        "appliedCountsWithFailures": "{{ok}}/{{total}} wijziging(en) toegepast, {{failed}} mislukt.",
+        "configValidationValid": "Configuratievalidatie: geldig.",
+        "configValidationValidWarnings": "Configuratievalidatie: geldig (waarschuwingen: {{count}}).",
+        "configValidationInvalidErrors": "Configuratievalidatie: ONGELDIG (fouten: {{count}}).",
+        "configValidationFailedHttp": "Configuratievalidatie mislukt (HTTP {{status}}).",
+        "configValidationFailedNetwork": "Configuratievalidatie mislukt (netwerkfout).",
+        "restartRequiredFor": "Herstart vereist voor: {{keys}}.",
+        "restartRequiredNo": "Herstart vereist: nee.",
+        "restartCheckFailedHttp": "Controle op herstartvereiste mislukt (HTTP {{status}}).",
+        "restartCheckFailedNetwork": "Controle op herstartvereiste mislukt (netwerkfout)."
+      }
     }
   },
   "adminOnboarding": {
@@ -818,7 +858,7 @@
     "LLM_MODEL": {
       "label": "Modelnaam",
       "description": "Modelnaam/identificatie",
-      "hint": "De modelidentificatie om te gebruiken (bijv. \"kimi-k2-thinking\"). Raadpleeg de documentatie van uw provider voor beschikbare modellen."
+      "hint": "De modelidentificatie om te gebruiken (bijv. \"kimi-k2-5\"). Raadpleeg de documentatie van uw provider voor beschikbare modellen."
     },
     "LLM_API_URL": {
       "label": "API-eindpunt",

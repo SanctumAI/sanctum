@@ -411,6 +411,46 @@
       "selectUsers": "Wähle mindestens einen Benutzer zum Migrieren aus.",
       "batchFailed": "Ausgewählte Benutzer konnten nicht migriert werden.",
       "batchSummary": "Migration abgeschlossen. Migriert: {{migrated}}. Fehlgeschlagen: {{failed}}."
+    },
+    "configAssistant": {
+      "openAria": "Admin-Assistent öffnen",
+      "openTitle": "Admin-Assistent",
+      "title": "Admin-Konfigurationsassistent",
+      "contextToolOff": "Kontext-Tool ist deaktiviert",
+      "contextReady": "Kontext: {{timestamp}}",
+      "contextNotLoaded": "Kontext: noch nicht geladen",
+      "contextRefreshed": "Admin-Kontext aktualisiert: {{timestamp}}",
+      "refreshContext": "Kontext aktualisieren",
+      "refreshFailed": "Kontext konnte nicht aktualisiert werden",
+      "switchToCompact": "Auf kompakte Größe wechseln",
+      "switchToExpanded": "Auf erweiterte Größe wechseln",
+      "compact": "Kompakt",
+      "expand": "Erweitern",
+      "shareSecretsTitle": "Geheime Umgebungsvariablen teilen",
+      "shareSecretsHint": "Standardmäßig aus. Aktiviere zuerst das Config-Tool. Wenn aktiviert, werden geheime Deployment-Konfigurationswerte clientseitig offengelegt und an deinen LLM-Anbieter gesendet.",
+      "sensitive": "Sensibel",
+      "emptyPrompt": "Stelle Fragen zu beliebigen Admin-Einstellungen. Wenn der Assistent Änderungen vorschlagen und anwenden soll, bitte ihn um ein JSON-Change-Set.",
+      "pendingChanges": "Ausstehende Änderungen",
+      "pendingChangesWithSummary": "Ausstehende Änderungen: {{summary}}",
+      "dismiss": "Verwerfen",
+      "apply": "Anwenden",
+      "reviewMaskedSecrets": "Hinweis: Werte für geheime Deployment-Schlüssel sind hier maskiert.",
+      "applyingChanges": "Änderungen werden angewendet...",
+      "applyingAdminChanges": "Admin-Konfigurationsänderungen werden angewendet...",
+      "inputPlaceholder": "Fragen zur Admin-Konfiguration stellen...",
+      "applySummary": {
+        "appliedCounts": "{{ok}}/{{total}} Änderung(en) angewendet.",
+        "appliedCountsWithFailures": "{{ok}}/{{total}} Änderung(en) angewendet, {{failed}} fehlgeschlagen.",
+        "configValidationValid": "Konfigurationsprüfung: gültig.",
+        "configValidationValidWarnings": "Konfigurationsprüfung: gültig (Warnungen: {{count}}).",
+        "configValidationInvalidErrors": "Konfigurationsprüfung: UNGÜLTIG (Fehler: {{count}}).",
+        "configValidationFailedHttp": "Konfigurationsprüfung fehlgeschlagen (HTTP {{status}}).",
+        "configValidationFailedNetwork": "Konfigurationsprüfung fehlgeschlagen (Netzwerkfehler).",
+        "restartRequiredFor": "Neustart erforderlich für: {{keys}}.",
+        "restartRequiredNo": "Neustart erforderlich: nein.",
+        "restartCheckFailedHttp": "Neustart-Prüfung fehlgeschlagen (HTTP {{status}}).",
+        "restartCheckFailedNetwork": "Neustart-Prüfung fehlgeschlagen (Netzwerkfehler)."
+      }
     }
   },
   "adminOnboarding": {
@@ -671,7 +711,7 @@
     "LLM_MODEL": {
       "label": "Modellname",
       "description": "Modellname/-kennung",
-      "hint": "Die zu verwendende Modellkennung (z.B. \"kimi-k2-thinking\"). Prüfe die Dokumentation deines Anbieters für verfügbare Modelle."
+      "hint": "Die zu verwendende Modellkennung (z.B. \"kimi-k2-5\"). Prüfe die Dokumentation deines Anbieters für verfügbare Modelle."
     },
     "LLM_API_URL": {
       "label": "API-Endpunkt",

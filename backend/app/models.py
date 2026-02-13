@@ -71,7 +71,8 @@ class InstanceSettings(BaseModel):
     header_layout: Optional[str] = None
     header_tagline: Optional[str] = None
     chat_bubble_style: Optional[str] = None
-    chat_bubble_shadow: Optional[str] = None
+    # Stored in SQLite as text ("true"/"false"), but accept boolean payloads from the UI/assistant.
+    chat_bubble_shadow: Optional[bool] = None
     surface_style: Optional[str] = None
     status_icon_set: Optional[str] = None
     typography_preset: Optional[str] = None

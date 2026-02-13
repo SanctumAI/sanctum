@@ -424,6 +424,46 @@
       "selectUsers": "Wybierz co najmniej jednego użytkownika do migracji.",
       "batchFailed": "Nie udało się zmigrować zaznaczonych użytkowników.",
       "batchSummary": "Migracja zakończona. Zmigrowano: {{migrated}}. Niepowodzenie: {{failed}}."
+    },
+    "configAssistant": {
+      "openAria": "Otwórz asystenta administratora",
+      "openTitle": "Asystent administratora",
+      "title": "Asystent konfiguracji administratora",
+      "contextToolOff": "Narzędzie kontekstu jest wyłączone",
+      "contextReady": "Kontekst: {{timestamp}}",
+      "contextNotLoaded": "Kontekst: jeszcze nie załadowany",
+      "contextRefreshed": "Kontekst konfiguracji administratora odświeżony: {{timestamp}}",
+      "refreshContext": "Odśwież kontekst",
+      "refreshFailed": "Nie udało się odświeżyć kontekstu",
+      "switchToCompact": "Przełącz na rozmiar kompaktowy",
+      "switchToExpanded": "Przełącz na rozmiar rozszerzony",
+      "compact": "Kompaktowy",
+      "expand": "Rozszerz",
+      "shareSecretsTitle": "Udostępnij tajne zmienne środowiskowe",
+      "shareSecretsHint": "Domyślnie wyłączone. Najpierw włącz narzędzie Config. Po włączeniu tajne wartości konfiguracji wdrożenia są ujawniane po stronie klienta i wysyłane do dostawcy LLM.",
+      "sensitive": "Wrażliwe",
+      "emptyPrompt": "Zadawaj pytania o dowolną konfigurację administratora. Jeśli chcesz, aby asystent zaproponował i zastosował zmiany, poproś o dołączenie JSON change set.",
+      "pendingChanges": "Oczekujące zmiany",
+      "pendingChangesWithSummary": "Oczekujące zmiany: {{summary}}",
+      "dismiss": "Zamknij",
+      "apply": "Zastosuj",
+      "reviewMaskedSecrets": "Podgląd: wartości tajnych kluczy wdrożenia są tutaj zamaskowane.",
+      "applyingChanges": "Trwa stosowanie zmian...",
+      "applyingAdminChanges": "Trwa stosowanie zmian konfiguracji administratora...",
+      "inputPlaceholder": "Zapytaj o konfigurację administratora...",
+      "applySummary": {
+        "appliedCounts": "Zastosowano {{ok}}/{{total}} zmian(y).",
+        "appliedCountsWithFailures": "Zastosowano {{ok}}/{{total}} zmian(y), {{failed}} nieudanych.",
+        "configValidationValid": "Walidacja konfiguracji: poprawna.",
+        "configValidationValidWarnings": "Walidacja konfiguracji: poprawna (ostrzeżenia: {{count}}).",
+        "configValidationInvalidErrors": "Walidacja konfiguracji: NIEPOPRAWNA (błędy: {{count}}).",
+        "configValidationFailedHttp": "Walidacja konfiguracji nie powiodła się (HTTP {{status}}).",
+        "configValidationFailedNetwork": "Walidacja konfiguracji nie powiodła się (błąd sieci).",
+        "restartRequiredFor": "Wymagany restart dla: {{keys}}.",
+        "restartRequiredNo": "Wymagany restart: nie.",
+        "restartCheckFailedHttp": "Sprawdzenie wymaganego restartu nie powiodło się (HTTP {{status}}).",
+        "restartCheckFailedNetwork": "Sprawdzenie wymaganego restartu nie powiodło się (błąd sieci)."
+      }
     }
   },
   "adminOnboarding": {
@@ -692,7 +732,7 @@
     "LLM_MODEL": {
       "label": "Nazwa modelu",
       "description": "Nazwa/identyfikator modelu",
-      "hint": "Identyfikator modelu do użycia (np. \"kimi-k2-thinking\"). Sprawdź dokumentację dostawcy, aby poznać dostępne modele."
+      "hint": "Identyfikator modelu do użycia (np. \"kimi-k2-5\"). Sprawdź dokumentację dostawcy, aby poznać dostępne modele."
     },
     "LLM_API_URL": {
       "label": "Punkt końcowy API",

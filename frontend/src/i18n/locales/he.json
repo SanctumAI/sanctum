@@ -414,6 +414,46 @@
       "selectUsers": "בחר לפחות משתמש אחד להעברה.",
       "batchFailed": "העברת המשתמשים הנבחרים נכשלה.",
       "batchSummary": "ההעברה הושלמה. הועברו: {{migrated}}. נכשלו: {{failed}}."
+    },
+    "configAssistant": {
+      "openAria": "פתח את עוזר הניהול",
+      "openTitle": "עוזר ניהול",
+      "title": "עוזר תצורת ניהול",
+      "contextToolOff": "כלי ההקשר כבוי",
+      "contextReady": "הקשר: {{timestamp}}",
+      "contextNotLoaded": "הקשר: עדיין לא נטען",
+      "contextRefreshed": "הקשר תצורת הניהול רוענן: {{timestamp}}",
+      "refreshContext": "רענון הקשר",
+      "refreshFailed": "רענון ההקשר נכשל",
+      "switchToCompact": "מעבר לגודל קומפקטי",
+      "switchToExpanded": "מעבר לגודל מורחב",
+      "compact": "קומפקטי",
+      "expand": "הרחב",
+      "shareSecretsTitle": "שתף משתני סביבה סודיים",
+      "shareSecretsHint": "כבוי כברירת מחדל. תחילה יש להפעיל את כלי Config. כאשר מופעל, ערכי תצורת פריסה סודיים נחשפים בצד הלקוח ונשלחים לספק ה-LLM שלך.",
+      "sensitive": "רגיש",
+      "emptyPrompt": "שאלו על כל תצורת ניהול. אם תרצו שהעוזר יציע ויחיל שינויים, בקשו ממנו לכלול JSON change set.",
+      "pendingChanges": "שינויים ממתינים",
+      "pendingChangesWithSummary": "שינויים ממתינים: {{summary}}",
+      "dismiss": "סגור",
+      "apply": "החל",
+      "reviewMaskedSecrets": "סקירה: הערכים של מפתחות פריסה סודיים מוסתרים כאן.",
+      "applyingChanges": "מחיל שינויים...",
+      "applyingAdminChanges": "מחיל שינויים בתצורת הניהול...",
+      "inputPlaceholder": "שאלו לגבי תצורת ניהול...",
+      "applySummary": {
+        "appliedCounts": "הוחלו {{ok}}/{{total}} שינוי(ים).",
+        "appliedCountsWithFailures": "הוחלו {{ok}}/{{total}} שינוי(ים), {{failed}} נכשלו.",
+        "configValidationValid": "אימות תצורה: תקין.",
+        "configValidationValidWarnings": "אימות תצורה: תקין (אזהרות: {{count}}).",
+        "configValidationInvalidErrors": "אימות תצורה: לא תקין (שגיאות: {{count}}).",
+        "configValidationFailedHttp": "אימות התצורה נכשל (HTTP {{status}}).",
+        "configValidationFailedNetwork": "אימות התצורה נכשל (שגיאת רשת).",
+        "restartRequiredFor": "נדרשת הפעלה מחדש עבור: {{keys}}.",
+        "restartRequiredNo": "נדרשת הפעלה מחדש: לא.",
+        "restartCheckFailedHttp": "בדיקת צורך בהפעלה מחדש נכשלה (HTTP {{status}}).",
+        "restartCheckFailedNetwork": "בדיקת צורך בהפעלה מחדש נכשלה (שגיאת רשת)."
+      }
     }
   },
   "adminOnboarding": {
@@ -682,7 +722,7 @@
     "LLM_MODEL": {
       "label": "שם המודל",
       "description": "שם/מזהה המודל",
-      "hint": "מזהה המודל לשימוש (לדוגמה, \"kimi-k2-thinking\"). בדוק את התיעוד של הספק שלך עבור מודלים זמינים."
+      "hint": "מזהה המודל לשימוש (לדוגמה, \"kimi-k2-5\"). בדוק את התיעוד של הספק שלך עבור מודלים זמינים."
     },
     "LLM_API_URL": {
       "label": "נקודת קצה API",

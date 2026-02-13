@@ -413,6 +413,46 @@
       "selectUsers": "Sélectionnez au moins un utilisateur à migrer.",
       "batchFailed": "Échec de la migration des utilisateurs sélectionnés.",
       "batchSummary": "Migration terminée. Migrés : {{migrated}}. Échoués : {{failed}}."
+    },
+    "configAssistant": {
+      "openAria": "Ouvrir l’assistant admin",
+      "openTitle": "Assistant admin",
+      "title": "Assistant de configuration admin",
+      "contextToolOff": "L’outil de contexte est désactivé",
+      "contextReady": "Contexte : {{timestamp}}",
+      "contextNotLoaded": "Contexte : pas encore chargé",
+      "contextRefreshed": "Contexte de configuration admin actualisé : {{timestamp}}",
+      "refreshContext": "Actualiser le contexte",
+      "refreshFailed": "Impossible d’actualiser le contexte",
+      "switchToCompact": "Passer à la taille compacte",
+      "switchToExpanded": "Passer à la taille étendue",
+      "compact": "Compact",
+      "expand": "Étendre",
+      "shareSecretsTitle": "Partager les variables d’environnement secrètes",
+      "shareSecretsHint": "Désactivé par défaut. Activez d’abord l’outil Config. Une fois activé, les valeurs secrètes de configuration de déploiement sont révélées côté client et envoyées à votre fournisseur LLM.",
+      "sensitive": "Sensible",
+      "emptyPrompt": "Posez des questions sur n’importe quelle configuration admin. Si vous voulez que l’assistant propose et applique des changements, demandez-lui d’inclure un jeu de changements JSON.",
+      "pendingChanges": "Modifications en attente",
+      "pendingChangesWithSummary": "Modifications en attente : {{summary}}",
+      "dismiss": "Ignorer",
+      "apply": "Appliquer",
+      "reviewMaskedSecrets": "Vérification : les valeurs des clés secrètes de déploiement sont masquées ici.",
+      "applyingChanges": "Application des modifications...",
+      "applyingAdminChanges": "Application des modifications de configuration admin...",
+      "inputPlaceholder": "Posez une question sur la configuration admin...",
+      "applySummary": {
+        "appliedCounts": "{{ok}}/{{total}} modification(s) appliquée(s).",
+        "appliedCountsWithFailures": "{{ok}}/{{total}} modification(s) appliquée(s), {{failed}} échec(s).",
+        "configValidationValid": "Validation de configuration : valide.",
+        "configValidationValidWarnings": "Validation de configuration : valide (avertissements : {{count}}).",
+        "configValidationInvalidErrors": "Validation de configuration : INVALIDE (erreurs : {{count}}).",
+        "configValidationFailedHttp": "Échec de la validation de configuration (HTTP {{status}}).",
+        "configValidationFailedNetwork": "Échec de la validation de configuration (erreur réseau).",
+        "restartRequiredFor": "Redémarrage requis pour : {{keys}}.",
+        "restartRequiredNo": "Redémarrage requis : non.",
+        "restartCheckFailedHttp": "Échec de la vérification de redémarrage requis (HTTP {{status}}).",
+        "restartCheckFailedNetwork": "Échec de la vérification de redémarrage requis (erreur réseau)."
+      }
     }
   },
   "adminOnboarding": {
@@ -686,7 +726,7 @@
     "LLM_MODEL": {
       "label": "Nom du modèle",
       "description": "Nom/identifiant du modèle",
-      "hint": "L'identifiant du modèle à utiliser (ex: \"kimi-k2-thinking\"). Consultez la documentation de votre fournisseur pour les modèles disponibles."
+      "hint": "L'identifiant du modèle à utiliser (ex: \"kimi-k2-5\"). Consultez la documentation de votre fournisseur pour les modèles disponibles."
     },
     "LLM_API_URL": {
       "label": "Point de terminaison API",

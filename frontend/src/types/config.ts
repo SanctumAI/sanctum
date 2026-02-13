@@ -282,7 +282,7 @@ export function getConfigCategories(t: TFunction): Record<ConfigCategory, Config
     llm: {
       label: t('configCategories.llm.label', 'AI Provider'),
       description: t('configCategories.llm.description', 'Connect to your AI service'),
-      hint: t('configCategories.llm.hint', "Configure which AI service powers your assistant. You'll need an API key from your chosen provider (e.g., OpenAI, Anthropic). Changes require a service restart to take effect."),
+      hint: t('configCategories.llm.hint', 'Configure which AI service powers your assistant. Use Maple (API key required) or Ollama (self-hosted, no key). Changes require a service restart to take effect.'),
     },
     embedding: {
       label: t('configCategories.embedding.label', 'Text Processing'),
@@ -446,7 +446,7 @@ export interface DeploymentConfigItemMeta {
 
 export const DEPLOYMENT_CONFIG_KEY_LIST = [
   // LLM
-  'LLM_PROVIDER', 'LLM_MODEL', 'LLM_API_URL', 'RAG_TOP_K', 'PDF_EXTRACT_MODE',
+  'LLM_PROVIDER', 'LLM_MODEL', 'LLM_API_URL', 'LLM_API_KEY', 'RAG_TOP_K', 'PDF_EXTRACT_MODE',
   // Embedding
   'EMBEDDING_MODEL',
   // Email
@@ -481,12 +481,17 @@ export function getDeploymentConfigItemMeta(t: TFunction): Record<DeploymentConf
     LLM_MODEL: {
       label: t('deploymentConfigItems.LLM_MODEL.label', 'Model Name'),
       description: t('deploymentConfigItems.LLM_MODEL.description', 'Model name/identifier'),
-      hint: t('deploymentConfigItems.LLM_MODEL.hint', 'The model identifier to use (e.g., "kimi-k2-thinking"). Check your provider\'s documentation for available models.'),
+      hint: t('deploymentConfigItems.LLM_MODEL.hint', 'The model identifier to use (e.g., "kimi-k2-5"). Check your provider\'s documentation for available models.'),
     },
     LLM_API_URL: {
       label: t('deploymentConfigItems.LLM_API_URL.label', 'API Endpoint'),
       description: t('deploymentConfigItems.LLM_API_URL.description', 'Base URL for API requests'),
       hint: t('deploymentConfigItems.LLM_API_URL.hint', 'The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434.'),
+    },
+    LLM_API_KEY: {
+      label: t('deploymentConfigItems.LLM_API_KEY.label', 'API Key'),
+      description: t('deploymentConfigItems.LLM_API_KEY.description', 'Provider API key (secret)'),
+      hint: t('deploymentConfigItems.LLM_API_KEY.hint', 'Used by cloud providers like Maple. For Maple, this maps to MAPLE_API_KEY. Leave empty to clear the override and use .env fallback.'),
     },
     RAG_TOP_K: {
       label: t('deploymentConfigItems.RAG_TOP_K.label', 'Context Chunks'),

@@ -223,7 +223,8 @@ export function AdminDeploymentConfig() {
       .find((c) => c.key === editingKey)
 
     // Don't save empty secret values - this prevents wiping existing credentials
-    if (item?.is_secret && editValue === '') {
+    // Exception: LLM_API_KEY can be cleared so runtime falls back to .env
+    if (item?.is_secret && editValue === '' && item.key !== 'LLM_API_KEY') {
       setEditingKey(null)
       setEditValue('')
       return
@@ -767,10 +768,10 @@ export function AdminDeploymentConfig() {
       hint: t('adminDeployment.llmHelp.mapleHint', 'Privacy-focused inference. Your queries are never stored or used for training.'),
       config: {
         LLM_PROVIDER: 'maple',
-        MAPLE_API_KEY: 'your-api-key-from-trymaple.ai',
-        LLM_MODEL: 'llama-3.3-70b',
+        LLM_API_KEY: 'your-api-key-from-trymaple.ai',
+        LLM_MODEL: 'kimi-k2-5',
       },
-      extra: t('adminDeployment.llmHelp.mapleExtra', 'Get your API key at trymaple.ai. Maple routes requests through privacy-preserving infrastructure.'),
+      extra: t('adminDeployment.llmHelp.mapleExtra', 'Get your API key at trymaple.ai. In Admin Deployment Config, set LLM_API_KEY (it maps to MAPLE_API_KEY).'),
     },
     {
       title: 'Ollama',
@@ -781,16 +782,6 @@ export function AdminDeploymentConfig() {
         LLM_MODEL: 'llama3.2',
       },
       extra: t('adminDeployment.llmHelp.ollamaExtra', 'Install Ollama from ollama.ai, then run: ollama pull llama3.2'),
-    },
-    {
-      title: 'OpenAI',
-      hint: t('adminDeployment.llmHelp.openaiHint', 'Cloud-hosted, requires API key from OpenAI.'),
-      config: {
-        LLM_PROVIDER: 'openai',
-        OPENAI_API_KEY: 'sk-...',
-        LLM_MODEL: 'gpt-4o',
-      },
-      extra: t('adminDeployment.llmHelp.openaiExtra', 'Get your API key at platform.openai.com. Common models: gpt-4o, gpt-4o-mini, gpt-3.5-turbo'),
     },
   ]
 
@@ -1044,7 +1035,15 @@ export function AdminDeploymentConfig() {
               type={item.is_secret ? 'password' : 'text'}
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
-              placeholder={item.is_secret ? t('adminDeployment.leaveEmptyForSecret', 'Leave empty to keep current value') : (item.value || '')}
+              placeholder={
+                item.is_secret
+                  ? (
+                    item.key === 'LLM_API_KEY'
+                      ? t('adminDeployment.leaveEmptyForLlmApiKey', 'Leave empty to clear override and use .env fallback')
+                      : t('adminDeployment.leaveEmptyForSecret', 'Leave empty to keep current value')
+                  )
+                  : (item.value || '')
+              }
               className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm font-mono focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
 
@@ -1855,7 +1854,7 @@ export function AdminDeploymentConfig() {
                       <div className="bg-surface-overlay border border-border rounded-lg p-3">
                         <p className="text-sm font-medium text-text">LLM_PROVIDER</p>
                         <p className="text-xs text-text-muted mt-1">
-                          {t('adminDeployment.llmHelp.providerField', 'Which service to use: "maple", "ollama", or "openai"')}
+                          {t('adminDeployment.llmHelp.providerField', 'Which service to use: "maple" or "ollama"')}
                         </p>
                       </div>
                       <div className="bg-surface-overlay border border-border rounded-lg p-3">
@@ -2002,15 +2001,15 @@ export function AdminDeploymentConfig() {
                         <p className="text-xs text-success mt-1">{t('adminDeployment.embeddingHelp.recommended', 'Recommended')}</p>
                       </div>
                       <div className="bg-surface-overlay border border-border rounded-lg p-3">
-                        <p className="text-sm font-medium text-text">OpenAI text-embedding-3-small</p>
+                        <p className="text-sm font-medium text-text">intfloat/multilingual-e5-small</p>
                         <p className="text-xs text-text-muted mt-1">
-                          {t('adminDeployment.embeddingHelp.openaiSmallDesc', 'Cloud-based, requires API key. Fast and cost-effective.')}
+                          {t('adminDeployment.embeddingHelp.e5SmallDesc', 'Faster and lighter than the base model, with lower memory usage.')}
                         </p>
                       </div>
                       <div className="bg-surface-overlay border border-border rounded-lg p-3">
-                        <p className="text-sm font-medium text-text">OpenAI text-embedding-3-large</p>
+                        <p className="text-sm font-medium text-text">intfloat/multilingual-e5-large</p>
                         <p className="text-xs text-text-muted mt-1">
-                          {t('adminDeployment.embeddingHelp.openaiLargeDesc', 'Highest quality but more expensive. Best for complex documents.')}
+                          {t('adminDeployment.embeddingHelp.e5LargeDesc', 'Higher quality retrieval than base/small, but with slower indexing and more RAM use.')}
                         </p>
                       </div>
                     </div>
@@ -2022,21 +2021,21 @@ export function AdminDeploymentConfig() {
                     </p>
                     <div className="space-y-2">
                       <div className="bg-surface-overlay border border-border rounded-lg p-3">
-                        <p className="text-sm font-medium text-text">EMBEDDING_DIMENSION</p>
+                        <p className="text-sm font-medium text-text">EMBEDDING_MODEL</p>
                         <p className="text-xs text-text-muted mt-1">
-                          {t('adminDeployment.embeddingHelp.dimensionDesc', 'Size of the vectors. Higher = more detailed but uses more storage. Default: 768')}
+                          {t('adminDeployment.embeddingHelp.modelPerfDesc', 'Choose smaller models for faster indexing, or larger models for better recall at higher CPU/RAM cost.')}
                         </p>
                       </div>
                       <div className="bg-surface-overlay border border-border rounded-lg p-3">
-                        <p className="text-sm font-medium text-text">EMBEDDING_BATCH_SIZE</p>
+                        <p className="text-sm font-medium text-text">HF_HUB_OFFLINE / TRANSFORMERS_OFFLINE</p>
                         <p className="text-xs text-text-muted mt-1">
-                          {t('adminDeployment.embeddingHelp.batchDesc', 'How many chunks to process at once. Higher = faster but uses more memory. Default: 32')}
+                          {t('adminDeployment.embeddingHelp.cacheDesc', 'Set to 1 in air-gapped environments to force cached model assets and avoid network fetches.')}
                         </p>
                       </div>
                     </div>
                     <div className="bg-warning/10 border border-warning/20 rounded-lg p-3 mt-4">
                       <p className="text-xs text-warning">
-                        {t('adminDeployment.embeddingHelp.warning', 'Changing the embedding model or dimension after uploading documents requires re-processing all documents.')}
+                        {t('adminDeployment.embeddingHelp.warning', 'Changing the embedding model after uploading documents requires re-processing all documents.')}
                       </p>
                     </div>
                   </div>

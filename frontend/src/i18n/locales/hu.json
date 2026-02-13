@@ -414,6 +414,46 @@
       "selectUsers": "Válassz ki legalább egy felhasználót a migráláshoz.",
       "batchFailed": "Nem sikerült migrálni a kijelölt felhasználókat.",
       "batchSummary": "Migrálás befejezve. Migrálva: {{migrated}}. Sikertelen: {{failed}}."
+    },
+    "configAssistant": {
+      "openAria": "Admin asszisztens megnyitása",
+      "openTitle": "Admin asszisztens",
+      "title": "Admin konfigurációs asszisztens",
+      "contextToolOff": "A kontextus eszköz ki van kapcsolva",
+      "contextReady": "Kontextus: {{timestamp}}",
+      "contextNotLoaded": "Kontextus: még nincs betöltve",
+      "contextRefreshed": "Az admin konfigurációs kontextus frissítve: {{timestamp}}",
+      "refreshContext": "Kontextus frissítése",
+      "refreshFailed": "A kontextus frissítése sikertelen",
+      "switchToCompact": "Váltás kompakt méretre",
+      "switchToExpanded": "Váltás bővített méretre",
+      "compact": "Kompakt",
+      "expand": "Bővítés",
+      "shareSecretsTitle": "Titkos környezeti változók megosztása",
+      "shareSecretsHint": "Alapértelmezetten ki van kapcsolva. Először engedélyezze a Config eszközt. Engedélyezés után a titkos telepítési konfigurációs értékek kliensoldalon láthatóvá válnak és elküldésre kerülnek az LLM szolgáltatójának.",
+      "sensitive": "Érzékeny",
+      "emptyPrompt": "Kérdezzen bármilyen admin beállításról. Ha szeretné, hogy az asszisztens változtatásokat javasoljon és alkalmazzon, kérje, hogy adjon meg egy JSON change setet.",
+      "pendingChanges": "Függőben lévő változtatások",
+      "pendingChangesWithSummary": "Függőben lévő változtatások: {{summary}}",
+      "dismiss": "Bezárás",
+      "apply": "Alkalmazás",
+      "reviewMaskedSecrets": "Áttekintés: a titkos telepítési kulcsok értékei itt maszkolva vannak.",
+      "applyingChanges": "Változtatások alkalmazása...",
+      "applyingAdminChanges": "Admin konfigurációs változtatások alkalmazása...",
+      "inputPlaceholder": "Kérdezzen az admin konfigurációról...",
+      "applySummary": {
+        "appliedCounts": "{{ok}}/{{total}} módosítás alkalmazva.",
+        "appliedCountsWithFailures": "{{ok}}/{{total}} módosítás alkalmazva, {{failed}} sikertelen.",
+        "configValidationValid": "Konfiguráció-ellenőrzés: érvényes.",
+        "configValidationValidWarnings": "Konfiguráció-ellenőrzés: érvényes (figyelmeztetések: {{count}}).",
+        "configValidationInvalidErrors": "Konfiguráció-ellenőrzés: ÉRVÉNYTELEN (hibák: {{count}}).",
+        "configValidationFailedHttp": "A konfiguráció-ellenőrzés sikertelen (HTTP {{status}}).",
+        "configValidationFailedNetwork": "A konfiguráció-ellenőrzés sikertelen (hálózati hiba).",
+        "restartRequiredFor": "Újraindítás szükséges ehhez: {{keys}}.",
+        "restartRequiredNo": "Újraindítás szükséges: nem.",
+        "restartCheckFailedHttp": "Az újraindítási szükséglet ellenőrzése sikertelen (HTTP {{status}}).",
+        "restartCheckFailedNetwork": "Az újraindítási szükséglet ellenőrzése sikertelen (hálózati hiba)."
+      }
     }
   },
   "adminOnboarding": {
@@ -682,7 +722,7 @@
     "LLM_MODEL": {
       "label": "Modell neve",
       "description": "Modell név/azonosító",
-      "hint": "A használandó modell azonosító (pl. \"kimi-k2-thinking\"). Ellenőrizd a szolgáltatód dokumentációját az elérhető modellekért."
+      "hint": "A használandó modell azonosító (pl. \"kimi-k2-5\"). Ellenőrizd a szolgáltatód dokumentációját az elérhető modellekért."
     },
     "LLM_API_URL": {
       "label": "API végpont",

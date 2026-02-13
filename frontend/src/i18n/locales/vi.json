@@ -416,6 +416,46 @@
       "selectUsers": "Chọn ít nhất một người dùng để di chuyển.",
       "batchFailed": "Không thể di chuyển người dùng đã chọn.",
       "batchSummary": "Di chuyển hoàn tất. Đã di chuyển: {{migrated}}. Thất bại: {{failed}}."
+    },
+    "configAssistant": {
+      "openAria": "Mở trợ lý quản trị",
+      "openTitle": "Trợ lý quản trị",
+      "title": "Trợ lý cấu hình quản trị",
+      "contextToolOff": "Công cụ ngữ cảnh đang tắt",
+      "contextReady": "Ngữ cảnh: {{timestamp}}",
+      "contextNotLoaded": "Ngữ cảnh: chưa tải",
+      "contextRefreshed": "Đã làm mới ngữ cảnh cấu hình quản trị: {{timestamp}}",
+      "refreshContext": "Làm mới ngữ cảnh",
+      "refreshFailed": "Không thể làm mới ngữ cảnh",
+      "switchToCompact": "Chuyển sang kích thước gọn",
+      "switchToExpanded": "Chuyển sang kích thước mở rộng",
+      "compact": "Gọn",
+      "expand": "Mở rộng",
+      "shareSecretsTitle": "Chia sẻ biến môi trường bí mật",
+      "shareSecretsHint": "Mặc định tắt. Hãy bật công cụ Config trước. Khi bật, các giá trị cấu hình triển khai bí mật sẽ được hiển thị phía client và gửi tới nhà cung cấp LLM của bạn.",
+      "sensitive": "Nhạy cảm",
+      "emptyPrompt": "Hỏi về bất kỳ cấu hình quản trị nào. Nếu muốn trợ lý đề xuất và áp dụng thay đổi, hãy yêu cầu nó kèm JSON change set.",
+      "pendingChanges": "Thay đổi đang chờ",
+      "pendingChangesWithSummary": "Thay đổi đang chờ: {{summary}}",
+      "dismiss": "Đóng",
+      "apply": "Áp dụng",
+      "reviewMaskedSecrets": "Xem lại: giá trị của khóa triển khai bí mật được che tại đây.",
+      "applyingChanges": "Đang áp dụng thay đổi...",
+      "applyingAdminChanges": "Đang áp dụng thay đổi cấu hình quản trị...",
+      "inputPlaceholder": "Hỏi về cấu hình quản trị...",
+      "applySummary": {
+        "appliedCounts": "Đã áp dụng {{ok}}/{{total}} thay đổi.",
+        "appliedCountsWithFailures": "Đã áp dụng {{ok}}/{{total}} thay đổi, {{failed}} thất bại.",
+        "configValidationValid": "Xác thực cấu hình: hợp lệ.",
+        "configValidationValidWarnings": "Xác thực cấu hình: hợp lệ (cảnh báo: {{count}}).",
+        "configValidationInvalidErrors": "Xác thực cấu hình: KHÔNG HỢP LỆ (lỗi: {{count}}).",
+        "configValidationFailedHttp": "Xác thực cấu hình thất bại (HTTP {{status}}).",
+        "configValidationFailedNetwork": "Xác thực cấu hình thất bại (lỗi mạng).",
+        "restartRequiredFor": "Cần khởi động lại cho: {{keys}}.",
+        "restartRequiredNo": "Cần khởi động lại: không.",
+        "restartCheckFailedHttp": "Kiểm tra yêu cầu khởi động lại thất bại (HTTP {{status}}).",
+        "restartCheckFailedNetwork": "Kiểm tra yêu cầu khởi động lại thất bại (lỗi mạng)."
+      }
     }
   },
   "adminOnboarding": {
@@ -684,7 +724,7 @@
     "LLM_MODEL": {
       "label": "Tên mô hình",
       "description": "Tên/mã định danh mô hình",
-      "hint": "Mã định danh mô hình cần sử dụng (ví dụ: \"kimi-k2-thinking\"). Xem tài liệu của nhà cung cấp để biết các mô hình có sẵn."
+      "hint": "Mã định danh mô hình cần sử dụng (ví dụ: \"kimi-k2-5\"). Xem tài liệu của nhà cung cấp để biết các mô hình có sẵn."
     },
     "LLM_API_URL": {
       "label": "Điểm cuối API",

@@ -11,6 +11,7 @@ import {
   getInstanceConfig,
   saveInstanceConfig,
   applyAccentColor,
+  applyCustomAccentColor,
   applyDocumentTitle,
   applyFavicon,
   applyAppleTouchIcon,
@@ -70,6 +71,23 @@ function hexToAccentColor(value: string | undefined): AccentColor | undefined {
   }
 
   return undefined
+}
+
+function applyPrimaryColorFromSetting(primaryColor: string | undefined, fallback: AccentColor) {
+  // If it's a preset name, keep using the class-based themes.
+  const preset = hexToAccentColor(primaryColor)
+  if (preset) {
+    applyAccentColor(preset)
+    return
+  }
+
+  // If it's a custom hex color, apply it directly.
+  if (typeof primaryColor === 'string' && applyCustomAccentColor(primaryColor)) {
+    return
+  }
+
+  // Fallback to a known preset.
+  applyAccentColor(fallback)
 }
 
 /**
@@ -133,7 +151,7 @@ export function InstanceConfigProvider({ children }: { children: ReactNode }) {
     // Immediately apply cached config
     const stored = getInstanceConfig()
     setConfigState(stored)
-    applyAccentColor(stored.accentColor)
+    applyPrimaryColorFromSetting(stored.primaryColor, stored.accentColor)
     applySurfaceStyle(stored.surfaceStyle)
     applyTypographyPreset(stored.typographyPreset)
     applyDocumentTitle(stored.name)
@@ -154,6 +172,7 @@ export function InstanceConfigProvider({ children }: { children: ReactNode }) {
               hexToAccentColor(settings.primary_color) ??
               stored.accentColor ??
               DEFAULT_INSTANCE_CONFIG.accentColor,
+            primaryColor: typeof settings.primary_color === 'string' ? settings.primary_color : undefined,
             icon: validateIcon(settings.icon) ?? stored.icon ?? DEFAULT_INSTANCE_CONFIG.icon,
             logoUrl:
               typeof settings.logo_url === 'string'
@@ -215,7 +234,7 @@ export function InstanceConfigProvider({ children }: { children: ReactNode }) {
           
           setConfigState(newConfig)
           saveInstanceConfig(newConfig)
-          applyAccentColor(newConfig.accentColor)
+          applyPrimaryColorFromSetting(settings.primary_color, newConfig.accentColor)
           applySurfaceStyle(newConfig.surfaceStyle)
           applyTypographyPreset(newConfig.typographyPreset)
           applyDocumentTitle(newConfig.name)
@@ -233,7 +252,7 @@ export function InstanceConfigProvider({ children }: { children: ReactNode }) {
   const setConfig = (newConfig: InstanceConfig) => {
     setConfigState(newConfig)
     saveInstanceConfig(newConfig)
-    applyAccentColor(newConfig.accentColor)
+    applyPrimaryColorFromSetting(newConfig.primaryColor, newConfig.accentColor)
     applySurfaceStyle(newConfig.surfaceStyle)
     applyTypographyPreset(newConfig.typographyPreset)
     applyDocumentTitle(newConfig.name)

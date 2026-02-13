@@ -414,6 +414,46 @@
       "selectUsers": "เลือกผู้ใช้อย่างน้อยหนึ่งคนเพื่อย้าย",
       "batchFailed": "ไม่สามารถย้ายผู้ใช้ที่เลือกได้",
       "batchSummary": "การย้ายเสร็จสมบูรณ์ ย้ายแล้ว: {{migrated}} ล้มเหลว: {{failed}}"
+    },
+    "configAssistant": {
+      "openAria": "เปิดผู้ช่วยผู้ดูแลระบบ",
+      "openTitle": "ผู้ช่วยผู้ดูแลระบบ",
+      "title": "ผู้ช่วยการตั้งค่าผู้ดูแลระบบ",
+      "contextToolOff": "ปิดเครื่องมือบริบทอยู่",
+      "contextReady": "บริบท: {{timestamp}}",
+      "contextNotLoaded": "บริบท: ยังไม่โหลด",
+      "contextRefreshed": "รีเฟรชบริบทการตั้งค่าผู้ดูแลระบบแล้ว: {{timestamp}}",
+      "refreshContext": "รีเฟรชบริบท",
+      "refreshFailed": "รีเฟรชบริบทไม่สำเร็จ",
+      "switchToCompact": "สลับเป็นขนาดกะทัดรัด",
+      "switchToExpanded": "สลับเป็นขนาดขยาย",
+      "compact": "กะทัดรัด",
+      "expand": "ขยาย",
+      "shareSecretsTitle": "แชร์ตัวแปรสภาพแวดล้อมลับ",
+      "shareSecretsHint": "ปิดไว้โดยค่าเริ่มต้น เปิดเครื่องมือ Config ก่อน เมื่อเปิดแล้ว ค่าคอนฟิกการดีพลอยที่เป็นความลับจะแสดงฝั่งไคลเอนต์และส่งไปยังผู้ให้บริการ LLM ของคุณ",
+      "sensitive": "ละเอียดอ่อน",
+      "emptyPrompt": "ถามเกี่ยวกับการตั้งค่าผู้ดูแลระบบใด ๆ ได้ หากต้องการให้ผู้ช่วยเสนอและใช้การเปลี่ยนแปลง ให้บอกให้รวม JSON change set",
+      "pendingChanges": "การเปลี่ยนแปลงที่รอดำเนินการ",
+      "pendingChangesWithSummary": "การเปลี่ยนแปลงที่รอดำเนินการ: {{summary}}",
+      "dismiss": "ปิด",
+      "apply": "นำไปใช้",
+      "reviewMaskedSecrets": "ตรวจสอบ: ค่าสำหรับคีย์ดีพลอยลับถูกปิดบังไว้ที่นี่",
+      "applyingChanges": "กำลังนำการเปลี่ยนแปลงไปใช้...",
+      "applyingAdminChanges": "กำลังนำการเปลี่ยนแปลงการตั้งค่าผู้ดูแลระบบไปใช้...",
+      "inputPlaceholder": "ถามเกี่ยวกับการตั้งค่าผู้ดูแลระบบ...",
+      "applySummary": {
+        "appliedCounts": "นำการเปลี่ยนแปลงไปใช้แล้ว {{ok}}/{{total}} รายการ",
+        "appliedCountsWithFailures": "นำการเปลี่ยนแปลงไปใช้แล้ว {{ok}}/{{total}} รายการ ล้มเหลว {{failed}} รายการ",
+        "configValidationValid": "การตรวจสอบคอนฟิก: ถูกต้อง",
+        "configValidationValidWarnings": "การตรวจสอบคอนฟิก: ถูกต้อง (คำเตือน: {{count}})",
+        "configValidationInvalidErrors": "การตรวจสอบคอนฟิก: ไม่ถูกต้อง (ข้อผิดพลาด: {{count}})",
+        "configValidationFailedHttp": "การตรวจสอบคอนฟิกล้มเหลว (HTTP {{status}})",
+        "configValidationFailedNetwork": "การตรวจสอบคอนฟิกล้มเหลว (ข้อผิดพลาดเครือข่าย)",
+        "restartRequiredFor": "ต้องรีสตาร์ตสำหรับ: {{keys}}",
+        "restartRequiredNo": "ต้องรีสตาร์ต: ไม่",
+        "restartCheckFailedHttp": "การตรวจสอบความจำเป็นในการรีสตาร์ตล้มเหลว (HTTP {{status}})",
+        "restartCheckFailedNetwork": "การตรวจสอบความจำเป็นในการรีสตาร์ตล้มเหลว (ข้อผิดพลาดเครือข่าย)"
+      }
     }
   },
   "adminOnboarding": {
@@ -682,7 +722,7 @@
     "LLM_MODEL": {
       "label": "ชื่อโมเดล",
       "description": "ชื่อ/ตัวระบุโมเดล",
-      "hint": "ตัวระบุโมเดลที่จะใช้ (เช่น \"kimi-k2-thinking\") ตรวจสอบเอกสารของผู้ให้บริการสำหรับโมเดลที่มี"
+      "hint": "ตัวระบุโมเดลที่จะใช้ (เช่น \"kimi-k2-5\") ตรวจสอบเอกสารของผู้ให้บริการสำหรับโมเดลที่มี"
     },
     "LLM_API_URL": {
       "label": "จุดเชื่อมต่อ API",

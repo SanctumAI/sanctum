@@ -207,6 +207,46 @@
       "typographyHumanist": "Humanist",
       "typographyHumanistDesc": "Warm, readable typography with clarity."
     },
+    "configAssistant": {
+      "openAria": "Open admin assistant",
+      "openTitle": "Admin assistant",
+      "title": "Admin Configuration Assistant",
+      "contextToolOff": "Context tool is off",
+      "contextReady": "Context: {{timestamp}}",
+      "contextNotLoaded": "Context: not loaded yet",
+      "contextRefreshed": "Admin config context refreshed: {{timestamp}}",
+      "refreshContext": "Refresh context",
+      "refreshFailed": "Failed to refresh context",
+      "switchToCompact": "Switch to compact size",
+      "switchToExpanded": "Switch to expanded size",
+      "compact": "Compact",
+      "expand": "Expand",
+      "shareSecretsTitle": "Share secret env vars",
+      "shareSecretsHint": "Off by default. Enable Config tool first. When enabled, secret deployment config values are revealed client-side and sent to your LLM provider.",
+      "sensitive": "Sensitive",
+      "emptyPrompt": "Ask questions about any admin configuration. If you want the assistant to propose and apply changes, ask it to include a JSON change set.",
+      "pendingChanges": "Pending changes",
+      "pendingChangesWithSummary": "Pending changes: {{summary}}",
+      "dismiss": "Dismiss",
+      "apply": "Apply",
+      "reviewMaskedSecrets": "Review: values for secret deployment keys are masked here.",
+      "applyingChanges": "Applying changes...",
+      "applyingAdminChanges": "Applying admin configuration changes...",
+      "inputPlaceholder": "Ask about admin configuration...",
+      "applySummary": {
+        "appliedCounts": "Applied {{ok}}/{{total}} change(s).",
+        "appliedCountsWithFailures": "Applied {{ok}}/{{total}} change(s), {{failed}} failed.",
+        "configValidationValid": "Config validation: valid.",
+        "configValidationValidWarnings": "Config validation: valid (warnings: {{count}}).",
+        "configValidationInvalidErrors": "Config validation: INVALID (errors: {{count}}).",
+        "configValidationFailedHttp": "Config validation: failed (HTTP {{status}}).",
+        "configValidationFailedNetwork": "Config validation: failed (network error).",
+        "restartRequiredFor": "Restart required for: {{keys}}.",
+        "restartRequiredNo": "Restart required: no.",
+        "restartCheckFailedHttp": "Restart required check: failed (HTTP {{status}}).",
+        "restartCheckFailedNetwork": "Restart required check: failed (network error)."
+      }
+    },
     "reachout": {
       "title": "User Reachout",
       "subtitle": "Optionally let authenticated users send a message to your team via email.",
@@ -914,7 +954,7 @@
     "LLM_MODEL": {
       "label": "Model Name",
       "description": "Model name/identifier",
-      "hint": "The model identifier to use (e.g., \"kimi-k2-thinking\"). Check your provider's documentation for available models."
+      "hint": "The model identifier to use (e.g., \"kimi-k2-5\"). Check your provider's documentation for available models."
     },
     "LLM_API_URL": {
       "label": "API Endpoint",

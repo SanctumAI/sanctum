@@ -248,6 +248,46 @@
       "selectUsers": "মাইগ্রেট করতে কমপক্ষে একজন ব্যবহারকারী নির্বাচন করুন।",
       "batchFailed": "নির্বাচিত ব্যবহারকারীদের মাইগ্রেট করতে ব্যর্থ।",
       "batchSummary": "মাইগ্রেশন সম্পূর্ণ। মাইগ্রেট হয়েছে: {{migrated}}। ব্যর্থ: {{failed}}।"
+    },
+    "configAssistant": {
+      "openAria": "অ্যাডমিন সহকারী খুলুন",
+      "openTitle": "অ্যাডমিন সহকারী",
+      "title": "অ্যাডমিন কনফিগারেশন সহকারী",
+      "contextToolOff": "কনটেক্সট টুল বন্ধ আছে",
+      "contextReady": "কনটেক্সট: {{timestamp}}",
+      "contextNotLoaded": "কনটেক্সট: এখনও লোড হয়নি",
+      "contextRefreshed": "অ্যাডমিন কনফিগ কনটেক্সট রিফ্রেশ করা হয়েছে: {{timestamp}}",
+      "refreshContext": "কনটেক্সট রিফ্রেশ করুন",
+      "refreshFailed": "কনটেক্সট রিফ্রেশ করা যায়নি",
+      "switchToCompact": "কমপ্যাক্ট আকারে পরিবর্তন করুন",
+      "switchToExpanded": "বড় আকারে পরিবর্তন করুন",
+      "compact": "কমপ্যাক্ট",
+      "expand": "বড় করুন",
+      "shareSecretsTitle": "গোপন এনভ ভ্যারিয়েবল শেয়ার করুন",
+      "shareSecretsHint": "ডিফল্টভাবে বন্ধ। আগে Config টুল চালু করুন। চালু করলে ডিপ্লয়মেন্ট কনফিগের গোপন মান ক্লায়েন্টে প্রকাশিত হয়ে আপনার LLM প্রোভাইডারের কাছে পাঠানো হবে।",
+      "sensitive": "সংবেদনশীল",
+      "emptyPrompt": "যেকোনো অ্যাডমিন কনফিগারেশন সম্পর্কে প্রশ্ন করুন। সহকারীকে পরিবর্তন প্রস্তাব ও প্রয়োগ করাতে চাইলে তাকে JSON change set দিতে বলুন।",
+      "pendingChanges": "মুলতুবি পরিবর্তন",
+      "pendingChangesWithSummary": "মুলতুবি পরিবর্তন: {{summary}}",
+      "dismiss": "বন্ধ করুন",
+      "apply": "প্রয়োগ করুন",
+      "reviewMaskedSecrets": "রিভিউ: গোপন ডিপ্লয়মেন্ট কী-র মান এখানে মাস্ক করা থাকে।",
+      "applyingChanges": "পরিবর্তন প্রয়োগ করা হচ্ছে...",
+      "applyingAdminChanges": "অ্যাডমিন কনফিগারেশন পরিবর্তন প্রয়োগ করা হচ্ছে...",
+      "inputPlaceholder": "অ্যাডমিন কনফিগারেশন সম্পর্কে জিজ্ঞাসা করুন...",
+      "applySummary": {
+        "appliedCounts": "{{ok}}/{{total}} টি পরিবর্তন প্রয়োগ করা হয়েছে।",
+        "appliedCountsWithFailures": "{{ok}}/{{total}} টি পরিবর্তন প্রয়োগ করা হয়েছে, {{failed}} টি ব্যর্থ।",
+        "configValidationValid": "কনফিগ যাচাই: বৈধ।",
+        "configValidationValidWarnings": "কনফিগ যাচাই: বৈধ (সতর্কতা: {{count}})।",
+        "configValidationInvalidErrors": "কনফিগ যাচাই: অবৈধ (ত্রুটি: {{count}})।",
+        "configValidationFailedHttp": "কনফিগ যাচাই ব্যর্থ (HTTP {{status}})।",
+        "configValidationFailedNetwork": "কনফিগ যাচাই ব্যর্থ (নেটওয়ার্ক ত্রুটি)।",
+        "restartRequiredFor": "রিস্টার্ট প্রয়োজন: {{keys}}।",
+        "restartRequiredNo": "রিস্টার্ট প্রয়োজন: না।",
+        "restartCheckFailedHttp": "রিস্টার্ট প্রয়োজন কিনা যাচাই ব্যর্থ (HTTP {{status}})।",
+        "restartCheckFailedNetwork": "রিস্টার্ট প্রয়োজন কিনা যাচাই ব্যর্থ (নেটওয়ার্ক ত্রুটি)।"
+      }
     }
   },
   "adminOnboarding": {
@@ -682,7 +722,7 @@
     "LLM_MODEL": {
       "label": "মডেলের নাম",
       "description": "মডেলের নাম/আইডেন্টিফায়ার",
-      "hint": "ব্যবহার করার জন্য মডেল আইডেন্টিফায়ার (যেমন, \"kimi-k2-thinking\")। উপলব্ধ মডেলগুলির জন্য আপনার প্রদানকারীর ডকুমেন্টেশন দেখুন।"
+      "hint": "ব্যবহার করার জন্য মডেল আইডেন্টিফায়ার (যেমন, \"kimi-k2-5\")। উপলব্ধ মডেলগুলির জন্য আপনার প্রদানকারীর ডকুমেন্টেশন দেখুন।"
     },
     "LLM_API_URL": {
       "label": "API এন্ডপয়েন্ট",

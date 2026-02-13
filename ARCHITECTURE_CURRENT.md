@@ -281,9 +281,7 @@ Key configuration options (see `.env.example`):
 | `MAPLE_API_KEY` | (required) | API key for maple-proxy when `LLM_PROVIDER=maple` |
 | `QDRANT_HOST` | `qdrant` | Qdrant hostname |
 | `QDRANT_PORT` | `6333` | Qdrant port |
-| `EMBEDDING_PROVIDER` | `local` | Embedding backend (`local` or `openai`) |
 | `EMBEDDING_MODEL` | `intfloat/multilingual-e5-base` | Embedding model name |
-| `OPENAI_API_KEY` | (required for OpenAI embeddings) | OpenAI key when `EMBEDDING_PROVIDER=openai` |
 | `SEARXNG_URL` | `http://searxng:8080` | SearXNG endpoint |
 | `FRONTEND_URL` | `http://localhost:5173` | Base URL for magic links |
 | `MOCK_EMAIL` | `true` | Log magic links instead of sending (alias: `MOCK_SMTP`) |

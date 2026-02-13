@@ -16,13 +16,15 @@ scripts/tests/
 │   ├── test_3b_key_migration_execute.py
 │   ├── test_3c_auth_hardening_regression.py
 │   └── test_3d_phase3_config_integrity.py
-├── CRM/                    # User data encryption tests (1x)
+├── CRM/                    # User data encryption tests (2x)
 │   ├── test-config.json    # Test fixtures and constants
 │   ├── test_1a_verify_encryption.py
 │   └── test_1b_decrypt_fidelity.py
-└── RAG/                    # Document ingestion persistence tests (2x)
-    ├── test-config.json    # Test fixtures and constants
-    └── test_2a_document_persistence.py
+├── RAG/                    # Document ingestion persistence tests (1x, 1 planned)
+│   ├── test-config.json    # Test fixtures and constants
+│   └── test_2a_document_persistence.py
+└── TOOLS/                  # Tool behavior parity checks (1x)
+    └── test_4a_unified_chat_tools_parity.py
 ```
 
 ---
@@ -49,7 +51,7 @@ test_{number}{letter}_{description}.py
 | 1 | CRM | User data, encryption, PII handling |
 | 2 | RAG | Document ingestion, retrieval, persistence |
 | 3 | AUTH | Admin key migration and auth flows |
-| 4 | TOOLS | Tool orchestration (reserved) |
+| 4 | TOOLS | Tool orchestration and parity checks |
 
 ### Current Tests
 
@@ -63,6 +65,7 @@ test_{number}{letter}_{description}.py
 | 3B | `test_3b_key_migration_execute.py` | AUTH | Execute migration and verify re-encryption |
 | 3C | `test_3c_auth_hardening_regression.py` | AUTH | Validate ingest/vector auth, session ownership, and CSRF behavior |
 | 3D | `test_3d_phase3_config_integrity.py` | AUTH | Validate secret-at-rest encryption and audit hash-chain verification |
+| 4A | `test_4a_unified_chat_tools_parity.py` | TOOLS | Verify `/llm/chat` `tools_used` parity across full-chat and admin-bubble payload shapes |
 
 ---
 
@@ -219,6 +222,10 @@ python test_3c_auth_hardening_regression.py --api-base http://localhost:8000
 # Phase 3 config integrity regression (3D)
 cd scripts/tests/AUTH
 python test_3d_phase3_config_integrity.py --api-base http://localhost:8000
+
+# Unified admin chat tool parity (4A)
+cd scripts/tests/TOOLS
+python test_4a_unified_chat_tools_parity.py --api-base http://localhost:8000 --admin-token <ADMIN_TOKEN>
 ```
 
 ---
@@ -263,6 +270,13 @@ python test_3d_phase3_config_integrity.py --api-base http://localhost:8000
 - Secret deployment config values are stored encrypted at rest in SQLite
 - Secret reveal endpoint returns decrypted values correctly for authenticated admin
 - Audit hash-chain verification remains valid with interleaved audit events across tables
+
+### Test 4A: Unified Chat Tool Parity
+
+✅ **PASS** when:
+- Full-chat payload shape and admin-bubble payload shape return identical `tools_used` sets for the same selected tools.
+- `tool_context` + `client_executed_tools: []` still allows server-side tool execution.
+- `tool_context` + `client_executed_tools: ["db-query"]` reports `db-query` without missing companion tools (for example `web-search`).
 
 ---
 
@@ -333,4 +347,4 @@ docker compose -f docker-compose.infra.yml -f docker-compose.app.yml exec backen
 ```
 
 ### Authentication errors
-Provide token via `--token` argument or ensure admin is set up.
+Provide token via `--admin-token` argument or ensure admin is set up.

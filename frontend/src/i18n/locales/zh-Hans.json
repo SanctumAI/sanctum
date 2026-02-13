@@ -250,6 +250,46 @@
       "selectUsers": "请至少选择一个用户进行迁移。",
       "batchFailed": "所选用户迁移失败。",
       "batchSummary": "迁移完成。已迁移：{{migrated}}。失败：{{failed}}。"
+    },
+    "configAssistant": {
+      "openAria": "打开管理员助手",
+      "openTitle": "管理员助手",
+      "title": "管理员配置助手",
+      "contextToolOff": "上下文工具已关闭",
+      "contextReady": "上下文：{{timestamp}}",
+      "contextNotLoaded": "上下文：尚未加载",
+      "contextRefreshed": "管理员配置上下文已刷新：{{timestamp}}",
+      "refreshContext": "刷新上下文",
+      "refreshFailed": "刷新上下文失败",
+      "switchToCompact": "切换到紧凑尺寸",
+      "switchToExpanded": "切换到扩展尺寸",
+      "compact": "紧凑",
+      "expand": "展开",
+      "shareSecretsTitle": "共享机密环境变量",
+      "shareSecretsHint": "默认关闭。请先启用 Config 工具。启用后，部署配置中的机密值会在客户端显示并发送到你的 LLM 提供商。",
+      "sensitive": "敏感",
+      "emptyPrompt": "你可以询问任何管理员配置问题。如果希望助手提出并应用更改，请要求其包含 JSON 变更集。",
+      "pendingChanges": "待处理更改",
+      "pendingChangesWithSummary": "待处理更改：{{summary}}",
+      "dismiss": "关闭",
+      "apply": "应用",
+      "reviewMaskedSecrets": "审阅：机密部署密钥的值在此处已被掩码。",
+      "applyingChanges": "正在应用更改...",
+      "applyingAdminChanges": "正在应用管理员配置更改...",
+      "inputPlaceholder": "询问管理员配置...",
+      "applySummary": {
+        "appliedCounts": "已应用 {{ok}}/{{total}} 项更改。",
+        "appliedCountsWithFailures": "已应用 {{ok}}/{{total}} 项更改，{{failed}} 项失败。",
+        "configValidationValid": "配置校验：有效。",
+        "configValidationValidWarnings": "配置校验：有效（警告：{{count}}）。",
+        "configValidationInvalidErrors": "配置校验：无效（错误：{{count}}）。",
+        "configValidationFailedHttp": "配置校验失败（HTTP {{status}}）。",
+        "configValidationFailedNetwork": "配置校验失败（网络错误）。",
+        "restartRequiredFor": "以下项需要重启：{{keys}}。",
+        "restartRequiredNo": "无需重启。",
+        "restartCheckFailedHttp": "重启需求检查失败（HTTP {{status}}）。",
+        "restartCheckFailedNetwork": "重启需求检查失败（网络错误）。"
+      }
     }
   },
   "adminOnboarding": {
@@ -685,7 +725,7 @@
     "LLM_MODEL": {
       "label": "模型名称",
       "description": "模型名称/标识符",
-      "hint": "要使用的模型标识符（例如 \"kimi-k2-thinking\"）。请查看提供商的文档了解可用模型。"
+      "hint": "要使用的模型标识符（例如 \"kimi-k2-5\"）。请查看提供商的文档了解可用模型。"
     },
     "LLM_API_URL": {
       "label": "API 端点",

@@ -1393,9 +1393,9 @@
       "hint": "ユーザーがアプリにアクセスする公開URL。マジックリンクの生成に使用されます。"
     },
     "LLM_API_KEY": {
-      "description": "説明",
-      "hint": "ヒント",
-      "label": "ラベル"
+      "label": "APIキー",
+      "description": "LLMサービスのAPIキー",
+      "hint": "LLMプロバイダーのAPIキーまたはトークン。認証が必要なプロバイダーでは必須です。"
     },
     "ADMIN_BASE_URL": {
       "description": "管理パネルのサブドメインURL（オプション）",

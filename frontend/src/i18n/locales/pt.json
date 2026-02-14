@@ -1395,9 +1395,9 @@
       "hint": "A URL pública onde os usuários acessam o aplicativo. Usado para gerar links mágicos."
     },
     "LLM_API_KEY": {
-      "description": "Descrição",
-      "hint": "Dica",
-      "label": "Rótulo"
+      "label": "Chave API",
+      "description": "Chave API para o serviço LLM",
+      "hint": "Sua chave API ou token do provedor LLM. Obrigatória para provedores com autenticação."
     },
     "ADMIN_BASE_URL": {
       "description": "URL do subdomínio do painel de administração (opcional)",

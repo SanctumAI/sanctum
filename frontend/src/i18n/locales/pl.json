@@ -1403,9 +1403,9 @@
       "hint": "Publiczny URL, pod którym użytkownicy uzyskują dostęp do aplikacji. Używany do generowania magicznych linków."
     },
     "LLM_API_KEY": {
-      "description": "Opis",
-      "hint": "Podpowiedź",
-      "label": "Etykieta"
+      "label": "Klucz API",
+      "description": "Klucz API dla usługi LLM",
+      "hint": "Twój klucz API lub token od dostawcy LLM. Wymagany dla dostawców z uwierzytelnianiem."
     },
     "ADMIN_BASE_URL": {
       "description": "Adres URL subdomeny panelu administratora (opcjonalnie)",

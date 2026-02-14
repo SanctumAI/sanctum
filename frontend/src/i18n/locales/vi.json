@@ -1395,9 +1395,9 @@
       "hint": "URL công khai nơi người dùng truy cập ứng dụng. Dùng để tạo liên kết ma thuật."
     },
     "LLM_API_KEY": {
-      "description": "Mô tả",
-      "hint": "Gợi ý",
-      "label": "Nhãn"
+      "label": "Khóa API",
+      "description": "Khóa API cho dịch vụ LLM",
+      "hint": "Khóa API hoặc token của bạn từ nhà cung cấp LLM. Bắt buộc đối với nhà cung cấp yêu cầu xác thực."
     },
     "ADMIN_BASE_URL": {
       "description": "URL tên miền phụ bảng điều khiển quản trị (tùy chọn)",

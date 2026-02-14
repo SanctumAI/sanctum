@@ -1393,9 +1393,9 @@
       "hint": "Julkinen URL, josta käyttäjät pääsevät sovellukseen. Käytetään taikalinkkien luomiseen."
     },
     "LLM_API_KEY": {
-      "description": "Kuvaus",
-      "hint": "Vihje",
-      "label": "Tarra"
+      "label": "API-avain",
+      "description": "API-avain LLM-palvelulle",
+      "hint": "API-avaimesi tai tunnuksesi LLM-tarjoajalta. Vaaditaan todennusta edellyttäville tarjoajille."
     },
     "ADMIN_BASE_URL": {
       "description": "Järjestelmänvalvojan paneelin aliverkkotunnuksen URL (valinnainen)",

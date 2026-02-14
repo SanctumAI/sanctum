@@ -1393,9 +1393,9 @@
       "hint": "Die öffentliche URL, unter der Benutzer auf die App zugreifen. Wird für die Generierung von Magic-Links verwendet."
     },
     "LLM_API_KEY": {
-      "description": "Beschreibung",
-      "hint": "Hinweis",
-      "label": "Bezeichnung"
+      "label": "API-Schlüssel",
+      "description": "API-Schlüssel für den LLM-Dienst",
+      "hint": "Ihr API-Schlüssel oder Token vom LLM-Anbieter. Erforderlich für Anbieter mit Authentifizierung."
     },
     "ADMIN_BASE_URL": {
       "description": "Subdomain-URL des Admin-Panels (optional)",

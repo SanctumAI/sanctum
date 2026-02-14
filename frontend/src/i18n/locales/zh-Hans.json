@@ -1396,9 +1396,9 @@
       "hint": "用户访问应用的公开 URL。用于生成魔法链接。"
     },
     "LLM_API_KEY": {
-      "description": "描述",
-      "hint": "提示",
-      "label": "标签"
+      "label": "API 密钥",
+      "description": "LLM 服务的 API 密钥",
+      "hint": "来自 LLM 提供商的 API 密钥或令牌。需要身份验证的提供商必须填写。"
     },
     "ADMIN_BASE_URL": {
       "description": "管理面板子域名 URL（可选）",

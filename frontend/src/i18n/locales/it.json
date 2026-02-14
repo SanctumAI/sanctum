@@ -1396,9 +1396,9 @@
       "hint": "L'URL pubblico dove gli utenti accedono all'app. Usato per generare i link magici."
     },
     "LLM_API_KEY": {
-      "description": "Descrizione",
-      "hint": "Suggerimento",
-      "label": "Etichetta"
+      "label": "Chiave API",
+      "description": "Chiave API per il servizio LLM",
+      "hint": "La tua chiave API o token dal fornitore LLM. Richiesta per i fornitori con autenticazione."
     },
     "ADMIN_BASE_URL": {
       "description": "URL sottodominio pannello di amministrazione (opzionale)",

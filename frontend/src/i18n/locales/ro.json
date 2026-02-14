@@ -1410,9 +1410,9 @@
       "hint": "URL-ul public unde utilizatorii accesează aplicația. Folosit pentru generarea linkurilor magice."
     },
     "LLM_API_KEY": {
-      "description": "Descriere",
-      "hint": "Sugestie",
-      "label": "Etichetă"
+      "label": "Cheie API",
+      "description": "Cheie API pentru serviciul LLM",
+      "hint": "Cheia API sau tokenul dvs. de la furnizorul LLM. Necesară pentru furnizorii care necesită autentificare."
     },
     "ADMIN_BASE_URL": {
       "description": "URL subdomeniu panou de administrare (opțional)",

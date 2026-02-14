@@ -1393,9 +1393,9 @@
       "hint": "Den offentlige URL, hvor brugere tilgår appen. Bruges til generering af magiske links."
     },
     "LLM_API_KEY": {
-      "description": "Beskrivelse",
-      "hint": "Tip",
-      "label": "Etiket"
+      "label": "API-nøgle",
+      "description": "API-nøgle til LLM-tjenesten",
+      "hint": "Din API-nøgle eller token fra LLM-udbyderen. Påkrævet for udbydere med godkendelse."
     },
     "ADMIN_BASE_URL": {
       "description": "Adminpanel-underdomæne-URL (valgfrit)",

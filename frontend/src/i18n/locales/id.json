@@ -1393,9 +1393,9 @@
       "hint": "URL publik tempat pengguna mengakses aplikasi. Digunakan untuk menghasilkan tautan ajaib."
     },
     "LLM_API_KEY": {
-      "description": "Deskripsi",
-      "hint": "Petunjuk",
-      "label": "Penanda"
+      "label": "Kunci API",
+      "description": "Kunci API untuk layanan LLM",
+      "hint": "Kunci API atau token Anda dari penyedia LLM. Diperlukan untuk penyedia yang memerlukan autentikasi."
     },
     "ADMIN_BASE_URL": {
       "description": "URL subdomain panel admin (opsional)",

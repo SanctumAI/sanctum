@@ -1394,9 +1394,9 @@
       "hint": "使用者存取應用程式的公開 URL。用於產生魔法連結。"
     },
     "LLM_API_KEY": {
-      "description": "描述",
-      "hint": "提示",
-      "label": "標籤"
+      "label": "API 金鑰",
+      "description": "LLM 服務的 API 金鑰",
+      "hint": "來自 LLM 供應商的 API 金鑰或權杖。需要驗證的供應商必須填寫。"
     },
     "ADMIN_BASE_URL": {
       "description": "管理面板子網域 URL (選填)",

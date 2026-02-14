@@ -1396,9 +1396,9 @@
       "hint": "Veřejná URL, kde uživatelé přistupují k aplikaci. Používá se pro generování magických odkazů."
     },
     "LLM_API_KEY": {
-      "description": "Popis",
-      "hint": "Nápověda",
-      "label": "Štítek"
+      "label": "API klíč",
+      "description": "API klíč pro službu LLM",
+      "hint": "Váš API klíč nebo token od poskytovatele LLM. Vyžadováno pro poskytovatele s ověřováním."
     },
     "ADMIN_BASE_URL": {
       "description": "URL subdomény panelu administrace (volitelné)",

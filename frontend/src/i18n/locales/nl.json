@@ -1482,9 +1482,9 @@
       "hint": "Gezondheidscontrole-URL voor externe monitors. Standaard: http://localhost:8000/health."
     },
     "LLM_API_KEY": {
-      "description": "Beschrijving",
-      "hint": "Tip",
-      "label": "Etiket"
+      "label": "API-sleutel",
+      "description": "API-sleutel voor de LLM-service",
+      "hint": "Uw API-sleutel of token van de LLM-provider. Vereist voor providers met authenticatie."
     }
   },
   "colors": {

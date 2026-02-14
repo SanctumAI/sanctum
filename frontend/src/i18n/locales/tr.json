@@ -1393,9 +1393,9 @@
       "hint": "Kullanıcıların uygulamaya eriştiği genel URL. Sihirli bağlantılar oluşturmak için kullanılır."
     },
     "LLM_API_KEY": {
-      "description": "Açıklama",
-      "hint": "İpucu",
-      "label": "Etiket"
+      "label": "API Anahtarı",
+      "description": "LLM hizmeti için API anahtarı",
+      "hint": "LLM sağlayıcınızdan API anahtarınız veya tokenınız. Kimlik doğrulama gerektiren sağlayıcılar için zorunludur."
     },
     "ADMIN_BASE_URL": {
       "description": "Yönetici paneli alt alan adı URL'si (isteğe bağlı)",

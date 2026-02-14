@@ -1393,9 +1393,9 @@
       "hint": "A nyilvános URL, ahol a felhasználók elérik az alkalmazást. Magikus linkek generálásához használatos."
     },
     "LLM_API_KEY": {
-      "description": "Leírás",
-      "hint": "Tipp",
-      "label": "Címke"
+      "label": "API kulcs",
+      "description": "API kulcs az LLM szolgáltatáshoz",
+      "hint": "Az API kulcs vagy token az LLM szolgáltatótól. Hitelesítést igénylő szolgáltatóknál kötelező."
     },
     "ADMIN_BASE_URL": {
       "description": "Admin panel aldomain URL (opcionális)",

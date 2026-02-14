@@ -1393,9 +1393,9 @@
       "hint": "사용자가 앱에 접근하는 공개 URL. 매직 링크 생성에 사용됩니다."
     },
     "LLM_API_KEY": {
-      "description": "설명",
-      "hint": "힌트",
-      "label": "레이블"
+      "label": "API 키",
+      "description": "LLM 서비스용 API 키",
+      "hint": "LLM 제공업체의 API 키 또는 토큰입니다. 인증이 필요한 제공업체에 필수입니다."
     },
     "ADMIN_BASE_URL": {
       "description": "관리자 패널 서브도메인 URL (선택 사항)",

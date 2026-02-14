@@ -47,8 +47,9 @@ type ValidationState = {
 }
 
 export function AdminDeploymentConfig() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const fixedT = i18n.getFixedT(i18n.language)
 
   // Hooks for config data
   const {
@@ -60,6 +61,7 @@ export function AdminDeploymentConfig() {
     validate,
     revealSecret,
   } = useDeploymentConfig()
+  const translatedConfigError = configError && i18n.exists(configError) ? fixedT(configError) : configError
 
   const {
     health,
@@ -1227,7 +1229,7 @@ export function AdminDeploymentConfig() {
         {/* Error display */}
         {configError && (
           <div className="bg-error/10 border border-error/20 rounded-xl p-4">
-            <p className="text-sm text-error">{t(configError)}</p>
+            <p className="text-sm text-error">{translatedConfigError}</p>
           </div>
         )}
 
@@ -1263,7 +1265,7 @@ export function AdminDeploymentConfig() {
               {Array.isArray(health.changed_keys_requiring_restart) &&
                health.changed_keys_requiring_restart.length > 0 && (
                 <p className="text-xs text-text-muted mt-1">
-                  Changed keys: {health.changed_keys_requiring_restart.join(', ')}
+                  {t('adminDeployment.extracted.changed_keys_6dd885', 'Changed keys:')} {health.changed_keys_requiring_restart.join(', ')}
                 </p>
               )}
             </div>
@@ -1630,7 +1632,7 @@ export function AdminDeploymentConfig() {
                     type="email"
                     value={testEmailAddress}
                     onChange={(e) => setTestEmailAddress(e.target.value)}
-                    placeholder="test@example.com"
+                    placeholder={t('adminDeployment.extracted.test_example_com_567159', 'test@example.com')}
                     className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                     disabled={testEmailSending}
                   />
@@ -2027,7 +2029,7 @@ export function AdminDeploymentConfig() {
                         </p>
                       </div>
                       <div className="bg-surface-overlay border border-border rounded-lg p-3">
-                        <p className="text-sm font-medium text-text">HF_HUB_OFFLINE / TRANSFORMERS_OFFLINE</p>
+                        <p className="text-sm font-medium text-text">{t('adminDeployment.extracted.hf_hub_offline_transformers_offline_65a6e3', 'HF_HUB_OFFLINE / TRANSFORMERS_OFFLINE')}</p>
                         <p className="text-xs text-text-muted mt-1">
                           {t('adminDeployment.embeddingHelp.cacheDesc', 'Set to 1 in air-gapped environments to force cached model assets and avoid network fetches.')}
                         </p>
@@ -2132,10 +2134,10 @@ export function AdminDeploymentConfig() {
                       {t('adminDeployment.domainsHelp.urlsDesc', 'Public URLs and CORS origins must match exactly (scheme + domain + port).')}
                     </p>
                     <div className="bg-surface-overlay border border-border rounded-lg p-3 font-mono text-xs space-y-1">
-                      <div>INSTANCE_URL=https://app.example.com</div>
-                      <div>API_BASE_URL=https://api.example.com</div>
-                      <div>ADMIN_BASE_URL=https://admin.example.com</div>
-                      <div>CORS_ORIGINS=https://app.example.com,https://admin.example.com</div>
+                      <div>{t('adminDeployment.extracted.instance_url_https_app_example_com_0700b1', 'INSTANCE_URL=https://app.example.com')}</div>
+                      <div>{t('adminDeployment.extracted.api_base_url_https_api_example_com_5249b4', 'API_BASE_URL=https://api.example.com')}</div>
+                      <div>{t('adminDeployment.extracted.admin_base_url_https_admin_example_com_f9b733', 'ADMIN_BASE_URL=https://admin.example.com')}</div>
+                      <div>{t('adminDeployment.extracted.cors_origins_https_app_example_com_https_admin_664e5d', 'CORS_ORIGINS=https://app.example.com,https://admin.example.com')}</div>
                     </div>
                     <p className="text-xs text-text-muted">
                       {t('adminDeployment.domainsHelp.urlsNote', 'If your API is served from the same domain as the app, you can leave API_BASE_URL empty.')}
@@ -2276,19 +2278,19 @@ export function AdminDeploymentConfig() {
                     </div>
                     <div className="space-y-2">
                       <div className="bg-surface-overlay border border-border rounded-lg p-3">
-                        <p className="text-sm font-medium text-text">SQLite Database</p>
+                        <p className="text-sm font-medium text-text">{t('adminDeployment.extracted.sqlite_database_d9c1be', 'SQLite Database')}</p>
                         <p className="text-xs text-text-muted mt-1">
                           {t('adminDeployment.storageHelp.sqliteDesc', 'Stores users, settings, and job status. Controlled by SQLITE_PATH.')}
                         </p>
                       </div>
                       <div className="bg-surface-overlay border border-border rounded-lg p-3">
-                        <p className="text-sm font-medium text-text">Uploads Folder</p>
+                        <p className="text-sm font-medium text-text">{t('adminDeployment.extracted.uploads_folder_5402a4', 'Uploads Folder')}</p>
                         <p className="text-xs text-text-muted mt-1">
                           {t('adminDeployment.storageHelp.uploadsDesc', 'Raw documents are saved here (UPLOADS_DIR). Mounted to the backend container.')}
                         </p>
                       </div>
                       <div className="bg-surface-overlay border border-border rounded-lg p-3">
-                        <p className="text-sm font-medium text-text">Vector Database</p>
+                        <p className="text-sm font-medium text-text">{t('adminDeployment.extracted.vector_database_eb5526', 'Vector Database')}</p>
                         <p className="text-xs text-text-muted mt-1">
                           {t('adminDeployment.storageHelp.qdrantDesc', 'Embeddings are stored in Qdrant at QDRANT_HOST:QDRANT_PORT.')}
                         </p>
@@ -2315,8 +2317,8 @@ export function AdminDeploymentConfig() {
                         <p className="text-xs text-text-muted mt-1">/uploads</p>
                       </div>
                       <div className="bg-surface-overlay border border-border rounded-lg p-3">
-                        <p className="text-sm font-medium text-text">QDRANT_HOST / QDRANT_PORT</p>
-                        <p className="text-xs text-text-muted mt-1">qdrant / 6333</p>
+                        <p className="text-sm font-medium text-text">{t('adminDeployment.extracted.qdrant_host_qdrant_port_d0cf55', 'QDRANT_HOST / QDRANT_PORT')}</p>
+                        <p className="text-xs text-text-muted mt-1">{t('adminDeployment.extracted.qdrant_6333_289ff3', 'qdrant / 6333')}</p>
                       </div>
                     </div>
                     <div className="bg-warning/10 border border-warning/20 rounded-lg p-3 mt-4">
@@ -2438,7 +2440,7 @@ export function AdminDeploymentConfig() {
                       {t('adminDeployment.searchHelp.configDesc', 'Point SEARXNG_URL to your SearXNG instance. In Docker Compose, the default service name works.')}
                     </p>
                     <div className="bg-surface-overlay border border-border rounded-lg p-3 font-mono text-xs">
-                      SEARXNG_URL=http://searxng:8080
+                      {t('adminDeployment.extracted.searxng_url_http_searxng_8080_ede53c', 'SEARXNG_URL=http://searxng:8080')}
                     </div>
                     <p className="text-xs text-text-muted">
                       {t('adminDeployment.searchHelp.configNote', 'If SearXNG is hosted externally, use its public URL instead.')}
@@ -2571,7 +2573,7 @@ export function AdminDeploymentConfig() {
                       {t('adminDeployment.securityHelp.frontendDesc', 'FRONTEND_URL is used for magic-link emails and should match your public UI domain.')}
                     </p>
                     <div className="bg-surface-overlay border border-border rounded-lg p-3 font-mono text-xs">
-                      FRONTEND_URL=https://app.example.com
+                      {t('adminDeployment.extracted.frontend_url_https_app_example_com_05514a', 'FRONTEND_URL=https://app.example.com')}
                     </div>
                     <p className="text-xs text-text-muted">
                       {t('adminDeployment.securityHelp.frontendNote', 'If this is wrong, login links may send users to the wrong place.')}
@@ -2800,7 +2802,7 @@ export function AdminDeploymentConfig() {
                       type="text"
                       value={newAdminPubkey}
                       onChange={(e) => setNewAdminPubkey(e.target.value)}
-                      placeholder="npub1... or 64-char hex"
+                      placeholder={t('adminDeployment.extracted.npub1_or_64_char_hex_b8e906', 'npub1... or 64-char hex')}
                       className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-text placeholder:text-text-muted text-sm font-mono focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                     />
                     <p className="text-xs text-text-muted mt-1">

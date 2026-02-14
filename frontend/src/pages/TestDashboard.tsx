@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Sun, Moon, Settings, Database, ChevronDown, Key, Shield, Users, Sliders, FileText, Zap, Lock, Unlock } from 'lucide-react'
 import { useTheme } from '../theme'
 import {
@@ -111,6 +112,7 @@ interface Neo4jQueryResult {
 }
 
 function ThemeToggle() {
+  const { t } = useTranslation()
   const { theme, setTheme, resolvedTheme } = useTheme()
 
   return (
@@ -118,7 +120,7 @@ function ThemeToggle() {
       <button
         onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
         className="p-2 rounded-lg bg-surface-raised border border-border hover:bg-surface-overlay transition-colors"
-        aria-label="Toggle theme"
+        aria-label={t('testDashboard.extracted.toggle_theme_9b0eaf', 'Toggle theme')}
       >
         {resolvedTheme === 'dark' ? (
           <Sun className="w-5 h-5 text-text" />
@@ -252,6 +254,7 @@ function StatusBadge({ status }: { status: 'success' | 'warning' | 'error' | 'in
 }
 
 export function TestDashboard() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   // Admin guard - redirect non-admins to home
@@ -1362,15 +1365,15 @@ export function TestDashboard() {
             <Link
               to="/chat"
               className="p-2 -ml-2 rounded-lg text-text-muted hover:text-text hover:bg-surface-overlay transition-all"
-              title="Back to Chat"
+              title={t('testDashboard.extracted.back_to_chat_e2991f', 'Back to Chat')}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
             </Link>
             <div>
-              <h1 className="text-2xl font-semibold text-text">Test Dashboard</h1>
-              <p className="text-sm text-text-muted">Admin tools for testing the RAG pipeline</p>
+              <h1 className="text-2xl font-semibold text-text">{t('testDashboard.extracted.test_dashboard_7349f9', 'Test Dashboard')}</h1>
+              <p className="text-sm text-text-muted">{t('testDashboard.extracted.admin_tools_for_testing_the_rag_pipeline_a7787f', 'Admin tools for testing the RAG pipeline')}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -1379,7 +1382,7 @@ export function TestDashboard() {
               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-text-secondary border border-border hover:bg-surface-overlay hover:text-text transition-colors text-sm"
             >
               <Settings className="w-4 h-4" />
-              Instance Config
+              {t('testDashboard.extracted.instance_config_6c9a3f', 'Instance Config')}
             </Link>
             <ThemeToggle />
           </div>
@@ -1388,18 +1391,18 @@ export function TestDashboard() {
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-6 py-8">
-        <p className="text-text-secondary mb-8">Test each component of the RAG pipeline</p>
+        <p className="text-text-secondary mb-8">{t('testDashboard.extracted.test_each_component_of_the_rag_pipeline_408491', 'Test each component of the RAG pipeline')}</p>
 
         {/* System Status Row */}
         <div className="grid md:grid-cols-2 gap-6 mb-6">
           {/* Health Check */}
           <Card>
-            <h3 className="text-lg font-semibold text-text mb-2">1. Health Check</h3>
+            <h3 className="text-lg font-semibold text-text mb-2">{t('testDashboard.extracted.1_health_check_7d1e91', '1. Health Check')}</h3>
             <p className="text-sm text-text-secondary mb-4">
-              Checks if Neo4j and Qdrant services are running.
+              {t('testDashboard.extracted.checks_if_neo4j_and_qdrant_services_are_running_8dab74', 'Checks if Neo4j and Qdrant services are running.')}
             </p>
             <InfoBox>
-              <strong className="text-text">GET /health</strong> — Pings both databases and returns their status.
+              <strong className="text-text">{t('testDashboard.extracted.get_health_ce575b', 'GET /health')}</strong> {t('testDashboard.extracted.pings_both_databases_and_returns_their_status_0602d8', '— Pings both databases and returns their status.')}
             </InfoBox>
             <Button onClick={checkHealth} disabled={healthLoading}>
               {healthLoading ? 'Checking...' : 'Check Health'}
@@ -1413,12 +1416,12 @@ export function TestDashboard() {
 
           {/* DB Smoke Test */}
           <Card>
-            <h3 className="text-lg font-semibold text-text mb-2">2. Database Smoke Test</h3>
+            <h3 className="text-lg font-semibold text-text mb-2">{t('testDashboard.extracted.2_database_smoke_test_209494', '2. Database Smoke Test')}</h3>
             <p className="text-sm text-text-secondary mb-4">
-              Verifies seeded test data exists in both databases.
+              {t('testDashboard.extracted.verifies_seeded_test_data_exists_in_both_databases_3ac1d4', 'Verifies seeded test data exists in both databases.')}
             </p>
             <InfoBox>
-              <strong className="text-text">GET /test</strong> — Retrieves the Spanish UDHR claim from Neo4j and its embedding from Qdrant.
+              <strong className="text-text">{t('testDashboard.extracted.get_test_b58003', 'GET /test')}</strong> {t('testDashboard.extracted.retrieves_the_spanish_udhr_claim_from_neo4j_and_3bbddf', '— Retrieves the Spanish UDHR claim from Neo4j and its embedding from Qdrant.')}
             </InfoBox>
             <Button onClick={runDbTest} disabled={dbTestLoading}>
               {dbTestLoading ? 'Testing...' : 'Run DB Test'}
@@ -1433,12 +1436,12 @@ export function TestDashboard() {
 
         {/* LLM Test */}
         <Card className="mb-6">
-          <h3 className="text-lg font-semibold text-text mb-2">3. LLM Provider Test</h3>
+          <h3 className="text-lg font-semibold text-text mb-2">{t('testDashboard.extracted.3_llm_provider_test_f3cd3d', '3. LLM Provider Test')}</h3>
           <p className="text-sm text-text-secondary mb-4">
-            Tests connectivity to the LLM provider (Maple or Ollama).
+            {t('testDashboard.extracted.tests_connectivity_to_the_llm_provider_maple_or_e91a9f', 'Tests connectivity to the LLM provider (Maple or Ollama).')}
           </p>
           <InfoBox>
-            <strong className="text-text">GET /llm/test</strong> — Sends "Say 'hello'" to the LLM and returns its response. Shows which model and provider are active.
+            <strong className="text-text">{t('testDashboard.extracted.get_llm_test_86edd0', 'GET /llm/test')}</strong> {t('testDashboard.extracted.sends_say_hello_to_the_llm_and_returns_9da964', '— Sends "Say \'hello\'" to the LLM and returns its response. Shows which model and provider are active.')}
           </InfoBox>
           <Button onClick={runLlmTest} disabled={llmTestLoading}>
             {llmTestLoading ? 'Testing LLM...' : 'Test LLM'}
@@ -1452,18 +1455,18 @@ export function TestDashboard() {
 
         {/* RAG Query */}
         <Card className="mb-6">
-          <h3 className="text-lg font-semibold text-text mb-2">4. RAG Query (Full Pipeline)</h3>
+          <h3 className="text-lg font-semibold text-text mb-2">{t('testDashboard.extracted.4_rag_query_full_pipeline_8ea01b', '4. RAG Query (Full Pipeline)')}</h3>
           <p className="text-sm text-text-secondary mb-4">
-            The complete RAG pipeline: embed → search → retrieve → generate.
+            {t('testDashboard.extracted.the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42', 'The complete RAG pipeline: embed → search → retrieve → generate.')}
           </p>
           <InfoBox>
-            <strong className="text-text">POST /query</strong> — This is where the magic happens:
+            <strong className="text-text">{t('testDashboard.extracted.post_query_1e40bd', 'POST /query')}</strong> {t('testDashboard.extracted.this_is_where_the_magic_happens_e98c18', '— This is where the magic happens:')}
             <ol className="mt-2 ml-5 list-decimal text-text-secondary">
-              <li>Embeds your question using the same model as ingestion</li>
-              <li>Searches Qdrant for semantically similar knowledge</li>
-              <li>Fetches full context from Neo4j (claims + sources)</li>
-              <li>Sends context + question to the LLM</li>
-              <li>Returns a grounded answer with citations</li>
+              <li>{t('testDashboard.extracted.embeds_your_question_using_the_same_model_as_436607', 'Embeds your question using the same model as ingestion')}</li>
+              <li>{t('testDashboard.extracted.searches_qdrant_for_semantically_similar_knowledge_303a40', 'Searches Qdrant for semantically similar knowledge')}</li>
+              <li>{t('testDashboard.extracted.fetches_full_context_from_neo4j_claims_sources_98ea16', 'Fetches full context from Neo4j (claims + sources)')}</li>
+              <li>{t('testDashboard.extracted.sends_context_question_to_the_llm_e76b36', 'Sends context + question to the LLM')}</li>
+              <li>{t('testDashboard.extracted.returns_a_grounded_answer_with_citations_f503fe', 'Returns a grounded answer with citations')}</li>
             </ol>
           </InfoBox>
 
@@ -1473,7 +1476,7 @@ export function TestDashboard() {
               value={ragInput}
               onChange={e => setRagInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && runRagQuery()}
-              placeholder="Ask a question... (try: When was the UDHR adopted?)"
+              placeholder={t('testDashboard.extracted.ask_a_question_try_when_was_the_udhr_b3eb35', 'Ask a question... (try: When was the UDHR adopted?)')}
               className="flex-1 px-4 py-2 bg-surface border border-border rounded-lg text-text placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
               disabled={ragLoading}
             />
@@ -1495,14 +1498,14 @@ export function TestDashboard() {
                 <p className="font-medium text-success mb-2">Answer:</p>
                 <p className="text-text whitespace-pre-wrap">{ragResult.answer}</p>
                 <p className="text-sm text-text-muted mt-2">
-                  Session: {ragResult.session_id?.slice(0, 8)}... | Temp: {ragResult.temperature}
+                  Session: {ragResult.session_id?.slice(0, 8)}{t('testDashboard.extracted.temp_b27bd5', '... | Temp:')} {ragResult.temperature}
                 </p>
               </div>
 
               {/* Clarifying Questions */}
               {ragResult.clarifying_questions?.length > 0 && (
                 <div className="bg-warning-subtle border border-warning/20 rounded-lg p-4">
-                  <p className="font-medium text-warning mb-2">Clarifying Questions:</p>
+                  <p className="font-medium text-warning mb-2">{t('testDashboard.extracted.clarifying_questions_8a371e', 'Clarifying Questions:')}</p>
                   <ul className="list-disc list-inside text-text-secondary">
                     {ragResult.clarifying_questions.map((q, i) => (
                       <li key={i}>{q}</li>
@@ -1514,13 +1517,13 @@ export function TestDashboard() {
               {/* Sources */}
               {ragResult.sources?.length > 0 && (
                 <div>
-                  <p className="font-medium text-text mb-2">Sources ({ragResult.sources.length}):</p>
+                  <p className="font-medium text-text mb-2">{t('testDashboard.extracted.sources_25464d', 'Sources (')}{ragResult.sources.length}):</p>
                   <div className="space-y-2">
                     {ragResult.sources.slice(0, 5).map((s, i) => (
                       <div key={i} className="bg-accent-subtle border border-accent/20 rounded-lg p-4">
                         <div className="flex justify-between items-start mb-2">
                           <span className="text-xs font-mono bg-surface-secondary px-2 py-1 rounded">
-                            {s.type} | score: {s.score?.toFixed(3)}
+                            {s.type} {t('testDashboard.extracted.score_92d190', '| score:')} {s.score?.toFixed(3)}
                           </span>
                           <span className="text-xs text-text-muted">{s.source_file}</span>
                         </div>
@@ -1534,7 +1537,7 @@ export function TestDashboard() {
               {/* Graph Context */}
               {ragResult.graph_context && Object.keys(ragResult.graph_context).some(k => ragResult.graph_context[k]?.length > 0) && (
                 <div>
-                  <p className="font-medium text-text mb-2">Graph Context:</p>
+                  <p className="font-medium text-text mb-2">{t('testDashboard.extracted.graph_context_185228', 'Graph Context:')}</p>
                   <div className="bg-surface-secondary rounded-lg p-4 text-sm">
                     {Object.entries(ragResult.graph_context).map(([key, values]) => (
                       values?.length > 0 && (
@@ -1553,18 +1556,18 @@ export function TestDashboard() {
 
         {/* Direct Chat */}
         <Card>
-          <h3 className="text-lg font-semibold text-text mb-2">5. Direct Chat (No RAG)</h3>
+          <h3 className="text-lg font-semibold text-text mb-2">{t('testDashboard.extracted.5_direct_chat_no_rag_e7a3fb', '5. Direct Chat (No RAG)')}</h3>
           <p className="text-sm text-text-secondary mb-4">
-            Direct chat with the LLM. No retrieval, just generation.
+            {t('testDashboard.extracted.direct_chat_with_the_llm_no_retrieval_just_d01a4a', 'Direct chat with the LLM. No retrieval, just generation.')}
           </p>
           <InfoBox>
-            <strong className="text-text">POST /llm/chat</strong> — Sends your message directly to the LLM without any knowledge retrieval. Useful for comparing RAG vs non-RAG responses.
+            <strong className="text-text">{t('testDashboard.extracted.post_llm_chat_296eaa', 'POST /llm/chat')}</strong> {t('testDashboard.extracted.sends_your_message_directly_to_the_llm_without_a01bbb', '— Sends your message directly to the LLM without any knowledge retrieval. Useful for comparing RAG vs non-RAG responses.')}
           </InfoBox>
 
           {/* Chat Messages */}
           <div className="border border-border rounded-lg h-52 overflow-y-auto p-4 mb-4 bg-surface">
             {messages.length === 0 && (
-              <p className="text-text-muted">Send a message to chat directly with the LLM...</p>
+              <p className="text-text-muted">{t('testDashboard.extracted.send_a_message_to_chat_directly_with_the_1a9c04', 'Send a message to chat directly with the LLM...')}</p>
             )}
             {messages.map((msg, i) => (
               <div
@@ -1598,7 +1601,7 @@ export function TestDashboard() {
               value={chatInput}
               onChange={e => setChatInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && sendChat()}
-              placeholder="Type a message..."
+              placeholder={t('testDashboard.extracted.type_a_message_09bdff', 'Type a message...')}
               className="flex-1 px-4 py-2 bg-surface border border-border rounded-lg text-text placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
               disabled={chatLoading}
             />
@@ -1610,16 +1613,16 @@ export function TestDashboard() {
 
         {/* Ingestion Pipeline */}
         <Card className="mt-6">
-          <h3 className="text-lg font-semibold text-text mb-2">6. Ingestion Pipeline</h3>
+          <h3 className="text-lg font-semibold text-text mb-2">{t('testDashboard.extracted.6_ingestion_pipeline_e66cb3', '6. Ingestion Pipeline')}</h3>
           <p className="text-sm text-text-secondary mb-4">
-            Document upload, chunking, and manual LLM extraction workflow.
+            {t('testDashboard.extracted.document_upload_chunking_and_manual_llm_extraction_workflow_9edc5e', 'Document upload, chunking, and manual LLM extraction workflow.')}
           </p>
 
           {/* UPLOAD DOCUMENT */}
           <div className="mb-6">
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Upload Document</p>
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">{t('testDashboard.extracted.upload_document_9e2628', 'Upload Document')}</p>
             <InfoBox>
-              <strong className="text-text">POST /ingest/upload</strong> — Upload PDF, TXT, or MD files for processing. Returns a job_id to track progress.
+              <strong className="text-text">{t('testDashboard.extracted.post_ingest_upload_3eb8fd', 'POST /ingest/upload')}</strong> {t('testDashboard.extracted.upload_pdf_txt_or_md_files_for_processing_0a6ce7', '— Upload PDF, TXT, or MD files for processing. Returns a job_id to track progress.')}
             </InfoBox>
             <div className="flex flex-wrap gap-3 items-center">
               <input
@@ -1644,10 +1647,10 @@ export function TestDashboard() {
 
           {/* JOBS & STATUS */}
           <div className="border-t border-border pt-6 mb-6">
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Jobs & Status</p>
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">{t('testDashboard.extracted.jobs_status_8339b3', 'Jobs & Status')}</p>
             <InfoBox>
-              <strong className="text-text">GET /ingest/jobs</strong> — List all ingest jobs. <br />
-              <strong className="text-text">GET /ingest/status/&#123;job_id&#125;</strong> — Get detailed status of a specific job.
+              <strong className="text-text">{t('testDashboard.extracted.get_ingest_jobs_039c92', 'GET /ingest/jobs')}</strong> {t('testDashboard.extracted.list_all_ingest_jobs_49dcb6', '— List all ingest jobs.')} <br />
+              <strong className="text-text">{t('testDashboard.extracted.get_ingest_status_job_id_c08668', 'GET /ingest/status/&#123;job_id&#125;')}</strong> {t('testDashboard.extracted.get_detailed_status_of_a_specific_job_ead8cd', '— Get detailed status of a specific job.')}
             </InfoBox>
             <div className="flex gap-3 mb-4">
               <Button onClick={fetchJobs} disabled={jobsLoading}>
@@ -1659,7 +1662,7 @@ export function TestDashboard() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border">
-                      <th className="text-left py-2 px-2 text-text-muted font-medium">Job ID</th>
+                      <th className="text-left py-2 px-2 text-text-muted font-medium">{t('testDashboard.extracted.job_id_770797', 'Job ID')}</th>
                       <th className="text-left py-2 px-2 text-text-muted font-medium">Filename</th>
                       <th className="text-left py-2 px-2 text-text-muted font-medium">Status</th>
                       <th className="text-left py-2 px-2 text-text-muted font-medium">Chunks</th>
@@ -1700,11 +1703,11 @@ export function TestDashboard() {
               </div>
             )}
             {jobs && jobs.length === 0 && (
-              <p className="text-text-muted text-sm mb-4">No jobs found. Upload a document to create one.</p>
+              <p className="text-text-muted text-sm mb-4">{t('testDashboard.extracted.no_jobs_found_upload_a_document_to_create_b24fe3', 'No jobs found. Upload a document to create one.')}</p>
             )}
             {selectedJobId && (
               <div className="flex gap-3 items-center mb-4">
-                <span className="text-sm text-text-secondary">Selected Job:</span>
+                <span className="text-sm text-text-secondary">{t('testDashboard.extracted.selected_job_651296', 'Selected Job:')}</span>
                 <code className="text-sm bg-surface-overlay px-2 py-1 rounded font-mono text-text">{selectedJobId}</code>
                 <Button variant="secondary" onClick={() => fetchJobStatus()} disabled={jobStatusLoading}>
                   {jobStatusLoading ? 'Checking...' : 'Check Status'}
@@ -1722,15 +1725,15 @@ export function TestDashboard() {
           <div className="border-t border-border pt-6 mb-6">
             <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Chunks</p>
             <InfoBox>
-              <strong className="text-text">GET /ingest/pending</strong> — List all chunks (optionally filtered by job). <br />
-              <strong className="text-text">GET /ingest/chunk/&#123;chunk_id&#125;</strong> — Get chunk with full LLM extraction prompt.
+              <strong className="text-text">{t('testDashboard.extracted.get_ingest_pending_35eae8', 'GET /ingest/pending')}</strong> {t('testDashboard.extracted.list_all_chunks_optionally_filtered_by_job_36f0d4', '— List all chunks (optionally filtered by job).')} <br />
+              <strong className="text-text">{t('testDashboard.extracted.get_ingest_chunk_chunk_id_c379aa', 'GET /ingest/chunk/&#123;chunk_id&#125;')}</strong> {t('testDashboard.extracted.get_chunk_with_full_llm_extraction_prompt_49a386', '— Get chunk with full LLM extraction prompt.')}
             </InfoBox>
             <div className="flex gap-3 mb-4">
               <Button onClick={() => fetchPendingChunks()} disabled={chunksLoading}>
                 {chunksLoading ? 'Fetching...' : 'Fetch Chunks'}
               </Button>
               {selectedJobId && (
-                <span className="text-sm text-text-muted self-center">(filtered by selected job)</span>
+                <span className="text-sm text-text-muted self-center">{t('testDashboard.extracted.filtered_by_selected_job_955917', '(filtered by selected job)')}</span>
               )}
             </div>
             {chunks && chunks.length > 0 && (
@@ -1759,20 +1762,20 @@ export function TestDashboard() {
                       </span>
                     </div>
                     <p className="text-xs text-text-secondary mt-1 line-clamp-2">{chunk.text.slice(0, 100)}...</p>
-                    <p className="text-xs text-text-muted mt-1">{chunk.char_count} chars | {chunk.source_file}</p>
+                    <p className="text-xs text-text-muted mt-1">{chunk.char_count} {t('testDashboard.extracted.chars_5a36c0', 'chars |')} {chunk.source_file}</p>
                   </div>
                 ))}
               </div>
             )}
             {chunks && chunks.length === 0 && (
-              <p className="text-text-muted text-sm mb-4">No chunks found.</p>
+              <p className="text-text-muted text-sm mb-4">{t('testDashboard.extracted.no_chunks_found_96d00e', 'No chunks found.')}</p>
             )}
             {chunkLoading && (
-              <p className="text-text-muted text-sm mt-4">Loading chunk details...</p>
+              <p className="text-text-muted text-sm mt-4">{t('testDashboard.extracted.loading_chunk_details_785d39', 'Loading chunk details...')}</p>
             )}
             {chunkDetail && !chunkLoading && (
               <div className="mt-4">
-                <p className="text-sm font-medium text-text mb-2">Full LLM Prompt (copy this to your LLM):</p>
+                <p className="text-sm font-medium text-text mb-2">{t('testDashboard.extracted.full_llm_prompt_copy_this_to_your_llm_660052', 'Full LLM Prompt (copy this to your LLM):')}</p>
                 <div className="bg-surface-overlay rounded-lg p-4 overflow-auto max-h-64">
                   <pre className="text-xs font-mono text-text-secondary whitespace-pre-wrap">
                     {(chunkDetail as { full_prompt_for_llm?: string }).full_prompt_for_llm || JSON.stringify(chunkDetail, null, 2)}
@@ -1785,7 +1788,7 @@ export function TestDashboard() {
                     if (prompt) navigator.clipboard.writeText(prompt)
                   }}
                 >
-                  Copy Prompt
+                  {t('testDashboard.extracted.copy_prompt_c6ce5d', 'Copy Prompt')}
                 </Button>
               </div>
             )}
@@ -1793,26 +1796,26 @@ export function TestDashboard() {
 
           {/* EXTRACTION WORKFLOW */}
           <div className="border-t border-border pt-6 mb-6">
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Extraction Workflow</p>
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">{t('testDashboard.extracted.extraction_workflow_63958f', 'Extraction Workflow')}</p>
             <InfoBox>
-              <strong className="text-text">POST /ingest/chunk/&#123;chunk_id&#125;/extract</strong> — Submit LLM extraction results. <br />
-              <strong className="text-text">POST /ingest/chunk/&#123;chunk_id&#125;/store</strong> — Commit extraction to Neo4j and Qdrant.
+              <strong className="text-text">{t('testDashboard.extracted.post_ingest_chunk_chunk_id_extract_ebff86', 'POST /ingest/chunk/&#123;chunk_id&#125;/extract')}</strong> {t('testDashboard.extracted.submit_llm_extraction_results_9668ac', '— Submit LLM extraction results.')} <br />
+              <strong className="text-text">{t('testDashboard.extracted.post_ingest_chunk_chunk_id_store_3ebda3', 'POST /ingest/chunk/&#123;chunk_id&#125;/store')}</strong> {t('testDashboard.extracted.commit_extraction_to_neo4j_and_qdrant_6ddd62', '— Commit extraction to Neo4j and Qdrant.')}
             </InfoBox>
             {!selectedChunkId ? (
-              <p className="text-text-muted text-sm">Select a chunk above to begin extraction workflow.</p>
+              <p className="text-text-muted text-sm">{t('testDashboard.extracted.select_a_chunk_above_to_begin_extraction_workflow_e530d4', 'Select a chunk above to begin extraction workflow.')}</p>
             ) : (
               <div className="space-y-4">
                 <div>
                   <p className="text-sm text-text-secondary mb-2">
-                    1. Copy the prompt above and send to your LLM
+                    {t('testDashboard.extracted.1_copy_the_prompt_above_and_send_to_bf527f', '1. Copy the prompt above and send to your LLM')}
                   </p>
                   <p className="text-sm text-text-secondary mb-2">
-                    2. Paste the JSON response below (should have <code className="bg-surface-overlay px-1 rounded">entities</code> and <code className="bg-surface-overlay px-1 rounded">relationships</code> arrays):
+                    {t('testDashboard.extracted.2_paste_the_json_response_below_should_have_59b7bd', '2. Paste the JSON response below (should have')} <code className="bg-surface-overlay px-1 rounded">entities</code> and <code className="bg-surface-overlay px-1 rounded">relationships</code> {t('testDashboard.extracted.arrays_6e742b', 'arrays):')}
                   </p>
                   <textarea
                     value={extractionJson}
                     onChange={(e) => setExtractionJson(e.target.value)}
-                    placeholder='{"entities": [...], "relationships": [...]}'
+                    placeholder={t('testDashboard.extracted.entities_relationships_df50cd', '{"entities": [...], "relationships": [...]}')}
                     className="w-full h-32 px-4 py-3 bg-surface border border-border rounded-lg text-text font-mono text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent resize-none"
                   />
                 </div>
@@ -1830,13 +1833,13 @@ export function TestDashboard() {
                 </div>
                 {extractionResult && (
                   <div className="mt-2">
-                    <p className="text-sm font-medium text-text mb-1">Extraction Result:</p>
+                    <p className="text-sm font-medium text-text mb-1">{t('testDashboard.extracted.extraction_result_604392', 'Extraction Result:')}</p>
                     <CodeBlock>{JSON.stringify(extractionResult, null, 2)}</CodeBlock>
                   </div>
                 )}
                 {storeResult && (
                   <div className="mt-2">
-                    <p className="text-sm font-medium text-text mb-1">Store Result:</p>
+                    <p className="text-sm font-medium text-text mb-1">{t('testDashboard.extracted.store_result_4a8acf', 'Store Result:')}</p>
                     <CodeBlock>{JSON.stringify(storeResult, null, 2)}</CodeBlock>
                   </div>
                 )}
@@ -1846,9 +1849,9 @@ export function TestDashboard() {
 
           {/* PIPELINE STATS */}
           <div className="border-t border-border pt-6">
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Pipeline Stats</p>
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">{t('testDashboard.extracted.pipeline_stats_5fc80f', 'Pipeline Stats')}</p>
             <InfoBox>
-              <strong className="text-text">GET /ingest/stats</strong> — Overall statistics for jobs and chunks.
+              <strong className="text-text">{t('testDashboard.extracted.get_ingest_stats_48d91e', 'GET /ingest/stats')}</strong> {t('testDashboard.extracted.overall_statistics_for_jobs_and_chunks_3111a8', '— Overall statistics for jobs and chunks.')}
             </InfoBox>
             <Button onClick={fetchIngestStats} disabled={statsLoading}>
               {statsLoading ? 'Fetching...' : 'Fetch Stats'}
@@ -1886,13 +1889,12 @@ export function TestDashboard() {
 
         {/* Vector Search */}
         <Card className="mt-6">
-          <h3 className="text-lg font-semibold text-text mb-2">7. Vector Search (Direct Qdrant)</h3>
+          <h3 className="text-lg font-semibold text-text mb-2">{t('testDashboard.extracted.7_vector_search_direct_qdrant_049447', '7. Vector Search (Direct Qdrant)')}</h3>
           <p className="text-sm text-text-secondary mb-4">
-            Search the vector store directly without LLM generation. Useful for debugging embeddings.
+            {t('testDashboard.extracted.search_the_vector_store_directly_without_llm_generation_ce9e36', 'Search the vector store directly without LLM generation. Useful for debugging embeddings.')}
           </p>
           <InfoBox>
-            <strong className="text-text">POST /vector-search</strong> — Embeds your query and searches Qdrant directly.
-            Returns matching vectors with similarity scores (no LLM call).
+            <strong className="text-text">{t('testDashboard.extracted.post_vector_search_da9f62', 'POST /vector-search')}</strong> {t('testDashboard.extracted.embeds_your_query_and_searches_qdrant_directly_returns_eeff55', '— Embeds your query and searches Qdrant directly. Returns matching vectors with similarity scores (no LLM call).')}
           </InfoBox>
 
           <div className="space-y-3 mb-4">
@@ -1902,7 +1904,7 @@ export function TestDashboard() {
                 value={vectorQuery}
                 onChange={e => setVectorQuery(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && runVectorSearch()}
-                placeholder="Enter search query..."
+                placeholder={t('testDashboard.extracted.enter_search_query_87a0d2', 'Enter search query...')}
                 className="flex-1 px-4 py-2 bg-surface border border-border rounded-lg text-text placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                 disabled={vectorLoading}
               />
@@ -1912,7 +1914,7 @@ export function TestDashboard() {
             </div>
             <div className="flex gap-4 items-center">
               <label className="text-sm text-text-secondary">
-                Top K:
+                {t('testDashboard.extracted.top_k_bf7748', 'Top K:')}
                 <select
                   value={vectorTopK}
                   onChange={(e) => setVectorTopK(Number(e.target.value))}
@@ -1941,10 +1943,10 @@ export function TestDashboard() {
           {vectorResults && (
             <div className="space-y-3">
               <p className="text-sm text-text-secondary">
-                Found {vectorResults.results.length} results | Embedding dimension: {vectorResults.query_embedding_dim}
+                Found {vectorResults.results.length} {t('testDashboard.extracted.results_embedding_dimension_e74de7', 'results | Embedding dimension:')} {vectorResults.query_embedding_dim}
               </p>
               {vectorResults.results.length === 0 ? (
-                <p className="text-text-muted text-sm">No results found. Try a different query or check if the collection has data.</p>
+                <p className="text-text-muted text-sm">{t('testDashboard.extracted.no_results_found_try_a_different_query_or_fef914', 'No results found. Try a different query or check if the collection has data.')}</p>
               ) : (
                 <div className="space-y-2 max-h-80 overflow-y-auto">
                   {vectorResults.results.map((result, idx) => (
@@ -1971,14 +1973,14 @@ export function TestDashboard() {
 
         {/* User Onboarding Test */}
         <Card className="mt-6">
-          <h3 className="text-lg font-semibold text-text mb-2">8. User Onboarding Test</h3>
+          <h3 className="text-lg font-semibold text-text mb-2">{t('testDashboard.extracted.8_user_onboarding_test_6152c0', '8. User Onboarding Test')}</h3>
           <p className="text-sm text-text-secondary mb-4">
-            Test the user creation flow with dynamic fields based on user type.
+            {t('testDashboard.extracted.test_the_user_creation_flow_with_dynamic_fields_b0142a', 'Test the user creation flow with dynamic fields based on user type.')}
           </p>
           <InfoBox>
-            <strong className="text-text">GET /user-types</strong> — Fetch available user types. <br />
-            <strong className="text-text">GET /admin/user-fields</strong> — Get field definitions for a type. <br />
-            <strong className="text-text">POST /users</strong> — Create a new user with fields.
+            <strong className="text-text">{t('testDashboard.extracted.get_user_types_0ccb5f', 'GET /user-types')}</strong> {t('testDashboard.extracted.fetch_available_user_types_9799ee', '— Fetch available user types.')} <br />
+            <strong className="text-text">{t('testDashboard.extracted.get_admin_user_fields_c29319', 'GET /admin/user-fields')}</strong> {t('testDashboard.extracted.get_field_definitions_for_a_type_3d1099', '— Get field definitions for a type.')} <br />
+            <strong className="text-text">{t('testDashboard.extracted.post_users_137faf', 'POST /users')}</strong> {t('testDashboard.extracted.create_a_new_user_with_fields_5206e7', '— Create a new user with fields.')}
           </InfoBox>
 
           <div className="space-y-4">
@@ -1990,7 +1992,7 @@ export function TestDashboard() {
               {userTypes && (
                 <div className="mt-3 flex flex-wrap gap-2">
                   {userTypes.length === 0 ? (
-                    <p className="text-text-muted text-sm">No user types configured. Go to Admin Setup to create some.</p>
+                    <p className="text-text-muted text-sm">{t('testDashboard.extracted.no_user_types_configured_go_to_admin_setup_694677', 'No user types configured. Go to Admin Setup to create some.')}</p>
                   ) : (
                     userTypes.map((type) => (
                       <button
@@ -2016,9 +2018,9 @@ export function TestDashboard() {
             {/* Field Definitions & Input */}
             {selectedUserTypeId && fieldDefinitions && (
               <div className="border-t border-border pt-4">
-                <p className="text-sm font-medium text-text mb-3">2. Fill in fields for selected type:</p>
+                <p className="text-sm font-medium text-text mb-3">{t('testDashboard.extracted.2_fill_in_fields_for_selected_type_1c0f0c', '2. Fill in fields for selected type:')}</p>
                 {fieldDefinitions.length === 0 ? (
-                  <p className="text-text-muted text-sm">No fields defined for this type.</p>
+                  <p className="text-text-muted text-sm">{t('testDashboard.extracted.no_fields_defined_for_this_type_f99ace', 'No fields defined for this type.')}</p>
                 ) : (
                   <div className="space-y-3">
                     {fieldDefinitions.map((field) => (
@@ -2045,13 +2047,13 @@ export function TestDashboard() {
             {/* Create User */}
             {selectedUserTypeId && (
               <div className="border-t border-border pt-4">
-                <p className="text-sm font-medium text-text mb-3">3. Enter user details and create user:</p>
+                <p className="text-sm font-medium text-text mb-3">{t('testDashboard.extracted.3_enter_user_details_and_create_user_c3da8f', '3. Enter user details and create user:')}</p>
                 <div className="space-y-3">
                   <input
                     type="text"
                     value={testPubkey}
                     onChange={(e) => setTestPubkey(e.target.value)}
-                    placeholder="Pubkey (e.g., npub1... or hex)"
+                    placeholder={t('testDashboard.extracted.pubkey_e_g_npub1_or_hex_ec4a44', 'Pubkey (e.g., npub1... or hex)')}
                     className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
                   />
                   <div className="flex gap-3">
@@ -2059,14 +2061,14 @@ export function TestDashboard() {
                       type="email"
                       value={testEmail}
                       onChange={(e) => setTestEmail(e.target.value)}
-                      placeholder="Email (optional)"
+                      placeholder={t('testDashboard.extracted.email_optional_5c10b5', 'Email (optional)')}
                       className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
                     />
                     <input
                       type="text"
                       value={testName}
                       onChange={(e) => setTestName(e.target.value)}
-                      placeholder="Name (optional)"
+                      placeholder={t('testDashboard.extracted.name_optional_9c9f03', 'Name (optional)')}
                       className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
                     />
                   </div>
@@ -2089,13 +2091,12 @@ export function TestDashboard() {
 
         {/* Neo4j Graph Query */}
         <Card className="mt-6">
-          <h3 className="text-lg font-semibold text-text mb-2">9. Neo4j Graph Query</h3>
+          <h3 className="text-lg font-semibold text-text mb-2">{t('testDashboard.extracted.9_neo4j_graph_query_c9ebc6', '9. Neo4j Graph Query')}</h3>
           <p className="text-sm text-text-secondary mb-4">
-            Run read-only Cypher queries against the knowledge graph.
+            {t('testDashboard.extracted.run_read_only_cypher_queries_against_the_knowledge_99f5cd', 'Run read-only Cypher queries against the knowledge graph.')}
           </p>
           <InfoBox>
-            <strong className="text-text">POST /admin/neo4j/query</strong> — Execute a Cypher query (MATCH only, no writes).
-            Useful for exploring entities and relationships after ingestion.
+            <strong className="text-text">{t('testDashboard.extracted.post_admin_neo4j_query_edf4d4', 'POST /admin/neo4j/query')}</strong> {t('testDashboard.extracted.execute_a_cypher_query_match_only_no_writes_a8734d', '— Execute a Cypher query (MATCH only, no writes). Useful for exploring entities and relationships after ingestion.')}
           </InfoBox>
 
           <div className="space-y-4">
@@ -2105,31 +2106,31 @@ export function TestDashboard() {
                 onClick={() => setCypherQuery('MATCH (n) RETURN n LIMIT 10')}
                 className="text-xs text-accent hover:text-accent-hover underline"
               >
-                All nodes
+                {t('testDashboard.extracted.all_nodes_59bd64', 'All nodes')}
               </button>
               <button
                 onClick={() => setCypherQuery('MATCH (c:Claim)-[r:SUPPORTED_BY]->(s:Source) RETURN c, r, s LIMIT 10')}
                 className="text-xs text-accent hover:text-accent-hover underline"
               >
-                Claims + Sources
+                {t('testDashboard.extracted.claims_sources_929fbf', 'Claims + Sources')}
               </button>
               <button
                 onClick={() => setCypherQuery('MATCH (n) RETURN labels(n) AS type, count(*) AS count')}
                 className="text-xs text-accent hover:text-accent-hover underline"
               >
-                Node counts by type
+                {t('testDashboard.extracted.node_counts_by_type_0575ec', 'Node counts by type')}
               </button>
               <button
                 onClick={() => setCypherQuery('MATCH ()-[r]->() RETURN type(r) AS rel_type, count(*) AS count')}
                 className="text-xs text-accent hover:text-accent-hover underline"
               >
-                Relationship counts
+                {t('testDashboard.extracted.relationship_counts_f4de62', 'Relationship counts')}
               </button>
             </div>
             <textarea
               value={cypherQuery}
               onChange={(e) => setCypherQuery(e.target.value)}
-              placeholder="MATCH (n) RETURN n LIMIT 10"
+              placeholder={t('testDashboard.extracted.match_n_return_n_limit_10_b71dca', 'MATCH (n) RETURN n LIMIT 10')}
               className="w-full h-24 px-4 py-3 bg-surface border border-border rounded-lg text-text font-mono text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent resize-none"
             />
             <Button onClick={runNeo4jQuery} disabled={neo4jLoading || !cypherQuery.trim()}>
@@ -2145,10 +2146,10 @@ export function TestDashboard() {
                 ) : (
                   <div>
                     <p className="text-sm text-text-secondary mb-2">
-                      {neo4jResult.rows.length} row(s) returned | Columns: {neo4jResult.columns.join(', ')}
+                      {neo4jResult.rows.length} {t('testDashboard.extracted.row_s_returned_columns_cb3f95', 'row(s) returned | Columns:')} {neo4jResult.columns.join(', ')}
                     </p>
                     {neo4jResult.rows.length === 0 ? (
-                      <p className="text-text-muted text-sm">No results.</p>
+                      <p className="text-text-muted text-sm">{t('testDashboard.extracted.no_results_003540', 'No results.')}</p>
                     ) : (
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
@@ -2186,14 +2187,14 @@ export function TestDashboard() {
         {/* NEW MODULES: Authentication & Admin Testing */}
         {/* ============================================ */}
 
-        <SectionHeader title="Authentication Testing" icon={Key} />
+        <SectionHeader title={t('testDashboard.extracted.authentication_testing_af7ce7', 'Authentication Testing')} icon={Key} />
 
         {/* Admin Session Panel */}
         <Card className="mb-6 border-accent/30">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-accent" />
-              <h3 className="text-lg font-semibold text-text">Admin Session</h3>
+              <h3 className="text-lg font-semibold text-text">{t('testDashboard.extracted.admin_session_0b18ca', 'Admin Session')}</h3>
             </div>
             {adminToken ? (
               <StatusBadge status="success" />
@@ -2202,7 +2203,7 @@ export function TestDashboard() {
             )}
           </div>
           <p className="text-sm text-text-secondary mb-4">
-            Admin authentication is required for admin-only endpoints below. Authenticate via Nostr or paste a token.
+            {t('testDashboard.extracted.admin_authentication_is_required_for_admin_only_endpoints_d67ff6', 'Admin authentication is required for admin-only endpoints below. Authenticate via Nostr or paste a token.')}
           </p>
           <div className="space-y-4">
             <div className="flex flex-wrap gap-3 items-center">
@@ -2213,7 +2214,7 @@ export function TestDashboard() {
                 {nostrAuthLoading ? 'Authenticating...' : hasNostrExtension() ? 'Login with Nostr' : 'No Nostr Extension'}
               </Button>
               <Button variant="secondary" onClick={clearAdminSession} disabled={!adminToken}>
-                Clear Session
+                {t('testDashboard.extracted.clear_session_f08fca', 'Clear Session')}
               </Button>
             </div>
             {nostrAuthError && (
@@ -2223,18 +2224,18 @@ export function TestDashboard() {
             )}
             {nostrAuthResult && (
               <div className="bg-success-subtle border border-success/20 rounded-lg px-4 py-3 text-sm">
-                <p className="text-success font-medium">Authenticated as admin!</p>
+                <p className="text-success font-medium">{t('testDashboard.extracted.authenticated_as_admin_a499c5', 'Authenticated as admin!')}</p>
                 <p className="text-text-secondary mt-1 font-mono text-xs">Pubkey: {nostrAuthResult.admin.pubkey.slice(0, 16)}...</p>
               </div>
             )}
             <div className="border-t border-border pt-4">
-              <p className="text-xs text-text-muted mb-2">Or paste an existing admin session token:</p>
+              <p className="text-xs text-text-muted mb-2">{t('testDashboard.extracted.or_paste_an_existing_admin_session_token_67d4c1', 'Or paste an existing admin session token:')}</p>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={adminToken}
                   onChange={(e) => setAdminToken(e.target.value)}
-                  placeholder="Paste admin session token..."
+                  placeholder={t('testDashboard.extracted.paste_admin_session_token_26636c', 'Paste admin session token...')}
                   className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm font-mono placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
                 />
                 <Button
@@ -2247,37 +2248,37 @@ export function TestDashboard() {
             </div>
             {adminToken && (
               <p className="text-xs text-text-muted">
-                Token in-memory: {adminToken.slice(0, 20)}...
+                {t('testDashboard.extracted.token_in_memory_8c6773', 'Token in-memory:')} {adminToken.slice(0, 20)}...
               </p>
             )}
           </div>
         </Card>
 
         {/* Module 10: Authentication Testing */}
-        <CollapsibleSection title="Authentication Testing" moduleNumber={10} icon={Key}>
+        <CollapsibleSection title={t('testDashboard.extracted.authentication_testing_af7ce7', 'Authentication Testing')} moduleNumber={10} icon={Key}>
           <p className="text-sm text-text-secondary mb-4">
-            Test magic link and Nostr authentication flows.
+            {t('testDashboard.extracted.test_magic_link_and_nostr_authentication_flows_40c5c7', 'Test magic link and Nostr authentication flows.')}
           </p>
 
           {/* Magic Link */}
           <div className="mb-6">
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Magic Link Authentication</p>
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">{t('testDashboard.extracted.magic_link_authentication_ea55a8', 'Magic Link Authentication')}</p>
             <InfoBox>
-              <strong className="text-text">POST /auth/magic-link</strong> — Send a magic link to the provided email. Rate limited: 5 requests/minute.
+              <strong className="text-text">{t('testDashboard.extracted.post_auth_magic_link_78e420', 'POST /auth/magic-link')}</strong> {t('testDashboard.extracted.send_a_magic_link_to_the_provided_email_fa9f3b', '— Send a magic link to the provided email. Rate limited: 5 requests/minute.')}
             </InfoBox>
             <div className="flex flex-wrap gap-3 mb-3">
               <input
                 type="email"
                 value={magicLinkEmail}
                 onChange={(e) => setMagicLinkEmail(e.target.value)}
-                placeholder="Email address"
+                placeholder={t('testDashboard.extracted.email_address_c94d31', 'Email address')}
                 className="flex-1 min-w-[200px] px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
               />
               <input
                 type="text"
                 value={magicLinkName}
                 onChange={(e) => setMagicLinkName(e.target.value)}
-                placeholder="Name (optional)"
+                placeholder={t('testDashboard.extracted.name_optional_9c9f03', 'Name (optional)')}
                 className="w-40 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
               />
               <Button onClick={sendMagicLink} disabled={magicLinkLoading || !magicLinkEmail.trim()}>
@@ -2291,16 +2292,16 @@ export function TestDashboard() {
 
           {/* Token Verification */}
           <div className="border-t border-border pt-6 mb-6">
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Verify Magic Link Token</p>
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">{t('testDashboard.extracted.verify_magic_link_token_183cf5', 'Verify Magic Link Token')}</p>
             <InfoBox>
-              <strong className="text-text">POST /auth/verify</strong> — Verify a magic link token and get session info (cookie-based session).
+              <strong className="text-text">{t('testDashboard.extracted.post_auth_verify_8bed78', 'POST /auth/verify')}</strong> {t('testDashboard.extracted.verify_a_magic_link_token_and_get_session_fc176a', '— Verify a magic link token and get session info (cookie-based session).')}
             </InfoBox>
             <div className="flex gap-3 mb-3">
               <input
                 type="text"
                 value={verifyToken}
                 onChange={(e) => setVerifyToken(e.target.value)}
-                placeholder="Paste magic link token..."
+                placeholder={t('testDashboard.extracted.paste_magic_link_token_0a179f', 'Paste magic link token...')}
                 className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm font-mono placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
               />
               <Button onClick={verifyMagicLink} disabled={verifyLoading || !verifyToken.trim()}>
@@ -2314,16 +2315,16 @@ export function TestDashboard() {
 
           {/* Session Check */}
           <div className="border-t border-border pt-6 mb-6">
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Check Session Status</p>
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">{t('testDashboard.extracted.check_session_status_c950fd', 'Check Session Status')}</p>
             <InfoBox>
-              <strong className="text-text">GET /auth/me</strong> — Check current cookie session (or pass Authorization bearer token).
+              <strong className="text-text">{t('testDashboard.extracted.get_auth_me_277c84', 'GET /auth/me')}</strong> {t('testDashboard.extracted.check_current_cookie_session_or_pass_authorization_bearer_98f304', '— Check current cookie session (or pass Authorization bearer token).')}
             </InfoBox>
             <div className="flex gap-3 mb-3">
               <input
                 type="text"
                 value={sessionCheckToken}
                 onChange={(e) => setSessionCheckToken(e.target.value)}
-                placeholder="Paste session token..."
+                placeholder={t('testDashboard.extracted.paste_session_token_1db0f3', 'Paste session token...')}
                 className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm font-mono placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
               />
               <Button onClick={checkAuthStatus} disabled={sessionCheckLoading}>
@@ -2337,14 +2338,14 @@ export function TestDashboard() {
 
           {/* Admin List */}
           <div className="border-t border-border pt-6 mb-6">
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Admin List</p>
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">{t('testDashboard.extracted.admin_list_99f096', 'Admin List')}</p>
             <InfoBox>
-              <strong className="text-text">GET /admin/list</strong> — List all admins. Requires admin authentication.
+              <strong className="text-text">{t('testDashboard.extracted.get_admin_list_3f352e', 'GET /admin/list')}</strong> {t('testDashboard.extracted.list_all_admins_requires_admin_authentication_fc4e7b', '— List all admins. Requires admin authentication.')}
             </InfoBox>
             <Button onClick={fetchAdmins} disabled={adminsLoading || !adminToken}>
               {adminsLoading ? 'Fetching...' : 'Fetch Admins'}
             </Button>
-            {!adminToken && <p className="text-xs text-warning mt-2">Requires admin session above</p>}
+            {!adminToken && <p className="text-xs text-warning mt-2">{t('testDashboard.extracted.requires_admin_session_above_ce1222', 'Requires admin session above')}</p>}
             {adminsList && (
               <div className="mt-4">
                 <table className="w-full text-sm">
@@ -2371,16 +2372,16 @@ export function TestDashboard() {
 
           {/* Remove Admin */}
           <div className="border-t border-border pt-6">
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Remove Admin</p>
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">{t('testDashboard.extracted.remove_admin_2bfae9', 'Remove Admin')}</p>
             <InfoBox>
-              <strong className="text-text">DELETE /admin/&#123;pubkey&#125;</strong> — Remove an admin by pubkey. Requires admin authentication.
+              <strong className="text-text">{t('testDashboard.extracted.delete_admin_pubkey_6e8f73', 'DELETE /admin/&#123;pubkey&#125;')}</strong> {t('testDashboard.extracted.remove_an_admin_by_pubkey_requires_admin_authentication_f2131f', '— Remove an admin by pubkey. Requires admin authentication.')}
             </InfoBox>
             <div className="flex gap-3 mb-3">
               <input
                 type="text"
                 value={removeAdminPubkey}
                 onChange={(e) => setRemoveAdminPubkey(e.target.value)}
-                placeholder="Admin pubkey to remove..."
+                placeholder={t('testDashboard.extracted.admin_pubkey_to_remove_d5384e', 'Admin pubkey to remove...')}
                 className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm font-mono placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent"
               />
               <Button onClick={removeAdmin} disabled={removeAdminLoading || !removeAdminPubkey.trim() || !adminToken}>
@@ -2394,12 +2395,12 @@ export function TestDashboard() {
         </CollapsibleSection>
 
         {/* Module 16: Rate Limiting Test */}
-        <CollapsibleSection title="Rate Limiting Test" moduleNumber={16} icon={Zap}>
+        <CollapsibleSection title={t('testDashboard.extracted.rate_limiting_test_fbe391', 'Rate Limiting Test')} moduleNumber={16} icon={Zap}>
           <p className="text-sm text-text-secondary mb-4">
-            Test rate limiting by sending rapid requests to rate-limited endpoints.
+            {t('testDashboard.extracted.test_rate_limiting_by_sending_rapid_requests_to_2ede24', 'Test rate limiting by sending rapid requests to rate-limited endpoints.')}
           </p>
           <InfoBox>
-            <strong className="text-text">Magic Link:</strong> 5 requests/minute | <strong className="text-text">Admin Auth:</strong> 10 requests/minute
+            <strong className="text-text">{t('testDashboard.extracted.magic_link_9d2e96', 'Magic Link:')}</strong> {t('testDashboard.extracted.5_requests_minute_2110bd', '5 requests/minute |')} <strong className="text-text">{t('testDashboard.extracted.admin_auth_2d5ed1', 'Admin Auth:')}</strong> {t('testDashboard.extracted.10_requests_minute_4ddd60', '10 requests/minute')}
           </InfoBox>
           <div className="flex flex-wrap gap-3 items-center mb-4">
             <select
@@ -2407,8 +2408,8 @@ export function TestDashboard() {
               onChange={(e) => setRateLimitTestType(e.target.value as 'magic_link' | 'admin_auth')}
               className="px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm focus:border-accent focus:ring-1 focus:ring-accent"
             >
-              <option value="magic_link">Magic Link (5/min)</option>
-              <option value="admin_auth">Admin Auth (10/min)</option>
+              <option value="magic_link">{t('testDashboard.extracted.magic_link_5_min_6decbc', 'Magic Link (5/min)')}</option>
+              <option value="admin_auth">{t('testDashboard.extracted.admin_auth_10_min_e15503', 'Admin Auth (10/min)')}</option>
             </select>
             <Button onClick={runRateLimitTest} disabled={rateLimitTesting}>
               {rateLimitTesting ? 'Testing...' : `Send ${rateLimitTestType === 'magic_link' ? '6' : '11'} Rapid Requests`}
@@ -2423,7 +2424,7 @@ export function TestDashboard() {
                 </div>
                 <div className="bg-error-subtle border border-error/20 rounded-lg p-3 flex-1 text-center">
                   <p className="text-2xl font-bold text-error">{rateLimitResults.blocked}</p>
-                  <p className="text-xs text-text-secondary">Blocked (429)</p>
+                  <p className="text-xs text-text-secondary">{t('testDashboard.extracted.blocked_429_04c78f', 'Blocked (429)')}</p>
                 </div>
               </div>
               <div className="max-h-40 overflow-y-auto bg-surface-overlay rounded-lg p-3">
@@ -2437,21 +2438,21 @@ export function TestDashboard() {
           )}
         </CollapsibleSection>
 
-        <SectionHeader title="Admin: Instance & User Management" icon={Sliders} />
+        <SectionHeader title={t('testDashboard.extracted.admin_instance_user_management_fb3ccf', 'Admin: Instance & User Management')} icon={Sliders} />
 
         {/* Module 11: Instance Settings */}
-        <CollapsibleSection title="Instance Settings" moduleNumber={11} badge="Admin" icon={Settings}>
+        <CollapsibleSection title={t('testDashboard.extracted.instance_settings_4ae9d7', 'Instance Settings')} moduleNumber={11} badge="Admin" icon={Settings}>
           <p className="text-sm text-text-secondary mb-4">
-            View and update instance-wide configuration settings.
+            {t('testDashboard.extracted.view_and_update_instance_wide_configuration_settings_9d59d3', 'View and update instance-wide configuration settings.')}
           </p>
           <InfoBox>
-            <strong className="text-text">GET /admin/settings</strong> — Fetch all settings. <br />
-            <strong className="text-text">PUT /admin/settings</strong> — Update settings.
+            <strong className="text-text">{t('testDashboard.extracted.get_admin_settings_bb858a', 'GET /admin/settings')}</strong> {t('testDashboard.extracted.fetch_all_settings_a3925a', '— Fetch all settings.')} <br />
+            <strong className="text-text">{t('testDashboard.extracted.put_admin_settings_ef90bd', 'PUT /admin/settings')}</strong> {t('testDashboard.extracted.update_settings_9959e7', '— Update settings.')}
           </InfoBox>
           <Button onClick={fetchInstanceSettings} disabled={settingsLoading || !adminToken}>
             {settingsLoading ? 'Fetching...' : 'Fetch Settings'}
           </Button>
-          {!adminToken && <p className="text-xs text-warning mt-2">Requires admin session</p>}
+          {!adminToken && <p className="text-xs text-warning mt-2">{t('testDashboard.extracted.requires_admin_session_557d43', 'Requires admin session')}</p>}
           {instanceSettings && (
             <div className="mt-4 space-y-4">
               <div className="grid gap-3">
@@ -2485,8 +2486,8 @@ export function TestDashboard() {
                         onChange={(e) => setSettingsForm(prev => ({ ...prev, [key]: e.target.value }))}
                         className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
                       >
-                        <option value="true">true (auto-approve new users)</option>
-                        <option value="false">false (require manual approval)</option>
+                        <option value="true">{t('testDashboard.extracted.true_auto_approve_new_users_07a0a6', 'true (auto-approve new users)')}</option>
+                        <option value="false">{t('testDashboard.extracted.false_require_manual_approval_cf2539', 'false (require manual approval)')}</option>
                       </select>
                     ) : (
                       <input
@@ -2510,22 +2511,22 @@ export function TestDashboard() {
         </CollapsibleSection>
 
         {/* Module 12: User Type Management */}
-        <CollapsibleSection title="User Type Management" moduleNumber={12} badge="Admin" icon={Users}>
+        <CollapsibleSection title={t('testDashboard.extracted.user_type_management_670f60', 'User Type Management')} moduleNumber={12} badge="Admin" icon={Users}>
           <p className="text-sm text-text-secondary mb-4">
-            Manage user types for categorizing users during onboarding.
+            {t('testDashboard.extracted.manage_user_types_for_categorizing_users_during_onboarding_43211e', 'Manage user types for categorizing users during onboarding.')}
           </p>
           <InfoBox>
-            <strong className="text-text">GET/POST /admin/user-types</strong> — List and create user types. <br />
-            <strong className="text-text">PUT/DELETE /admin/user-types/&#123;id&#125;</strong> — Update and delete.
+            <strong className="text-text">{t('testDashboard.extracted.get_post_admin_user_types_a96df8', 'GET/POST /admin/user-types')}</strong> {t('testDashboard.extracted.list_and_create_user_types_a517f0', '— List and create user types.')} <br />
+            <strong className="text-text">{t('testDashboard.extracted.put_delete_admin_user_types_id_4981b5', 'PUT/DELETE /admin/user-types/&#123;id&#125;')}</strong> {t('testDashboard.extracted.update_and_delete_28386e', '— Update and delete.')}
           </InfoBox>
           <Button onClick={fetchAdminUserTypes} disabled={adminUserTypesLoading || !adminToken}>
             {adminUserTypesLoading ? 'Fetching...' : 'Fetch User Types'}
           </Button>
-          {!adminToken && <p className="text-xs text-warning mt-2">Requires admin session</p>}
+          {!adminToken && <p className="text-xs text-warning mt-2">{t('testDashboard.extracted.requires_admin_session_557d43', 'Requires admin session')}</p>}
           {adminUserTypes && (
             <div className="mt-4 space-y-4">
               {adminUserTypes.length === 0 ? (
-                <p className="text-text-muted text-sm">No user types defined.</p>
+                <p className="text-text-muted text-sm">{t('testDashboard.extracted.no_user_types_defined_a605f5', 'No user types defined.')}</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -2577,27 +2578,27 @@ export function TestDashboard() {
               {/* Edit Form */}
               {editingTypeId && (
                 <div className="bg-accent-subtle border border-accent/20 rounded-lg p-4">
-                  <p className="text-sm font-medium text-text mb-3">Edit User Type #{editingTypeId}</p>
+                  <p className="text-sm font-medium text-text mb-3">{t('testDashboard.extracted.edit_user_type_465134', 'Edit User Type #')}{editingTypeId}</p>
                   <div className="grid gap-3">
                     <input
                       type="text"
                       value={editTypeName}
                       onChange={(e) => setEditTypeName(e.target.value)}
-                      placeholder="Name"
+                      placeholder={t('testDashboard.extracted.name_49ee30', 'Name')}
                       className="px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
                     />
                     <input
                       type="text"
                       value={editTypeDescription}
                       onChange={(e) => setEditTypeDescription(e.target.value)}
-                      placeholder="Description"
+                      placeholder={t('testDashboard.extracted.description_d2b81d', 'Description')}
                       className="px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
                     />
                     <input
                       type="number"
                       value={editTypeOrder}
                       onChange={(e) => setEditTypeOrder(Number(e.target.value))}
-                      placeholder="Display order"
+                      placeholder={t('testDashboard.extracted.display_order_5f1293', 'Display order')}
                       className="w-32 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
                     />
                     <div className="flex gap-2">
@@ -2614,7 +2615,7 @@ export function TestDashboard() {
 
               {/* Create Form */}
               <div className="border-t border-border pt-4">
-                <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Create New User Type</p>
+                <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">{t('testDashboard.extracted.create_new_user_type_f48e26', 'Create New User Type')}</p>
                 <div className="flex flex-wrap gap-3 items-end">
                   <div>
                     <label className="text-xs text-text-muted">Name</label>
@@ -2622,7 +2623,7 @@ export function TestDashboard() {
                       type="text"
                       value={newTypeName}
                       onChange={(e) => setNewTypeName(e.target.value)}
-                      placeholder="Developer"
+                      placeholder={t('testDashboard.extracted.developer_96882c', 'Developer')}
                       className="block mt-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
                     />
                   </div>
@@ -2632,7 +2633,7 @@ export function TestDashboard() {
                       type="text"
                       value={newTypeDescription}
                       onChange={(e) => setNewTypeDescription(e.target.value)}
-                      placeholder="Software developers"
+                      placeholder={t('testDashboard.extracted.software_developers_d0b5df', 'Software developers')}
                       className="block mt-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
                     />
                   </div>
@@ -2660,13 +2661,13 @@ export function TestDashboard() {
         </CollapsibleSection>
 
         {/* Module 13: User Field Definitions */}
-        <CollapsibleSection title="User Field Definitions" moduleNumber={13} badge="Admin" icon={FileText}>
+        <CollapsibleSection title={t('testDashboard.extracted.user_field_definitions_96a417', 'User Field Definitions')} moduleNumber={13} badge="Admin" icon={FileText}>
           <p className="text-sm text-text-secondary mb-4">
-            Manage custom fields that users fill out during onboarding.
+            {t('testDashboard.extracted.manage_custom_fields_that_users_fill_out_during_465c3f', 'Manage custom fields that users fill out during onboarding.')}
           </p>
           <InfoBox>
-            <strong className="text-text">GET/POST /admin/user-fields</strong> — List and create fields. <br />
-            <strong className="text-text">PUT/DELETE /admin/user-fields/&#123;id&#125;</strong> — Update and delete.
+            <strong className="text-text">{t('testDashboard.extracted.get_post_admin_user_fields_0cbd77', 'GET/POST /admin/user-fields')}</strong> {t('testDashboard.extracted.list_and_create_fields_e0f6c5', '— List and create fields.')} <br />
+            <strong className="text-text">{t('testDashboard.extracted.put_delete_admin_user_fields_id_967add', 'PUT/DELETE /admin/user-fields/&#123;id&#125;')}</strong> {t('testDashboard.extracted.update_and_delete_28386e', '— Update and delete.')}
           </InfoBox>
           <div className="flex flex-wrap gap-3 items-center mb-4">
             <select
@@ -2674,8 +2675,8 @@ export function TestDashboard() {
               onChange={(e) => setFieldTypeFilter(e.target.value === 'all' ? 'all' : e.target.value === 'global' ? 'global' : Number(e.target.value))}
               className="px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
             >
-              <option value="all">All Fields</option>
-              <option value="global">Global Only</option>
+              <option value="all">{t('testDashboard.extracted.all_fields_f51c73', 'All Fields')}</option>
+              <option value="global">{t('testDashboard.extracted.global_only_018ef5', 'Global Only')}</option>
               {adminUserTypes?.map((t) => (
                 <option key={t.id} value={t.id}>{t.name} Only</option>
               ))}
@@ -2684,11 +2685,11 @@ export function TestDashboard() {
               {fieldDefsLoading ? 'Fetching...' : 'Fetch Fields'}
             </Button>
           </div>
-          {!adminToken && <p className="text-xs text-warning mt-2">Requires admin session</p>}
+          {!adminToken && <p className="text-xs text-warning mt-2">{t('testDashboard.extracted.requires_admin_session_557d43', 'Requires admin session')}</p>}
           {adminFieldDefs && (
             <div className="mt-4 space-y-4">
               {adminFieldDefs.length === 0 ? (
-                <p className="text-text-muted text-sm">No field definitions found.</p>
+                <p className="text-text-muted text-sm">{t('testDashboard.extracted.no_field_definitions_found_fd57b8', 'No field definitions found.')}</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -2698,7 +2699,7 @@ export function TestDashboard() {
                         <th className="text-left py-2 px-2 text-text-muted font-medium">Name</th>
                         <th className="text-left py-2 px-2 text-text-muted font-medium">Type</th>
                         <th className="text-left py-2 px-2 text-text-muted font-medium">Required</th>
-                        <th className="text-left py-2 px-2 text-text-muted font-medium">User Type</th>
+                        <th className="text-left py-2 px-2 text-text-muted font-medium">{t('testDashboard.extracted.user_type_1ef9d5', 'User Type')}</th>
                         <th className="text-left py-2 px-2 text-text-muted font-medium">Actions</th>
                       </tr>
                     </thead>
@@ -2738,7 +2739,7 @@ export function TestDashboard() {
 
               {/* Create Form */}
               <div className="border-t border-border pt-4">
-                <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Create New Field</p>
+                <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">{t('testDashboard.extracted.create_new_field_190e49', 'Create New Field')}</p>
                 <div className="flex flex-wrap gap-3 items-end">
                   <div>
                     <label className="text-xs text-text-muted">Name</label>
@@ -2746,7 +2747,7 @@ export function TestDashboard() {
                       type="text"
                       value={newFieldName}
                       onChange={(e) => setNewFieldName(e.target.value)}
-                      placeholder="company_name"
+                      placeholder={t('testDashboard.extracted.company_name_2959df', 'company_name')}
                       className="block mt-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
                     />
                   </div>
@@ -2767,13 +2768,13 @@ export function TestDashboard() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs text-text-muted">User Type</label>
+                    <label className="text-xs text-text-muted">{t('testDashboard.extracted.user_type_1ef9d5', 'User Type')}</label>
                     <select
                       value={newFieldUserTypeId}
                       onChange={(e) => setNewFieldUserTypeId(e.target.value === 'global' ? 'global' : Number(e.target.value))}
                       className="block mt-1 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
                     >
-                      <option value="global">Global (all types)</option>
+                      <option value="global">{t('testDashboard.extracted.global_all_types_ae5fa4', 'Global (all types)')}</option>
                       {adminUserTypes?.map((t) => (
                         <option key={t.id} value={t.id}>{t.name}</option>
                       ))}
@@ -2804,22 +2805,22 @@ export function TestDashboard() {
         </CollapsibleSection>
 
         {/* Module 14: User Management */}
-        <CollapsibleSection title="User Management" moduleNumber={14} badge="Admin" icon={Users}>
+        <CollapsibleSection title={t('testDashboard.extracted.user_management_5ca6e5', 'User Management')} moduleNumber={14} badge="Admin" icon={Users}>
           <p className="text-sm text-text-secondary mb-4">
-            View all users, manage approval status, and delete users.
+            {t('testDashboard.extracted.view_all_users_manage_approval_status_and_delete_03feec', 'View all users, manage approval status, and delete users.')}
           </p>
           <InfoBox>
-            <strong className="text-text">GET /admin/users</strong> — List all users (admin only). <br />
-            <strong className="text-text">GET/PUT/DELETE /users/&#123;id&#125;</strong> — Manage individual users.
+            <strong className="text-text">{t('testDashboard.extracted.get_admin_users_16656e', 'GET /admin/users')}</strong> {t('testDashboard.extracted.list_all_users_admin_only_ef41b8', '— List all users (admin only).')} <br />
+            <strong className="text-text">{t('testDashboard.extracted.get_put_delete_users_id_5fc49d', 'GET/PUT/DELETE /users/&#123;id&#125;')}</strong> {t('testDashboard.extracted.manage_individual_users_ea076d', '— Manage individual users.')}
           </InfoBox>
           <Button onClick={fetchAllUsers} disabled={usersLoading || !adminToken}>
             {usersLoading ? 'Fetching...' : 'Fetch All Users'}
           </Button>
-          {!adminToken && <p className="text-xs text-warning mt-2">Requires admin session</p>}
+          {!adminToken && <p className="text-xs text-warning mt-2">{t('testDashboard.extracted.requires_admin_session_557d43', 'Requires admin session')}</p>}
           {allUsers && (
             <div className="mt-4 space-y-4">
               {allUsers.length === 0 ? (
-                <p className="text-text-muted text-sm">No users found.</p>
+                <p className="text-text-muted text-sm">{t('testDashboard.extracted.no_users_found_e611ef', 'No users found.')}</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -2878,13 +2879,13 @@ export function TestDashboard() {
 
               {/* Single User Lookup */}
               <div className="border-t border-border pt-4">
-                <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Lookup Single User</p>
+                <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">{t('testDashboard.extracted.lookup_single_user_f65358', 'Lookup Single User')}</p>
                 <div className="flex gap-3 mb-3">
                   <input
                     type="text"
                     value={lookupUserId}
                     onChange={(e) => setLookupUserId(e.target.value)}
-                    placeholder="User ID"
+                    placeholder={t('testDashboard.extracted.user_id_23bf49', 'User ID')}
                     className="w-32 px-3 py-2 bg-surface border border-border rounded-lg text-text text-sm"
                   />
                   <Button onClick={lookupUser} disabled={lookupLoading || !lookupUserId.trim()}>
@@ -2904,22 +2905,22 @@ export function TestDashboard() {
           )}
         </CollapsibleSection>
 
-        <SectionHeader title="Admin: Database" icon={Database} />
+        <SectionHeader title={t('testDashboard.extracted.admin_database_f19a90', 'Admin: Database')} icon={Database} />
 
         {/* Module 15: Database Explorer */}
-        <CollapsibleSection title="Database Explorer (Quick View)" moduleNumber={15} badge="Admin" icon={Database}>
+        <CollapsibleSection title={t('testDashboard.extracted.database_explorer_quick_view_134355', 'Database Explorer (Quick View)')} moduleNumber={15} badge="Admin" icon={Database}>
           <p className="text-sm text-text-secondary mb-4">
-            Quick view of SQLite database. For full explorer, visit{' '}
+            {t('testDashboard.extracted.quick_view_of_sqlite_database_for_full_explorer_1b8c77', 'Quick view of SQLite database. For full explorer, visit')}{' '}
             <Link to="/admin/database" className="text-accent hover:text-accent-hover underline">/admin/database</Link>.
           </p>
           <InfoBox>
-            <strong className="text-text">GET /admin/db/tables</strong> — List tables. <br />
-            <strong className="text-text">POST /admin/db/query</strong> — Execute read-only SQL.
+            <strong className="text-text">{t('testDashboard.extracted.get_admin_db_tables_1ea5ca', 'GET /admin/db/tables')}</strong> {t('testDashboard.extracted.list_tables_732bbb', '— List tables.')} <br />
+            <strong className="text-text">{t('testDashboard.extracted.post_admin_db_query_0f1b94', 'POST /admin/db/query')}</strong> {t('testDashboard.extracted.execute_read_only_sql_a4eb56', '— Execute read-only SQL.')}
           </InfoBox>
           <Button onClick={fetchDbTables} disabled={dbTablesLoading || !adminToken}>
             {dbTablesLoading ? 'Fetching...' : 'Fetch Tables'}
           </Button>
-          {!adminToken && <p className="text-xs text-warning mt-2">Requires admin session</p>}
+          {!adminToken && <p className="text-xs text-warning mt-2">{t('testDashboard.extracted.requires_admin_session_557d43', 'Requires admin session')}</p>}
           {dbTables && (
             <div className="mt-4 space-y-4">
               <div className="flex flex-wrap gap-2">
@@ -2938,7 +2939,7 @@ export function TestDashboard() {
                 ))}
               </div>
 
-              {tableDataLoading && <p className="text-text-muted text-sm">Loading table data...</p>}
+              {tableDataLoading && <p className="text-text-muted text-sm">{t('testDashboard.extracted.loading_table_data_624023', 'Loading table data...')}</p>}
               {tableData && selectedDbTable && (() => {
                 // Filter out ephemeral_pubkey_* columns from display (they're technical data)
                 const displayColumns = tableData.columns.filter(col => !col.startsWith('ephemeral_pubkey_'))
@@ -2964,7 +2965,7 @@ export function TestDashboard() {
                 return (
                   <div>
                     <p className="text-sm font-medium text-text mb-2">
-                      {selectedDbTable} (first 20 rows)
+                      {selectedDbTable} {t('testDashboard.extracted.first_20_rows_fe14b1', '(first 20 rows)')}
                     </p>
                     <div className="overflow-x-auto max-h-60">
                       <table className="w-full text-xs">
@@ -2998,11 +2999,11 @@ export function TestDashboard() {
 
               {/* Quick Query */}
               <div className="border-t border-border pt-4">
-                <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">Quick SQL Query</p>
+                <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">{t('testDashboard.extracted.quick_sql_query_7af594', 'Quick SQL Query')}</p>
                 <textarea
                   value={dbQuery}
                   onChange={(e) => setDbQuery(e.target.value)}
-                  placeholder="SELECT * FROM users LIMIT 10"
+                  placeholder={t('testDashboard.extracted.select_from_users_limit_10_27fd4a', 'SELECT * FROM users LIMIT 10')}
                   className="w-full h-20 px-4 py-3 bg-surface border border-border rounded-lg text-text font-mono text-sm placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent resize-none"
                 />
                 <div className="flex gap-2 mt-2">
@@ -3041,7 +3042,7 @@ export function TestDashboard() {
                       return (
                         <div>
                           <p className="text-sm text-text-secondary mb-2">
-                            {dbQueryResult.rows.length} row(s) returned
+                            {dbQueryResult.rows.length} {t('testDashboard.extracted.row_s_returned_b2299c', 'row(s) returned')}
                           </p>
                           <div className="overflow-x-auto max-h-60">
                             <table className="w-full text-xs">
@@ -3085,7 +3086,7 @@ export function TestDashboard() {
       {/* Footer */}
       <footer className="border-t border-border mt-12">
         <div className="max-w-6xl mx-auto px-6 py-6 text-center text-sm text-text-muted">
-          Sanctum — Private RAG System for Curated Knowledge
+          {t('testDashboard.extracted.sanctum_private_rag_system_for_curated_knowledge_5afbbe', 'Sanctum — Private RAG System for Curated Knowledge')}
         </div>
       </footer>
     </div>

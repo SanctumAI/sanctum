@@ -29,7 +29,7 @@ import { getPromptSectionMeta, getParameterMeta, getDefaultMeta } from '../types
 import type { UserType } from '../types/onboarding'
 
 export function AdminAIConfig() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
 
   // User type selector state
@@ -87,6 +87,10 @@ export function AdminAIConfig() {
   const [previewContent, setPreviewContent] = useState('')
   const [previewError, setPreviewError] = useState<string | null>(null)
   const [toggleError, setToggleError] = useState<string | null>(null)
+  const fixedT = i18n.getFixedT(i18n.language)
+  const translateMaybeKey = (value: string | null) => (
+    value && i18n.exists(value) ? fixedT(value) : value
+  )
   const [authChecked, setAuthChecked] = useState(false)
   const modalRef = useRef<HTMLDivElement>(null)
 
@@ -539,7 +543,7 @@ export function AdminAIConfig() {
         {/* Error display */}
         {aiError && (
           <div className="bg-error/10 border border-error/20 rounded-xl p-4">
-            <p className="text-sm text-error">{t(aiError)}</p>
+            <p className="text-sm text-error">{translateMaybeKey(aiError)}</p>
           </div>
         )}
 
@@ -558,7 +562,7 @@ export function AdminAIConfig() {
           <div className="bg-error/10 border border-error/20 rounded-xl p-4">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-error" />
-              <p className="text-sm text-error">{t(toggleError)}</p>
+              <p className="text-sm text-error">{translateMaybeKey(toggleError)}</p>
             </div>
           </div>
         )}

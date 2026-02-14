@@ -59,8 +59,8 @@ export async function submitAuthEvent(signedEvent: Event): Promise<AuthResult> {
     const error = await response.json().catch(() => ({ detail: 'errors.authenticationFailed' }))
     // Translate error.detail if it's a translation key, otherwise use as-is
     const errorMessage = error.detail || 'errors.authenticationFailed'
-    // Translate the message (i18n.t returns the key if translation not found, so this handles both keys and plain text)
-    const translatedMessage = i18n.exists(errorMessage) ? i18n.t(errorMessage) : errorMessage
+    const fixedT = i18n.getFixedT(i18n.language)
+    const translatedMessage = i18n.exists(errorMessage) ? fixedT(errorMessage) : errorMessage
     throw new Error(translatedMessage)
   }
 

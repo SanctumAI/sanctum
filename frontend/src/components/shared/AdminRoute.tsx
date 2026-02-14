@@ -78,7 +78,7 @@ export function AdminRoute({ children }: AdminRouteProps) {
             }}
             className="w-full bg-accent text-accent-text rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-accent-hover transition-colors"
           >
-            Retry
+            {t('common.retry', 'Retry')}
           </button>
         </div>
       </div>

@@ -44,7 +44,7 @@
       "nameLabel": "ชื่อ",
       "namePlaceholder": "ชื่อของคุณ",
       "emailLabel": "อีเมล",
-      "emailPlaceholder": "คุณ @example.com",
+      "emailPlaceholder": "คุณ@example.com",
       "nameRequired": "จำเป็นต้องกรอกชื่อ",
       "emailRequired": "จำเป็นต้องกรอกอีเมล",
       "emailInvalid": "โปรดกรอกอีเมลที่ถูกต้อง",
@@ -558,7 +558,7 @@
       "title": "การเข้าถึงผู้ใช้",
       "toEmailHint": "อีเมลจะถูกส่งโดยใช้การตั้งค่า SMTP ที่คุณกำหนดค่าไว้",
       "toEmailLabel": "อีเมลปลายทาง",
-      "toEmailPlaceholder": "support @example.com",
+      "toEmailPlaceholder": "support@example.com",
       "mode": {
         "feedback": {
           "desc": "Invite product feedback and suggestions.",
@@ -1117,12 +1117,12 @@
       "frontend_url_https_app_example_com_05514a": "FRONTEND_URL=https://app.example.com",
       "hf_hub_offline_transformers_offline_65a6e3": "HF_HUB_OFFLINE / TRANSFORMERS_OFFLINE",
       "instance_url_https_app_example_com_0700b1": "INSTANCE_URL=https://app.example.com",
-      "npub1_or_64_char_hex_b8e906": "npub1... หรือ เลขฐานสิบหก 64 ตัวอักษร",
+      "npub1_or_64_char_hex_b8e906": "npub1... or 64-char hex",
       "qdrant_6333_289ff3": "qdrant / 6333",
       "qdrant_host_qdrant_port_d0cf55": "QDRANT_HOST / QDRANT_PORT",
       "searxng_url_http_searxng_8080_ede53c": "SEARXNG_URL=http://searxng:8080",
       "sqlite_database_d9c1be": "ฐานข้อมูล SQLite",
-      "test_example_com_567159": "ทดสอบ @example.com",
+      "test_example_com_567159": "test@example.com",
       "uploads_folder_5402a4": "โฟลเดอร์อัปโหลด",
       "vector_database_eb5526": "ฐานข้อมูลเวกเตอร์"
     }
@@ -1434,7 +1434,7 @@
     },
     "DMARC_POLICY": {
       "description": "บันทึกนโยบาย DNS ของ DMARC",
-      "hint": "เริ่มต้นด้วย v=DMARC1; p=none; rua=mailto:dmarc @example.com และปรับให้เข้มงวดในภายหลัง",
+      "hint": "เริ่มต้นด้วย v=DMARC1; p=none; rua=mailto:dmarc@example.com และปรับให้เข้มงวดในภายหลัง",
       "label": "นโยบาย DMARC"
     },
     "EMAIL_DOMAIN": {
@@ -1633,11 +1633,11 @@
       "clarifying_questions_8a371e": "คำถามชี้แจง:",
       "clear_session_f08fca": "ล้างเซสชัน",
       "commit_extraction_to_neo4j_and_qdrant_6ddd62": "— การดึงข้อมูลการคอมมิตไปยัง Neo4j และ Qdrant",
-      "company_name_2959df": "ชื่อบริษัท",
+      "company_name_2959df": "company_name",
       "copy_prompt_c6ce5d": "คัดลอกข้อความแจ้ง",
       "create_a_new_user_with_fields_5206e7": "— สร้างผู้ใช้ใหม่พร้อมฟิลด์",
-      "create_new_field_190e49": "สร้างฟิลด์ใหม่",
-      "create_new_user_type_f48e26": "สร้างประเภทผู้ใช้ใหม่",
+      "create_new_field_190e49": "Create New Field",
+      "create_new_user_type_f48e26": "Create New User Type",
       "database_explorer_quick_view_134355": "เครื่องมือสำรวจฐานข้อมูล (มุมมองด่วน)",
       "delete_admin_pubkey_6e8f73": "DELETE /admin/&#123;pubkey&#125;",
       "description_d2b81d": "คำอธิบาย",
@@ -1760,7 +1760,7 @@
       "score_92d190": "| คะแนน:",
       "search_the_vector_store_directly_without_llm_generation_ce9e36": "ค้นหาร้านค้าเวกเตอร์โดยตรงโดยไม่มีการสร้าง LLM มีประโยชน์สำหรับการแก้ไขข้อบกพร่องของการฝัง",
       "searches_qdrant_for_semantically_similar_knowledge_303a40": "ค้นหา Qdrant สำหรับความรู้ที่คล้ายคลึงกันทางความหมาย",
-      "select_a_chunk_above_to_begin_extraction_workflow_e530d4": "เลือกส่วนข้อมูลด้านบนเพื่อเริ่มเวิร์กโฟลว์การดึงข้อมูล",
+      "select_a_chunk_above_to_begin_extraction_workflow_e530d4": "Select a chunk above to begin extraction workflow.",
       "select_from_users_limit_10_27fd4a": "SELECT * FROM users LIMIT 10",
       "selected_job_651296": "งานที่เลือก:",
       "send_a_magic_link_to_the_provided_email_fa9f3b": "— ส่ง magic link ไปยังอีเมลที่ระบุ จำกัดอัตรา: 5 คำขอ/นาที",

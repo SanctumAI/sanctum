@@ -1516,9 +1516,9 @@
       "hint": "Health check URL for external monitors. Default: http://localhost:8000/health."
     },
     "LLM_API_KEY": {
-      "description": "Description",
-      "hint": "Hint",
-      "label": "Label"
+      "label": "API Key",
+      "description": "API key for the LLM service",
+      "hint": "Your API key or token from the LLM provider. Required for authenticated providers."
     }
   },
   "colors": {

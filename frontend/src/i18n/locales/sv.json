@@ -558,7 +558,7 @@
       "title": "Användarkontakt",
       "toEmailHint": "E-postmeddelanden kommer att skickas med dina konfigurerade SMTP-inställningar.",
       "toEmailLabel": "Mottagarens e-postadress",
-      "toEmailPlaceholder": "support @example.com",
+      "toEmailPlaceholder": "support@example.com",
       "mode": {
         "feedback": {
           "desc": "Invite product feedback and suggestions.",
@@ -1071,7 +1071,7 @@
       "ariaLabel": "Hjälp med domäner och DNS-konfiguration",
       "cdnDesc": "Kommaseparerade CDN-värdnamn för statiska tillgångar. Lämna tomt om du inte använder ett CDN.",
       "dkimExample": "Använd väljaren från DKIM_SELECTOR och den publika nyckeln från din leverantör.",
-      "dmarcExample": "Exempel TXT-post: v=DMARC1; p=none; rua=mailto:dmarc @example.com",
+      "dmarcExample": "Exempel TXT-post: v=DMARC1; p=none; rua=mailto:dmarc@example.com",
       "dnsDesc": "Dessa värden hjälper dig att skapa DNS-poster för e-postleverans.",
       "dnsNote": "Använd din e-postleverantörs rekommenderade poster för bästa leverans.",
       "dnsTitle": "DNS-poster (e-post)",
@@ -1117,12 +1117,12 @@
       "frontend_url_https_app_example_com_05514a": "FRONTEND_URL=https://app.example.com",
       "hf_hub_offline_transformers_offline_65a6e3": "HF_HUB_OFFLINE / TRANSFORMERS_OFFLINE",
       "instance_url_https_app_example_com_0700b1": "INSTANCE_URL=https://app.example.com",
-      "npub1_or_64_char_hex_b8e906": "npub1... eller 64-teckens hex",
+      "npub1_or_64_char_hex_b8e906": "npub1... or 64-char hex",
       "qdrant_6333_289ff3": "qdrant / 6333",
       "qdrant_host_qdrant_port_d0cf55": "QDRANT_HOST / QDRANT_PORT",
       "searxng_url_http_searxng_8080_ede53c": "SEARXNG_URL=http://searxng:8080",
       "sqlite_database_d9c1be": "SQLite-databas",
-      "test_example_com_567159": "test @example.com",
+      "test_example_com_567159": "test@example.com",
       "uploads_folder_5402a4": "Uppladdningsmapp",
       "vector_database_eb5526": "Vektordatabas"
     }
@@ -1434,7 +1434,7 @@
     },
     "DMARC_POLICY": {
       "description": "DMARC DNS-policy post",
-      "hint": "Börja med v=DMARC1; p=none; rua=mailto:dmarc @example.com och skärp sedan.",
+      "hint": "Börja med v=DMARC1; p=none; rua=mailto:dmarc@example.com och skärp sedan.",
       "label": "DMARC-policy"
     },
     "EMAIL_DOMAIN": {
@@ -1570,7 +1570,7 @@
   },
   "adminDatabaseExplorer": {
     "extracted": {
-      "date_now_7_days_28303f": "date('now', '-7 dagar');",
+      "date_now_7_days_28303f": "date('now', '-7 days');",
       "decryption_help_136c23": "Dekrypteringshjälp",
       "drop_table_ac02c0": "DROP TABLE",
       "select_count_from_documents_481fff": "SELECT COUNT(*) FROM documents;",
@@ -1633,11 +1633,11 @@
       "clarifying_questions_8a371e": "Förtydligande frågor:",
       "clear_session_f08fca": "Rensa session",
       "commit_extraction_to_neo4j_and_qdrant_6ddd62": "— Genomför extraktion till Neo4j och Qdrant.",
-      "company_name_2959df": "företagsnamn",
+      "company_name_2959df": "company_name",
       "copy_prompt_c6ce5d": "Kopiera prompt",
       "create_a_new_user_with_fields_5206e7": "— Skapa en ny användare med fält.",
-      "create_new_field_190e49": "Skapa nytt fält",
-      "create_new_user_type_f48e26": "Skapa ny användartyp",
+      "create_new_field_190e49": "Create New Field",
+      "create_new_user_type_f48e26": "Create New User Type",
       "database_explorer_quick_view_134355": "Databasutforskare (snabbvy)",
       "delete_admin_pubkey_6e8f73": "DELETE /admin/&#123;pubkey&#125;",
       "description_d2b81d": "Beskrivning",
@@ -1760,7 +1760,7 @@
       "score_92d190": "| poäng:",
       "search_the_vector_store_directly_without_llm_generation_ce9e36": "Sök vektorbutiken direkt utan LLM-generering. Användbart för att felsöka inbäddningar.",
       "searches_qdrant_for_semantically_similar_knowledge_303a40": "Söker Qdrant efter semantiskt liknande kunskap",
-      "select_a_chunk_above_to_begin_extraction_workflow_e530d4": "Välj en chunk ovan för att påbörja extraktionsarbetsflödet.",
+      "select_a_chunk_above_to_begin_extraction_workflow_e530d4": "Select a chunk above to begin extraction workflow.",
       "select_from_users_limit_10_27fd4a": "SELECT * FROM users LIMIT 10",
       "selected_job_651296": "Valt jobb:",
       "send_a_magic_link_to_the_provided_email_fa9f3b": "— Skicka en magic link till den angivna e-postadressen. Hastighetsbegränsad: 5 förfrågningar/minut.",

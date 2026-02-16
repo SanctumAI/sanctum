@@ -1043,11 +1043,11 @@
     },
     "domainsHelp": {
       "ariaLabel": "Ayuda de configuración de dominios y DNS",
-      "cdnDesc": "Nombres de host CDN separados por comas para activos estáticos. Deje en blanco si no utiliza un CDN.",
-      "dkimExample": "Utilice el selector de DKIM_SELECTOR y la clave pública de su proveedor.",
+      "cdnDesc": "Nombres de host CDN separados por comas para activos estáticos. Deja en blanco si no utilizas un CDN.",
+      "dkimExample": "Utiliza el selector de DKIM_SELECTOR y la clave pública de tu proveedor.",
       "dmarcExample": "Ejemplo de registro TXT: v=DMARC1; p=none; rua=mailto:dmarc@example.com",
       "dnsDesc": "Estos valores le ayudan a crear registros DNS para la entregabilidad del correo electrónico.",
-      "dnsNote": "Utilice los registros recomendados por su proveedor de correo electrónico para una mejor entregabilidad.",
+      "dnsNote": "Utiliza los registros recomendados por tu proveedor de correo electrónico para una mejor entregabilidad.",
       "dnsTitle": "Registros DNS (correo electrónico)",
       "edgeDesc": "Configuración opcional para configuraciones avanzadas.",
       "edgeTitle": "CDN y webhooks",
@@ -1063,15 +1063,15 @@
       "urlsDesc": "Las URL públicas y los orígenes de CORS deben coincidir exactamente (esquema + dominio + puerto).",
       "urlsNote": "Si su API se sirve desde el mismo dominio que la aplicación, puede dejar API_BASE_URL vacío.",
       "urlsTitle": "URL públicas y CORS",
-      "webhookDesc": "URL base utilizada para construir las devoluciones de llamada de webhook. Utilice su dominio API público.",
-      "whatToSet": "Configure esto cuando entre en funcionamiento:"
+      "webhookDesc": "URL base utilizada para construir las devoluciones de llamada de webhook. Utiliza tu dominio API público.",
+      "whatToSet": "Configura esto cuando entres en funcionamiento:"
     },
     "revalidate": "Revalidar",
     "validating": "Validando...",
     "validationConfigUpdated": "Configuración actualizada {{time}}",
     "validationErrors": "Errores",
     "validationNoIssues": "No se encontraron problemas",
-    "validationStaleDesc": "La configuración ha cambiado desde la última validación. Vuelva a validar para confirmar.",
+    "validationStaleDesc": "La configuración ha cambiado desde la última validación. Vuelve a validar para confirmar.",
     "validationStalePill": "Desactualizado",
     "validationStaleTitle": "Validación desactualizada",
     "validationSummary": "{{errors}} errores, {{warnings}} advertencias",
@@ -1205,12 +1205,12 @@
     },
     "domains": {
       "description": "Configurar nombres de dominio, URLs y ajustes de DNS",
-      "hint": "Utilice esto al migrar a un dominio personalizado. Los valores predeterminados asumen desarrollo local (localhost). Configure su dominio raíz, URLs públicas, orígenes CORS y registros DNS de correo electrónico (DKIM/SPF/DMARC).",
+      "hint": "Utiliza esto al migrar a un dominio personalizado. Los valores predeterminados asumen desarrollo local (localhost). Configura tu dominio raíz, URLs públicas, orígenes CORS y registros DNS de correo electrónico (DKIM/SPF/DMARC).",
       "label": "Dominio y URLs"
     },
     "ssl": {
       "description": "Configurar certificados SSL y ajustes HTTPS",
-      "hint": "Configure los ajustes de TLS y proxy al servir a través de HTTPS. Los valores predeterminados son seguros para desarrollo local; habilite HTTPS solo después de que los certificados estén montados.",
+      "hint": "Configura los ajustes de TLS y proxy al servir a través de HTTPS. Los valores predeterminados son seguros para desarrollo local; habilita HTTPS solo después de que los certificados estén montados.",
       "label": "SSL y Seguridad"
     }
   },
@@ -1477,7 +1477,7 @@
     },
     "SPF_INCLUDE": {
       "description": "Directiva de inclusión SPF DNS",
-      "hint": "Reemplace con el valor de inclusión de su proveedor (p. ej., include:sendgrid.net, include:_spf.google.com).",
+      "hint": "Reemplaza con el valor de inclusión de tu proveedor (p. ej., include:sendgrid.net, include:_spf.google.com).",
       "label": "Inclusión SPF"
     },
     "SSL_CERT_PATH": {

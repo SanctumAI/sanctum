@@ -1458,9 +1458,9 @@
       "label": "Alkalmazás URL"
     },
     "MONITORING_URL": {
-      "description": "Egészségügyi megfigyelő végpont URL",
-      "hint": "Egészségügyi ellenőrző URL külső monitorokhoz. Alapértelmezés: http://localhost:8000/health.",
-      "label": "Megfigyelési URL"
+      "description": "Állapotfigyelő végpont URL",
+      "hint": "Állapotellenőrző URL külső monitorokhoz. Alapértelmezés: http://localhost:8000/health.",
+      "label": "Állapotfigyelő URL"
     },
     "SIMULATE_ADMIN_AUTH": {
       "description": "Mock Nostr kapcsolódás gomb megjelenítése admin hitelesítéshez (csak tesztelésre)",

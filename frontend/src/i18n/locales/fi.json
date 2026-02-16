@@ -1107,7 +1107,7 @@
     "validationStaleTitle": "Validoinnin vanhentunut",
     "validationSummary": "{{errors}} virhettä, {{warnings}} varoitusta",
     "validationSummaryStale": "Viimeisin tulos: {{errors}} virhettä, {{warnings}} varoitusta",
-    "validationTimestamp": "Validioitu {{time}}",
+    "validationTimestamp": "Validoitu {{time}}",
     "validationWarnings": "Varoitukset",
     "extracted": {
       "admin_base_url_https_admin_example_com_f9b733": "ADMIN_BASE_URL=https://admin.example.com",
@@ -1588,7 +1588,7 @@
   },
   "initiationGate": {
     "extracted": {
-      "checking_instance_status_1a4324": "Tarkistetaan esiintymän tilaa..."
+      "checking_instance_status_1a4324": "Tarkistetaan instanssin tilaa..."
     }
   },
   "testDashboard": {
@@ -1612,7 +1612,7 @@
       "admin_auth_2d5ed1": "Ylläpitäjän todennus:",
       "admin_authentication_is_required_for_admin_only_endpoints_d67ff6": "Ylläpitäjän todennus vaaditaan vain ylläpitäjille tarkoitettuihin päätepisteisiin. Todennus Nostrin kautta tai liitä token.",
       "admin_database_f19a90": "Ylläpitäjä: Tietokanta",
-      "admin_instance_user_management_fb3ccf": "Ylläpitäjä: Esiintymän ja käyttäjien hallinta",
+      "admin_instance_user_management_fb3ccf": "Ylläpitäjä: Instanssin ja käyttäjien hallinta",
       "admin_list_99f096": "Ylläpitäjälista",
       "admin_pubkey_to_remove_d5384e": "Ylläpitäjän julkinen avain poistettavaksi...",
       "admin_session_0b18ca": "Ylläpitäjän istunto",
@@ -1687,8 +1687,8 @@
       "global_all_types_ae5fa4": "Globaali (kaikki tyypit)",
       "global_only_018ef5": "Vain globaali",
       "graph_context_185228": "Graafin konteksti:",
-      "instance_config_6c9a3f": "Esiintymän asetukset",
-      "instance_settings_4ae9d7": "Esiintymän asetukset",
+      "instance_config_6c9a3f": "Instanssin asetukset",
+      "instance_settings_4ae9d7": "Instanssin asetukset",
       "job_id_770797": "Työn tunnus",
       "jobs_status_8339b3": "Työt ja tila",
       "list_all_admins_requires_admin_authentication_fc4e7b": "– Listaa kaikki ylläpitäjät. Vaatii ylläpitäjän todennuksen.",
@@ -1799,7 +1799,7 @@
       "verify_a_magic_link_token_and_get_session_fc176a": "– Vahvista maagisen linkin token ja hae istuntotiedot (evästepohjainen istunto).",
       "verify_magic_link_token_183cf5": "Vahvista maagisen linkin token",
       "view_all_users_manage_approval_status_and_delete_03feec": "Tarkastele kaikkia käyttäjiä, hallinnoi hyväksymistilaa ja poista käyttäjiä.",
-      "view_and_update_instance_wide_configuration_settings_9d59d3": "Tarkastele ja päivitä esiintymänlaajuisia määritysasetuksia."
+      "view_and_update_instance_wide_configuration_settings_9d59d3": "Tarkastele ja päivitä instanssinlaajuisia määritysasetuksia."
     }
   }
 }

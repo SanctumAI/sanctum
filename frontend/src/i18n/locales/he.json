@@ -556,7 +556,7 @@
       "subjectPrefixPlaceholder": "[תמיכה]",
       "subtitle": "אפשר באופן אופציונלי למשתמשים מאומתים לשלוח הודעה לצוות שלך באמצעות אימייל.",
       "title": "יצירת קשר עם משתמש",
-      "toEmailHint": "אימיילים יישלחו באמצעות הגדרות ה-SMTP שתצורגנו.",
+      "toEmailHint": "אימיילים יישלחו באמצעות הגדרות ה-SMTP שהוגדרו.",
       "toEmailLabel": "אימייל יעד",
       "toEmailPlaceholder": "תמיכה@example.com",
       "mode": {

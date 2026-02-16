@@ -66,7 +66,7 @@
       "encryptionBody": "Profilfelder sind standardmäßig verschlüsselt, aber der Administrator dieser Instanz steuert die Einstellungen pro Feld und kann zulassen, dass ausgewählte Daten anders gespeichert oder geteilt werden.",
       "adminControlNotice": "Die Datenverarbeitung wird vom Administrator dieser Instanz konfiguriert, einschließlich dessen, was unverschlüsselt gespeichert oder mit KI-Tools geteilt werden darf.",
       "noWarrantyNotice": "Die Sanctum-Software wird ohne Gewähr bereitgestellt. Die Nutzung dieser Instanz unterliegt den Richtlinien des Administrators.",
-      "retentionNotice": "Die Zeiträume für die Datenaufbewahrung und -löschung werden vom Administrator dieser Instanz festgelegt. Kontaktieren Sie diesen für Zugriffs-, Korrektur- oder Löschanfragen."
+      "retentionNotice": "Die Zeiträume für die Datenaufbewahrung und -löschung werden vom Administrator dieser Instanz festgelegt. Kontaktiere diesen für Zugriffs-, Korrektur- oder Löschanfragen."
     },
     "verify": {
       "verifying": "Link wird überprüft...",
@@ -282,7 +282,7 @@
       "save": "Konfiguration speichern",
       "instanceSectionDesc": "Lege den Namen, das Symbol und die Farben fest, die in deiner Instanz angezeigt werden.",
       "instanceSectionTitle": "Instanz-Konfiguration",
-      "onboardingFieldsHint": "Erstellen Sie die Fragen, die Benutzer während des Onboardings beantworten.",
+      "onboardingFieldsHint": "Erstelle die Fragen, die Benutzer während des Onboardings beantworten.",
       "userSectionDesc": "Konfiguriere Benutzertypen und die Fragen, die Benutzer beim Onboarding beantworten.",
       "userSectionTitle": "Benutzerkonfiguration"
     },
@@ -479,7 +479,7 @@
       "anonymizedHint": "Die Daten dieses Benutzers wurden anonymisiert und können nicht entschlüsselt werden.",
       "emailEncryptedHint": "E-Mail (verschlüsselt)",
       "nameEncryptedHint": "Name (verschlüsselt)",
-      "noUsersHint": "Versuchen Sie, den Filter oben zu ändern oder zu aktualisieren.",
+      "noUsersHint": "Versuche, den Filter oben zu ändern oder zu aktualisieren.",
       "pubkeyPresent": "Nostr-Pubkey vorhanden"
     },
     "configAssistant": {
@@ -554,9 +554,9 @@
       "subjectPrefixHint": "Optional. Wird der E-Mail-Betreffzeile vorangestellt.",
       "subjectPrefixLabel": "Betreff-Präfix",
       "subjectPrefixPlaceholder": "[Unterstützung]",
-      "subtitle": "Authentifizierten Benutzern optional erlauben, eine Nachricht an Ihr Team per E-Mail zu senden.",
+      "subtitle": "Authentifizierten Benutzern optional erlauben, eine Nachricht an dein Team per E-Mail zu senden.",
       "title": "Benutzer-Reachout",
-      "toEmailHint": "E-Mails werden über Ihre konfigurierten SMTP-Einstellungen gesendet.",
+      "toEmailHint": "E-Mails werden über deine konfigurierten SMTP-Einstellungen gesendet.",
       "toEmailLabel": "Ziel-E-Mail",
       "toEmailPlaceholder": "support@example.com",
       "mode": {
@@ -622,7 +622,7 @@
       "assistantNameLabel": "Anzeigename des Assistenten",
       "assistantNamePlaceholder": "z.B. Sanctum AI",
       "bubbleShadowLabel": "Subtilen Blasenschatten hinzufügen",
-      "bubbleStyleDesc": "Wählen Sie die Form und Tiefe der Chatblasen.",
+      "bubbleStyleDesc": "Wähle die Form und Tiefe der Chatblasen.",
       "bubbleStylePill": "Pille",
       "bubbleStylePillDesc": "Vollständiger Pillenstil für einen markanten Look.",
       "bubbleStyleRound": "Rund",
@@ -632,17 +632,17 @@
       "bubbleStyleSquare": "Quadratisch",
       "bubbleStyleSquareDesc": "Schärfere Ecken für einen strukturierten Look.",
       "bubbleStyleTitle": "Chatblasenstil",
-      "chatIconsDesc": "Legen Sie die Standardsymbole fest, die in Chatnachrichten verwendet werden.",
+      "chatIconsDesc": "Lege die Standardsymbole fest, die in Chatnachrichten verwendet werden.",
       "chatIconsTitle": "Chat-Symbole",
-      "chatIdentityDesc": "Legen Sie die über Chatnachrichten angezeigten Beschriftungen fest.",
-      "chatIdentityHint": "Lassen Sie eine Beschriftung leer, um sie auszublenden.",
+      "chatIdentityDesc": "Lege die über Chatnachrichten angezeigten Beschriftungen fest.",
+      "chatIdentityHint": "Lass eine Beschriftung leer, um sie auszublenden.",
       "chatIdentityTitle": "Chat-Identität",
       "faviconHint": "Wird in der Browser-Registerkarte und in Lesezeichen angezeigt (empfohlen 32x32 oder 64x64).",
       "faviconLabel": "Favicon-URL",
       "faviconPlaceholder": "https://example.com/favicon.png",
-      "headerDesc": "Steuern Sie, wie Ihre Instanz in der oberen Kopfzeile erscheint.",
+      "headerDesc": "Steuere, wie deine Instanz in der oberen Kopfzeile erscheint.",
       "headerLayoutIconName": "Symbol + Name",
-      "headerLayoutIconNameDesc": "Zeigen Sie sowohl das Symbol als auch den Instanznamen an.",
+      "headerLayoutIconNameDesc": "Zeige sowohl das Symbol als auch den Instanznamen an.",
       "headerLayoutIconOnly": "Nur Symbol",
       "headerLayoutIconOnlyDesc": "Minimale Kopfzeile mit nur dem Symbol.",
       "headerLayoutLabel": "Header-Layout",
@@ -659,14 +659,14 @@
       "logoUrlPlaceholder": "https://example.com/logo.png",
       "statusIconsClassic": "Klassisch",
       "statusIconsClassicDesc": "Einfache Punkte und Symbole.",
-      "statusIconsDesc": "Wählen Sie, wie Statusaktualisierungen angezeigt werden.",
+      "statusIconsDesc": "Wähle, wie Statusaktualisierungen angezeigt werden.",
       "statusIconsMinimal": "Minimalistisch",
       "statusIconsMinimalDesc": "Kompakte Glyphen mit leichter Berührung.",
       "statusIconsPlayful": "Spielerisch",
       "statusIconsPlayfulDesc": "Spielerische Symbole für freundliches Feedback.",
       "statusIconsTitle": "Status-Symbole",
-      "subtitle": "Steuern Sie Branding, Chat-Stil und Theme-Einstellungen für Ihre Instanz.",
-      "surfaceDesc": "Wählen Sie die Hintergrundtextur für Ihre Instanz.",
+      "subtitle": "Steuere Branding, Chat-Stil und Theme-Einstellungen für deine Instanz.",
+      "surfaceDesc": "Wähle die Hintergrundtextur für deine Instanz.",
       "surfaceGradient": "Weicher Farbverlauf",
       "surfaceGradientDesc": "Subtiler Farbverlauf im Hintergrund.",
       "surfaceGrid": "Gitter",
@@ -677,7 +677,7 @@
       "surfacePlainDesc": "Sauberer und minimalistischer Hintergrund.",
       "surfaceTitle": "Hintergrundstil",
       "title": "Instanz-Konfiguration",
-      "typographyDesc": "Wählen Sie ein Schriftpaar für die gesamte Oberfläche.",
+      "typographyDesc": "Wähle ein Schriftpaar für die gesamte Oberfläche.",
       "typographyGrotesk": "Grotesk",
       "typographyGroteskDesc": "Fette, moderne Schrift mit Persönlichkeit.",
       "typographyHumanist": "Humanistisch",
@@ -690,7 +690,7 @@
       "userLabelPlaceholder": "z.B. Du"
     },
     "userConfig": {
-      "subtitle": "Konfigurieren Sie Benutzertypen und die Fragen, die Benutzer während des Onboardings beantworten.",
+      "subtitle": "Konfiguriere Benutzertypen und die Fragen, die Benutzer während des Onboardings beantworten.",
       "title": "Benutzerkonfiguration",
       "typeDescription": "Beschreibung",
       "typeIcon": "Typensymbol",
@@ -1041,27 +1041,27 @@
     "domainsHelp": {
       "ariaLabel": "Hilfe zur Domain- und DNS-Konfiguration",
       "cdnDesc": "Durch Kommas getrennte CDN-Hostnamen für statische Assets. Leer lassen, wenn kein CDN verwendet wird.",
-      "dkimExample": "Verwenden Sie den Selektor aus DKIM_SELECTOR und den öffentlichen Schlüssel Ihres Anbieters.",
+      "dkimExample": "Verwende den Selektor aus DKIM_SELECTOR und den öffentlichen Schlüssel deines Anbieters.",
       "dmarcExample": "Beispiel TXT-Eintrag: v=DMARC1; p=none; rua=mailto:dmarc@example.com",
-      "dnsDesc": "Diese Werte helfen Ihnen, DNS-Einträge für die E-Mail-Zustellbarkeit zu erstellen.",
-      "dnsNote": "Verwenden Sie die empfohlenen Einträge Ihres E-Mail-Anbieters für die beste Zustellbarkeit.",
+      "dnsDesc": "Diese Werte helfen dir, DNS-Einträge für die E-Mail-Zustellbarkeit zu erstellen.",
+      "dnsNote": "Verwende die empfohlenen Einträge deines E-Mail-Anbieters für die beste Zustellbarkeit.",
       "dnsTitle": "DNS-Einträge (E-Mail)",
       "edgeDesc": "Optionale Einstellungen für erweiterte Setups.",
       "edgeTitle": "CDN & Webhooks",
       "goToPage": "Gehe zu Seite",
-      "overviewCORS": "CORS_ORIGINS, um Ihre Frontend-Domain zuzulassen",
-      "overviewDesc": "Diese Einstellungen steuern, wo Ihre App im Internet lebt und wie Dienste einander finden. Standardwerte sind für die lokale Entwicklung festgelegt.",
+      "overviewCORS": "CORS_ORIGINS, um deine Frontend-Domain zuzulassen",
+      "overviewDesc": "Diese Einstellungen steuern, wo deine App im Internet lebt und wie Dienste einander finden. Standardwerte sind für die lokale Entwicklung festgelegt.",
       "overviewDns": "E-Mail-DNS (DKIM/SPF/DMARC) für die Zustellbarkeit",
-      "overviewNote": "Wenn Sie auf localhost bleiben, können Sie die Standardwerte beibehalten.",
+      "overviewNote": "Wenn du auf localhost bleibst, kannst du die Standardwerte beibehalten.",
       "overviewTitle": "Domains & URLs Übersicht",
       "overviewUrl": "INSTANCE_URL / API_BASE_URL / ADMIN_BASE_URL für öffentliche Einstiegspunkte",
-      "searxDesc": "Nur erforderlich, wenn Ihre SearXNG-Instanz auf einem anderen Host läuft.",
+      "searxDesc": "Nur erforderlich, wenn deine SearXNG-Instanz auf einem anderen Host läuft.",
       "spfExample": "Beispiel TXT-Eintrag: v=spf1 include:sendgrid.net ~all",
       "urlsDesc": "Öffentliche URLs & CORS-Ursprünge müssen exakt übereinstimmen (Schema + Domain + Port).",
-      "urlsNote": "Wenn Ihre API von derselben Domain wie die App bereitgestellt wird, können Sie API_BASE_URL leer lassen.",
+      "urlsNote": "Wenn deine API von derselben Domain wie die App bereitgestellt wird, kannst du API_BASE_URL leer lassen.",
       "urlsTitle": "Öffentliche URLs & CORS",
-      "webhookDesc": "Basis-URL, die zum Erstellen von Webhook-Callbacks verwendet wird. Verwenden Sie Ihre öffentliche API-Domain.",
-      "whatToSet": "Legen Sie diese fest, wenn Sie live gehen:"
+      "webhookDesc": "Basis-URL, die zum Erstellen von Webhook-Callbacks verwendet wird. Verwende deine öffentliche API-Domain.",
+      "whatToSet": "Lege diese fest, wenn du live gehst:"
     },
     "revalidate": "Revalidieren",
     "validating": "Validieren...",
@@ -1157,7 +1157,7 @@
       "troubleshootingTitle": "Fehlerbehebung",
       "txtDesc": ".txt — Klartextdateien. Das einfachste Format, funktioniert zuverlässig mit jedem Inhalt."
     },
-    "jobsTimeout": "Server ist beschäftigt mit der Dokumentenverarbeitung. Versuchen Sie, in einem Moment zu aktualisieren.",
+    "jobsTimeout": "Server ist beschäftigt mit der Dokumentenverarbeitung. Versuche, in einem Moment zu aktualisieren.",
     "refresh": "Aktualisieren",
     "serverBusy": "Server ist beschäftigt",
     "tryRefresh": "Erneut versuchen",
@@ -1202,12 +1202,12 @@
     },
     "domains": {
       "description": "Domainnamen, URLs und DNS-Einstellungen konfigurieren",
-      "hint": "Verwenden Sie diese, wenn Sie zu einer benutzerdefinierten Domain wechseln. Die Standardeinstellungen gehen von lokaler Entwicklung (localhost) aus. Konfigurieren Sie Ihre Root-Domain, öffentlichen URLs, CORS-Ursprünge und E-Mail-DNS-Einträge (DKIM/SPF/DMARC).",
+      "hint": "Verwende diese, wenn du zu einer benutzerdefinierten Domain wechselst. Die Standardeinstellungen gehen von lokaler Entwicklung (localhost) aus. Konfiguriere deine Root-Domain, öffentlichen URLs, CORS-Ursprünge und E-Mail-DNS-Einträge (DKIM/SPF/DMARC).",
       "label": "Domäne & URLs"
     },
     "ssl": {
       "description": "SSL-Zertifikate und HTTPS-Einstellungen konfigurieren",
-      "hint": "Konfigurieren Sie TLS- und Proxy-Einstellungen bei der Bereitstellung über HTTPS. Die Standardeinstellungen sind für die lokale Entwicklung sicher; HTTPS nur aktivieren, nachdem Zertifikate eingebunden wurden.",
+      "hint": "Konfiguriere TLS- und Proxy-Einstellungen bei der Bereitstellung über HTTPS. Die Standardeinstellungen sind für die lokale Entwicklung sicher; HTTPS nur aktivieren, nachdem Zertifikate eingebunden wurden.",
       "label": "SSL & Sicherheit"
     }
   },
@@ -1395,7 +1395,7 @@
     "LLM_API_KEY": {
       "label": "API-Schlüssel",
       "description": "API-Schlüssel für den LLM-Dienst",
-      "hint": "Ihr API-Schlüssel oder Token vom LLM-Anbieter. Erforderlich für Anbieter mit Authentifizierung."
+      "hint": "Dein API-Schlüssel oder Token vom LLM-Anbieter. Erforderlich für Anbieter mit Authentifizierung."
     },
     "ADMIN_BASE_URL": {
       "description": "Subdomain-URL des Admin-Panels (optional)",
@@ -1429,12 +1429,12 @@
     },
     "DKIM_SELECTOR": {
       "description": "DKIM DNS-Eintrag-Selektor",
-      "hint": "Selektor-Präfix für Ihren DKIM TXT-Eintrag. Standard: sanctum. Ihr Anbieter benötigt möglicherweise einen spezifischen Selektor.",
+      "hint": "Selektor-Präfix für deinen DKIM TXT-Eintrag. Standard: sanctum. Dein Anbieter benötigt möglicherweise einen spezifischen Selektor.",
       "label": "DKIM-Selektor"
     },
     "DMARC_POLICY": {
       "description": "DMARC DNS-Richtlinien-Eintrag",
-      "hint": "Beginnen Sie mit v=DMARC1; p=none; rua=mailto:dmarc@example.com und verschärfen Sie später.",
+      "hint": "Beginne mit v=DMARC1; p=none; rua=mailto:dmarc@example.com und verschärfe später.",
       "label": "DMARC-Richtlinie"
     },
     "EMAIL_DOMAIN": {
@@ -1449,7 +1449,7 @@
     },
     "HSTS_MAX_AGE": {
       "description": "HSTS Max-Age in Sekunden",
-      "hint": "Sekunden, die Browser HTTPS erzwingen sollen. Standard: 31536000 (1 Jahr). Verwenden Sie 0 zum Deaktivieren.",
+      "hint": "Sekunden, die Browser HTTPS erzwingen sollen. Standard: 31536000 (1 Jahr). Verwende 0 zum Deaktivieren.",
       "label": "HSTS Max-Alter"
     },
     "INSTANCE_URL": {
@@ -1474,7 +1474,7 @@
     },
     "SPF_INCLUDE": {
       "description": "SPF DNS Include-Direktive",
-      "hint": "Ersetzen Sie dies durch den Include-Wert Ihres Anbieters (z.B. include:sendgrid.net, include:_spf.google.com).",
+      "hint": "Ersetze dies durch den Include-Wert deines Anbieters (z.B. include:sendgrid.net, include:_spf.google.com).",
       "label": "SPF Einbeziehen"
     },
     "SSL_CERT_PATH": {
@@ -1536,19 +1536,19 @@
   },
   "reachout": {
     "errors": {
-      "failed": "Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
+      "failed": "Nachricht konnte nicht gesendet werden. Bitte versuche es erneut.",
       "notConfigured": "Diese Funktion ist nicht konfiguriert.",
-      "rateLimited": "Zu viele Nachrichten. Bitte versuchen Sie es später erneut.",
+      "rateLimited": "Zu viele Nachrichten. Bitte versuche es später erneut.",
       "required": "Nachricht ist erforderlich.",
       "unavailable": "Kontaktaufnahme ist nicht verfügbar."
     },
     "form": {
       "messageLabel": "Nachricht",
-      "placeholder": "Schreiben Sie Ihre Nachricht...",
+      "placeholder": "Schreibe deine Nachricht...",
       "send": "Senden"
     },
     "status": {
-      "success": "Danke. Ihre Nachricht wurde gesendet."
+      "success": "Danke. Deine Nachricht wurde gesendet."
     },
     "mode": {
       "feedback": {

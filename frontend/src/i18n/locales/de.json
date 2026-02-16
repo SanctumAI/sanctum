@@ -41,7 +41,7 @@
       "createAccountSubtitle": "Registriere dich, um {{instanceName}} zu nutzen",
       "welcomeBackTitle": "Willkommen zurück",
       "welcomeBackSubtitle": "Melde dich an, um dort fortzufahren, wo du aufgehört hast",
-      "nameLabel": "Bezeichnung",
+      "nameLabel": "Name",
       "namePlaceholder": "Dein Name",
       "emailLabel": "E-Mail",
       "emailPlaceholder": "du@beispiel.com",
@@ -235,7 +235,7 @@
     "confirmDeleteField": "Feld \"{{name}}\" löschen?",
     "confirmDeleteTypeWithFields": "Benutzertyp \"{{name}}\" löschen? Dies löscht auch {{count}} zugehörige(s) Feld(er).",
     "confirmDeleteType": "Benutzertyp \"{{name}}\" löschen?",
-    "global": "Weltweit",
+    "global": "Global",
     "errors": {
       "loadTypesFailed": "Benutzertypen konnten nicht geladen werden",
       "loadFieldsFailed": "Benutzerfelder konnten nicht geladen werden",
@@ -1294,7 +1294,7 @@
     "blue": "Blau",
     "purple": "Lila",
     "green": "Grün",
-    "orange": "Apfelsine",
+    "orange": "Orange",
     "pink": "Rosa",
     "teal": "Türkis"
   },

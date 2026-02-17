@@ -761,7 +761,7 @@
     "securityStep3Primary": "Ejecutar validación de configuración",
     "securityStep3Secondary": "Revisar datos almacenados",
     "user": "Configuración de usuario",
-    "userDesc": "Defina los tipos de usuario y las preguntas de incorporación"
+    "userDesc": "Configura los tipos de usuario y las preguntas de incorporación"
   },
   "adminAI": {
     "title": "Configuración de IA",
@@ -786,7 +786,7 @@
     "invalidJson": "Formato JSON inválido",
     "chunks": "fragmentos",
     "configureFor": "Configurar para",
-    "globalAllUsers": "Todos los usuarios globales",
+    "globalAllUsers": "Todos los usuarios (Global)",
     "inherited": "Heredado",
     "override": "Sobrescribir",
     "overrideHint": "Sobrescribe el valor global predeterminado solo para este tipo de usuario.",
@@ -1539,9 +1539,9 @@
   },
   "reachout": {
     "errors": {
-      "failed": "Error al enviar mensaje. Por favor, inténtelo de nuevo.",
+      "failed": "Error al enviar mensaje. Por favor, inténtalo de nuevo.",
       "notConfigured": "Esta característica no está configurada.",
-      "rateLimited": "Demasiados mensajes. Por favor, inténtelo de nuevo más tarde.",
+      "rateLimited": "Demasiados mensajes. Por favor, inténtalo de nuevo más tarde.",
       "required": "El mensaje es obligatorio.",
       "unavailable": "Contacto no disponible."
     },
@@ -1551,7 +1551,7 @@
       "send": "Enviar"
     },
     "status": {
-      "success": "Gracias. Su mensaje fue enviado."
+      "success": "Gracias. Tu mensaje fue enviado."
     },
     "mode": {
       "feedback": {

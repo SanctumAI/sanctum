@@ -66,7 +66,7 @@
       "encryptionBody": "Profilikentät salataan oletuksena, mutta tämän instanssin ylläpitäjä hallitsee kenttäkohtaisia asetuksia ja voi sallia valittujen tietojen tallentamisen tai jakamisen eri tavalla.",
       "adminControlNotice": "Tietojen käsittelyn määrittää tämän instanssin ylläpitäjä, mukaan lukien mitä voidaan tallentaa salaamattomana tai jakaa AI-työkalujen kanssa.",
       "noWarrantyNotice": "Sanctum-ohjelmisto tarjotaan sellaisenaan ilman takuuta. Tämän instanssin käyttöön sovelletaan ylläpitäjän käytäntöjä.",
-      "retentionNotice": "Tietojen säilytys- ja poistoajat määrittää tämän instanssin järjestelmänvalvoja. Ota heihin yhteyttä pääsy-, korjaus- tai poistopyyntöjen osalta."
+      "retentionNotice": "Tietojen säilytys- ja poistoajat määrittää tämän instanssin ylläpitäjä. Ota heihin yhteyttä pääsy-, korjaus- tai poistopyyntöjen osalta."
     },
     "verify": {
       "verifying": "Linkkiäsi vahvistetaan...",

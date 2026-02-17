@@ -825,7 +825,7 @@
     "invalidJson": "Neplatný formát JSON",
     "chunks": "části",
     "configureFor": "Konfigurovat pro",
-    "globalAllUsers": "Globální všichni uživatelé",
+    "globalAllUsers": "Všichni uživatelé (globální)",
     "inherited": "Zděděno",
     "override": "Přepsat",
     "overrideHint": "Přepsat globální výchozí hodnotu pouze pro tento typ uživatele.",

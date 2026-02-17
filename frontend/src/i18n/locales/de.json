@@ -783,7 +783,7 @@
     "invalidJson": "Ungültiges JSON-Format",
     "chunks": "Abschnitte",
     "configureFor": "Konfigurieren für",
-    "globalAllUsers": "Globale alle Benutzer",
+    "globalAllUsers": "Alle Benutzer (Global)",
     "inherited": "Geerbt",
     "override": "Überschreiben",
     "overrideHint": "Den globalen Standardwert nur für diesen Benutzertyp überschreiben.",

@@ -1117,7 +1117,7 @@
       "frontend_url_https_app_example_com_05514a": "FRONTEND_URL=https://app.example.com",
       "hf_hub_offline_transformers_offline_65a6e3": "HF_HUB_OFFLINE / TRANSFORMERS_OFFLINE",
       "instance_url_https_app_example_com_0700b1": "INSTANCE_URL=https://app.example.com",
-      "npub1_or_64_char_hex_b8e906": "npub1... or 64-char hex",
+      "npub1_or_64_char_hex_b8e906": "npub1... או hex בן 64 תווים",
       "qdrant_6333_289ff3": "qdrant / 6333",
       "qdrant_host_qdrant_port_d0cf55": "QDRANT_HOST / QDRANT_PORT",
       "searxng_url_http_searxng_8080_ede53c": "SEARXNG_URL=http://searxng:8080",

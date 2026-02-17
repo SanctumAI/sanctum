@@ -166,6 +166,7 @@
       "resultsCount": "Výsledky databázového dotazu ({{count}} řádků):",
       "resultsTruncated": "(Výsledky zkráceny na 100 řádků)",
       "resultsCount_one": "Výsledek databázového dotazu ({{count}} řádek):",
+      "resultsCount_few": "Výsledky databázového dotazu ({{count}} řádky):",
       "resultsCount_other": "Výsledky databázového dotazu ({{count}} řádků):"
     }
   },
@@ -270,6 +271,7 @@
       "instanceSectionTitle": "Konfigurace instance",
       "onboardingFieldsHint": "Vytvořte otázky, na které uživatelé odpovídají během onboardingu.",
       "optionsCount_one": "{{count}} možnost",
+      "optionsCount_few": "{{count}} možnosti",
       "optionsCount_other": "{{count}} možností",
       "userSectionDesc": "Nakonfigurujte typy uživatelů a otázky, na které uživatelé odpovídají během onboardingu.",
       "userSectionTitle": "Konfigurace uživatelů"
@@ -303,8 +305,10 @@
       "clickToExpand": "Klikněte pro rozbalení",
       "pagination": "Zobrazeno {{from}} až {{to}} z {{total}}",
       "tableCount_one": "{{count}} tabulka",
+      "tableCount_few": "{{count}} tabulky",
       "tableCount_other": "{{count}} tabulek",
       "rowCount_one": "{{count}} řádek",
+      "rowCount_few": "{{count}} řádky",
       "rowCount_other": "{{count}} řádků",
       "rowsInTable": "{{count}} řádků v {{table}}",
       "connected": "SQLite připojen",
@@ -358,6 +362,7 @@
       "primaryKeyIcon": "Primární klíč",
       "unlockDecryption": "Odemknout dešifrování",
       "rowsInTable_one": "{{count}} řádek v {{table}}",
+      "rowsInTable_few": "{{count}} řádky v {{table}}",
       "rowsInTable_other": "{{count}} řádků v {{table}}"
     },
     "fields": {

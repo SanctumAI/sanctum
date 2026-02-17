@@ -31,7 +31,7 @@
     "enabled": "Enabled",
     "disabled": "Disabled",
     "gotIt": "Got it",
-    "goToPage": "Go To Page",
+    "goToPage": "Go to page",
     "next": "Next",
     "previous": "Previous",
     "refresh": "Refresh",
@@ -790,7 +790,7 @@
     "adminSessionExpired": "Admin session expired",
     "authenticationFailed": "Authentication failed",
     "noNostrExtension": "No Nostr extension found",
-    "exportFailed": "Export Failed"
+    "exportFailed": "Export failed"
   },
   "adminDashboard": {
     "title": "Admin Dashboard",

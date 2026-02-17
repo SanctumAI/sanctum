@@ -66,7 +66,7 @@
       "encryptionBody": "Les champs de profil sont chiffrés par défaut, mais l'administrateur de cette instance contrôle les paramètres au niveau de chaque champ et peut autoriser un stockage ou un partage différent pour certaines données.",
       "adminControlNotice": "Le traitement des données est configuré par l'administrateur de cette instance, y compris ce qui peut être stocké non chiffré ou partagé avec des outils d'IA.",
       "noWarrantyNotice": "Le logiciel Sanctum est fourni en l'état, sans garantie. L'utilisation de cette instance est soumise aux politiques de l'administrateur.",
-      "retentionNotice": "Les délais de conservation et de suppression des données sont définis par l'administrateur de cette instance. Contactez-les pour les demandes d'accès, de correction ou de suppression."
+      "retentionNotice": "Les délais de conservation et de suppression des données sont définis par l'administrateur de cette instance. Contactez l'administrateur pour les demandes d'accès, de correction ou de suppression."
     },
     "verify": {
       "verifying": "Vérification de votre lien...",
@@ -534,7 +534,7 @@
         "invalidRateLimits": "Les limites de débit doivent être des nombres positifs.",
         "toEmailRequired": "L'adresse e-mail de destination est requise lorsque le contact est activé."
       },
-      "includeIpHint": "Désactivé par défaut. Les adresses IP sont des données personnelles en vertu du GDPR. Lorsqu'activé, les adresses IP sont masquées (par exemple 1.2.3.0) avant inclusion.",
+      "includeIpHint": "Désactivé par défaut. Les adresses IP sont des données personnelles en vertu du RGPD. Lorsqu'activé, les adresses IP sont masquées (par exemple 1.2.3.0) avant inclusion.",
       "includeIpLabel": "Inclure l'adresse IP client masquée dans les e-mails de contact",
       "leaveBlankPlaceholder": "Laisser vide pour utiliser la valeur par défaut",
       "limitDayLabel": "Limite de débit (par jour)",

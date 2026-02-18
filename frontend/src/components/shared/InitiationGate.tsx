@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { fetchInstanceStatus } from '../../utils/instanceStatus'
 
 interface InitiationGateProps {
@@ -15,6 +16,7 @@ type GateState = 'checking' | 'initiated' | 'uninitiated'
  * to the admin initiation flow at /admin.
  */
 export function InitiationGate({ children }: InitiationGateProps) {
+  const { t } = useTranslation()
   const [state, setState] = useState<GateState>('checking')
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export function InitiationGate({ children }: InitiationGateProps) {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          <p className="text-text-muted text-sm">Checking instance status...</p>
+          <p className="text-text-muted text-sm">{t('initiationGate.extracted.checking_instance_status_1a4324', 'Checking instance status...')}</p>
         </div>
       </div>
     )

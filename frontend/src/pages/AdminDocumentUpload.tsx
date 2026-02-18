@@ -13,7 +13,7 @@ import {
 import { adminFetch, isAdminAuthenticated } from '../utils/adminApi'
 
 export function AdminDocumentUpload() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -48,6 +48,10 @@ export function AdminDocumentUpload() {
   const recentJobsRef = useRef<JobStatus[]>([])
 
   const JOBS_FETCH_TIMEOUT_MS = 30000
+  const fixedT = i18n.getFixedT(i18n.language)
+  const translateErrorMessage = (message: string) => (
+    message.startsWith('errors.') && i18n.exists(message) ? fixedT(message) : message
+  )
 
   // Cleanup success timeout on unmount
   useEffect(() => {
@@ -145,7 +149,7 @@ export function AdminDocumentUpload() {
         console.error(t('errors.errorFetchingJobs'), error)
         if (showErrors) {
           if (error instanceof Error && error.message.startsWith('errors.')) {
-            const errorMessage = t(error.message)
+            const errorMessage = translateErrorMessage(error.message)
             if (recentJobsRef.current.length > 0) {
               setJobsWarning(errorMessage)
             } else {
@@ -197,7 +201,7 @@ export function AdminDocumentUpload() {
     } catch (error) {
       console.error('Delete error:', error)
       if (error instanceof Error && error.message.startsWith('errors.')) {
-        setDeleteError(t(error.message))
+        setDeleteError(translateErrorMessage(error.message))
       } else {
         setDeleteError(error instanceof Error ? error.message : t('upload.deleteFailed'))
       }
@@ -331,7 +335,7 @@ export function AdminDocumentUpload() {
     } catch (error) {
       console.error('Upload error:', error)
       if (error instanceof Error && error.message.startsWith('errors.')) {
-        setUploadError(t(error.message))
+        setUploadError(translateErrorMessage(error.message))
       } else {
         setUploadError(error instanceof Error ? error.message : 'Upload failed')
       }

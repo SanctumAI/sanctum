@@ -821,7 +821,7 @@ export function AdminDatabaseExplorer() {
                     setShowDecryptHelp((current) => !current)
                   }}
                   className="btn-ghost p-1.5 rounded-lg transition-all text-text-muted hover:text-accent"
-                  aria-label="Decryption help"
+                  aria-label={t('adminDatabaseExplorer.extracted.decryption_help_136c23', 'Decryption help')}
                   aria-expanded={showDecryptHelp}
                   aria-controls="db-decrypt-help-popover"
                   aria-describedby={showDecryptHelp ? 'db-decrypt-help-popover' : undefined}
@@ -1434,19 +1434,19 @@ export function AdminDatabaseExplorer() {
                   <div className="bg-surface-overlay border border-border rounded-lg p-3 font-mono text-xs space-y-2">
                     <div>
                       <p className="text-text-muted mb-1">-- {t('admin.database.help.viewAll', 'View all rows in a table')}</p>
-                      <p className="text-accent">SELECT * FROM users LIMIT 100;</p>
+                      <p className="text-accent">{t('adminDatabaseExplorer.extracted.select_from_users_limit_100_2ee1ff', 'SELECT * FROM users LIMIT 100;')}</p>
                     </div>
                     <div>
                       <p className="text-text-muted mb-1">-- {t('admin.database.help.filterRows', 'Filter rows')}</p>
-                      <p className="text-accent">SELECT * FROM sessions WHERE created_at {'>'} date('now', '-7 days');</p>
+                      <p className="text-accent">{t('adminDatabaseExplorer.extracted.select_from_sessions_where_created_at_71a1a4', "SELECT * FROM sessions WHERE created_at > date('now', '-7 days');")}</p>
                     </div>
                     <div>
                       <p className="text-text-muted mb-1">-- {t('admin.database.help.countRows', 'Count rows')}</p>
-                      <p className="text-accent">SELECT COUNT(*) FROM documents;</p>
+                      <p className="text-accent">{t('adminDatabaseExplorer.extracted.select_count_from_documents_481fff', 'SELECT COUNT(*) FROM documents;')}</p>
                     </div>
                     <div>
                       <p className="text-text-muted mb-1">-- {t('admin.database.help.joinTables', 'Join tables')}</p>
-                      <p className="text-accent">SELECT u.*, s.created_at FROM users u JOIN sessions s ON u.id = s.user_id;</p>
+                      <p className="text-accent">{t('adminDatabaseExplorer.extracted.select_u_s_created_at_from_users_u_729d1a', 'SELECT u.*, s.created_at FROM users u JOIN sessions s ON u.id = s.user_id;')}</p>
                     </div>
                   </div>
                   <p className="text-xs text-text-muted mt-3">
@@ -1466,7 +1466,7 @@ export function AdminDatabaseExplorer() {
                       </p>
                     </div>
                     <div className="bg-error/10 border border-error/20 rounded-lg p-3">
-                      <p className="text-sm font-medium text-error">DROP TABLE</p>
+                      <p className="text-sm font-medium text-error">{t('adminDatabaseExplorer.extracted.drop_table_ac02c0', 'DROP TABLE')}</p>
                       <p className="text-xs text-text-muted mt-1">
                         {t('admin.database.help.dropWarning', 'Permanently deletes a table and all its data. Cannot be undone.')}
                       </p>

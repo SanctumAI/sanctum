@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { isAdminAuthenticated, validateAdminSession, type AdminSessionValidationState } from '../../utils/adminApi'
 import { AdminConfigAssistant } from '../admin/AdminConfigAssistant'
 
@@ -15,6 +16,7 @@ type GuardState = 'checking' | AdminSessionValidationState
  * - Shows a retry screen for backend/network errors (5xx/unreachable)
  */
 export function AdminRoute({ children }: AdminRouteProps) {
+  const { t } = useTranslation()
   const [state, setState] = useState<GuardState>('checking')
   const [retryNonce, setRetryNonce] = useState(0)
 
@@ -51,7 +53,7 @@ export function AdminRoute({ children }: AdminRouteProps) {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          <p className="text-text-muted text-sm">Verifying admin session...</p>
+          <p className="text-text-muted text-sm">{t('adminRoute.extracted.verifying_admin_session_87c53b', 'Verifying admin session...')}</p>
         </div>
       </div>
     )
@@ -65,9 +67,9 @@ export function AdminRoute({ children }: AdminRouteProps) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <div className="card max-w-md w-full space-y-4">
-          <h1 className="text-lg font-semibold text-text">Unable to verify admin session</h1>
+          <h1 className="text-lg font-semibold text-text">{t('adminRoute.extracted.unable_to_verify_admin_session_5f87b8', 'Unable to verify admin session')}</h1>
           <p className="text-sm text-text-muted">
-            The backend returned an error while validating authentication. This is not treated as a logout.
+            {t('adminRoute.extracted.the_backend_returned_an_error_while_validating_authentication_0a9a16', 'The backend returned an error while validating authentication. This is not treated as a logout.')}
           </p>
           <button
             onClick={() => {
@@ -76,7 +78,7 @@ export function AdminRoute({ children }: AdminRouteProps) {
             }}
             className="w-full bg-accent text-accent-text rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-accent-hover transition-colors"
           >
-            Retry
+            {t('common.retry', 'Retry')}
           </button>
         </div>
       </div>

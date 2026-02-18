@@ -172,7 +172,18 @@ export function getAccentColors(t: TFunction): Record<AccentColor, AccentColorCo
     Object.entries(ACCENT_COLORS).map(([key, value]) => [
       key,
       {
-        name: t(value.nameKey),
+        name:
+          key === 'blue'
+            ? t('colors.blue')
+            : key === 'purple'
+              ? t('colors.purple')
+              : key === 'green'
+                ? t('colors.green')
+                : key === 'orange'
+                  ? t('colors.orange')
+                  : key === 'pink'
+                    ? t('colors.pink')
+                    : t('colors.teal'),
         preview: value.preview,
         gradient: value.gradient,
       },

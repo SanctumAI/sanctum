@@ -9,16 +9,14 @@ interface MessageListProps {
   onSuggestedPrompt?: (prompt: string) => void
 }
 
-const suggestedPromptKeys = [
-  'chat.suggestedPrompts.documents',
-  'chat.suggestedPrompts.summarize',
-  'chat.suggestedPrompts.ragPipeline',
-  'chat.suggestedPrompts.entities',
-] as const
-
-
 function EmptyState({ onSuggestedPrompt }: { onSuggestedPrompt?: (prompt: string) => void }) {
   const { t } = useTranslation()
+  const suggestedPrompts = [
+    t('chat.suggestedPrompts.documents'),
+    t('chat.suggestedPrompts.summarize'),
+    t('chat.suggestedPrompts.ragPipeline'),
+    t('chat.suggestedPrompts.entities'),
+  ]
 
   return (
     <div className="flex-1 flex items-center justify-center p-4">
@@ -42,13 +40,13 @@ function EmptyState({ onSuggestedPrompt }: { onSuggestedPrompt?: (prompt: string
           <div className="space-y-3">
             <p className="label mb-3">{t('chat.emptyState.tryAsking')}</p>
             <div className="flex flex-wrap justify-center gap-2 stagger-children">
-              {suggestedPromptKeys.map((key, i) => (
+              {suggestedPrompts.map((prompt, i) => (
                 <button
                   key={i}
-                  onClick={() => onSuggestedPrompt(t(key))}
+                  onClick={() => onSuggestedPrompt(prompt)}
                   className="px-4 py-2 text-sm text-text-secondary bg-surface-raised border border-border rounded-full hover:border-accent hover:text-accent hover:bg-accent/5 hover:-translate-y-0.5 hover:shadow-md transition-all active:scale-95"
                 >
-                  {t(key)}
+                  {prompt}
                 </button>
               ))}
             </div>

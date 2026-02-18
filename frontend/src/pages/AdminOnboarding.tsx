@@ -13,7 +13,7 @@ import { LANGUAGES } from '../utils/languages'
 type ConnectionState = 'idle' | 'connecting' | 'success' | 'no-extension' | 'error'
 
 function LanguageSwitcher() {
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -37,7 +37,7 @@ function LanguageSwitcher() {
         type="button"
         onClick={() => setOpen(!open)}
         className="btn-ghost flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-text-muted hover:text-text transition-colors"
-        aria-label="Change language"
+        aria-label={t('adminOnboarding.extracted.change_language_789b14', 'Change language')}
       >
         <Globe className="w-3.5 h-3.5" />
         <span>{currentLang.nativeName}</span>

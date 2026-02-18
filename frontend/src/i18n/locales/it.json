@@ -124,7 +124,7 @@
       "database": "Interroga il database SQLite",
       "knowledgeGraph": "Interroga il grafo della conoscenza",
       "config": "Configurazione",
-      "configName": "Nome Configurazione",
+      "configName": "Nome configurazione",
       "databaseName": "Base di dati",
       "webSearchName": "Web"
     },
@@ -227,7 +227,7 @@
       "aiConfigDesc": "Prompt, parametri, valori predefiniti",
       "deploymentConfig": "Configurazione deployment",
       "deploymentConfigDesc": "Servizi, SMTP, archiviazione",
-      "userConfig": "Configurazione Utente",
+      "userConfig": "Configurazione utente",
       "userConfigDesc": "Tipi di utente e domande di onboarding"
     }
   },
@@ -331,7 +331,7 @@
       "decryptHelp": "Collega la tua estensione Nostr per decrittografare i campi crittografati nel browser.",
       "decryptNoExtension": "Nessuna estensione Nostr rilevata. Installa un'estensione NIP-07 per decrittografare i campi.",
       "encryptedFieldIcon": "Campo crittografato",
-      "exportDatabase": "Esporta Database",
+      "exportDatabase": "Esporta database",
       "help": {
         "advancedWarning": "Funzionalità avanzata",
         "advancedWarningDesc": "L'esploratore del database offre accesso diretto al tuo database SQLite. Query errate possono corrompere i dati — usalo solo se sai cosa stai facendo.",
@@ -370,7 +370,7 @@
       "nip07Unavailable": "Nessuna estensione Nostr rilevata",
       "plaintextFieldIcon": "Campo in testo in chiaro",
       "primaryKeyIcon": "Chiave primaria",
-      "unlockDecryption": "Sblocca Decrittazione",
+      "unlockDecryption": "Sblocca decrittazione",
       "rowsInTable_one": "{{count}} riga in {{table}}",
       "rowsInTable_other": "{{count}} righe in {{table}}"
     },
@@ -678,7 +678,7 @@
       "surfaceNoiseDesc": "Texture delicata per calore.",
       "surfacePlain": "Semplice",
       "surfacePlainDesc": "Sfondo pulito e minimale.",
-      "surfaceTitle": "Stile Sfondo",
+      "surfaceTitle": "Stile sfondo",
       "title": "Configurazione istanza",
       "typographyDesc": "Scegli una coppia di font per l'intera interfaccia.",
       "typographyGrotesk": "Grotesk",
@@ -694,7 +694,7 @@
     },
     "userConfig": {
       "subtitle": "Configura i tipi di utente e le domande a cui gli utenti rispondono durante l'onboarding.",
-      "title": "Configurazione Utente",
+      "title": "Configurazione utente",
       "typeDescription": "Descrizione",
       "typeIcon": "Icona Tipo",
       "typeName": "Nome del tipo"
@@ -760,7 +760,7 @@
     "securityStep3Body": "Valida la configurazione, controlla lo stato dei servizi, proteggi email e HTTPS e rivedi regolarmente i record archiviati.",
     "securityStep3Primary": "Esegui validazione configurazione",
     "securityStep3Secondary": "Rivedi dati archiviati",
-    "user": "Configurazione Utente",
+    "user": "Configurazione utente",
     "userDesc": "Definisci tipi di utente e domande di onboarding"
   },
   "adminAI": {

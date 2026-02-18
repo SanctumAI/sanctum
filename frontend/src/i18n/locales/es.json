@@ -66,7 +66,7 @@
       "encryptionBody": "Los campos de perfil se cifran por defecto, pero el administrador de esta instancia controla la configuración por campo y puede permitir que ciertos datos se almacenen o compartan de forma diferente.",
       "adminControlNotice": "El tratamiento de datos lo configura el administrador de esta instancia, incluido qué puede almacenarse sin cifrar o compartirse con herramientas de IA.",
       "noWarrantyNotice": "El software Sanctum se proporciona tal cual, sin garantía. El uso de esta instancia está sujeto a las políticas del administrador.",
-      "retentionNotice": "Los plazos de retención y eliminación de datos son establecidos por el administrador de esta instancia. Contacte con ellos para solicitudes de acceso, corrección o eliminación."
+      "retentionNotice": "Los plazos de retención y eliminación de datos son establecidos por el administrador de esta instancia. Contacta con ellos para solicitudes de acceso, corrección o eliminación."
     },
     "verify": {
       "verifying": "Verificando tu enlace...",
@@ -1160,7 +1160,7 @@
       "troubleshootingTitle": "Solución de problemas",
       "txtDesc": ".txt — Archivos de texto plano. El formato más simple, funciona de manera fiable con cualquier contenido."
     },
-    "jobsTimeout": "El servidor está ocupado procesando documentos. Intente actualizar en un momento.",
+    "jobsTimeout": "El servidor está ocupado procesando documentos. Intenta actualizar en un momento.",
     "refresh": "Actualizar",
     "serverBusy": "Servidor ocupado",
     "tryRefresh": "Intentar de nuevo",

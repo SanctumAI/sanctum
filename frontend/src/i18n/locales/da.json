@@ -479,7 +479,7 @@
       "anonymizedHint": "Denne brugers data er blevet anonymiseret og kan ikke dekrypteres.",
       "emailEncryptedHint": "E-mail (krypteret)",
       "nameEncryptedHint": "Navn (krypteret)",
-      "noUsersHint": "Prøv at ændre filteret ovenfor eller genopfrisk.",
+      "noUsersHint": "Prøv at ændre filteret ovenfor eller opdater.",
       "pubkeyPresent": "Nostr pubkey til stede"
     },
     "configAssistant": {
@@ -1191,7 +1191,7 @@
       "troubleshootingTitle": "Fejlfinding",
       "txtDesc": ".txt — Rene tekstfiler. Det simpleste format, fungerer pålideligt med alt indhold."
     },
-    "jobsTimeout": "Serveren har travlt med at behandle dokumenter. Prøv at genopfriske om et øjeblik.",
+    "jobsTimeout": "Serveren har travlt med at behandle dokumenter. Prøv at opdatere om et øjeblik.",
     "refresh": "Opdater",
     "serverBusy": "Serveren har travlt",
     "tryRefresh": "Prøv igen",

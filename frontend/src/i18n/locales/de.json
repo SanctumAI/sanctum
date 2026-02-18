@@ -386,7 +386,7 @@
       "optionPlaceholder": "Auswahl {{number}}",
       "addOption": "+ Option hinzufügen",
       "placeholder": "Platzhalter",
-      "placeholderOptional": "(wahlweise)",
+      "placeholderOptional": "(optional)",
       "placeholderHint": "Hilfetext im Eingabefeld",
       "requiredField": "Pflichtfeld",
       "dataSecurityTitle": "Datensicherheit",

@@ -1570,11 +1570,10 @@
   },
   "adminDatabaseExplorer": {
     "extracted": {
-      "date_now_7_days_28303f": "date('now', '-7 days');",
       "decryption_help_136c23": "کمک رمزگشایی",
       "drop_table_ac02c0": "DROP TABLE",
       "select_count_from_documents_481fff": "SELECT COUNT(*) FROM documents;",
-      "select_from_sessions_where_created_at_71a1a4": "SELECT * FROM sessions WHERE created_at",
+      "select_from_sessions_where_created_at_71a1a4": "SELECT * FROM sessions WHERE created_at > date('now', '-7 days');",
       "select_from_users_limit_100_2ee1ff": "SELECT * FROM users LIMIT 100;",
       "select_u_s_created_at_from_users_u_729d1a": "SELECT u.*, s.created_at FROM users u JOIN sessions s ON u.id = s.user_id;"
     }

@@ -1438,7 +1438,7 @@ export function AdminDatabaseExplorer() {
                     </div>
                     <div>
                       <p className="text-text-muted mb-1">-- {t('admin.database.help.filterRows', 'Filter rows')}</p>
-                      <p className="text-accent">{t('adminDatabaseExplorer.extracted.select_from_sessions_where_created_at_71a1a4', 'SELECT * FROM sessions WHERE created_at')} {'>'} {t('adminDatabaseExplorer.extracted.date_now_7_days_28303f', 'date(\'now\', \'-7 days\');')}</p>
+                      <p className="text-accent">{t('adminDatabaseExplorer.extracted.select_from_sessions_where_created_at_71a1a4', "SELECT * FROM sessions WHERE created_at > date('now', '-7 days');")}</p>
                     </div>
                     <div>
                       <p className="text-text-muted mb-1">-- {t('admin.database.help.countRows', 'Count rows')}</p>

@@ -752,8 +752,8 @@
     "failedToRevealSecret": "Salaisuuden paljastaminen epäonnistui",
     "failedToFetchServiceHealth": "Palvelun tilan haku epäonnistui",
     "failedToFetchAuditLog": "Tarkastuslokin haku epäonnistui",
-    "notAuthenticatedAsAdmin": "Ei todennettu järjestelmänvalvojana",
-    "adminSessionExpired": "Järjestelmänvalvojan istunto vanhentunut",
+    "notAuthenticatedAsAdmin": "Ei todennettu ylläpitäjänä",
+    "adminSessionExpired": "Ylläpitäjän istunto vanhentunut",
     "authenticationFailed": "Todennus epäonnistui",
     "noNostrExtension": "Nostr-laajennusta ei löytynyt",
     "exportFailed": "Vienti epäonnistui"
@@ -1117,7 +1117,7 @@
       "frontend_url_https_app_example_com_05514a": "FRONTEND_URL=https://app.example.com",
       "hf_hub_offline_transformers_offline_65a6e3": "HF_HUB_OFFLINE / TRANSFORMERS_OFFLINE",
       "instance_url_https_app_example_com_0700b1": "INSTANCE_URL=https://app.example.com",
-      "npub1_or_64_char_hex_b8e906": "npub1... or 64-char hex",
+      "npub1_or_64_char_hex_b8e906": "npub1... tai 64 merkin heksadesimaali",
       "qdrant_6333_289ff3": "qdrant / 6333",
       "qdrant_host_qdrant_port_d0cf55": "QDRANT_HOST / QDRANT_PORT",
       "searxng_url_http_searxng_8080_ede53c": "SEARXNG_URL=http://searxng:8080",
@@ -1398,9 +1398,9 @@
       "hint": "API-avaimesi tai tunnuksesi LLM-tarjoajalta. Vaaditaan todennusta edellyttäville tarjoajille."
     },
     "ADMIN_BASE_URL": {
-      "description": "Järjestelmänvalvojan paneelin aliverkkotunnuksen URL (valinnainen)",
-      "hint": "Vain jos järjestelmänvalvojan käyttöliittymä on erillisessä verkkotunnuksessa. Esimerkki: https://admin.example.com. Oletus: http://localhost:5173/admin.",
-      "label": "Järjestelmänvalvojan URL"
+      "description": "Ylläpitäjän paneelin aliverkkotunnuksen URL (valinnainen)",
+      "hint": "Vain jos ylläpitäjän käyttöliittymä on erillisessä verkkotunnuksessa. Esimerkki: https://admin.example.com. Oletus: http://localhost:5173/admin.",
+      "label": "Ylläpitäjän URL"
     },
     "API_BASE_URL": {
       "description": "API-aliverkkotunnuksen URL (valinnainen)",
@@ -1463,9 +1463,9 @@
       "label": "Tarkkailun URL"
     },
     "SIMULATE_ADMIN_AUTH": {
-      "description": "Näytä Mock-yhteyspainike järjestelmänvalvojan todennukseen (vain testaus)",
-      "hint": "Ota käyttöön kehitystä/testausta varten. Näyttää \"Mock Connection\" -painikkeen järjestelmänvalvojan kirjautumisessa, joka ohittaa Nostr-laajennusvaatimuksen. Pitäisi olla poissa käytöstä tuotannossa.",
-      "label": "Simuloi järjestelmänvalvojan todennusta"
+      "description": "Näytä Mock-yhteyspainike ylläpitäjän todennukseen (vain testaus)",
+      "hint": "Ota käyttöön kehitystä/testausta varten. Näyttää \"Mock Connection\" -painikkeen ylläpitäjän kirjautumisessa, joka ohittaa Nostr-laajennusvaatimuksen. Pitäisi olla poissa käytöstä tuotannossa.",
+      "label": "Simuloi ylläpitäjän todennusta"
     },
     "SIMULATE_USER_AUTH": {
       "description": "Salli käyttäjän varmennus ilman taikalinkkitunnusta (vain testaus)",
@@ -1570,11 +1570,10 @@
   },
   "adminDatabaseExplorer": {
     "extracted": {
-      "date_now_7_days_28303f": "date('now', '-7 days');",
       "decryption_help_136c23": "Salauksen purkuohje",
       "drop_table_ac02c0": "DROP TABLE",
       "select_count_from_documents_481fff": "SELECT COUNT(*) FROM documents;",
-      "select_from_sessions_where_created_at_71a1a4": "SELECT * FROM sessions WHERE created_at",
+      "select_from_sessions_where_created_at_71a1a4": "SELECT * FROM sessions WHERE created_at > date('now', '-7 days');",
       "select_from_users_limit_100_2ee1ff": "SELECT * FROM users LIMIT 100;",
       "select_u_s_created_at_from_users_u_729d1a": "SELECT u.*, s.created_at FROM users u JOIN sessions s ON u.id = s.user_id;"
     }

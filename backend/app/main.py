@@ -25,7 +25,7 @@ from pydantic import BaseModel
 from typing import Optional, List, Dict
 from sentence_transformers import SentenceTransformer
 
-from llm import get_provider
+from llm import get_maple_provider
 from tools import init_tools, ToolOrchestrator, ToolCallInfo
 import database
 from models import (
@@ -627,19 +627,17 @@ async def smoke_test():
 @app.get("/llm/test", response_model=LLMTestResult)
 async def llm_smoke_test():
     """
-    Smoke test LLM provider connectivity.
+    Smoke test Maple LLM connectivity.
 
-    Tests the configured LLM provider (set via LLM_PROVIDER env var):
-    - Checks provider health endpoint
+    Tests the Maple service endpoint:
+    - Checks Maple health endpoint
     - Sends a simple test prompt
     - Returns the response
-
-    Supports: maple, ollama
     """
-    provider_name = os.getenv("LLM_PROVIDER", "maple")
+    provider_name = "maple"
 
     try:
-        provider = get_provider()
+        provider = get_maple_provider()
 
         # Check health first
         health = provider.health_check()
@@ -648,7 +646,7 @@ async def llm_smoke_test():
                 success=False,
                 provider=provider.name,
                 health=False,
-                error=f"Provider '{provider.name}' health check failed"
+                error=f"Maple health check failed (provider='{provider.name}')"
             )
 
         # Send a simple test prompt
@@ -799,20 +797,20 @@ async def chat(
             user_profile_context=user_profile_context,
         )
 
-        provider = get_provider()
+        provider = get_maple_provider()
         # Convert low-level provider connection failures into a user-friendly 503.
         # This is especially common in local dev if the LLM container is restarting.
         try:
             if not provider.health_check():
                 raise HTTPException(
                     status_code=503,
-                    detail=f"LLM provider '{provider.name}' is unavailable (health check failed).",
+                    detail=f"Maple service '{provider.name}' is unavailable (health check failed).",
                 )
             result = provider.complete(prompt, temperature=temperature)
         except HTTPException:
             raise
         except Exception as e:
-            logger.exception("LLM provider error (%s): %s", provider.name, e)
+            logger.exception("Maple LLM error (%s): %s", provider.name, e)
             connection_error_types: tuple[type[BaseException], ...] = ()
             try:
                 import httpx
@@ -831,7 +829,7 @@ async def chat(
             if connection_error_types and isinstance(e, connection_error_types):
                 raise HTTPException(
                     status_code=503,
-                    detail=f"LLM provider '{provider.name}' is unavailable (connection error).",
+                    detail=f"Maple service '{provider.name}' is unavailable (connection error).",
                 )
             raise
         return ChatResponse(

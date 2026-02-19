@@ -500,7 +500,7 @@
       "compact": "Compacto",
       "expand": "Ampliar",
       "shareSecretsTitle": "Compartir variables de entorno secretas",
-      "shareSecretsHint": "Desactivado por defecto. Activa primero la herramienta Config. Al activarla, los valores secretos de configuración de despliegue se revelan en el cliente y se envían a tu proveedor de LLM.",
+      "shareSecretsHint": "Desactivado por defecto. Habilite primero la herramienta de configuración. Cuando está habilitado, los valores de configuración de despliegue secretos se revelan en el lado del cliente y se envían a Maple.",
       "sensitive": "Sensible",
       "emptyPrompt": "Haz preguntas sobre cualquier configuración de administración. Si quieres que el asistente proponga y aplique cambios, pídele que incluya un conjunto de cambios JSON.",
       "pendingChanges": "Cambios pendientes",
@@ -951,21 +951,21 @@
       "usersToMigrate": "Usuarios a migrar",
       "warning": "Esta es una operación avanzada. Una migración incorrecta puede bloquearte el acceso a datos cifrados. Continúa solo si entiendes las implicaciones."
     },
-    "leaveEmptyForLlmApiKey": "Deja vacío para proveedores locales que no requieren una clave API.",
+    "leaveEmptyForLlmApiKey": "Deje vacío para borrar la anulación y usar la reserva MAPLE_API_KEY de .env.",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — tu clave API o token de acceso. No es necesaria para proveedores locales como Ollama.",
-      "apiKeyLabel": "Clave API",
-      "ariaLabel": "Ayuda de configuración del proveedor de LLM",
+      "apiKeyField": "LLM_API_KEY — su clave de API de Maple. Se asigna a MAPLE_API_KEY.",
+      "apiKeyLabel": "Clave de API de Maple",
+      "ariaLabel": "Ayuda de configuración de LLM de Maple",
       "exampleConfig": "Ejemplo de configuración",
       "goToPage": "Ir a la página",
-      "mapleExtra": "Maple se ejecuta como un contenedor sidecar y no requiere clave API. Redirige las solicitudes a proveedores de inferencia que preservan la privacidad.",
-      "mapleHint": "Maple Proxy es el proveedor predeterminado para inferencia con privacidad. Se ejecuta localmente junto a Sanctum.",
-      "modelField": "LLM_MODEL — el nombre del modelo a usar (ej., gpt-4, llama3, claude-3-sonnet). Debe ser compatible con tu proveedor elegido.",
-      "ollamaExtra": "Instala Ollama en tu máquina host y descarga el modelo que desees antes de configurarlo aquí. Sanctum se conecta a través de la API de Ollama.",
-      "ollamaHint": "Ollama te permite ejecutar LLMs de código abierto localmente. Toda la inferencia permanece en tu hardware — nada sale de tu red.",
-      "overviewDesc": "Estos ajustes controlan qué proveedor de LLM y modelo usa Sanctum para generar respuestas. Puedes usar un proveedor local para total privacidad o un proveedor en la nube para modelos más potentes.",
-      "overviewTitle": "Resumen del proveedor de LLM",
-      "providerField": "LLM_PROVIDER — el backend de inferencia a usar (ej., maple, ollama, openai, anthropic)."
+      "mapleExtra": "Establezca LLM_API_KEY con su clave de Maple de trymaple.ai. Las claves LLM_* se asignan a los alias MAPLE_*.",
+      "mapleHint": "Maple es el backend LLM estándar para Sanctum.",
+      "modelField": "LLM_MODEL — identificador del modelo Maple (por ejemplo: kimi-k2-5).",
+      "ollamaExtra": "Clave heredada mantenida para compatibilidad de traducción. Use la configuración de Maple anterior.",
+      "ollamaHint": "Reservado para documentos heredados. El tiempo de ejecución de Sanctum es solo Maple.",
+      "overviewDesc": "Sanctum utiliza Maple como su servicio LLM estándar. Maple proporciona una API compatible con OpenAI.",
+      "overviewTitle": "Visión general de LLM de Maple",
+      "providerField": "LLM_PROVIDER — fijado a \"maple\" para compatibilidad."
     },
     "revealFailed": "Error al revelar el valor. Verifica la conexión de tu extensión Nostr.",
     "searchHelp": {
@@ -1169,9 +1169,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "Proveedor de IA",
-      "description": "Conecta con tu servicio de IA",
-      "hint": "Configura qué servicio de IA impulsa tu asistente. Necesitarás una clave API de tu proveedor elegido (ej., OpenAI, Anthropic). Los cambios requieren reinicio del servicio."
+      "label": "IA de Maple",
+      "description": "Configurar la inferencia de Maple",
+      "hint": "Sanctum solo utiliza Maple para la inferencia de LLM. Configure aquí el modelo y los ajustes de la API de Maple. Los cambios requieren un reinicio."
     },
     "embedding": {
       "label": "Procesamiento de Texto",
@@ -1307,18 +1307,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "Servicio de IA",
-      "description": "Proveedor de LLM (maple, ollama)",
-      "hint": "Elige \"maple\" para el proxy Maple (recomendado para privacidad) o \"ollama\" para modelos locales."
+      "description": "Proveedor de LLM (solo maple)",
+      "hint": "Maple es el único valor admitido. Esta clave se mantiene por compatibilidad."
     },
     "LLM_MODEL": {
       "label": "Nombre del modelo",
       "description": "Nombre/identificador del modelo",
-      "hint": "El identificador del modelo a usar (ej: \"kimi-k2-5\"). Consulta la documentación de tu proveedor para modelos disponibles."
+      "hint": "El identificador del modelo Maple a utilizar (por ejemplo, \"kimi-k2-5\")."
     },
     "LLM_API_URL": {
       "label": "Endpoint de API",
       "description": "URL base para solicitudes de API",
-      "hint": "La URL base para solicitudes de API. Para Maple: http://maple-proxy:8080/v1. Para Ollama: http://localhost:11434."
+      "hint": "URL base de la API de Maple. Por defecto: http://maple-proxy:8080/v1."
     },
     "RAG_TOP_K": {
       "label": "Fragmentos de contexto",
@@ -1397,8 +1397,8 @@
     },
     "LLM_API_KEY": {
       "label": "Clave API",
-      "description": "Clave API para el servicio LLM",
-      "hint": "Su clave API o token del proveedor de LLM. Requerida para proveedores con autenticación."
+      "description": "Clave de API de Maple (secreta)",
+      "hint": "Se asigna a MAPLE_API_KEY. Deje vacío para borrar la anulación y usar la reserva de .env."
     },
     "ADMIN_BASE_URL": {
       "description": "URL del subdominio del panel de administración (opcional)",
@@ -1780,7 +1780,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "Pruebe los flujos de autenticación de enlace mágico y Nostr.",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "Pruebe el límite de velocidad enviando solicitudes rápidas a los endpoints con límite de velocidad.",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "Pruebe el flujo de creación de usuarios con campos dinámicos basados en el tipo de usuario.",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Prueba la conectividad con el proveedor de LLM (Maple u Ollama).",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Prueba la conectividad con el servicio LLM de Maple.",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "El pipeline RAG completo: incrustar → buscar → recuperar → generar.",
       "this_is_where_the_magic_happens_e98c18": "— Aquí es donde ocurre la magia:",
       "toggle_theme_9b0eaf": "Cambiar tema",

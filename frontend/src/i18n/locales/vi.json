@@ -499,7 +499,7 @@
       "compact": "Gọn",
       "expand": "Mở rộng",
       "shareSecretsTitle": "Chia sẻ biến môi trường bí mật",
-      "shareSecretsHint": "Mặc định tắt. Hãy bật công cụ Config trước. Khi bật, các giá trị cấu hình triển khai bí mật sẽ được hiển thị phía client và gửi tới nhà cung cấp LLM của bạn.",
+      "shareSecretsHint": "Mặc định tắt. Kích hoạt công cụ Cấu hình trước. Khi được bật, các giá trị cấu hình triển khai bí mật sẽ được tiết lộ ở phía máy khách và gửi đến Maple.",
       "sensitive": "Nhạy cảm",
       "emptyPrompt": "Hỏi về bất kỳ cấu hình quản trị nào. Nếu muốn trợ lý đề xuất và áp dụng thay đổi, hãy yêu cầu nó kèm JSON change set.",
       "pendingChanges": "Thay đổi đang chờ",
@@ -979,21 +979,21 @@
       "usersToMigrate": "Người dùng cần di chuyển",
       "warning": "Đây là thao tác nâng cao. Di chuyển không chính xác có thể khóa bạn khỏi dữ liệu đã mã hóa. Chỉ tiếp tục nếu bạn hiểu hệ quả."
     },
-    "leaveEmptyForLlmApiKey": "Để trống cho nhà cung cấp cục bộ không yêu cầu khóa API.",
+    "leaveEmptyForLlmApiKey": "Để trống để xóa ghi đè và sử dụng MAPLE_API_KEY dự phòng trong .env.",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — khóa API hoặc token truy cập của bạn. Không bắt buộc cho nhà cung cấp cục bộ như Ollama.",
-      "apiKeyLabel": "Khóa API",
-      "ariaLabel": "Trợ giúp cấu hình nhà cung cấp LLM",
+      "apiKeyField": "LLM_API_KEY — khóa API Maple của bạn. Ánh xạ tới MAPLE_API_KEY.",
+      "apiKeyLabel": "Khóa API Maple",
+      "ariaLabel": "Trợ giúp cấu hình Maple LLM",
       "exampleConfig": "Cấu hình mẫu",
       "goToPage": "Đi đến trang",
-      "mapleExtra": "Maple chạy như container bên cạnh và không yêu cầu khóa API. Nó chuyển tiếp yêu cầu đến các nhà cung cấp suy luận bảo vệ quyền riêng tư.",
-      "mapleHint": "Maple Proxy là nhà cung cấp mặc định cho suy luận ưu tiên quyền riêng tư. Nó chạy cục bộ cùng Sanctum.",
-      "modelField": "LLM_MODEL — tên mô hình sử dụng (ví dụ: gpt-4, llama3, claude-3-sonnet). Phải được nhà cung cấp đã chọn hỗ trợ.",
-      "ollamaExtra": "Cài đặt Ollama trên máy chủ và tải mô hình bạn muốn trước khi cấu hình ở đây. Sanctum kết nối qua API Ollama.",
-      "ollamaHint": "Ollama cho phép bạn chạy các LLM mã nguồn mở cục bộ. Toàn bộ suy luận ở trên phần cứng của bạn — không có gì rời khỏi mạng.",
-      "overviewDesc": "Các cài đặt này kiểm soát nhà cung cấp LLM và mô hình nào Sanctum sử dụng để tạo phản hồi. Bạn có thể sử dụng nhà cung cấp cục bộ cho quyền riêng tư hoàn toàn hoặc nhà cung cấp đám mây cho các mô hình mạnh hơn.",
-      "overviewTitle": "Tổng quan nhà cung cấp LLM",
-      "providerField": "LLM_PROVIDER — backend suy luận sử dụng (ví dụ: maple, ollama, openai, anthropic)."
+      "mapleExtra": "Đặt LLM_API_KEY thành khóa Maple của bạn từ trymaple.ai. Các khóa LLM_* ánh xạ tới các bí danh MAPLE_*.",
+      "mapleHint": "Maple là backend LLM tiêu chuẩn cho Sanctum.",
+      "modelField": "LLM_MODEL — mã định danh mô hình Maple (ví dụ: kimi-k2-5).",
+      "ollamaExtra": "Khóa cũ được giữ lại để tương thích dịch thuật. Sử dụng cài đặt Maple ở trên.",
+      "ollamaHint": "Dành riêng cho tài liệu cũ. Thời gian chạy Sanctum chỉ dùng Maple.",
+      "overviewDesc": "Sanctum sử dụng Maple làm dịch vụ LLM tiêu chuẩn. Maple cung cấp API tương thích OpenAI bên dưới.",
+      "overviewTitle": "Tổng quan về Maple LLM",
+      "providerField": "LLM_PROVIDER — cố định thành \"maple\" để tương thích."
     },
     "revealFailed": "Không thể hiển thị giá trị. Kiểm tra kết nối tiện ích mở rộng Nostr.",
     "searchHelp": {
@@ -1202,9 +1202,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "Nhà cung cấp AI",
-      "description": "Kết nối với dịch vụ AI của bạn",
-      "hint": "Cấu hình dịch vụ AI nào cấp nguồn cho trợ lý của bạn. Bạn sẽ cần khóa API từ nhà cung cấp đã chọn (ví dụ: OpenAI, Anthropic). Thay đổi cần khởi động lại dịch vụ để có hiệu lực."
+      "label": "Maple AI",
+      "description": "Cấu hình suy luận Maple",
+      "hint": "Sanctum chỉ sử dụng Maple để suy luận LLM. Cấu hình mô hình Maple/cài đặt API tại đây. Các thay đổi yêu cầu khởi động lại."
     },
     "embedding": {
       "label": "Xử lý văn bản",
@@ -1306,18 +1306,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "Dịch vụ AI",
-      "description": "Nhà cung cấp LLM (maple, ollama)",
-      "hint": "Chọn \"maple\" cho proxy Maple (khuyên dùng cho quyền riêng tư) hoặc \"ollama\" cho mô hình cục bộ."
+      "description": "Nhà cung cấp LLM (chỉ maple)",
+      "hint": "Maple là giá trị duy nhất được hỗ trợ. Khóa này vẫn còn để tương thích."
     },
     "LLM_MODEL": {
       "label": "Tên mô hình",
       "description": "Tên/mã định danh mô hình",
-      "hint": "Mã định danh mô hình cần sử dụng (ví dụ: \"kimi-k2-5\"). Xem tài liệu của nhà cung cấp để biết các mô hình có sẵn."
+      "hint": "Mã định danh mô hình Maple để sử dụng (ví dụ: \"kimi-k2-5\")."
     },
     "LLM_API_URL": {
       "label": "Điểm cuối API",
       "description": "URL cơ sở cho yêu cầu API",
-      "hint": "URL cơ sở cho yêu cầu API. Cho Maple: http://maple-proxy:8080/v1. Cho Ollama: http://localhost:11434."
+      "hint": "URL cơ sở API Maple. Mặc định: http://maple-proxy:8080/v1."
     },
     "RAG_TOP_K": {
       "label": "Khối ngữ cảnh",
@@ -1396,8 +1396,8 @@
     },
     "LLM_API_KEY": {
       "label": "Khóa API",
-      "description": "Khóa API cho dịch vụ LLM",
-      "hint": "Khóa API hoặc token của bạn từ nhà cung cấp LLM. Bắt buộc đối với nhà cung cấp yêu cầu xác thực."
+      "description": "Khóa API Maple (bí mật)",
+      "hint": "Ánh xạ tới MAPLE_API_KEY. Để trống để xóa ghi đè và sử dụng dự phòng .env."
     },
     "ADMIN_BASE_URL": {
       "description": "URL tên miền phụ bảng điều khiển quản trị (tùy chọn)",
@@ -1779,7 +1779,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "Kiểm tra liên kết thần kỳ và luồng xác thực Nostr.",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "Kiểm tra giới hạn tỷ lệ bằng cách gửi các yêu cầu nhanh đến các điểm cuối bị giới hạn tỷ lệ.",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "Kiểm tra quy trình tạo người dùng với các trường động dựa trên loại người dùng.",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Kiểm tra kết nối với nhà cung cấp LLM (Maple hoặc Ollama).",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Kiểm tra kết nối với dịch vụ Maple LLM.",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "Quy trình RAG hoàn chỉnh: nhúng → tìm kiếm → truy xuất → tạo.",
       "this_is_where_the_magic_happens_e98c18": "— Đây là nơi phép thuật xảy ra:",
       "toggle_theme_9b0eaf": "Chuyển đổi giao diện",

@@ -147,9 +147,9 @@ class SQLiteQueryTool(BaseTool):
 
     def _generate_sql(self, natural_query: str) -> str:
         """Use LLM to convert natural language to SQL."""
-        from llm import get_provider
+        from llm import get_maple_provider
 
-        provider = get_provider()
+        provider = get_maple_provider()
         extra_context = self._build_extra_context(natural_query)
         prompt = TEXT_TO_SQL_PROMPT.format(question=natural_query, extra_context=extra_context)
         response = provider.complete(prompt)

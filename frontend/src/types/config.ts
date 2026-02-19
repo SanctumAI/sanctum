@@ -280,9 +280,9 @@ export type ConfigCategory = typeof CONFIG_CATEGORY_KEYS[number]
 export function getConfigCategories(t: TFunction): Record<ConfigCategory, ConfigCategoryMeta> {
   return {
     llm: {
-      label: t('configCategories.llm.label', 'AI Provider'),
-      description: t('configCategories.llm.description', 'Connect to your AI service'),
-      hint: t('configCategories.llm.hint', 'Configure which AI service powers your assistant. Use Maple (API key required) or Ollama (self-hosted, no key). Changes require a service restart to take effect.'),
+      label: t('configCategories.llm.label', 'Maple AI'),
+      description: t('configCategories.llm.description', 'Configure Maple inference'),
+      hint: t('configCategories.llm.hint', 'Sanctum is Maple-only for LLM inference. Set Maple model/API settings here. Changes require a service restart to take effect.'),
     },
     embedding: {
       label: t('configCategories.embedding.label', 'Text Processing'),
@@ -475,23 +475,23 @@ export function getDeploymentConfigItemMeta(t: TFunction): Record<DeploymentConf
   return {
     LLM_PROVIDER: {
       label: t('deploymentConfigItems.LLM_PROVIDER.label', 'AI Service'),
-      description: t('deploymentConfigItems.LLM_PROVIDER.description', 'LLM provider (maple, ollama)'),
-      hint: t('deploymentConfigItems.LLM_PROVIDER.hint', 'Choose "maple" for the Maple proxy (recommended for privacy) or "ollama" for local models.'),
+      description: t('deploymentConfigItems.LLM_PROVIDER.description', 'LLM provider (maple only)'),
+      hint: t('deploymentConfigItems.LLM_PROVIDER.hint', 'Maple is the only supported value. This key is retained for compatibility.'),
     },
     LLM_MODEL: {
       label: t('deploymentConfigItems.LLM_MODEL.label', 'Model Name'),
       description: t('deploymentConfigItems.LLM_MODEL.description', 'Model name/identifier'),
-      hint: t('deploymentConfigItems.LLM_MODEL.hint', 'The model identifier to use (e.g., "kimi-k2-5"). Check your provider\'s documentation for available models.'),
+      hint: t('deploymentConfigItems.LLM_MODEL.hint', 'The Maple model identifier to use (e.g., "kimi-k2-5").'),
     },
     LLM_API_URL: {
       label: t('deploymentConfigItems.LLM_API_URL.label', 'API Endpoint'),
       description: t('deploymentConfigItems.LLM_API_URL.description', 'Base URL for API requests'),
-      hint: t('deploymentConfigItems.LLM_API_URL.hint', 'The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434.'),
+      hint: t('deploymentConfigItems.LLM_API_URL.hint', 'The Maple API base URL. Default: http://maple-proxy:8080/v1.'),
     },
     LLM_API_KEY: {
       label: t('deploymentConfigItems.LLM_API_KEY.label', 'API Key'),
-      description: t('deploymentConfigItems.LLM_API_KEY.description', 'Provider API key (secret)'),
-      hint: t('deploymentConfigItems.LLM_API_KEY.hint', 'Used by cloud providers like Maple. For Maple, this maps to MAPLE_API_KEY. Leave empty to clear the override and use .env fallback.'),
+      description: t('deploymentConfigItems.LLM_API_KEY.description', 'Maple API key (secret)'),
+      hint: t('deploymentConfigItems.LLM_API_KEY.hint', 'Maps to MAPLE_API_KEY. Leave empty to clear the override and use .env fallback.'),
     },
     RAG_TOP_K: {
       label: t('deploymentConfigItems.RAG_TOP_K.label', 'Context Chunks'),

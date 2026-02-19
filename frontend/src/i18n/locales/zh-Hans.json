@@ -330,7 +330,7 @@
       "compact": "紧凑",
       "expand": "展开",
       "shareSecretsTitle": "共享机密环境变量",
-      "shareSecretsHint": "默认关闭。请先启用 Config 工具。启用后，部署配置中的机密值会在客户端显示并发送到你的 LLM 提供商。",
+      "shareSecretsHint": "默认关闭。首先启用配置工具。启用后，秘密部署配置值将在客户端显示并发送到Maple。",
       "sensitive": "敏感",
       "emptyPrompt": "你可以询问任何管理员配置问题。如果希望助手提出并应用更改，请要求其包含 JSON 变更集。",
       "pendingChanges": "待处理更改",
@@ -980,21 +980,21 @@
       "usersToMigrate": "待迁移用户",
       "warning": "这是一个高级操作。错误的迁移可能导致你无法访问加密数据。仅在你理解其后果时才继续。"
     },
-    "leaveEmptyForLlmApiKey": "对于不需要 API 密钥的本地提供商，请留空。",
+    "leaveEmptyForLlmApiKey": "留空以清除覆盖并使用 .env MAPLE_API_KEY 备用。",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY——你的 API 密钥或访问令牌。本地提供商（如 Ollama）不需要。",
-      "apiKeyLabel": "API 密钥",
-      "ariaLabel": "LLM 提供商配置帮助",
+      "apiKeyField": "LLM_API_KEY — 您的 Maple API 密钥。映射到 MAPLE_API_KEY。",
+      "apiKeyLabel": "Maple API 密钥",
+      "ariaLabel": "Maple LLM 配置帮助",
       "exampleConfig": "示例配置",
       "goToPage": "前往页面",
-      "mapleExtra": "Maple 作为 sidecar 容器运行，不需要 API 密钥。它将请求代理到隐私保护的推理提供商。",
-      "mapleHint": "Maple Proxy 是隐私优先推理的默认提供商。它与 Sanctum 一起在本地运行。",
-      "modelField": "LLM_MODEL——要使用的模型名称（例如 gpt-4、llama3、claude-3-sonnet）。必须被你选择的提供商支持。",
-      "ollamaExtra": "在你的主机上安装 Ollama 并在此处配置之前拉取你想要的模型。Sanctum 通过 Ollama API 连接。",
-      "ollamaHint": "Ollama 允许你在本地运行开源 LLM。所有推理都在你的硬件上进行——不会有任何数据离开你的网络。",
-      "overviewDesc": "这些设置控制 Sanctum 使用哪个 LLM 提供商和模型来生成响应。你可以使用本地提供商以获得完全隐私，或使用云提供商以获得更强大的模型。",
-      "overviewTitle": "LLM 提供商概述",
-      "providerField": "LLM_PROVIDER——要使用的推理后端（例如 maple、ollama、openai、anthropic）。"
+      "mapleExtra": "将 LLM_API_KEY 设置为您的 trymaple.ai 的 Maple 密钥。LLM_* 密钥映射到 MAPLE_* 别名。",
+      "mapleHint": "Maple 是 Sanctum 的标准 LLM 后端。",
+      "modelField": "LLM_MODEL — Maple 模型标识符（例如：kimi-k2-5）。",
+      "ollamaExtra": "为翻译兼容性保留的旧密钥。使用上面的 Maple 设置。",
+      "ollamaHint": "保留用于旧文档。Sanctum 运行时仅限 Maple。",
+      "overviewDesc": "Sanctum 使用 Maple 作为其标准 LLM 服务。Maple 在底层提供 OpenAI 兼容的 API。",
+      "overviewTitle": "Maple LLM 概述",
+      "providerField": "LLM_PROVIDER — 为兼容性固定为 \"maple\"。"
     },
     "revealFailed": "显示值失败。请检查你的 Nostr 扩展连接。",
     "searchHelp": {
@@ -1203,9 +1203,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "AI 提供商",
-      "description": "连接到你的 AI 服务",
-      "hint": "配置为你的助手提供支持的 AI 服务。你需要从所选提供商（如 OpenAI、Anthropic）获取 API 密钥。更改需要重启服务才能生效。"
+      "label": "Maple AI",
+      "description": "配置 Maple 推理",
+      "hint": "Sanctum 仅支持 Maple 进行 LLM 推理。在此处配置 Maple 模型/API 设置。更改需要重启。"
     },
     "embedding": {
       "label": "文本处理",
@@ -1307,18 +1307,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "AI 服务",
-      "description": "LLM 提供商（maple、ollama）",
-      "hint": "选择 \"maple\" 使用 Maple 代理（推荐用于隐私保护）或 \"ollama\" 使用本地模型。"
+      "description": "LLM 提供商（仅限 maple）",
+      "hint": "Maple 是唯一支持的值。此密钥保留用于兼容性。"
     },
     "LLM_MODEL": {
       "label": "模型名称",
       "description": "模型名称/标识符",
-      "hint": "要使用的模型标识符（例如 \"kimi-k2-5\"）。请查看提供商的文档了解可用模型。"
+      "hint": "要使用的 Maple 模型标识符（例如：“kimi-k2-5”）。"
     },
     "LLM_API_URL": {
       "label": "API 端点",
       "description": "API 请求的基础 URL",
-      "hint": "API 请求的基础 URL。Maple: http://maple-proxy:8080/v1。Ollama: http://localhost:11434。"
+      "hint": "Maple API 基础 URL。默认：http://maple-proxy:8080/v1。"
     },
     "RAG_TOP_K": {
       "label": "上下文块数",
@@ -1397,8 +1397,8 @@
     },
     "LLM_API_KEY": {
       "label": "API 密钥",
-      "description": "LLM 服务的 API 密钥",
-      "hint": "来自 LLM 提供商的 API 密钥或令牌。需要身份验证的提供商必须填写。"
+      "description": "Maple API 密钥（秘密）",
+      "hint": "映射到 MAPLE_API_KEY。留空以清除覆盖并使用 .env 备用。"
     },
     "ADMIN_BASE_URL": {
       "description": "管理面板子域名 URL（可选）",
@@ -1780,7 +1780,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "测试魔术链接和 Nostr 认证流程。",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "通过向受速率限制的端点发送快速请求来测试速率限制。",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "测试基于用户类型的动态字段的用户创建流程。",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "测试与 LLM 提供商（Maple 或 Ollama）的连接。",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "测试与 Maple LLM 服务的连接。",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "完整的 RAG 管道：嵌入 → 搜索 → 检索 → 生成。",
       "this_is_where_the_magic_happens_e98c18": "— 这就是奇迹发生的地方：",
       "toggle_theme_9b0eaf": "切换主题",

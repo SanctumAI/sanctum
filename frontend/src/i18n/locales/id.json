@@ -328,7 +328,7 @@
       "compact": "Ringkas",
       "expand": "Perluas",
       "shareSecretsTitle": "Bagikan variabel environment rahasia",
-      "shareSecretsHint": "Nonaktif secara default. Aktifkan alat Config terlebih dahulu. Saat diaktifkan, nilai konfigurasi deployment rahasia akan ditampilkan di sisi klien dan dikirim ke penyedia LLM Anda.",
+      "shareSecretsHint": "Nonaktif secara default. Aktifkan alat Konfigurasi terlebih dahulu. Saat diaktifkan, nilai konfigurasi deployment rahasia akan terungkap di sisi klien dan dikirim ke Maple.",
       "sensitive": "Sensitif",
       "emptyPrompt": "Ajukan pertanyaan tentang konfigurasi admin apa pun. Jika Anda ingin asisten mengusulkan dan menerapkan perubahan, minta agar menyertakan JSON change set.",
       "pendingChanges": "Perubahan tertunda",
@@ -977,21 +977,21 @@
       "usersToMigrate": "Pengguna yang akan dimigrasikan",
       "warning": "Ini adalah operasi lanjutan. Migrasi yang salah dapat mengunci Anda dari data terenkripsi. Lanjutkan hanya jika Anda memahami konsekuensinya."
     },
-    "leaveEmptyForLlmApiKey": "Biarkan kosong untuk penyedia lokal yang tidak memerlukan kunci API.",
+    "leaveEmptyForLlmApiKey": "Biarkan kosong untuk menghapus override dan menggunakan fallback MAPLE_API_KEY dari .env.",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — kunci API atau token akses Anda. Tidak diperlukan untuk penyedia lokal seperti Ollama.",
-      "apiKeyLabel": "Kunci API",
-      "ariaLabel": "Bantuan konfigurasi penyedia LLM",
+      "apiKeyField": "LLM_API_KEY — kunci API Maple Anda. Berpeta ke MAPLE_API_KEY.",
+      "apiKeyLabel": "Kunci API Maple",
+      "ariaLabel": "Bantuan konfigurasi LLM Maple",
       "exampleConfig": "Contoh konfigurasi",
       "goToPage": "Buka halaman",
-      "mapleExtra": "Maple berjalan sebagai kontainer sidecar dan tidak memerlukan kunci API. Ia mem-proxy permintaan ke penyedia inferensi yang menjaga privasi.",
-      "mapleHint": "Maple Proxy adalah penyedia default untuk inferensi yang mengutamakan privasi. Berjalan secara lokal bersama Sanctum.",
-      "modelField": "LLM_MODEL — nama model yang digunakan (misalnya, gpt-4, llama3, claude-3-sonnet). Harus didukung oleh penyedia yang Anda pilih.",
-      "ollamaExtra": "Instal Ollama di mesin host Anda dan tarik model yang diinginkan sebelum mengonfigurasinya di sini. Sanctum terhubung melalui API Ollama.",
-      "ollamaHint": "Ollama memungkinkan Anda menjalankan LLM open-source secara lokal. Semua inferensi tetap di perangkat keras Anda — tidak ada yang meninggalkan jaringan Anda.",
-      "overviewDesc": "Pengaturan ini mengontrol penyedia LLM dan model mana yang digunakan Sanctum untuk menghasilkan respons. Anda dapat menggunakan penyedia lokal untuk privasi penuh atau penyedia cloud untuk model yang lebih kuat.",
-      "overviewTitle": "Gambaran Umum Penyedia LLM",
-      "providerField": "LLM_PROVIDER — backend inferensi yang digunakan (misalnya, maple, ollama, openai, anthropic)."
+      "mapleExtra": "Setel LLM_API_KEY ke kunci Maple Anda dari trymaple.ai. Kunci LLM_* berpeta ke alias MAPLE_*.",
+      "mapleHint": "Maple adalah backend LLM standar untuk Sanctum.",
+      "modelField": "LLM_MODEL — pengidentifikasi model Maple (misalnya: kimi-k2-5).",
+      "ollamaExtra": "Kunci lama dipertahankan untuk kompatibilitas terjemahan. Gunakan pengaturan Maple di atas.",
+      "ollamaHint": "Dicadangkan untuk dokumen lama. Runtime Sanctum hanya Maple.",
+      "overviewDesc": "Sanctum menggunakan Maple sebagai layanan LLM standarnya. Maple menyediakan API yang kompatibel dengan OpenAI di balik layar.",
+      "overviewTitle": "Ikhtisar LLM Maple",
+      "providerField": "LLM_PROVIDER — tetap \"maple\" untuk kompatibilitas."
     },
     "revealFailed": "Gagal menampilkan nilai. Periksa koneksi ekstensi Nostr Anda.",
     "searchHelp": {
@@ -1200,9 +1200,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "Penyedia AI",
-      "description": "Hubungkan ke layanan AI Anda",
-      "hint": "Konfigurasi layanan AI mana yang menggerakkan asisten Anda. Anda memerlukan API key dari penyedia pilihan Anda (misalnya OpenAI, Anthropic). Perubahan memerlukan restart layanan untuk berlaku."
+      "label": "AI Maple",
+      "description": "Konfigurasi inferensi Maple",
+      "hint": "Sanctum hanya menggunakan Maple untuk inferensi LLM. Konfigurasi pengaturan model/API Maple di sini. Perubahan memerlukan restart."
     },
     "embedding": {
       "label": "Pemrosesan Teks",
@@ -1304,18 +1304,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "Layanan AI",
-      "description": "Penyedia LLM (maple, ollama)",
-      "hint": "Pilih \"maple\" untuk proxy Maple (disarankan untuk privasi) atau \"ollama\" untuk model lokal."
+      "description": "Penyedia LLM (hanya maple)",
+      "hint": "Maple adalah satu-satunya nilai yang didukung. Kunci ini tetap ada untuk kompatibilitas."
     },
     "LLM_MODEL": {
       "label": "Nama Model",
       "description": "Nama/pengenal model",
-      "hint": "Pengenal model yang akan digunakan (misalnya \"kimi-k2-5\"). Periksa dokumentasi penyedia untuk model yang tersedia."
+      "hint": "Pengidentifikasi model Maple yang akan digunakan (misalnya, \"kimi-k2-5\")."
     },
     "LLM_API_URL": {
       "label": "Endpoint API",
       "description": "URL dasar untuk permintaan API",
-      "hint": "URL dasar untuk permintaan API. Untuk Maple: http://maple-proxy:8080/v1. Untuk Ollama: http://localhost:11434."
+      "hint": "URL dasar API Maple. Default: http://maple-proxy:8080/v1."
     },
     "RAG_TOP_K": {
       "label": "Potongan Konteks",
@@ -1394,8 +1394,8 @@
     },
     "LLM_API_KEY": {
       "label": "Kunci API",
-      "description": "Kunci API untuk layanan LLM",
-      "hint": "Kunci API atau token Anda dari penyedia LLM. Diperlukan untuk penyedia yang memerlukan autentikasi."
+      "description": "Kunci API Maple (rahasia)",
+      "hint": "Berpeta ke MAPLE_API_KEY. Biarkan kosong untuk menghapus override dan menggunakan fallback .env."
     },
     "ADMIN_BASE_URL": {
       "description": "URL subdomain panel admin (opsional)",
@@ -1777,7 +1777,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "Uji tautan ajaib dan alur otentikasi Nostr.",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "Uji pembatasan kecepatan dengan mengirimkan permintaan cepat ke endpoint yang dibatasi kecepatan.",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "Uji alur pembuatan pengguna dengan bidang dinamis berdasarkan jenis pengguna.",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Menguji konektivitas ke penyedia LLM (Maple atau Ollama).",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Menguji konektivitas ke layanan LLM Maple.",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "Pipa RAG lengkap: semat → cari → ambil → hasilkan.",
       "this_is_where_the_magic_happens_e98c18": "— Di sinilah keajaiban terjadi:",
       "toggle_theme_9b0eaf": "Ganti tema",

@@ -499,7 +499,7 @@
       "compact": "कॉम्पैक्ट",
       "expand": "विस्तार करें",
       "shareSecretsTitle": "गुप्त पर्यावरण वेरिएबल साझा करें",
-      "shareSecretsHint": "डिफ़ॉल्ट रूप से बंद। पहले Config टूल सक्षम करें। सक्षम होने पर, डिप्लॉयमेंट कॉन्फ़िग के गुप्त मान क्लाइंट-साइड पर प्रकट होकर आपके LLM प्रदाता को भेजे जाते हैं।",
+      "shareSecretsHint": "डिफ़ॉल्ट रूप से बंद है। पहले कॉन्फिग टूल सक्षम करें। जब सक्षम किया जाता है, तो गुप्त डिप्लॉयमेंट कॉन्फिग मान क्लाइंट-साइड पर प्रकट होते हैं और Maple को भेजे जाते हैं।",
       "sensitive": "संवेदनशील",
       "emptyPrompt": "किसी भी एडमिन कॉन्फ़िगरेशन के बारे में प्रश्न पूछें। यदि आप चाहते हैं कि सहायक बदलाव सुझाए और लागू करे, तो उसे JSON change set शामिल करने के लिए कहें।",
       "pendingChanges": "लंबित परिवर्तन",
@@ -979,21 +979,21 @@
       "usersToMigrate": "माइग्रेट करने के लिए उपयोगकर्ता",
       "warning": "यह एक उन्नत ऑपरेशन है। गलत माइग्रेशन आपको एन्क्रिप्टेड डेटा से लॉक कर सकता है। केवल तभी आगे बढ़ें जब आप इसके प्रभावों को समझते हों।"
     },
-    "leaveEmptyForLlmApiKey": "उन स्थानीय प्रदाताओं के लिए खाली छोड़ें जिन्हें API कुंजी की आवश्यकता नहीं है।",
+    "leaveEmptyForLlmApiKey": "ओवरराइड साफ़ करने और .env MAPLE_API_KEY फ़ॉलबैक का उपयोग करने के लिए खाली छोड़ दें।",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — आपकी API कुंजी या एक्सेस टोकन। Ollama जैसे स्थानीय प्रदाताओं के लिए आवश्यक नहीं।",
-      "apiKeyLabel": "API कुंजी",
-      "ariaLabel": "LLM प्रदाता कॉन्फ़िगरेशन सहायता",
+      "apiKeyField": "LLM_API_KEY — आपकी Maple API कुंजी। MAPLE_API_KEY से मैप होता है।",
+      "apiKeyLabel": "Maple API कुंजी",
+      "ariaLabel": "Maple LLM कॉन्फ़िगरेशन सहायता",
       "exampleConfig": "उदाहरण कॉन्फ़िगरेशन",
       "goToPage": "पेज पर जाएँ",
-      "mapleExtra": "Maple एक साइडकार कंटेनर के रूप में चलता है और किसी API कुंजी की आवश्यकता नहीं है। यह गोपनीयता-संरक्षित इनफ़रेंस प्रदाताओं को अनुरोध प्रॉक्सी करता है।",
-      "mapleHint": "Maple Proxy गोपनीयता-प्रथम इनफ़रेंस के लिए डिफ़ॉल्ट प्रदाता है। यह Sanctum के साथ स्थानीय रूप से चलता है।",
-      "modelField": "LLM_MODEL — उपयोग करने के लिए मॉडल का नाम (उदा., gpt-4, llama3, claude-3-sonnet)। आपके चुने हुए प्रदाता द्वारा समर्थित होना चाहिए।",
-      "ollamaExtra": "Ollama को अपने होस्ट मशीन पर इंस्टॉल करें और यहाँ कॉन्फ़िगर करने से पहले आप जो मॉडल चाहते हैं उसे पुल करें। Sanctum Ollama API के माध्यम से कनेक्ट होता है।",
-      "ollamaHint": "Ollama आपको स्थानीय रूप से ओपन-सोर्स LLM चलाने देता है। सभी इनफ़रेंस आपके हार्डवेयर पर रहती है — आपके नेटवर्क से कुछ भी बाहर नहीं जाता।",
-      "overviewDesc": "ये सेटिंग्स नियंत्रित करती हैं कि Sanctum प्रतिक्रियाएं उत्पन्न करने के लिए किस LLM प्रदाता और मॉडल का उपयोग करता है। आप पूर्ण गोपनीयता के लिए स्थानीय प्रदाता या अधिक शक्तिशाली मॉडल के लिए क्लाउड प्रदाता का उपयोग कर सकते हैं।",
-      "overviewTitle": "LLM प्रदाता अवलोकन",
-      "providerField": "LLM_PROVIDER — उपयोग करने के लिए इनफ़रेंस बैकएंड (उदा., maple, ollama, openai, anthropic)।"
+      "mapleExtra": "LLM_API_KEY को trymaple.ai से अपनी Maple कुंजी पर सेट करें। LLM_* कुंजियाँ MAPLE_* उपनामों से मैप होती हैं।",
+      "mapleHint": "Maple Sanctum के लिए मानक LLM बैकएंड है।",
+      "modelField": "LLM_MODEL — Maple मॉडल पहचानकर्ता (उदाहरण के लिए: kimi-k2-5)।",
+      "ollamaExtra": "अनुवाद संगतता के लिए विरासत कुंजी बरकरार रखी गई। ऊपर Maple सेटिंग्स का उपयोग करें।",
+      "ollamaHint": "विरासत दस्तावेज़ों के लिए आरक्षित। Sanctum रनटाइम केवल Maple है।",
+      "overviewDesc": "Sanctum अपने मानक LLM सेवा के रूप में Maple का उपयोग करता है। Maple हुड के तहत एक OpenAI-संगत API प्रदान करता है।",
+      "overviewTitle": "Maple LLM अवलोकन",
+      "providerField": "LLM_PROVIDER — संगतता के लिए \"maple\" पर निश्चित।"
     },
     "revealFailed": "मान प्रकट करने में विफल। अपने Nostr एक्सटेंशन कनेक्शन की जांच करें।",
     "searchHelp": {
@@ -1202,9 +1202,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "AI प्रदाता",
-      "description": "अपनी AI सेवा से कनेक्ट करें",
-      "hint": "कॉन्फ़िगर करें कि कौन सी AI सेवा आपके सहायक को संचालित करती है। आपको अपने चुने हुए प्रदाता (जैसे OpenAI, Anthropic) से API कुंजी की आवश्यकता होगी। परिवर्तन प्रभावी होने के लिए सेवा पुनरारंभ आवश्यक है।"
+      "label": "Maple AI",
+      "description": "Maple अनुमान कॉन्फ़िगर करें",
+      "hint": "Sanctum LLM अनुमान के लिए केवल Maple है। यहां Maple मॉडल/API सेटिंग्स कॉन्फ़िगर करें। परिवर्तनों के लिए पुनरारंभ की आवश्यकता है।"
     },
     "embedding": {
       "label": "टेक्स्ट प्रोसेसिंग",
@@ -1306,18 +1306,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "AI सेवा",
-      "description": "LLM प्रदाता (maple, ollama)",
-      "hint": "Maple प्रॉक्सी के लिए \"maple\" चुनें (गोपनीयता के लिए अनुशंसित) या स्थानीय मॉडल के लिए \"ollama\"।"
+      "description": "LLM प्रदाता (केवल maple)",
+      "hint": "Maple एकमात्र समर्थित मान है। यह कुंजी संगतता के लिए बनी हुई है।"
     },
     "LLM_MODEL": {
       "label": "मॉडल का नाम",
       "description": "मॉडल का नाम/पहचानकर्ता",
-      "hint": "उपयोग करने के लिए मॉडल पहचानकर्ता (जैसे, \"kimi-k2-5\")। उपलब्ध मॉडलों के लिए अपने प्रदाता का दस्तावेज़ देखें।"
+      "hint": "उपयोग करने के लिए Maple मॉडल पहचानकर्ता (उदाहरण के लिए, \"kimi-k2-5\")."
     },
     "LLM_API_URL": {
       "label": "API एंडपॉइंट",
       "description": "API अनुरोधों के लिए आधार URL",
-      "hint": "API अनुरोधों के लिए आधार URL। Maple के लिए: http://maple-proxy:8080/v1. Ollama के लिए: http://localhost:11434."
+      "hint": "Maple API बेस URL। डिफ़ॉल्ट: http://maple-proxy:8080/v1।"
     },
     "RAG_TOP_K": {
       "label": "संदर्भ खंड",
@@ -1396,8 +1396,8 @@
     },
     "LLM_API_KEY": {
       "label": "API कुंजी",
-      "description": "LLM सेवा के लिए API कुंजी",
-      "hint": "LLM प्रदाता से आपकी API कुंजी या टोकन। प्रमाणित प्रदाताओं के लिए आवश्यक।"
+      "description": "Maple API कुंजी (गुप्त)",
+      "hint": "MAPLE_API_KEY पर मैप करता है। ओवरराइड साफ़ करने और .env फ़ॉलबैक का उपयोग करने के लिए खाली छोड़ दें।"
     },
     "ADMIN_BASE_URL": {
       "description": "एडमिन पैनल सबडोमेन यूआरएल (वैकल्पिक)",
@@ -1779,7 +1779,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "मैजिक लिंक और Nostr प्रमाणीकरण प्रवाह का परीक्षण करें।",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "दर-सीमित एंडपॉइंट्स पर तेजी से अनुरोध भेजकर दर सीमित करने का परीक्षण करें।",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "उपयोगकर्ता प्रकार के आधार पर गतिशील फ़ील्ड के साथ उपयोगकर्ता निर्माण प्रवाह का परीक्षण करें।",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "LLM प्रदाता (Maple या Ollama) से कनेक्टिविटी का परीक्षण करता है।",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Maple LLM सेवा से कनेक्टिविटी का परीक्षण करता है।",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "पूर्ण RAG पाइपलाइन: एम्बेड → खोज → पुनः प्राप्त करें → उत्पन्न करें।",
       "this_is_where_the_magic_happens_e98c18": "— यह वह जगह है जहाँ जादू होता है:",
       "toggle_theme_9b0eaf": "थीम बदलें",

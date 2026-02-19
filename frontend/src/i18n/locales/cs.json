@@ -505,7 +505,7 @@
       "compact": "Kompaktní",
       "expand": "Rozšířit",
       "shareSecretsTitle": "Sdílet tajné proměnné prostředí",
-      "shareSecretsHint": "Ve výchozím stavu vypnuto. Nejprve zapněte nástroj Config. Po zapnutí se tajné hodnoty konfigurace nasazení odhalí na klientu a odešlou vašemu poskytovateli LLM.",
+      "shareSecretsHint": "Ve výchozím nastavení vypnuto. Nejprve povolte nástroj Konfigurace. Když je povoleno, hodnoty tajné konfigurace nasazení se odhalí na straně klienta a odešlou do Maple.",
       "sensitive": "Citlivé",
       "emptyPrompt": "Ptejte se na libovolnou administrátorskou konfiguraci. Pokud chcete, aby asistent navrhl a provedl změny, požádejte ho o JSON change set.",
       "pendingChanges": "Čekající změny",
@@ -985,21 +985,21 @@
       "usersToMigrate": "Uživatelé k migraci",
       "warning": "Toto je pokročilá operace. Nesprávná migrace vás může uzamknout ze šifrovaných dat. Pokračujte pouze pokud rozumíte důsledkům."
     },
-    "leaveEmptyForLlmApiKey": "Ponechte prázdné pro lokální poskytovatele, kteří nevyžadují API klíč.",
+    "leaveEmptyForLlmApiKey": "Ponechte prázdné pro zrušení přepsání a použití záložního klíče .env MAPLE_API_KEY.",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — váš API klíč nebo přístupový token. Není vyžadován pro lokální poskytovatele jako Ollama.",
-      "apiKeyLabel": "API klíč",
-      "ariaLabel": "Nápověda ke konfiguraci poskytovatele LLM",
+      "apiKeyField": "LLM_API_KEY – váš klíč API Maple. Mapuje se na MAPLE_API_KEY.",
+      "apiKeyLabel": "Klíč API Maple",
+      "ariaLabel": "Nápověda pro konfiguraci Maple LLM",
       "exampleConfig": "Příklad konfigurace",
       "goToPage": "Přejít na stránku",
-      "mapleExtra": "Maple běží jako vedlejší kontejner a nevyžaduje API klíč. Prostředkuje požadavky k poskytovatelům inference chránícím soukromí.",
-      "mapleHint": "Maple Proxy je výchozí poskytovatel pro inferenci chránící soukromí. Běží lokálně vedle Sanctum.",
-      "modelField": "LLM_MODEL — název modelu k použití (např. gpt-4, llama3, claude-3-sonnet). Musí být podporován vaším zvoleným poskytovatelem.",
-      "ollamaExtra": "Nainstalujte Ollama na svůj hostitelský počítač a stáhněte požadovaný model, než ho zde nakonfigurujete. Sanctum se připojuje přes Ollama API.",
-      "ollamaHint": "Ollama umožňuje spouštět open-source LLM lokálně. Veškerá inference zůstává na vašem hardwaru — nic neopouští vaši síť.",
-      "overviewDesc": "Tato nastavení řídí, kterého poskytovatele LLM a model Sanctum používá pro generování odpovědí. Můžete použít lokálního poskytovatele pro úplné soukromí nebo cloudového poskytovatele pro výkonnější modely.",
-      "overviewTitle": "Přehled poskytovatele LLM",
-      "providerField": "LLM_PROVIDER — backend pro inferenci (např. maple, ollama, openai, anthropic)."
+      "mapleExtra": "Nastavte LLM_API_KEY na váš klíč Maple z trymaple.ai. Klíče LLM_* se mapují na aliasy MAPLE_*.",
+      "mapleHint": "Maple je standardní backend LLM pro Sanctum.",
+      "modelField": "LLM_MODEL – identifikátor modelu Maple (například: kimi-k2-5).",
+      "ollamaExtra": "Starý klíč zachován pro kompatibilitu překladu. Použijte nastavení Maple výše.",
+      "ollamaHint": "Vyhrazeno pro starší dokumenty. Runtime Sanctum je pouze Maple.",
+      "overviewDesc": "Sanctum používá Maple jako svou standardní službu LLM. Maple poskytuje pod kapotou API kompatibilní s OpenAI.",
+      "overviewTitle": "Přehled Maple LLM",
+      "providerField": "LLM_PROVIDER – pevně nastaveno na \"maple\" pro kompatibilitu."
     },
     "revealFailed": "Nepodařilo se odhalit hodnotu. Zkontrolujte připojení rozšíření Nostr.",
     "searchHelp": {
@@ -1208,9 +1208,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "Poskytovatel AI",
-      "description": "Připojte se k vaší AI službě",
-      "hint": "Nakonfigurujte, která AI služba pohání vašeho asistenta. Budete potřebovat API klíč od zvoleného poskytovatele (např. OpenAI, Anthropic). Změny vyžadují restart služby."
+      "label": "Maple AI",
+      "description": "Konfigurace odvozování Maple",
+      "hint": "Sanctum je pouze Maple pro odvozování LLM. Zde nakonfigurujte model Maple/nastavení API. Změny vyžadují restart."
     },
     "embedding": {
       "label": "Zpracování textu",
@@ -1312,18 +1312,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "AI služba",
-      "description": "Poskytovatel LLM (maple, ollama)",
-      "hint": "Vyberte \"maple\" pro Maple proxy (doporučeno pro soukromí) nebo \"ollama\" pro lokální modely."
+      "description": "Poskytovatel LLM (pouze maple)",
+      "hint": "Maple je jediná podporovaná hodnota. Tento klíč zůstává pro kompatibilitu."
     },
     "LLM_MODEL": {
       "label": "Název modelu",
       "description": "Název/identifikátor modelu",
-      "hint": "Identifikátor modelu k použití (např. \"kimi-k2-5\"). Zkontrolujte dokumentaci vašeho poskytovatele pro dostupné modely."
+      "hint": "Identifikátor modelu Maple, který se má použít (např. \"kimi-k2-5\")."
     },
     "LLM_API_URL": {
       "label": "API koncový bod",
       "description": "Základní URL pro API požadavky",
-      "hint": "Základní URL pro API požadavky. Pro Maple: http://maple-proxy:8080/v1. Pro Ollama: http://localhost:11434."
+      "hint": "Základní URL API Maple. Výchozí: http://maple-proxy:8080/v1."
     },
     "RAG_TOP_K": {
       "label": "Kontextové části",
@@ -1402,8 +1402,8 @@
     },
     "LLM_API_KEY": {
       "label": "API klíč",
-      "description": "API klíč pro službu LLM",
-      "hint": "Váš API klíč nebo token od poskytovatele LLM. Vyžadováno pro poskytovatele s ověřováním."
+      "description": "Klíč API Maple (tajný)",
+      "hint": "Mapuje se na MAPLE_API_KEY. Ponechte prázdné pro zrušení přepsání a použití záložního klíče .env."
     },
     "ADMIN_BASE_URL": {
       "description": "URL subdomény panelu administrace (volitelné)",
@@ -1785,7 +1785,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "Testujte toky kouzelného odkazu a autentizace Nostr.",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "Testujte omezování rychlosti odesíláním rychlých požadavků na koncové body s omezenou rychlostí.",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "Testujte tok vytváření uživatelů s dynamickými poli na základě typu uživatele.",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Testuje konektivitu k poskytovateli LLM (Maple nebo Ollama).",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Testuje konektivitu ke službě Maple LLM.",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "Kompletní RAG pipeline: vložení → vyhledávání → načtení → generování.",
       "this_is_where_the_magic_happens_e98c18": "— Zde se děje kouzlo:",
       "toggle_theme_9b0eaf": "Přepnout motiv",

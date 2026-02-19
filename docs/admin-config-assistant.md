@@ -31,7 +31,7 @@ The admin's Nostr private key (`nsec`) is custodied by the browser extension via
 - The admin UI can reveal a secret value with:
   - `GET /admin/deployment/config/{key}/reveal`
 - The assistant bubble follows a strict rule:
-  - Secrets are NOT fetched and NOT sent to the LLM provider unless the admin flips the "Share secret env vars" toggle.
+  - Secrets are NOT fetched and NOT sent to Maple unless the admin flips the "Share secret env vars" toggle.
 
 Defense-in-depth:
 - When secret sharing is enabled, the frontend keeps the revealed secret values locally and redacts any exact matches from rendered assistant messages (to prevent accidental echoing).

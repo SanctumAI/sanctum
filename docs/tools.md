@@ -291,11 +291,11 @@ If no fields can be decrypted (e.g., admin lacks the correct private key), the f
 
 #### Privacy and Security Warnings
 
-> **⚠️ PII Exposure to LLM Provider**: When you use `tool_context` to send decrypted data to `/llm/chat`, that plaintext PII (emails, names, custom field values) is transmitted to the configured LLM provider. The provider may log, retain, or use this data according to their policies. This bypasses the at-rest encryption protections.
+> **⚠️ PII Exposure to Maple LLM**: When you use `tool_context` to send decrypted data to `/llm/chat`, that plaintext PII (emails, names, custom field values) is transmitted to Maple. This bypasses the at-rest encryption protections.
 
 **Compliance considerations (GDPR, CCPA, etc.):**
-- Decrypted PII sent to external LLM providers may constitute a data transfer requiring user consent
-- Ensure your LLM provider has appropriate data processing agreements (DPAs) in place
+- Decrypted PII sent to Maple may constitute a data transfer requiring user consent
+- Ensure your Maple agreement/policy posture meets your compliance requirements
 - Consider whether decrypted queries fall under "legitimate interest" or require explicit consent
 - Document this data flow in your privacy policy
 
@@ -306,10 +306,10 @@ If no fields can be decrypted (e.g., admin lacks the correct private key), the f
 - Implement rate limiting on `/admin/tools/execute` to detect anomalous bulk decryption
 
 **Mitigations:**
-- Use a self-hosted LLM provider (e.g., local Ollama, maple-proxy) to keep PII on-premises
+- Use maple-proxy in your controlled infrastructure to keep PII on-premises where possible
 - Limit which admins have access to the `db-query` tool
 - Prefer aggregate queries ("count users by type") over queries that return individual PII
-- Review LLM provider logs and data retention settings
+- Review Maple logs and data retention settings
 
 ### Usage
 

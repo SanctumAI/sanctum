@@ -497,7 +497,7 @@
       "compact": "Kompakt",
       "expand": "Genişlet",
       "shareSecretsTitle": "Gizli ortam değişkenlerini paylaş",
-      "shareSecretsHint": "Varsayılan olarak kapalıdır. Önce Config aracını etkinleştirin. Etkinleştirildiğinde gizli dağıtım yapılandırma değerleri istemci tarafında gösterilir ve LLM sağlayıcınıza gönderilir.",
+      "shareSecretsHint": "Varsayılan olarak kapalıdır. Önce Yapılandırma aracını etkinleştirin. Etkinleştirildiğinde, gizli dağıtım yapılandırma değerleri istemci tarafında gösterilir ve Maple'a gönderilir.",
       "sensitive": "Hassas",
       "emptyPrompt": "Herhangi bir yönetici yapılandırması hakkında soru sorun. Asistanın değişiklik önermesini ve uygulamasını istiyorsanız, JSON change set eklemesini isteyin.",
       "pendingChanges": "Bekleyen değişiklikler",
@@ -977,21 +977,21 @@
       "usersToMigrate": "Taşınacak kullanıcılar",
       "warning": "Bu gelişmiş bir işlemdir. Yanlış taşıma, şifrelenmiş verilere erişiminizi kaybetmenize neden olabilir. Yalnızca sonuçlarını anlıyorsanız devam edin."
     },
-    "leaveEmptyForLlmApiKey": "API anahtarı gerektirmeyen yerel sağlayıcılar için boş bırakın.",
+    "leaveEmptyForLlmApiKey": "Geçersiz kılmayı temizlemek ve .env MAPLE_API_KEY yedeklemesini kullanmak için boş bırakın.",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — API anahtarınız veya erişim tokenınız. Ollama gibi yerel sağlayıcılar için gerekli değildir.",
-      "apiKeyLabel": "API Anahtarı",
-      "ariaLabel": "LLM sağlayıcı yapılandırma yardımı",
+      "apiKeyField": "LLM_API_KEY — Maple API anahtarınız. MAPLE_API_KEY ile eşleşir.",
+      "apiKeyLabel": "Maple API Anahtarı",
+      "ariaLabel": "Maple LLM yapılandırma yardımı",
       "exampleConfig": "Örnek yapılandırma",
       "goToPage": "Sayfaya git",
-      "mapleExtra": "Maple bir yan konteyner olarak çalışır ve API anahtarı gerektirmez. İstekleri gizlilik korumalı çıkarım sağlayıcılarına yönlendirir.",
-      "mapleHint": "Maple Proxy, gizlilik öncelikli çıkarım için varsayılan sağlayıcıdır. Sanctum'un yanında yerel olarak çalışır.",
-      "modelField": "LLM_MODEL — kullanılacak model adı (örn. gpt-4, llama3, claude-3-sonnet). Seçtiğiniz sağlayıcı tarafından desteklenmelidir.",
-      "ollamaExtra": "Burada yapılandırmadan önce ana makinenize Ollama'yı kurun ve istediğiniz modeli çekin. Sanctum, Ollama API'si aracılığıyla bağlanır.",
-      "ollamaHint": "Ollama, açık kaynak LLM'leri yerel olarak çalıştırmanıza olanak tanır. Tüm çıkarım donanımınızda kalır — hiçbir şey ağınızı terk etmez.",
-      "overviewDesc": "Bu ayarlar, Sanctum'un yanıt oluşturmak için hangi LLM sağlayıcısını ve modelini kullanacağını kontrol eder. Tam gizlilik için yerel bir sağlayıcı veya daha güçlü modeller için bir bulut sağlayıcı kullanabilirsiniz.",
-      "overviewTitle": "LLM Sağlayıcıya Genel Bakış",
-      "providerField": "LLM_PROVIDER — kullanılacak çıkarım arka ucu (örn. maple, ollama, openai, anthropic)."
+      "mapleExtra": "LLM_API_KEY'i trymaple.ai adresindeki Maple anahtarınıza ayarlayın. LLM_* anahtarları MAPLE_* takma adlarına eşleşir.",
+      "mapleHint": "Maple, Sanctum için standart LLM arka ucudur.",
+      "modelField": "LLM_MODEL — Maple model tanımlayıcısı (örneğin: kimi-k2-5).",
+      "ollamaExtra": "Çeviri uyumluluğu için eski anahtar korunmuştur. Yukarıdaki Maple ayarlarını kullanın.",
+      "ollamaHint": "Eski belgeler için ayrılmıştır. Sanctum çalışma zamanı sadece Maple'dır.",
+      "overviewDesc": "Sanctum, standart LLM hizmeti olarak Maple'ı kullanır. Maple, kaputun altında OpenAI uyumlu bir API sağlar.",
+      "overviewTitle": "Maple LLM Genel Bakış",
+      "providerField": "LLM_PROVIDER — uyumluluk için \"maple\" olarak sabitlenmiştir."
     },
     "revealFailed": "Değer gösterilemedi. Nostr uzantısı bağlantınızı kontrol edin.",
     "searchHelp": {
@@ -1200,9 +1200,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "Yapay Zeka Sağlayıcısı",
-      "description": "Yapay zeka servisinize bağlanın",
-      "hint": "Asistanınızı hangi yapay zeka servisinin çalıştıracağını yapılandırın. Seçtiğiniz sağlayıcıdan (örn. OpenAI, Anthropic) bir API anahtarına ihtiyacınız olacak. Değişikliklerin geçerli olması için servisin yeniden başlatılması gerekir."
+      "label": "Maple AI",
+      "description": "Maple çıkarımını yapılandırın",
+      "hint": "Sanctum, LLM çıkarımı için sadece Maple'dır. Maple modeli/API ayarlarını buradan yapılandırın. Değişiklikler yeniden başlatma gerektirir."
     },
     "embedding": {
       "label": "Metin İşleme",
@@ -1304,18 +1304,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "Yapay Zeka Servisi",
-      "description": "LLM sağlayıcısı (maple, ollama)",
-      "hint": "Maple proxy için \"maple\" (gizlilik için önerilir) veya yerel modeller için \"ollama\" seçin."
+      "description": "LLM sağlayıcısı (yalnızca maple)",
+      "hint": "Maple tek desteklenen değerdir. Bu anahtar uyumluluk için kalır."
     },
     "LLM_MODEL": {
       "label": "Model Adı",
       "description": "Model adı/tanımlayıcısı",
-      "hint": "Kullanılacak model tanımlayıcısı (ör. \"kimi-k2-5\"). Mevcut modeller için sağlayıcınızın belgelerini kontrol edin."
+      "hint": "Kullanılacak Maple model tanımlayıcısı (örn. \"kimi-k2-5\")."
     },
     "LLM_API_URL": {
       "label": "API Uç Noktası",
       "description": "API istekleri için temel URL",
-      "hint": "API istekleri için temel URL. Maple için: http://maple-proxy:8080/v1. Ollama için: http://localhost:11434."
+      "hint": "Maple API temel URL'si. Varsayılan: http://maple-proxy:8080/v1."
     },
     "RAG_TOP_K": {
       "label": "Bağlam Parçaları",
@@ -1394,8 +1394,8 @@
     },
     "LLM_API_KEY": {
       "label": "API Anahtarı",
-      "description": "LLM hizmeti için API anahtarı",
-      "hint": "LLM sağlayıcınızdan API anahtarınız veya tokenınız. Kimlik doğrulama gerektiren sağlayıcılar için zorunludur."
+      "description": "Maple API anahtarı (gizli)",
+      "hint": "MAPLE_API_KEY ile eşleşir. Geçersiz kılmayı temizlemek ve .env yedeklemesini kullanmak için boş bırakın."
     },
     "ADMIN_BASE_URL": {
       "description": "Yönetici paneli alt alan adı URL'si (isteğe bağlı)",
@@ -1777,7 +1777,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "Sihirli bağlantı ve Nostr kimlik doğrulama akışlarını test edin.",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "Oran sınırlı uç noktalara hızlı istekler göndererek oran sınırlamasını test edin.",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "Kullanıcı türüne göre dinamik alanlarla kullanıcı oluşturma akışını test edin.",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "LLM sağlayıcısına (Maple veya Ollama) bağlantıyı test eder.",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Maple LLM hizmetine bağlantıyı test eder.",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "Tam RAG boru hattı: göm → ara → al → oluştur.",
       "this_is_where_the_magic_happens_e98c18": "— Sihrin gerçekleştiği yer burası:",
       "toggle_theme_9b0eaf": "Temayı değiştir",

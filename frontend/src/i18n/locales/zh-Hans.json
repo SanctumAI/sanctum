@@ -1307,7 +1307,7 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "AI 服务",
-      "description": "LLM 提供商（仅限 maple）",
+      "description": "LLM 提供商（仅限 Maple）",
       "hint": "Maple 是唯一支持的值。此密钥保留用于兼容性。"
     },
     "LLM_MODEL": {

@@ -810,7 +810,7 @@ async def chat(
         except HTTPException:
             raise
         except Exception as e:
-            logger.exception("Maple LLM error (%s): %s", provider.name, e)
+            logger.exception("Maple LLM error (%s)", provider.name)
             connection_error_types: tuple[type[BaseException], ...] = ()
             try:
                 import httpx

@@ -977,7 +977,7 @@
       "usersToMigrate": "Migrálandó felhasználók",
       "warning": "Ez egy haladó művelet. A helytelen migrálás kizárhat a titkosított adatokból. Csak akkor folytasd, ha megérted a következményeket."
     },
-    "leaveEmptyForLlmApiKey": "Hagyja üresen az felülbírálás törléséhez és az .env MAPLE_API_KEY tartalék használatához.",
+    "leaveEmptyForLlmApiKey": "Hagyja üresen a felülbírálás törléséhez és az .env MAPLE_API_KEY tartalék használatához.",
     "llmHelp": {
       "apiKeyField": "LLM_API_KEY — az Ön Maple API kulcsa. A MAPLE_API_KEY-hez van hozzárendelve.",
       "apiKeyLabel": "Maple API kulcs",
@@ -1395,7 +1395,7 @@
     "LLM_API_KEY": {
       "label": "API kulcs",
       "description": "Maple API kulcs (titok)",
-      "hint": "A MAPLE_API_KEY-hez van hozzárendelve. Hagyja üresen az felülbírálás törléséhez és az .env tartalék használatához."
+      "hint": "A MAPLE_API_KEY-hez van hozzárendelve. Hagyja üresen a felülbírálás törléséhez és az .env tartalék használatához."
     },
     "ADMIN_BASE_URL": {
       "description": "Admin panel aldomain URL (opcionális)",

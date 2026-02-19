@@ -632,10 +632,10 @@ async def get_service_health(admin: dict = Depends(auth.require_admin)):
         or config_dict.get("MAPLE_BASE_URL")
         or os.getenv("MAPLE_BASE_URL", "")
     )
-    base_url = llm_url or "http://maple-proxy:8080"
+    base_url = (llm_url or "http://maple-proxy:8080").rstrip("/")
     if base_url.endswith("/v1"):
         base_url = base_url[:-3]
-    llm_health_url = base_url.rstrip("/") + "/health"
+    llm_health_url = base_url + "/health"
 
     try:
         start = time.time()

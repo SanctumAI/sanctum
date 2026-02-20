@@ -1200,7 +1200,7 @@
     "llm": {
       "label": "Maple AI",
       "description": "Maple çıkarımını yapılandırın",
-      "hint": "Sanctum, LLM çıkarımı için sadece Maple'dır. Maple modeli/API ayarlarını buradan yapılandırın. Değişiklikler yeniden başlatma gerektirir."
+      "hint": "Sanctum, LLM çıkarımı için yalnızca Maple'ı kullanır. Maple modeli/API ayarlarını buradan yapılandırın. Değişiklikler yeniden başlatma gerektirir."
     },
     "embedding": {
       "label": "Metin İşleme",

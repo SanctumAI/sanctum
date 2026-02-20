@@ -989,8 +989,6 @@
       "mapleExtra": "Đặt LLM_API_KEY thành khóa Maple của bạn từ trymaple.ai. Các khóa LLM_* ánh xạ tới các bí danh MAPLE_*.",
       "mapleHint": "Maple là backend LLM tiêu chuẩn cho Sanctum.",
       "modelField": "LLM_MODEL — mã định danh mô hình Maple (ví dụ: kimi-k2-5).",
-      "ollamaExtra": "Khóa cũ được giữ lại để tương thích dịch thuật. Sử dụng cài đặt Maple ở trên.",
-      "ollamaHint": "Dành riêng cho tài liệu cũ. Thời gian chạy Sanctum chỉ dùng Maple.",
       "overviewDesc": "Sanctum sử dụng Maple làm dịch vụ LLM tiêu chuẩn. Maple cung cấp API tương thích OpenAI bên dưới.",
       "overviewTitle": "Tổng quan về Maple LLM",
       "providerField": "LLM_PROVIDER — cố định thành \"maple\" để tương thích."

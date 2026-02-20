@@ -987,8 +987,6 @@
       "mapleExtra": "LLM_API_KEY'i trymaple.ai adresindeki Maple anahtarınıza ayarlayın. LLM_* anahtarları MAPLE_* takma adlarına eşleşir.",
       "mapleHint": "Maple, Sanctum için standart LLM arka ucudur.",
       "modelField": "LLM_MODEL — Maple model tanımlayıcısı (örneğin: kimi-k2-5).",
-      "ollamaExtra": "Çeviri uyumluluğu için eski anahtar korunmuştur. Yukarıdaki Maple ayarlarını kullanın.",
-      "ollamaHint": "Eski belgeler için ayrılmıştır. Sanctum çalışma zamanı sadece Maple'dır.",
       "overviewDesc": "Sanctum, standart LLM hizmeti olarak Maple'ı kullanır. Maple, kaputun altında OpenAI uyumlu bir API sağlar.",
       "overviewTitle": "Maple LLM Genel Bakış",
       "providerField": "LLM_PROVIDER — uyumluluk için \"maple\" olarak sabitlenmiştir."

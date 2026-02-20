@@ -1059,8 +1059,6 @@
       "mapleExtra": "Set LLM_API_KEY to your Maple key from trymaple.ai. LLM_* keys map to MAPLE_* aliases.",
       "mapleHint": "Maple is the standard LLM backend for Sanctum.",
       "modelField": "LLM_MODEL — Maple model identifier (for example: kimi-k2-5).",
-      "ollamaExtra": "Legacy key retained for translation compatibility. Use Maple settings above.",
-      "ollamaHint": "Reserved for legacy docs. Sanctum runtime is Maple-only.",
       "overviewDesc": "Sanctum uses Maple as its standard LLM service. Maple provides an OpenAI-compatible API under the hood.",
       "overviewTitle": "Maple LLM Overview",
       "providerField": "LLM_PROVIDER — fixed to \"maple\" for compatibility."

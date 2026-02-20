@@ -987,8 +987,6 @@
       "mapleExtra": "LLM_API_KEYをtrymaple.aiから取得したあなたのMapleキーに設定してください。LLM_*キーはMAPLE_*エイリアスにマッピングされます。",
       "mapleHint": "Maple は Sanctum の標準 LLM バックエンドです。",
       "modelField": "LLM_MODEL — Mapleモデル識別子 (例: kimi-k2-5)。",
-      "ollamaExtra": "翻訳の互換性のため、レガシーキーが保持されています。上記のMaple設定を使用してください。",
-      "ollamaHint": "レガシーなドキュメントのために予約されています。SanctumランタイムはMaple専用です。",
       "overviewDesc": "Sanctumは標準のLLMサービスとしてMapleを使用しています。Mapleは内部的にOpenAI互換のAPIを提供しています。",
       "overviewTitle": "Maple LLM概要",
       "providerField": "LLM_PROVIDER — 互換性のため「maple」に固定されています。"

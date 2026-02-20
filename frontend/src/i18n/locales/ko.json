@@ -987,8 +987,6 @@
       "mapleExtra": "LLM_API_KEY를 trymaple.ai의 Maple 키로 설정하십시오. LLM_* 키는 MAPLE_* 별칭에 매핑됩니다.",
       "mapleHint": "Maple은 Sanctum의 표준 LLM 백엔드입니다.",
       "modelField": "LLM_MODEL — Maple 모델 식별자 (예: kimi-k2-5).",
-      "ollamaExtra": "번역 호환성을 위해 레거시 키가 유지됩니다. 위에 있는 Maple 설정을 사용하십시오.",
-      "ollamaHint": "레거시 문서용으로 예약되어 있습니다. Sanctum 런타임은 Maple 전용입니다.",
       "overviewDesc": "Sanctum은 표준 LLM 서비스로 Maple을 사용합니다. Maple은 내부적으로 OpenAI 호환 API를 제공합니다.",
       "overviewTitle": "Maple LLM 개요",
       "providerField": "LLM_PROVIDER — 호환성을 위해 \"maple\"로 고정됩니다."

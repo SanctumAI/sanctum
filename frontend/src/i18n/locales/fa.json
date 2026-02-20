@@ -987,8 +987,6 @@
       "mapleExtra": "LLM_API_KEY را با کلید Maple خود از trymaple.ai تنظیم کنید. کلیدهای LLM_* به نام‌های مستعار MAPLE_* نگاشت می‌شوند.",
       "mapleHint": "Maple بک‌اند استاندارد LLM برای Sanctum است.",
       "modelField": "LLM_MODEL — شناسه مدل Maple (به عنوان مثال: kimi-k2-5).",
-      "ollamaExtra": "کلید قدیمی برای سازگاری ترجمه حفظ شده است. از تنظیمات Maple در بالا استفاده کنید.",
-      "ollamaHint": "برای مستندات قدیمی رزرو شده است. زمان اجرای Sanctum فقط با Maple است.",
       "overviewDesc": "Sanctum از Maple به عنوان سرویس استاندارد LLM خود استفاده می‌کند. Maple یک API سازگار با OpenAI را در زیرساخت خود ارائه می‌دهد.",
       "overviewTitle": "بررسی اجمالی Maple LLM",
       "providerField": "LLM_PROVIDER — برای سازگاری روی \"maple\" ثابت شده است."
@@ -1304,7 +1302,7 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "سرویس هوش مصنوعی",
-      "description": "ارائه‌دهنده LLM (فقط maple)",
+      "description": "ارائه‌دهنده LLM (فقط Maple)",
       "hint": "Maple تنها مقدار پشتیبانی شده است. این کلید برای سازگاری باقی مانده است."
     },
     "LLM_MODEL": {

@@ -997,8 +997,6 @@
       "mapleExtra": "Встановіть LLM_API_KEY як ваш ключ Maple з trymaple.ai. Ключі LLM_* відповідають псевдонімам MAPLE_*.",
       "mapleHint": "Maple є стандартним LLM-бек-ендом для Sanctum.",
       "modelField": "LLM_MODEL — ідентифікатор моделі Maple (наприклад: kimi-k2-5).",
-      "ollamaExtra": "Застарілий ключ збережено для сумісності перекладу. Використовуйте налаштування Maple вище.",
-      "ollamaHint": "Зарезервовано для застарілої документації. Середовище виконання Sanctum підтримує лише Maple.",
       "overviewDesc": "Sanctum використовує Maple як стандартний сервіс LLM. Maple надає API, сумісний з OpenAI.",
       "overviewTitle": "Огляд Maple LLM",
       "providerField": "LLM_PROVIDER — зафіксовано на \"maple\" для сумісності."

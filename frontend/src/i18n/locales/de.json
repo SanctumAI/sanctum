@@ -958,8 +958,6 @@
       "mapleExtra": "Setze LLM_API_KEY auf deinen Maple-Schlüssel von trymaple.ai. LLM_*-Schlüssel sind MAPLE_*-Aliase zugeordnet.",
       "mapleHint": "Maple ist das Standard-LLM-Backend für Sanctum.",
       "modelField": "LLM_MODEL — Maple Modell-Identifikator (zum Beispiel: kimi-k2-5).",
-      "ollamaExtra": "Legacy-Schlüssel zur Kompatibilität der Übersetzung beibehalten. Verwende die Maple-Einstellungen oben.",
-      "ollamaHint": "Reserviert für Legacy-Dokumente. Die Sanctum-Laufzeit ist nur Maple-basiert.",
       "overviewDesc": "Sanctum verwendet Maple als seinen Standard-LLM-Dienst. Maple bietet unter der Haube eine OpenAI-kompatible API.",
       "overviewTitle": "Maple LLM-Übersicht",
       "providerField": "LLM_PROVIDER — zur Kompatibilität auf \"maple\" festgelegt."
@@ -1168,7 +1166,7 @@
     "llm": {
       "label": "Maple KI",
       "description": "Maple Inferenz konfigurieren",
-      "hint": "Sanctum ist für die LLM-Inferenz ausschließlich Maple-basiert. Konfigurieren Sie hier die Maple Modell-/API-Einstellungen. Änderungen erfordern einen Neustart."
+      "hint": "Sanctum ist für die LLM-Inferenz ausschließlich Maple-basiert. Konfiguriere hier die Maple Modell-/API-Einstellungen. Änderungen erfordern einen Neustart."
     },
     "embedding": {
       "label": "Textverarbeitung",

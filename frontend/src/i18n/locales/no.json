@@ -988,8 +988,6 @@
       "mapleExtra": "Sett LLM_API_KEY til din Maple-nøkkel fra trymaple.ai. LLM_*-nøkler tilsvarer MAPLE_*-aliaser.",
       "mapleHint": "Maple er standard LLM-backend for Sanctum.",
       "modelField": "LLM_MODEL — Maple-modellidentifikator (for eksempel: kimi-k2-5).",
-      "ollamaExtra": "Gammel nøkkel beholdt for oversettelseskompatibilitet. Bruk Maple-innstillingene ovenfor.",
-      "ollamaHint": "Reservert for eldre dokumenter. Sanctum kjører kun med Maple.",
       "overviewDesc": "Sanctum bruker Maple som sin standard LLM-tjeneste. Maple tilbyr et OpenAI-kompatibelt API under panseret.",
       "overviewTitle": "Oversikt over Maple LLM",
       "providerField": "LLM_PROVIDER — fastsatt til \"maple\" for kompatibilitet."

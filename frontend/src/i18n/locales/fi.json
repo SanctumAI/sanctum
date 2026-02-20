@@ -987,8 +987,6 @@
       "mapleExtra": "Aseta LLM_API_KEY Maple-avaimeksesi osoitteesta trymaple.ai. LLM_*-avaimet vastaavat MAPLE_*-aliaksia.",
       "mapleHint": "Maple on Sanctumin standardi LLM-taustaohjelma.",
       "modelField": "LLM_MODEL – Maple-mallitunniste (esimerkiksi: kimi-k2-5).",
-      "ollamaExtra": "Vanhentunut avain säilytetty käännöksen yhteensopivuuden vuoksi. Käytä yllä olevia Maple-asetuksia.",
-      "ollamaHint": "Varattu vanhentuneille ohjeille. Sanctum-ajonaika on vain Maple-pohjainen.",
       "overviewDesc": "Sanctum käyttää Maplea standardina LLM-palvelunaan. Maple tarjoaa OpenAI-yhteensopivan sovellusliittymän taustalla.",
       "overviewTitle": "Maple LLM yleiskatsaus",
       "providerField": "LLM_PROVIDER – asetettu arvoon \"maple\" yhteensopivuuden vuoksi."
@@ -1304,8 +1302,8 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "AI-palvelu",
-      "description": "LLM-palveluntarjoaja (vain maple)",
-      "hint": "maple on ainoa tuettu arvo. Tämä avain säilytetään yhteensopivuuden vuoksi."
+      "description": "LLM-palveluntarjoaja (vain Maple)",
+      "hint": "Maple on ainoa tuettu arvo. Tämä avain säilytetään yhteensopivuuden vuoksi."
     },
     "LLM_MODEL": {
       "label": "Mallin nimi",

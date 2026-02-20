@@ -987,8 +987,6 @@
       "mapleExtra": "ตั้งค่า LLM_API_KEY เป็นคีย์ Maple ของคุณจาก trymaple.ai คีย์ LLM_* แมปกับนามแฝง MAPLE_*",
       "mapleHint": "Maple เป็นแบ็กเอนด์ LLM มาตรฐานสำหรับ Sanctum",
       "modelField": "LLM_MODEL — ตัวระบุโมเดล Maple (เช่น kimi-k2-5)",
-      "ollamaExtra": "คงคีย์เดิมไว้เพื่อความเข้ากันได้ของการแปล ใช้การตั้งค่า Maple ด้านบน",
-      "ollamaHint": "สงวนไว้สำหรับเอกสารเก่า รันไทม์ของ Sanctum เป็น Maple เท่านั้น",
       "overviewDesc": "Sanctum ใช้ Maple เป็นบริการ LLM มาตรฐาน Maple ให้บริการ OpenAI-compatible API ภายใต้พื้นฐาน",
       "overviewTitle": "ภาพรวม Maple LLM",
       "providerField": "LLM_PROVIDER — กำหนดตายตัวเป็น \"maple\" เพื่อความเข้ากันได้"

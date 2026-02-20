@@ -987,8 +987,6 @@
       "mapleExtra": "Állítsa be az LLM_API_KEY-t a trymaple.ai webhelyről származó Maple kulcsára. Az LLM_* kulcsok a MAPLE_* aliasokhoz vannak hozzárendelve.",
       "mapleHint": "A Maple a Sanctum szabványos LLM háttérrendszere.",
       "modelField": "LLM_MODEL — Maple modell azonosító (például: kimi-k2-5).",
-      "ollamaExtra": "Fordítási kompatibilitás miatt megőrzött régi kulcs. Használja a fenti Maple beállításokat.",
-      "ollamaHint": "Régi dokumentumok számára fenntartva. A Sanctum futásidejű környezete csak Maple-t támogatja.",
       "overviewDesc": "A Sanctum a Maple-t használja szabványos LLM szolgáltatásként. A Maple egy OpenAI-kompatibilis API-t biztosít a háttérben.",
       "overviewTitle": "Maple LLM áttekintés",
       "providerField": "LLM_PROVIDER — kompatibilitás miatt „maple”-re rögzítve."

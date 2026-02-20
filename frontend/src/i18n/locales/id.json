@@ -987,8 +987,6 @@
       "mapleExtra": "Setel LLM_API_KEY ke kunci Maple Anda dari trymaple.ai. Kunci LLM_* berpeta ke alias MAPLE_*.",
       "mapleHint": "Maple adalah backend LLM standar untuk Sanctum.",
       "modelField": "LLM_MODEL — pengidentifikasi model Maple (misalnya: kimi-k2-5).",
-      "ollamaExtra": "Kunci lama dipertahankan untuk kompatibilitas terjemahan. Gunakan pengaturan Maple di atas.",
-      "ollamaHint": "Dicadangkan untuk dokumen lama. Runtime Sanctum hanya Maple.",
       "overviewDesc": "Sanctum menggunakan Maple sebagai layanan LLM standarnya. Maple menyediakan API yang kompatibel dengan OpenAI di balik layar.",
       "overviewTitle": "Ikhtisar LLM Maple",
       "providerField": "LLM_PROVIDER — tetap \"maple\" untuk kompatibilitas."

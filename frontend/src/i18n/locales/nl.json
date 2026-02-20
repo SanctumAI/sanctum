@@ -410,7 +410,7 @@
       "compact": "Beknopt",
       "expand": "Uitbreiden",
       "shareSecretsTitle": "Geheime omgevingsvariabelen delen",
-      "shareSecretsHint": "Standaard uitgeschakeld. Schakel eerst de Config-tool in. Wanneer ingeschakeld worden geheime deployment-configuratiewaarden client-side zichtbaar en naar je LLM-provider gestuurd.",
+      "shareSecretsHint": "Standaard uitgeschakeld. Schakel eerst de Config-tool in. Indien ingeschakeld, worden geheime implementatieconfiguratiewaarden aan de clientzijde onthuld en naar Maple verzonden.",
       "sensitive": "Gevoelig",
       "emptyPrompt": "Stel vragen over elke beheerconfiguratie. Wil je dat de assistent wijzigingen voorstelt en toepast, vraag dan om een JSON change set op te nemen.",
       "pendingChanges": "Openstaande wijzigingen",
@@ -1014,21 +1014,19 @@
       "usersToMigrate": "Te migreren gebruikers",
       "warning": "Dit is een geavanceerde bewerking. Onjuiste migratie kan je buitensluiten van versleutelde gegevens. Ga alleen verder als je de gevolgen begrijpt."
     },
-    "leaveEmptyForLlmApiKey": "Laat leeg voor lokale providers die geen API-sleutel vereisen.",
+    "leaveEmptyForLlmApiKey": "Laat leeg om de overschrijving te wissen en de .env MAPLE_API_KEY-terugval te gebruiken.",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — je API-sleutel of toegangstoken. Niet vereist voor lokale providers zoals Ollama.",
-      "apiKeyLabel": "API-sleutel",
-      "ariaLabel": "Hulp bij LLM-providerconfiguratie",
+      "apiKeyField": "LLM_API_KEY — uw Maple API-sleutel. Komt overeen met MAPLE_API_KEY.",
+      "apiKeyLabel": "Maple API-sleutel",
+      "ariaLabel": "Maple LLM-configuratiehulp",
       "exampleConfig": "Voorbeeldconfiguratie",
       "goToPage": "Ga naar pagina",
-      "mapleExtra": "Maple draait als een sidecar-container en vereist geen API-sleutel. Het proxyt verzoeken naar privacy-beschermende inference-providers.",
-      "mapleHint": "Maple Proxy is de standaardprovider voor privacy-first inference. Het draait lokaal naast Sanctum.",
-      "modelField": "LLM_MODEL — de modelnaam om te gebruiken (bijv. gpt-4, llama3, claude-3-sonnet). Moet worden ondersteund door je gekozen provider.",
-      "ollamaExtra": "Installeer Ollama op je hostmachine en pull het gewenste model voordat je het hier configureert. Sanctum maakt verbinding via de Ollama API.",
-      "ollamaHint": "Met Ollama kun je open-source LLM's lokaal draaien. Alle inference blijft op je hardware — niets verlaat je netwerk.",
-      "overviewDesc": "Deze instellingen bepalen welke LLM-provider en welk model Sanctum gebruikt voor het genereren van reacties. Je kunt een lokale provider gebruiken voor volledige privacy of een cloudprovider voor krachtigere modellen.",
-      "overviewTitle": "Overzicht LLM-provider",
-      "providerField": "LLM_PROVIDER — de inference-backend om te gebruiken (bijv. maple, ollama, openai, anthropic)."
+      "mapleExtra": "Stel LLM_API_KEY in op uw Maple-sleutel van trymaple.ai. LLM_*-sleutels komen overeen met MAPLE_*-aliassen.",
+      "mapleHint": "Maple is de standaard LLM-backend voor Sanctum.",
+      "modelField": "LLM_MODEL — Maple-modelidentificatie (bijvoorbeeld: kimi-k2-5).",
+      "overviewDesc": "Sanctum gebruikt Maple als zijn standaard LLM-service. Maple biedt onder de motorkap een OpenAI-compatibele API.",
+      "overviewTitle": "Maple LLM Overzicht",
+      "providerField": "LLM_PROVIDER — vastgezet op \"maple\" voor compatibiliteit."
     },
     "revealFailed": "Kan de waarde niet onthullen. Controleer je Nostr-extensieverbinding.",
     "searchHelp": {
@@ -1200,9 +1198,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "AI-provider",
-      "description": "Verbind met je AI-service",
-      "hint": "Configureer welke AI-service je assistent aandrijft. Je hebt een API-sleutel nodig van je gekozen provider (bijv. OpenAI, Anthropic). Wijzigingen vereisen een herstart van de service."
+      "label": "Maple AI",
+      "description": "Configureer Maple-inferentie",
+      "hint": "Sanctum is alleen Maple voor LLM-inferentie. Configureer hier de Maple-model/API-instellingen. Wijzigingen vereisen een herstart."
     },
     "embedding": {
       "label": "Tekstverwerking",
@@ -1293,18 +1291,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "AI-service",
-      "description": "LLM-provider (maple, ollama)",
-      "hint": "Kies \"maple\" voor de Maple-proxy (aanbevolen voor privacy) of \"ollama\" voor lokale modellen."
+      "description": "LLM-provider (alleen maple)",
+      "hint": "Maple is de enige ondersteunde waarde. Deze sleutel blijft behouden voor compatibiliteit."
     },
     "LLM_MODEL": {
       "label": "Modelnaam",
       "description": "Modelnaam/identificatie",
-      "hint": "De modelidentificatie om te gebruiken (bijv. \"kimi-k2-5\"). Raadpleeg de documentatie van uw provider voor beschikbare modellen."
+      "hint": "De te gebruiken Maple-modelidentificatie (bijv. \"kimi-k2-5\")."
     },
     "LLM_API_URL": {
       "label": "API-eindpunt",
       "description": "Basis-URL voor API-verzoeken",
-      "hint": "De basis-URL voor API-verzoeken. Voor Maple: http://maple-proxy:8080/v1. Voor Ollama: http://localhost:11434."
+      "hint": "Maple API-basis-URL. Standaard: http://maple-proxy:8080/v1."
     },
     "RAG_TOP_K": {
       "label": "Contextfragmenten",
@@ -1483,8 +1481,8 @@
     },
     "LLM_API_KEY": {
       "label": "API-sleutel",
-      "description": "API-sleutel voor de LLM-service",
-      "hint": "Uw API-sleutel of token van de LLM-provider. Vereist voor providers met authenticatie."
+      "description": "Maple API-sleutel (geheim)",
+      "hint": "Komt overeen met MAPLE_API_KEY. Laat leeg om de overschrijving te wissen en de .env-terugval te gebruiken."
     }
   },
   "colors": {
@@ -1777,7 +1775,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "Test magic link en Nostr authenticatiestromen.",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "Test rate limiting door snelle verzoeken te sturen naar rate-limited endpoints.",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "Test de gebruikersaanmaakstroom met dynamische velden op basis van gebruikerstype.",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Test connectiviteit met de LLM-provider (Maple of Ollama).",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Test de connectiviteit met de Maple LLM-service.",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "De complete RAG-pijplijn: embed → zoeken → ophalen → genereren.",
       "this_is_where_the_magic_happens_e98c18": "— Dit is waar de magie gebeurt:",
       "toggle_theme_9b0eaf": "Thema wisselen",

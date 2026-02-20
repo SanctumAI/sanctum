@@ -497,7 +497,7 @@
       "compact": "مضغوط",
       "expand": "توسيع",
       "shareSecretsTitle": "مشاركة متغيرات البيئة السرّية",
-      "shareSecretsHint": "مُعطّل افتراضياً. فعّل أداة الإعدادات أولاً. عند التفعيل، يتم كشف قيم إعدادات النشر السرية على جهة العميل وإرسالها إلى مزود LLM الخاص بك.",
+      "shareSecretsHint": "معطل افتراضياً. قم بتمكين أداة التكوين أولاً. عند التمكين، يتم الكشف عن قيم تكوين النشر السرية من جانب العميل وإرسالها إلى Maple.",
       "sensitive": "حساس",
       "emptyPrompt": "اطرح أسئلة حول أي إعداد إداري. إذا أردت من المساعد اقتراح التغييرات وتطبيقها، اطلب منه تضمين مجموعة تغييرات JSON.",
       "pendingChanges": "تغييرات معلّقة",
@@ -977,21 +977,19 @@
       "usersToMigrate": "المستخدمون المراد ترحيلهم",
       "warning": "هذه عملية متقدمة. الترحيل غير الصحيح قد يحرمك من الوصول إلى البيانات المشفرة. تابع فقط إذا كنت تفهم الآثار المترتبة."
     },
-    "leaveEmptyForLlmApiKey": "اتركه فارغًا للمزودين المحليين الذين لا يتطلبون مفتاح API.",
+    "leaveEmptyForLlmApiKey": "اتركه فارغًا لمسح التجاوز واستخدام خيار MAPLE_API_KEY الاحتياطي في .env.",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — مفتاح API أو رمز الوصول الخاص بك. غير مطلوب للمزودين المحليين مثل Ollama.",
-      "apiKeyLabel": "مفتاح API",
-      "ariaLabel": "مساعدة تكوين مزود LLM",
+      "apiKeyField": "LLM_API_KEY — مفتاح API الخاص بك لـ Maple. يتوافق مع MAPLE_API_KEY.",
+      "apiKeyLabel": "مفتاح API لـ Maple",
+      "ariaLabel": "مساعدة في تكوين LLM لـ Maple",
       "exampleConfig": "مثال على التكوين",
       "goToPage": "الذهاب إلى الصفحة",
-      "mapleExtra": "يعمل Maple كحاوية جانبية ولا يتطلب مفتاح API. يوجه الطلبات إلى مزودي الاستدلال الذين يحافظون على الخصوصية.",
-      "mapleHint": "Maple Proxy هو المزود الافتراضي للاستدلال الذي يضع الخصوصية أولاً. يعمل محليًا إلى جانب Sanctum.",
-      "modelField": "LLM_MODEL — اسم النموذج المراد استخدامه (مثال: gpt-4, llama3, claude-3-sonnet). يجب أن يكون مدعومًا من المزود المختار.",
-      "ollamaExtra": "قم بتثبيت Ollama على جهازك واسحب النموذج الذي تريده قبل تكوينه هنا. يتصل Sanctum عبر واجهة برمجة تطبيقات Ollama.",
-      "ollamaHint": "يتيح لك Ollama تشغيل نماذج LLM مفتوحة المصدر محليًا. يبقى كل الاستدلال على عتادك — لا شيء يغادر شبكتك.",
-      "overviewDesc": "تتحكم هذه الإعدادات في مزود LLM والنموذج الذي يستخدمه Sanctum لتوليد الاستجابات. يمكنك استخدام مزود محلي لخصوصية كاملة أو مزود سحابي لنماذج أقوى.",
-      "overviewTitle": "نظرة عامة على مزود LLM",
-      "providerField": "LLM_PROVIDER — واجهة الاستدلال المراد استخدامها (مثال: maple, ollama, openai, anthropic)."
+      "mapleExtra": "عيّن LLM_API_KEY على مفتاح Maple الخاص بك من trymaple.ai. تتوافق مفاتيح LLM_* مع الأسماء المستعارة MAPLE_*.",
+      "mapleHint": "Maple هو الخلفية القياسية لنموذج LLM لـ Sanctum.",
+      "modelField": "LLM_MODEL — معرف نموذج Maple (على سبيل المثال: kimi-k2-5).",
+      "overviewDesc": "يستخدم Sanctum Maple كخدمة LLM القياسية الخاصة به. يوفر Maple واجهة برمجة تطبيقات متوافقة مع OpenAI.",
+      "overviewTitle": "نظرة عامة على LLM من Maple",
+      "providerField": "LLM_PROVIDER — ثابت على \"maple\" للتوافق."
     },
     "revealFailed": "فشل في كشف القيمة. تحقق من اتصال إضافة Nostr الخاصة بك.",
     "searchHelp": {
@@ -1200,9 +1198,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "مزود الذكاء الاصطناعي",
-      "description": "الاتصال بخدمة الذكاء الاصطناعي",
-      "hint": "تكوين خدمة الذكاء الاصطناعي التي تشغّل مساعدك. ستحتاج إلى مفتاح API من المزود المختار (مثل OpenAI أو Anthropic). تتطلب التغييرات إعادة تشغيل الخدمة لتدخل حيز التنفيذ."
+      "label": "ذكاء اصطناعي من Maple",
+      "description": "تكوين استدلال Maple",
+      "hint": "Sanctum هو Maple فقط لاستدلال LLM. قم بتكوين إعدادات نموذج/API لـ Maple هنا. تتطلب التغييرات إعادة التشغيل."
     },
     "embedding": {
       "label": "معالجة النصوص",
@@ -1304,18 +1302,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "خدمة الذكاء الاصطناعي",
-      "description": "مزود LLM (maple, ollama)",
-      "hint": "اختر \"maple\" لوكيل Maple (موصى به للخصوصية) أو \"ollama\" للنماذج المحلية."
+      "description": "مزود LLM (Maple فقط)",
+      "hint": "Maple هي القيمة المدعومة الوحيدة. يظل هذا المفتاح للتوافق."
     },
     "LLM_MODEL": {
       "label": "اسم النموذج",
       "description": "اسم/معرف النموذج",
-      "hint": "معرف النموذج المراد استخدامه (مثال: \"kimi-k2-5\"). راجع وثائق المزود للنماذج المتاحة."
+      "hint": "معرف نموذج Maple المراد استخدامه (مثل: \"kimi-k2-5\")."
     },
     "LLM_API_URL": {
       "label": "نقطة نهاية API",
       "description": "عنوان URL الأساسي لطلبات API",
-      "hint": "عنوان URL الأساسي لطلبات API. لـ Maple: http://maple-proxy:8080/v1. لـ Ollama: http://localhost:11434."
+      "hint": "عنوان URL الأساسي لـ Maple API. الافتراضي: http://maple-proxy:8080/v1."
     },
     "RAG_TOP_K": {
       "label": "أجزاء السياق",
@@ -1394,8 +1392,8 @@
     },
     "LLM_API_KEY": {
       "label": "مفتاح API",
-      "description": "مفتاح API لخدمة LLM",
-      "hint": "مفتاح API أو الرمز المميز الخاص بك من مزود LLM. مطلوب لمزودي الخدمة الذين يتطلبون المصادقة."
+      "description": "مفتاح Maple API (سري)",
+      "hint": "يتوافق مع MAPLE_API_KEY. اتركه فارغًا لمسح التجاوز واستخدام خيار .env الاحتياطي."
     },
     "ADMIN_BASE_URL": {
       "description": "عنوان URL للنطاق الفرعي للوحة الإدارة (اختياري)",
@@ -1777,7 +1775,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "اختبار الرابط السحري وتدفقات مصادقة Nostr.",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "اختبار تحديد المعدل عن طريق إرسال طلبات سريعة إلى نقاط النهاية ذات المعدل المحدود.",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "اختبار تدفق إنشاء المستخدمين مع حقول ديناميكية بناءً على نوع المستخدم.",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "يختبر الاتصال بموفر LLM (Maple أو Ollama).",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "يختبر الاتصال بخدمة Maple LLM.",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "مسار RAG الكامل: تضمين ← بحث ← استرجاع ← توليد.",
       "this_is_where_the_magic_happens_e98c18": "— هذا هو المكان الذي يحدث فيه السحر:",
       "toggle_theme_9b0eaf": "تبديل السمة",

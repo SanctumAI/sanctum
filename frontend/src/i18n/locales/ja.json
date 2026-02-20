@@ -497,7 +497,7 @@
       "compact": "コンパクト",
       "expand": "拡張",
       "shareSecretsTitle": "秘密の環境変数を共有",
-      "shareSecretsHint": "デフォルトではオフです。先に Config ツールを有効にしてください。有効化すると、デプロイ設定の秘密値がクライアント側で表示され、LLM プロバイダーに送信されます。",
+      "shareSecretsHint": "デフォルトでは無効です。まず、設定ツールを有効にしてください。有効にすると、機密のデプロイ設定値がクライアント側で表示され、Mapleに送信されます。",
       "sensitive": "機密",
       "emptyPrompt": "管理設定について質問してください。アシスタントに変更の提案と適用をさせたい場合は、JSON の change set を含めるよう依頼してください。",
       "pendingChanges": "保留中の変更",
@@ -977,21 +977,19 @@
       "usersToMigrate": "移行するユーザー",
       "warning": "これは上級者向けの操作です。不正な移行を行うと、暗号化データにアクセスできなくなる可能性があります。影響を理解した上でのみ続行してください。"
     },
-    "leaveEmptyForLlmApiKey": "APIキーが不要なローカルプロバイダーの場合は空のままにしてください。",
+    "leaveEmptyForLlmApiKey": "上書きを解除して.env MAPLE_API_KEY フォールバックを使用するには、空欄にしてください。",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — APIキーまたはアクセストークン。Ollamaのようなローカルプロバイダーでは不要です。",
-      "apiKeyLabel": "APIキー",
-      "ariaLabel": "LLMプロバイダー設定のヘルプ",
+      "apiKeyField": "LLM_API_KEY — お使いのMaple APIキー。MAPLE_API_KEYにマッピングされます。",
+      "apiKeyLabel": "Maple APIキー",
+      "ariaLabel": "Maple LLM構成ヘルプ",
       "exampleConfig": "設定例",
       "goToPage": "ページへ移動",
-      "mapleExtra": "Mapleはサイドカーコンテナとして実行され、APIキーは不要です。プライバシー保護の推論プロバイダーにリクエストをプロキシします。",
-      "mapleHint": "Maple Proxyはプライバシー優先の推論のためのデフォルトプロバイダーです。Sanctumと並行してローカルで実行されます。",
-      "modelField": "LLM_MODEL — 使用するモデル名（例：gpt-4、llama3、claude-3-sonnet）。選択したプロバイダーでサポートされている必要があります。",
-      "ollamaExtra": "ここで設定する前に、ホストマシンにOllamaをインストールし、使用したいモデルをプルしてください。SanctumはOllama API経由で接続します。",
-      "ollamaHint": "Ollamaではオープンソースのローカルなモデルを実行できます。すべての推論はハードウェア上で行われ、ネットワーク外にデータは出ません。",
-      "overviewDesc": "これらの設定は、Sanctumが応答生成に使用するLLMプロバイダーとモデルを制御します。完全なプライバシーのためにローカルプロバイダーを使用するか、より強力なモデルのためにクラウドプロバイダーを使用できます。",
-      "overviewTitle": "LLMプロバイダーの概要",
-      "providerField": "LLM_PROVIDER — 使用する推論バックエンド（例：maple、ollama、openai、anthropic）。"
+      "mapleExtra": "LLM_API_KEYをtrymaple.aiから取得したあなたのMapleキーに設定してください。LLM_*キーはMAPLE_*エイリアスにマッピングされます。",
+      "mapleHint": "Maple は Sanctum の標準 LLM バックエンドです。",
+      "modelField": "LLM_MODEL — Mapleモデル識別子 (例: kimi-k2-5)。",
+      "overviewDesc": "Sanctumは標準のLLMサービスとしてMapleを使用しています。Mapleは内部的にOpenAI互換のAPIを提供しています。",
+      "overviewTitle": "Maple LLM概要",
+      "providerField": "LLM_PROVIDER — 互換性のため「maple」に固定されています。"
     },
     "revealFailed": "値の表示に失敗しました。Nostr拡張機能の接続を確認してください。",
     "searchHelp": {
@@ -1200,9 +1198,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "AIプロバイダー",
-      "description": "AIサービスに接続",
-      "hint": "アシスタントを動かすAIサービスを設定します。選択したプロバイダー（例：OpenAI、Anthropic）のAPIキーが必要です。変更を反映するにはサービスの再起動が必要です。"
+      "label": "Maple AI",
+      "description": "Maple推論を設定する",
+      "hint": "SanctumはLLM推論においてMaple専用です。Mapleモデル/API設定はここで構成します。変更には再起動が必要です。"
     },
     "embedding": {
       "label": "テキスト処理",
@@ -1304,18 +1302,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "AIサービス",
-      "description": "LLMプロバイダー（maple、ollama）",
-      "hint": "プライバシー重視なら「maple」（Mapleプロキシ）、ローカルモデルなら「ollama」を選択してください。"
+      "description": "LLMプロバイダー（mapleのみ）",
+      "hint": "Mapleは唯一サポートされている値です。このキーは互換性のために残されています。"
     },
     "LLM_MODEL": {
       "label": "モデル名",
       "description": "モデル名/識別子",
-      "hint": "使用するモデル識別子（例：「kimi-k2-5」）。利用可能なモデルについてはプロバイダーのドキュメントを確認してください。"
+      "hint": "使用するMapleモデル識別子（例: \"kimi-k2-5\"）。"
     },
     "LLM_API_URL": {
       "label": "APIエンドポイント",
       "description": "APIリクエストのベースURL",
-      "hint": "APIリクエストのベースURL。Maple: http://maple-proxy:8080/v1、Ollama: http://localhost:11434"
+      "hint": "Maple APIのベースURL。デフォルト: http://maple-proxy:8080/v1。"
     },
     "RAG_TOP_K": {
       "label": "コンテキストチャンク数",
@@ -1394,8 +1392,8 @@
     },
     "LLM_API_KEY": {
       "label": "APIキー",
-      "description": "LLMサービスのAPIキー",
-      "hint": "LLMプロバイダーのAPIキーまたはトークン。認証が必要なプロバイダーでは必須です。"
+      "description": "Maple APIキー (シークレット)",
+      "hint": "MAPLE_API_KEY にマッピングされます。オーバーライドをクリアして.envフォールバックを使用するには、空のままにしてください。"
     },
     "ADMIN_BASE_URL": {
       "description": "管理パネルのサブドメインURL（オプション）",
@@ -1777,7 +1775,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "マジックリンクとNostr認証フローをテストします。",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "レート制限されたエンドポイントに高速リクエストを送信して、レート制限をテストします。",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "ユーザータイプに基づいた動的フィールドを持つユーザー作成フローをテストします。",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "LLMプロバイダー（MapleまたはOllama）への接続をテストします。",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Maple LLMサービスへの接続をテストします。",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "完全なRAGパイプライン：埋め込み → 検索 → 取得 → 生成。",
       "this_is_where_the_magic_happens_e98c18": "— ここで魔法が起こります:",
       "toggle_theme_9b0eaf": "テーマを切り替え",

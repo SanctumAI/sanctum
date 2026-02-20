@@ -497,7 +497,7 @@
       "compact": "Kompakt",
       "expand": "Bővítés",
       "shareSecretsTitle": "Titkos környezeti változók megosztása",
-      "shareSecretsHint": "Alapértelmezetten ki van kapcsolva. Először engedélyezze a Config eszközt. Engedélyezés után a titkos telepítési konfigurációs értékek kliensoldalon láthatóvá válnak és elküldésre kerülnek az LLM szolgáltatójának.",
+      "shareSecretsHint": "Alapértelmezetten kikapcsolva. Előbb engedélyezze a Konfigurációs eszközt. Ha engedélyezve van, a titkos telepítési konfigurációs értékek láthatóvá válnak a kliensoldalon, és elküldésre kerülnek a Maple-nek.",
       "sensitive": "Érzékeny",
       "emptyPrompt": "Kérdezzen bármilyen admin beállításról. Ha szeretné, hogy az asszisztens változtatásokat javasoljon és alkalmazzon, kérje, hogy adjon meg egy JSON change setet.",
       "pendingChanges": "Függőben lévő változtatások",
@@ -977,21 +977,19 @@
       "usersToMigrate": "Migrálandó felhasználók",
       "warning": "Ez egy haladó művelet. A helytelen migrálás kizárhat a titkosított adatokból. Csak akkor folytasd, ha megérted a következményeket."
     },
-    "leaveEmptyForLlmApiKey": "Hagyd üresen az API kulcsot nem igénylő helyi szolgáltatóknál.",
+    "leaveEmptyForLlmApiKey": "Hagyja üresen a felülbírálás törléséhez és az .env MAPLE_API_KEY tartalék használatához.",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — az API kulcsod vagy hozzáférési tokened. Helyi szolgáltatókhoz, mint az Ollama, nem szükséges.",
-      "apiKeyLabel": "API kulcs",
-      "ariaLabel": "LLM szolgáltató konfiguráció súgó",
+      "apiKeyField": "LLM_API_KEY — az Ön Maple API kulcsa. A MAPLE_API_KEY-hez van hozzárendelve.",
+      "apiKeyLabel": "Maple API kulcs",
+      "ariaLabel": "Maple LLM konfigurációs súgó",
       "exampleConfig": "Példa konfiguráció",
       "goToPage": "Ugrás az oldalra",
-      "mapleExtra": "A Maple mellékelt konténerként fut, és nem igényel API kulcsot. A kéréseket adatvédelmet biztosító inferencia-szolgáltatóknak közvetíti.",
-      "mapleHint": "A Maple Proxy az alapértelmezett szolgáltató az adatvédelem-első inferenciához. Helyileg fut a Sanctum mellett.",
-      "modelField": "LLM_MODEL — a használandó modell neve (pl. gpt-4, llama3, claude-3-sonnet). A választott szolgáltatódnak támogatnia kell.",
-      "ollamaExtra": "Telepítsd az Ollama-t a gazdagépedre, és húzd le a kívánt modellt, mielőtt itt konfigurálnád. A Sanctum az Ollama API-n keresztül csatlakozik.",
-      "ollamaHint": "Az Ollama lehetővé teszi nyílt forráskódú LLM-ek helyi futtatását. Minden inferencia a hardvereden marad — semmi nem hagyja el a hálózatodat.",
-      "overviewDesc": "Ezek a beállítások szabályozzák, hogy a Sanctum melyik LLM szolgáltatót és modellt használja a válaszok generálásához. Használhatsz helyi szolgáltatót a teljes adatvédelemért, vagy felhőszolgáltatót az erősebb modellekért.",
-      "overviewTitle": "LLM szolgáltató áttekintése",
-      "providerField": "LLM_PROVIDER — a használandó inferencia háttérrendszer (pl. maple, ollama, openai, anthropic)."
+      "mapleExtra": "Állítsa be az LLM_API_KEY-t a trymaple.ai webhelyről származó Maple kulcsára. Az LLM_* kulcsok a MAPLE_* aliasokhoz vannak hozzárendelve.",
+      "mapleHint": "A Maple a Sanctum szabványos LLM háttérrendszere.",
+      "modelField": "LLM_MODEL — Maple modell azonosító (például: kimi-k2-5).",
+      "overviewDesc": "A Sanctum a Maple-t használja szabványos LLM szolgáltatásként. A Maple egy OpenAI-kompatibilis API-t biztosít a háttérben.",
+      "overviewTitle": "Maple LLM áttekintés",
+      "providerField": "LLM_PROVIDER — kompatibilitás miatt „maple”-re rögzítve."
     },
     "revealFailed": "Nem sikerült felfedni az értéket. Ellenőrizd a Nostr bővítmény kapcsolatot.",
     "searchHelp": {
@@ -1200,9 +1198,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "AI szolgáltató",
-      "description": "Csatlakozás az AI szolgáltatáshoz",
-      "hint": "Konfiguráld, melyik AI szolgáltatás működteti az asszisztenst. Szükséged lesz egy API kulcsra a választott szolgáltatótól (pl. OpenAI, Anthropic). A változások szolgáltatás újraindítást igényelnek."
+      "label": "Maple AI",
+      "description": "Maple következtetés konfigurálása",
+      "hint": "A Sanctum csak Maple-t használ az LLM következtetéshez. Itt konfigurálhatja a Maple modell/API beállításait. A változtatások újraindítást igényelnek."
     },
     "embedding": {
       "label": "Szövegfeldolgozás",
@@ -1304,18 +1302,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "AI szolgáltató",
-      "description": "LLM szolgáltató (maple, ollama)",
-      "hint": "Válaszd a \"maple\"-t a Maple proxyhoz (ajánlott az adatvédelemhez) vagy az \"ollama\"-t helyi modellekhez."
+      "description": "LLM szolgáltató (csak maple)",
+      "hint": "A Maple az egyetlen támogatott érték. Ez a kulcs a kompatibilitás miatt maradt meg."
     },
     "LLM_MODEL": {
       "label": "Modell neve",
       "description": "Modell név/azonosító",
-      "hint": "A használandó modell azonosító (pl. \"kimi-k2-5\"). Ellenőrizd a szolgáltatód dokumentációját az elérhető modellekért."
+      "hint": "A használandó Maple modell azonosító (pl. „kimi-k2-5”)."
     },
     "LLM_API_URL": {
       "label": "API végpont",
       "description": "Alap URL az API kérésekhez",
-      "hint": "Az alap URL az API kérésekhez. Maple esetén: http://maple-proxy:8080/v1. Ollama esetén: http://localhost:11434."
+      "hint": "Maple API alap URL. Alapértelmezett: http://maple-proxy:8080/v1."
     },
     "RAG_TOP_K": {
       "label": "Kontextus darabok",
@@ -1394,8 +1392,8 @@
     },
     "LLM_API_KEY": {
       "label": "API kulcs",
-      "description": "API kulcs az LLM szolgáltatáshoz",
-      "hint": "Az API kulcs vagy token az LLM szolgáltatótól. Hitelesítést igénylő szolgáltatóknál kötelező."
+      "description": "Maple API kulcs (titok)",
+      "hint": "A MAPLE_API_KEY-hez van hozzárendelve. Hagyja üresen a felülbírálás törléséhez és az .env tartalék használatához."
     },
     "ADMIN_BASE_URL": {
       "description": "Admin panel aldomain URL (opcionális)",
@@ -1777,7 +1775,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "Magikus link és Nostr hitelesítési folyamatok tesztelése.",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "Sebességkorlátozás tesztelése gyors kérések küldésével a sebességkorlátozott végpontokra.",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "A felhasználói létrehozási folyamat tesztelése dinamikus mezőkkel a felhasználói típus alapján.",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "A csatlakozás tesztelése az LLM szolgáltatóhoz (Maple vagy Ollama).",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Ellenőrzi a kapcsolatot a Maple LLM szolgáltatással.",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "A teljes RAG pipeline: beágyazás → keresés → lekérés → generálás.",
       "this_is_where_the_magic_happens_e98c18": "– Itt történik a varázslat:",
       "toggle_theme_9b0eaf": "Téma váltása",

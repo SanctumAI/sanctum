@@ -24,18 +24,12 @@ _cache_time: float = 0
 _cache_lock = threading.Lock()
 CACHE_TTL = 60  # seconds
 
-# Key translation maps for different LLM providers
-# UI uses generic keys, providers use specific keys
+# Key translation map for Maple-backed LLM config.
+# UI uses generic keys, runtime also supports Maple-specific env aliases.
 KEY_TRANSLATION = {
-    "maple": {
-        "LLM_API_URL": "MAPLE_BASE_URL",
-        "LLM_MODEL": "MAPLE_MODEL",
-        "LLM_API_KEY": "MAPLE_API_KEY",
-    },
-    "ollama": {
-        "LLM_API_URL": "OLLAMA_BASE_URL",
-        "LLM_MODEL": "OLLAMA_MODEL",
-    },
+    "LLM_API_URL": "MAPLE_BASE_URL",
+    "LLM_MODEL": "MAPLE_MODEL",
+    "LLM_API_KEY": "MAPLE_API_KEY",
 }
 
 # Email config translation
@@ -45,15 +39,20 @@ EMAIL_KEY_TRANSLATION = {
 
 
 def _get_provider() -> str:
-    """Get current LLM provider from config or env"""
+    """Get current LLM provider from config or env (Maple only)."""
     # Use cache to avoid repeated DB queries
     _refresh_cache_if_needed()
+    configured = None
     with _cache_lock:
         if "LLM_PROVIDER" in _config_cache:
             value = _config_cache["LLM_PROVIDER"]
             if value and value != MASKED_VALUE_PLACEHOLDER:
-                return value
-    return os.getenv("LLM_PROVIDER", "maple")
+                configured = str(value).strip().lower()
+    if not configured:
+        configured = os.getenv("LLM_PROVIDER", "maple").strip().lower()
+    if configured and configured != "maple":
+        logger.warning("Unsupported LLM_PROVIDER=%r detected; using maple", configured)
+    return "maple"
 
 
 def _refresh_cache_if_needed():
@@ -145,13 +144,9 @@ def get_config(key: str, default: Any = None) -> Any:
             if value is not None and not (isinstance(value, str) and value.strip() == "") and value != MASKED_VALUE_PLACEHOLDER:
                 return value
 
-    # Try key translation for provider-specific keys
-    provider = _get_provider()
-    translation_map = KEY_TRANSLATION.get(provider, {})
-
-    # If this is a generic key, try the provider-specific version
-    if key in translation_map:
-        translated_key = translation_map[key]
+    # Try key translation for Maple-specific aliases.
+    if key in KEY_TRANSLATION:
+        translated_key = KEY_TRANSLATION[key]
         # Check cache for translated key (thread-safe read)
         with _cache_lock:
             if translated_key in _config_cache:
@@ -186,12 +181,10 @@ def get_config(key: str, default: Any = None) -> Any:
 def get_llm_config() -> dict:
     """
     Get all LLM-related configuration.
-    Returns provider-agnostic keys mapped to current values.
+    Returns Maple-backed generic keys mapped to current values.
     """
-    provider = _get_provider()
-
     return {
-        "provider": provider,
+        "provider": _get_provider(),
         "base_url": get_config("LLM_API_URL"),
         "model": get_config("LLM_MODEL"),
         "api_key": get_config("LLM_API_KEY"),

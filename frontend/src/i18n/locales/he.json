@@ -497,7 +497,7 @@
       "compact": "קומפקטי",
       "expand": "הרחב",
       "shareSecretsTitle": "שתף משתני סביבה סודיים",
-      "shareSecretsHint": "כבוי כברירת מחדל. תחילה יש להפעיל את כלי Config. כאשר מופעל, ערכי תצורת פריסה סודיים נחשפים בצד הלקוח ונשלחים לספק ה-LLM שלך.",
+      "shareSecretsHint": "כבוי כברירת מחדל. הפעל תחילה את כלי התצורה. כשהוא מופעל, ערכי תצורת פריסה סודיים נחשפים בצד הלקוח ונשלחים ל-Maple.",
       "sensitive": "רגיש",
       "emptyPrompt": "שאלו על כל תצורת ניהול. אם תרצו שהעוזר יציע ויחיל שינויים, בקשו ממנו לכלול JSON change set.",
       "pendingChanges": "שינויים ממתינים",
@@ -977,21 +977,19 @@
       "usersToMigrate": "משתמשים להעברה",
       "warning": "זוהי פעולה מתקדמת. העברה שגויה עלולה לנעול אותך מנתונים מוצפנים. המשך רק אם אתה מבין את ההשלכות."
     },
-    "leaveEmptyForLlmApiKey": "השאר ריק עבור ספקים מקומיים שאינם דורשים מפתח API.",
+    "leaveEmptyForLlmApiKey": "השאר ריק כדי לנקות את העקיפה ולהשתמש בגיבוי .env MAPLE_API_KEY.",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — מפתח ה-API או אסימון הגישה שלך. אינו נדרש עבור ספקים מקומיים כמו Ollama.",
-      "apiKeyLabel": "מפתח API",
-      "ariaLabel": "עזרה בהגדרת ספק LLM",
+      "apiKeyField": "LLM_API_KEY — מפתח ה-API שלך ל-Maple. ממפה ל-MAPLE_API_KEY.",
+      "apiKeyLabel": "מפתח API של Maple",
+      "ariaLabel": "עזרה בתצורת Maple LLM",
       "exampleConfig": "דוגמת הגדרה",
       "goToPage": "עבור לעמוד",
-      "mapleExtra": "Maple רץ כמכולה צמודה ואינו דורש מפתח API. הוא מפנה בקשות לספקי הסקה ששומרים על פרטיות.",
-      "mapleHint": "Maple Proxy הוא ספק ברירת המחדל להסקה ששמה פרטיות בראש. הוא רץ מקומית לצד Sanctum.",
-      "modelField": "LLM_MODEL — שם המודל לשימוש (לדוגמה, gpt-4, llama3, claude-3-sonnet). חייב להיות נתמך על ידי הספק שבחרת.",
-      "ollamaExtra": "התקן Ollama על המכונה המארחת שלך ומשוך את המודל הרצוי לפני שתגדיר אותו כאן. Sanctum מתחבר דרך ה-API של Ollama.",
-      "ollamaHint": "Ollama מאפשר לך להריץ LLM-ים בקוד פתוח מקומית. כל ההסקה נשארת על החומרה שלך — שום דבר לא עוזב את הרשת שלך.",
-      "overviewDesc": "הגדרות אלו שולטות באיזה ספק LLM ומודל Sanctum משתמש ליצירת תגובות. ניתן להשתמש בספק מקומי לפרטיות מלאה או בספק ענן למודלים חזקים יותר.",
-      "overviewTitle": "סקירת ספק LLM",
-      "providerField": "LLM_PROVIDER — מנוע ההסקה לשימוש (לדוגמה, maple, ollama, openai, anthropic)."
+      "mapleExtra": "הגדר LLM_API_KEY למפתח ה-Maple שלך מ-trymaple.ai. מקשי LLM_* ממפים לכינויי MAPLE_*.",
+      "mapleHint": "Maple הוא ה-backend הסטנדרטי של LLM עבור Sanctum.",
+      "modelField": "LLM_MODEL — מזהה מודל Maple (לדוגמה: kimi-k2-5).",
+      "overviewDesc": "Sanctum משתמש ב-Maple כשירות ה-LLM הסטנדרטי שלו. Maple מספקת API תואם OpenAI מתחת למכסה המנוע.",
+      "overviewTitle": "סקירה כללית של Maple LLM",
+      "providerField": "LLM_PROVIDER — קבוע ל-\"maple\" לתאימות."
     },
     "revealFailed": "נכשל בחשיפת הערך. בדוק את חיבור הרחבת Nostr שלך.",
     "searchHelp": {
@@ -1200,9 +1198,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "ספק AI",
-      "description": "התחבר לשירות ה-AI שלך",
-      "hint": "הגדר איזה שירות AI מפעיל את העוזר שלך. תצטרך מפתח API מהספק שבחרת (למשל, OpenAI, Anthropic). שינויים דורשים אתחול שירות כדי להיכנס לתוקף."
+      "label": "Maple AI",
+      "description": "הגדר את הסקת Maple",
+      "hint": "Sanctum הוא Maple-בלבד עבור הסקת LLM. הגדר את מודל Maple/הגדרות API כאן. שינויים דורשים הפעלה מחדש."
     },
     "embedding": {
       "label": "עיבוד טקסט",
@@ -1304,18 +1302,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "שירות AI",
-      "description": "ספק LLM (maple, ollama)",
-      "hint": "בחר \"maple\" עבור פרוקסי Maple (מומלץ לפרטיות) או \"ollama\" עבור מודלים מקומיים."
+      "description": "ספק LLM (Maple בלבד)",
+      "hint": "Maple הוא הערך היחיד הנתמך. מפתח זה נשאר לתאימות."
     },
     "LLM_MODEL": {
       "label": "שם המודל",
       "description": "שם/מזהה המודל",
-      "hint": "מזהה המודל לשימוש (לדוגמה, \"kimi-k2-5\"). בדוק את התיעוד של הספק שלך עבור מודלים זמינים."
+      "hint": "מזהה מודל ה-Maple לשימוש (לדוגמה: \"kimi-k2-5\")."
     },
     "LLM_API_URL": {
       "label": "נקודת קצה API",
       "description": "כתובת URL בסיסית לבקשות API",
-      "hint": "כתובת ה-URL הבסיסית לבקשות API. עבור Maple: http://maple-proxy:8080/v1. עבור Ollama: http://localhost:11434."
+      "hint": "כתובת ה-URL הבסיסית של Maple API. ברירת מחדל: http://maple-proxy:8080/v1."
     },
     "RAG_TOP_K": {
       "label": "קטעי הקשר",
@@ -1394,8 +1392,8 @@
     },
     "LLM_API_KEY": {
       "label": "מפתח API",
-      "description": "מפתח API עבור שירות ה-LLM",
-      "hint": "מפתח ה-API או האסימון שלך מספק ה-LLM. נדרש עבור ספקים המחייבים אימות."
+      "description": "מפתח API של Maple (סודי)",
+      "hint": "ממפה ל-MAPLE_API_KEY. השאר ריק כדי לנקות את העקיפה ולהשתמש בגיבוי .env."
     },
     "ADMIN_BASE_URL": {
       "description": "כתובת URL של תת-דומיין לפאנל הניהול (אופציונלי)",
@@ -1777,7 +1775,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "בדוק זרימות אימות קישור קסם ו-Nostr.",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "בדוק הגבלת קצב על ידי שליחת בקשות מהירות לנקודות קצה מוגבלות קצב.",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "בדוק את זרימת יצירת המשתמש עם שדות דינמיים המבוססים על סוג משתמש.",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "בודק קישוריות לספק ה-LLM (Maple או Ollama).",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "בודק קישוריות לשירות Maple LLM.",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "צינור ה-RAG המלא: הטמעה ← חיפוש ← שליפה ← יצירה.",
       "this_is_where_the_magic_happens_e98c18": "— כאן קורה הקסם:",
       "toggle_theme_9b0eaf": "החלף ערכת נושא",

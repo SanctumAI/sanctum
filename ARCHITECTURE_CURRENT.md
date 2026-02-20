@@ -149,11 +149,6 @@ User Query → Embed → Qdrant Search → Top-K Results → LLM Context → Res
 - Supports structured outputs
 - Privacy-preserving proxy layer
 
-### Ollama (Optional)
-
-- Local inference alternative
-- Configure via `LLM_PROVIDER=ollama` environment variable
-
 ---
 
 ## Tools
@@ -177,7 +172,7 @@ See [docs/tools.md](./docs/tools.md) for details.
 |----------|--------|-------------|
 | `/health` | GET | Service health check (Qdrant status) |
 | `/test` | GET | Smoke test (verifies Qdrant seeded data) |
-| `/llm/test` | GET | LLM provider connectivity test |
+| `/llm/test` | GET | Maple LLM connectivity test |
 
 ### Public Config
 
@@ -275,10 +270,10 @@ Key configuration options (see `.env.example`):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `LLM_PROVIDER` | `maple` | LLM backend (`maple` or `ollama`) |
-| `LLM_API_URL` | (provider-specific) | Base URL for LLM provider. Set this generic variable OR the provider-specific `MAPLE_BASE_URL`/`OLLAMA_BASE_URL` |
-| `LLM_MODEL` | (provider-specific) | Model name. Set this generic variable OR the provider-specific `MAPLE_MODEL`/`OLLAMA_MODEL` |
-| `MAPLE_API_KEY` | (required) | API key for maple-proxy when `LLM_PROVIDER=maple` |
+| `LLM_PROVIDER` | `maple` | LLM backend (Maple only) |
+| `LLM_API_URL` | `http://maple-proxy:8080/v1` | Base URL for Maple-compatible chat completions (alias: `MAPLE_BASE_URL`) |
+| `LLM_MODEL` | `kimi-k2-5` | Maple model identifier (alias: `MAPLE_MODEL`) |
+| `LLM_API_KEY` | (required) | API key for maple-proxy (alias: `MAPLE_API_KEY`) |
 | `QDRANT_HOST` | `qdrant` | Qdrant hostname |
 | `QDRANT_PORT` | `6333` | Qdrant port |
 | `EMBEDDING_MODEL` | `intfloat/multilingual-e5-base` | Embedding model name |

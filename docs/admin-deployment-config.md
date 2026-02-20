@@ -64,15 +64,15 @@ If you edit any deployment setting after validating, the banner is marked out of
 
 ## Common Workflows
 
-### LLM Provider
+### Maple LLM
 
-Use provider‑agnostic keys where possible:
-- `LLM_PROVIDER` (`maple` or `ollama`)
+Sanctum is Maple-only for LLM inference. Use these keys:
+- `LLM_PROVIDER` (`maple` only; compatibility key)
 - `LLM_API_URL`
 - `LLM_MODEL`
-- `LLM_API_KEY` (secret; for Maple this maps to `MAPLE_API_KEY`)
+- `LLM_API_KEY` (secret; maps to `MAPLE_API_KEY`)
 
-Provider‑specific keys (`MAPLE_BASE_URL`, `MAPLE_MODEL`, `OLLAMA_BASE_URL`, `OLLAMA_MODEL`) are also supported and mapped internally.
+Maple alias keys (`MAPLE_BASE_URL`, `MAPLE_MODEL`, `MAPLE_API_KEY`) are also supported and mapped internally.
 
 Example (set Maple model and base URL):
 ```bash
@@ -97,7 +97,7 @@ curl -X PUT http://localhost:8000/admin/deployment/config/LLM_MODEL \
   -d '{"value":"kimi-k2-5"}'
 ```
 
-If `LLM_API_KEY` is not set in deployment config, Sanctum still falls back to `.env` provider keys (for Maple: `MAPLE_API_KEY`).
+If `LLM_API_KEY` is not set in deployment config, Sanctum still falls back to `.env` Maple keys (`MAPLE_API_KEY`).
 In the admin UI, saving `LLM_API_KEY` as empty clears the override and re-enables this fallback.
 
 ### Email + SMTP

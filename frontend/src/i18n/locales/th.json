@@ -497,7 +497,7 @@
       "compact": "กะทัดรัด",
       "expand": "ขยาย",
       "shareSecretsTitle": "แชร์ตัวแปรสภาพแวดล้อมลับ",
-      "shareSecretsHint": "ปิดไว้โดยค่าเริ่มต้น เปิดเครื่องมือ Config ก่อน เมื่อเปิดแล้ว ค่าคอนฟิกการดีพลอยที่เป็นความลับจะแสดงฝั่งไคลเอนต์และส่งไปยังผู้ให้บริการ LLM ของคุณ",
+      "shareSecretsHint": "ปิดใช้งานโดยค่าเริ่มต้น เปิดใช้งานเครื่องมือ Config ก่อน เมื่อเปิดใช้งาน ค่าการกำหนดค่าการปรับใช้ที่เป็นความลับจะถูกเปิดเผยฝั่งไคลเอ็นต์และส่งไปยัง Maple",
       "sensitive": "ละเอียดอ่อน",
       "emptyPrompt": "ถามเกี่ยวกับการตั้งค่าผู้ดูแลระบบใด ๆ ได้ หากต้องการให้ผู้ช่วยเสนอและใช้การเปลี่ยนแปลง ให้บอกให้รวม JSON change set",
       "pendingChanges": "การเปลี่ยนแปลงที่รอดำเนินการ",
@@ -977,21 +977,19 @@
       "usersToMigrate": "ผู้ใช้ที่จะย้าย",
       "warning": "นี่เป็นการดำเนินการขั้นสูง การย้ายที่ไม่ถูกต้องอาจทำให้คุณไม่สามารถเข้าถึงข้อมูลที่เข้ารหัสได้ ดำเนินการเฉพาะเมื่อคุณเข้าใจผลกระทบ"
     },
-    "leaveEmptyForLlmApiKey": "เว้นว่างไว้สำหรับผู้ให้บริการในเครื่องที่ไม่ต้องการ API key",
+    "leaveEmptyForLlmApiKey": "เว้นว่างไว้เพื่อล้างการแทนที่และใช้ .env MAPLE_API_KEY สำรอง",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — API key หรือโทเค็นเข้าถึงของคุณ ไม่จำเป็นสำหรับผู้ให้บริการในเครื่องเช่น Ollama",
-      "apiKeyLabel": "คีย์ API",
-      "ariaLabel": "ความช่วยเหลือการกำหนดค่าผู้ให้บริการ LLM",
+      "apiKeyField": "LLM_API_KEY — คีย์ Maple API ของคุณ แมปกับ MAPLE_API_KEY",
+      "apiKeyLabel": "คีย์ Maple API",
+      "ariaLabel": "ความช่วยเหลือในการกำหนดค่า Maple LLM",
       "exampleConfig": "ตัวอย่างการตั้งค่า",
       "goToPage": "ไปที่หน้า",
-      "mapleExtra": "Maple ทำงานเป็นคอนเทนเนอร์ข้างเคียงและไม่ต้องการ API key มันส่งต่อคำขอไปยังผู้ให้บริการ inference ที่รักษาความเป็นส่วนตัว",
-      "mapleHint": "Maple Proxy เป็นผู้ให้บริการเริ่มต้นสำหรับ inference ที่เน้นความเป็นส่วนตัว ทำงานในเครื่องร่วมกับ Sanctum",
-      "modelField": "LLM_MODEL — ชื่อโมเดลที่จะใช้ (เช่น gpt-4, llama3, claude-3-sonnet) ต้องได้รับการสนับสนุนโดยผู้ให้บริการที่คุณเลือก",
-      "ollamaExtra": "ติดตั้ง Ollama บนเครื่องโฮสต์ของคุณและดึงโมเดลที่ต้องการก่อนกำหนดค่าที่นี่ Sanctum เชื่อมต่อผ่าน Ollama API",
-      "ollamaHint": "Ollama ให้คุณรัน LLM โอเพนซอร์สในเครื่อง inference ทั้งหมดอยู่บนฮาร์ดแวร์ของคุณ — ไม่มีอะไรออกจากเครือข่ายของคุณ",
-      "overviewDesc": "การตั้งค่าเหล่านี้ควบคุมผู้ให้บริการ LLM และโมเดลที่ Sanctum ใช้สำหรับสร้างการตอบสนอง คุณสามารถใช้ผู้ให้บริการในเครื่องเพื่อความเป็นส่วนตัวเต็มที่หรือผู้ให้บริการคลาวด์สำหรับโมเดลที่ทรงพลังกว่า",
-      "overviewTitle": "ภาพรวมผู้ให้บริการ LLM",
-      "providerField": "LLM_PROVIDER — แบ็กเอนด์ inference ที่จะใช้ (เช่น maple, ollama, openai, anthropic)"
+      "mapleExtra": "ตั้งค่า LLM_API_KEY เป็นคีย์ Maple ของคุณจาก trymaple.ai คีย์ LLM_* แมปกับนามแฝง MAPLE_*",
+      "mapleHint": "Maple เป็นแบ็กเอนด์ LLM มาตรฐานสำหรับ Sanctum",
+      "modelField": "LLM_MODEL — ตัวระบุโมเดล Maple (เช่น kimi-k2-5)",
+      "overviewDesc": "Sanctum ใช้ Maple เป็นบริการ LLM มาตรฐาน Maple ให้บริการ OpenAI-compatible API ภายใต้พื้นฐาน",
+      "overviewTitle": "ภาพรวม Maple LLM",
+      "providerField": "LLM_PROVIDER — กำหนดตายตัวเป็น \"maple\" เพื่อความเข้ากันได้"
     },
     "revealFailed": "ไม่สามารถแสดงค่าได้ ตรวจสอบการเชื่อมต่อส่วนขยาย Nostr ของคุณ",
     "searchHelp": {
@@ -1200,9 +1198,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "ผู้ให้บริการ AI",
-      "description": "เชื่อมต่อกับบริการ AI ของคุณ",
-      "hint": "กำหนดค่าบริการ AI ที่ขับเคลื่อนผู้ช่วยของคุณ คุณจะต้องมี API key จากผู้ให้บริการที่เลือก (เช่น OpenAI, Anthropic) การเปลี่ยนแปลงต้องรีสตาร์ทบริการจึงจะมีผล"
+      "label": "Maple AI",
+      "description": "กำหนดค่าการอนุมานของ Maple",
+      "hint": "Sanctum ใช้ Maple เท่านั้นสำหรับการอนุมาน LLM กำหนดค่าโมเดล Maple/การตั้งค่า API ที่นี่ การเปลี่ยนแปลงต้องมีการรีสตาร์ท"
     },
     "embedding": {
       "label": "การประมวลผลข้อความ",
@@ -1304,18 +1302,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "บริการ AI",
-      "description": "ผู้ให้บริการ LLM (maple, ollama)",
-      "hint": "เลือก \"maple\" สำหรับ Maple proxy (แนะนำเพื่อความเป็นส่วนตัว) หรือ \"ollama\" สำหรับโมเดลในเครื่อง"
+      "description": "ผู้ให้บริการ LLM (maple เท่านั้น)",
+      "hint": "Maple เป็นค่าที่รองรับเพียงค่าเดียว คีย์นี้ยังคงอยู่เพื่อความเข้ากันได้"
     },
     "LLM_MODEL": {
       "label": "ชื่อโมเดล",
       "description": "ชื่อ/ตัวระบุโมเดล",
-      "hint": "ตัวระบุโมเดลที่จะใช้ (เช่น \"kimi-k2-5\") ตรวจสอบเอกสารของผู้ให้บริการสำหรับโมเดลที่มี"
+      "hint": "ตัวระบุโมเดล Maple ที่จะใช้ (เช่น \"kimi-k2-5\")"
     },
     "LLM_API_URL": {
       "label": "จุดเชื่อมต่อ API",
       "description": "URL พื้นฐานสำหรับคำขอ API",
-      "hint": "URL พื้นฐานสำหรับคำขอ API สำหรับ Maple: http://maple-proxy:8080/v1 สำหรับ Ollama: http://localhost:11434"
+      "hint": "URL พื้นฐานของ Maple API ค่าเริ่มต้น: http://maple-proxy:8080/v1"
     },
     "RAG_TOP_K": {
       "label": "จำนวนส่วนบริบท",
@@ -1394,8 +1392,8 @@
     },
     "LLM_API_KEY": {
       "label": "คีย์ API",
-      "description": "คีย์ API สำหรับบริการ LLM",
-      "hint": "คีย์ API หรือโทเค็นของคุณจากผู้ให้บริการ LLM จำเป็นสำหรับผู้ให้บริการที่ต้องการการยืนยันตัวตน"
+      "description": "คีย์ Maple API (ความลับ)",
+      "hint": "แมปกับ MAPLE_API_KEY เว้นว่างไว้เพื่อล้างการแทนที่และใช้ .env สำรอง"
     },
     "ADMIN_BASE_URL": {
       "description": "URL โดเมนย่อยของแผงผู้ดูแลระบบ (ไม่บังคับ)",
@@ -1777,7 +1775,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "ทดสอบการเชื่อมโยง Magic Link และโฟลว์การตรวจสอบสิทธิ์ Nostr",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "ทดสอบการจำกัดอัตราโดยการส่งคำขออย่างรวดเร็วไปยังปลายทางที่จำกัดอัตรา",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "ทดสอบโฟลว์การสร้างผู้ใช้ด้วยฟิลด์ไดนามิกตามประเภทผู้ใช้",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "ทดสอบการเชื่อมต่อกับผู้ให้บริการ LLM (Maple หรือ Ollama)",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "ทดสอบการเชื่อมต่อกับบริการ Maple LLM",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "ไปป์ไลน์ RAG ที่สมบูรณ์: ฝัง → ค้นหา → ดึงข้อมูล → สร้าง",
       "this_is_where_the_magic_happens_e98c18": "— นี่คือที่ที่ความมหัศจรรย์เกิดขึ้น:",
       "toggle_theme_9b0eaf": "สลับธีม",

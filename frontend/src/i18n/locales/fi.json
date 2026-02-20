@@ -497,7 +497,7 @@
       "compact": "Kompakti",
       "expand": "Laajenna",
       "shareSecretsTitle": "Jaa salaiset ympäristömuuttujat",
-      "shareSecretsHint": "Pois päältä oletuksena. Ota ensin Config-työkalu käyttöön. Kun se on käytössä, salaiset deploy-määritysarvot paljastetaan client-puolella ja lähetetään LLM-palveluntarjoajallesi.",
+      "shareSecretsHint": "Oletusarvoisesti poissa käytöstä. Ota Config-työkalu käyttöön ensin. Kun käytössä, salaiset käyttöönottokokoonpanon arvot näytetään asiakaspuolella ja lähetetään Maplelle.",
       "sensitive": "Arkaluonteinen",
       "emptyPrompt": "Kysy mistä tahansa ylläpidon asetuksesta. Jos haluat avustajan ehdottavan ja toteuttavan muutoksia, pyydä sitä lisäämään JSON-muotoinen change set.",
       "pendingChanges": "Odottavat muutokset",
@@ -977,21 +977,19 @@
       "usersToMigrate": "Siirrettäviä käyttäjiä",
       "warning": "Tämä on edistynyt toiminto. Virheellinen siirto voi estää pääsyn salattuihin tietoihin. Jatka vain, jos ymmärrät seuraukset."
     },
-    "leaveEmptyForLlmApiKey": "Jätä tyhjäksi paikallisille palveluntarjoajille, jotka eivät vaadi API-avainta.",
+    "leaveEmptyForLlmApiKey": "Jätä tyhjäksi tyhjentääksesi ohituksen ja käyttääksesi .env MAPLE_API_KEY -varatoimintoa.",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — API-avaimesi tai käyttöoikeustunnus. Ei vaadita paikallisille palveluntarjoajille kuten Ollama.",
-      "apiKeyLabel": "API-avain",
-      "ariaLabel": "LLM-palveluntarjoajan konfiguraation ohje",
+      "apiKeyField": "LLM_API_KEY – Maple-sovellusliittymäavaimesi. Vastaa MAPLE_API_KEY:tä.",
+      "apiKeyLabel": "Maple-sovellusliittymäavain",
+      "ariaLabel": "Maple LLM -kokoonpanoapu",
       "exampleConfig": "Esimerkkikonfiguraatio",
       "goToPage": "Siirry sivulle",
-      "mapleExtra": "Maple toimii sivuvaunukonttina eikä vaadi API-avainta. Se välittää pyynnöt yksityisyyttä suojeleville päättelypalveluntarjoajille.",
-      "mapleHint": "Maple Proxy on oletuspalveluntarjoaja yksityisyyttä suojelevaan päättelyyn. Se toimii paikallisesti Sanctumin rinnalla.",
-      "modelField": "LLM_MODEL — käytettävä mallinimi (esim. gpt-4, llama3, claude-3-sonnet). Valitun palveluntarjoajan on tuettava sitä.",
-      "ollamaExtra": "Asenna Ollama isäntäkoneellesi ja lataa haluamasi malli ennen sen määrittämistä tässä. Sanctum yhdistää Ollama API:n kautta.",
-      "ollamaHint": "Ollama mahdollistaa avoimen lähdekoodin LLM-mallien suorittamisen paikallisesti. Kaikki päättely pysyy laitteistollasi — mikään ei poistu verkostasi.",
-      "overviewDesc": "Nämä asetukset ohjaavat, mitä LLM-palveluntarjoajaa ja mallia Sanctum käyttää vastausten tuottamiseen. Voit käyttää paikallista palveluntarjoajaa täydelle yksityisyydelle tai pilvipalveluntarjoajaa tehokkaampien mallien käyttöön.",
-      "overviewTitle": "LLM-palveluntarjoajan yleiskatsaus",
-      "providerField": "LLM_PROVIDER — käytettävä päättelytaustajärjestelmä (esim. maple, ollama, openai, anthropic)."
+      "mapleExtra": "Aseta LLM_API_KEY Maple-avaimeksesi osoitteesta trymaple.ai. LLM_*-avaimet vastaavat MAPLE_*-aliaksia.",
+      "mapleHint": "Maple on Sanctumin standardi LLM-taustaohjelma.",
+      "modelField": "LLM_MODEL – Maple-mallitunniste (esimerkiksi: kimi-k2-5).",
+      "overviewDesc": "Sanctum käyttää Maplea standardina LLM-palvelunaan. Maple tarjoaa OpenAI-yhteensopivan sovellusliittymän taustalla.",
+      "overviewTitle": "Maple LLM yleiskatsaus",
+      "providerField": "LLM_PROVIDER – asetettu arvoon \"maple\" yhteensopivuuden vuoksi."
     },
     "revealFailed": "Arvon paljastaminen epäonnistui. Tarkista Nostr-laajennuksesi yhteys.",
     "searchHelp": {
@@ -1200,9 +1198,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "Tekoälypalvelu",
-      "description": "Yhdistä tekoälypalveluusi",
-      "hint": "Määritä mikä tekoälypalvelu toimii avustajasi moottorina. Tarvitset API-avaimen valitsemaltasi palveluntarjoajalta (esim. OpenAI, Anthropic). Muutokset vaativat palvelun uudelleenkäynnistyksen."
+      "label": "Maple AI",
+      "description": "Määritä Maple-päätelmät",
+      "hint": "Sanctum on vain Maple-pohjainen LLM-päätelmien osalta. Määritä Maple-malli/sovellusliittymäasetukset täällä. Muutokset vaativat uudelleenkäynnistyksen."
     },
     "embedding": {
       "label": "Tekstinkäsittely",
@@ -1304,18 +1302,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "AI-palvelu",
-      "description": "LLM-tarjoaja (maple, ollama)",
-      "hint": "Valitse \"maple\" Maple-proxylle (suositellaan yksityisyyden vuoksi) tai \"ollama\" paikallisille malleille."
+      "description": "LLM-palveluntarjoaja (vain Maple)",
+      "hint": "Maple on ainoa tuettu arvo. Tämä avain säilytetään yhteensopivuuden vuoksi."
     },
     "LLM_MODEL": {
       "label": "Mallin nimi",
       "description": "Mallin nimi/tunniste",
-      "hint": "Käytettävä mallitunniste (esim. \"kimi-k2-5\"). Tarkista tarjoajasi dokumentaatiosta saatavilla olevat mallit."
+      "hint": "Käytettävä Maple-mallitunniste (esim. \"kimi-k2-5\")."
     },
     "LLM_API_URL": {
       "label": "API-päätepiste",
       "description": "API-pyyntöjen perus-URL",
-      "hint": "API-pyyntöjen perus-URL. Maplelle: http://maple-proxy:8080/v1. Ollamalle: http://localhost:11434."
+      "hint": "Maplen sovellusliittymän perus-URL. Oletus: http://maple-proxy:8080/v1."
     },
     "RAG_TOP_K": {
       "label": "Kontekstipalat",
@@ -1394,8 +1392,8 @@
     },
     "LLM_API_KEY": {
       "label": "API-avain",
-      "description": "API-avain LLM-palvelulle",
-      "hint": "API-avaimesi tai tunnuksesi LLM-tarjoajalta. Vaaditaan todennusta edellyttäville tarjoajille."
+      "description": "Maple-sovellusliittymäavain (salainen)",
+      "hint": "Vastaa MAPLE_API_KEY:tä. Jätä tyhjäksi tyhjentääksesi ohituksen ja käyttääksesi .env-varatoimintoa."
     },
     "ADMIN_BASE_URL": {
       "description": "Ylläpitäjän paneelin aliverkkotunnuksen URL (valinnainen)",
@@ -1777,7 +1775,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "Testaa maagisen linkin ja Nostr-todennusvirrat.",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "Testaa nopeusrajoitusta lähettämällä nopeita pyyntöjä nopeusrajoitettuihin päätepisteisiin.",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "Testaa käyttäjän luontityönkulku dynaamisilla kentillä käyttäjätyypin perusteella.",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Testaa yhteyttä LLM-palveluntarjoajaan (Maple tai Ollama).",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Testaa yhteyttä Maple LLM -palveluun.",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "Koko RAG-putki: upota → hae → nouda → generoi.",
       "this_is_where_the_magic_happens_e98c18": "– Tässä taika tapahtuu:",
       "toggle_theme_9b0eaf": "Vaihda teemaa",

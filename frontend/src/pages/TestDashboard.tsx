@@ -1438,7 +1438,7 @@ export function TestDashboard() {
         <Card className="mb-6">
           <h3 className="text-lg font-semibold text-text mb-2">{t('testDashboard.extracted.3_llm_provider_test_f3cd3d', '3. LLM Provider Test')}</h3>
           <p className="text-sm text-text-secondary mb-4">
-            {t('testDashboard.extracted.tests_connectivity_to_the_llm_provider_maple_or_e91a9f', 'Tests connectivity to the LLM provider (Maple or Ollama).')}
+            {t('testDashboard.extracted.tests_connectivity_to_the_llm_provider_maple_or_e91a9f', 'Tests connectivity to the Maple LLM service.')}
           </p>
           <InfoBox>
             <strong className="text-text">{t('testDashboard.extracted.get_llm_test_86edd0', 'GET /llm/test')}</strong> {t('testDashboard.extracted.sends_say_hello_to_the_llm_and_returns_9da964', '— Sends "Say \'hello\'" to the LLM and returns its response. Shows which model and provider are active.')}

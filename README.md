@@ -89,7 +89,7 @@ See `docs/security.md` and `docs/security-data-protection-checklist.md` for prod
 | `GET /` | API info |
 | `GET /health` | Service health check |
 | `GET /test` | Smoke test (Qdrant + health check) |
-| `GET /llm/test` | LLM provider connectivity test |
+| `GET /llm/test` | Maple LLM connectivity test |
 
 ### Service URLs
 

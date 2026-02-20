@@ -53,10 +53,10 @@ config_export_limiter = RateLimiter(
 # These are the keys we allow managing through the UI
 ENV_CONFIG_MAP = {
     # LLM Settings
-    "LLM_PROVIDER": {"category": "llm", "description": "LLM provider (maple, ollama)", "requires_restart": True, "default": "maple"},
-    "LLM_MODEL": {"category": "llm", "description": "Model name/identifier", "requires_restart": False},  # Provider-translated
-    "LLM_API_URL": {"category": "llm", "description": "LLM API base URL", "requires_restart": True},  # Provider-translated
-    "LLM_API_KEY": {"category": "llm", "description": "LLM provider API key", "requires_restart": False, "is_secret": True},  # Provider-translated
+    "LLM_PROVIDER": {"category": "llm", "description": "LLM provider (maple only)", "requires_restart": True, "default": "maple"},
+    "LLM_MODEL": {"category": "llm", "description": "Model name/identifier", "requires_restart": False},  # Maple-translated
+    "LLM_API_URL": {"category": "llm", "description": "LLM API base URL", "requires_restart": True},  # Maple-translated
+    "LLM_API_KEY": {"category": "llm", "description": "Maple API key", "requires_restart": False, "is_secret": True},  # Maple-translated
     # Embedding Settings
     "EMBEDDING_MODEL": {"category": "embedding", "description": "Sentence transformer model", "requires_restart": True, "default": "intfloat/multilingual-e5-base"},
     # Email Settings (no defaults - optional, user must configure)
@@ -130,40 +130,40 @@ def _sync_env_to_db() -> None:
     """
     Sync current environment variables to the database.
     Only syncs keys that are in ENV_CONFIG_MAP and don't already exist in DB.
-    Uses key translation for provider-specific variables.
+    Uses key translation for Maple-specific aliases.
     """
     # Import key translation from config_loader
     from config_loader import KEY_TRANSLATION, EMAIL_KEY_TRANSLATION
-
-    # Get the current provider for key translation
-    provider = os.getenv("LLM_PROVIDER", "maple")
-    translation_map = KEY_TRANSLATION.get(provider, {})
 
     for key, meta in ENV_CONFIG_MAP.items():
         if key in FORBIDDEN_KEYS:
             continue
 
         existing = database.get_deployment_config(key)
-        # Keep provider API keys env-driven unless explicitly overridden in admin UI.
+        # Keep Maple API keys env-driven unless explicitly overridden in admin UI.
         # This preserves expected `.env` behavior while still exposing the key in admin config.
         preserve_env_fallback = key == "LLM_API_KEY"
 
-        # Try to get value from env, with key translation
+        # Try to get value from env, with Maple key translation
         value = None
 
         if not preserve_env_fallback:
             # 1. Try the original key
             value = os.getenv(key)
 
-            # 2. If not found, try provider-translated key
-            if value is None and key in translation_map:
-                translated_key = translation_map[key]
+            # 2. If not found, try Maple-translated key
+            if value is None and key in KEY_TRANSLATION:
+                translated_key = KEY_TRANSLATION[key]
                 value = os.getenv(translated_key)
 
             # 3. If not found, try email key translation
             if value is None and key in EMAIL_KEY_TRANSLATION:
                 translated_key = EMAIL_KEY_TRANSLATION[key]
                 value = os.getenv(translated_key)
+
+        # Enforce Maple as the only supported provider.
+        if key == "LLM_PROVIDER":
+            value = "maple"
 
         # 4. Fall back to default from config map
         if value is None:
@@ -181,9 +181,13 @@ def _sync_env_to_db() -> None:
             should_sync_metadata = (
                 key == "MONITORING_URL" and existing.get("category") != meta["category"]
             )
+            should_force_maple_provider = (
+                key == "LLM_PROVIDER"
+                and str(existing_value or "").strip().lower() != "maple"
+            )
 
-            if should_backfill_value or should_sync_metadata:
-                value_to_store = existing_value if existing_value not in (None, "") else value
+            if should_backfill_value or should_sync_metadata or should_force_maple_provider:
+                value_to_store = "maple" if should_force_maple_provider else (existing_value if existing_value not in (None, "") else value)
                 database.upsert_deployment_config(
                     key=key,
                     value=value_to_store,
@@ -196,6 +200,8 @@ def _sync_env_to_db() -> None:
                     logger.debug(f"Backfilled empty config: {key} (value: {'***' if meta.get('is_secret') else value_to_store})")
                 elif should_sync_metadata:
                     logger.debug(f"Synchronized config metadata: {key} (category -> {meta['category']})")
+                elif should_force_maple_provider:
+                    logger.info("Normalized LLM_PROVIDER to maple during startup sync")
             continue
 
         database.upsert_deployment_config(
@@ -462,6 +468,12 @@ async def update_deployment_config_value(
         if value_to_save.lower() not in ("true", "false", "1", "0", "yes", "no", "on", "off"):
             raise HTTPException(status_code=400, detail="FORCE_HTTPS must be a boolean value (true/false, 1/0, yes/no, on/off)")
 
+    if key == "LLM_PROVIDER":
+        normalized = str(value_to_save or "").strip().lower()
+        if normalized not in ("", "maple"):
+            raise HTTPException(status_code=400, detail='LLM_PROVIDER only supports "maple"')
+        value_to_save = "maple"
+
     # Get admin pubkey for audit log
     admin_pubkey = admin.get("pubkey")
     if not admin_pubkey:
@@ -613,40 +625,37 @@ async def get_service_health(admin: dict = Depends(auth.require_admin)):
             error="Connection failed",
         ))
 
-    # Check LLM Provider
-    llm_provider = config_dict.get("LLM_PROVIDER") or os.getenv("LLM_PROVIDER", "maple")
-    llm_url = config_dict.get("LLM_API_URL") or os.getenv("LLM_API_URL", "")
+    # Check Maple LLM service
+    llm_url = (
+        config_dict.get("LLM_API_URL")
+        or os.getenv("LLM_API_URL", "")
+        or config_dict.get("MAPLE_BASE_URL")
+        or os.getenv("MAPLE_BASE_URL", "")
+    )
+    base_url = (llm_url or "http://maple-proxy:8080").rstrip("/")
+    if base_url.endswith("/v1"):
+        base_url = base_url[:-3]
+    llm_health_url = base_url + "/health"
 
-    if llm_provider == "maple":
-        base_url = llm_url or "http://maple-proxy:8080"
-        if base_url.endswith("/v1"):
-            base_url = base_url[:-3]
-        llm_health_url = base_url.rstrip("/") + "/health"
-    elif llm_provider == "ollama":
-        llm_health_url = (llm_url or "http://localhost:11434").rstrip("/") + "/api/version"
-    else:
-        llm_health_url = None
-
-    if llm_health_url:
-        try:
-            start = time.time()
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                resp = await client.get(llm_health_url)
-            response_time = int((time.time() - start) * 1000)
-            services.append(ServiceHealthItem(
-                name=f"LLM ({llm_provider})",
-                status="healthy" if resp.status_code == 200 else "unhealthy",
-                response_time_ms=response_time,
-                last_checked=datetime.now(timezone.utc).isoformat(),
-            ))
-        except Exception as e:
-            logger.warning(f"LLM ({llm_provider}) health check failed: {e}")
-            services.append(ServiceHealthItem(
-                name=f"LLM ({llm_provider})",
-                status="unhealthy",
-                last_checked=datetime.now(timezone.utc).isoformat(),
-                error="Connection failed",
-            ))
+    try:
+        start = time.time()
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(llm_health_url)
+        response_time = int((time.time() - start) * 1000)
+        services.append(ServiceHealthItem(
+            name="LLM (maple)",
+            status="healthy" if resp.status_code == 200 else "unhealthy",
+            response_time_ms=response_time,
+            last_checked=datetime.now(timezone.utc).isoformat(),
+        ))
+    except Exception as e:
+        logger.warning(f"LLM (maple) health check failed: {e}")
+        services.append(ServiceHealthItem(
+            name="LLM (maple)",
+            status="unhealthy",
+            last_checked=datetime.now(timezone.utc).isoformat(),
+            error="Connection failed",
+        ))
 
     # Check SearXNG
     searxng_url = config_dict.get("SEARXNG_URL") or os.getenv("SEARXNG_URL", "")

@@ -227,7 +227,7 @@
       "compact": "Compact",
       "expand": "Expand",
       "shareSecretsTitle": "Share secret env vars",
-      "shareSecretsHint": "Off by default. Enable Config tool first. When enabled, secret deployment config values are revealed client-side and sent to your LLM provider.",
+      "shareSecretsHint": "Off by default. Enable Config tool first. When enabled, secret deployment config values are revealed client-side and sent to Maple.",
       "sensitive": "Sensitive",
       "emptyPrompt": "Ask questions about any admin configuration. If you want the assistant to propose and apply changes, ask it to include a JSON change set.",
       "pendingChanges": "Pending changes",
@@ -1049,21 +1049,19 @@
       "usersToMigrate": "Users to migrate",
       "warning": "This is an advanced operation. Incorrect migration can lock you out of encrypted data. Proceed only if you understand the implications."
     },
-    "leaveEmptyForLlmApiKey": "Leave empty for local providers that don't require an API key.",
+    "leaveEmptyForLlmApiKey": "Leave empty to clear override and use .env MAPLE_API_KEY fallback.",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — your API key or access token. Not required for local providers like Ollama.",
-      "apiKeyLabel": "API Key",
-      "ariaLabel": "LLM provider configuration help",
+      "apiKeyField": "LLM_API_KEY — your Maple API key. Maps to MAPLE_API_KEY.",
+      "apiKeyLabel": "Maple API Key",
+      "ariaLabel": "Maple LLM configuration help",
       "exampleConfig": "Example configuration",
       "goToPage": "Go to page",
-      "mapleExtra": "Maple runs as a sidecar container and requires no API key. It proxies requests to privacy-preserving inference providers.",
-      "mapleHint": "Maple Proxy is the default provider for privacy-first inference. It runs locally alongside Sanctum.",
-      "modelField": "LLM_MODEL — the model name to use (e.g., gpt-4, llama3, claude-3-sonnet). Must be supported by your chosen provider.",
-      "ollamaExtra": "Install Ollama on your host machine and pull the model you want before configuring it here. Sanctum connects via the Ollama API.",
-      "ollamaHint": "Ollama lets you run open-source LLMs locally. All inference stays on your hardware — nothing leaves your network.",
-      "overviewDesc": "These settings control which LLM provider and model Sanctum uses for generating responses. You can use a local provider for full privacy or a cloud provider for more powerful models.",
-      "overviewTitle": "LLM Provider Overview",
-      "providerField": "LLM_PROVIDER — the inference backend to use (e.g., maple, ollama, openai, anthropic)."
+      "mapleExtra": "Set LLM_API_KEY to your Maple key from trymaple.ai. LLM_* keys map to MAPLE_* aliases.",
+      "mapleHint": "Maple is the standard LLM backend for Sanctum.",
+      "modelField": "LLM_MODEL — Maple model identifier (for example: kimi-k2-5).",
+      "overviewDesc": "Sanctum uses Maple as its standard LLM service. Maple provides an OpenAI-compatible API under the hood.",
+      "overviewTitle": "Maple LLM Overview",
+      "providerField": "LLM_PROVIDER — fixed to \"maple\" for compatibility."
     },
     "revealFailed": "Failed to reveal the value. Check your Nostr extension connection.",
     "searchHelp": {
@@ -1234,9 +1232,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "AI Provider",
-      "description": "Connect to your AI service",
-      "hint": "Configure which AI service powers your assistant. You'll need an API key from your chosen provider (e.g., OpenAI, Anthropic). Changes require a service restart to take effect."
+      "label": "Maple AI",
+      "description": "Configure Maple inference",
+      "hint": "Sanctum is Maple-only for LLM inference. Configure Maple model/API settings here. Changes require a restart."
     },
     "embedding": {
       "label": "Text Processing",
@@ -1327,18 +1325,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "AI Service",
-      "description": "LLM provider (maple, ollama)",
-      "hint": "Choose \"maple\" for the Maple proxy (recommended for privacy) or \"ollama\" for local models."
+      "description": "LLM provider (maple only)",
+      "hint": "Maple is the only supported value. This key remains for compatibility."
     },
     "LLM_MODEL": {
       "label": "Model Name",
       "description": "Model name/identifier",
-      "hint": "The model identifier to use (e.g., \"kimi-k2-5\"). Check your provider's documentation for available models."
+      "hint": "The Maple model identifier to use (e.g., \"kimi-k2-5\")."
     },
     "LLM_API_URL": {
       "label": "API Endpoint",
       "description": "Base URL for API requests",
-      "hint": "The base URL for API requests. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+      "hint": "Maple API base URL. Default: http://maple-proxy:8080/v1."
     },
     "RAG_TOP_K": {
       "label": "Context Chunks",
@@ -1517,8 +1515,8 @@
     },
     "LLM_API_KEY": {
       "label": "API Key",
-      "description": "API key for the LLM service",
-      "hint": "Your API key or token from the LLM provider. Required for authenticated providers."
+      "description": "Maple API key (secret)",
+      "hint": "Maps to MAPLE_API_KEY. Leave empty to clear override and use .env fallback."
     }
   },
   "colors": {
@@ -1607,7 +1605,7 @@
       "get_test_b58003": "GET /test",
       "retrieves_the_spanish_udhr_claim_from_neo4j_and_3bbddf": "— Retrieves the Spanish UDHR claim from Neo4j and its embedding from Qdrant.",
       "3_llm_provider_test_f3cd3d": "3. LLM Provider Test",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Tests connectivity to the LLM provider (Maple or Ollama).",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Tests connectivity to the Maple LLM service.",
       "get_llm_test_86edd0": "GET /llm/test",
       "sends_say_hello_to_the_llm_and_returns_9da964": "— Sends \"Say 'hello'\" to the LLM and returns its response. Shows which model and provider are active.",
       "4_rag_query_full_pipeline_8ea01b": "4. RAG Query (Full Pipeline)",

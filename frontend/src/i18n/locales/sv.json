@@ -497,7 +497,7 @@
       "compact": "Kompakt",
       "expand": "Expandera",
       "shareSecretsTitle": "Dela hemliga miljövariabler",
-      "shareSecretsHint": "Avstängt som standard. Aktivera först Config-verktyget. När det är aktiverat visas hemliga deploy-konfigurationsvärden på klienten och skickas till din LLM-leverantör.",
+      "shareSecretsHint": "Avstängd som standard. Aktivera konfigurationsverktyget först. När den är aktiverad, visas hemliga distributionskonfigurationsvärden på klientsidan och skickas till Maple.",
       "sensitive": "Känsligt",
       "emptyPrompt": "Ställ frågor om valfri admin-konfiguration. Om du vill att assistenten ska föreslå och tillämpa ändringar, be den inkludera ett JSON change set.",
       "pendingChanges": "Väntande ändringar",
@@ -977,21 +977,19 @@
       "usersToMigrate": "Användare att migrera",
       "warning": "Detta är en avancerad operation. Felaktig migrering kan låsa dig ute från krypterad data. Fortsätt bara om du förstår konsekvenserna."
     },
-    "leaveEmptyForLlmApiKey": "Lämna tomt för lokala leverantörer som inte kräver en API-nyckel.",
+    "leaveEmptyForLlmApiKey": "Lämna tomt för att rensa åsidosättning och använda .env MAPLE_API_KEY reservlösning.",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — din API-nyckel eller åtkomsttoken. Krävs inte för lokala leverantörer som Ollama.",
-      "apiKeyLabel": "API-nyckel",
-      "ariaLabel": "Hjälp för konfiguration av LLM-leverantör",
+      "apiKeyField": "LLM_API_KEY — din Maple API-nyckel. Mappar till MAPLE_API_KEY.",
+      "apiKeyLabel": "Maple API-nyckel",
+      "ariaLabel": "Maple LLM-konfigurationshjälp",
       "exampleConfig": "Exempelkonfiguration",
       "goToPage": "Gå till sida",
-      "mapleExtra": "Maple körs som en sidocontainer och kräver ingen API-nyckel. Den vidarebefordrar förfrågningar till integritetsskyddande inferensleverantörer.",
-      "mapleHint": "Maple Proxy är standardleverantören för integritetsfokuserad inferens. Den körs lokalt tillsammans med Sanctum.",
-      "modelField": "LLM_MODEL — modellnamnet att använda (t.ex. gpt-4, llama3, claude-3-sonnet). Måste stödjas av din valda leverantör.",
-      "ollamaExtra": "Installera Ollama på din värdmaskin och ladda ner modellen du vill ha innan du konfigurerar den här. Sanctum ansluter via Ollama API.",
-      "ollamaHint": "Ollama låter dig köra open source LLM:er lokalt. All inferens stannar på din hårdvara — inget lämnar ditt nätverk.",
-      "overviewDesc": "Dessa inställningar styr vilken LLM-leverantör och modell Sanctum använder för att generera svar. Du kan använda en lokal leverantör för fullständig integritet eller en molnleverantör för kraftfullare modeller.",
-      "overviewTitle": "Översikt av LLM-leverantör",
-      "providerField": "LLM_PROVIDER — inferens-backenden att använda (t.ex. maple, ollama, openai, anthropic)."
+      "mapleExtra": "Ställ in LLM_API_KEY till din Maple-nyckel från trymaple.ai. LLM_* nycklar mappas till MAPLE_* alias.",
+      "mapleHint": "Maple är standard LLM-backend för Sanctum.",
+      "modelField": "LLM_MODEL — Maple-modellidentifierare (till exempel: kimi-k2-5).",
+      "overviewDesc": "Sanctum använder Maple som sin standard LLM-tjänst. Maple tillhandahåller ett OpenAI-kompatibelt API under huven.",
+      "overviewTitle": "Maple LLM Översikt",
+      "providerField": "LLM_PROVIDER — fastställd till \"maple\" för kompatibilitet."
     },
     "revealFailed": "Kunde inte visa värdet. Kontrollera anslutningen till ditt Nostr-tillägg.",
     "searchHelp": {
@@ -1200,9 +1198,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "AI-leverantör",
-      "description": "Anslut till din AI-tjänst",
-      "hint": "Konfigurera vilken AI-tjänst som driver din assistent. Du behöver en API-nyckel från din valda leverantör (t.ex. OpenAI, Anthropic). Ändringar kräver en omstart av tjänsten för att träda i kraft."
+      "label": "Maple AI",
+      "description": "Konfigurera Maple-inferens",
+      "hint": "Sanctum är endast Maple för LLM-inferens. Konfigurera Maple-modell/API-inställningar här. Ändringar kräver en omstart."
     },
     "embedding": {
       "label": "Textbearbetning",
@@ -1304,18 +1302,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "AI-tjänst",
-      "description": "LLM-leverantör (maple, ollama)",
-      "hint": "Välj \"maple\" för Maple-proxy (rekommenderas för integritet) eller \"ollama\" för lokala modeller."
+      "description": "LLM-leverantör (endast maple)",
+      "hint": "Maple är det enda värdet som stöds. Denna nyckel finns kvar för kompatibilitet."
     },
     "LLM_MODEL": {
       "label": "Modellnamn",
       "description": "Modellnamn/identifierare",
-      "hint": "Modellidentifieraren att använda (t.ex. \"kimi-k2-5\"). Se din leverantörs dokumentation för tillgängliga modeller."
+      "hint": "Maple-modellidentifieraren som ska användas (t.ex. \"kimi-k2-5\")."
     },
     "LLM_API_URL": {
       "label": "API-slutpunkt",
       "description": "Bas-URL för API-förfrågningar",
-      "hint": "Bas-URL för API-förfrågningar. För Maple: http://maple-proxy:8080/v1. För Ollama: http://localhost:11434."
+      "hint": "Maple API bas-URL. Standard: http://maple-proxy:8080/v1."
     },
     "RAG_TOP_K": {
       "label": "Kontextfragment",
@@ -1394,8 +1392,8 @@
     },
     "LLM_API_KEY": {
       "label": "API-nyckel",
-      "description": "API-nyckel för LLM-tjänsten",
-      "hint": "Din API-nyckel eller token från LLM-leverantören. Krävs för leverantörer med autentisering."
+      "description": "Maple API-nyckel (hemlig)",
+      "hint": "Mappar till MAPLE_API_KEY. Lämna tomt för att rensa åsidosättning och använda .env reservlösning."
     },
     "ADMIN_BASE_URL": {
       "description": "URL för administratörspanelens subdomän (valfritt)",
@@ -1777,7 +1775,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "Testa magic link och Nostr-autentiseringsflöden.",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "Testa hastighetsbegränsning genom att skicka snabba förfrågningar till hastighetsbegränsade slutpunkter.",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "Testa användarskaparflödet med dynamiska fält baserat på användartyp.",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Testar anslutning till LLM-leverantören (Maple eller Ollama).",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Testar anslutning till Maple LLM-tjänsten.",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "Den kompletta RAG-pipelinen: bädda in → sök → hämta → generera.",
       "this_is_where_the_magic_happens_e98c18": "— Det är här magin händer:",
       "toggle_theme_9b0eaf": "Växla tema",

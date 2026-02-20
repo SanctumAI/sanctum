@@ -497,7 +497,7 @@
       "compact": "Kompakt",
       "expand": "Udvid",
       "shareSecretsTitle": "Del hemmelige miljøvariabler",
-      "shareSecretsHint": "Slået fra som standard. Aktivér først Config-værktøjet. Når det er aktiveret, vises hemmelige deploy-konfigurationsværdier på klientsiden og sendes til din LLM-udbyder.",
+      "shareSecretsHint": "Deaktiveret som standard. Aktiver konfigurationsværktøjet først. Når aktiveret, afsløres hemmelige implementeringskonfigurationsværdier på klientsiden og sendes til Maple.",
       "sensitive": "Følsom",
       "emptyPrompt": "Stil spørgsmål om enhver admin-konfiguration. Hvis du vil have assistenten til at foreslå og anvende ændringer, så bed den om at inkludere et JSON change set.",
       "pendingChanges": "Afventende ændringer",
@@ -977,21 +977,19 @@
       "usersToMigrate": "Brugere til migrering",
       "warning": "Dette er en avanceret operation. Forkert migrering kan låse dig ude fra krypterede data. Fortsæt kun, hvis du forstår konsekvenserne."
     },
-    "leaveEmptyForLlmApiKey": "Lad stå tomt for lokale udbydere, der ikke kræver en API-nøgle.",
+    "leaveEmptyForLlmApiKey": "Lad stå tom for at fjerne tilsidesættelse og bruge .env MAPLE_API_KEY fallback.",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — din API-nøgle eller adgangstoken. Ikke påkrævet for lokale udbydere som Ollama.",
-      "apiKeyLabel": "API-nøgle",
-      "ariaLabel": "Hjælp til LLM-udbyderkonfiguration",
+      "apiKeyField": "LLM_API_KEY — din Maple API-nøgle. Svarer til MAPLE_API_KEY.",
+      "apiKeyLabel": "Maple API-nøgle",
+      "ariaLabel": "Maple LLM-konfigurationshjælp",
       "exampleConfig": "Eksempelkonfiguration",
       "goToPage": "Gå til side",
-      "mapleExtra": "Maple kører som en sidecar-container og kræver ingen API-nøgle. Den proxyer anmodninger til privatlivsbevarende inferensudbydere.",
-      "mapleHint": "Maple Proxy er standardudbyderen for privatlivsorienteret inferens. Den kører lokalt sammen med Sanctum.",
-      "modelField": "LLM_MODEL — modelnavnet, der skal bruges (f.eks. gpt-4, llama3, claude-3-sonnet). Skal understøttes af din valgte udbyder.",
-      "ollamaExtra": "Installer Ollama på din værtsmaskine, og hent den model, du vil bruge, før du konfigurerer den her. Sanctum forbinder via Ollama API'et.",
-      "ollamaHint": "Ollama lader dig køre open source-LLM'er lokalt. Al inferens forbliver på din hardware — intet forlader dit netværk.",
-      "overviewDesc": "Disse indstillinger styrer, hvilken LLM-udbyder og model Sanctum bruger til at generere svar. Du kan bruge en lokal udbyder for fuld privatlivsbeskyttelse eller en cloud-udbyder for mere kraftfulde modeller.",
-      "overviewTitle": "Oversigt over LLM-udbyder",
-      "providerField": "LLM_PROVIDER — den inferens-backend, der skal bruges (f.eks. maple, ollama, openai, anthropic)."
+      "mapleExtra": "Indstil LLM_API_KEY til din Maple-nøgle fra trymaple.ai. LLM_*-nøgler svarer til MAPLE_*-aliasser.",
+      "mapleHint": "Maple er standard LLM-backend for Sanctum.",
+      "modelField": "LLM_MODEL — Maple model-identifikator (for eksempel: kimi-k2-5).",
+      "overviewDesc": "Sanctum bruger Maple som sin standard LLM-tjeneste. Maple tilbyder en OpenAI-kompatibel API under motorhjelmen.",
+      "overviewTitle": "Maple LLM-oversigt",
+      "providerField": "LLM_PROVIDER — fastsat til \"maple\" for kompatibilitet."
     },
     "revealFailed": "Kunne ikke afsløre værdien. Kontroller din Nostr-udvidelsesforbindelse.",
     "searchHelp": {
@@ -1200,9 +1198,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "AI-udbyder",
-      "description": "Forbind til din AI-tjeneste",
-      "hint": "Konfigurer, hvilken AI-tjeneste der driver din assistent. Du skal bruge en API-nøgle fra din valgte udbyder (f.eks. OpenAI, Anthropic). Ændringer kræver en genstart af tjenesten for at træde i kraft."
+      "label": "Maple AI",
+      "description": "Konfigurer Maple inferens",
+      "hint": "Sanctum er kun Maple-baseret for LLM-inferens. Konfigurer Maple-model/API-indstillinger her. Ændringer kræver en genstart."
     },
     "embedding": {
       "label": "Tekstbehandling",
@@ -1304,18 +1302,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "AI-tjeneste",
-      "description": "LLM-udbyder (maple, ollama)",
-      "hint": "Vælg \"maple\" for Maple-proxy (anbefalet for privatliv) eller \"ollama\" for lokale modeller."
+      "description": "LLM-udbyder (kun maple)",
+      "hint": "Maple er den eneste understøttede værdi. Denne nøgle er bibeholdt for kompatibilitet."
     },
     "LLM_MODEL": {
       "label": "Modelnavn",
       "description": "Modelnavn/identifikator",
-      "hint": "Model-identifikatoren der skal bruges (f.eks. \"kimi-k2-5\"). Tjek din udbyders dokumentation for tilgængelige modeller."
+      "hint": "Den Maple model-identifikator, der skal bruges (f.eks. \"kimi-k2-5\")."
     },
     "LLM_API_URL": {
       "label": "API-endepunkt",
       "description": "Basis-URL for API-anmodninger",
-      "hint": "Basis-URL for API-anmodninger. For Maple: http://maple-proxy:8080/v1. For Ollama: http://localhost:11434."
+      "hint": "Maple API base-URL. Standard: http://maple-proxy:8080/v1."
     },
     "RAG_TOP_K": {
       "label": "Kontekstdele",
@@ -1394,8 +1392,8 @@
     },
     "LLM_API_KEY": {
       "label": "API-nøgle",
-      "description": "API-nøgle til LLM-tjenesten",
-      "hint": "Din API-nøgle eller token fra LLM-udbyderen. Påkrævet for udbydere med godkendelse."
+      "description": "Maple API-nøgle (hemmelig)",
+      "hint": "Svarer til MAPLE_API_KEY. Lad stå tom for at fjerne tilsidesættelse og bruge .env fallback."
     },
     "ADMIN_BASE_URL": {
       "description": "Adminpanel-underdomæne-URL (valgfrit)",
@@ -1777,7 +1775,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "Test magisk link og Nostr-godkendelsesflows.",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "Test hastighedsbegrænsning ved at sende hurtige anmodninger til hastighedsbegrænsede endepunkter.",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "Test brugeroprettelsesflowet med dynamiske felter baseret på brugertype.",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Tester forbindelse til LLM-udbyderen (Maple eller Ollama).",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Tester forbindelse til Maple LLM-tjenesten.",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "Den komplette RAG-pipeline: indlejring → søgning → hentning → generering.",
       "this_is_where_the_magic_happens_e98c18": "— Her sker magien:",
       "toggle_theme_9b0eaf": "Skift tema",

@@ -28,7 +28,7 @@ from store import (
     QDRANT_HOST,
     QDRANT_PORT,
 )
-from llm import get_provider
+from llm import get_maple_provider
 from utils import sanitize_profile_value
 from rate_limit import RateLimiter
 from rate_limit_key import rate_limit_key as _stable_rate_limit_key
@@ -352,7 +352,7 @@ def _extract_facts_from_conversation(session: dict) -> dict:
     Uses a focused prompt to reliably extract structured facts from conversation.
     """
     import json as json_module
-    llm = get_provider()
+    llm = get_maple_provider()
     
     # Format conversation for fact extraction
     messages = session.get("messages", [])
@@ -492,7 +492,7 @@ def _call_llm_contextual(
     """
     import re
     from ai_config import get_prompt_sections, get_llm_parameters
-    llm = get_provider()
+    llm = get_maple_provider()
     tools = tools or []
 
     # Get prompt sections from database with user-type overrides if applicable

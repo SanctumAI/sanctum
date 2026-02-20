@@ -514,7 +514,7 @@
       "compact": "Comprimat",
       "expand": "Extinde",
       "shareSecretsTitle": "Partajează variabile de mediu secrete",
-      "shareSecretsHint": "Dezactivat implicit. Activează mai întâi instrumentul Config. Când este activat, valorile secrete de configurare deployment sunt dezvăluite client-side și trimise furnizorului tău LLM.",
+      "shareSecretsHint": "Dezactivat implicit. Activați instrumentul Config mai întâi. Când este activat, valorile secrete de configurare a implementării sunt dezvăluite pe partea clientului și trimise către Maple.",
       "sensitive": "Sensibil",
       "emptyPrompt": "Pune întrebări despre orice configurare admin. Dacă vrei ca asistentul să propună și să aplice schimbări, cere-i să includă un set de schimbări JSON.",
       "pendingChanges": "Schimbări în așteptare",
@@ -994,21 +994,19 @@
       "usersToMigrate": "Utilizatori de migrat",
       "warning": "Aceasta este o operațiune avansată. O migrare incorectă te poate bloca din datele criptate. Continuă doar dacă înțelegi implicațiile."
     },
-    "leaveEmptyForLlmApiKey": "Lasă gol pentru furnizorii locali care nu necesită o cheie API.",
+    "leaveEmptyForLlmApiKey": "Lăsați gol pentru a anula suprascrierea și a utiliza valoarea implicită din .env MAPLE_API_KEY.",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — cheia ta API sau tokenul de acces. Nu este necesar pentru furnizorii locali precum Ollama.",
-      "apiKeyLabel": "Cheie API",
-      "ariaLabel": "Ajutor configurare furnizor LLM",
+      "apiKeyField": "LLM_API_KEY — cheia dumneavoastră API Maple. Se mapează la MAPLE_API_KEY.",
+      "apiKeyLabel": "Cheie API Maple",
+      "ariaLabel": "Ajutor pentru configurarea Maple LLM",
       "exampleConfig": "Exemplu de configurare",
       "goToPage": "Accesează pagina",
-      "mapleExtra": "Maple rulează ca un container sidecar și nu necesită cheie API. Proxy-ează cererile către furnizori de inferență care respectă confidențialitatea.",
-      "mapleHint": "Maple Proxy este furnizorul implicit pentru inferență cu confidențialitate. Rulează local alături de Sanctum.",
-      "modelField": "LLM_MODEL — numele modelului de utilizat (de ex., gpt-4, llama3, claude-3-sonnet). Trebuie să fie suportat de furnizorul ales.",
-      "ollamaExtra": "Instalează Ollama pe mașina gazdă și descarcă modelul dorit înainte de a-l configura aici. Sanctum se conectează prin API-ul Ollama.",
-      "ollamaHint": "Ollama îți permite să rulezi LLM-uri open-source local. Toată inferența rămâne pe hardware-ul tău — nimic nu părăsește rețeaua ta.",
-      "overviewDesc": "Aceste setări controlează ce furnizor LLM și model folosește Sanctum pentru generarea răspunsurilor. Poți folosi un furnizor local pentru confidențialitate totală sau un furnizor cloud pentru modele mai puternice.",
-      "overviewTitle": "Prezentare generală furnizor LLM",
-      "providerField": "LLM_PROVIDER — backend-ul de inferență de utilizat (de ex., maple, ollama, openai, anthropic)."
+      "mapleExtra": "Setați LLM_API_KEY la cheia dumneavoastră Maple de la trymaple.ai. Cheile LLM_* se mapează la aliasuri MAPLE_*.",
+      "mapleHint": "Maple este backend-ul LLM standard pentru Sanctum.",
+      "modelField": "LLM_MODEL — identificator model Maple (de exemplu: kimi-k2-5).",
+      "overviewDesc": "Sanctum utilizează Maple ca serviciu LLM standard. Maple oferă un API compatibil OpenAI sub capotă.",
+      "overviewTitle": "Prezentare generală Maple LLM",
+      "providerField": "LLM_PROVIDER — fixat la \"maple\" pentru compatibilitate."
     },
     "revealFailed": "Nu s-a putut dezvălui valoarea. Verifică conexiunea extensiei Nostr.",
     "searchHelp": {
@@ -1217,9 +1215,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "Furnizor AI",
-      "description": "Conectează-te la serviciul tău AI",
-      "hint": "Configurează ce serviciu AI alimentează asistentul tău. Vei avea nevoie de o cheie API de la furnizorul ales (ex. OpenAI, Anthropic). Modificările necesită repornirea serviciului pentru a intra în vigoare."
+      "label": "Maple AI",
+      "description": "Configurați inferența Maple",
+      "hint": "Sanctum este doar Maple pentru inferența LLM. Configurați modelul Maple/setările API aici. Modificările necesită o repornire."
     },
     "embedding": {
       "label": "Procesare text",
@@ -1321,18 +1319,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "Serviciu AI",
-      "description": "Furnizor LLM (maple, ollama)",
-      "hint": "Alegeți \"maple\" pentru proxy-ul Maple (recomandat pentru confidențialitate) sau \"ollama\" pentru modele locale."
+      "description": "Furnizor LLM (numai maple)",
+      "hint": "Maple este singura valoare acceptată. Această cheie rămâne pentru compatibilitate."
     },
     "LLM_MODEL": {
       "label": "Numele modelului",
       "description": "Numele/identificatorul modelului",
-      "hint": "Identificatorul modelului de utilizat (de ex. \"kimi-k2-5\"). Verificați documentația furnizorului pentru modelele disponibile."
+      "hint": "Identificatorul modelului Maple de utilizat (de exemplu, \"kimi-k2-5\")."
     },
     "LLM_API_URL": {
       "label": "Punct final API",
       "description": "URL de bază pentru solicitări API",
-      "hint": "URL-ul de bază pentru solicitări API. Pentru Maple: http://maple-proxy:8080/v1. Pentru Ollama: http://localhost:11434."
+      "hint": "URL de bază API Maple. Implicit: http://maple-proxy:8080/v1."
     },
     "RAG_TOP_K": {
       "label": "Fragmente de context",
@@ -1411,8 +1409,8 @@
     },
     "LLM_API_KEY": {
       "label": "Cheie API",
-      "description": "Cheie API pentru serviciul LLM",
-      "hint": "Cheia API sau tokenul dvs. de la furnizorul LLM. Necesară pentru furnizorii care necesită autentificare."
+      "description": "Cheie API Maple (secret)",
+      "hint": "Se mapează la MAPLE_API_KEY. Lăsați gol pentru a anula suprascrierea și a utiliza valoarea implicită din .env."
     },
     "ADMIN_BASE_URL": {
       "description": "URL subdomeniu panou de administrare (opțional)",
@@ -1794,7 +1792,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "Testează fluxurile de autentificare link magic și Nostr.",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "Testează limitarea ratei prin trimiterea de cereri rapide către punctele finale (endpoints) cu limitare de rată.",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "Testează fluxul de creare a utilizatorilor cu câmpuri dinamice bazate pe tipul de utilizator.",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Testează conectivitatea la furnizorul LLM (Maple sau Ollama).",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "Testează conectivitatea la serviciul LLM Maple.",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "Pipeline-ul RAG complet: încorporare → căutare → recuperare → generare.",
       "this_is_where_the_magic_happens_e98c18": "— Aici se întâmplă magia:",
       "toggle_theme_9b0eaf": "Schimbă tema",

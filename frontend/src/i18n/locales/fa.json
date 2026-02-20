@@ -328,7 +328,7 @@
       "compact": "فشرده",
       "expand": "گسترش",
       "shareSecretsTitle": "اشتراک‌گذاری متغیرهای محیطی محرمانه",
-      "shareSecretsHint": "به‌صورت پیش‌فرض خاموش است. ابتدا ابزار Config را فعال کنید. با فعال شدن، مقادیر محرمانه تنظیمات استقرار در سمت کلاینت آشکار شده و برای ارائه‌دهنده LLM شما ارسال می‌شود.",
+      "shareSecretsHint": "به‌طور پیش‌فرض خاموش است. ابتدا ابزار پیکربندی را فعال کنید. وقتی فعال شود، مقادیر محرمانه پیکربندی استقرار در سمت کاربر آشکار شده و به Maple ارسال می‌شوند.",
       "sensitive": "حساس",
       "emptyPrompt": "درباره هر پیکربندی مدیریتی سؤال بپرسید. اگر می‌خواهید دستیار تغییرات را پیشنهاد و اعمال کند، از او بخواهید یک JSON change set ارائه دهد.",
       "pendingChanges": "تغییرات در انتظار",
@@ -977,21 +977,19 @@
       "usersToMigrate": "کاربران برای مهاجرت",
       "warning": "این یک عملیات پیشرفته است. مهاجرت نادرست می‌تواند شما را از داده‌های رمزگذاری شده قفل کند. فقط در صورت درک عواقب ادامه دهید."
     },
-    "leaveEmptyForLlmApiKey": "برای ارائه‌دهندگان محلی که نیازی به کلید API ندارند خالی بگذارید.",
+    "leaveEmptyForLlmApiKey": "برای پاک کردن مقدار جایگزین و استفاده از مقدار پیش‌فرض MAPLE_API_KEY در فایل .env، این فیلد را خالی بگذارید.",
     "llmHelp": {
-      "apiKeyField": "LLM_API_KEY — کلید API یا توکن دسترسی شما. برای ارائه‌دهندگان محلی مانند Ollama الزامی نیست.",
-      "apiKeyLabel": "کلید API",
-      "ariaLabel": "راهنمای پیکربندی ارائه‌دهنده LLM",
+      "apiKeyField": "LLM_API_KEY — کلید API شما برای Maple. به MAPLE_API_KEY نگاشت می‌شود.",
+      "apiKeyLabel": "کلید API Maple",
+      "ariaLabel": "راهنمای پیکربندی Maple LLM",
       "exampleConfig": "نمونه پیکربندی",
       "goToPage": "رفتن به صفحه",
-      "mapleExtra": "Maple به عنوان یک کانتینر جانبی اجرا می‌شود و نیازی به کلید API ندارد. درخواست‌ها را به ارائه‌دهندگان استنتاج حافظ حریم خصوصی پراکسی می‌کند.",
-      "mapleHint": "Maple Proxy ارائه‌دهنده پیش‌فرض برای استنتاج با اولویت حریم خصوصی است. به صورت محلی در کنار Sanctum اجرا می‌شود.",
-      "modelField": "LLM_MODEL — نام مدل برای استفاده (مثلاً gpt-4، llama3، claude-3-sonnet). باید توسط ارائه‌دهنده انتخابی شما پشتیبانی شود.",
-      "ollamaExtra": "Ollama را روی ماشین میزبان خود نصب کنید و مدل مورد نظر را قبل از پیکربندی اینجا دریافت کنید. Sanctum از طریق API Ollama متصل می‌شود.",
-      "ollamaHint": "Ollama به شما امکان می‌دهد LLMهای متن‌باز را به صورت محلی اجرا کنید. تمام استنتاج‌ها روی سخت‌افزار شما می‌ماند — هیچ چیزی از شبکه شما خارج نمی‌شود.",
-      "overviewDesc": "این تنظیمات کنترل می‌کنند Sanctum از کدام ارائه‌دهنده و مدل LLM برای تولید پاسخ‌ها استفاده کند. می‌توانید از ارائه‌دهنده محلی برای حریم خصوصی کامل یا ارائه‌دهنده ابری برای مدل‌های قدرتمندتر استفاده کنید.",
-      "overviewTitle": "نمای کلی ارائه‌دهنده LLM",
-      "providerField": "LLM_PROVIDER — بک‌اند استنتاج برای استفاده (مثلاً maple، ollama، openai، anthropic)."
+      "mapleExtra": "LLM_API_KEY را با کلید Maple خود از trymaple.ai تنظیم کنید. کلیدهای LLM_* به نام‌های مستعار MAPLE_* نگاشت می‌شوند.",
+      "mapleHint": "Maple بک‌اند استاندارد LLM برای Sanctum است.",
+      "modelField": "LLM_MODEL — شناسه مدل Maple (به عنوان مثال: kimi-k2-5).",
+      "overviewDesc": "Sanctum از Maple به عنوان سرویس استاندارد LLM خود استفاده می‌کند. Maple یک API سازگار با OpenAI را در زیرساخت خود ارائه می‌دهد.",
+      "overviewTitle": "بررسی اجمالی Maple LLM",
+      "providerField": "LLM_PROVIDER — برای سازگاری روی \"maple\" ثابت شده است."
     },
     "revealFailed": "نمایش مقدار ناموفق بود. اتصال افزونه Nostr خود را بررسی کنید.",
     "searchHelp": {
@@ -1200,9 +1198,9 @@
   },
   "configCategories": {
     "llm": {
-      "label": "ارائه‌دهنده هوش مصنوعی",
-      "description": "اتصال به سرویس هوش مصنوعی",
-      "hint": "پیکربندی کنید کدام سرویس هوش مصنوعی دستیار شما را تغذیه کند. به یک کلید API از ارائه‌دهنده انتخابی (مثلاً OpenAI، Anthropic) نیاز دارید. تغییرات نیاز به راه‌اندازی مجدد سرویس دارند."
+      "label": "هوش مصنوعی Maple",
+      "description": "پیکربندی استنتاج Maple",
+      "hint": "Sanctum برای استنتاج LLM فقط از Maple استفاده می‌کند. تنظیمات مدل/API Maple را اینجا پیکربندی کنید. تغییرات نیاز به راه‌اندازی مجدد دارند."
     },
     "embedding": {
       "label": "پردازش متن",
@@ -1304,18 +1302,18 @@
   "deploymentConfigItems": {
     "LLM_PROVIDER": {
       "label": "سرویس هوش مصنوعی",
-      "description": "ارائه‌دهنده LLM (maple, ollama)",
-      "hint": "\"maple\" را برای پراکسی Maple (توصیه شده برای حریم خصوصی) یا \"ollama\" را برای مدل‌های محلی انتخاب کنید."
+      "description": "ارائه‌دهنده LLM (فقط Maple)",
+      "hint": "Maple تنها مقدار پشتیبانی شده است. این کلید برای سازگاری باقی مانده است."
     },
     "LLM_MODEL": {
       "label": "نام مدل",
       "description": "نام/شناسه مدل",
-      "hint": "شناسه مدل برای استفاده (مثلاً \"kimi-k2-5\"). مستندات ارائه‌دهنده خود را برای مدل‌های موجود بررسی کنید."
+      "hint": "شناسه مدل Maple برای استفاده (مثلاً: \"kimi-k2-5\")."
     },
     "LLM_API_URL": {
       "label": "نقطه پایانی API",
       "description": "URL پایه برای درخواست‌های API",
-      "hint": "URL پایه برای درخواست‌های API. برای Maple: http://maple-proxy:8080/v1. برای Ollama: http://localhost:11434."
+      "hint": "آدرس پایه API Maple. پیش‌فرض: http://maple-proxy:8080/v1."
     },
     "RAG_TOP_K": {
       "label": "قطعات زمینه",
@@ -1394,8 +1392,8 @@
     },
     "LLM_API_KEY": {
       "label": "کلید API",
-      "description": "کلید API برای سرویس LLM",
-      "hint": "کلید API یا توکن شما از ارائه‌دهنده LLM. برای ارائه‌دهندگان نیازمند احراز هویت الزامی است."
+      "description": "کلید API Maple (محرمانه)",
+      "hint": "به MAPLE_API_KEY نگاشت می‌شود. برای پاک کردن مقدار جایگزین و استفاده از مقدار پیش‌فرض .env، خالی بگذارید."
     },
     "ADMIN_BASE_URL": {
       "description": "نشانی وب زیردامنه پنل مدیریت (اختیاری)",
@@ -1777,7 +1775,7 @@
       "test_magic_link_and_nostr_authentication_flows_40c5c7": "جریان‌های احراز هویت لینک جادویی و Nostr را تست کنید.",
       "test_rate_limiting_by_sending_rapid_requests_to_2ede24": "محدودیت نرخ را با ارسال درخواست‌های سریع به نقاط پایانی محدود شده تست کنید.",
       "test_the_user_creation_flow_with_dynamic_fields_b0142a": "جریان ایجاد کاربر را با فیلدهای پویا بر اساس نوع کاربر تست کنید.",
-      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "اتصال به ارائه دهنده LLM (Maple یا Ollama) را تست می‌کند.",
+      "tests_connectivity_to_the_llm_provider_maple_or_e91a9f": "اتصال به سرویس Maple LLM را آزمایش می‌کند.",
       "the_complete_rag_pipeline_embed_search_retrieve_generate_d5ac42": "پایپ لاین کامل RAG: تعبیه ← جستجو ← بازیابی ← تولید.",
       "this_is_where_the_magic_happens_e98c18": "— اینجاست که جادو اتفاق می‌افتد:",
       "toggle_theme_9b0eaf": "تغییر پوسته",
